@@ -24,12 +24,11 @@
     }
   }
 
-  input[type='checkbox']   {
+  input[type="checkbox"] {
     display: unset;
   }
 
   .block {
-
     .DayPickerInput {
       display: block;
     }
@@ -70,7 +69,7 @@
 
   .dangerous {
     background-color: #ef5350;
-    color: #ffffff;
+    color: #fff;
     padding: 15px;
   }
 }

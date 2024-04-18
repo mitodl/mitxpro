@@ -3,7 +3,7 @@
 from django.db import migrations
 
 
-def add_legal_addresses(apps, schema_editor):  # noqa: D103
+def add_legal_addresses(apps, schema_editor):
     User = apps.get_model("users", "User")
     LegalAddress = apps.get_model("users", "LegalAddress")
 
@@ -11,7 +11,7 @@ def add_legal_addresses(apps, schema_editor):  # noqa: D103
         LegalAddress.objects.create(user=user)
 
 
-def remove_legal_addresses(apps, schema_editor):  # noqa: D103
+def remove_legal_addresses(apps, schema_editor):
     LegalAddress = apps.get_model("users", "LegalAddress")
     LegalAddress.objects.all().delete()
 

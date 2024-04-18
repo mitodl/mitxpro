@@ -34,7 +34,7 @@ class UserLegalAddressInline(admin.StackedInline):
         ),
     )
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -44,7 +44,7 @@ class UserProfileInline(admin.StackedInline):
     model = Profile
     classes = ["collapse"]
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return True
 
 
@@ -102,5 +102,5 @@ class BlockListAdmin(admin.ModelAdmin):
     model = BlockList
     list_display = ("hashed_email",)
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False

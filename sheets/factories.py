@@ -9,9 +9,7 @@ from sheets import models
 from users.factories import UserFactory
 
 
-class CouponGenerationRequestFactory(  # noqa: D101
-    DjangoModelFactory
-):
+class CouponGenerationRequestFactory(DjangoModelFactory):
     purchase_order_id = Faker("pystr", max_chars=15)
     coupon_name = fuzzy.FuzzyText()
 
@@ -19,7 +17,7 @@ class CouponGenerationRequestFactory(  # noqa: D101
         model = models.CouponGenerationRequest
 
 
-class GoogleApiAuthFactory(DjangoModelFactory):  # noqa: D101
+class GoogleApiAuthFactory(DjangoModelFactory):
     requesting_user = SubFactory(UserFactory)
     access_token = Faker("pystr", max_chars=30)
     refresh_token = Faker("pystr", max_chars=30)
@@ -28,7 +26,7 @@ class GoogleApiAuthFactory(DjangoModelFactory):  # noqa: D101
         model = models.GoogleApiAuth
 
 
-class GoogleFileWatchFactory(DjangoModelFactory):  # noqa: D101
+class GoogleFileWatchFactory(DjangoModelFactory):
     file_id = Faker("pystr", max_chars=15)
     channel_id = fuzzy.FuzzyText(prefix="Channel ")
     activation_date = Faker(

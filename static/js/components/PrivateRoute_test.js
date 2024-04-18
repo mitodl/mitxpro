@@ -24,7 +24,7 @@ describe("PrivateRoute component", () => {
       PrivateRoute,
       InnerPrivateRoute,
       {},
-      {}
+      {},
     )
   })
 
@@ -33,20 +33,20 @@ describe("PrivateRoute component", () => {
   })
   ;[
     [false, loggedInUser, "load the route"],
-    [true, anonUser, "redirect to the login page with a 'next' param"]
+    [true, anonUser, "redirect to the login page with a 'next' param"],
   ].forEach(([isAnonymous, user, desc]) => {
     it(`should ${desc} if user ${isIf(isAnonymous)} anonymous`, async () => {
       window.location = fakeWindowLocation
       const { inner } = await renderComponent(
         {
           entities: {
-            currentUser: user
-          }
+            currentUser: user,
+          },
         },
         {
           path:      fakeRoutePath,
-          component: DummyComponent
-        }
+          component: DummyComponent,
+        },
       )
       const routeComponent = inner.find("Route")
       assert.isTrue(routeComponent.exists())
@@ -57,7 +57,7 @@ describe("PrivateRoute component", () => {
         assert.equal(renderResult.type, Redirect)
         assert.equal(
           renderResult.props.to,
-          `${routes.login.begin}?next=%2Fprotected%2Froute`
+          `${routes.login.begin}?next=%2Fprotected%2Froute`,
         )
       } else {
         assert.equal(renderResult.type, DummyComponent)

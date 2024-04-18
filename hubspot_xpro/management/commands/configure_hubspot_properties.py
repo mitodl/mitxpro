@@ -314,7 +314,7 @@ class Command(BaseCommand):
             help="Delete custom hubspot properties/groups",
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         if options["delete"]:
             print("Uninstalling custom groups and properties...")  # noqa: T201
             delete_custom_properties()

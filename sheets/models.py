@@ -28,12 +28,7 @@ class CouponGenerationRequest(TimestampedModel):
     raw_data = models.CharField(max_length=300, null=True, blank=True)  # noqa: DJ001
 
     def __str__(self):
-        return "CouponGenerationRequest: id={}, coupon_name={}, purchase_order_id={}, completed={}".format(
-            self.id,
-            self.coupon_name,
-            self.purchase_order_id,
-            self.date_completed is not None,
-        )
+        return f"CouponGenerationRequest: id={self.id}, coupon_name={self.coupon_name}, purchase_order_id={self.purchase_order_id}, completed={self.date_completed is not None}"
 
 
 class EnrollmentChangeRequestModel(TimestampedModel):
@@ -51,18 +46,14 @@ class RefundRequest(EnrollmentChangeRequestModel):
     """Model that represents a request to refund an enrollment"""
 
     def __str__(self):
-        return "RefundRequest: id={}, form_response_id={}, completed={}".format(
-            self.id, self.form_response_id, self.date_completed is not None
-        )
+        return f"RefundRequest: id={self.id}, form_response_id={self.form_response_id}, completed={self.date_completed is not None}"
 
 
 class DeferralRequest(EnrollmentChangeRequestModel):
     """Model that represents a request to defer an enrollment"""
 
     def __str__(self):
-        return "DeferralRequest: id={}, form_response_id={}, completed={}".format(
-            self.id, self.form_response_id, self.date_completed is not None
-        )
+        return f"DeferralRequest: id={self.id}, form_response_id={self.form_response_id}, completed={self.date_completed is not None}"
 
 
 class GoogleFileWatch(TimestampedModel):
@@ -81,7 +72,7 @@ class GoogleFileWatch(TimestampedModel):
     class Meta:
         unique_together = ("file_id", "version")
 
-    def save(  # noqa: D102
+    def save(
         self,
         force_insert=False,  # noqa: FBT002
         force_update=False,  # noqa: FBT002
@@ -93,10 +84,8 @@ class GoogleFileWatch(TimestampedModel):
             and self._meta.model.objects.filter(file_id=self.file_id).count() > 0
         ):
             raise ValidationError(
-                "Only one {} object should exist for each unique file_id (file_id provided: {}). "  # noqa: EM103
-                "Update the existing object instead of creating a new one.".format(
-                    self.__class__.__name__, self.file_id
-                )
+                f"Only one {self.__class__.__name__} object should exist for each unique file_id (file_id provided: {self.file_id}). "  # noqa: EM102
+                "Update the existing object instead of creating a new one."
             )
         return super().save(
             force_insert=force_insert,
@@ -106,9 +95,7 @@ class GoogleFileWatch(TimestampedModel):
         )
 
     def __str__(self):
-        return "GoogleFileWatch: id={}, channel_id={}, file_id={}, expires={}".format(
-            self.id, self.channel_id, self.file_id, self.expiration_date.isoformat()
-        )
+        return f"GoogleFileWatch: id={self.id}, channel_id={self.channel_id}, file_id={self.file_id}, expires={self.expiration_date.isoformat()}"
 
 
 class FileWatchRenewalAttempt(Model):  # noqa: DJ008

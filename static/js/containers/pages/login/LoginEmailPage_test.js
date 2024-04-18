@@ -3,13 +3,13 @@ import { assert } from "chai"
 import sinon from "sinon"
 
 import LoginEmailPage, {
-  LoginEmailPage as InnerLoginEmailPage
+  LoginEmailPage as InnerLoginEmailPage,
 } from "./LoginEmailPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import {
   STATE_LOGIN_PASSWORD,
   STATE_ERROR,
-  STATE_REGISTER_REQUIRED
+  STATE_REGISTER_REQUIRED,
 } from "../../../lib/auth"
 import { makeLoginAuthResponse } from "../../../factories/auth"
 import { routes } from "../../../lib/urls"
@@ -30,9 +30,9 @@ describe("LoginEmailPage", () => {
       {},
       {
         location: {
-          search: "?next=/checkout/product=1"
-        }
-      }
+          search: "?next=/checkout/product=1",
+        },
+      },
     )
   })
 
@@ -52,7 +52,7 @@ describe("LoginEmailPage", () => {
     assert.ok(
       inner
         .find(`Link[to='${routes.register.begin}?next=/checkout/product=1']`)
-        .exists()
+        .exists(),
     )
   })
 
@@ -61,21 +61,21 @@ describe("LoginEmailPage", () => {
     it(`handles onSubmit by calling setErrors given state=${state}`, async () => {
       const { inner } = await renderPage()
       const fieldErrors = {
-        email: "error message"
+        email: "error message",
       }
 
       helper.handleRequestStub.returns({
         body: makeLoginAuthResponse({
           state,
-          field_errors: fieldErrors
-        })
+          field_errors: fieldErrors,
+        }),
       })
 
       const onSubmit = inner.find("EmailForm").prop("onSubmit")
 
       await onSubmit(
         { email },
-        { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+        { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
       )
 
       assert.lengthOf(helper.browserHistory, 1)
@@ -89,21 +89,21 @@ describe("LoginEmailPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeLoginAuthResponse({
-        state: STATE_LOGIN_PASSWORD
-      })
+        state: STATE_LOGIN_PASSWORD,
+      }),
     })
 
     const onSubmit = inner.find("EmailForm").prop("onSubmit")
 
     await onSubmit(
       { email },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.login.password,
-      search:   ""
+      search:   "",
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)

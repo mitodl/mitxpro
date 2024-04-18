@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     help = "Sync grades and certificates for a course run for all enrolled users or a specified user."
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--user",
             type=str,
@@ -86,7 +86,7 @@ class Command(BaseCommand):
 
         if options["grade"] is not None:
             override_grade = float(options["grade"])
-            if override_grade and (override_grade < 0.0 or override_grade > 1.0):  # noqa: PLR2004
+            if override_grade and (override_grade < 0.0 or override_grade > 1.0):
                 raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")  # noqa: EM101
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)

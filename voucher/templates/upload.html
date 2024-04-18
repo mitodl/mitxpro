@@ -1,24 +1,35 @@
 {% extends "course_app_base.html" %}
 {% load static %}
 
-{% block title %}{{ site_name }} | Boeing Enroll{% endblock %}
+{% block title %}{{ site_name }}
+| Boeing Enroll{% endblock %}
 
 {% block content %}
-    <div class="container voucher-container">
-        <h1>Boeing employee enrollment page</h1>
-        <div class="voucher-card">
-                <h2>Upload Voucher</h2>
-                <hr/>
-                <p class="upload-gray">Please upload your voucher or sponsorship letter to enroll in our courses.</p>
-                <form method="post" enctype="multipart/form-data" class="voucher-form upload-gray">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <hr/>
-                    <br>
-                    <div class="text-right">
-                        <input type="submit" value="SUBMIT" class="btn btn-primary btn-light-blue">
-                    </div>
-                </form>
-            </div>
-    </div>
+<div class="container voucher-container">
+  <h1>Boeing employee enrollment page</h1>
+  <div class="voucher-card">
+    <h2>Upload Voucher</h2>
+    <hr />
+    <p class="upload-gray">
+      Please upload your voucher or sponsorship letter to enroll in our courses.
+    </p>
+    <form
+      method="post"
+      enctype="multipart/form-data"
+      class="voucher-form upload-gray"
+    >
+      {% csrf_token %}
+      {{ form.as_p }}
+      <hr />
+      <br />
+      <div class="text-right">
+        <input
+          type="submit"
+          value="SUBMIT"
+          class="btn btn-primary btn-light-blue"
+        />
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock content %}

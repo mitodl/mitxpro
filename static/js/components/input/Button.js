@@ -4,7 +4,7 @@ import React from "react"
 type ButtonProps = {
   children: React$Element<*>,
   onClick: Function,
-  className?: string
+  className?: string,
 }
 
 const Button = ({ children, onClick, className }: ButtonProps) => (

@@ -13,7 +13,7 @@ import {
   COUPON_TYPE_PROMO,
   COUPON_TYPE_SINGLE_USE,
   PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_PROGRAM
+  PRODUCT_TYPE_PROGRAM,
 } from "../../constants"
 import { isPromo } from "../../lib/ecommerce"
 import { getProductSelectLabel } from "../../lib/util"
@@ -24,7 +24,7 @@ import type { Company, Product } from "../../flow/ecommerceTypes"
 type CouponFormProps = {
   onSubmit: Function,
   companies: Array<Company>,
-  products: Array<Product>
+  products: Array<Product>,
 }
 
 const couponValidations = yup.object().shape({
@@ -35,7 +35,7 @@ const couponValidations = yup.object().shape({
   coupon_type: yup.string().required("Coupon type is required"),
   products:    yup.array().when("is_global", {
     is:   false,
-    then: yup.array().min(1, "${min} or more products must be selected")
+    then: yup.array().min(1, "${min} or more products must be selected"),
   }),
   is_global:       yup.boolean(),
   activation_date: yup.date().required("Valid activation date required"),
@@ -43,7 +43,7 @@ const couponValidations = yup.object().shape({
     .date()
     .min(
       moment.max(yup.ref("activation_date"), moment()),
-      "Expiration date must be after today/activation date"
+      "Expiration date must be after today/activation date",
     )
     .required("Valid expiration date required"),
   discount: yup
@@ -54,7 +54,10 @@ const couponValidations = yup.object().shape({
       is:   DISCOUNT_TYPE_PERCENT_OFF,
       then: yup
         .number()
-        .max(100, "The amount should be between (0 - 1) when discount type is percent-off.")
+        .max(
+          100,
+          "The amount should be between (0 - 1) when discount type is percent-off.",
+        ),
     }),
   discount_type:   yup.string().required("Discount type is required"),
   max_redemptions: yup.number().when("coupon_type", {
@@ -62,21 +65,21 @@ const couponValidations = yup.object().shape({
     then: yup
       .number()
       .min(1, "Must be at least ${min}")
-      .required("Number required")
+      .required("Number required"),
   }),
   coupon_code: yup.string().when("coupon_type", {
     is:   COUPON_TYPE_PROMO,
     then: yup
       .string()
       .required("Coupon code is required")
-      .matches(/^\w+$/, "Only letters, numbers, and underscores allowed")
+      .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
   }),
   num_coupon_codes: yup.number().when("coupon_type", {
     is:   COUPON_TYPE_SINGLE_USE,
     then: yup
       .number()
       .min(1, "Must be at least ${min}")
-      .required("Number required")
+      .required("Number required"),
   }),
   max_redemptions_per_user: yup.number().when("coupon_type", {
     is:   COUPON_TYPE_PROMO,
@@ -84,16 +87,16 @@ const couponValidations = yup.object().shape({
       .number()
       .required("Number required")
       .min(1, "Must be at least ${min}")
-      .max(100, "Must be at most ${max}")
+      .max(100, "Must be at most ${max}"),
   }),
   payment_transaction: yup.string().when("coupon_type", {
     is:   COUPON_TYPE_SINGLE_USE,
-    then: yup.string().required("Payment transaction is required")
+    then: yup.string().required("Payment transaction is required"),
   }),
   payment_type: yup.string().when("coupon_type", {
     is:   COUPON_TYPE_SINGLE_USE,
-    then: yup.string().required("Payment type is required")
-  })
+    then: yup.string().required("Payment type is required"),
+  }),
 })
 
 const zeroHour = value => {
@@ -111,7 +114,7 @@ const finalHour = value => {
 export const CouponForm = ({
   onSubmit,
   companies,
-  products
+  products,
 }: CouponFormProps) => (
   <Formik
     onSubmit={onSubmit}
@@ -133,7 +136,7 @@ export const CouponForm = ({
       payment_type:             "",
       payment_transaction:      "",
       include_future_runs:      false,
-      is_global:                false
+      is_global:                false,
     }}
     render={({
       isSubmitting,
@@ -141,7 +144,7 @@ export const CouponForm = ({
       setFieldTouched,
       errors,
       touched,
-      values
+      values,
     }) => (
       <Form className="coupon-form">
         <div className="flex">
@@ -360,9 +363,9 @@ export const CouponForm = ({
                 prop("label"),
                 (products || []).map(product => ({
                   ...product,
-                  label: getProductSelectLabel(product)
-                }))
-              )
+                  label: getProductSelectLabel(product),
+                })),
+              ),
             )}
             value={values.products}
             open={true}

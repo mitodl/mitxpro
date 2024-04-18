@@ -5,64 +5,94 @@
 {% block title %}Webinars{% endblock %}
 
 {% block headercontent %}
-  <div id="header"></div>
-  {% render_bundle 'header' %}
+<div id="header"></div>
+{% render_bundle 'header' %}
 {% endblock %}
 
 {% block content %}
-  <div class="webinars">
-    {% block banner %}
-      {% if page.banner_image %}
-        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% image_version_url page.banner_image "fill-1440x200" %}')">
-      {% else %}
-        <div class="sub-banner webinar-sub-banner" style="background-image:url('{% static default_banner_image %}')">
+<div class="webinars">
+  {% block banner %}
+  {% if page.banner_image %}
+  <div
+    class="sub-banner webinar-sub-banner"
+    style="
+      background-image: url('{% image_version_url page.banner_image "fill-1440x200" %}');
+    "
+  >
+    {% else %}
+    <div
+      class="sub-banner webinar-sub-banner"
+      style="background-image: url('{% static default_banner_image %}')"
+    >
       {% endif %}
-        <h1>Webinars</h1>
-      </div>
-      {% if not webinars %}
-          <div class="no-available-webinars">There are currently no webinars available.</div>
-      {% endif %}
+      <h1>Webinars</h1>
+    </div>
+    {% if not webinars %}
+    <div class="no-available-webinars">
+      There are currently no webinars available.
+    </div>
+    {% endif %}
     {% endblock %}
 
     {% for webinar_category, webinars_list in webinars.items %}
-      {% if webinars_list %}
+    {% if webinars_list %}
 
-        <h1 class="webinar-category">{{ webinar_category }} WEBINARS</h1>
+    <h1 class="webinar-category">
+      {{ webinar_category }}
+      WEBINARS
+    </h1>
 
-        <div class="webinars-list">
-          {% for webinar in webinars_list %}
-            <div class="webinar">
-              <div class="webinar-holder">
-                {% if webinar.banner_image %}
-                  <img src="{% image_version_url webinar.banner_image "fill-330x200" %}" alt="{{ webinar.title }}" width="330" height="200" loading="lazy"/>
-                {% else %}
-                  <img src="{% static webinar_default_images|random %}" alt="Preview image" />
-                {% endif %}
-                <a href="{{ webinar.detail_page_url }}" class="title">{{ webinar.title }}</a>
-                {% if webinar.description %}
-                  <p class="description">{{ webinar.description }}</p>
-                {% endif %}
-                {% if webinar.date %}
-                  {% if webinar.is_upcoming_webinar and webinar.time %}
-                    <p class="time">{{ webinar.formatted_date }} | {{ webinar.time }}</p>
-                  {% else %}
-                    <p class="time">{{ webinar.formatted_date }} </p>
-                  {% endif %}
-                {% endif %}
-                  <a href="{{ webinar.detail_page_url }}" class="read-more">{{ webinar.detail_page_button_title }}</a>
-              </div>
-            </div>
-          {% endfor %}
+    <div class="webinars-list">
+      {% for webinar in webinars_list %}
+      <div class="webinar">
+        <div class="webinar-holder">
+          {% if webinar.banner_image %}
+          <img
+            src="{% image_version_url webinar.banner_image "fill-330x200" %}"
+            alt="{{ webinar.title }}"
+            width="330"
+            height="200"
+            loading="lazy"
+          />
+          {% else %}
+          <img
+            src="{% static webinar_default_images|random %}"
+            alt="Preview image"
+          />
+          {% endif %}
+          <a href="{{ webinar.detail_page_url }}" class="title"
+            >{{ webinar.title }}</a
+          >
+          {% if webinar.description %}
+          <p class="description">{{ webinar.description }}</p>
+          {% endif %}
+          {% if webinar.date %}
+          {% if webinar.is_upcoming_webinar and webinar.time %}
+          <p class="time">
+            {{ webinar.formatted_date }}
+            |
+            {{ webinar.time }}
+          </p>
+          {% else %}
+          <p class="time">{{ webinar.formatted_date }}</p>
+          {% endif %}
+          {% endif %}
+          <a href="{{ webinar.detail_page_url }}" class="read-more"
+            >{{ webinar.detail_page_button_title }}</a
+          >
         </div>
+      </div>
+      {% endfor %}
+    </div>
 
-      {% endif %}
+    {% endif %}
     {% endfor %}
-
   </div>
-{% endblock %}
+  {% endblock %}
 
-{% block contact-us %}
+  {% block contact-us %}
   {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
-    {% include "subscription.html" %}
+  {% include "subscription.html" %}
   {% endif %}
-{% endblock %}
+  {% endblock %}
+</div>

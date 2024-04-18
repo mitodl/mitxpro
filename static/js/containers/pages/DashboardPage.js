@@ -29,7 +29,7 @@ import type { Location, RouterHistory } from "react-router"
 import type {
   ProgramEnrollment,
   CourseRunEnrollment,
-  UserEnrollments
+  UserEnrollments,
 } from "../../flow/courseTypes"
 import type { EnrollmentCode } from "../../flow/ecommerceTypes"
 import type { CurrentUser } from "../../flow/authTypes"
@@ -44,13 +44,13 @@ type Props = {
   forceRequest: () => Promise<*>,
   history: RouterHistory,
   location: Location,
-  requestDigitalCredentials: (uuid: string, isCourse: boolean) => Promise<*>
+  requestDigitalCredentials: (uuid: string, isCourse: boolean) => Promise<*>,
 }
 
 type State = {
   collapseVisible: Object,
   now: Moment,
-  timeoutActive: boolean
+  timeoutActive: boolean,
 }
 
 const NUM_MINUTES_TO_POLL = 2
@@ -60,7 +60,7 @@ export class DashboardPage extends React.Component<Props, State> {
   state = {
     collapseVisible: {},
     now:             moment(),
-    timeoutActive:   false
+    timeoutActive:   false,
   }
 
   componentDidMount() {
@@ -71,7 +71,7 @@ export class DashboardPage extends React.Component<Props, State> {
         transactionTotal: CSOURCE_PAYLOAD.transaction_total,
         productType:      CSOURCE_PAYLOAD.product_type,
         coursewareId:     CSOURCE_PAYLOAD.courseware_id,
-        referenceNumber:  CSOURCE_PAYLOAD.reference_number
+        referenceNumber:  CSOURCE_PAYLOAD.reference_number,
       })
       CSOURCE_PAYLOAD = null
     }
@@ -89,7 +89,7 @@ export class DashboardPage extends React.Component<Props, State> {
   handleOrderStatus = () => {
     const {
       enrollments,
-      location: { search }
+      location: { search },
     } = this.props
     if (!enrollments) {
       // wait until we have access to the dashboard
@@ -103,12 +103,8 @@ export class DashboardPage extends React.Component<Props, State> {
   }
 
   handleOrderPending = async (readableId: ?string) => {
-    const {
-      addUserNotification,
-      enrollments,
-      forceRequest,
-      history
-    } = this.props
+    const { addUserNotification, enrollments, forceRequest, history } =
+      this.props
     const { timeoutActive, now: initialTime } = this.state
 
     if (timeoutActive) {
@@ -123,9 +119,9 @@ export class DashboardPage extends React.Component<Props, State> {
         "order-status": {
           type:  ALERT_TYPE_TEXT,
           props: {
-            text: `You are now enrolled in ${item.title}!`
-          }
-        }
+            text: `You are now enrolled in ${item.title}!`,
+          },
+        },
       })
       return
     }
@@ -144,11 +140,9 @@ export class DashboardPage extends React.Component<Props, State> {
           type:  ALERT_TYPE_TEXT,
           color: "danger",
           props: {
-            text: `Something went wrong. Please contact support at ${
-              SETTINGS.support_email
-            }.`
-          }
-        }
+            text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`,
+          },
+        },
       })
     }
   }
@@ -188,8 +182,8 @@ export class DashboardPage extends React.Component<Props, State> {
     this.setState({
       collapseVisible: {
         ...this.state.collapseVisible,
-        [programEnrollmentId]: !this.state.collapseVisible[programEnrollmentId]
-      }
+        [programEnrollmentId]: !this.state.collapseVisible[programEnrollmentId],
+      },
     })
   }
 
@@ -197,7 +191,7 @@ export class DashboardPage extends React.Component<Props, State> {
     (
       isProgramCourse: boolean,
       courseRunEnrollment: CourseRunEnrollment,
-      index: number
+      index: number,
     ) => {
       const dateSummary = getDateSummary(courseRunEnrollment)
       const courseDialogIdentifier = `course-${courseRunEnrollment.run.id}`
@@ -270,7 +264,7 @@ export class DashboardPage extends React.Component<Props, State> {
                       View Certificate
                     </a>
                     {this.isDigitalCredentialSupported(
-                      courseRunEnrollment.run.courseware_id
+                      courseRunEnrollment.run.courseware_id,
                     ) ? (
                         <div className="digital-credential-link">
                           <a
@@ -285,7 +279,7 @@ export class DashboardPage extends React.Component<Props, State> {
                           // $FlowFixMe: Flow thinks certificate can be null or undefined but it can't be
                             courseRunEnrollment.certificate.uuid,
                             courseDialogIdentifier,
-                            true
+                            true,
                           )}
                         </div>
                       ) : null}
@@ -296,14 +290,14 @@ export class DashboardPage extends React.Component<Props, State> {
           </div>
         </div>
       )
-    }
+    },
   )
 
   renderEnrollmentCode = R.curry(
     (
       enrollmentCode: EnrollmentCode,
       isProgramCourse: boolean,
-      index: number
+      index: number,
     ) => {
       return (
         <div className="enrollment-code row" key={index}>
@@ -343,9 +337,7 @@ export class DashboardPage extends React.Component<Props, State> {
               </div>
             </div>
             <a
-              href={`${routes.checkout}?product=${
-                enrollmentCode.product_id
-              }&code=${enrollmentCode.coupon_code}`}
+              href={`${routes.checkout}?product=${enrollmentCode.product_id}&code=${enrollmentCode.coupon_code}`}
               className="btn btn-primary btn-enroll"
             >
               <span className="button-text">Enroll</span>
@@ -353,12 +345,12 @@ export class DashboardPage extends React.Component<Props, State> {
           </div>
         </div>
       )
-    }
+    },
   )
 
   renderProgramEnrollment = (
     programEnrollment: ProgramEnrollment,
-    index: number
+    index: number,
   ) => {
     const { collapseVisible } = this.state
 
@@ -415,7 +407,7 @@ export class DashboardPage extends React.Component<Props, State> {
                     View Certificate
                   </a>
                   {this.isDigitalCredentialSupported(
-                    programEnrollment.program.readable_id
+                    programEnrollment.program.readable_id,
                   ) ? (
                       <div className="digital-credential-link">
                         <a
@@ -430,7 +422,7 @@ export class DashboardPage extends React.Component<Props, State> {
                         // $FlowFixMe: Flow thinks certificate can be null or undefined but it can't be
                           programEnrollment.certificate.uuid,
                           programDialogIdentifier,
-                          false
+                          false,
                         )}
                       </div>
                     ) : null}
@@ -447,7 +439,7 @@ export class DashboardPage extends React.Component<Props, State> {
               <h5>List of courses in this program:</h5>
               <div>
                 {programEnrollment.course_run_enrollments.map(
-                  this.renderCourseEnrollment(true)
+                  this.renderCourseEnrollment(true),
                 )}
               </div>
             </section>
@@ -458,7 +450,7 @@ export class DashboardPage extends React.Component<Props, State> {
               <Button
                 className="collapse-toggle btn-link shadow-none d-flex align-items-center"
                 onClick={R.partial(this.onCollapseToggle, [
-                  programEnrollment.id
+                  programEnrollment.id,
                 ])}
               >
                 {isExpanded ? <span>Close</span> : <span>View Courses</span>}
@@ -499,7 +491,7 @@ export class DashboardPage extends React.Component<Props, State> {
   renderDigitalCredentialDialog = (
     certificateUUID: string,
     dialogId: string,
-    isCourse: boolean
+    isCourse: boolean,
   ) => {
     return (
       <div className="modal fade" id={dialogId} role="dialog">
@@ -552,7 +544,7 @@ export class DashboardPage extends React.Component<Props, State> {
                           .requestDigitalCredentials(certificateUUID, isCourse)
                           .then(response => {
                             Promise.resolve(
-                              (window.location = response.body.deep_link_url)
+                              (window.location = response.body.deep_link_url),
                             )
                           })
                       }}
@@ -620,12 +612,12 @@ export class DashboardPage extends React.Component<Props, State> {
                     <h3>Courses and Programs</h3>
                     <div className="program-enrollments">
                       {enrollments.program_enrollments.map(
-                        this.renderProgramEnrollment
+                        this.renderProgramEnrollment,
                       )}
                     </div>
                     <div className="non-program-course-enrollments">
                       {enrollments.course_run_enrollments.map(
-                        this.renderCourseEnrollment(false)
+                        this.renderCourseEnrollment(false),
                       )}
                     </div>
                   </div>
@@ -635,12 +627,12 @@ export class DashboardPage extends React.Component<Props, State> {
                     <h3>Past Courses and Programs</h3>
                     <div className="program-enrollments">
                       {enrollments.past_program_enrollments.map(
-                        this.renderProgramEnrollment
+                        this.renderProgramEnrollment,
                       )}
                     </div>
                     <div className="non-program-course-enrollments">
                       {enrollments.past_course_run_enrollments.map(
-                        this.renderCourseEnrollment(false)
+                        this.renderCourseEnrollment(false),
                       )}
                     </div>
                   </div>
@@ -658,29 +650,26 @@ export class DashboardPage extends React.Component<Props, State> {
 
 const mapStateToProps = createStructuredSelector({
   enrollments: queries.enrollment.enrollmentsSelector,
-  currentUser: currentUserSelector
+  currentUser: currentUserSelector,
 })
 
 const mapPropsToConfigs = () => [
   queries.enrollment.enrollmentsQuery(),
-  users.currentUserQuery()
+  users.currentUserQuery(),
 ]
 
 const requestDigitalCredentials = (uuid: string, isCourse: boolean) =>
   requestAsync({
     ...queries.digitalCredentials.requestDigitalCredentials(uuid, isCourse),
-    force: true
+    force: true,
   })
 
 const mapDispatchToProps = {
   requestDigitalCredentials,
-  addUserNotification
+  addUserNotification,
 }
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfigs)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfigs),
 )(DashboardPage)

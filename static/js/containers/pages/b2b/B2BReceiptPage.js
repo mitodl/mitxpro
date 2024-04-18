@@ -30,11 +30,11 @@ type Props = {
   location: Location,
   currentUser: CurrentUser,
   forceRequest: () => Promise<void>,
-  requestPending: boolean
+  requestPending: boolean,
 }
 type State = {
   now: Moment,
-  timeoutActive: boolean
+  timeoutActive: boolean,
 }
 
 const NUM_MINUTES_TO_POLL = 2
@@ -43,7 +43,7 @@ const NUM_MILLIS_PER_POLL = 3000
 export class B2BReceiptPage extends React.Component<Props, State> {
   state = {
     now:           moment(),
-    timeoutActive: false
+    timeoutActive: false,
   }
 
   componentDidMount() {
@@ -94,8 +94,8 @@ export class B2BReceiptPage extends React.Component<Props, State> {
       addUserNotification({
         "b2b-order-status": {
           type:  ALTER_TYPE_B2B_ORDER_STATUS,
-          color: "danger"
-        }
+          color: "danger",
+        },
       })
     }
   }
@@ -103,7 +103,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
   render() {
     const {
       orderStatus,
-      location: { search }
+      location: { search },
     } = this.props
 
     const hash = qs.parse(search).hash
@@ -124,7 +124,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
       receipt_data: receiptData,
       reference_number: referenceNumber,
       customer_name: customerName,
-      product_version: { content_title: title, readable_id: readableId }
+      product_version: { content_title: title, readable_id: readableId },
     } = orderStatus
     return (
       <React.Fragment>
@@ -231,21 +231,18 @@ export class B2BReceiptPage extends React.Component<Props, State> {
 }
 
 const mapStateToProps = state => ({
-  orderStatus: state.entities.b2b_order_status
+  orderStatus: state.entities.b2b_order_status,
 })
 
 const mapDispatchToProps = {
-  addUserNotification
+  addUserNotification,
 }
 
 const mapPropsToConfig = props => [
-  queries.ecommerce.b2bOrderStatus(qs.parse(props.location.search).hash)
+  queries.ecommerce.b2bOrderStatus(qs.parse(props.location.search).hash),
 ]
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(B2BReceiptPage)

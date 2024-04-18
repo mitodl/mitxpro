@@ -79,7 +79,7 @@ class ProductViewSet(ReadOnlyModelViewSet):
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = ProductFilter
 
-    def get_queryset(self):  # noqa: D102
+    def get_queryset(self):
         now = now_in_utc()
         expired_courseruns = CourseRun.objects.filter(
             enrollment_end__lt=now
@@ -154,7 +154,7 @@ class ProgramRunsViewSet(ReadOnlyModelViewSet):
     permission_classes = ()
     serializer_class = ProgramRunSerializer
 
-    def get_queryset(self):  # noqa: D102
+    def get_queryset(self):
         return ProgramRun.objects.filter(
             program__products=self.kwargs["program_product_id"]
         )
@@ -284,7 +284,7 @@ class OrderReceiptView(RetrieveAPIView):
 
     serializer_class = OrderReceiptSerializer
 
-    def get_queryset(self):  # noqa: D102
+    def get_queryset(self):
         return Order.objects.filter(purchaser=self.request.user, status=Order.FULFILLED)
 
     def get(self, request, *args, **kwargs):
@@ -389,8 +389,5 @@ def bulk_assignment_csv_view(request, bulk_assignment_id):
             }
             for product_coupon_assignment in bulk_assignment.assignments.all()
         ),
-        filename="Bulk Assign {coupon_name} {formatted_dt}.csv".format(
-            coupon_name=first_coupon_name[0:COUPON_NAME_FILENAME_LIMIT],
-            formatted_dt=format_datetime_for_filename(bulk_assignment.created_on),
-        ),
+        filename=f"Bulk Assign {first_coupon_name[0:COUPON_NAME_FILENAME_LIMIT]} {format_datetime_for_filename(bulk_assignment.created_on)}.csv",
     )

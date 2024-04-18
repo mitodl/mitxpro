@@ -8,33 +8,33 @@ import type { AuthResponse, AuthFlow, AuthStates } from "../flow/authTypes"
 export const makeAuthResponse = (
   values: $Shape<AuthResponse> & {
     state: AuthStates,
-    flow: AuthFlow
-  }
+    flow: AuthFlow,
+  },
 ): AuthResponse => ({
-  errors:        [],
-  field_errors:  {},
+  errors: [],
+  field_errors: {},
   partial_token: casual.uuid,
-  redirect_url:  undefined,
-  extra_data:    {},
-  ...values
+  redirect_url: undefined,
+  extra_data: {},
+  ...values,
 })
 
 export const makeLoginAuthResponse = (
   values: $Shape<AuthResponse> & {
-    state: AuthStates
-  }
+    state: AuthStates,
+  },
 ): AuthResponse =>
   makeAuthResponse({
     flow: FLOW_LOGIN,
-    ...values
+    ...values,
   })
 
 export const makeRegisterAuthResponse = (
   values: $Shape<AuthResponse> & {
-    state: AuthStates
-  }
+    state: AuthStates,
+  },
 ): AuthResponse =>
   makeAuthResponse({
     flow: FLOW_REGISTER,
-    ...values
+    ...values,
   })

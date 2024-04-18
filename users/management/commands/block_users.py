@@ -46,7 +46,7 @@ class Command(BaseCommand):
             help="Single or multiple username(s) or email(s)",
         )
 
-    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         users = kwargs.get("users", [])
         if not users:
             self.stderr.write(

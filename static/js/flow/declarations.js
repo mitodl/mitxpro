@@ -14,7 +14,7 @@ declare type Settings = {
   site_name: string,
   zendesk_config: {
     help_widget_enabled: boolean,
-    help_widget_key: ?string
+    help_widget_key: ?string,
   },
   digital_credentials: boolean,
   digital_credentials_supported_runs: Array<string>,
@@ -36,5 +36,5 @@ declare var describe: Function
 declare var __webpack_public_path__: string // eslint-disable-line camelcase
 
 declare var module: {
-  hot: any
+  hot: any,
 }

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load render_bundle wagtailcore_tags %}
 
-{% block title %}{{ site_name }} | {{ page.title }}{% endblock %}
+{% block title %}{{ site_name }}
+|
+{{ page.title }}{% endblock %}
 
 {% block headercontent %}
 <div id="header"></div>
@@ -10,31 +12,35 @@
 
 {% block content %}
 
-  <div class="resource-banner">
-    <div class="container">
-      <h1 class="text-uppercase">{{ page.title }}</h1>
-      {% if page.sub_heading %}
-        <h2>{{ page.sub_heading }}</h2>
-      {% endif %}
-    </div>
+<div class="resource-banner">
+  <div class="container">
+    <h1 class="text-uppercase">{{ page.title }}</h1>
+    {% if page.sub_heading %}
+    <h2>{{ page.sub_heading }}</h2>
+    {% endif %}
   </div>
+</div>
 
 <div class="container resource-container">
   <div class="row">
     <div class="col-md-3">
       <ul class="resource-list">
         {% for block in page.content %}
-          <li class="item">
-            <a class="text-capitalize" href="#{{ block.value.heading|slugify }}">{{ block.value.heading }}</a>
-          </li>
+        <li class="item">
+          <a class="text-capitalize" href="#{{ block.value.heading|slugify }}"
+            >{{ block.value.heading }}</a
+          >
+        </li>
         {% endfor %}
       </ul>
     </div>
     <div class="col-md-9">
       {% for block in page.content %}
-        <h2 class="text-uppercase" id="{{ block.value.heading|slugify }}">{{ block.value.heading }}:</h2>
-        <p>{{ block.value.detail }}</p>
-        <a href="#" class="back-to-top">Back to top</a>
+      <h2 class="text-uppercase" id="{{ block.value.heading|slugify }}">
+        {{ block.value.heading }}:
+      </h2>
+      <p>{{ block.value.detail }}</p>
+      <a href="#" class="back-to-top">Back to top</a>
       {% endfor %}
     </div>
   </div>

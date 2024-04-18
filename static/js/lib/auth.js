@@ -34,7 +34,7 @@ export const STATE_REGISTER_REQUIRED = "register/required"
 export const INFORMATIVE_STATES = [
   STATE_INVALID_EMAIL,
   STATE_INVALID_LINK,
-  STATE_EXISTING_ACCOUNT
+  STATE_EXISTING_ACCOUNT,
 ]
 
 export const ALL_STATES = [
@@ -52,7 +52,7 @@ export const ALL_STATES = [
   STATE_REGISTER_CONFIRM_SENT,
   STATE_REGISTER_DETAILS,
   STATE_REGISTER_EXTRA_DETAILS,
-  STATE_REGISTER_REQUIRED
+  STATE_REGISTER_REQUIRED,
 ]
 
 export const generateLoginRedirectUrl = () => {
@@ -63,20 +63,20 @@ export const generateLoginRedirectUrl = () => {
 }
 
 export type StateHandlers = {
-  [AuthStates]: (response: AuthResponse) => void
+  [AuthStates]: (response: AuthResponse) => void,
 }
 
 const getErrorQs = (errors: Array<string>) =>
   !isEmpty(errors)
     ? qs.stringify({
-      error: errors[0]
+      error: errors[0],
     })
     : ""
 
 export const handleAuthResponse = (
   history: RouterHistory,
   response: AuthResponse,
-  handlers: StateHandlers
+  handlers: StateHandlers,
 ) => {
   /* eslint-disable camelcase */
   const { state, redirect_url, partial_token, errors, field_errors } = response
@@ -92,12 +92,12 @@ export const handleAuthResponse = (
     history.push(routes.login.password)
   } else if (state === STATE_REGISTER_DETAILS) {
     const params = qs.stringify({
-      partial_token
+      partial_token,
     })
     history.push(`${routes.register.details}?${params}`)
   } else if (state === STATE_REGISTER_EXTRA_DETAILS) {
     const params = qs.stringify({
-      partial_token
+      partial_token,
     })
     history.push(`${routes.register.extra}?${params}`)
   } else if (state === STATE_USER_BLOCKED) {

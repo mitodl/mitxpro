@@ -24,7 +24,8 @@ type Props = {
   courseTopics: Array<CourseTopic>,
 }
 
-const errorPageHeader = document.getElementsByClassName("error-page-header").length > 0 ? true : false
+const errorPageHeader =
+  document.getElementsByClassName("error-page-header").length > 0 ? true : false
 
 export class HeaderApp extends React.Component<Props, void> {
   componentDidUpdate(prevProps: Props) {
@@ -37,9 +38,9 @@ export class HeaderApp extends React.Component<Props, void> {
           type:  ALERT_TYPE_UNUSED_COUPON,
           props: {
             productId:  unusedCoupon.product_id,
-            couponCode: unusedCoupon.coupon_code
-          }
-        }
+            couponCode: unusedCoupon.coupon_code,
+          },
+        },
       })
     }
   }
@@ -58,25 +59,35 @@ export class HeaderApp extends React.Component<Props, void> {
       return <div />
     }
 
-    return <Header currentUser={currentUser} location={null} errorPageHeader={errorPageHeader} courseTopics={courseTopics}/>
+    return (
+      <Header
+        currentUser={currentUser}
+        location={null}
+        errorPageHeader={errorPageHeader}
+        courseTopics={courseTopics}
+      />
+    )
   }
 }
 
 const mapStateToProps = createStructuredSelector({
   currentUser:  currentUserSelector,
-  courseTopics: catalog.courseTopicsSelector
+  courseTopics: catalog.courseTopicsSelector,
 })
 
-const mapPropsToConfig = () => errorPageHeader ? [] : [users.currentUserQuery(), SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : []]
+const mapPropsToConfig = () =>
+  errorPageHeader
+    ? []
+    : [
+      users.currentUserQuery(),
+      SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : [],
+    ]
 
 const mapDispatchToProps = {
-  addUserNotification
+  addUserNotification,
 }
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(HeaderApp)

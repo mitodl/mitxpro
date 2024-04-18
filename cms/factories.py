@@ -456,7 +456,7 @@ class SignatoryPageFactory(wagtail_factories.PageFactory):
         model = SignatoryPage
 
 
-class SignatoryChooserBlockFactory(wagtail_factories.PageChooserBlockFactory):  # noqa: D101
+class SignatoryChooserBlockFactory(wagtail_factories.PageChooserBlockFactory):
     class Meta:
         model = SignatoryPage
 

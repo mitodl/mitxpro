@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load static render_bundle image_version_url wagtailcore_tags wagtailimages_tags wagtailmetadata_tags tz %}
 
-{% block title %}{{ site_name }} | {{ page.title }}{% endblock %}
+{% block title %}{{ site_name }}
+|
+{{ page.title }}{% endblock %}
 
 {% block headercontent %}
 <div id="header"></div>
@@ -10,55 +12,80 @@
 
 {% block content %}
 
-  {% if page.banner_image %}
-    <div class="webinar-resource-banner sub-banner" style="background-image:url('{% image_version_url page.banner_image "fill-1440x200" %}');">
+{% if page.banner_image %}
+<div
+  class="webinar-resource-banner sub-banner"
+  style="
+    background-image: url('{% image_version_url page.banner_image "fill-1440x200" %}');
+  "
+>
   {% else %}
-    <div class="webinar-resource-banner sub-banner" style="background-image:url('{% static default_banner_image %}');">
-  {% endif %}
+  <div
+    class="webinar-resource-banner sub-banner"
+    style="background-image: url('{% static default_banner_image %}')"
+  >
+    {% endif %}
     <div class="container">
       <h1 class="text-uppercase">{{ page.title }}</h1>
       {% if page.sub_heading %}
-        <h2>{{ page.sub_heading }}</h2>
+      <h2>{{ page.sub_heading }}</h2>
       {% endif %}
     </div>
   </div>
 
-<div class="container resource-container">
-  <div class="row webinar-row">
-    <div class="col-md-12">
-      {% if page.date %}
+  <div class="container resource-container">
+    <div class="row webinar-row">
+      <div class="col-md-12">
+        {% if page.date %}
         {% if page.is_upcoming_webinar %}
-          <p>{{ page.formatted_date }} | {{ page.time }}</p>
+        <p>
+          {{ page.formatted_date }}
+          |
+          {{ page.time }}
+        </p>
         {% else %}
-          <p>{{ page.formatted_date }}</p>
+        <p>{{ page.formatted_date }}</p>
         {% endif %}
-      {% endif %}
-      {% if page.action_url and not page.is_upcoming_webinar %}
+        {% endif %}
+        {% if page.action_url and not page.is_upcoming_webinar %}
         <div class="col-md-12 resource-video">
-          <iframe src="{{page.action_url}}" width="80%" height="500" frameborder="0" allow="autoplay" scrolling="no" allowfullscreen></iframe>
+          <iframe
+            src="{{page.action_url}}"
+            width="80%"
+            height="500"
+            frameborder="0"
+            allow="autoplay"
+            scrolling="no"
+            allowfullscreen
+          ></iframe>
         </div>
-      {% endif %}
-      <div class="body_text">
-        {{ page.body_text|richtext }}
-      </div>
-      {% if page.is_upcoming_webinar %}
-        <a href="{{ detail_page_url }}" class="read-more">{{ page.detail_page_button_title }}</a>
-      {% endif %}
-      {% if page.course or page.program %}
+        {% endif %}
+        <div class="body_text">
+          {{ page.body_text|richtext }}
+        </div>
+        {% if page.is_upcoming_webinar %}
+        <a href="{{ detail_page_url }}" class="read-more"
+          >{{ page.detail_page_button_title }}</a
+        >
+        {% endif %}
+        {% if page.course or page.program %}
         <a href="{{ courseware_url }}" class="read-more">
           {% if page.course %}
-            Learn more about this course or enroll
+          Learn more about this course or enroll
           {% else %}
-            Learn more about this program or enroll
+          Learn more about this program or enroll
           {% endif %}
         </a>
-      {% else %}
-        <a href="/catalog/" class="read-more">
-          Explore MITx PRO Catalog
-        </a>
-      {% endif %}
-      <a href="{% pageurl page.get_parent %}" class="back-to-top back-to-webinars">Back to webinars</a>
+        {% else %}
+        <a href="/catalog/" class="read-more"> Explore MITx PRO Catalog </a>
+        {% endif %}
+        <a
+          href="{% pageurl page.get_parent %}"
+          class="back-to-top back-to-webinars"
+          >Back to webinars</a
+        >
+      </div>
     </div>
   </div>
+  {% endblock %}
 </div>
-{% endblock %}

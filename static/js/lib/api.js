@@ -36,31 +36,20 @@ const credentials = R.merge({ credentials: "same-origin" })
 const setWith = R.curry((path, valFunc, obj) => R.set(path, valFunc(), obj))
 
 const csrfToken = R.unless(
-  R.compose(
-    csrfSafeMethod,
-    R.prop("method")
-  ),
-  setWith(R.lensPath(["headers", "X-CSRFToken"]), () => getCookie("csrftoken"))
+  R.compose(csrfSafeMethod, R.prop("method")),
+  setWith(R.lensPath(["headers", "X-CSRFToken"]), () => getCookie("csrftoken")),
 )
 
 const jsonHeaders = R.merge({
   headers: {
     "Content-Type": "application/json",
-    Accept:         "application/json"
-  }
+    Accept:         "application/json",
+  },
 })
 
-const formatRequest = R.compose(
-  csrfToken,
-  credentials,
-  method,
-  headers
-)
+const formatRequest = R.compose(csrfToken, credentials, method, headers)
 
-const formatJSONRequest = R.compose(
-  formatRequest,
-  jsonHeaders
-)
+const formatJSONRequest = R.compose(formatRequest, jsonHeaders)
 
 const _fetchWithCSRF = async (path: string, init: Object = {}): Promise<*> => {
   const response = await fetch(path, formatRequest(init))
@@ -85,7 +74,7 @@ export { _fetchWithCSRF as fetchWithCSRF }
 const _fetchJSONWithCSRF = async (
   input: string,
   init: Object = {},
-  loginOnError: boolean = false
+  loginOnError: boolean = false,
 ): Promise<*> => {
   const response = await fetch(input, formatJSONRequest(init))
   // For 400 and 401 errors, force login
@@ -98,7 +87,7 @@ const _fetchJSONWithCSRF = async (
   ) {
     const relativePath = window.location.pathname + window.location.search
     const loginRedirect = `/login/edxorg/?next=${encodeURIComponent(
-      relativePath
+      relativePath,
     )}`
     window.location = `/logout?next=${encodeURIComponent(loginRedirect)}`
   }
@@ -126,6 +115,6 @@ import { fetchJSONWithCSRF } from "./api"
 export function patchThing(username: string, newThing: Object) {
   return fetchJSONWithCSRF(`/api/v0/thing/${username}/`, {
     method: "PATCH",
-    body:   JSON.stringify(newThing)
+    body:   JSON.stringify(newThing),
   })
 }

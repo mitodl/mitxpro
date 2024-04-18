@@ -6,7 +6,7 @@ import { createMemoryHistory } from "history"
 import {
   ALL_STATES,
   generateLoginRedirectUrl,
-  handleAuthResponse
+  handleAuthResponse,
 } from "./auth"
 import { routes } from "../lib/urls"
 import { makeRegisterAuthResponse } from "../factories/auth"
@@ -17,7 +17,7 @@ describe("auth lib function", () => {
     const redirectUrl = generateLoginRedirectUrl()
     assert.equal(
       redirectUrl,
-      `${routes.login.begin}?next=%2Fprotected%2Froute%3Fvar%3Dabc`
+      `${routes.login.begin}?next=%2Fprotected%2Froute%3Fvar%3Dabc`,
     )
   })
 
@@ -39,7 +39,7 @@ describe("auth lib function", () => {
         const response = makeRegisterAuthResponse({ state })
         const handler = sinon.stub()
         const handlers = {
-          [state]: handler
+          [state]: handler,
         }
 
         handleAuthResponse(history, response, handlers)

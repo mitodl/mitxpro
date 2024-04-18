@@ -13,7 +13,7 @@ import {
   formatPrice,
   formatNumber,
   formatDiscount,
-  formatRunTitle
+  formatRunTitle,
 } from "./ecommerce"
 import { makeCourseRun } from "../factories/course"
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
@@ -23,7 +23,7 @@ describe("ecommerce", () => {
     it("calculates the price of an item", () => {
       const item = {
         ...makeItem(),
-        price: "123.45"
+        price: "123.45",
       }
       assert.equal(calculatePrice(item), item.price)
     })
@@ -31,15 +31,15 @@ describe("ecommerce", () => {
     it("calculates a price of an item including the coupon", () => {
       const item = {
         ...makeItem(),
-        price: "123.45"
+        price: "123.45",
       }
       const coupon = {
         ...makeCouponSelection(item),
-        amount: "0.5"
+        amount: "0.5",
       }
       assert.equal(
         calculatePrice(item, coupon).toString(),
-        new Decimal("61.72").toString()
+        new Decimal("61.72").toString(),
       )
     })
   })
@@ -53,11 +53,11 @@ describe("ecommerce", () => {
       it("calculates the tax of an item price", () => {
         const item = {
           ...makeItem(),
-          price: price
+          price: price,
         }
         const coupon = {
           ...makeCouponSelection(item),
-          amount: discountAmount
+          amount: discountAmount,
         }
         assert.equal(calculateTax(item, coupon, taxRate), tax)
       })
@@ -73,11 +73,11 @@ describe("ecommerce", () => {
       it("calculates the total including the tax for an item", () => {
         const item = {
           ...makeItem(),
-          price: price
+          price: price,
         }
         const coupon = {
           ...makeCouponSelection(item),
-          amount: discountAmount
+          amount: discountAmount,
         }
         assert.equal(calculateTotalAfterTax(item, coupon, taxRate), tax)
       })
@@ -122,16 +122,16 @@ describe("ecommerce", () => {
       assert.equal(formatDiscount(20), "-$20.00")
       assert.equal(formatDiscount(-20), "-$20.00")
       assert.equal(formatDiscount(20), "-$20.00")
-      assert.equal(formatDiscount(20.00), "-$20.00")
-      assert.equal(formatDiscount(20.00), "-$20.00")
-      assert.equal(formatDiscount(-20.00), "-$20.00")
+      assert.equal(formatDiscount(20.0), "-$20.00")
+      assert.equal(formatDiscount(20.0), "-$20.00")
+      assert.equal(formatDiscount(-20.0), "-$20.00")
       assert.equal(formatDiscount(20.1), "-$20.10")
       assert.equal(formatDiscount(20.1), "-$20.10")
       assert.equal(formatDiscount(20.6959), "-$20.70")
       assert.equal(formatDiscount(-20.6959), "-$20.70")
       assert.equal(formatDiscount(20.6959), "-$20.70")
-      assert.equal(formatDiscount(0.00), "$0.00")
-      assert.equal(formatDiscount(0.00), "$0.00")
+      assert.equal(formatDiscount(0.0), "$0.00")
+      assert.equal(formatDiscount(0.0), "$0.00")
     })
 
     it("returns $0 string if null or undefined", () => {
@@ -146,8 +146,8 @@ describe("ecommerce", () => {
       assert.equal(
         formatRunTitle(run),
         `${moment(run.start_date).format("ll")} - ${moment(run.end_date).format(
-          "ll"
-        )}`
+          "ll",
+        )}`,
       )
     })
 
@@ -155,7 +155,7 @@ describe("ecommerce", () => {
       const run = {
         ...makeCourseRun(),
         start_date: null,
-        end_date:   null
+        end_date:   null,
       }
       assert.equal(formatRunTitle(run), "? - ?")
     })
@@ -184,8 +184,8 @@ describe("ecommerce", () => {
         R.map(course =>
           // Expecting index 1 since the run_tag is "R2", and those values were incrementally generated
           // starting with "R1"
-          [course.id, course.courseruns[1].id]
-        )
+          [course.id, course.courseruns[1].id],
+        ),
       )(programBasketItem.courses)
       const result = calcSelectedRunIds(programBasketItem)
       assert.deepEqual(result, expectedResult)
@@ -195,7 +195,7 @@ describe("ecommerce", () => {
       const preselectRunId = programBasketItem.courses[0].courseruns[1].id
       const expectedResult = R.compose(
         R.fromPairs,
-        R.map(course => [course.id, course.courseruns[1].id])
+        R.map(course => [course.id, course.courseruns[1].id]),
       )(programBasketItem.courses)
       const result = calcSelectedRunIds(programBasketItem, preselectRunId)
       assert.deepEqual(result, expectedResult)
@@ -218,7 +218,7 @@ describe("ecommerce", () => {
       const courseRunBasketItem = makeItem(PRODUCT_TYPE_COURSERUN)
       const result = calcSelectedRunIds(courseRunBasketItem)
       assert.deepEqual(result, {
-        [courseRunBasketItem.courses[0].id]: courseRunBasketItem.object_id
+        [courseRunBasketItem.courses[0].id]: courseRunBasketItem.object_id,
       })
     })
   })

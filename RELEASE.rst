@@ -2606,4 +2606,3 @@ Version 0.1.0 (Released April 23, 2019)
 - RFC for ecommerce infrastructure (#25)
 - Added RFC for storing course data
 - Fix JS travis builds
-

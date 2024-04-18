@@ -266,7 +266,7 @@ class RegisterEmailSerializer(SocialAuthSerializer):
     email = serializers.EmailField(write_only=True, required=False)
     next = serializers.CharField(write_only=True, required=False)
 
-    def validate(self, attrs):  # noqa: D102
+    def validate(self, attrs):
         token = (attrs.get("partial", {}) or {}).get("token", None)
         email = attrs.get("email", None)
         if not email and not token:

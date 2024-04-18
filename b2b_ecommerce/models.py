@@ -105,7 +105,7 @@ class B2BCoupon(TimestampedModel, AuditableModel):
     objects = B2BCouponManager()
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         return B2BCouponAudit
 
     def to_dict(self):
@@ -128,7 +128,7 @@ class B2BCouponAudit(AuditModel):
     coupon = models.ForeignKey(B2BCoupon, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):  # noqa: D102
+    def get_related_field_name(cls):
         return "coupon"
 
 
@@ -175,7 +175,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
         return f"B2BOrder #{self.id}, status={self.status}"
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         return B2BOrderAudit
 
     def to_dict(self):
@@ -230,7 +230,7 @@ class B2BOrderAudit(AuditModel):
     order = models.ForeignKey(B2BOrder, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):  # noqa: D102
+    def get_related_field_name(cls):
         return "order"
 
 

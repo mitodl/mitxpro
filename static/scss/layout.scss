@@ -21,7 +21,7 @@
 @import "detail/header";
 @import "detail/tiles";
 @import "detail/learning-outcomes";
-@import "detail/learning-techniques.scss";
+@import "detail/learning-techniques";
 @import "detail/faqs";
 @import "detail/for-teams";
 @import "detail/who-should-enroll";
@@ -49,9 +49,9 @@
 @import "detail/enterprise/success-stories";
 @import "detail/enterprise/learning-strategy-form";
 
-
 body {
-  font-family: Rajdhani, "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: Rajdhani, "Open Sans", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
   margin: 0;
 
   .main-panel {

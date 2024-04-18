@@ -26,18 +26,15 @@ import {
   getProductSelectLabel,
   isSuccessResponse,
   isErrorResponse,
-  isUnauthorizedResponse
+  isUnauthorizedResponse,
 } from "./util"
 import { makeUserEnrollments } from "../factories/course"
 import {
   makeProgramProduct,
-  makeCourseRunProduct
+  makeCourseRunProduct,
 } from "../factories/ecommerce"
 
-const assertRaises = async (
-  asyncFunc: Function,
-  expectedMessage: string
-) => {
+const assertRaises = async (asyncFunc: Function, expectedMessage: string) => {
   let exception
   try {
     await asyncFunc()
@@ -80,7 +77,13 @@ describe("utility functions", () => {
       list.push(item)
     }
 
-    assert.deepEqual(list, [[0, 6], [1, 7], [2, 8], [3, 9], [4, 10]])
+    assert.deepEqual(list, [
+      [0, 6],
+      [1, 7],
+      [2, 8],
+      [3, 9],
+      [4, 10],
+    ])
   })
 
   it("isEmptyText works as expected", () => {
@@ -91,7 +94,7 @@ describe("utility functions", () => {
       ["                   \t ", true],
       ["foo \n", false],
       ["foo", false],
-      ["   \n\tfoo", false]
+      ["   \n\tfoo", false],
     ].forEach(([text, exp]) => {
       assert.equal(isEmptyText(text), exp)
     })
@@ -102,7 +105,7 @@ describe("utility functions", () => {
       ["", ""],
       [null, ""],
       ["A random string", "A random string"],
-      ["A random string with many words.", "A random string..."]
+      ["A random string with many words.", "A random string..."],
     ].forEach(([text, expected]) => {
       assert.equal(truncate(text, 20), expected)
     })
@@ -111,7 +114,7 @@ describe("utility functions", () => {
   it("preventDefaultAndInvoke works as expected", () => {
     const invokee = sinon.stub()
     const event = {
-      preventDefault: sinon.stub()
+      preventDefault: sinon.stub(),
     }
 
     preventDefaultAndInvoke(invokee, event)
@@ -126,7 +129,7 @@ describe("utility functions", () => {
       [undefined, false],
       [0, true],
       ["", true],
-      ["abc", true]
+      ["abc", true],
     ].forEach(([val, exp]) => {
       assert.equal(notNil(val), exp)
     })
@@ -140,11 +143,11 @@ describe("utility functions", () => {
       getProductSelectLabel(courseRun),
       `${courseRun.content_object.readable_id} | ${
         courseRun.content_object.title
-      } | ${formatPrettyDate(moment(courseRun.content_object.start_date))}`
+      } | ${formatPrettyDate(moment(courseRun.content_object.start_date))}`,
     )
     assert.equal(
       getProductSelectLabel(program),
-      `${program.content_object.readable_id} | ${program.content_object.title}`
+      `${program.content_object.readable_id} | ${program.content_object.title}`,
     )
   })
 
@@ -154,17 +157,17 @@ describe("utility functions", () => {
       [undefined, "?token=querystring_token", "querystring_token"],
       ["url_token", "?token=querystring_token", "url_token"],
       [undefined, "?not_token=whatever", ""],
-      [undefined, undefined, ""]
+      [undefined, undefined, ""],
     ].forEach(([urlMatchTokenValue, querystringValue, exp]) => {
       const props = {
         match: {
           params: {
-            token: urlMatchTokenValue
-          }
+            token: urlMatchTokenValue,
+          },
         },
         location: {
-          search: querystringValue
-        }
+          search: querystringValue,
+        },
       }
       const token = getTokenFromUrl(props)
       assert.equal(token, exp)
@@ -194,7 +197,7 @@ describe("utility functions", () => {
         [["a", "b", "c"], "a b c"],
         [[null, null], ""],
         [[null, "a", "b"], "a b"],
-        [["a", "b", null], "a b"]
+        [["a", "b", null], "a b"],
       ].forEach(([inputArr, expectedStr]) => {
         assert.deepEqual(spaceSeparated(inputArr), expectedStr)
       })
@@ -299,7 +302,7 @@ describe("utility functions", () => {
       const program = enrollments.program_enrollments[0].program
       assert.deepEqual(
         findItemWithTextId(enrollments, program.readable_id),
-        program
+        program,
       )
     })
 
@@ -323,47 +326,59 @@ describe("utility functions", () => {
   })
 
   //
-  ;[[200, false], [299, false], [300, false], [400, true], [500, true]].forEach(
-    ([status, expResult]) => {
-      it(`isErrorResponse returns ${String(expResult)} when status=${String(
-        status
-      )}`, () => {
-        const response = {
-          status: status,
-          body:   {}
-        }
-        assert.equal(isErrorResponse(response), expResult)
-      })
-    }
-  )
+  ;[
+    [200, false],
+    [299, false],
+    [300, false],
+    [400, true],
+    [500, true],
+  ].forEach(([status, expResult]) => {
+    it(`isErrorResponse returns ${String(expResult)} when status=${String(
+      status,
+    )}`, () => {
+      const response = {
+        status: status,
+        body:   {},
+      }
+      assert.equal(isErrorResponse(response), expResult)
+    })
+  })
 
   //
-  ;[[200, true], [299, true], [300, false], [400, false], [500, false]].forEach(
-    ([status, expResult]) => {
-      it(`isSuccessResponse returns ${String(expResult)} when status=${String(
-        status
-      )}`, () => {
-        const response = {
-          status: status,
-          body:   {}
-        }
-        assert.equal(isSuccessResponse(response), expResult)
-      })
-    }
-  )
+  ;[
+    [200, true],
+    [299, true],
+    [300, false],
+    [400, false],
+    [500, false],
+  ].forEach(([status, expResult]) => {
+    it(`isSuccessResponse returns ${String(expResult)} when status=${String(
+      status,
+    )}`, () => {
+      const response = {
+        status: status,
+        body:   {},
+      }
+      assert.equal(isSuccessResponse(response), expResult)
+    })
+  })
 
   //
-  ;[[401, true], [403, true], [200, false], [400, false], [500, false]].forEach(
-    ([status, expResult]) => {
-      it(`isUnauthorizedResponse returns ${String(
-        expResult
-      )} when status=${String(status)}`, () => {
-        const response = {
-          status: status,
-          body:   {}
-        }
-        assert.equal(isUnauthorizedResponse(response), expResult)
-      })
-    }
-  )
+  ;[
+    [401, true],
+    [403, true],
+    [200, false],
+    [400, false],
+    [500, false],
+  ].forEach(([status, expResult]) => {
+    it(`isUnauthorizedResponse returns ${String(
+      expResult,
+    )} when status=${String(status)}`, () => {
+      const response = {
+        status: status,
+        body:   {},
+      }
+      assert.equal(isUnauthorizedResponse(response), expResult)
+    })
+  })
 })

@@ -20,7 +20,7 @@ course, or program to a basket. This simplifies the UX and means we don't need t
 how multiple coupons can conflict.
 
 Users ultimately purchase course runs. In the UI when a user buys a course it will add the
-next course run to the basket. When a user buys a program it will add the next course run 
+next course run to the basket. When a user buys a program it will add the next course run
 for each course to the basket.
 
 ##### Coupon target
@@ -31,8 +31,8 @@ is redeemable for is different from MicroMasters.
 A program coupon is redeemable only if all courses for the program are in the basket. If a course
 was missing from the basket, maybe because the program is nearing end of life and one of
 the courses is not enrollable anymore, then the program coupon would not be redeemable at all.
-  
-A course coupon would be redeemable only for the next course run for that course. It may have 
+
+A course coupon would be redeemable only for the next course run for that course. It may have
 multiple courses where it can be redeemed.
 
 A course run coupon is redeemable only for the particular course run.

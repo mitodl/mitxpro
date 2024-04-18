@@ -35,7 +35,7 @@ const renderHeader = () => {
         </AppTypeContext.Provider>
       </Provider>
     </AppContainer>,
-    rootEl
+    rootEl,
   )
 }
 

@@ -7,33 +7,53 @@
       <div class="col-lg-6 {% if page.switch_layout %}order-2{% endif %}">
         {{ page.content|richtext }}
         {% if page.action_url and page.action_title %}
-          <a href="{{ page.action_url }}" class="btn btn-primary text-uppercase px-5 py-2 action-button">{{ page.action_title }}</a>
+        <a
+          href="{{ page.action_url }}"
+          class="btn btn-primary text-uppercase px-5 py-2 action-button"
+          >{{ page.action_title }}</a
+        >
         {% endif %}
       </div>
       <div class="col-lg-6">
         {% if page.video_url %}
-          <div class="video-holder">
-              {% embed page.video_url as youtube_video %}
-              {% if youtube_video %}
-                <div class="tv-video youtube-video" id="tv-yt-video">{{ youtube_video }}</div>
-              {% else %}
-                <video class="tv-video" id="tv-video" controls data-source="{{ page.video_url }}"></video>
-              {% endif %}
-            <div class="video-caption">{{ page.video_title|richtext }}</div>
+        <div class="video-holder">
+          {% embed page.video_url as youtube_video %}
+          {% if youtube_video %}
+          <div class="tv-video youtube-video" id="tv-yt-video">
+            {{ youtube_video }}
           </div>
+          {% else %}
+          <video
+            class="tv-video"
+            id="tv-video"
+            controls
+            data-source="{{ page.video_url }}"
+          ></video>
+          {% endif %}
+          <div class="video-caption">{{ page.video_title|richtext }}</div>
+        </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
 {% if page.video_url %}
-    <div class="light-box-video-holder hidden">
-        {% embed page.video_url as youtube_video %}
-        {% if youtube_video %}
-            <div class="tv-video youtube-video" id="tv-light-box-yt-video" data-href='{{ youtube_video }}'></div>
-        {% else %}
-            <video class="tv-video" id="tv-light-box-video" controls data-source="{{ page.video_url }}"></video>
-        {% endif %}
-        <div class="video-caption">{{ page.video_title|richtext }}</div>
-    </div>
+<div class="light-box-video-holder hidden">
+  {% embed page.video_url as youtube_video %}
+  {% if youtube_video %}
+  <div
+    class="tv-video youtube-video"
+    id="tv-light-box-yt-video"
+    data-href="{{ youtube_video }}"
+  ></div>
+  {% else %}
+  <video
+    class="tv-video"
+    id="tv-light-box-video"
+    controls
+    data-source="{{ page.video_url }}"
+  ></video>
+  {% endif %}
+  <div class="video-caption">{{ page.video_title|richtext }}</div>
+</div>
 {% endif %}

@@ -16,7 +16,7 @@ describe("EmailForm", () => {
       <EmailForm
         onSubmit={onSubmitStub}
         {...(children ? { children: children } : {})}
-      />
+      />,
     )
 
   beforeEach(() => {

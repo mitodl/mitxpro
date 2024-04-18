@@ -6,24 +6,24 @@ import { routes } from "../../lib/urls"
 import {
   ALERT_TYPE_TEXT,
   ALERT_TYPE_UNUSED_COUPON,
-  ALTER_TYPE_B2B_ORDER_STATUS
+  ALTER_TYPE_B2B_ORDER_STATUS,
 } from "../../constants"
 
 import type {
   TextNotificationProps,
-  UnusedCouponNotificationProps
+  UnusedCouponNotificationProps,
 } from "../../reducers/notifications"
 
 type ComponentProps = {
-  dismiss: Function
+  dismiss: Function,
 }
 
 export const TextNotification = (
-  props: TextNotificationProps & ComponentProps
+  props: TextNotificationProps & ComponentProps,
 ) => <span>{props.text}</span>
 
 export const UnusedCouponNotification = (
-  props: UnusedCouponNotificationProps & ComponentProps
+  props: UnusedCouponNotificationProps & ComponentProps,
 ) => {
   const { productId, couponCode, dismiss } = props
 
@@ -63,5 +63,5 @@ export const B2BOrderStatusNotification = (props: ComponentProps) => {
 export const notificationTypeMap = {
   [ALERT_TYPE_TEXT]:             TextNotification,
   [ALERT_TYPE_UNUSED_COUPON]:    UnusedCouponNotification,
-  [ALTER_TYPE_B2B_ORDER_STATUS]: B2BOrderStatusNotification
+  [ALTER_TYPE_B2B_ORDER_STATUS]: B2BOrderStatusNotification,
 }

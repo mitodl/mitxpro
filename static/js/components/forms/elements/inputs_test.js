@@ -13,8 +13,8 @@ describe("Form input", () => {
       field: { name: fieldName },
       form:  {
         touched: { [fieldName]: false },
-        errors:  { [fieldName]: null }
-      }
+        errors:  { [fieldName]: null },
+      },
     }
 
     it("has the right input type", () => {
@@ -28,24 +28,24 @@ describe("Form input", () => {
     ;[
       ["some-class", false, "some-class "],
       ["", true, " errored"],
-      ["some-class", true, "some-class errored"]
+      ["some-class", true, "some-class errored"],
     ].forEach(([className, isErrored, expClassName]) => {
       it(`has the right class names if class ${isIf(
-        !!className
+        !!className,
       )} specified and ${isIf(isErrored)} in error state`, () => {
         const props = {
           ...defaultProps,
           form: {
             touched: {
-              [fieldName]: isErrored
+              [fieldName]: isErrored,
             },
             errors: {
-              [fieldName]: isErrored ? "ERROR" : null
-            }
-          }
+              [fieldName]: isErrored ? "ERROR" : null,
+            },
+          },
         }
         const textInput = shallow(
-          <TextInput className={className} {...props} />
+          <TextInput className={className} {...props} />,
         )
         assert.equal(textInput.prop("className"), expClassName)
       })

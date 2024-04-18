@@ -4,7 +4,7 @@ import { assert } from "chai"
 import sinon from "sinon"
 
 import LoginForgotPasswordPage, {
-  LoginForgotPasswordPage as InnerLoginForgotPasswordPage
+  LoginForgotPasswordPage as InnerLoginForgotPasswordPage,
 } from "./LoginForgotPasswordPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { routes } from "../../../lib/urls"
@@ -25,7 +25,7 @@ describe("LoginForgotPasswordPage", () => {
       LoginForgotPasswordPage,
       InnerLoginForgotPasswordPage,
       {},
-      {}
+      {},
     )
   })
 
@@ -43,7 +43,7 @@ describe("LoginForgotPasswordPage", () => {
     const { inner, store } = await renderPage()
 
     helper.handleRequestStub.returns({
-      status: 200
+      status: 200,
     })
 
     const onSubmit = inner.find("EmailForm").prop("onSubmit")
@@ -56,17 +56,17 @@ describe("LoginForgotPasswordPage", () => {
       "POST",
       {
         body: {
-          email
+          email,
         },
         credentials: undefined,
-        headers:     { "X-CSRFTOKEN": null }
-      }
+        headers:     { "X-CSRFTOKEN": null },
+      },
     )
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.root,
-      search:   ""
+      search:   "",
     })
     sinon.assert.calledWith(setSubmittingStub, false)
   })
@@ -84,7 +84,7 @@ describe("LoginForgotPasswordPage", () => {
     await onSubmit({ email }, { setSubmitting: setSubmittingStub })
     assert.equal(
       inner.find(".contact-support > a").prop("href"),
-      `mailto:${supportEmail}`
+      `mailto:${supportEmail}`,
     )
   })
 

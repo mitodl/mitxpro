@@ -92,7 +92,7 @@ build-backend = "poetry.core.masonry.api"
 target-version = "py39"
 line-length = 88
 
-[lint]
+[tool.ruff.lint]
 select = [
     "A",  # flake8-builtins
     # "AIR",  # Airflow
@@ -186,16 +186,16 @@ ignore = [
 
 typing-modules = ["colour.hints"]
 
-[pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "pep257"
 
-[flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 inline-quotes = "double"
 
-[flake8-pytest-style]
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 
-[per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "*_test.py" = ["ARG001", "E501", "S101", "PLR2004"]
 "test_*.py" = ["ARG001", "E501", "S101", "PLR2004"]
 "**/migrations/**" = ["ARG001", "D101", "D100"]

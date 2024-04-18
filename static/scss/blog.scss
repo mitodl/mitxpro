@@ -6,7 +6,6 @@
   padding-bottom: 150px;
 
   .body {
-
     .blog-header {
       display: flex;
       width: 1140px;
@@ -30,7 +29,7 @@
           background: $dark-blue;
           width: fit-content;
 
-          @include media-breakpoint-down (md) {
+          @include media-breakpoint-down(md) {
             display: inline-flex;
           }
         }
@@ -45,17 +44,17 @@
           line-height: 100%;
           background: $dark-blue;
 
-          @include media-breakpoint-down (md) {
+          @include media-breakpoint-down(md) {
             justify-content: center;
           }
         }
       }
 
-      @include media-breakpoint-down (lg) {
+      @include media-breakpoint-down(lg) {
         max-width: 80%;
       }
 
-      @include media-breakpoint-down (md) {
+      @include media-breakpoint-down(md) {
         display: inherit;
         padding: 30px 10px;
         text-align: center;
@@ -87,12 +86,13 @@
               margin: 10px;
             }
 
-            .slick-prev, .slick-next {
+            .slick-prev,
+            .slick-next {
               margin: -3% 0 0 !important;
             }
 
             img {
-              @include media-breakpoint-down (lg) {
+              @include media-breakpoint-down(lg) {
                 width: 100%;
               }
             }
@@ -118,13 +118,14 @@
           width: 1140px;
           align-items: flex-start;
           align-content: flex-start;
+
           // sass-lint:disable no-misspelled-properties
           gap: 30px;
           flex-wrap: wrap;
           margin-left: auto;
           margin-right: auto;
 
-          @include media-breakpoint-down (lg) {
+          @include media-breakpoint-down(lg) {
             width: 100%;
             justify-content: center;
           }
@@ -133,11 +134,11 @@
     }
   }
 
-  @include media-breakpoint-down (md) {
+  @include media-breakpoint-down(md) {
     background-size: 100% 350px;
   }
 
-  @include media-breakpoint-down (sm) {
+  @include media-breakpoint-down(sm) {
     background-size: 100% 380px;
   }
 }
@@ -161,7 +162,7 @@
     color: $tile-background;
   }
 
-  @include media-breakpoint-down (md) {
+  @include media-breakpoint-down(md) {
     display: inline-flex;
     margin-top: 10px;
   }
@@ -176,7 +177,7 @@
   flex-shrink: 0;
   border-radius: 5px;
   background: $tile-background;
-  box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
+  box-shadow: 0 2px 3px 0 rgb(3 21 45 / 10%);
   border: 2px solid $tile-background;
   cursor: pointer;
 
@@ -194,15 +195,15 @@
     }
   }
 
-  @include media-breakpoint-down (lg) {
+  @include media-breakpoint-down(lg) {
     width: 310px;
   }
 
-  @include media-breakpoint-down (md) {
+  @include media-breakpoint-down(md) {
     width: 330px;
   }
 
-  @include media-breakpoint-down (sm) {
+  @include media-breakpoint-down(sm) {
     width: 360px;
   }
 
@@ -216,17 +217,19 @@
       height: 200px;
       border-radius: 5px;
       background: $dark-blue;
-      box-shadow: 0 2px 3px 0 rgba(3, 21, 45, 0.10);
+      box-shadow: 0 2px 3px 0 rgb(3 21 45 / 10%);
       filter: brightness(50%);
       transition: all 1s ease;
 
-      @include media-breakpoint-down (lg) {
+      @include media-breakpoint-down(lg) {
         width: 270px;
       }
-      @include media-breakpoint-down (md) {
+
+      @include media-breakpoint-down(md) {
         width: 290px;
       }
-      @include media-breakpoint-down (sm) {
+
+      @include media-breakpoint-down(sm) {
         width: 320px;
       }
     }
@@ -256,9 +259,11 @@
     }
   }
 
-  .title, .description {
+  .title,
+  .description {
     overflow: hidden;
     text-overflow: ellipsis;
+
     // sass-lint:disable no-vendor-prefixes
     -webkit-box-orient: vertical;
     display: -webkit-box; // sass-lint:disable no-vendor-prefixes
@@ -329,10 +334,11 @@
       }
     }
 
-    @include media-breakpoint-down (lg) {
+    @include media-breakpoint-down(lg) {
       min-height: 80px;
     }
-    @include media-breakpoint-down (md) {
+
+    @include media-breakpoint-down(md) {
       min-height: 50px;
     }
   }

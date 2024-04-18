@@ -20,7 +20,7 @@
   box-shadow: -5px 5px 10px grey;
   border-color: $white-smoke;
   border-radius: 5px;
-  right: 0px;
+  right: 0;
   left: unset;
 
   .dropdown-divider {
@@ -45,17 +45,17 @@
     &:active {
       background-color: $soft-light-gray;
     }
-
   }
 }
 
-.user-menu.dropdown, .catalog-menu.dropdown {
+.user-menu.dropdown,
+.catalog-menu.dropdown {
   padding-left: 15px;
   padding-right: 15px;
 
   .dropdown-toggle {
     max-width: 100%;
-    padding: 0px;
+    padding: 0;
 
     &:hover {
       cursor: pointer;

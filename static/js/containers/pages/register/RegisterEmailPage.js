@@ -17,7 +17,7 @@ import {
   STATE_REGISTER_CONFIRM_SENT,
   STATE_LOGIN_PASSWORD,
   STATE_REGISTER_EMAIL,
-  handleAuthResponse
+  handleAuthResponse,
 } from "../../../lib/auth"
 import { qsNextSelector } from "../../../lib/selectors"
 import { ALERT_TYPE_TEXT } from "../../../constants"
@@ -38,9 +38,9 @@ type Props = {
   registerEmail: (
     email: string,
     recaptcha: ?string,
-    next: ?string
+    next: ?string,
   ) => Promise<Response<AuthResponse>>,
-  addUserNotification: Function
+  addUserNotification: Function,
 }
 
 const accountExistsNotificationText = (email: string): string =>
@@ -48,13 +48,13 @@ const accountExistsNotificationText = (email: string): string =>
 export class RegisterEmailPage extends React.Component<Props> {
   async onSubmit(
     { email, recaptcha }: RegisterEmailFormValues,
-    { setSubmitting, setErrors }: any
+    { setSubmitting, setErrors }: any,
   ) {
     const {
       addUserNotification,
       registerEmail,
       params: { next },
-      history
+      history,
     } = this.props
 
     try {
@@ -63,7 +63,7 @@ export class RegisterEmailPage extends React.Component<Props> {
       handleAuthResponse(history, body, {
         [STATE_REGISTER_CONFIRM_SENT]: () => {
           const params = qs.stringify({
-            email
+            email,
           })
           history.push(`${routes.register.confirmSent}?${params}`)
         },
@@ -85,10 +85,10 @@ export class RegisterEmailPage extends React.Component<Props> {
                       customer support
                     </a>{" "}
                     to complete your registration.
-                  </div>
-                ]
-              }
-            }
+                  </div>,
+                ],
+              },
+            },
           })
         },
         [STATE_LOGIN_PASSWORD]: () => {
@@ -97,14 +97,14 @@ export class RegisterEmailPage extends React.Component<Props> {
               type:  ALERT_TYPE_TEXT,
               color: "danger",
               props: {
-                text: accountExistsNotificationText(email)
-              }
-            }
+                text: accountExistsNotificationText(email),
+              },
+            },
           })
         },
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors)
+          setErrors(field_errors),
       })
     } finally {
       setSubmitting(false)
@@ -133,8 +133,8 @@ export class RegisterEmailPage extends React.Component<Props> {
 
 const mapStateToProps = createStructuredSelector({
   params: createStructuredSelector({
-    next: qsNextSelector
-  })
+    next: qsNextSelector,
+  }),
 })
 
 const registerEmail = (email: string, recaptcha: ?string, nextUrl: ?string) =>
@@ -142,12 +142,9 @@ const registerEmail = (email: string, recaptcha: ?string, nextUrl: ?string) =>
 
 const mapDispatchToProps = {
   registerEmail,
-  addUserNotification
+  addUserNotification,
 }
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(RegisterEmailPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  RegisterEmailPage,
+)

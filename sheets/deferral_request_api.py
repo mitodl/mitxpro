@@ -180,13 +180,9 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 raise Exception("edX enrollment change failed")  # noqa: EM101, TRY002
         except ObjectDoesNotExist as exc:
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):
-                message = "'from' course run enrollment does not exist ({})".format(
-                    deferral_req_row.from_courseware_id
-                )
+                message = f"'from' course run enrollment does not exist ({deferral_req_row.from_courseware_id})"
             elif isinstance(exc, CourseRun.DoesNotExist):
-                message = "'to' course run does not exist ({})".format(
-                    deferral_req_row.to_courseware_id
-                )
+                message = f"'to' course run does not exist ({deferral_req_row.to_courseware_id})"
             elif isinstance(exc, User.DoesNotExist):
                 message = "User '{}' does not exist".format(  # noqa: UP032
                     deferral_req_row.learner_email

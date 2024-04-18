@@ -5,7 +5,7 @@ import { Formik, Form } from "formik"
 import {
   passwordValidation,
   legalAddressValidation,
-  LegalAddressFields
+  LegalAddressFields,
 } from "./ProfileFormFields"
 
 import type { Country } from "../../flow/authTypes"
@@ -29,10 +29,15 @@ const INITIAL_VALUES = {
     state_or_territory: "",
     postal_code:        "",
     vat_id:             "",
-  }
+  },
 }
 
-const RegisterDetailsForm = ({ onSubmit, countries, isVatEnabled, enableVatID }: Props) => (
+const RegisterDetailsForm = ({
+  onSubmit,
+  countries,
+  isVatEnabled,
+  enableVatID,
+}: Props) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(passwordValidation)}

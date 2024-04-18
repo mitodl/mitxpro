@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
     help = "Disables coupons in the system."
 
-    def add_arguments(self, parser) -> None:  # noqa: D102
+    def add_arguments(self, parser) -> None:
         parser.add_argument(
             "--payment",
             "-p",
@@ -44,7 +44,7 @@ class Command(BaseCommand):
             dest="codefile",
         )
 
-    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         if not kwargs["payment"] and not kwargs["codefile"]:
             raise CommandError(
                 "Please specify a payment to deactivate or a code file to process."  # noqa: EM101

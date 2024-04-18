@@ -23,12 +23,10 @@ def enrollment_summary(enrollment):
         str: A string representation of an enrollment
     """
     if isinstance(enrollment, ProgramEnrollment):
-        return "<ProgramEnrollment: id={}, program={}>".format(
-            enrollment.id, enrollment.program.text_id
-        )
+        return f"<ProgramEnrollment: id={enrollment.id}, program={enrollment.program.text_id}>"
     else:
-        return "<CourseRunEnrollment: id={}, run={}>".format(
-            enrollment.id, enrollment.run.text_id
+        return (
+            f"<CourseRunEnrollment: id={enrollment.id}, run={enrollment.run.text_id}>"
         )
 
 
@@ -62,7 +60,7 @@ def create_or_update_enrollment(model_cls, defaults=None, **kwargs):
 class EnrollmentChangeCommand(BaseCommand):
     """Base class for management commands that change enrollment status"""
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "-f",
             "--force",
@@ -71,7 +69,7 @@ class EnrollmentChangeCommand(BaseCommand):
             help="Ignores validation when performing the desired status change",
         )
 
-    def handle(self, *args, **options):  # noqa: D102
+    def handle(self, *args, **options):
         pass
 
     @staticmethod

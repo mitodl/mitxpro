@@ -45,16 +45,16 @@ describe("ChangeEmailForm", () => {
       await wrapper.find(Formik).prop("validate")(
         {
           email:           "abc@example.com",
-          confirmPassword: ""
+          confirmPassword: "",
         },
         {
-          context: { currentEmail: "abc@example.com" }
-        }
+          context: { currentEmail: "abc@example.com" },
+        },
       )
     } catch (errors) {
       assert.equal(
         errors.confirmPassword,
-        "Confirm Password is a required field"
+        "Confirm Password is a required field",
       )
     }
   })

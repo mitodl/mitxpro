@@ -23,7 +23,7 @@ __webpack_public_path__ = SETTINGS.public_path // eslint-disable-line no-undef, 
 Sentry.init({
   dsn:         SETTINGS.sentry_dsn,
   release:     SETTINGS.release_version,
-  environment: SETTINGS.environment
+  environment: SETTINGS.environment,
 })
 
 if (!Object.entries) {
@@ -51,7 +51,7 @@ const renderApp = Component => {
         </Component>
       </AppTypeContext.Provider>
     </AppContainer>,
-    rootEl
+    rootEl,
   )
 }
 

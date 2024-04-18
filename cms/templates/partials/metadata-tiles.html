@@ -3,15 +3,27 @@
   <div class="container">
     <ul class="tiles-list">
       {% if page.product.first_unexpired_run.start_date %}
-        <li>
-          <span class="title">START DATE</span>
-          <span class="text">{{ page.product.first_unexpired_run.start_date|date:"F j, Y" }}</span>
-          {% if page.product.unexpired_runs|length > 1 %}
-            {% with course_runs=page.product.unexpired_runs %}
-              <span class="dates-link">
-                <a tabindex="0" role="button" class="dates-tooltip" id="datesPopover" data-trigger="focus" href="#" onClick="event.preventDefault();"
-                  data-toggle="popover" data-html="true" data-placement="auto" title="More dates available for this course"
-                  data-content="
+      <li>
+        <span class="title">START DATE</span>
+        <span class="text"
+          >{{ page.product.first_unexpired_run.start_date|date:"F j, Y" }}</span
+        >
+        {% if page.product.unexpired_runs|length > 1 %}
+        {% with course_runs=page.product.unexpired_runs %}
+        <span class="dates-link">
+          <a
+            tabindex="0"
+            role="button"
+            class="dates-tooltip"
+            id="datesPopover"
+            data-trigger="focus"
+            href="#"
+            onClick="event.preventDefault();"
+            data-toggle="popover"
+            data-html="true"
+            data-placement="auto"
+            title="More dates available for this course"
+            data-content="
                     <div>
                       <p>Click below to enroll in one of these dates</p>
                     </div>
@@ -25,17 +37,28 @@
                         <a class='date-link' href='{% url 'checkout-page' %}?product={{ course_run.products.first.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
                       </div>
                     {% endif %}
-                    {% endfor %}">
-                    More Dates
-                </a>
-              </span>
-            {% endwith %}
-          {% elif page.product.first_course_unexpired_runs|length > 1 %}
-            {% with course_runs=page.product.first_course_unexpired_runs product_id=page.product.products.first.id %}
-              <span class="dates-link">
-                <a tabindex="0" role="button" class="dates-tooltip" id="datesPopover" data-trigger="focus" href="#" onClick="event.preventDefault();"
-                  data-toggle="popover" data-html="true" data-placement="auto" title="More dates available for this program"
-                  data-content="
+                    {% endfor %}"
+          >
+            More Dates
+          </a>
+        </span>
+        {% endwith %}
+        {% elif page.product.first_course_unexpired_runs|length > 1 %}
+        {% with course_runs=page.product.first_course_unexpired_runs product_id=page.product.products.first.id %}
+        <span class="dates-link">
+          <a
+            tabindex="0"
+            role="button"
+            class="dates-tooltip"
+            id="datesPopover"
+            data-trigger="focus"
+            href="#"
+            onClick="event.preventDefault();"
+            data-toggle="popover"
+            data-html="true"
+            data-placement="auto"
+            title="More dates available for this program"
+            data-content="
                     <div>
                       <p>Click below to enroll in one of these dates</p>
                     </div>
@@ -43,40 +66,45 @@
                       <div>
                         <a class='date-link' href='{% url 'checkout-page' %}?product={{ product_id }}&preselect={{ course_run.id }}'>Start Date {{ course_run.start_date|date:'F j, Y' }}</a>
                       </div>
-                    {% endfor %}">
-                  More Dates
-                </a>
-              </span>
-            {% endwith %}
-          {% endif %}
-        </li>
+                    {% endfor %}"
+          >
+            More Dates
+          </a>
+        </span>
+        {% endwith %}
+        {% endif %}
+      </li>
       {% endif %}
       {% if page.time_commitment %}
-        <li>
-          <span class="title">TIME COMMITMENT</span>
-          <span class="text">{{ page.time_commitment }}</span>
-        </li>
+      <li>
+        <span class="title">TIME COMMITMENT</span>
+        <span class="text">{{ page.time_commitment }}</span>
+      </li>
       {% endif %}
       {% if page.duration %}
-        <li>
-          <span class="title">DURATION</span>
-          <span class="text">{{ page.duration }}</span>
-        </li>
+      <li>
+        <span class="title">DURATION</span>
+        <span class="text">{{ page.duration }}</span>
+      </li>
       {% endif %}
       <li>
         <span class="title">FORMAT</span>
         <span class="text">{{ page.format }}</span>
       </li>
       {% if page.product.current_price %}
-        <li>
-          <span class="title">PRICE</span>
-          <span class="text">${{ page.product.current_price|floatformat:"0"|intcomma }}</span>
-        </li>
+      <li>
+        <span class="title">PRICE</span>
+        <span class="text"
+          >${{ page.product.current_price|floatformat:"0"|intcomma }}</span
+        >
+      </li>
       {% elif page.is_internal_or_external_course_page and page.product.first_unexpired_run.current_price %}
-        <li>
-          <span class="title">PRICE</span>
-          <span class="text">${{ page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}</span>
-        </li>
+      <li>
+        <span class="title">PRICE</span>
+        <span class="text"
+          >${{ page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}</span
+        >
+      </li>
       {% endif %}
     </ul>
   </div>

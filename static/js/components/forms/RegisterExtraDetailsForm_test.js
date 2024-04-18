@@ -9,7 +9,7 @@ import RegisterExtraDetailsForm from "./RegisterExtraDetailsForm"
 
 import {
   findFormikFieldByName,
-  findFormikErrorByName
+  findFormikErrorByName,
 } from "../../lib/test_utils"
 
 describe("RegisterExtraDetailsForm", () => {
@@ -45,10 +45,10 @@ describe("RegisterExtraDetailsForm", () => {
     ["profile.company", "MIT", ""],
     ["profile.job_title", "", "Job Title is a required field"],
     ["profile.job_title", "  ", "Job Title is a required field"],
-    ["profile.job_title", "QA Tester", ""]
+    ["profile.job_title", "QA Tester", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
@@ -59,7 +59,7 @@ describe("RegisterExtraDetailsForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -69,10 +69,10 @@ describe("RegisterExtraDetailsForm", () => {
     ["profile.gender", "", "Gender is a required field"],
     ["profile.gender", "f", ""],
     ["profile.birth_year", "", "Birth Year is a required field"],
-    ["profile.birth_year", "2000", ""]
+    ["profile.birth_year", "2000", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
@@ -83,7 +83,7 @@ describe("RegisterExtraDetailsForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })

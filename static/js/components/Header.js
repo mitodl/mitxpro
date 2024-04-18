@@ -7,7 +7,7 @@ import NotificationContainer from "./NotificationContainer"
 
 import type { CurrentUser } from "../flow/authTypes"
 import type { Location } from "react-router"
-import type {CourseTopic} from "../flow/courseTypes"
+import type { CourseTopic } from "../flow/courseTypes"
 
 type Props = {
   currentUser: ?CurrentUser,
@@ -16,14 +16,19 @@ type Props = {
   courseTopics: Array<CourseTopic>,
 }
 
-const Header = ({ currentUser, location, errorPageHeader, courseTopics }: Props) => {
+const Header = ({
+  currentUser,
+  location,
+  errorPageHeader,
+  courseTopics,
+}: Props) => {
   if (currentUser && currentUser.is_authenticated) {
     Sentry.configureScope(scope => {
       scope.setUser({
         id:       currentUser.id,
         email:    currentUser.email,
         username: currentUser.username,
-        name:     currentUser.name
+        name:     currentUser.name,
       })
     })
   } else {
@@ -33,7 +38,12 @@ const Header = ({ currentUser, location, errorPageHeader, courseTopics }: Props)
   }
   return (
     <React.Fragment>
-      <TopAppBar currentUser={currentUser} location={location} errorPageHeader={errorPageHeader} courseTopics={courseTopics}/>
+      <TopAppBar
+        currentUser={currentUser}
+        location={location}
+        errorPageHeader={errorPageHeader}
+        courseTopics={courseTopics}
+      />
       <NotificationContainer />
     </React.Fragment>
   )

@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "-s",
             "--sheet-type",
@@ -69,7 +69,7 @@ class Command(BaseCommand):
             ),
         )
 
-    def handle(  # noqa: D102, C901
+    def handle(  # noqa: C901
         self,
         *args,  # noqa: ARG002
         **options,
@@ -132,9 +132,7 @@ class Command(BaseCommand):
                 error_msg = (
                     ""
                     if renewal_attempt is None
-                    else "\n[{}] {}".format(
-                        renewal_attempt.result_status_code, renewal_attempt.result
-                    )
+                    else f"\n[{renewal_attempt.result_status_code}] {renewal_attempt.result}"
                 )
                 self.style.ERROR(
                     "Failed to create/update file watch.{}".format(error_msg)  # noqa: UP032
@@ -152,9 +150,7 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    "{} file watch {}{}.".format(
-                        file_watch_result.metadata.sheet_name, desc, file_id_desc
-                    )
+                    f"{file_watch_result.metadata.sheet_name} file watch {desc}{file_id_desc}."
                 )
             )
             self.stdout.write(str(file_watch))
@@ -186,15 +182,13 @@ class Command(BaseCommand):
                     expiration=file_watch.expiration_date,
                 )
             except HttpError as exc:
-                existing_channel_id_message = "Channel id {} not unique".format(
-                    file_watch.channel_id
+                existing_channel_id_message = (
+                    f"Channel id {file_watch.channel_id} not unique"
                 )
                 if existing_channel_id_message in str(exc):
                     self.stdout.write(
                         self.style.SUCCESS(
-                            "The file watch with channel id {} already exists.".format(
-                                file_watch.channel_id
-                            )
+                            f"The file watch with channel id {file_watch.channel_id} already exists."
                         )
                     )
                 else:
@@ -205,8 +199,6 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(
                     self.style.SUCCESS(
-                        "New file watch successfully created via API.\n Response: {}".format(
-                            resp_dict
-                        )
+                        f"New file watch successfully created via API.\n Response: {resp_dict}"
                     )
                 )

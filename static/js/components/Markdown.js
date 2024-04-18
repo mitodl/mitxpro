@@ -8,7 +8,7 @@ import ReactMarkdown from "react-markdown"
 // and also to block images
 
 type MarkdownProps = {
-  source: string
+  source: string,
 }
 
 const Markdown = (props: MarkdownProps) => (
@@ -22,7 +22,7 @@ const Markdown = (props: MarkdownProps) => (
           <a href={reference.$ref}>{reference.children}</a>
         ) : (
           <span>[{reference.children[0]}]</span>
-        )
+        ),
     }}
     {...props}
   />

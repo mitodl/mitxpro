@@ -56,9 +56,7 @@ class Command(BaseCommand):
         if course_run_enrollments.count() == 0:
             self.stderr.write(
                 self.style.ERROR(
-                    "No course run enrollments found that match the given filters ({}).\nExiting...".format(
-                        enrollment_filter
-                    )
+                    f"No course run enrollments found that match the given filters ({enrollment_filter}).\nExiting..."
                 )
             )
             return
@@ -75,9 +73,7 @@ class Command(BaseCommand):
                 enrollment.save_and_log(None)
                 self.stdout.write(
                     self.style.SUCCESS(
-                        "Successfully enrolled user {} ({}) in course run '{}'".format(
-                            user.username, user.email, course_run.courseware_id
-                        )
+                        f"Successfully enrolled user {user.username} ({user.email}) in course run '{course_run.courseware_id}'"
                     )
                 )
 

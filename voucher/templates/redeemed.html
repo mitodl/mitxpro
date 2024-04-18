@@ -1,23 +1,24 @@
 {% extends "course_app_base.html" %}
 {% load static %}
 
-{% block title %}{{ site_name }} | Boeing Course Enroll{% endblock %}
+{% block title %}{{ site_name }}
+| Boeing Course Enroll{% endblock %}
 
 {% block content %}
-    <div class="container voucher-container">
-        <h1>Boeing employee enrollment page</h1>
-        <div class="voucher-card">
-            <h2>Upload Voucher</h2>
-            <hr/>
-            <p class="form-error">The voucher you have submitted has already been redeemed.
-                If you believe this is an error, please contact:
-            </p>
-            <p>
-                MIT xPRO Customer Support
-                <br/>
-                <a href="mailto:xpro@mit.edu">xpro@mit.edu</a>
-            </p>
-        </div>
-
-    </div>
+<div class="container voucher-container">
+  <h1>Boeing employee enrollment page</h1>
+  <div class="voucher-card">
+    <h2>Upload Voucher</h2>
+    <hr />
+    <p class="form-error">
+      The voucher you have submitted has already been redeemed. If you believe
+      this is an error, please contact:
+    </p>
+    <p>
+      MIT xPRO Customer Support
+      <br />
+      <a href="mailto:xpro@mit.edu">xpro@mit.edu</a>
+    </p>
+  </div>
+</div>
 {% endblock content %}

@@ -12,7 +12,7 @@ import configureStoreMain from "../../store/configureStore"
 
 import {
   makeB2BCouponStatus,
-  makeCourseRunProduct
+  makeCourseRunProduct,
 } from "../../factories/ecommerce"
 import { Provider } from "react-redux"
 
@@ -34,7 +34,7 @@ describe("B2BPurchaseForm", () => {
     products = [
       makeCourseRunProduct(),
       makeCourseRunProduct(),
-      makeCourseRunProduct()
+      makeCourseRunProduct(),
     ]
     couponStatus = makeB2BCouponStatus()
   })
@@ -60,18 +60,18 @@ describe("B2BPurchaseForm", () => {
           seats="1"
           {...props}
         />
-      </Provider>
+      </Provider>,
     )
 
-  const shallowRender = props => _render(shallow, props)
-  const mountRender = props => _render(mount, props).first()
+  const shallowRender = (props) => _render(shallow, props)
+  const mountRender = (props) => _render(mount, props).first()
 
   it("renders a form", () => {
     const wrapper = mountRender()
 
     const [productSelectorProps, numSeatsProps, emailProps] = wrapper
       .find(Field)
-      .map(_field => _field.props())
+      .map((_field) => _field.props())
 
     assert.equal(productSelectorProps.name, "product")
     assert.deepEqual(productSelectorProps.products, products)
@@ -81,14 +81,14 @@ describe("B2BPurchaseForm", () => {
   })
 
   //
-  ;[true, false].forEach(requestPending => {
+  ;[true, false].forEach((requestPending) => {
     it(`disables the submit button if the request is ${
       requestPending ? "pending" : "not pending"
     }`, () => {
       const wrapper = mountRender({ requestPending })
       assert.equal(
         wrapper.find("button[type='submit']").prop("disabled"),
-        requestPending
+        requestPending,
       )
     })
   })
@@ -103,12 +103,12 @@ describe("B2BPurchaseForm", () => {
       assert.deepEqual(
         validate({
           num_seats: "",
-          product:   { productId: null, programId: null }
+          product: { productId: null, programId: null },
         }),
         {
           num_seats: "Number of Seats is required",
-          product:   "No product selected"
-        }
+          product: "No product selected",
+        },
       )
     })
 
@@ -116,10 +116,10 @@ describe("B2BPurchaseForm", () => {
       assert.equal(
         validate({
           num_seats: "-2",
-          email:     "",
-          product:   { productId: null, programId: null }
+          email: "",
+          product: { productId: null, programId: null },
         }).num_seats,
-        "Number of Seats is required"
+        "Number of Seats is required",
       )
     })
     ;[
@@ -127,7 +127,7 @@ describe("B2BPurchaseForm", () => {
       ["something", "Invalid email"],
       ["something@", "Invalid email"],
       ["@something", "Invalid email"],
-      ["abc@example.com", null]
+      ["abc@example.com", null],
     ].forEach(([email, expectedError]) => {
       it("should validate email field", async () => {
         const values = { email: email }
@@ -145,10 +145,10 @@ describe("B2BPurchaseForm", () => {
       assert.deepEqual(
         validate({
           num_seats: "3",
-          email:     "a@email.address",
-          product:   { productId: "4", programRunId: null }
+          email: "a@email.address",
+          product: { productId: "4", programRunId: null },
         }),
-        {}
+        {},
       )
     })
   })

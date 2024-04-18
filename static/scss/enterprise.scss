@@ -4,21 +4,30 @@
   font-family: Rajdhani;
 
   .nav-line {
-    background: linear-gradient(270deg, #f0ba46 0%, #95bb83 51.02%, #3dbdbf 100%);
+    background: linear-gradient(
+      270deg,
+      #f0ba46 0%,
+      #95bb83 51.02%,
+      #3dbdbf 100%
+    );
     height: 2px;
     max-width: 100%;
   }
 
   .section-line {
-    background: linear-gradient(270deg, #f0ba46 0%, #95bb83 51.02%, #3dbdbf 100%);
+    background: linear-gradient(
+      270deg,
+      #f0ba46 0%,
+      #95bb83 51.02%,
+      #3dbdbf 100%
+    );
     height: 5px;
     max-width: 100%;
   }
 }
 
 .enterprise-banner-block {
-
-  @include media-breakpoint-down (sm) {
+  @include media-breakpoint-down(sm) {
     padding-bottom: 30px;
   }
 
@@ -26,9 +35,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 50px 0px;
+    padding: 50px 0;
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       display: block;
       padding: 16px 5px;
     }
@@ -37,7 +46,7 @@
       width: 544px;
       height: 444px;
 
-      @include media-breakpoint-down (sm) {
+      @include media-breakpoint-down(sm) {
         width: 100%;
         height: auto;
         padding-top: 13px;
@@ -57,9 +66,9 @@
     .enterprise-banner-content {
       text-align: left;
 
-      @include media-breakpoint-down (sm) {
+      @include media-breakpoint-down(sm) {
         width: fit-content;
-        padding: 16px 0px;
+        padding: 16px 0;
       }
 
       h3 {
@@ -68,10 +77,10 @@
         font-style: normal;
         font-weight: 700;
 
-        @include media-breakpoint-down (sm) {
+        @include media-breakpoint-down(sm) {
           font-size: 25px;
-          padding: 0px;
-          margin: 0px;
+          padding: 0;
+          margin: 0;
         }
 
         @include media-breakpoint-only(md) {
@@ -90,13 +99,13 @@
         font-size: 71px;
         font-style: normal;
         font-weight: 700;
-        margin: 10px 0px;
+        margin: 10px 0;
         line-height: 50px;
 
-        @include media-breakpoint-down (sm) {
+        @include media-breakpoint-down(sm) {
           font-size: 45px;
-          padding: 0px;
-          margin: 0px;
+          padding: 0;
+          margin: 0;
           line-height: 55px;
         }
 
@@ -118,10 +127,10 @@
         font-weight: 700;
         line-height: 50px;
 
-        @include media-breakpoint-down (sm) {
+        @include media-breakpoint-down(sm) {
           font-size: 30px;
-          padding: 0px;
-          margin: 0px;
+          padding: 0;
+          margin: 0;
           line-height: 25px;
         }
 
@@ -154,10 +163,10 @@
         &:hover {
           background: $dark-blue;
           text-decoration: none;
-          transition: all .2s ease-in;
+          transition: all 0.2s ease-in;
         }
 
-        @include media-breakpoint-down (sm) {
+        @include media-breakpoint-down(sm) {
           margin-bottom: 2px;
           margin-top: 25px;
           width: 95%;
@@ -171,13 +180,13 @@
   display: inline-flex;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #f0f5f7 0%, rgba(240, 245, 247, 0) 100%);
-  border-top: 1px rgba(0, 0, 0, 0.07) solid;
-  padding: 50px 40px 50px 40px;
+  background: linear-gradient(180deg, #f0f5f7 0%, rgb(240 245 247 / 0%) 100%);
+  border-top: 1px rgb(0 0 0 / 7%) solid;
+  padding: 50px 40px;
   text-align: center;
 
-  @include media-breakpoint-down (sm) {
-    padding: 20px 5px 20px 5px;
+  @include media-breakpoint-down(sm) {
+    padding: 20px 5px;
     text-align: unset;
   }
 
@@ -191,7 +200,7 @@
     line-height: 27px;
     word-wrap: break-word;
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       font-size: 16px;
       align-self: stretch;
     }
@@ -203,21 +212,21 @@
     margin-bottom: 40px;
     text-align: start;
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       margin-bottom: 30px;
     }
 
     p {
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
   }
 
   a {
     padding: 10px 20px;
     background: white;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgb(0 0 0 / 5%);
     border-radius: 5px;
-    border: 1px rgba(0, 0, 0, 0.07) solid;
+    border: 1px rgb(0 0 0 / 7%) solid;
     color: $primary;
     text-align: center;
 
@@ -225,10 +234,10 @@
       background: $primary;
       color: $white;
       text-decoration: none;
-      transition: all .2s ease-in;
+      transition: all 0.2s ease-in;
     }
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       font-weight: 600;
       padding: 10px 15px;
       width: 100%;

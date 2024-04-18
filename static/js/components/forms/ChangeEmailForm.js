@@ -8,7 +8,7 @@ import {
   Form,
   ErrorMessage,
   yupToFormErrors,
-  validateYupSchema
+  validateYupSchema,
 } from "formik"
 
 import { PasswordInput, EmailInput } from "./elements/inputs"
@@ -19,12 +19,12 @@ import type { User } from "../../flow/authTypes"
 
 type Props = {
   onSubmit: Function,
-  user: User
+  user: User,
 }
 
 export type ChangeEmailFormValues = {
   email: string,
-  confirmPassword: string
+  confirmPassword: string,
 }
 
 const ChangeEmailForm = ({ onSubmit, user }: Props) => (
@@ -32,11 +32,11 @@ const ChangeEmailForm = ({ onSubmit, user }: Props) => (
     onSubmit={onSubmit}
     initialValues={{
       email:           user.email,
-      confirmPassword: ""
+      confirmPassword: "",
     }}
     validate={values =>
       validateYupSchema(values, changeEmailFormValidation, false, {
-        currentEmail: user.email
+        currentEmail: user.email,
       }).catch(err => Promise.reject(yupToFormErrors(err)))
     }
     render={({ isSubmitting }) => (

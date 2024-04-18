@@ -9,14 +9,14 @@ type Props = {
   totalPrice: Decimal,
   discount: ?string,
   numSeats: number,
-  alreadyPaid: boolean
+  alreadyPaid: boolean,
 }
 const B2BPurchaseSummary = ({
   itemPrice,
   totalPrice,
   numSeats,
   discount,
-  alreadyPaid
+  alreadyPaid,
 }: Props) => (
   <div className="b2b-order-summary">
     <div className="container">

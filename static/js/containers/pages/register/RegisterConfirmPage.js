@@ -16,14 +16,14 @@ import { getAppropriateInformationFragment } from "../../../lib/util"
 import {
   STATE_REGISTER_DETAILS,
   handleAuthResponse,
-  INFORMATIVE_STATES
+  INFORMATIVE_STATES,
 } from "../../../lib/auth"
 
 import { authSelector } from "../../../lib/queries/auth"
 import {
   qsVerificationCodeSelector,
   qsPartialTokenSelector,
-  qsSelector
+  qsSelector,
 } from "../../../lib/selectors"
 
 import type { RouterHistory, Location } from "react-router"
@@ -33,7 +33,7 @@ type Props = {
   addUserNotification: Function,
   location: Location,
   history: RouterHistory,
-  auth: ?AuthResponse
+  auth: ?AuthResponse,
 }
 
 export class RegisterConfirmPage extends React.Component<Props> {
@@ -48,12 +48,11 @@ export class RegisterConfirmPage extends React.Component<Props> {
             "email-verified": {
               type:  ALERT_TYPE_TEXT,
               props: {
-                text:
-                  "Success! We've verified your email. Please finish your account creation below."
-              }
-            }
+                text: "Success! We've verified your email. Please finish your account creation below.",
+              },
+            },
           })
-        }
+        },
       })
     }
   }
@@ -83,20 +82,17 @@ export class RegisterConfirmPage extends React.Component<Props> {
 
 const mapStateToProps = createStructuredSelector({
   auth:     authSelector,
-  qsParams: qsSelector
+  qsParams: qsSelector,
 })
 
 const mapPropsToConfig = ({ qsParams }) =>
   mutateAsync(queries.auth.registerConfirmEmailMutation(qsParams))
 
 const mapDispatchToProps = {
-  addUserNotification
+  addUserNotification,
 }
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(RegisterConfirmPage)

@@ -2,32 +2,35 @@
 
 {% load static wagtailimages_tags wagtailmetadata_tags render_bundle wagtailcore_tags %}
 
-{% block title %}Catalog | {{ site_name }}{% endblock %}
+{% block title %}Catalog |
+{{ site_name }}{% endblock %}
 
 {% block headercontent %}
-  <div id="header"></div>
-  {% render_bundle 'header' %}
+<div id="header"></div>
+{% render_bundle 'header' %}
 {% endblock %}
 
 {% block content %}
-  <div class="course-catalog">
-    {% block banner %}
-      <div class="sub-banner">
-        <div class="container">
-          <h1>{{ site_name }}—Professional Development, the MIT Way</h1>
-        </div>
-      </div>
-    {% endblock %}
-    <div class="catalog-content">
-      <div class="topics">
-        {% for topic in topics %}
-          {% if selected_topic == topic %}
-          <div class="topic selected">
-          {% else %}
-          <div class="topic">
+<div class="course-catalog">
+  {% block banner %}
+  <div class="sub-banner">
+    <div class="container">
+      <h1>{{ site_name }}—Professional Development, the MIT Way</h1>
+    </div>
+  </div>
+  {% endblock %}
+  <div class="catalog-content">
+    <div class="topics">
+      {% for topic in topics %}
+      {% if selected_topic == topic %}
+      <div class="topic selected">
+        {% else %}
+        <div class="topic">
           {% endif %}
-            <a href="{% pageurl page %}?topic={{ topic | urlencode }}">{{ topic }}</a>
-          </div>
+          <a href="{% pageurl page %}?topic={{ topic | urlencode }}"
+            >{{ topic }}</a
+          >
+        </div>
         {% endfor %}
       </div>
       <div class="courseware">
@@ -35,85 +38,177 @@
           <div class="container">
             <ul class="nav nav-tabs" role="tablist">
               <li class="nav-item">
-
                 {% if active_tab == "all-tab" %}
-                  <a id="all-tab" class="nav-link active" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
+                <a
+                  id="all-tab"
+                  class="nav-link active"
+                  data-toggle="tab"
+                  href="#all"
+                  role="tab"
+                  aria-controls="all"
+                  aria-selected="true"
+                  >All</a
+                >
                 {% else %}
-                  <a id="all-tab" class="nav-link" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">All</a>
+                <a
+                  id="all-tab"
+                  class="nav-link"
+                  data-toggle="tab"
+                  href="#all"
+                  role="tab"
+                  aria-controls="all"
+                  aria-selected="true"
+                  >All</a
+                >
                 {% endif %}
-
               </li>
-              <li class="nav-item" data-toggle="tooltip" title="Multi-course offerings" data-placement="bottom">
-
+              <li
+                class="nav-item"
+                data-toggle="tooltip"
+                title="Multi-course offerings"
+                data-placement="bottom"
+              >
                 {% if active_tab == "programs-tab" %}
-                  <a id="programs-tab" class="nav-link active" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
+                <a
+                  id="programs-tab"
+                  class="nav-link active"
+                  data-toggle="tab"
+                  href="#programs"
+                  role="tab"
+                  aria-controls="programs"
+                  aria-selected="false"
+                  >programs</a
+                >
                 {% else %}
-                  <a id="programs-tab" class="nav-link" data-toggle="tab" href="#programs" role="tab" aria-controls="programs" aria-selected="false">programs</a>
+                <a
+                  id="programs-tab"
+                  class="nav-link"
+                  data-toggle="tab"
+                  href="#programs"
+                  role="tab"
+                  aria-controls="programs"
+                  aria-selected="false"
+                  >programs</a
+                >
                 {% endif %}
-
               </li>
-              <li class="nav-item" data-toggle="tooltip" title="Single course offerings" data-placement="bottom">
-
+              <li
+                class="nav-item"
+                data-toggle="tooltip"
+                title="Single course offerings"
+                data-placement="bottom"
+              >
                 {% if active_tab == "courses-tab" %}
-                  <a id="courses-tab" class="nav-link active" data-toggle="tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
+                <a
+                  id="courses-tab"
+                  class="nav-link active"
+                  data-toggle="tab"
+                  href="#courses"
+                  role="tab"
+                  aria-controls="courses"
+                  aria-selected="false"
+                  >Courses</a
+                >
                 {% else %}
-                  <a id="courses-tab" class="nav-link" data-toggle="tab" href="#courses" role="tab" aria-controls="courses" aria-selected="false">Courses</a>
+                <a
+                  id="courses-tab"
+                  class="nav-link"
+                  data-toggle="tab"
+                  href="#courses"
+                  role="tab"
+                  aria-controls="courses"
+                  aria-selected="false"
+                  >Courses</a
+                >
                 {% endif %}
-
               </li>
             </ul>
             <div class="tab-content">
               {% if featured_product.program %}
-                {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
+              {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
               {% elif featured_product.course %}
-                {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
+              {% include "partials/featured_card.html" with courseware_page=featured_product object_type="course"%}
               {% endif %}
 
               {% if active_tab == "all-tab" %}
-              <div class="tab-pane catalog-body fade in show active" id="all" role="tabpanel" aria-labelledby="all-tab">
-              {% else %}
-              <div class="tab-pane catalog-body fade" id="all" role="tabpanel" aria-labelledby="all-tab">
-              {% endif %}
-                {% for page in all_pages %}
-                  {% if page.program or page.is_external_program_page %}
-                      {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
-                  {% elif page.course or page.is_external_course_page %}
-                      {% include "partials/catalog_card.html" with courseware_page=page object_type="course" tab="all"%}
+              <div
+                class="tab-pane catalog-body fade in show active"
+                id="all"
+                role="tabpanel"
+                aria-labelledby="all-tab"
+              >
+                {% else %}
+                <div
+                  class="tab-pane catalog-body fade"
+                  id="all"
+                  role="tabpanel"
+                  aria-labelledby="all-tab"
+                >
                   {% endif %}
-                {% endfor %}
-              </div>
+                  {% for page in all_pages %}
+                  {% if page.program or page.is_external_program_page %}
+                  {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
+                  {% elif page.course or page.is_external_course_page %}
+                  {% include "partials/catalog_card.html" with courseware_page=page object_type="course" tab="all"%}
+                  {% endif %}
+                  {% endfor %}
+                </div>
 
-              {% if active_tab == "programs-tab" %}
-              <div class="tab-pane catalog-body fade in show active" id="programs" role="tabpanel" aria-labelledby="programs-tab">
-              {% else %}
-              <div class="tab-pane catalog-body fade" id="programs" role="tabpanel" aria-labelledby="programs-tab">
-              {% endif %}
-                <h1>PROGRAMS</h1>
-                {% for program_page in program_pages %}
+                {% if active_tab == "programs-tab" %}
+                <div
+                  class="tab-pane catalog-body fade in show active"
+                  id="programs"
+                  role="tabpanel"
+                  aria-labelledby="programs-tab"
+                >
+                  {% else %}
+                  <div
+                    class="tab-pane catalog-body fade"
+                    id="programs"
+                    role="tabpanel"
+                    aria-labelledby="programs-tab"
+                  >
+                    {% endif %}
+                    <h1>PROGRAMS</h1>
+                    {% for program_page in program_pages %}
                     {% include "partials/catalog_card.html" with courseware_page=program_page object_type="program" tab="program" %}
-                {% endfor %}
-              </div>
+                    {% endfor %}
+                  </div>
 
-              {% if active_tab == "courses-tab" %}
-              <div class="tab-pane catalog-body fade in show active" id="courses" role="tabpanel" aria-labelledby="courses-tab">
-              {% else %}
-              <div class="tab-pane catalog-body fade" id="courses" role="tabpanel" aria-labelledby="courses-tab">
-              {% endif %}
-                <h1>COURSES</h1>
-                {% for course_page in course_pages %}
-                    {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}
-                {% endfor %}
+                  {% if active_tab == "courses-tab" %}
+                  <div
+                    class="tab-pane catalog-body fade in show active"
+                    id="courses"
+                    role="tabpanel"
+                    aria-labelledby="courses-tab"
+                  >
+                    {% else %}
+                    <div
+                      class="tab-pane catalog-body fade"
+                      id="courses"
+                      role="tabpanel"
+                      aria-labelledby="courses-tab"
+                    >
+                      {% endif %}
+                      <h1>COURSES</h1>
+                      {% for course_page in course_pages %}
+                      {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-      </div>
+        </div>
+        {% endblock %}
+
+        {% block contact-us %}
+        {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
+        {% include "subscription.html" %}
+        {% endif %}
+        {% endblock %}
       </div>
     </div>
   </div>
-{% endblock %}
-
-{% block contact-us %}
-  {% if hubspot_new_courses_form_guid and hubspot_portal_id %}
-    {% include "subscription.html" %}
-  {% endif %}
-{% endblock %}
+</div>

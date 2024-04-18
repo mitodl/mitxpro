@@ -18,8 +18,8 @@ export const passwordFieldValidation = yup
 export const newPasswordFieldValidation = passwordFieldValidation.matches(
   /^(?=.*[0-9])(?=.*[a-zA-Z]).*$/,
   {
-    message: "Password must contain at least one letter and number"
-  }
+    message: "Password must contain at least one letter and number",
+  },
 )
 
 export const resetPasswordFormValidation = yup.object().shape({
@@ -28,14 +28,11 @@ export const resetPasswordFormValidation = yup.object().shape({
     .string()
     .label("Confirm Password")
     .required()
-    .oneOf([yup.ref("newPassword")], "Passwords must match")
+    .oneOf([yup.ref("newPassword")], "Passwords must match"),
 })
 
 export const changePasswordFormValidation = yup.object().shape({
-  oldPassword: yup
-    .string()
-    .label("Old Password")
-    .required(),
+  oldPassword: yup.string().label("Old Password").required(),
 
   newPassword: newPasswordFieldValidation.label("New Password"),
 
@@ -43,14 +40,14 @@ export const changePasswordFormValidation = yup.object().shape({
     .string()
     .label("Confirm Password")
     .required()
-    .oneOf([yup.ref("newPassword")], "Passwords must match")
+    .oneOf([yup.ref("newPassword")], "Passwords must match"),
 })
 
 export const changeEmailFormValidation = yup.object().shape({
   email: emailFieldValidation.notOneOf(
     [yup.ref("$currentEmail")],
-    "Email cannot be same, Use a different one"
+    "Email cannot be same, Use a different one",
   ),
 
-  confirmPassword: passwordFieldValidation.label("Confirm Password")
+  confirmPassword: passwordFieldValidation.label("Confirm Password"),
 })

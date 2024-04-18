@@ -19,7 +19,7 @@ class TestUnblockUsers(TestCase):
     Tests unblock users management command.
     """
 
-    def setUp(self):  # noqa: D102
+    def setUp(self):
         super().setUp()
         self.RETIRE_USER_COMMAND = retire_users.Command()
         self.UNBLOCK_USER_COMMAND = unblock_users.Command()

@@ -1,33 +1,46 @@
 {% extends "base.html" %}
 {% load static wagtailcore_tags wagtailimages_tags wagtailmetadata_tags render_bundle image_version_url %}
 
-
-{% block title %}{{ site_name }} | {{ page.title }}{% endblock %}
+{% block title %}{{ site_name }}
+|
+{{ page.title }}{% endblock %}
 
 {% block seohead %}
-    {% meta_tags page %}
-    {% if page.thumbnail_image %}
-      <meta property="og:image" content="{% image_version_url page.thumbnail_image "fill-821x400" True %}" />
-    {% endif %}
-    <meta property="og:description" content="{{page.search_description}}">
-    <meta property="product:brand" content="xPro">
-    <meta property="product:availability" content="in stock">
-    <meta property="product:condition" content="new">
+{% meta_tags page %}
+{% if page.thumbnail_image %}
+<meta
+  property="og:image"
+  content="{% image_version_url page.thumbnail_image "fill-821x400" True %}"
+/>
+{% endif %}
+<meta property="og:description" content="{{page.search_description}}" />
+<meta property="product:brand" content="xPro" />
+<meta property="product:availability" content="in stock" />
+<meta property="product:condition" content="new" />
 
-    {% if page.product.current_price %}
-      <meta property="product:price:amount" content="{{ page.product.current_price }}">
+{% if page.product.current_price %}
+<meta
+  property="product:price:amount"
+  content="{{ page.product.current_price }}"
+/>
 
-    {% elif page.is_course_page and page.product.first_unexpired_run and page.product.first_unexpired_run.current_price %}
-      <meta property="product:price:amount" content="{{ page.product.first_unexpired_run.current_price }}">
-    {% endif %}
-    <meta property="product:price:currency" content="USD">
-    <meta property="product:retailer_item_id" content="{{ page.product.readable_id }}">
-    <meta property="product:category" content="317">
+{% elif page.is_course_page and page.product.first_unexpired_run and page.product.first_unexpired_run.current_price %}
+<meta
+  property="product:price:amount"
+  content="{{ page.product.first_unexpired_run.current_price }}"
+/>
+{% endif %}
+<meta property="product:price:currency" content="USD" />
+<meta
+  property="product:retailer_item_id"
+  content="{{ page.product.readable_id }}"
+/>
+<meta property="product:category" content="317" />
 {% endblock%}
 
 {% block headercontent %}
-  <div id="header"></div>
-  {% render_bundle 'header' %}
+<div id="header"></div>
+{% render_bundle 'header' %}
 {% endblock %}
 
 {% block content %}
@@ -35,24 +48,42 @@
   {% include "partials/hero.html" %}
   {% include "partials/metadata-tiles.html" %}
   {% include "partials/subnav.html" with product=page.product %}
-  {% if outcomes %} {% include "partials/learning-outcomes.html" with page=outcomes %} {% endif %}
-  {% if who_should_enroll %} {% include "partials/target-audience.html" with page=who_should_enroll %} {% endif %}
-  {% if techniques %} {% include "partials/learning-techniques.html" with page=techniques %} {% endif %}
-  {% if testimonials %} {% include "partials/testimonial-carousel.html" with page=testimonials %} {% endif %}
-  {% if faculty %} {% include "partials/faculty-carousel.html" with page=faculty %} {% endif %}
-  {% if course_lineup and course_pages %}
-    {% with program_page=page.program_page %}
-      {% pageurl program_page as program_url %}
-      {% if page.program %}
-        {% include "partials/course-carousel.html" with page=course_lineup courseware_pages=course_pages %}
-      {% else %}
-        {% include "partials/course-carousel.html" with page=course_lineup courseware_pages=course_pages button_title="View Full Program" button_url=program_url %}
-      {% endif %}
-    {% endwith %}
+  {% if outcomes %}
+  {% include "partials/learning-outcomes.html" with page=outcomes %}
   {% endif %}
-  {% if news_and_events %} {% include "partials/news-and-events-carousel.html" with page=news_and_events %} {% endif %}
-  {% if for_teams %} {% include "partials/for-teams.html" with page=for_teams %} {% endif %}
-  {% if faqs %} {% include "partials/faqs.html" with faqs=faqs %} {% endif %}
-  {% if propel_career %} {% include "partials/text-section.html" with page=propel_career %} {% endif %}
+  {% if who_should_enroll %}
+  {% include "partials/target-audience.html" with page=who_should_enroll %}
+  {% endif %}
+  {% if techniques %}
+  {% include "partials/learning-techniques.html" with page=techniques %}
+  {% endif %}
+  {% if testimonials %}
+  {% include "partials/testimonial-carousel.html" with page=testimonials %}
+  {% endif %}
+  {% if faculty %}
+  {% include "partials/faculty-carousel.html" with page=faculty %}
+  {% endif %}
+  {% if course_lineup and course_pages %}
+  {% with program_page=page.program_page %}
+  {% pageurl program_page as program_url %}
+  {% if page.program %}
+  {% include "partials/course-carousel.html" with page=course_lineup courseware_pages=course_pages %}
+  {% else %}
+  {% include "partials/course-carousel.html" with page=course_lineup courseware_pages=course_pages button_title="View Full Program" button_url=program_url %}
+  {% endif %}
+  {% endwith %}
+  {% endif %}
+  {% if news_and_events %}
+  {% include "partials/news-and-events-carousel.html" with page=news_and_events %}
+  {% endif %}
+  {% if for_teams %}
+  {% include "partials/for-teams.html" with page=for_teams %}
+  {% endif %}
+  {% if faqs %}
+  {% include "partials/faqs.html" with faqs=faqs %}
+  {% endif %}
+  {% if propel_career %}
+  {% include "partials/text-section.html" with page=propel_career %}
+  {% endif %}
 </div>
 {% endblock %}

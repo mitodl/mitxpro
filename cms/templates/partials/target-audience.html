@@ -6,15 +6,20 @@
         <h1>{{page.heading}}</h1>
         <ul class="item-list">
           {% for item in page.content %}
-            <li>{{ item }}</li>
+          <li>{{ item }}</li>
           {% endfor %}
         </ul>
       </div>
       <div class="col-lg-6">
         {% if page.image %}
-          <div class="img-holder {% if page.switch_layout %}stick-left{% endif %}">
-            <img src="{% image_version_url page.image "fill-870x500" %}" alt="{{ page.image.title }}" />
-          </div>
+        <div
+          class="img-holder {% if page.switch_layout %}stick-left{% endif %}"
+        >
+          <img
+            src="{% image_version_url page.image "fill-870x500" %}"
+            alt="{{ page.image.title }}"
+          />
+        </div>
         {% endif %}
       </div>
     </div>

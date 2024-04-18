@@ -9,16 +9,16 @@ import { EmailInput } from "./elements/inputs"
 import { emailFieldValidation } from "../../lib/validation"
 
 const emailValidation = yup.object().shape({
-  email: emailFieldValidation
+  email: emailFieldValidation,
 })
 
 type EmailFormProps = {
   onSubmit: Function,
-  children?: React$Element<*>
+  children?: React$Element<*>,
 }
 
 export type EmailFormValues = {
-  email: string
+  email: string,
 }
 
 const EmailForm = ({ onSubmit, children }: EmailFormProps) => (

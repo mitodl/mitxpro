@@ -17,8 +17,8 @@ export const CYBERSOURCE_CHECKOUT_RESPONSE = {
       "access_key,amount,consumer_id,currency,locale,override_custom_cancel_page,override_custom_receipt_page,profile_id,reference_number,signed_date_time,signed_field_names,transaction_type,transaction_uuid,unsigned_field_names",
     transaction_type:     "sale",
     transaction_uuid:     "uuid",
-    unsigned_field_names: ""
+    unsigned_field_names: "",
   },
   url:    "https://testsecureacceptance.cybersource.com/pay",
-  method: "POST"
+  method: "POST",
 }

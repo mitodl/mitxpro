@@ -24,7 +24,7 @@ type Props = {
   countries: Array<Country>,
   match: Match,
   currentUser: CurrentUser,
-  forceRequest: () => Promise<*>
+  forceRequest: () => Promise<*>,
 }
 
 export class ReceiptPage extends React.Component<Props> {
@@ -46,13 +46,8 @@ export class ReceiptPage extends React.Component<Props> {
   }
 
   render() {
-    const {
-      orderReceipt,
-      isLoading,
-      countries,
-      match,
-      currentUser
-    } = this.props
+    const { orderReceipt, isLoading, countries, match, currentUser } =
+      this.props
     let orderDate = null
     let stateCode = null
     let countryName = null
@@ -62,7 +57,7 @@ export class ReceiptPage extends React.Component<Props> {
 
       if (countries) {
         const country = countries.find(
-          element => element.code === orderReceipt.purchaser.country
+          element => element.code === orderReceipt.purchaser.country,
         )
         if (country) {
           countryName = country.name
@@ -111,10 +106,12 @@ export class ReceiptPage extends React.Component<Props> {
                         NE49-2000
                         <br />
                         Cambridge, MA 02139 USA
-                        {SETTINGS.enable_taxes_display ? <div>GSTIN: Pending</div> : null}
+                        {SETTINGS.enable_taxes_display ? (
+                          <div>GSTIN: Pending</div>
+                        ) : null}
                         Support:{" "}
                         <a href={`mailto:${SETTINGS.support_email}`}>
-                          { SETTINGS.support_email }
+                          {SETTINGS.support_email}
                         </a>
                       </p>
                     </div>
@@ -254,8 +251,14 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
-                        {SETTINGS.enable_taxes_display ? <th>Total Before Tax</th> : null}
-                        {SETTINGS.enable_taxes_display ? <th>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</th> : null}
+                        {SETTINGS.enable_taxes_display ? (
+                          <th>Total Before Tax</th>
+                        ) : null}
+                        {SETTINGS.enable_taxes_display ? (
+                          <th>
+                            Tax ({formatNumber(orderReceipt.order.tax_rate)}%)
+                          </th>
+                        ) : null}
                         <th>Total Paid</th>
                       </tr>
                     </thead>
@@ -300,7 +303,10 @@ export class ReceiptPage extends React.Component<Props> {
 
                             {SETTINGS.enable_taxes_display ? (
                               <td>
-                                <p>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</p>
+                                <p>
+                                  Tax (
+                                  {formatNumber(orderReceipt.order.tax_rate)}%)
+                                </p>
                                 <div>${line.tax_paid}</div>
                               </td>
                             ) : null}
@@ -313,13 +319,20 @@ export class ReceiptPage extends React.Component<Props> {
                       })}
                     </tbody>
                   </table>
-                  {SETTINGS.enable_taxes_display ? <div className="receipt-hsn">HSN: 9992</div> : null}
+                  {SETTINGS.enable_taxes_display ? (
+                    <div className="receipt-hsn">HSN: 9992</div>
+                  ) : null}
                 </div>
-                { SETTINGS.enable_taxes_display ? <div className="footnote-signature">
-                  <img src="static/images/receipts/signature_only.png" alt=""></img>
-                  <small>Bryan Adkison</small>
-                  <small>MIT Open Learning - A/R Manager</small>
-                </div> : null }
+                {SETTINGS.enable_taxes_display ? (
+                  <div className="footnote-signature">
+                    <img
+                      src="static/images/receipts/signature_only.png"
+                      alt=""
+                    ></img>
+                    <small>Bryan Adkison</small>
+                    <small>MIT Open Learning - A/R Manager</small>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -335,15 +348,15 @@ const mapStateToProps = state => ({
   orderReceipt: state.entities.orderReceipt,
   isLoading:
     pathOr(true, ["queries", "countries", "isPending"], state) ||
-    pathOr(true, ["queries", "orderReceipt", "isPending"], state)
+    pathOr(true, ["queries", "orderReceipt", "isPending"], state),
 })
 
 const mapPropsToConfigs = props => [
   queries.users.countriesQuery(),
-  queries.ecommerce.orderReceipt(props.match.params.orderId)
+  queries.ecommerce.orderReceipt(props.match.params.orderId),
 ]
 
 export default compose(
   connect(mapStateToProps),
-  connectRequest(mapPropsToConfigs)
+  connectRequest(mapPropsToConfigs),
 )(ReceiptPage)

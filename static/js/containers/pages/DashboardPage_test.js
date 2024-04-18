@@ -7,14 +7,14 @@ import moment, { fn as momentProto } from "moment"
 import { mergeDeepRight, mergeRight } from "ramda"
 
 import DashboardPage, {
-  DashboardPage as InnerDashboardPage
+  DashboardPage as InnerDashboardPage,
 } from "./DashboardPage"
 import { formatPrettyDate } from "../../lib/util"
 import { shouldIf } from "../../lib/test_utils"
 import IntegrationTestHelper from "../../util/integration_test_helper"
 import {
   makeCourseRunEnrollment,
-  makeUserEnrollments
+  makeUserEnrollments,
 } from "../../factories/course"
 
 import { makeUser, makeUnusedCoupon } from "../../factories/user"
@@ -36,7 +36,7 @@ describe("DashboardPage", () => {
     helper = new IntegrationTestHelper()
     userEnrollments = makeUserEnrollments()
     currentUser = mergeRight(makeUser(), {
-      unused_coupons: [makeUnusedCoupon()]
+      unused_coupons: [makeUnusedCoupon()],
     })
     programDateRangeStub = helper.sandbox
       .stub(coursesApi, "programDateRange")
@@ -51,14 +51,14 @@ describe("DashboardPage", () => {
       {
         entities: {
           enrollments: userEnrollments,
-          currentUser: currentUser
-        }
+          currentUser: currentUser,
+        },
       },
       {
         location: {
-          search: ""
-        }
-      }
+          search: "",
+        },
+      },
     )
   })
 
@@ -71,30 +71,32 @@ describe("DashboardPage", () => {
     assert.isTrue(inner.find(".user-dashboard").exists())
     const programEnrollments = userEnrollments.program_enrollments
     const pastProgramEnrollments = userEnrollments.past_program_enrollments
-    const programRunEnrollments = userEnrollments.program_enrollments[0].course_run_enrollments.concat(
-      userEnrollments.past_program_enrollments[0].course_run_enrollments
-    )
-    const nonProgramRunEnrollments = userEnrollments.course_run_enrollments.concat(
-      userEnrollments.past_course_run_enrollments
-    )
+    const programRunEnrollments =
+      userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+        userEnrollments.past_program_enrollments[0].course_run_enrollments,
+      )
+    const nonProgramRunEnrollments =
+      userEnrollments.course_run_enrollments.concat(
+        userEnrollments.past_course_run_enrollments,
+      )
     assert.lengthOf(programEnrollments, 1)
     assert.lengthOf(programRunEnrollments, 4)
     assert.lengthOf(nonProgramRunEnrollments, 4)
     assert.lengthOf(
       inner.find(".program-enrollment"),
-      programEnrollments.length + pastProgramEnrollments.length
+      programEnrollments.length + pastProgramEnrollments.length,
     )
     assert.lengthOf(
       inner.find(".program-enrollments .course-enrollment"),
-      programRunEnrollments.length
+      programRunEnrollments.length,
     )
     assert.lengthOf(
       inner.find(".non-program-course-enrollments .course-enrollment"),
-      nonProgramRunEnrollments.length
+      nonProgramRunEnrollments.length,
     )
     assert.lengthOf(
       inner.find(".enrollment-code"),
-      currentUser.unused_coupons.length
+      currentUser.unused_coupons.length,
     )
   })
 
@@ -103,19 +105,19 @@ describe("DashboardPage", () => {
       entities: {
         enrollments: {
           program_enrollments:    [],
-          course_run_enrollments: []
+          course_run_enrollments: [],
         },
         currentUser: {
-          is_authenticated: false
-        }
-      }
+          is_authenticated: false,
+        },
+      },
     })
 
     const header = inner.find(".user-dashboard .header")
     assert.isTrue(header.exists())
     assert.include(
       header.text(),
-      "You are not yet enrolled in any courses or programs"
+      "You are not yet enrolled in any courses or programs",
     )
   })
 
@@ -123,7 +125,7 @@ describe("DashboardPage", () => {
     const { inner } = await renderPage()
     sinon.assert.calledWith(
       programDateRangeStub,
-      userEnrollments.program_enrollments[0]
+      userEnrollments.program_enrollments[0],
     )
     sinon.assert.callCount(
       getDateSummaryStub,
@@ -131,16 +133,13 @@ describe("DashboardPage", () => {
         userEnrollments.past_program_enrollments[0].course_run_enrollments
           .length +
         userEnrollments.course_run_enrollments.length +
-        userEnrollments.past_course_run_enrollments.length
+        userEnrollments.past_course_run_enrollments.length,
     )
 
     const dates = programDateRangeStub()
     assert.include(
-      inner
-        .find(".program-details")
-        .at(0)
-        .text(),
-      `${formatPrettyDate(dates[0])} – ${formatPrettyDate(dates[1])}`
+      inner.find(".program-details").at(0).text(),
+      `${formatPrettyDate(dates[0])} – ${formatPrettyDate(dates[1])}`,
     )
 
     const dateSummary = getDateSummaryStub()
@@ -148,7 +147,7 @@ describe("DashboardPage", () => {
     assert.equal(courseEnrollmentEl.find(".status").text(), "In Progress")
     assert.equal(
       courseEnrollmentEl.find(".date-summary-text").text(),
-      dateSummary.text
+      dateSummary.text,
     )
   })
 
@@ -162,26 +161,23 @@ describe("DashboardPage", () => {
         entities: {
           enrollments: {
             program_enrollments:      userEnrollments.program_enrollments,
-            past_program_enrollments: []
-          }
-        }
+            past_program_enrollments: [],
+          },
+        },
       })
 
       inner.setState({
         collapseVisible: {
-          [programEnrollmentId]: !willExpand
-        }
+          [programEnrollmentId]: !willExpand,
+        },
       })
       assert.equal(
-        inner
-          .find("#expand-control Button")
-          .childAt(0)
-          .text(),
-        willExpand ? "View Courses" : "Close"
+        inner.find("#expand-control Button").childAt(0).text(),
+        willExpand ? "View Courses" : "Close",
       )
       assert.equal(
         inner.find("#expand-control .material-icons").text(),
-        willExpand ? "expand_more" : "expand_less"
+        willExpand ? "expand_more" : "expand_less",
       )
 
       const collapseToggleBtn = inner
@@ -189,7 +185,7 @@ describe("DashboardPage", () => {
         .at(0)
       collapseToggleBtn.prop("onClick")({})
       assert.deepEqual(inner.state("collapseVisible"), {
-        [programEnrollmentId]: willExpand
+        [programEnrollmentId]: willExpand,
       })
     })
   })
@@ -197,61 +193,45 @@ describe("DashboardPage", () => {
   //
   ;[
     [
-      moment()
-        .add(-5, "days")
-        .format(),
-      moment()
-        .add(5, "days")
-        .format(),
+      moment().add(-5, "days").format(),
+      moment().add(5, "days").format(),
       "abc",
       true,
-      "past start date, non-null courseware id"
+      "past start date, non-null courseware id",
     ],
     [
-      moment()
-        .add(-5, "days")
-        .format(),
-      moment()
-        .add(-3, "days")
-        .format(),
+      moment().add(-5, "days").format(),
+      moment().add(-3, "days").format(),
       "abc",
       false,
-      "past start date, past end date, non-null courseware id"
+      "past start date, past end date, non-null courseware id",
     ],
     [
-      moment()
-        .add(-5, "days")
-        .format(),
-      moment()
-        .add(5, "days")
-        .format(),
+      moment().add(-5, "days").format(),
+      moment().add(5, "days").format(),
       null,
       false,
-      "null courseware_url"
+      "null courseware_url",
     ],
     [
-      moment()
-        .add(5, "days")
-        .format(),
-      moment()
-        .add(10, "days")
-        .format(),
+      moment().add(5, "days").format(),
+      moment().add(10, "days").format(),
       "abc",
       false,
-      "future start date"
+      "future start date",
     ],
-    [null, null, "abc", false, "null start date"]
+    [null, null, "abc", false, "null start date"],
   ].forEach(
     ([startDate, endDate, coursewareUrl, shouldLink, runDescription]) => {
       it(`${shouldIf(
-        shouldLink
+        shouldLink,
       )} link to edX if course run has ${runDescription}`, async () => {
         const userRunEnrollment = mergeDeepRight(makeCourseRunEnrollment(), {
           run: {
             courseware_url: coursewareUrl,
             start_date:     startDate,
-            end_date:       endDate
-          }
+            end_date:       endDate,
+          },
         })
         const { inner } = await renderPage({
           entities: {
@@ -259,9 +239,9 @@ describe("DashboardPage", () => {
               program_enrollments:         [],
               past_program_enrollments:    [],
               course_run_enrollments:      [userRunEnrollment],
-              past_course_run_enrollments: []
-            }
-          }
+              past_course_run_enrollments: [],
+            },
+          },
         })
 
         const courseRunLink = inner.find(".course-enrollment h2 a")
@@ -269,57 +249,39 @@ describe("DashboardPage", () => {
         if (shouldLink) {
           assert.include(
             courseRunLink.at(0).text(),
-            userRunEnrollment.run.course.title
+            userRunEnrollment.run.course.title,
           )
         }
       })
-    }
+    },
   )
 
   //
   ;[
     [
-      moment()
-        .add(-5, "days")
-        .format(),
-      moment()
-        .add(-3, "days")
-        .format(),
-      moment()
-        .add(2, "days")
-        .format(),
+      moment().add(-5, "days").format(),
+      moment().add(-3, "days").format(),
+      moment().add(2, "days").format(),
       "courseware_url",
       true,
-      "has link, has ended and not yet expired"
+      "has link, has ended and not yet expired",
     ],
     [
-      moment()
-        .add(-10, "days")
-        .format(),
-      moment()
-        .add(-5, "days")
-        .format(),
-      moment()
-        .add(1, "days")
-        .format(),
+      moment().add(-10, "days").format(),
+      moment().add(-5, "days").format(),
+      moment().add(1, "days").format(),
       null,
       false,
-      "has null link, has ended and not yet expired"
+      "has null link, has ended and not yet expired",
     ],
     [
-      moment()
-        .add(-5, "days")
-        .format(),
-      moment()
-        .add(-3, "days")
-        .format(),
-      moment()
-        .add(-1, "days")
-        .format(),
+      moment().add(-5, "days").format(),
+      moment().add(-3, "days").format(),
+      moment().add(-1, "days").format(),
       "courseware_url",
       false,
-      "has link, has ended and expired"
-    ]
+      "has link, has ended and expired",
+    ],
   ].forEach(
     ([
       startDate,
@@ -327,18 +289,18 @@ describe("DashboardPage", () => {
       expirationDate,
       coursewareUrl,
       shouldLink,
-      runDescription
+      runDescription,
     ]) => {
       it(`${shouldIf(
-        shouldLink
+        shouldLink,
       )} render link to archived course if course run ${runDescription}`, async () => {
         const pastRunEnrollments = mergeDeepRight(makeCourseRunEnrollment(), {
           run: {
             courseware_url:  coursewareUrl,
             start_date:      startDate,
             end_date:        endDate,
-            expiration_date: expirationDate
-          }
+            expiration_date: expirationDate,
+          },
         })
         // We need the actual method, not the stub for this test
         coursesApi.getDateSummary.restore()
@@ -348,13 +310,13 @@ describe("DashboardPage", () => {
               program_enrollments:         [],
               past_program_enrollments:    [],
               course_run_enrollments:      [],
-              past_course_run_enrollments: [pastRunEnrollments]
-            }
-          }
+              past_course_run_enrollments: [pastRunEnrollments],
+            },
+          },
         })
 
         const courseRunLink = inner.find(
-          ".course-enrollment .course-detail-column .archived-course-link a"
+          ".course-enrollment .course-detail-column .archived-course-link a",
         )
         assert.equal(courseRunLink.exists(), shouldLink)
         if (shouldLink) {
@@ -362,7 +324,7 @@ describe("DashboardPage", () => {
           assert.include(courseRunLink.at(0).text(), "View Archived Course")
         }
       })
-    }
+    },
   )
 
   describe("cybersource redirect", () => {
@@ -376,17 +338,17 @@ describe("DashboardPage", () => {
         {},
         {
           location: {
-            search: "purchased=a+b+c&status=purchased"
-          }
-        }
+            search: "purchased=a+b+c&status=purchased",
+          },
+        },
       )
       assert.deepEqual(store.getState().ui.userNotifications, {
         "order-status": {
           type:  "text",
           props: {
-            text: `You are now enrolled in ${program.title}!`
-          }
-        }
+            text: `You are now enrolled in ${program.title}!`,
+          },
+        },
       })
       sinon.assert.calledWith(stub, userEnrollments, "a b c")
       assert.equal(waitStub.callCount, 0)
@@ -413,9 +375,9 @@ describe("DashboardPage", () => {
           {},
           {
             location: {
-              search: "purchased=xyz&status=purchased"
-            }
-          }
+              search: "purchased=xyz&status=purchased",
+            },
+          },
         )
         helper.handleRequestStub.resetHistory()
 
@@ -432,17 +394,15 @@ describe("DashboardPage", () => {
               color: "danger",
               type:  "text",
               props: {
-                text: `Something went wrong. Please contact support at ${
-                  SETTINGS.support_email
-                }.`
-              }
-            }
+                text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`,
+              },
+            },
           })
         } else {
           sinon.assert.calledWith(
             helper.handleRequestStub,
             "/api/enrollments/",
-            "GET"
+            "GET",
           )
         }
       })
@@ -451,22 +411,23 @@ describe("DashboardPage", () => {
     it("shows a digital credential link", async () => {
       SETTINGS.digital_credentials = true
       const programEnrollments = userEnrollments.program_enrollments
-      const courseRunEnrollments = userEnrollments.program_enrollments[0].course_run_enrollments.concat(
-        userEnrollments.past_program_enrollments[0].course_run_enrollments
-      )
+      const courseRunEnrollments =
+        userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+          userEnrollments.past_program_enrollments[0].course_run_enrollments,
+        )
       SETTINGS.digital_credentials_supported_runs = [
-        programEnrollments[0].program.readable_id
+        programEnrollments[0].program.readable_id,
       ]
       const { inner } = await renderPage({
         entities: {
           enrollments: {
             program_enrollments:    programEnrollments,
-            course_run_enrollments: courseRunEnrollments
+            course_run_enrollments: courseRunEnrollments,
           },
           currentUser: {
-            is_authenticated: false
-          }
-        }
+            is_authenticated: false,
+          },
+        },
       })
 
       const digitalCredentialLink = inner.find(".digital-credential-link")
@@ -480,14 +441,16 @@ describe("DashboardPage", () => {
       entities: {
         enrollments: {
           program_enrollments:    userEnrollments.program_enrollments,
-          course_run_enrollments: userEnrollments.program_enrollments[0].course_run_enrollments.concat(
-            userEnrollments.past_program_enrollments[0].course_run_enrollments
-          )
+          course_run_enrollments:
+            userEnrollments.program_enrollments[0].course_run_enrollments.concat(
+              userEnrollments.past_program_enrollments[0]
+                .course_run_enrollments,
+            ),
         },
         currentUser: {
-          is_authenticated: false
-        }
-      }
+          is_authenticated: false,
+        },
+      },
     })
 
     const digitalCredentialLink = inner.find(".digital-credential-link")

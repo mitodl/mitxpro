@@ -7,7 +7,7 @@ import { AppTypeContext, SPA_APP_CONTEXT } from "../contextDefinitions"
 
 type MixedLinkProps = {
   children: any,
-  dest: string
+  dest: string,
 } & any
 
 export default class MixedLink extends React.Component<MixedLinkProps, *> {

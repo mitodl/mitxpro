@@ -3,7 +3,7 @@
 import { assert } from "chai"
 
 import RegisterConfirmSentPage, {
-  RegisterConfirmSentPage as InnerRegisterConfirmSentPage
+  RegisterConfirmSentPage as InnerRegisterConfirmSentPage,
 } from "./RegisterConfirmSentPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import { isIf, shouldIf } from "../../../lib/test_utils"
@@ -27,9 +27,9 @@ describe("RegisterConfirmSentPage", () => {
       {},
       {
         location: {
-          search: `?email=${encodeURIComponent(userEmail)}`
-        }
-      }
+          search: `?email=${encodeURIComponent(userEmail)}`,
+        },
+      },
     )
   })
 
@@ -41,7 +41,7 @@ describe("RegisterConfirmSentPage", () => {
     const { inner } = await renderPage()
     assert.equal(
       inner.find(".contact-support > a").prop("href"),
-      `mailto:${supportEmail}`
+      `mailto:${supportEmail}`,
     )
   })
 
@@ -54,7 +54,7 @@ describe("RegisterConfirmSentPage", () => {
     const { inner } = await renderPage()
     assert.equal(
       inner.find(".confirm-sent-page > p > span").text("href"),
-      userEmail
+      userEmail,
     )
   })
 

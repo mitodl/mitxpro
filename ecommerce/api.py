@@ -856,7 +856,7 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
             product_version=validated_basket.product_version,
         )
         country_code = determine_visitor_country(
-            kwargs["request"] if "request" in kwargs else None
+            kwargs["request"] if "request" in kwargs else None  # noqa: SIM401
         )
 
         try:

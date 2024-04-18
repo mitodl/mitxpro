@@ -3,7 +3,7 @@ import { assert } from "chai"
 
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import EmailConfirmPage, {
-  EmailConfirmPage as InnerEmailConfirmPage
+  EmailConfirmPage as InnerEmailConfirmPage,
 } from "./EmailConfirmPage"
 import { STATE_REGISTER_DETAILS } from "../../../lib/auth"
 
@@ -18,9 +18,9 @@ describe("EmailConfirmPage", () => {
       {},
       {
         location: {
-          search: ""
-        }
-      }
+          search: "",
+        },
+      },
     )
   })
 
@@ -34,9 +34,9 @@ describe("EmailConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         updateEmail: {
-          confirmed: true
-        }
-      }
+          confirmed: true,
+        },
+      },
     })
 
     inner.instance().componentDidUpdate({}, {})
@@ -44,10 +44,9 @@ describe("EmailConfirmPage", () => {
       "email-verified": {
         type:  "text",
         props: {
-          text:
-            "Success! We've verified your email. Your email has been updated."
-        }
-      }
+          text: "Success! We've verified your email. Your email has been updated.",
+        },
+      },
     })
   })
 
@@ -57,9 +56,9 @@ describe("EmailConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         updateEmail: {
-          confirmed: false
-        }
-      }
+          confirmed: false,
+        },
+      },
     })
 
     inner.instance().componentDidUpdate({}, {})
@@ -68,9 +67,9 @@ describe("EmailConfirmPage", () => {
         type:  "text",
         color: "danger",
         props: {
-          text: "Error! No confirmation code was provided or it has expired."
-        }
-      }
+          text: "Error! No confirmation code was provided or it has expired.",
+        },
+      },
     })
   })
 })

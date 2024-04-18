@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     help = "Imports the MaxMind GeoLite2 databases."
 
-    def add_arguments(self, parser) -> None:  # noqa: D102
+    def add_arguments(self, parser) -> None:
         parser.add_argument(
             "file",
             type=str,
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             help="The type of file being imported.",
         )
 
-    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         if not path.exists(kwargs["file"]):  # noqa: PTH110
             raise CommandError(f"Input file {kwargs['file']} does not exist.")  # noqa: EM102
 

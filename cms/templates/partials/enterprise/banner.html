@@ -1,52 +1,60 @@
 {% load static wagtailembeds_tags image_version_url wagtailcore_tags %}
 
 {% block extrahead %}
-  <style>
-      {% if page.background_image %}
-        .enterprise-banner-block {
-          background:
-                url('/static/images/enterprise/enterprise-page-dots-bg.png') 0% 100% repeat-x,
-                url('{% image_version_url page.background_image "fill-1440x613" %}') 0% 0% no-repeat;
-          background-position: center bottom, center top;
-          background-size: auto, cover;
-        }
+<style>
+  {% if page.background_image %}
+    .enterprise-banner-block {
+      background:
+            url('/static/images/enterprise/enterprise-page-dots-bg.png') 0% 100% repeat-x,
+            url('{% image_version_url page.background_image "fill-1440x613" %}') 0% 0% no-repeat;
+      background-position: center bottom, center top;
+      background-size: auto, cover;
+    }
 
-      {% else %}
-        .enterprise-banner-block {
-          background:
-                url('/static/images/enterprise/enterprise-page-dots-bg.png') 0% 100% repeat-x,
-                url('/static/images/enterprise/enterprise-page-banner-bg.png') 0% 0% no-repeat;
-          background-position: center bottom, center top;
-          background-size: auto, cover;
-        }
-      {% endif %}
-  </style>
+  {% else %}
+    .enterprise-banner-block {
+      background:
+            url('/static/images/enterprise/enterprise-page-dots-bg.png') 0% 100% repeat-x,
+            url('/static/images/enterprise/enterprise-page-banner-bg.png') 0% 0% no-repeat;
+      background-position: center bottom, center top;
+      background-size: auto, cover;
+    }
+  {% endif %}
+</style>
 {% endblock %}
 
 <div class="enterprise-banner-block">
-    <div class="container">
-        <div class="enterprise-banner">
-            <div class="enterprise-banner-content">
-                {% for block in page.headings %}
-                    <h3>{{ block.value.upper_head|upper }}</h3>
-                    <h1>{{ block.value.middle_head|upper }}</h1>
-                    <h2>{{ block.value.bottom_head|upper }}</h2>
-                {% endfor %}
-                <a href="#b2bform">Inquire Now</a>
-            </div>
-            {% if page.overlay_image %}
-                <img src="{% image_version_url page.overlay_image "fill-544x444" %}" alt="Banner Hero Image">
-            {% else %}
-                <img src="{% static 'images/enterprise/enterprise-page-banner-hero.png' %}" alt="Banner Hero Image">
-            {% endif %}
-        </div>
+  <div class="container">
+    <div class="enterprise-banner">
+      <div class="enterprise-banner-content">
+        {% for block in page.headings %}
+        <h3>{{ block.value.upper_head|upper }}</h3>
+        <h1>{{ block.value.middle_head|upper }}</h1>
+        <h2>{{ block.value.bottom_head|upper }}</h2>
+        {% endfor %}
+        <a href="#b2bform">Inquire Now</a>
+      </div>
+      {% if page.overlay_image %}
+      <img
+        src="{% image_version_url page.overlay_image "fill-544x444" %}"
+        alt="Banner Hero Image"
+      />
+      {% else %}
+      <img
+        src="{% static 'images/enterprise/enterprise-page-banner-hero.png' %}"
+        alt="Banner Hero Image"
+      />
+      {% endif %}
     </div>
+  </div>
 </div>
 <div class="enterprise-careers-companies-block">
-    <div class="container">
-        <div class="careers-companies-content">
-            <div class="careers-companies-description">{{ page.description|richtext }}</div>
-            <a href="#b2bform">{{ page.action_title }}</a>
-        </div>
+  <div class="container">
+    <div class="careers-companies-content">
+      <div class="careers-companies-description">
+        {{ page.description|richtext }}
+      </div>
+      <a href="#b2bform">{{ page.action_title }}</a>
     </div>
+  </div>
 </div>

@@ -5,12 +5,12 @@ import React from "react"
 export const findFormikFieldByName = (wrapper: any, name: string) =>
   wrapper
     .find("FormikConnect(FieldInner)")
-    .filterWhere(node => node.prop("name") === name)
+    .filterWhere((node) => node.prop("name") === name)
 
 export const findFormikErrorByName = (wrapper: any, name: string) =>
   wrapper
     .find("FormikConnect(ErrorMessageImpl)")
-    .filterWhere(node => node.prop("name") === name)
+    .filterWhere((node) => node.prop("name") === name)
 
 /**
  * This is here to support testing components that are wrapped with a
@@ -28,7 +28,7 @@ export const findFormikErrorByName = (wrapper: any, name: string) =>
 export const getComponentWithContext = (
   WrappedComponent: Class<React.Component<*, *>>,
   props: Object,
-  context: string | Object
+  context: string | Object,
 ) => {
   const outer = shallow(<WrappedComponent {...props} />)
   const inner = outer.props().children(context)

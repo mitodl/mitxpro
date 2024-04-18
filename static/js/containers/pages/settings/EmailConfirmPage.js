@@ -30,27 +30,22 @@ type Props = {
   location: Location,
   history: RouterHistory,
   updateEmail: ?updateEmailResponse,
-  getCurrentUser: () => Promise<Response<User>>
+  getCurrentUser: () => Promise<Response<User>>,
 }
 
 export class EmailConfirmPage extends React.Component<Props> {
   async componentDidUpdate(prevProps: Props) {
-    const {
-      addUserNotification,
-      updateEmail,
-      history,
-      getCurrentUser
-    } = this.props
+    const { addUserNotification, updateEmail, history, getCurrentUser } =
+      this.props
     const prevState = path(["updateEmail", "state"], prevProps)
     if (updateEmail && updateEmail !== prevState && updateEmail.confirmed) {
       addUserNotification({
         "email-verified": {
           type:  ALERT_TYPE_TEXT,
           props: {
-            text:
-              "Success! We've verified your email. Your email has been updated."
-          }
-        }
+            text: "Success! We've verified your email. Your email has been updated.",
+          },
+        },
       })
       await getCurrentUser()
     } else {
@@ -59,9 +54,9 @@ export class EmailConfirmPage extends React.Component<Props> {
           type:  ALERT_TYPE_TEXT,
           color: "danger",
           props: {
-            text: "Error! No confirmation code was provided or it has expired."
-          }
-        }
+            text: "Error! No confirmation code was provided or it has expired.",
+          },
+        },
       })
     }
     history.push(routes.accountSettings)
@@ -104,14 +99,14 @@ const mapStateToProps = createStructuredSelector({
   updateEmail: updateEmailSelector,
   isLoading:   pathOr(true, ["queries", "updateEmail", "isPending"]),
   params:      createStructuredSelector({
-    verificationCode: qsVerificationCodeSelector
-  })
+    verificationCode: qsVerificationCodeSelector,
+  }),
 })
 
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
-    force: true
+    force: true,
   })
 
 const confirmEmail = (code: string) =>
@@ -122,13 +117,10 @@ const mapPropsToConfig = ({ params: { verificationCode } }) =>
 
 const mapDispatchToProps = {
   addUserNotification,
-  getCurrentUser
+  getCurrentUser,
 }
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
 )(EmailConfirmPage)

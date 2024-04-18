@@ -7,7 +7,7 @@ import {
   profileValidation,
   legalAddressValidation,
   LegalAddressFields,
-  ProfileFields
+  ProfileFields,
 } from "./ProfileFormFields"
 
 import type { Country, User } from "../../flow/authTypes"
@@ -32,11 +32,17 @@ const getInitialValues = (user: User) => ({
     company_size:      pathOr("", ["company_size"], user.profile),
     leadership_level:  pathOr("", ["leadership_level"], user.profile),
     years_experience:  pathOr("", ["years_experience"], user.profile),
-    highest_education: pathOr("", ["highest_education"], user.profile)
-  }
+    highest_education: pathOr("", ["highest_education"], user.profile),
+  },
 })
 
-const EditProfileForm = ({ onSubmit, countries, user, isVatEnabled, enableVatID }: Props) => (
+const EditProfileForm = ({
+  onSubmit,
+  countries,
+  user,
+  isVatEnabled,
+  enableVatID,
+}: Props) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(profileValidation)}

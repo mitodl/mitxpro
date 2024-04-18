@@ -145,7 +145,7 @@ class Command(BaseCommand):
             help="Sync all orders",
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         sys.stdout.write("Syncing hubspot ids...\n")
         if not (
             options["sync_contacts"]

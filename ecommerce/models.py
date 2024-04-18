@@ -49,7 +49,7 @@ class Company(TimestampedModel):
         return f"Company {self.name}"
 
 
-class ProductQuerySet(PrefetchGenericQuerySet):  # noqa: D101
+class ProductQuerySet(PrefetchGenericQuerySet):
     def active(self):
         """Filters for active products only"""
         return self.filter(is_active=True)
@@ -226,7 +226,7 @@ class ProductVersion(TimestampedModel):
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
 
-    def save(self, *args, **kwargs):  # noqa: D102
+    def save(self, *args, **kwargs):
         try:
             self.text_id = getattr(self.product.content_object, "text_id")  # noqa: B009
         except AttributeError:
@@ -350,7 +350,7 @@ class Order(OrderAbstract, AuditableModel):
         return f"Order #{self.id}, status={self.status}"
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         return OrderAudit
 
     def to_dict(self):
@@ -430,7 +430,7 @@ class OrderAudit(AuditModel):
     order = models.ForeignKey(Order, null=True, on_delete=models.PROTECT)
 
     @classmethod
-    def get_related_field_name(cls):  # noqa: D102
+    def get_related_field_name(cls):
         return "order"
 
 
@@ -480,7 +480,7 @@ class ProgramRunLine(TimestampedModel):
         return f"ProgramRunLine for line: {self.id}, order: {self.line.order.id}, text id: {self.program_run.full_readable_id}"
 
 
-class CouponPaymentQueryset(models.QuerySet):  # noqa: D101
+class CouponPaymentQueryset(models.QuerySet):
     def with_ordered_versions(self):
         """Prefetches related CouponPaymentVersions in reverse creation order"""
         return self.prefetch_related(
@@ -492,7 +492,7 @@ class CouponPaymentQueryset(models.QuerySet):  # noqa: D101
         ).order_by("name")
 
 
-class CouponPaymentManager(models.Manager):  # noqa: D101
+class CouponPaymentManager(models.Manager):
     def get_queryset(self):
         """Sets the custom queryset"""
         return CouponPaymentQueryset(self.model, using=self._db)

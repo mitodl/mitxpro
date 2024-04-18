@@ -21,14 +21,14 @@ window.crypto = require("@trust/webcrypto")
 function copyProps(src, target) {
   Object.defineProperties(target, {
     ...Object.getOwnPropertyDescriptors(src),
-    ...Object.getOwnPropertyDescriptors(target)
+    ...Object.getOwnPropertyDescriptors(target),
   })
 }
 
 global.window = window
 global.document = window.document
 global.navigator = {
-  userAgent: "node.js"
+  userAgent: "node.js",
 }
 global.requestAnimationFrame = function(callback) {
   return setTimeout(callback, 0)
@@ -44,7 +44,7 @@ Object.defineProperty(window, "location", {
       value = `http://fake${value}`
     }
     jsdom.reconfigure({ url: value })
-  }
+  },
 })
 
 require("@babel/register")(babelSharedLoader.query)

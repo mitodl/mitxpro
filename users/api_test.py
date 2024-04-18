@@ -137,9 +137,7 @@ def test_find_available_username(
                 yield username
             else:
                 num_extra_characters = len(username) - temp_username_max_len
-                yield "{}{}".format(
-                    username_base[0 : len(username_base) - num_extra_characters], suffix
-                )
+                yield f"{username_base[0 : len(username_base) - num_extra_characters]}{suffix}"
 
     UserFactory.create(username=username_base)
     UserFactory.create_batch(
@@ -164,6 +162,7 @@ def test_full_username_creation():
     new_generated_username = usernameify(new_user_full_name)
     assert new_generated_username == generated_username
     available_username = find_available_username(new_generated_username)
-    assert available_username == "{}1".format(
-        new_generated_username[0 : expected_username_max - 1]
+    assert (
+        available_username
+        == f"{new_generated_username[0 : expected_username_max - 1]}1"
     )

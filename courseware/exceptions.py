@@ -37,12 +37,7 @@ class EdxApiEnrollErrorException(Exception):  # noqa: N818
         self.http_error = http_error
         if msg is None:
             # Set some default useful error message
-            msg = "EdX API error enrolling user {} ({}) in course run '{}'.\n{}".format(
-                self.user.username,
-                self.user.email,
-                self.course_run.courseware_id,
-                get_error_response_summary(self.http_error.response),
-            )
+            msg = f"EdX API error enrolling user {self.user.username} ({self.user.email}) in course run '{self.course_run.courseware_id}'.\n{get_error_response_summary(self.http_error.response)}"
         super().__init__(msg)
 
 
@@ -62,13 +57,7 @@ class UnknownEdxApiEnrollException(Exception):  # noqa: N818
         self.course_run = course_run
         self.base_exc = base_exc
         if msg is None:
-            msg = "Unexpected error enrolling user {} ({}) in course run '{}' ({}: {})".format(
-                self.user.username,
-                self.user.email,
-                self.course_run.courseware_id,
-                type(base_exc).__name__,
-                str(base_exc),
-            )
+            msg = f"Unexpected error enrolling user {self.user.username} ({self.user.email}) in course run '{self.course_run.courseware_id}' ({type(base_exc).__name__}: {base_exc!s})"
         super().__init__(msg)
 
 

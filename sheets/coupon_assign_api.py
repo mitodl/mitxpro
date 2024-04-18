@@ -534,10 +534,7 @@ class CouponAssignmentHandler:
             name_prefix=ASSIGNMENT_SHEET_PREFIX,
         )
     )
-    INCOMPLETE_SHEETS_QUERY_TERM = 'not appProperties has {{key="{completed_key}" and value="{completed_value}"}}'.format(
-        completed_key=ASSIGNMENT_MESSAGES_COMPLETED_KEY,
-        completed_value=GOOGLE_API_TRUE_VAL,
-    )
+    INCOMPLETE_SHEETS_QUERY_TERM = f'not appProperties has {{key="{ASSIGNMENT_MESSAGES_COMPLETED_KEY}" and value="{GOOGLE_API_TRUE_VAL}"}}'
     FILE_METADATA_FIELDS = "id, name, modifiedTime, appProperties"
 
     def __init__(self, spreadsheet_id, bulk_assignment):
@@ -644,7 +641,7 @@ class CouponAssignmentHandler:
         unsent_assignments = []
         for parsed_row in parsed_rows:
             code = parsed_row.code
-            assignment = assignment_dict.get(code, None)
+            assignment = assignment_dict.get(code)
             delivery_date = assignment_status_map.get_message_delivery_date(
                 self.bulk_assignment.id, code
             )

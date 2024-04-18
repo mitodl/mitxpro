@@ -495,16 +495,16 @@ def test_serialize_order_receipt(receipt_data):
             ],
         },
         "receipt": {
-            "card_number": receipt_data["req_card_number"]
+            "card_number": receipt_data["req_card_number"]  # noqa: SIM401
             if "req_card_number" in receipt_data
             else None,
             "card_type": CYBERSOURCE_CARD_TYPES[receipt_data["req_card_type"]]
             if "req_card_type" in receipt_data
             else None,
-            "payment_method": receipt.data["req_payment_method"]
+            "payment_method": receipt.data["req_payment_method"]  # noqa: SIM401
             if "req_payment_method" in receipt.data
             else None,
-            "bill_to_email": receipt.data["req_bill_to_email"]
+            "bill_to_email": receipt.data["req_bill_to_email"]  # noqa: SIM401
             if "req_bill_to_email" in receipt.data
             else None,
             "name": f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"

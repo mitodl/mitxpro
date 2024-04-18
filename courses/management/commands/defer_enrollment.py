@@ -17,7 +17,7 @@ class Command(EnrollmentChangeCommand):
 
     help = "Sets a user's enrollment to 'deferred' and creates an enrollment for a different course run"
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--user",
             type=str,
@@ -61,9 +61,7 @@ class Command(EnrollmentChangeCommand):
             )
         except ObjectDoesNotExist as exc:
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):
-                message = "'from' course run enrollment does not exist ({})".format(
-                    from_courseware_id
-                )
+                message = f"'from' course run enrollment does not exist ({from_courseware_id})"
             elif isinstance(exc, CourseRun.DoesNotExist):
                 message = "'to' course does not exist ({})".format(to_courseware_id)  # noqa: UP032
             else:

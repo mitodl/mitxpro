@@ -13,7 +13,7 @@ export const PRODUCT_TYPE_COURSERUN = "courserun"
 export const GENDER_CHOICES = [
   ["m", "Male"],
   ["f", "Female"],
-  ["o", "Other/Prefer Not to Say"]
+  ["o", "Other/Prefer Not to Say"],
 ]
 
 export const EMPLOYMENT_INDUSTRY = [
@@ -34,7 +34,7 @@ export const EMPLOYMENT_INDUSTRY = [
   "Information technology",
   "Transportation",
   "Other",
-  "Prefer not to say"
+  "Prefer not to say",
 ]
 
 export const EMPLOYMENT_EXPERIENCE = [
@@ -44,7 +44,7 @@ export const EMPLOYMENT_EXPERIENCE = [
   [15, "11 - 15 years"],
   [20, "16 - 20 years"],
   [21, "More than 20 years"],
-  [0, "Prefer not to say"]
+  [0, "Prefer not to say"],
 ]
 
 export const EMPLOYMENT_SIZE = [
@@ -54,7 +54,7 @@ export const EMPLOYMENT_SIZE = [
   [999, "Small to medium-sized (100-999 employees)"],
   [9999, "Medium-sized (1000-9999 employees)"],
   [10000, "Large Enterprise (10,000+ employees)"],
-  [0, "Other (N/A or Don't know)"]
+  [0, "Other (N/A or Don't know)"],
 ]
 
 export const EMPLOYMENT_FUNCTION = [
@@ -81,7 +81,7 @@ export const EMPLOYMENT_FUNCTION = [
   "Real Estate",
   "Research",
   "Support",
-  "Other"
+  "Other",
 ]
 
 export const EMPLOYMENT_LEVEL = [
@@ -92,7 +92,7 @@ export const EMPLOYMENT_LEVEL = [
   "Consultant/Contractor",
   "Temporary Employee",
   "Other",
-  "Prefer not to say"
+  "Prefer not to say",
 ]
 
 export const HIGHEST_EDUCATION_CHOICES = [
@@ -104,7 +104,7 @@ export const HIGHEST_EDUCATION_CHOICES = [
   "Junior secondary/junior high/middle school",
   "Elementary/primary school",
   "No formal education",
-  "Other education"
+  "Other education",
 ]
 
 export const ALERT_TYPE_TEXT = "text"

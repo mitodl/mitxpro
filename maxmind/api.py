@@ -50,22 +50,22 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
                         continent_name=row["continent_name"],
                         country_iso_code=row["country_iso_code"],
                         country_name=row["country_name"],
-                        subdivision_1_iso_code=row["subdivision_1_iso_code"]
+                        subdivision_1_iso_code=row["subdivision_1_iso_code"]  # noqa: SIM401
                         if "subdivision_1_iso_code" in row
                         else None,
-                        subdivision_1_name=row["subdivision_1_name"]
+                        subdivision_1_name=row["subdivision_1_name"]  # noqa: SIM401
                         if "subdivision_1_name" in row
                         else None,
-                        subdivision_2_iso_code=row["subdivision_2_iso_code"]
+                        subdivision_2_iso_code=row["subdivision_2_iso_code"]  # noqa: SIM401
                         if "subdivision_2_iso_code" in row
                         else None,
-                        subdivision_2_name=row["subdivision_2_name"]
+                        subdivision_2_name=row["subdivision_2_name"]  # noqa: SIM401
                         if "subdivision_2_name" in row
                         else None,
-                        city_name=row["city_name"] if "city_name" in row else None,
-                        metro_code=row["metro_code"] if "metro_code" in row else None,
-                        time_zone=row["time_zone"] if "time_zone" in row else None,
-                        is_in_european_union=row["is_in_european_union"]
+                        city_name=row["city_name"] if "city_name" in row else None,  # noqa: SIM401
+                        metro_code=row["metro_code"] if "metro_code" in row else None,  # noqa: SIM401
+                        time_zone=row["time_zone"] if "time_zone" in row else None,  # noqa: SIM401
+                        is_in_european_union=row["is_in_european_union"]  # noqa: SIM401
                         if "is_in_european_union" in row
                         else None,
                     )
@@ -112,18 +112,18 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
                         if "represented_country_geoname_id" in row
                         and len(row["represented_country_geoname_id"]) > 0
                         else None,
-                        is_anonymous_proxy=row["is_anonymous_proxy"]
+                        is_anonymous_proxy=row["is_anonymous_proxy"]  # noqa: SIM401
                         if "is_anonymous_proxy" in row
                         else None,
-                        is_satellite_provider=row["is_satellite_provider"]
+                        is_satellite_provider=row["is_satellite_provider"]  # noqa: SIM401
                         if "is_satellite_provider" in row
                         else None,
-                        postal_code=row["postal_code"]
+                        postal_code=row["postal_code"]  # noqa: SIM401
                         if "postal_code" in row
                         else None,
-                        latitude=row["latitude"] if "latitude" in row else None,
-                        longitude=row["longitude"] if "longitude" in row else None,
-                        accuracy_radius=row["accuracy_radius"]
+                        latitude=row["latitude"] if "latitude" in row else None,  # noqa: SIM401
+                        longitude=row["longitude"] if "longitude" in row else None,  # noqa: SIM401
+                        accuracy_radius=row["accuracy_radius"]  # noqa: SIM401
                         if "accuracy_radius" in row
                         else None,
                     )

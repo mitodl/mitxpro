@@ -1,16 +1,21 @@
 {% load image_version_url wagtailcore_tags %}
 
 <div class="companies-logo-block">
-    <div class="container">
-        <div class="companies-logo-heading">{{ companies_logo_carousel.heading|richtext }}</div>
-        <div class="companies-logo-carousel">
-            {% for image in companies_logo_carousel.images %}
-                <div class="slide">
-                    <div class="img-holder">
-                        <img src="{% image_version_url image.value "format-png|max-160x100" %}" alt="{{ image.value.title }}" />
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+  <div class="container">
+    <div class="companies-logo-heading">
+      {{ companies_logo_carousel.heading|richtext }}
     </div>
+    <div class="companies-logo-carousel">
+      {% for image in companies_logo_carousel.images %}
+      <div class="slide">
+        <div class="img-holder">
+          <img
+            src="{% image_version_url image.value "format-png|max-160x100" %}"
+            alt="{{ image.value.title }}"
+          />
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>

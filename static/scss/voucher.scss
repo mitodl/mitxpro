@@ -22,17 +22,16 @@
   }
 
   .voucher-card {
-
-    @include media-breakpoint-down(sm)  {
+    @include media-breakpoint-down(sm) {
       padding: 20px;
     }
 
-    @include media-breakpoint-down(xs)  {
+    @include media-breakpoint-down(xs) {
       padding: 15px 0;
     }
 
     background-color: $very-light-gray;
-    border-width: 7px 0 0 0;
+    border-width: 7px 0 0;
     border-style: solid;
     border-image-source: linear-gradient(90deg, #43bebc, #ebbb47);
     border-image-slice: 1;
@@ -45,7 +44,7 @@
       font-weight: inherit;
     }
 
-    input[type=file] {
+    input[type="file"] {
       color: $blue;
       font-weight: 600;
     }
@@ -76,5 +75,4 @@
       margin-top: 25px;
     }
   }
-
 }

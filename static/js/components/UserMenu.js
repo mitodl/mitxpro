@@ -9,7 +9,7 @@ import type { User } from "../flow/authTypes"
 
 type Props = {
   /* This is here for future use when we have custom profile avatars */
-  currentUser: User
+  currentUser: User,
 }
 
 const UserMenu = ({ currentUser }: Props) => {

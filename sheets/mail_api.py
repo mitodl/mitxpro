@@ -44,12 +44,7 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
         added_params["begin"] = format_datetime_for_mailgun(begin)
     if end:
         added_params["end"] = format_datetime_for_mailgun(end)
-    url = "https://api:{key}@{api_domain}/v3/{domain}/events?tags={tag}".format(
-        key=settings.MAILGUN_KEY,
-        api_domain=MAILGUN_API_DOMAIN,
-        domain=settings.MAILGUN_SENDER_DOMAIN,
-        tag=BULK_ENROLLMENT_EMAIL_TAG,
-    )
+    url = f"https://api:{settings.MAILGUN_KEY}@{MAILGUN_API_DOMAIN}/v3/{settings.MAILGUN_SENDER_DOMAIN}/events?tags={BULK_ENROLLMENT_EMAIL_TAG}"
     if added_params:
         url = "&".join((url, urlencode(added_params)))
     resp = request_get_with_timeout_retry(url, retries=MAILGUN_API_TIMEOUT_RETRIES)

@@ -1,14 +1,18 @@
 // sass-lint:disable mixins-before-declarations
 
 $standard-padding: 25px;
-$text-link-color: rgb(163, 31, 52);
+$text-link-color: rgb(163 31 52);
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   -webkit-font-smoothing: antialiased; // sass-lint:disable-line no-vendor-prefixes
 }
 
 .course-catalog {
-  background-color: #ffffff;
+  background-color: #fff;
 
   .catalog-content {
     display: flex;
@@ -30,7 +34,8 @@ h1, h2, h3, h4, h5 {
     text-align: center;
     padding: 30px 0;
 
-    h1, h3 {
+    h1,
+    h3 {
       padding: 0;
       margin: 0;
       max-width: 700px;
@@ -49,7 +54,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .topics {
-  padding-inline-start: 0px;
+  padding-inline-start: 0;
   margin-top: 15%;
   margin-right: 18px;
   width: 231px;
@@ -108,7 +113,7 @@ h1, h2, h3, h4, h5 {
   .catalog-card {
     background-color: #fff;
     box-sizing: border-box;
-    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 50%);
     margin-bottom: 50px;
     border-radius: 5px;
 
@@ -123,14 +128,15 @@ h1, h2, h3, h4, h5 {
       letter-spacing: 1.05px;
       line-height: 26px;
 
-      &:before {
-        content: '';
+      &::before {
+        content: "";
         position: absolute;
         top: 100%;
         left: 0;
         border: 14px solid $featured-banner-border;
         border-width: 7px 14px;
-        border-color: $featured-banner-border $featured-banner-border transparent transparent;
+        border-color: $featured-banner-border $featured-banner-border
+          transparent transparent;
       }
     }
 
@@ -141,14 +147,14 @@ h1, h2, h3, h4, h5 {
     }
 
     .top {
-      box-shadow: 0 7px 6px -6px rgba(0,0,0,0.125);
+      box-shadow: 0 7px 6px -6px rgb(0 0 0 / 12.5%);
       padding: $standard-padding $standard-padding 0 $standard-padding;
       position: relative;
+
       @include media-breakpoint-up(md) {
         display: flex;
-        flex-direction: row;
+        flex-flow: row wrap;
         align-items: flex-start;
-        flex-wrap: wrap;
       }
 
       .cover-image,
@@ -180,6 +186,7 @@ h1, h2, h3, h4, h5 {
         max-width: 275px;
         border-radius: 10px;
         margin: 0 auto;
+
         @include media-breakpoint-up(md) {
           margin: 0 $standard-padding 0 0;
         }
@@ -193,7 +200,8 @@ h1, h2, h3, h4, h5 {
     }
 
     .top-level-details {
-      h3, ul li {
+      h3,
+      ul li {
         padding: 0;
       }
 
@@ -205,7 +213,8 @@ h1, h2, h3, h4, h5 {
         line-height: 32px;
         color: $primary;
 
-        a:link, a:visited {
+        a:link,
+        a:visited {
           color: $text-link-color;
           text-decoration: none;
         }
@@ -234,7 +243,7 @@ h1, h2, h3, h4, h5 {
       label {
         display: inline-block;
         padding: 0 10px;
-        color: #000000;
+        color: #000;
         font-weight: 600;
         font-size: 14px;
         text-transform: uppercase;
@@ -265,9 +274,9 @@ h1, h2, h3, h4, h5 {
           padding: 0;
 
           a {
-            &:after {
-              font-family: Material Icons;
-              content: 'chevron_right';
+            &::after {
+              font-family: "Material Icons";
+              content: "chevron_right";
               font-size: 20px;
               display: inline-block;
               vertical-align: middle;
@@ -275,7 +284,8 @@ h1, h2, h3, h4, h5 {
             }
           }
 
-          a:link, a:visited {
+          a:link,
+          a:visited {
             color: $text-link-color;
           }
         }

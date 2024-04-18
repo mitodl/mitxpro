@@ -10,7 +10,7 @@ import type { CheckoutPayload } from "../flow/ecommerceTypes"
  */
 export function createCyberSourceForm(
   url: string,
-  payload: CheckoutPayload
+  payload: CheckoutPayload,
 ): HTMLFormElement {
   const form = document.createElement("form")
   form.setAttribute("action", url)
@@ -29,7 +29,7 @@ export function createCyberSourceForm(
 }
 
 export const formatErrors = (
-  errors: string | Object | null
+  errors: string | Object | null,
 ): React$Element<*> | null => {
   if (!errors) {
     return null

@@ -1,5 +1,5 @@
 {
-  "extends": "eslint-config-mitodl",
+  "extends": ["eslint-config-mitodl", "prettier"],
   "settings": {
     "react": {
       "pragma": "React",

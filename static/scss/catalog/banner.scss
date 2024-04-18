@@ -3,7 +3,9 @@
 .sub-banner {
   width: 100%;
   padding: 75px 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5)), url('#{$static-path}/images/header-banner.jpg') no-repeat 50% 50%;
+  background:
+    linear-gradient(rgb(0 0 0 / 30%), rgb(0 0 0 / 50%)),
+    url("#{$static-path}/images/header-banner.jpg") no-repeat 50% 50%;
   min-height: 200px;
   background-size: cover;
 

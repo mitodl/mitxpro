@@ -10,8 +10,8 @@ export const bulkReceiptCsvUrl = (hash: string) =>
 export const routes = {
   root:            "/",
   catalog:         "/catalog/",
-  webinars:         "/webinars/",
-  enterprise:         "/enterprise/",
+  webinars:        "/webinars/",
+  enterprise:      "/enterprise/",
   blog:            "/blog/",
   dashboard:       "/dashboard/",
   accountSettings: "/account-settings/",
@@ -23,8 +23,8 @@ export const routes = {
     password: "password/",
     forgot:   include("forgot-password/", {
       begin:   "",
-      confirm: "confirm/:uid/:token/"
-    })
+      confirm: "confirm/:uid/:token/",
+    }),
   }),
 
   register: include("/create-account/", {
@@ -34,28 +34,28 @@ export const routes = {
     details:     "details/",
     error:       "error/",
     extra:       "extra/",
-    denied:      "denied/"
+    denied:      "denied/",
   }),
 
   profile: include("/profile/", {
     view:   "",
-    update: "edit/"
+    update: "edit/",
   }),
 
   checkout: "/checkout/",
 
   ecommerceAdmin: include("/ecommerce/admin/", {
-    index:      "",
-    coupons:    "coupons/"
+    index:   "",
+    coupons: "coupons/",
   }),
 
   ecommerceBulk: include("/ecommerce/bulk/", {
     bulkPurchase: "",
-    receipt:      "receipt/"
+    receipt:      "receipt/",
   }),
   receipt: "receipt/:orderId/",
 
   account: include("/account/", {
-    confirmEmail: "confirm-email"
-  })
+    confirmEmail: "confirm-email",
+  }),
 }

@@ -5,7 +5,7 @@ import { Formik, Form } from "formik"
 import { ProfileFields, profileValidation } from "./ProfileFormFields"
 
 type Props = {
-  onSubmit: Function
+  onSubmit: Function,
 }
 
 const INITIAL_VALUES = {
@@ -13,8 +13,8 @@ const INITIAL_VALUES = {
     birth_year: "",
     gender:     "",
     company:    "",
-    job_title:  ""
-  }
+    job_title:  "",
+  },
 }
 
 const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (

@@ -266,8 +266,12 @@ def test_legal_address_serializer_invalid_name(sample_address):
     # Case 1: Make sure that invalid character(s) doesn't exist within the name
     for invalid_character in "~!@&)(+:'.?/,`-":
         # Replace the invalid character on 3 different places within name for rigorous testing of this case
-        sample_address["first_name"] = "{0}First{0} Name{0}".format(invalid_character)
-        sample_address["last_name"] = "{0}Last{0} Name{0}".format(invalid_character)
+        sample_address["first_name"] = (
+            f"{invalid_character}First{invalid_character} Name{invalid_character}"
+        )
+        sample_address["last_name"] = (
+            f"{invalid_character}Last{invalid_character} Name{invalid_character}"
+        )
         serializer = LegalAddressSerializer(data=sample_address)
         with pytest.raises(ValidationError):
             serializer.is_valid(raise_exception=True)

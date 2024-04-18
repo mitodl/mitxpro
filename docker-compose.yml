@@ -1,26 +1,24 @@
-version: '3.6'
+version: "3.6"
 
-x-environment:
-  &py-environment
-  NODE_ENV: 'production'
-  DEV_ENV: 'True'  # necessary to have nginx connect to web container
+x-environment: &py-environment
+  NODE_ENV: "production"
+  DEV_ENV: "True" # necessary to have nginx connect to web container
   SECRET_KEY: local_unsafe_key
   DATABASE_URL: postgres://postgres:postgres@db:5432/postgres
   MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET: test-hmac-secret
   MITXPRO_BASE_URL: ${MITXPRO_BASE_URL:-http://xpro.odl.local:8053}
-  MITXPRO_SECURE_SSL_REDIRECT: 'False'
-  MITXPRO_DB_DISABLE_SSL: 'True'
+  MITXPRO_SECURE_SSL_REDIRECT: "False"
+  MITXPRO_DB_DISABLE_SSL: "True"
   MITXPRO_ADMIN_EMAIL: admin@localhost
   MITOL_DIGITAL_CREDENTIALS_AUTH_TYPE: xpro
   ELASTICSEARCH_URL: elastic:9200
-  CELERY_TASK_ALWAYS_EAGER: 'False'
+  CELERY_TASK_ALWAYS_EAGER: "False"
   REDIS_URL: redis://redis:6379/4
   DOCKER_HOST: ${DOCKER_HOST:-missing}
   WEBPACK_DEV_SERVER_HOST: ${WEBPACK_DEV_SERVER_HOST:-localhost}
   OPENEDX_API_KEY: ${OPENEDX_API_KEY:-PUT_YOUR_API_KEY_HERE}
 
-x-extra-hosts:
-  &default-extra-hosts
+x-extra-hosts: &default-extra-hosts
   - "edx.odl.local:${OPENEDX_IP:-172.22.0.1}"
   - "host.docker.internal:host-gateway"
 
@@ -28,7 +26,7 @@ services:
   db:
     image: postgres:12.18
     environment:
-      POSTGRES_PASSWORD: postgres  # pragma: allowlist secret
+      POSTGRES_PASSWORD: postgres # pragma: allowlist secret
     ports:
       - "5432"
 
@@ -64,7 +62,7 @@ services:
     ports:
       - "8051:8051"
     environment:
-      << : *py-environment
+      <<: *py-environment
       PORT: 8051
     env_file: .env
     links:
@@ -80,9 +78,9 @@ services:
     ports:
       - "8052:8052"
     environment:
-      NODE_ENV: 'production'
+      NODE_ENV: "production"
       DOCKER_HOST: ${DOCKER_HOST:-missing}
-      CONTAINER_NAME: 'watch'
+      CONTAINER_NAME: "watch"
     env_file: .env
 
   celery:

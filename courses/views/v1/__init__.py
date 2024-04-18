@@ -68,7 +68,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
     serializer_class = CourseSerializer
 
-    def get_queryset(self):  # noqa: D102
+    def get_queryset(self):
         queryset = (
             Course.objects.filter(live=True)
             .select_related("coursepage", "externalcoursepage")

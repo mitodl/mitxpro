@@ -7,10 +7,10 @@ export default {
   enrollmentsQuery:    () => ({
     url:       "/api/enrollments/",
     transform: json => ({
-      enrollments: json
+      enrollments: json,
     }),
     update: {
-      enrollments: nextState
-    }
-  })
+      enrollments: nextState,
+    },
+  }),
 }

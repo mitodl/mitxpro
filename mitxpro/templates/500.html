@@ -5,15 +5,18 @@
 {% block title %}{{ site_name }}{% endblock %}
 
 {% block headercontent %}
-  <div id="header" class="error-page-header"></div>
-  {% render_bundle 'header' %}
+<div id="header" class="error-page-header"></div>
+{% render_bundle 'header' %}
 {% endblock %}
-
 
 {% block content %}
 <div class="error-block d-flex flex-column justify-content-center">
   <div class="container text-center">
-    <img class="server-error-img img-fluid" src="{% static 'images/500.png' %}" alt="">
+    <img
+      class="server-error-img img-fluid"
+      src="{% static 'images/500.png' %}"
+      alt=""
+    />
   </div>
 </div>
 {% endblock %}

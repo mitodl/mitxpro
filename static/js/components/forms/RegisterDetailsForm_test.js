@@ -9,7 +9,7 @@ import RegisterDetailsForm from "./RegisterDetailsForm"
 
 import {
   findFormikFieldByName,
-  findFormikErrorByName
+  findFormikErrorByName,
 } from "../../lib/test_utils"
 import { makeCountries } from "../../factories/user"
 
@@ -19,7 +19,14 @@ describe("RegisterDetailsForm", () => {
   const countries = makeCountries()
 
   const renderForm = (isVatEnabled = false) =>
-    mount(<RegisterDetailsForm onSubmit={onSubmitStub} countries={countries} isVatEnabled={isVatEnabled} enableVatID={enableVatIDStub}/>)
+    mount(
+      <RegisterDetailsForm
+        onSubmit={onSubmitStub}
+        countries={countries}
+        isVatEnabled={isVatEnabled}
+        enableVatID={enableVatIDStub}
+      />,
+    )
 
   beforeEach(() => {
     sandbox = sinon.createSandbox()
@@ -41,7 +48,6 @@ describe("RegisterDetailsForm", () => {
     assert.ok(form.find("button[type='submit']").exists())
     assert.ok(form.find(".add-vat-id").exists())
   })
-
   ;[true, false].forEach(isVatEnabled => {
     it(`Validate that VAT ID is ${
       isVatEnabled ? "enabled" : "disabled"
@@ -49,7 +55,10 @@ describe("RegisterDetailsForm", () => {
       const wrapper = renderForm(isVatEnabled)
       const form = wrapper.find("Formik")
       assert.equal(form.find(".add-vat-id").exists(), !isVatEnabled)
-      assert.equal(wrapper.find(`input[name="legal_address.vat_id"]`).exists(), isVatEnabled)
+      assert.equal(
+        wrapper.find(`input[name="legal_address.vat_id"]`).exists(),
+        isVatEnabled,
+      )
     })
   })
 
@@ -62,17 +71,17 @@ describe("RegisterDetailsForm", () => {
     [
       "password",
       "password",
-      "Password must contain at least one letter and number"
+      "Password must contain at least one letter and number",
     ],
     ["name", "", "Full Name is a required field"],
     ["name", "  ", "Full Name is a required field"],
     ["name", "Jane", ""],
     ["legal_address.city", "Cambridge", ""],
     ["legal_address.city", "", "City is a required field"],
-    ["legal_address.city", "  ", "City is a required field"]
+    ["legal_address.city", "  ", "City is a required field"],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
@@ -83,31 +92,34 @@ describe("RegisterDetailsForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
 
   //
-  ;[["US", "FR"], ["CA", "GB"]].forEach(([countryState, countryNoState]) => {
+  ;[
+    ["US", "FR"],
+    ["CA", "GB"],
+  ].forEach(([countryState, countryNoState]) => {
     it(`validates that state & postal_code required for ${countryState} but not ${countryNoState}`, async () => {
       const wrapper = renderForm()
       // Select country requiring state and zipcode
       const country = wrapper.find(`select[name="legal_address.country"]`)
       country.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.country", value: countryState }
+        target:  { name: "legal_address.country", value: countryState },
       })
       country.simulate("blur")
       await wait()
       wrapper.update()
       const stateTerritory = wrapper.find(
-        `select[name="legal_address.state_or_territory"]`
+        `select[name="legal_address.state_or_territory"]`,
       )
       assert.isTrue(stateTerritory.exists())
       stateTerritory.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.state_or_territory", value: "" }
+        target:  { name: "legal_address.state_or_territory", value: "" },
       })
       stateTerritory.simulate("blur")
       await wait()
@@ -116,7 +128,7 @@ describe("RegisterDetailsForm", () => {
       assert.isTrue(postalCode.exists())
       postalCode.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.postalCode", value: "" }
+        target:  { name: "legal_address.postalCode", value: "" },
       })
       postalCode.simulate("blur")
       await wait()
@@ -124,21 +136,21 @@ describe("RegisterDetailsForm", () => {
       assert.deepEqual(
         findFormikErrorByName(
           wrapper,
-          "legal_address.state_or_territory"
+          "legal_address.state_or_territory",
         ).text(),
-        "State/Territory is a required field"
+        "State/Territory is a required field",
       )
       assert.deepEqual(
         findFormikErrorByName(wrapper, "legal_address.postal_code").text(),
         countryState === "US"
           ? "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
-          : "Postal Code must be formatted as 'ANA NAN'"
+          : "Postal Code must be formatted as 'ANA NAN'",
       )
 
       // Select country not requiring state and zipcode
       country.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.country", value: countryNoState }
+        target:  { name: "legal_address.country", value: countryNoState },
       })
       country.simulate("blur")
       await wait()
@@ -146,11 +158,11 @@ describe("RegisterDetailsForm", () => {
       assert.isFalse(
         findFormikErrorByName(
           wrapper,
-          "legal_address.state_or_territory"
-        ).exists()
+          "legal_address.state_or_territory",
+        ).exists(),
       )
       assert.isFalse(
-        findFormikErrorByName(wrapper, "legal_address.postal_code").exists()
+        findFormikErrorByName(wrapper, "legal_address.postal_code").exists(),
       )
     })
   })
@@ -158,19 +170,19 @@ describe("RegisterDetailsForm", () => {
   it(`validates that additional street address lines are created on request`, async () => {
     const wrapper = renderForm()
     assert.isTrue(
-      wrapper.find(`input[name="legal_address.street_address[1]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[1]"]`).exists(),
     )
     assert.isFalse(
-      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists(),
     )
     const moreStreets = wrapper.find(".additional-street")
     moreStreets.simulate("click")
     assert.isTrue(
-      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[2]"]`).exists(),
     )
     moreStreets.simulate("click")
     assert.isTrue(
-      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists()
+      wrapper.find(`input[name="legal_address.street_address[3]"]`).exists(),
     )
     assert.isFalse(wrapper.find(".additional-street").exists())
   })
@@ -180,14 +192,14 @@ describe("RegisterDetailsForm", () => {
     const street = wrapper.find(`input[name="legal_address.street_address[0]"]`)
     street.simulate("change", {
       persist: () => {},
-      target:  { name: "legal_address.street_address[0]", value: "" }
+      target:  { name: "legal_address.street_address[0]", value: "" },
     })
     street.simulate("blur")
     await wait()
     wrapper.update()
     assert.deepEqual(
       findFormikErrorByName(wrapper, "legal_address.street_address").text(),
-      "Street address is a required field"
+      "Street address is a required field",
     )
   })
 
@@ -198,14 +210,14 @@ describe("RegisterDetailsForm", () => {
     ["legal_address.last_name", "family-name"],
     ["legal_address.street_address[0]", "address-line1"],
     ["legal_address.country", "country"],
-    ["legal_address.city", "address-level2"]
+    ["legal_address.city", "address-level2"],
   ].forEach(([formFieldName, autoCompleteName]) => {
     it(`validates that autoComplete=${autoCompleteName}  for field ${formFieldName}`, async () => {
       const wrapper = renderForm()
       const form = wrapper.find("Formik")
       assert.equal(
         findFormikFieldByName(form, formFieldName).prop("autoComplete"),
-        autoCompleteName
+        autoCompleteName,
       )
     })
   })
@@ -233,25 +245,25 @@ describe("RegisterDetailsForm", () => {
         "/",
         ",",
         "`",
-        "-"
+        "-",
       ].forEach(validCharacter => {
         it(`validates the field name=${fieldName}, value=${JSON.stringify(
-          `${validCharacter}Name`
+          `${validCharacter}Name`,
         )} and expects error=${JSON.stringify(
-          invalidNameMessage
+          invalidNameMessage,
         )}`, async () => {
           // Prepend the character to start of the name value
           const value = `${validCharacter}Name`
           field.simulate("change", {
             persist: () => {},
-            target:  { name: fieldName, value: value }
+            target:  { name: fieldName, value: value },
           })
           field.simulate("blur")
           await wait()
           wrapper.update()
           assert.deepEqual(
             findFormikErrorByName(wrapper, fieldName).text(),
-            invalidNameMessage
+            invalidNameMessage,
           )
         })
       })
@@ -274,28 +286,28 @@ describe("RegisterDetailsForm", () => {
         "{",
         "}",
         '"',
-        "|"
+        "|",
       ].forEach(invalidCharacter => {
         it(`validates the field name=${fieldName}, value=${JSON.stringify(
-          `${invalidCharacter}Name${invalidCharacter}`
+          `${invalidCharacter}Name${invalidCharacter}`,
         )} and expects error=${JSON.stringify(
-          invalidNameMessage
+          invalidNameMessage,
         )}`, async () => {
           // Prepend the character to start if the name value
           const value = `${invalidCharacter}Name${invalidCharacter}`
           field.simulate("change", {
             persist: () => {},
-            target:  { name: fieldName, value: value }
+            target:  { name: fieldName, value: value },
           })
           field.simulate("blur")
           await wait()
           wrapper.update()
           assert.deepEqual(
             findFormikErrorByName(wrapper, fieldName).text(),
-            invalidNameMessage
+            invalidNameMessage,
           )
         })
       })
-    }
+    },
   )
 })

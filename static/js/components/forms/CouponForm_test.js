@@ -10,16 +10,16 @@ import { CouponForm } from "./CouponForm"
 import {
   COUPON_TYPE_PROMO,
   PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_PROGRAM
+  PRODUCT_TYPE_PROGRAM,
 } from "../../constants"
 import {
   makeCompany,
   makeCourseRunProduct,
-  makeProgramProduct
+  makeProgramProduct,
 } from "../../factories/ecommerce"
 import {
   findFormikFieldByName,
-  findFormikErrorByName
+  findFormikErrorByName,
 } from "../../lib/test_utils"
 import { formatPrettyDate } from "../../lib/util"
 
@@ -33,7 +33,7 @@ describe("CouponForm", () => {
         onSubmit={onSubmitStub}
         products={products}
         companies={[makeCompany(), makeCompany()]}
-      />
+      />,
     )
 
   beforeEach(() => {
@@ -71,10 +71,10 @@ describe("CouponForm", () => {
     ["payment_transaction", "number", ""],
     ["num_coupon_codes", "", "Number required"],
     ["num_coupon_codes", "0", "Must be at least 1"],
-    ["num_coupon_codes", "2", ""]
+    ["num_coupon_codes", "2", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
@@ -85,7 +85,7 @@ describe("CouponForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -97,32 +97,20 @@ describe("CouponForm", () => {
     ["expiration_date", 1, "bad_date", "Valid expiration date required"],
     ["activation_date", 0, "bad_date", "Valid activation date required"],
     ["activation_date", 0, "06/27/2019", ""],
+    ["expiration_date", 1, moment().add(1, "days").format("MM/DD/YYYY"), ""],
     [
       "expiration_date",
       1,
-      moment()
-        .add(1, "days")
-        .format("MM/DD/YYYY"),
-      ""
+      moment().subtract(1, "days").format("MM/DD/YYYY"),
+      "Expiration date must be after today/activation date",
     ],
-    [
-      "expiration_date",
-      1,
-      moment()
-        .subtract(1, "days")
-        .format("MM/DD/YYYY"),
-      "Expiration date must be after today/activation date"
-    ]
   ].forEach(([name, idx, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm()
 
-      const input = wrapper
-        .find("DayPickerInput")
-        .at(idx)
-        .find("input")
+      const input = wrapper.find("DayPickerInput").at(idx).find("input")
       input.simulate("click")
       input.simulate("change", { persist: () => {}, target: { name, value } })
       input.simulate("blur")
@@ -130,7 +118,7 @@ describe("CouponForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -138,17 +126,14 @@ describe("CouponForm", () => {
   //
   ;[
     ["activation_date", 0, "06/27/2019", "2019-06-27T00:00:00.000Z"],
-    ["expiration_date", 1, "06/27/2519", "2519-06-27T23:59:59.999Z"]
+    ["expiration_date", 1, "06/27/2519", "2519-06-27T23:59:59.999Z"],
   ].forEach(([name, idx, value, formattedDate]) => {
     it(`converts the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} to date string ${JSON.stringify(formattedDate)}`, async () => {
       const wrapper = renderForm()
       const formik = wrapper.find("Formik").instance()
-      const input = wrapper
-        .find("DayPickerInput")
-        .at(idx)
-        .find("input")
+      const input = wrapper.find("DayPickerInput").at(idx).find("input")
       input.simulate("click")
       input.simulate("change", { persist: () => {}, target: { name, value } })
       input.simulate("blur")
@@ -161,12 +146,12 @@ describe("CouponForm", () => {
   //
   ;[
     [[], "1 or more products must be selected"],
-    [[makeCourseRunProduct()], ""]
+    [[makeCourseRunProduct()], ""],
   ].forEach(([value, errorMessage]) => {
     it(`validates the field name=products, value="${JSON.stringify(
-      value
+      value,
     )}" and expects error=${JSON.stringify(
-      errorMessage
+      errorMessage,
     )} for coupons`, async () => {
       const wrapper = renderForm()
       const formik = wrapper.find("Formik").instance()
@@ -176,7 +161,7 @@ describe("CouponForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, "products").text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -185,7 +170,7 @@ describe("CouponForm", () => {
   ;[
     [PRODUCT_TYPE_COURSERUN, [products[0]]],
     [PRODUCT_TYPE_PROGRAM, [products[1]]],
-    ["", products]
+    ["", products],
   ].forEach(([productType, availableProduct]) => {
     it(`displays correct product checkboxes when productType radio button value="${productType}"`, async () => {
       const wrapper = renderForm()
@@ -200,7 +185,7 @@ describe("CouponForm", () => {
       assert.ok(picky.text().includes(availableProduct[0].content_object.title))
       if (productType === "") {
         assert.ok(
-          picky.text().includes(availableProduct[1].content_object.title)
+          picky.text().includes(availableProduct[1].content_object.title),
         )
       }
     })
@@ -211,7 +196,7 @@ describe("CouponForm", () => {
     const wrapper = renderForm()
     wrapper
       .find(`input[name='product_type']`)
-      .findWhere(checkBox => checkBox.prop("value") === "")
+      .findWhere((checkBox) => checkBox.prop("value") === "")
       .simulate("click")
     await wait()
     wrapper.update()
@@ -223,30 +208,28 @@ describe("CouponForm", () => {
           `${products[0].latest_version.readable_id} | ${
             products[0].content_object.title
           } | ${formatPrettyDate(
-            moment(products[0].content_object.start_date)
-          )}`
-        )
+            moment(products[0].content_object.start_date),
+          )}`,
+        ),
     )
     assert.ok(
       picky
         .text()
         .includes(
-          `${products[1].latest_version.readable_id} | ${
-            products[1].content_object.title
-          }`
-        )
+          `${products[1].latest_version.readable_id} | ${products[1].content_object.title}`,
+        ),
     )
   })
 
   //
   ;[
     ["payment_type", "", "Payment type is required"],
-    ["payment_type", "staff", ""]
+    ["payment_type", "staff", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(
-      errorMessage
+      errorMessage,
     )} for single-use coupons`, async () => {
       const wrapper = renderForm()
       wrapper.find(`input[value="single-use"]`).simulate("click")
@@ -257,7 +240,7 @@ describe("CouponForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -266,12 +249,12 @@ describe("CouponForm", () => {
   ;[
     ["discount_type", "", "Discount type is required"],
     ["discount_type", "percent-off", ""],
-    ["discount_type", "dollars-off", ""]
+    ["discount_type", "dollars-off", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )} and expects error=${JSON.stringify(
-      errorMessage
+      errorMessage,
     )} for percent-off coupons`, async () => {
       const wrapper = renderForm()
       // wrapper.find(`input[value="percent-off"]`).simulate("click")
@@ -282,7 +265,7 @@ describe("CouponForm", () => {
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })
@@ -294,35 +277,35 @@ describe("CouponForm", () => {
     [
       "coupon_code",
       "INVALID CODE",
-      "Only letters, numbers, and underscores allowed"
+      "Only letters, numbers, and underscores allowed",
     ],
     ["max_redemptions", "", "Number required"],
     ["max_redemptions", "-10", "Must be at least 1"],
-    ["max_redemptions", "10000", ""]
+    ["max_redemptions", "10000", ""],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value="${value}" and expects error=${JSON.stringify(
-      errorMessage
+      errorMessage,
     )} for promo coupons`, async () => {
       const wrapper = renderForm()
       findFormikFieldByName(wrapper, "coupon_type")
         .at(1)
         .simulate("change", {
           persist: () => {},
-          target:  { name: "coupon_type", value: COUPON_TYPE_PROMO }
+          target: { name: "coupon_type", value: COUPON_TYPE_PROMO },
         })
       await wait()
       wrapper.update()
       const input = findFormikFieldByName(wrapper, name)
       input.simulate("change", {
         persist: () => {},
-        target:  { name, value }
+        target: { name, value },
       })
       input.simulate("blur")
       await wait()
       wrapper.update()
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       )
     })
   })

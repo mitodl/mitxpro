@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     help = "Creates an enrollment for a course run"
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--user",
             type=str,

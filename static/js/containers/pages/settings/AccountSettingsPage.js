@@ -30,17 +30,17 @@ type Props = {
   changePassword: (
     oldPassword: string,
     newPassword: string,
-    confirmPassword: string
+    confirmPassword: string,
   ) => Promise<any>,
   changeEmail: (newEmail: string, password: string) => Promise<any>,
   addUserNotification: Function,
-  currentUser: User
+  currentUser: User,
 }
 
 export class AccountSettingsPage extends React.Component<Props> {
   async onSubmitPasswordForm(
     { oldPassword, newPassword, confirmPassword }: ChangePasswordFormValues,
-    { setSubmitting, resetForm }: any
+    { setSubmitting, resetForm }: any,
   ) {
     const { addUserNotification, changePassword, history } = this.props
 
@@ -48,7 +48,7 @@ export class AccountSettingsPage extends React.Component<Props> {
       const response = await changePassword(
         oldPassword,
         newPassword,
-        confirmPassword
+        confirmPassword,
       )
 
       let alertText, color
@@ -65,9 +65,9 @@ export class AccountSettingsPage extends React.Component<Props> {
           type:  ALERT_TYPE_TEXT,
           color: color,
           props: {
-            text: alertText
-          }
-        }
+            text: alertText,
+          },
+        },
       })
 
       history.push(routes.accountSettings)
@@ -79,7 +79,7 @@ export class AccountSettingsPage extends React.Component<Props> {
 
   async onSubmitEmailForm(
     { email, confirmPassword }: ChangeEmailFormValues,
-    { setSubmitting, resetForm }: any
+    { setSubmitting, resetForm }: any,
   ) {
     const { addUserNotification, changeEmail, history } = this.props
 
@@ -102,9 +102,9 @@ export class AccountSettingsPage extends React.Component<Props> {
           type:  ALERT_TYPE_TEXT,
           color: color,
           props: {
-            text: alertText
-          }
-        }
+            text: alertText,
+          },
+        },
       })
 
       history.push(routes.accountSettings)
@@ -149,18 +149,15 @@ const changeEmail = (newEmail: string, password: string) =>
   mutateAsync(auth.changeEmailMutation(newEmail, password))
 
 const mapStateToProps = createStructuredSelector({
-  currentUser: currentUserSelector
+  currentUser: currentUserSelector,
 })
 
 const mapDispatchToProps = {
   changePassword,
   changeEmail,
-  addUserNotification
+  addUserNotification,
 }
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(AccountSettingsPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  AccountSettingsPage,
+)

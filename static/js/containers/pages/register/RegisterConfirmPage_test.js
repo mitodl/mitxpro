@@ -3,13 +3,13 @@ import { assert } from "chai"
 
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import RegisterConfirmPage, {
-  RegisterConfirmPage as InnerRegisterConfirmPage
+  RegisterConfirmPage as InnerRegisterConfirmPage,
 } from "./RegisterConfirmPage"
 import {
   STATE_REGISTER_DETAILS,
   STATE_INVALID_LINK,
   STATE_EXISTING_ACCOUNT,
-  STATE_INVALID_EMAIL
+  STATE_INVALID_EMAIL,
 } from "../../../lib/auth"
 import { routes } from "../../../lib/urls"
 
@@ -24,9 +24,9 @@ describe("RegisterConfirmPage", () => {
       {},
       {
         location: {
-          search: ""
-        }
-      }
+          search: "",
+        },
+      },
     )
   })
 
@@ -43,10 +43,10 @@ describe("RegisterConfirmPage", () => {
           state:         STATE_REGISTER_DETAILS,
           partial_token: token,
           extra_data:    {
-            name: "name"
-          }
-        }
-      }
+            name: "name",
+          },
+        },
+      },
     })
 
     inner.instance().componentDidUpdate({}, {})
@@ -54,10 +54,9 @@ describe("RegisterConfirmPage", () => {
       "email-verified": {
         type:  "text",
         props: {
-          text:
-            "Success! We've verified your email. Please finish your account creation below."
-        }
-      }
+          text: "Success! We've verified your email. Please finish your account creation below.",
+        },
+      },
     })
     assert.equal(helper.currentLocation.pathname, "/create-account/details/")
     assert.equal(helper.currentLocation.search, `?partial_token=${token}`)
@@ -71,15 +70,15 @@ describe("RegisterConfirmPage", () => {
         auth: {
           state:         STATE_INVALID_LINK,
           partial_token: token,
-          extra_data:    {}
-        }
-      }
+          extra_data:    {},
+        },
+      },
     })
     const confirmationErrorText = inner.find(".confirmation-message")
     assert.isNotNull(confirmationErrorText)
     assert.equal(
       confirmationErrorText.text().replace("<Link />", ""),
-      "This invitation is invalid or has expired. Please ."
+      "This invitation is invalid or has expired. Please .",
     )
   })
 
@@ -91,15 +90,15 @@ describe("RegisterConfirmPage", () => {
         auth: {
           state:         STATE_EXISTING_ACCOUNT,
           partial_token: token,
-          extra_data:    {}
-        }
-      }
+          extra_data:    {},
+        },
+      },
     })
     const confirmationErrorText = inner.find(".confirmation-message")
     assert.isNotNull(confirmationErrorText)
     assert.equal(
       confirmationErrorText.text().replace("<Link />", ""),
-      "You already have an xPRO account. Please ."
+      "You already have an xPRO account. Please .",
     )
   })
 
@@ -111,14 +110,14 @@ describe("RegisterConfirmPage", () => {
         auth: {
           state:         STATE_INVALID_EMAIL,
           partial_token: token,
-          extra_data:    {}
-        }
-      }
+          extra_data:    {},
+        },
+      },
     })
     const confirmationErrorText = inner.find(".confirmation-message")
     assert.equal(
       confirmationErrorText.text().replace("<Link />", ""),
-      "No confirmation code was provided or it has expired. ."
+      "No confirmation code was provided or it has expired. .",
     )
   })
 })

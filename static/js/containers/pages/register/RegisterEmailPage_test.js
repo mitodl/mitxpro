@@ -4,14 +4,14 @@ import sinon from "sinon"
 import React from "react"
 
 import RegisterEmailPage, {
-  RegisterEmailPage as InnerRegisterEmailPage
+  RegisterEmailPage as InnerRegisterEmailPage,
 } from "./RegisterEmailPage"
 import IntegrationTestHelper from "../../../util/integration_test_helper"
 import {
   STATE_REGISTER_CONFIRM_SENT,
   STATE_LOGIN_PASSWORD,
   STATE_REGISTER_EMAIL,
-  STATE_ERROR
+  STATE_ERROR,
 } from "../../../lib/auth"
 import { makeRegisterAuthResponse } from "../../../factories/auth"
 import { routes } from "../../../lib/urls"
@@ -35,9 +35,9 @@ describe("RegisterEmailPage", () => {
       {},
       {
         location: {
-          search: `partial_token=${partialToken}`
-        }
-      }
+          search: `partial_token=${partialToken}`,
+        },
+      },
     )
   })
 
@@ -54,21 +54,21 @@ describe("RegisterEmailPage", () => {
   it("handles onSubmit for an error response", async () => {
     const { inner } = await renderPage()
     const fieldErrors = {
-      email: "error message"
+      email: "error message",
     }
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
         state:        STATE_ERROR,
-        field_errors: fieldErrors
-      })
+        field_errors: fieldErrors,
+      }),
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     assert.lengthOf(helper.browserHistory, 1)
@@ -81,21 +81,21 @@ describe("RegisterEmailPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state: STATE_LOGIN_PASSWORD
-      })
+        state: STATE_LOGIN_PASSWORD,
+      }),
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.login.password,
-      search:   ""
+      search:   "",
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)
@@ -107,9 +107,9 @@ describe("RegisterEmailPage", () => {
         type:  ALERT_TYPE_TEXT,
         color: "danger",
         props: {
-          text: `You already have an account with ${email}. Enter password to sign in.`
-        }
-      }
+          text: `You already have an account with ${email}. Enter password to sign in.`,
+        },
+      },
     })
   })
 
@@ -118,15 +118,15 @@ describe("RegisterEmailPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state: STATE_REGISTER_EMAIL
-      })
+        state: STATE_REGISTER_EMAIL,
+      }),
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     sinon.assert.notCalled(setErrorsStub)
@@ -150,10 +150,10 @@ describe("RegisterEmailPage", () => {
                 customer support
               </a>{" "}
               to complete your registration.
-            </div>
-          ]
-        }
-      }
+            </div>,
+          ],
+        },
+      },
     })
   })
 
@@ -162,21 +162,21 @@ describe("RegisterEmailPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state: STATE_REGISTER_CONFIRM_SENT
-      })
+        state: STATE_REGISTER_CONFIRM_SENT,
+      }),
     })
 
     const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     )
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.register.confirmSent,
-      search:   `?email=${encodeURIComponent(email)}`
+      search:   `?email=${encodeURIComponent(email)}`,
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)

@@ -46,9 +46,7 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of users to hubspot contacts finished, took {} seconds\n".format(
-                total_seconds
-            )
+            f"Syncing of users to hubspot contacts finished, took {total_seconds} seconds\n"
         )
 
     def sync_products(self):
@@ -81,9 +79,7 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of b2b orders/lines to hubspot finished, took {} seconds\n".format(
-                total_seconds
-            )
+            f"Syncing of b2b orders/lines to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_deals(self):
@@ -102,9 +98,7 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of orders/lines to hubspot finished, took {} seconds\n".format(
-                total_seconds
-            )
+            f"Syncing of orders/lines to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_lines(self):
@@ -123,9 +117,7 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of order lines to hubspot finished, took {} seconds\n".format(
-                total_seconds
-            )
+            f"Syncing of order lines to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_associations(self):
@@ -138,9 +130,7 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of deal associations to hubspot finished, took {} seconds\n".format(
-                total_seconds
-            )
+            f"Syncing of deal associations to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_all(self):
@@ -214,7 +204,7 @@ class Command(BaseCommand):
             help="create or update",
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         if not options["mode"]:
             sys.stderr.write("You must specify mode ('create' or 'update')\n")
             sys.exit(1)

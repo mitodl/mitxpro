@@ -10,5 +10,5 @@ export default {
   users,
   ecommerce,
   enrollment,
-  digitalCredentials
+  digitalCredentials,
 }

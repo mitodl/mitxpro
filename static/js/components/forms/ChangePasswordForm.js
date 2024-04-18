@@ -9,13 +9,13 @@ import FormError from "./elements/FormError"
 import { changePasswordFormValidation } from "../../lib/validation"
 
 type Props = {
-  onSubmit: Function
+  onSubmit: Function,
 }
 
 export type ChangePasswordFormValues = {
   oldPassword: string,
   newPassword: string,
-  confirmPassword: string
+  confirmPassword: string,
 }
 
 const ChangePasswordForm = ({ onSubmit }: Props) => (
@@ -25,7 +25,7 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
     initialValues={{
       oldPassword:     "",
       newPassword:     "",
-      confirmPassword: ""
+      confirmPassword: "",
     }}
     render={({ isSubmitting }) => (
       <Form>

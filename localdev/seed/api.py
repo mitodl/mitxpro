@@ -102,7 +102,6 @@ from mitxpro.utils import (
 #     ]  # noqa: ERA001, RUF100
 # }  # noqa: ERA001, RUF100
 
-
 SEED_DATA_FILE_PATH = os.path.join(  # noqa: PTH118
     settings.BASE_DIR, "localdev/seed/resources/seed_data.json"
 )

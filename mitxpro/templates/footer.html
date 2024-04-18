@@ -6,7 +6,13 @@
       <div class="content-holder">
         <div class="row">
           <div class="col-sm-6 clearfix">
-            <img src={% static 'images/help.png' %} width="70" height="70" alt="Help" loading="lazy">
+            <img
+              src="{% static 'images/help.png' %}"
+              width="70"
+              height="70"
+              alt="Help"
+              loading="lazy"
+            />
             <div class="info">
               <a href="https://xpro.zendesk.com/hc/">
                 <h2>Help & FAQ</h2>
@@ -15,7 +21,13 @@
             </div>
           </div>
           <div class="col-sm-6 clearfix">
-            <img src={% static 'images/contact.png' %} width="70" height="70" alt="Contact Us" loading="lazy">
+            <img
+              src="{% static 'images/contact.png' %}"
+              width="70"
+              height="70"
+              alt="Contact Us"
+              loading="lazy"
+            />
             <div class="info">
               <a href="https://xpro.zendesk.com/hc/en-us/requests/new">
                 <h2>Contact Us</h2>
@@ -30,7 +42,13 @@
   <div class="container">
     <div class="footer-bottom">
       <div class="mit-info">
-        <img src="{% static 'images/mit-ol-logo.svg' %}" width="129" height="33" alt="MIT" loading="lazy"/>
+        <img
+          src="{% static 'images/mit-ol-logo.svg' %}"
+          width="129"
+          height="33"
+          alt="MIT"
+          loading="lazy"
+        />
         <address>
           Massachusetts Institute of Technology <br />77 Massachusetts Avenue
           <br />Cambridge, MA 02139
@@ -53,14 +71,14 @@
           src="//js.hsforms.net/forms/v2.js"
         ></script>
         <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            if (typeof hbspt !== "undefined") {
+          document.addEventListener('DOMContentLoaded', function () {
+            if (typeof hbspt !== 'undefined') {
               hbspt.forms.create({
-                portalId: "{{ hubspot_portal_id }}",
-                formId: "{{ hubspot_footer_form_guid }}",
-              });
+                portalId: '{{ hubspot_portal_id }}',
+                formId: '{{ hubspot_footer_form_guid }}',
+              })
             }
-          });
+          })
         </script>
       </div>
     </div>
@@ -78,7 +96,9 @@
       </li>
     </ul>
     <span class="copyright"
-      >&copy; {% now "Y" %} All rights reserved. <a href="#">{{ site_name }}</a>.</span
+      >&copy;
+      {% now "Y" %}
+      All rights reserved. <a href="#">{{ site_name }}</a>.</span
     >
   </div>
 </footer>

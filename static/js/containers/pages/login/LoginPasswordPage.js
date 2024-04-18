@@ -20,7 +20,7 @@ import type { Response } from "redux-query"
 import type {
   AuthResponse,
   User,
-  PasswordFormValues
+  PasswordFormValues,
 } from "../../../flow/authTypes"
 
 type Props = {
@@ -29,9 +29,9 @@ type Props = {
   auth: AuthResponse,
   loginPassword: (
     password: string,
-    partialToken: string
+    partialToken: string,
   ) => Promise<Response<AuthResponse>>,
-  getCurrentUser: () => Promise<Response<User>>
+  getCurrentUser: () => Promise<Response<User>>,
 }
 
 export class LoginPasswordPage extends React.Component<Props> {
@@ -47,13 +47,13 @@ export class LoginPasswordPage extends React.Component<Props> {
 
   async onSubmit(
     { password }: PasswordFormValues,
-    { setSubmitting, setErrors }: any
+    { setSubmitting, setErrors }: any,
   ) {
     /* eslint-disable camelcase */
     const {
       loginPassword,
       history,
-      auth: { partial_token }
+      auth: { partial_token },
     } = this.props
 
     if (!partial_token) {
@@ -65,7 +65,7 @@ export class LoginPasswordPage extends React.Component<Props> {
 
       handleAuthResponse(history, body, {
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors)
+          setErrors(field_errors),
       })
     } finally {
       setSubmitting(false)
@@ -113,7 +113,7 @@ export class LoginPasswordPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  auth: authSelector
+  auth: authSelector,
 })
 
 const loginPassword = (password: string, partialToken: string) =>
@@ -122,17 +122,14 @@ const loginPassword = (password: string, partialToken: string) =>
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
-    force: true
+    force: true,
   })
 
 const mapDispatchToProps = {
   loginPassword,
-  getCurrentUser
+  getCurrentUser,
 }
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(LoginPasswordPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  LoginPasswordPage,
+)

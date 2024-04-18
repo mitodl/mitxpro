@@ -13,13 +13,13 @@ import {
   COUPON_TYPE_PROMO,
   PRODUCT_TYPE_COURSERUN,
   DISCOUNT_TYPE_PERCENT_OFF,
-  DISCOUNT_TYPE_DOLLARS_OFF
+  DISCOUNT_TYPE_DOLLARS_OFF,
 } from "../constants"
 import type { Course, CourseRun } from "../flow/courseTypes"
 
 export const calculateDiscount = (
   item: BasketItem,
-  coupon: ?CouponSelection
+  coupon: ?CouponSelection,
 ): Decimal => {
   if (coupon && coupon.targets.includes(item.id)) {
     if (coupon.discount_type === DISCOUNT_TYPE_PERCENT_OFF) {
@@ -36,10 +36,9 @@ export const calculateDiscount = (
 
 export const calculatePrice = (
   item: BasketItem,
-  coupon: ?CouponSelection
+  coupon: ?CouponSelection,
 ): Decimal => {
-  const price = new Decimal(item.price).minus(calculateDiscount(item, coupon)
-  )
+  const price = new Decimal(item.price).minus(calculateDiscount(item, coupon))
   if (price < 0) {
     return 0
   } else {
@@ -68,11 +67,11 @@ export const calculateTotalAfterTax = (
 
 const determinePreselectRunTag = (
   item: BasketItem,
-  preselectId: number = 0
+  preselectId: number = 0,
 ): ?string => {
   if (preselectId && item.courses.length > 0) {
     const matchingPreselectRun = item.courses[0].courseruns.find(
-      run => run.id === preselectId
+      (run) => run.id === preselectId,
     )
     if (matchingPreselectRun && matchingPreselectRun.run_tag) {
       return matchingPreselectRun.run_tag
@@ -88,12 +87,12 @@ const determinePreselectRunTag = (
 
 export const calcSelectedRunIds = (
   item: BasketItem,
-  preselectId: number = 0
+  preselectId: number = 0,
 ): { [number]: number } => {
   if (item.type === PRODUCT_TYPE_COURSERUN) {
     const course = item.courses[0]
     return {
-      [course.id]: item.object_id
+      [course.id]: item.object_id,
     }
   }
 
@@ -106,7 +105,7 @@ export const calcSelectedRunIds = (
   const courseRunSelectionMap = {}
   for (const course of item.courses) {
     const matchingRun = course.courseruns.find(
-      run => run.run_tag === preselectRunTag
+      (run) => run.run_tag === preselectRunTag,
     )
     if (matchingRun) {
       courseRunSelectionMap[course.id] = matchingRun.id
@@ -117,7 +116,10 @@ export const calcSelectedRunIds = (
     : {}
 }
 
-export const formatNumber = (number: ?string | number | Decimal, trimTrailingZeros: boolean = true): Decimal => {
+export const formatNumber = (
+  number: ?string | number | Decimal,
+  trimTrailingZeros: boolean = true,
+): Decimal => {
   if (number === null || number === undefined) {
     return ""
   } else {
@@ -132,7 +134,10 @@ export const formatNumber = (number: ?string | number | Decimal, trimTrailingZer
   }
 }
 
-export const formatPrice = (price: ?string | number | Decimal, trimTrailingZeros: boolean = false): string => {
+export const formatPrice = (
+  price: ?string | number | Decimal,
+  trimTrailingZeros: boolean = false,
+): string => {
   let formattedPrice = formatNumber(price, trimTrailingZeros)
   if (formattedPrice) {
     formattedPrice = `$${formattedPrice}`
@@ -140,14 +145,18 @@ export const formatPrice = (price: ?string | number | Decimal, trimTrailingZeros
   return formattedPrice
 }
 
-export const formatDiscount = (discount: ?string | number | Decimal, trimTrailingZeros: boolean = false): string => {
+export const formatDiscount = (
+  discount: ?string | number | Decimal,
+  trimTrailingZeros: boolean = false,
+): string => {
   if (discount === null || discount === undefined) {
     return "$0.00"
   }
 
   let formattedDiscount = formatNumber(discount, trimTrailingZeros)
 
-  if (formattedDiscount == 0) {  // eslint-disable-line eqeqeq
+  if (formattedDiscount == 0) {
+    // eslint-disable-line eqeqeq
     return `$${formattedDiscount}`
   } else if (formattedDiscount < 0) {
     formattedDiscount = (formattedDiscount * -1).toFixed(2)
@@ -162,20 +171,20 @@ export const formatCoursewareDate = (dateString: ?string) =>
 export const formatRunTitle = (run: ?CourseRun) =>
   run
     ? `${formatCoursewareDate(run.start_date)} - ${formatCoursewareDate(
-      run.end_date
-    )}`
+        run.end_date,
+      )}`
     : ""
 
 export const isPromo = equals(COUPON_TYPE_PROMO)
 
 export const findProductById = (
   products: Array<Product>,
-  id: number | string
+  id: number | string,
 ): ?Product => {
   if (isNaN(id)) {
-    return products.find(product => product.latest_version.readable_id === id)
+    return products.find((product) => product.latest_version.readable_id === id)
   } else {
-    return products.find(product => product.id === parseInt(id))
+    return products.find((product) => product.id === parseInt(id))
   }
 }
 

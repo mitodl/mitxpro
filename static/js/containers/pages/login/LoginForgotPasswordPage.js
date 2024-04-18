@@ -20,12 +20,12 @@ import type { EmailFormValues } from "../../../components/forms/EmailForm"
 
 type Props = {
   history: RouterHistory,
-  forgotPassword: (email: string) => Promise<any>
+  forgotPassword: (email: string) => Promise<any>,
 }
 
 type State = {
   forgotEmailSent: boolean,
-  text: Object | null
+  text: Object | null,
 }
 
 const passwordResetText = (email: string) => (
@@ -48,7 +48,7 @@ export class LoginForgotPasswordPage extends React.Component<Props, State> {
       this.setState((state, props) => {
         return {
           forgotEmailSent: true,
-          text:            passwordResetText(email)
+          text: passwordResetText(email),
         }
       })
 
@@ -61,7 +61,7 @@ export class LoginForgotPasswordPage extends React.Component<Props, State> {
   resetEmailLinkSent() {
     this.setState({
       forgotEmailSent: false,
-      text:            null
+      text: null,
     })
   }
 
@@ -129,12 +129,9 @@ const forgotPassword = (email: string) =>
 
 const mapDispatchToProps = {
   forgotPassword,
-  addUserNotification
+  addUserNotification,
 }
 
-export default compose(
-  connect(
-    null,
-    mapDispatchToProps
-  )
-)(LoginForgotPasswordPage)
+export default compose(connect(null, mapDispatchToProps))(
+  LoginForgotPasswordPage,
+)

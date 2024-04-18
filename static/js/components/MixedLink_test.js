@@ -23,7 +23,7 @@ describe("MixedLink component", () => {
     const wrapper = renderMixedLink(SPA_APP_CONTEXT, {
       dest:         testDest,
       children:     testLinkText,
-      "aria-label": testAriaLabel
+      "aria-label": testAriaLabel,
     })
 
     const link = wrapper.find("Link")
@@ -39,7 +39,7 @@ describe("MixedLink component", () => {
     const wrapper = renderMixedLink(MIXED_APP_CONTEXT, {
       dest:         testDest,
       children:     testLinkText,
-      "aria-label": testAriaLabel
+      "aria-label": testAriaLabel,
     })
 
     const link = wrapper.find("a")

@@ -13,7 +13,7 @@ import type {
   CourseRunProduct,
   ProgramProduct,
   Product,
-  ProgramRunDetail
+  ProgramRunDetail,
 } from "../../flow/ecommerceTypes"
 import type { Course } from "../../flow/courseTypes"
 import { anyNil } from "../../lib/util"
@@ -22,7 +22,7 @@ import queries from "../../lib/queries"
 
 export const productTypeLabels = {
   [PRODUCT_TYPE_COURSERUN]: "Course",
-  [PRODUCT_TYPE_PROGRAM]:   "Program"
+  [PRODUCT_TYPE_PROGRAM]:   "Program",
 }
 const defaultSelectComponentsProp = { IndicatorSeparator: null }
 
@@ -31,58 +31,58 @@ type Props = {
     name: string,
     value: any,
     onChange: Function,
-    onBlur: Function
+    onBlur: Function,
   },
   form: {
     touched: boolean,
     errors: Object,
-    values: Object
+    values: Object,
   },
   products: Array<Product>,
   selectedProduct: ?Product,
   programRunsLoading: boolean,
   programRuns: Array<ProgramRunDetail>,
-  fetchProgramRuns: Function
+  fetchProgramRuns: Function,
 }
 type SelectOption = {
   label: string,
-  value: number | string
+  value: number | string,
 }
 type ProductType = PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM
 type State = {
   productType: ProductType,
   selectedCoursewareObj: ?SelectOption,
   selectedCourseDate: ?SelectOption,
-  initialized: boolean
+  initialized: boolean,
 }
 
 const buildProgramOption = (product: ProgramProduct): SelectOption => ({
   value: product.id,
-  label: product.latest_version.content_title
+  label: product.latest_version.content_title,
 })
 
 const buildCourseOption = (product: CourseRunProduct): SelectOption => ({
   value: product.content_object.course.id || "",
-  label: product.content_object.course.title || ""
+  label: product.content_object.course.title || "",
 })
 
 const buildCourseDateOption = (product: CourseRunProduct): SelectOption => ({
   value: product.id,
   label: `${formatCoursewareDate(
-    product.content_object.start_date
-  )} - ${formatCoursewareDate(product.content_object.end_date)}`
+    product.content_object.start_date,
+  )} - ${formatCoursewareDate(product.content_object.end_date)}`,
 })
 
 const buildProgramDateOption = (run: ProgramRunDetail): SelectOption => ({
   value: run.id,
   label: `${formatCoursewareDate(run.start_date)} - ${formatCoursewareDate(
-    run.end_date
-  )}`
+    run.end_date,
+  )}`,
 })
 
 export const productDateSortCompare = (
   firstProduct: CourseRunProduct,
-  secondProduct: CourseRunProduct
+  secondProduct: CourseRunProduct,
 ) => {
   if (!firstProduct.content_object.start_date) {
     return 1
@@ -98,7 +98,7 @@ export const productDateSortCompare = (
 
 export const programRunDateSortCompare = (
   firstProduct: ProgramRunDetail,
-  secondProduct: ProgramRunDetail
+  secondProduct: ProgramRunDetail,
 ) => {
   if (!firstProduct.start_date) {
     return 1
@@ -111,13 +111,13 @@ export const programRunDateSortCompare = (
 
 const buildCourseDateOptions = R.compose(
   R.map(buildCourseDateOption),
-  R.sort(productDateSortCompare)
+  R.sort(productDateSortCompare),
 )
 const buildProgramOptions = R.map(buildProgramOption)
 
 const buildProgramDateOptions = R.compose(
   R.map(buildProgramDateOption),
-  R.sort(programRunDateSortCompare)
+  R.sort(programRunDateSortCompare),
 )
 
 export class ProductSelector extends React.Component<Props, State> {
@@ -125,7 +125,7 @@ export class ProductSelector extends React.Component<Props, State> {
     productType:           PRODUCT_TYPE_COURSERUN,
     selectedCoursewareObj: null,
     selectedCourseDate:    null,
-    initialized:           false
+    initialized:           false,
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
@@ -139,20 +139,17 @@ export class ProductSelector extends React.Component<Props, State> {
     const { productType } = this.state
 
     const filteredProducts = products.filter(
-      product => product.product_type === productType
+      product => product.product_type === productType,
     )
     if (productType === PRODUCT_TYPE_PROGRAM) {
       return buildProgramOptions(filteredProducts)
     }
 
-    return R.compose(
-      R.uniq,
-      R.map(buildCourseOption)
-    )(filteredProducts)
+    return R.compose(R.uniq, R.map(buildCourseOption))(filteredProducts)
   }
 
   calcProductDateOptions = (
-    selectedCoursewareObj: ?SelectOption
+    selectedCoursewareObj: ?SelectOption,
   ): Array<SelectOption> => {
     const { products, programRunsLoading, programRuns } = this.props
     const { productType } = this.state
@@ -172,7 +169,7 @@ export class ProductSelector extends React.Component<Props, State> {
             endDate = new Date(programRun.end_date)
           }
           return endDate === null || endDate >= todaysDate
-        })
+        }),
       )
     } else {
       return buildCourseDateOptions(
@@ -187,7 +184,7 @@ export class ProductSelector extends React.Component<Props, State> {
             product.content_object.course.id === selectedCoursewareObj.value &&
             (enrollmentEndDate === null || enrollmentEndDate >= todaysDate)
           )
-        })
+        }),
       )
     }
   }
@@ -201,7 +198,7 @@ export class ProductSelector extends React.Component<Props, State> {
     this.setState({
       productType:           selectedOption.value,
       selectedCoursewareObj: null,
-      selectedCourseDate:    null
+      selectedCourseDate:    null,
     })
   }
 
@@ -214,7 +211,7 @@ export class ProductSelector extends React.Component<Props, State> {
     }
     this.setState({
       selectedCoursewareObj: selectedOption,
-      selectedCourseDate:    null
+      selectedCourseDate:    null,
     })
     if (productType === PRODUCT_TYPE_PROGRAM) {
       fetchProgramRuns(selectedOption.value)
@@ -229,19 +226,16 @@ export class ProductSelector extends React.Component<Props, State> {
       return
     }
     this.setState({
-      selectedCourseDate: selectedOption
+      selectedCourseDate: selectedOption,
     })
   }
 
   updateSelectedProduct = () => {
     const {
-      field: { name, onChange }
+      field: { name, onChange },
     } = this.props
-    const {
-      productType,
-      selectedCoursewareObj,
-      selectedCourseDate
-    } = this.state
+    const { productType, selectedCoursewareObj, selectedCourseDate } =
+      this.state
     let productValue
 
     if (
@@ -250,7 +244,7 @@ export class ProductSelector extends React.Component<Props, State> {
         anyNil([selectedCoursewareObj, selectedCourseDate]))
     ) {
       onChange({
-        target: { name, value: { productId: null, programRunId: null } }
+        target: { name, value: { productId: null, programRunId: null } },
       })
       return
     }
@@ -260,13 +254,13 @@ export class ProductSelector extends React.Component<Props, State> {
       productValue = {
         // $FlowFixMe: Can't be null/undefined
         productId:    selectedCoursewareObj.value,
-        programRunId: selectedCourseDate ? selectedCourseDate.value : null
+        programRunId: selectedCourseDate ? selectedCourseDate.value : null,
       }
     } else {
       productValue = {
         // $FlowFixMe: Can't be null/undefined
         productId:    selectedCourseDate.value,
-        programRunId: null
+        programRunId: null,
       }
     }
     onChange({ target: { name, value: productValue } })
@@ -314,16 +308,13 @@ export class ProductSelector extends React.Component<Props, State> {
       productType: selectedProduct.product_type,
       selectedCoursewareObj,
       selectedCourseDate,
-      initialized: true
+      initialized: true,
     }
   }
 
   render() {
-    const {
-      productType,
-      selectedCoursewareObj,
-      selectedCourseDate
-    } = this.state
+    const { productType, selectedCoursewareObj, selectedCourseDate } =
+      this.state
 
     const { programRunsLoading } = this.props
 
@@ -338,13 +329,13 @@ export class ProductSelector extends React.Component<Props, State> {
               className="select"
               options={Object.keys(productTypeLabels).map(productTypeKey => ({
                 value: productTypeKey,
-                label: productTypeLabels[productTypeKey]
+                label: productTypeLabels[productTypeKey],
               }))}
               components={defaultSelectComponentsProp}
               onChange={this.setProductType}
               value={{
                 value: productType,
-                label: productTypeLabels[productType]
+                label: productTypeLabels[productType],
               }}
             />
           </div>
@@ -394,7 +385,7 @@ export class ProductSelector extends React.Component<Props, State> {
 
 const mapDispatchToProps = dispatch => ({
   fetchProgramRuns: (productId: string) =>
-    dispatch(requestAsync(queries.ecommerce.programRunsQuery(productId)))
+    dispatch(requestAsync(queries.ecommerce.programRunsQuery(productId))),
 })
 
 const mapStateToProps = state => ({
@@ -402,13 +393,10 @@ const mapStateToProps = state => ({
   programRunsLoading: R.pathOr(
     false,
     ["queries", "programRuns", "isPending"],
-    state
-  )
+    state,
+  ),
 })
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(ProductSelector)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  ProductSelector,
+)

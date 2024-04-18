@@ -50,5 +50,5 @@ class WriteableSerializerMethodField(serializers.SerializerMethodField):
         super().__init__(**kwargs)
         self.read_only = False
 
-    def to_internal_value(self, data):  # noqa: D102
+    def to_internal_value(self, data):
         return data

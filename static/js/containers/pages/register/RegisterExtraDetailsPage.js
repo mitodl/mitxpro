@@ -24,20 +24,20 @@ import type { AuthResponse, ProfileForm, User } from "../../../flow/authTypes"
 type RegisterProps = {|
   location: Location,
   history: RouterHistory,
-  params: { partialToken: string }
+  params: { partialToken: string },
 |}
 
 type DispatchProps = {|
   registerExtraDetails: (
     profileData: ProfileForm,
-    partialToken: string
+    partialToken: string,
   ) => Promise<Response<AuthResponse>>,
-  getCurrentUser: () => Promise<Response<User>>
+  getCurrentUser: () => Promise<Response<User>>,
 |}
 
 type Props = {|
   ...RegisterProps,
-  ...DispatchProps
+  ...DispatchProps,
 |}
 
 export class RegisterExtraDetailsPage extends React.Component<Props> {
@@ -45,7 +45,7 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
     const {
       history,
       registerExtraDetails,
-      params: { partialToken }
+      params: { partialToken },
     } = this.props
 
     try {
@@ -54,7 +54,7 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
-          setErrors(field_errors)
+          setErrors(field_errors),
       })
     } finally {
       setSubmitting(false)
@@ -99,7 +99,7 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  params: createStructuredSelector({ partialToken: qsPartialTokenSelector })
+  params: createStructuredSelector({ partialToken: qsPartialTokenSelector }),
 })
 
 const registerExtraDetails = (profileData: ProfileForm, partialToken: string) =>
@@ -108,17 +108,14 @@ const registerExtraDetails = (profileData: ProfileForm, partialToken: string) =>
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
-    force: true
+    force: true,
   })
 
 const mapDispatchToProps = {
   registerExtraDetails: registerExtraDetails,
-  getCurrentUser
+  getCurrentUser,
 }
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(RegisterExtraDetailsPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  RegisterExtraDetailsPage,
+)

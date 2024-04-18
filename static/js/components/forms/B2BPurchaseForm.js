@@ -14,7 +14,7 @@ import B2BCheckoutExplanation from "../B2BCheckoutExplanation"
 import type {
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  Product
+  Product,
 } from "../../flow/ecommerceTypes"
 import { findProductById } from "../../lib/ecommerce"
 
@@ -28,11 +28,11 @@ type Props = {
   contractNumber: ?string,
   discountCode: ?string,
   productId: ?string,
-  seats: ?string
+  seats: ?string,
 }
 
 export const emailValidation = yup.object().shape({
-  email: emailFieldValidation
+  email: emailFieldValidation,
 })
 
 const errorMessageRenderer = msg => <span className="error">{msg}</span>
@@ -65,7 +65,7 @@ class B2BPurchaseForm extends React.Component<Props> {
           formikRefObj.state.values,
           formikRefObj.setFieldError,
           formikRefObj.setFieldTouched,
-          null
+          null,
         )
       }
     }
@@ -76,7 +76,7 @@ class B2BPurchaseForm extends React.Component<Props> {
       values: Object,
       setFieldError: Function,
       setFieldTouched: Function,
-      event: Event
+      event: Event,
     ) => {
       const { products, clearCouponStatus, fetchCouponStatus } = this.props
 
@@ -97,13 +97,13 @@ class B2BPurchaseForm extends React.Component<Props> {
 
       const response = await fetchCouponStatus({
         product_id: values.product.productId,
-        code:       values.coupon.trim()
+        code:       values.coupon.trim(),
       })
       if (response && response.status !== 200) {
         setFieldError("coupon", "Invalid coupon code")
         setFieldTouched("coupon", true, false)
       }
-    }
+    },
   )
 
   renderForm = ({ values, setFieldError, setFieldTouched }: Object) => {
@@ -112,7 +112,7 @@ class B2BPurchaseForm extends React.Component<Props> {
       requestPending,
       couponStatus,
       contractNumber,
-      clearCouponStatus
+      clearCouponStatus,
     } = this.props
 
     let itemPrice = new Decimal(0),
@@ -179,7 +179,12 @@ class B2BPurchaseForm extends React.Component<Props> {
 
             <label htmlFor="email">
               <span className="description">*Your email address:</span>
-              <Field type="email" name="email" autoComplete="email" component={EmailInput} />
+              <Field
+                type="email"
+                name="email"
+                autoComplete="email"
+                component={EmailInput}
+              />
               <span className="explanation">
                 * We will email the enrollment codes to this address.
               </span>
@@ -211,7 +216,7 @@ class B2BPurchaseForm extends React.Component<Props> {
                   onClick={this.applyCoupon(
                     values,
                     setFieldError,
-                    setFieldTouched
+                    setFieldTouched,
                   )}
                 >
                   Apply
@@ -259,10 +264,10 @@ class B2BPurchaseForm extends React.Component<Props> {
           email:     "",
           product:   {
             productId:    this.props.productId || "",
-            programRunId: null
+            programRunId: null,
           },
           coupon:          this.props.discountCode || "",
-          contract_number: this.props.contractNumber || ""
+          contract_number: this.props.contractNumber || "",
         }}
         validationSchema={emailValidation}
         validate={validate}

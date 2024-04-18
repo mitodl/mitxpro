@@ -19,7 +19,7 @@ class OffsettingSchedule(schedule):
         self._apply_offset = offset is not None
         super().__init__(run_every=self._run_every + (offset or timedelta(seconds=0)))
 
-    def is_due(self, last_run_at):  # noqa: D102
+    def is_due(self, last_run_at):
         retval = super().is_due(last_run_at)
         if self._apply_offset is not None and retval.is_due:
             self._apply_offset = False

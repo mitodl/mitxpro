@@ -25,16 +25,16 @@ function openVideoLightBox() {
       },
       afterClose: function() {
         backgroundVideo && backgroundVideo.play();
-      }
+      },
     },
     youtubeVideoSrc
       ? {
-        src: youtubeVideoSrc
+        src: youtubeVideoSrc,
       }
       : {
         content: hlsAboutVideoEl,
-        type:    "html"
-      }
+        type:    "html",
+      },
   );
   $.fancybox.open(fancyBoxArgs);
 }

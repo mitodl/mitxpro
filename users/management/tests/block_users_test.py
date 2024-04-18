@@ -20,7 +20,7 @@ class TestblockUsers(TestCase):
     Tests block users management command.
     """
 
-    def setUp(self):  # noqa: D102
+    def setUp(self):
         super().setUp()
 
     @pytest.mark.django_db
