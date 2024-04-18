@@ -1,7 +1,6 @@
 """
 Voucher views
 """
-import json
 import logging
 from datetime import datetime, timezone
 
@@ -20,7 +19,7 @@ from voucher.forms import VOUCHER_PARSE_ERROR, UploadVoucherForm
 from voucher.models import Voucher
 from voucher.utils import (
     get_current_voucher,
-    get_eligible_coupon_choices,
+    get_eligible_product_detail,
     get_valid_voucher_coupons_version,
 )
 
@@ -83,7 +82,7 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
 
 class EnrollView(LoginRequiredMixin, View):
     """
-    EnrollView checks the status of the voucher and looks for valid course runs to redeem it for
+    EnrollView checks the status of the voucher and looks for the valid course run to redeem it for
 
     On a POST, it redirects to the enrollment URL based on the submitted CouponEligibility object's product and
     coupon_code
@@ -91,23 +90,27 @@ class EnrollView(LoginRequiredMixin, View):
 
     def get(self, request):
         """
-        If voucher is not redeemed and valid coupons exist for course runs matching the input strings,
-        render the enroll form with CouponEligibility objects as choices.
+        Render the enroll form with the matching course run if the voucher
+        is not redeemed and a valid coupon exists for the matching course run,
         """
         voucher = get_current_voucher(self.request.user)
         if voucher is None:
             return redirect("voucher:upload")
         elif voucher.is_redeemed():
             return redirect("voucher:redeemed")
-        eligible_choices = get_eligible_coupon_choices(voucher)
-        if not eligible_choices:
+        product_id, coupon_id, course_run_display_title = get_eligible_product_detail(
+            voucher
+        )
+        if not (product_id and coupon_id and course_run_display_title):
             return redirect("voucher:resubmit")
         else:
             return render(
                 request,
                 "enroll.html",
                 context={
-                    "eligible_choices": eligible_choices,
+                    "product_id": product_id,
+                    "coupon_id": coupon_id,
+                    "course_run_display_title": course_run_display_title,
                     **get_base_context(self.request),
                 },
             )
@@ -117,11 +120,8 @@ class EnrollView(LoginRequiredMixin, View):
         Submit a CouponVersion object and redirect to the enrollment page
         """
         voucher = get_current_voucher(self.request.user)
-        try:
-            product_id, coupon_id = json.loads(request.POST["coupon_version"])
-        except json.JSONDecodeError:
-            messages.error(request, "Coupon Version is required.")
-            return self.get(request)
+        product_id = request.POST.get("product_id", None)
+        coupon_id = request.POST.get("coupon_id", None)
 
         if product_id and coupon_id:
             # Ensure no one has snagged this coupon while the user was waiting
@@ -133,7 +133,8 @@ class EnrollView(LoginRequiredMixin, View):
                     new_coupon_version, "coupon"
                 ):
                     log.error(
-                        "Found no valid coupons for matches for voucher %s", voucher.id
+                        "Found no valid coupons for course run matching the voucher %s",
+                        voucher.id,
                     )
                     return redirect("voucher:resubmit")
                 else:

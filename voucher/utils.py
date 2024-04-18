@@ -1,6 +1,4 @@
 """PDF Parsing functions for Vouchers"""
-import difflib
-import json
 import logging
 import re
 from datetime import datetime
@@ -8,7 +6,6 @@ from uuid import uuid4
 
 import pdftotext
 from django.conf import settings
-from django.db.models import Q
 
 from courses.models import CourseRun
 from ecommerce.api import get_valid_coupon_versions
@@ -43,97 +40,48 @@ def get_current_voucher(user):
     return user.vouchers.order_by("uploaded").last()
 
 
-def get_eligible_coupon_choices(voucher):
+def get_eligible_product_detail(voucher):
     """
-    Find exact or partial matching course runs and get valid coupons for them
+    Find a matching course run and get a valid coupon for it
 
     Args:
-        voucher (Voucher): a voucher to find courses for
+        voucher (Voucher): a voucher to find course for
 
     Returns:
-        list of tuple:
-            list of ('[<product_id>, <coupon_id>]', <course title>) for an eligible coupon / CourseRun match
+        tuple: <product_id>, <coupon_id>, <course run display title> for the eligible coupon / CourseRun match
     """
-    course_matches = None
-    # Search for an exact match if all inputs exist
+    matching_course_run = None
     if voucher.course_id_input and voucher.course_title_input:
-        course_matches = (
+        matching_course_run = (
             CourseRun.objects.filter(
-                course__readable_id__exact=voucher.course_id_input,
-                course__title__exact=voucher.course_title_input,
+                course__readable_id__iexact=voucher.course_id_input,
+                course__title__iexact=voucher.course_title_input,
                 start_date__date=voucher.course_start_date_input,
             )
             .live()
             .enrollment_available()
             .available()
             .order_by("start_date")
-        )
+        ).first()
 
-    # Search for partial matches if no exact match was found
-    if course_matches is None or not course_matches.exists():
-        # Try partial matching
-        course_matches = (
-            CourseRun.objects.filter(
-                (
-                    Q(course__readable_id__icontains=voucher.course_id_input)
-                    if voucher.course_id_input
-                    else Q()
-                )
-                | (
-                    Q(course__title__icontains=voucher.course_title_input)
-                    if voucher.course_title_input
-                    else Q()
-                )
-                | Q(start_date__date=voucher.course_start_date_input)
-            )
-            .live()
-            .enrollment_available()
-            .available()
-            .order_by("start_date")
-        )
-
-    if not course_matches.exists():
-        # No partial matches found
+    if not matching_course_run:
         log.error("Found no matching course runs for voucher %s", voucher.id)
-        return []
+        return None, None, None
 
-    # Check for valid coupon options and return choices
-    valid_coupons = [
-        get_valid_voucher_coupons_version(voucher, match.product.first())
-        for match in course_matches
-    ]
-    eligible_choices = [
-        (
-            json.dumps(
-                (course_matches[i].product.first().id, valid_coupons[i].coupon.id)
-            ),
-            "{title} - starts {start_date}".format(
-                title=course_matches[i].title,
-                start_date=course_matches[i].start_date.strftime("%b %d, %Y"),
-            ),
+    valid_coupon = get_valid_voucher_coupons_version(
+        voucher, matching_course_run.product.first()
+    )
+    if not valid_coupon:
+        log.error(
+            "Found no valid coupons for course run matching the voucher %s", voucher.id
         )
-        for i in range(len(course_matches))
-        if valid_coupons[i] is not None and course_matches[i].product is not None
-    ]
-    if course_matches and not eligible_choices:
-        log.error("Found no valid coupons for matches for voucher %s", voucher.id)
+        return None, None, None
 
-    if len(eligible_choices) > 1 and voucher.course_title_input:
-        eligible_choices_titles = [choice[1] for choice in eligible_choices]
-        close_matches = difflib.get_close_matches(
-            voucher.course_title_input,
-            eligible_choices_titles,
-            len(eligible_choices_titles),
-            0,
-        )
-        sorted_eligible_choices = []
-        for match in close_matches:
-            sorted_eligible_choices.append(  # noqa: PERF401
-                eligible_choices[eligible_choices_titles.index(match)]
-            )
-        eligible_choices = sorted_eligible_choices
-
-    return eligible_choices
+    return (
+        matching_course_run.product.first().id,
+        valid_coupon.coupon.id,
+        f"{matching_course_run.title} - starts {matching_course_run.start_date.strftime('%b %d, %Y')}",
+    )
 
 
 def get_valid_voucher_coupons_version(voucher, product):
