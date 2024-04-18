@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.145.2
+---------------
+
+- feat!: remove partial voucher matching (#2940)
+- Fix: This commit adds two Celery configurables
+
 Version 0.145.1 (Released April 18, 2024)
 ---------------
 
