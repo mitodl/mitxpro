@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.145.1
+Version 0.145.1 (Released April 18, 2024)
 ---------------
 
 - Enable fields for coupon and b2bcoupon to be editable (#2951)
