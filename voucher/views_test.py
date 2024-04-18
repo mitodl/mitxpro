@@ -233,7 +233,8 @@ def test_post_enroll_view_with_stolen_only_coupon(
     assert response.status_code == 302
     assert response.url == reverse("voucher:resubmit")
     mock_logger.error.assert_called_once_with(
-        "Found no valid coupons for course run match for voucher %s", context.voucher.id
+        "Found no valid coupons for course run matching the voucher %s",
+        context.voucher.id,
     )
 
 

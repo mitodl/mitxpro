@@ -73,18 +73,14 @@ def get_eligible_product_detail(voucher):
     )
     if not valid_coupon:
         log.error(
-            "Found no valid coupons for course run match for voucher %s", voucher.id
+            "Found no valid coupons for course run matching the voucher %s", voucher.id
         )
         return None, None, None
 
-    course_run_display_title = "{title} - starts {start_date}".format(
-        title=matching_course_run.title,
-        start_date=matching_course_run.start_date.strftime("%b %d, %Y"),
-    )
     return (
         matching_course_run.product.first().id,
         valid_coupon.coupon.id,
-        course_run_display_title,
+        f"{matching_course_run.title} - starts {matching_course_run.start_date.strftime('%b %d, %Y')}",
     )
 
 

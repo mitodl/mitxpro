@@ -133,7 +133,7 @@ class EnrollView(LoginRequiredMixin, View):
                     new_coupon_version, "coupon"
                 ):
                     log.error(
-                        "Found no valid coupons for course run match for voucher %s",
+                        "Found no valid coupons for course run matching the voucher %s",
                         voucher.id,
                     )
                     return redirect("voucher:resubmit")

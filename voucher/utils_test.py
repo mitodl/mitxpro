@@ -168,7 +168,7 @@ def test_exact_course_match_without_coupon(
     assert coupon_id is None
     assert course_run_display_title is None
     mock_logger.error.assert_called_once_with(
-        "Found no valid coupons for course run match for voucher %s", voucher.id
+        "Found no valid coupons for course run matching the voucher %s", voucher.id
     )
 
 
