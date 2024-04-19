@@ -257,7 +257,7 @@ def read_pdf(pdf_file):
             log.warning("Required setting %s missing for read_pdf", key)
             return  # noqa: RET502
     try:
-        pdf = pdftotext.PDF(pdf_file)
+        pdf = pdftotext.PDF(pdf_file, physical=True)
         if any("Entity Name:" in page for page in pdf):
             values = read_pdf_international(pdf)
             for key in international_settings_keys:
