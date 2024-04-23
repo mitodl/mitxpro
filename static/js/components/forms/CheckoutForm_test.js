@@ -30,7 +30,8 @@ describe("CheckoutForm", () => {
     couponCode,
     basketItem,
     submitCouponStub,
-    updateProductStub
+    updateProductStub,
+    isVoucherApplied
 
   beforeEach(() => {
     basket = makeBasketResponse()
@@ -41,6 +42,7 @@ describe("CheckoutForm", () => {
     onSubmitStub = sandbox.stub()
     submitCouponStub = sandbox.stub()
     updateProductStub = sandbox.stub()
+    isVoucherApplied = false
     SETTINGS.zendesk_config = {
       help_widget_enabled: false,
       help_widget_key:     "fake_key"
@@ -63,6 +65,7 @@ describe("CheckoutForm", () => {
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
         updateProduct={updateProductStub}
+        isVoucherApplied={isVoucherApplied}
         {...props}
       />
     )
@@ -234,6 +237,7 @@ describe("CheckoutForm", () => {
         item={basketItem}
         values={{ dataConsent: false }}
         errors={{ data_consents: errorMessage }}
+        isVoucherApplied={isVoucherApplied}
         onMount={sandbox.stub()}
       />
     )
@@ -363,6 +367,7 @@ describe("CheckoutForm", () => {
         setValues={sandbox.stub()}
         resetForm={resetFormStub}
         updateProduct={updateProductStub}
+        isVoucherApplied={isVoucherApplied}
         values={{}}
       />
     )
@@ -408,6 +413,7 @@ describe("CheckoutForm", () => {
           item={basketItem}
           onMount={sandbox.stub()}
           updateProduct={updateProductStub}
+          isVoucherApplied={isVoucherApplied}
           values={{
             dataConsent: checked
           }}
@@ -433,6 +439,7 @@ describe("CheckoutForm", () => {
         item={basketItem}
         onMount={sandbox.stub()}
         updateProduct={updateProductStub}
+        isVoucherApplied={isVoucherApplied}
         values={{}}
       />
     )
@@ -462,6 +469,7 @@ describe("CheckoutForm", () => {
             item={basketItem}
             onMount={sandbox.stub()}
             updateProduct={updateProductStub}
+            isVoucherApplied={isVoucherApplied}
             values={{}}
           />
         )

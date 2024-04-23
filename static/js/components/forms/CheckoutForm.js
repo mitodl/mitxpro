@@ -58,7 +58,8 @@ type CommonProps = {
     productId: number | string,
     runId: number,
     setFieldError: SetFieldError
-  ) => Promise<void>
+  ) => Promise<void>,
+  isVoucherApplied: boolean
 }
 type OuterProps = CommonProps & {
   couponCode: ?string,
@@ -122,7 +123,8 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
       setFieldError,
       setValues,
       resetForm,
-      updateProduct
+      updateProduct,
+      isVoucherApplied
     } = this.props
 
     if (item.type === "program") {
@@ -196,11 +198,17 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 Select a course run
               </option>
               {course.courseruns.map(run =>
-                run.product_id ? (
+                run.product_id && !isVoucherApplied ? (
                   <option value={run.id} key={run.id}>
                     {formatRunTitle(run)}
                   </option>
-                ) : null
+                ) : (
+                  run.product_id && isVoucherApplied && run.product_id === item.product_id ? (
+                    <option value={run.id} key={run.id}>
+                      {formatRunTitle(run)}
+                    </option>
+                  ) : null
+                )
               )}
             </Field>
           </div>
@@ -442,7 +450,8 @@ export class CheckoutForm extends React.Component<OuterProps> {
       requestPending,
       selectedRuns,
       submitCoupon,
-      updateProduct
+      updateProduct,
+      isVoucherApplied
     } = this.props
 
     return (
@@ -464,6 +473,7 @@ export class CheckoutForm extends React.Component<OuterProps> {
             onSubmit={onSubmit}
             submitCoupon={submitCoupon}
             updateProduct={updateProduct}
+            isVoucherApplied={isVoucherApplied}
             onMount={() => {
               // only submit if there is a couponCode query parameter,
               // and if it's different than one in the existing coupon

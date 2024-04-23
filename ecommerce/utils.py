@@ -63,7 +63,9 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
     return order_id
 
 
-def make_checkout_url(*, product_id=None, code=None, run_tag=None):
+def make_checkout_url(
+    *, product_id=None, code=None, run_tag=None, is_voucher_applied="false"
+):
     """
     Helper function to create a checkout URL with appropriate query parameters.
 
@@ -71,6 +73,7 @@ def make_checkout_url(*, product_id=None, code=None, run_tag=None):
         product_id (int|str): A Product ID or text ID
         code (str): The coupon code
         run_tag (str): A ProgramRun run tag
+        is_voucher_applied (str): String to indicate if voucher is used for checkout
 
     Returns:
         str: The URL for the checkout page, including product and coupon code if available
@@ -79,7 +82,7 @@ def make_checkout_url(*, product_id=None, code=None, run_tag=None):
     if product_id is None and code is None:
         return base_checkout_url
 
-    query_params = {}
+    query_params = {"is_voucher_applied": is_voucher_applied}
     if product_id is not None:
         query_params["product"] = (
             product_id

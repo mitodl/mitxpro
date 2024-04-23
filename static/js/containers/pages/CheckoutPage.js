@@ -78,9 +78,10 @@ export class CheckoutPage extends React.Component<Props, State> {
     } = this.props
     const params = queryString.parse(search)
     return {
-      productId:   params.product,
-      preselectId: parseInt(params.preselect),
-      couponCode:  params.code
+      productId:        params.product,
+      preselectId:      parseInt(params.preselect),
+      couponCode:       params.code,
+      isVoucherApplied: params.is_voucher_applied === "true",
     }
   }
 
@@ -339,7 +340,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       const coupon = basket.coupons.find(coupon =>
         coupon.targets.includes(item.id)
       )
-      const { couponCode, preselectId } = this.getQueryParams()
+      const { couponCode, preselectId, isVoucherApplied } = this.getQueryParams()
       const selectedRuns = calcSelectedRunIds(item, preselectId)
       pageBody = (
         <CheckoutForm
@@ -352,6 +353,7 @@ export class CheckoutPage extends React.Component<Props, State> {
           onSubmit={this.submit}
           updateProduct={this.updateProduct}
           requestPending={requestPending}
+          isVoucherApplied={isVoucherApplied}
         />
       )
     }
