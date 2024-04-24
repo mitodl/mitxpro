@@ -1258,7 +1258,7 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
         [
             [
                 assignment.email,
-                "http://test.com/checkout/?product={}&code={}".format(
+                "http://test.com/checkout/?is_voucher_applied=false&product={}&code={}".format(
                     assignment.product_coupon.product.id,
                     assignment.product_coupon.coupon.coupon_code,
                 ),
