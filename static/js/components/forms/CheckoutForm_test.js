@@ -321,6 +321,7 @@ describe("CheckoutForm", () => {
     })
     sinon.assert.notCalled(submitCouponStub)
   })
+
   ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach(type => {
     it(`shows a select with options for a product, and updates a ${type} run`, async () => {
       basketItem.type = type
@@ -348,6 +349,32 @@ describe("CheckoutForm", () => {
         })
       })
     })
+  })
+
+  it(`shows a select with only a single course run when voucher is applied`, async () => {
+    basketItem.type = PRODUCT_TYPE_COURSERUN
+    basketItem.courses = [basketItem.courses[0]]
+    // $FlowFixMe
+    basketItem.product_id = basketItem.courses[0].courseruns[0].product_id
+    const selectedRuns = calcSelectedRunIds(basketItem)
+    const isVoucherApplied = true
+    const inner = await renderForm({
+      selectedRuns,
+      isVoucherApplied
+    })
+    assert.equal(inner.find("select").length, basketItem.courses.length)
+    const course = basketItem.courses[0]
+
+    const select = inner.find("select").at(0)
+    const runs = course.courseruns
+    assert.equal(select.find("option").length, 2)
+    const firstOption = select.find("option").at(0)
+    assert.equal(firstOption.prop("value"), "")
+    assert.equal(firstOption.text(), "Select a course run")
+
+    const secondOption = select.find("option").at(1)
+    assert.equal(secondOption.prop("value"), runs[0].id)
+    assert.equal(secondOption.text(), formatRunTitle(runs[0]))
   })
 
   it("updates the product when the course run select is changed", async () => {
