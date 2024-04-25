@@ -198,17 +198,11 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 Select a course run
               </option>
               {course.courseruns.map(run =>
-                run.product_id && !isVoucherApplied ? (
+                run.product_id && ((!isVoucherApplied) || (isVoucherApplied && run.product_id === item.product_id)) ? (
                   <option value={run.id} key={run.id}>
                     {formatRunTitle(run)}
                   </option>
-                ) : (
-                  run.product_id && isVoucherApplied && run.product_id === item.product_id ? (
-                    <option value={run.id} key={run.id}>
-                      {formatRunTitle(run)}
-                    </option>
-                  ) : null
-                )
+                ) : null
               )}
             </Field>
           </div>
