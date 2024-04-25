@@ -190,7 +190,7 @@ def test_post_enroll_view_with_product_id_and_coupon_id(
     assert response.status_code == 302
     assert response.url == (
         f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
-        f"is_voucher_applied=true&product={product.id}&code={coupon_version.coupon.coupon_code}"
+        f"is_voucher_applied=True&product={product.id}&code={coupon_version.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version.coupon
 
@@ -269,6 +269,6 @@ def test_post_enroll_view_with_stolen_coupon(
     assert response.status_code == 302
     assert response.url == (
         f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}?"
-        f"is_voucher_applied=true&product={product.id}&code={coupon_version2.coupon.coupon_code}"
+        f"is_voucher_applied=True&product={product.id}&code={coupon_version2.coupon.coupon_code}"
     )
     assert Voucher.objects.get(id=voucher.id).coupon == coupon_version2.coupon

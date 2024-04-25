@@ -92,7 +92,7 @@ def test_send_bulk_enroll_emails(mocker, settings):
         assert user_message_props.recipient == assignment.email
         assert user_message_props.context == {
             "enrollable_title": assignment.product_coupon.product.content_object.title,
-            "enrollment_url": "http://test.com/checkout/?is_voucher_applied=false&product={}&code={}".format(
+            "enrollment_url": "http://test.com/checkout/?is_voucher_applied=False&product={}&code={}".format(
                 quote_plus(assignment.product_coupon.product.content_object.text_id),
                 assignment.product_coupon.coupon.coupon_code,
             ),

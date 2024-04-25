@@ -81,7 +81,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       productId:        params.product,
       preselectId:      parseInt(params.preselect),
       couponCode:       params.code,
-      isVoucherApplied: params.is_voucher_applied === "true",
+      isVoucherApplied: params.is_voucher_applied && params.is_voucher_applied.toLowerCase() === "true",
     }
   }
 

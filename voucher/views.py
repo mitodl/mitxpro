@@ -147,7 +147,7 @@ class EnrollView(LoginRequiredMixin, View):
             enroll_url = make_checkout_url(
                 product_id=product_id,
                 code=voucher.coupon.coupon_code,
-                is_voucher_applied="true",
+                is_voucher_applied=True,
             )
             return redirect(enroll_url)
         else:
