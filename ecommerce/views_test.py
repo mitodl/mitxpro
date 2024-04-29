@@ -441,9 +441,7 @@ def test_get_basket(basket_client, basket_and_coupons, mock_context, mocker):
         [Order.FULFILLED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
     ],
 )
-def test_get_order_configuration(  # noqa: PLR0913
-    user, user_client, order_status, expected_status_code
-):
+def test_get_order_configuration(user, user_client, order_status, expected_status_code):
     """Test the view that handles order receipts functions as expected"""
     line = LineFactory.create(order__status=order_status, order__purchaser=user)
     resp = user_client.get(reverse("order_receipt_api", kwargs={"pk": line.order.id}))

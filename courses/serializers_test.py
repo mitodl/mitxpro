@@ -357,8 +357,8 @@ def test_serialize_course_run_detail():
 
 
 @pytest.mark.parametrize(
-    "has_company",  # noqa: PT006
-    [True, False],  # noqa: PT007
+    "has_company",
+    [True, False],
 )
 def test_serialize_course_run_enrollments(settings, has_company):
     """Test that CourseRunEnrollmentSerializer has correct data"""
@@ -388,8 +388,8 @@ def test_serialize_program_enrollments_assert():
 
 
 @pytest.mark.parametrize(
-    "has_company",  # noqa: PT006
-    [True, False],  # noqa: PT007
+    "has_company",
+    [True, False],
 )
 def test_serialize_program_enrollments(settings, has_company):
     """Test that ProgramEnrollmentSerializer has correct data"""
