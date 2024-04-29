@@ -351,7 +351,7 @@ describe("CheckoutForm", () => {
     })
   })
 
-  it(`shows a select with only a single course run when voucher is applied`, async () => {
+  it(`shows a dropdown with only a single matching course run when voucher is applied`, async () => {
     basketItem.type = PRODUCT_TYPE_COURSERUN
     basketItem.courses = [basketItem.courses[0]]
     // $FlowFixMe
