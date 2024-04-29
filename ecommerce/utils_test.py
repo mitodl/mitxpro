@@ -1,9 +1,16 @@
 """Tests for utility functions for ecommerce"""
+from urllib.parse import urljoin
+
 import pytest
+from django.urls import reverse
 
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
-from ecommerce.utils import get_order_id_by_reference_number, validate_amount
+from ecommerce.utils import (
+    get_order_id_by_reference_number,
+    make_checkout_url,
+    validate_amount,
+)
 
 
 @pytest.mark.parametrize(
@@ -46,3 +53,147 @@ def test_validate_amount_with_discount_type(discount_type, amount, error):
     Test validate_amount returns proper validation message
     """
     assert error == validate_amount(discount_type, amount)
+
+
+@pytest.mark.parametrize(
+    (
+        "product_id",
+        "coupon_code",
+        "run_tag",
+        "is_voucher_applied",
+        "expected_query_params",
+    ),
+    [
+        (
+            1,
+            "test_coupon_code",
+            "R1",
+            True,
+            "?is_voucher_applied=True&product=1%2BR1&code=test_coupon_code",
+        ),
+        (
+            None,
+            "test_coupon_code",
+            "R1",
+            True,
+            "?is_voucher_applied=True&code=test_coupon_code",
+        ),
+        (
+            1,
+            None,
+            "R1",
+            True,
+            "?is_voucher_applied=True&product=1%2BR1",
+        ),
+        (
+            None,
+            None,
+            "R1",
+            True,
+            "",
+        ),
+        (
+            1,
+            "test_coupon_code",
+            None,
+            True,
+            "?is_voucher_applied=True&product=1&code=test_coupon_code",
+        ),
+        (
+            None,
+            "test_coupon_code",
+            None,
+            True,
+            "?is_voucher_applied=True&code=test_coupon_code",
+        ),
+        (
+            1,
+            None,
+            None,
+            True,
+            "?is_voucher_applied=True&product=1",
+        ),
+        (
+            None,
+            None,
+            None,
+            True,
+            "",
+        ),
+        (
+            1,
+            "test_coupon_code",
+            "R1",
+            False,
+            "?is_voucher_applied=False&product=1%2BR1&code=test_coupon_code",
+        ),
+        (
+            None,
+            "test_coupon_code",
+            "R1",
+            False,
+            "?is_voucher_applied=False&code=test_coupon_code",
+        ),
+        (
+            1,
+            None,
+            "R1",
+            False,
+            "?is_voucher_applied=False&product=1%2BR1",
+        ),
+        (
+            None,
+            None,
+            "R1",
+            False,
+            "",
+        ),
+        (
+            1,
+            "test_coupon_code",
+            None,
+            False,
+            "?is_voucher_applied=False&product=1&code=test_coupon_code",
+        ),
+        (
+            None,
+            "test_coupon_code",
+            None,
+            False,
+            "?is_voucher_applied=False&code=test_coupon_code",
+        ),
+        (
+            1,
+            None,
+            None,
+            False,
+            "?is_voucher_applied=False&product=1",
+        ),
+        (
+            None,
+            None,
+            None,
+            False,
+            "",
+        ),
+    ],
+)
+def test_make_checkout_url(  # noqa: PLR0913
+    settings,
+    product_id,
+    coupon_code,
+    run_tag,
+    is_voucher_applied,
+    expected_query_params,
+):
+    """Test `make_checkout_url` returns the expected checkout URL"""
+
+    assert (
+        make_checkout_url(
+            product_id=product_id,
+            code=coupon_code,
+            run_tag=run_tag,
+            is_voucher_applied=is_voucher_applied,
+        )
+        == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}{expected_query_params}"
+    )
