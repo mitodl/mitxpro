@@ -438,7 +438,6 @@ def test_get_basket(basket_client, basket_and_coupons, mock_context, mocker):
         [Order.FULFILLED, status.HTTP_200_OK],  # noqa: PT007
         [Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
         [Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        [Order.FULFILLED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
     ],
 )
 def test_get_order_configuration(user, user_client, order_status, expected_status_code):
