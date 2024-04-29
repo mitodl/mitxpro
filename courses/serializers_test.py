@@ -357,12 +357,11 @@ def test_serialize_course_run_detail():
 
 
 @pytest.mark.parametrize(
-    "has_company, receipts_enabled",  # noqa: PT006
-    [[True, False], [False, False], [False, True], [True, True]],  # noqa: PT007
+    "has_company",  # noqa: PT006
+    [True, False],  # noqa: PT007
 )
-def test_serialize_course_run_enrollments(settings, has_company, receipts_enabled):
+def test_serialize_course_run_enrollments(settings, has_company):
     """Test that CourseRunEnrollmentSerializer has correct data"""
-    settings.ENABLE_ORDER_RECEIPTS = receipts_enabled
     course_run_enrollment = CourseRunEnrollmentFactory.create(
         has_company_affiliation=has_company
     )
@@ -376,7 +375,7 @@ def test_serialize_course_run_enrollments(settings, has_company, receipts_enable
         ),
         "certificate": None,
         "receipt": course_run_enrollment.order_id
-        if course_run_enrollment.order.status == Order.FULFILLED and receipts_enabled
+        if course_run_enrollment.order.status == Order.FULFILLED
         else None,
     }
 
@@ -389,12 +388,11 @@ def test_serialize_program_enrollments_assert():
 
 
 @pytest.mark.parametrize(
-    "has_company, receipts_enabled",  # noqa: PT006
-    [[True, False], [False, False], [False, True], [True, True]],  # noqa: PT007
+    "has_company",  # noqa: PT006
+    [True, False],  # noqa: PT007
 )
-def test_serialize_program_enrollments(settings, has_company, receipts_enabled):
+def test_serialize_program_enrollments(settings, has_company):
     """Test that ProgramEnrollmentSerializer has correct data"""
-    settings.ENABLE_ORDER_RECEIPTS = receipts_enabled
     program = ProgramFactory.create()
     course_run_enrollments = CourseRunEnrollmentFactory.create_batch(
         3,
@@ -420,6 +418,6 @@ def test_serialize_program_enrollments(settings, has_company, receipts_enabled):
         ).data,
         "certificate": None,
         "receipt": program_enrollment.order_id
-        if program_enrollment.order.status == Order.FULFILLED and receipts_enabled
+        if program_enrollment.order.status == Order.FULFILLED
         else None,
     }

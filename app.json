@@ -218,10 +218,6 @@
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false
     },
-    "ENABLE_ORDER_RECEIPTS": {
-      "description": "Enable enrollment order receipts.",
-      "required": false
-    },
     "ENROLLMENT_CHANGE_SHEET_ID": {
       "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
       "required": false
