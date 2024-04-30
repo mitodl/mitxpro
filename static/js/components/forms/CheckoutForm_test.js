@@ -30,7 +30,8 @@ describe("CheckoutForm", () => {
     couponCode,
     basketItem,
     submitCouponStub,
-    updateProductStub
+    updateProductStub,
+    isVoucherApplied
 
   beforeEach(() => {
     basket = makeBasketResponse()
@@ -41,6 +42,7 @@ describe("CheckoutForm", () => {
     onSubmitStub = sandbox.stub()
     submitCouponStub = sandbox.stub()
     updateProductStub = sandbox.stub()
+    isVoucherApplied = false
     SETTINGS.zendesk_config = {
       help_widget_enabled: false,
       help_widget_key:     "fake_key"
@@ -63,6 +65,7 @@ describe("CheckoutForm", () => {
         submitCoupon={submitCouponStub}
         selectedRuns={{}}
         updateProduct={updateProductStub}
+        isVoucherApplied={isVoucherApplied}
         {...props}
       />
     )
@@ -234,6 +237,7 @@ describe("CheckoutForm", () => {
         item={basketItem}
         values={{ dataConsent: false }}
         errors={{ data_consents: errorMessage }}
+        isVoucherApplied={isVoucherApplied}
         onMount={sandbox.stub()}
       />
     )
@@ -317,6 +321,7 @@ describe("CheckoutForm", () => {
     })
     sinon.assert.notCalled(submitCouponStub)
   })
+
   ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach(type => {
     it(`shows a select with options for a product, and updates a ${type} run`, async () => {
       basketItem.type = type
@@ -346,6 +351,32 @@ describe("CheckoutForm", () => {
     })
   })
 
+  it(`shows a dropdown with only a single matching course run when voucher is applied`, async () => {
+    basketItem.type = PRODUCT_TYPE_COURSERUN
+    basketItem.courses = [basketItem.courses[0]]
+    // $FlowFixMe
+    basketItem.product_id = basketItem.courses[0].courseruns[0].product_id
+    const selectedRuns = calcSelectedRunIds(basketItem)
+    const isVoucherApplied = true
+    const inner = await renderForm({
+      selectedRuns,
+      isVoucherApplied
+    })
+    assert.equal(inner.find("select").length, basketItem.courses.length)
+    const course = basketItem.courses[0]
+
+    const select = inner.find("select").at(0)
+    const runs = course.courseruns
+    assert.equal(select.find("option").length, 2)
+    const firstOption = select.find("option").at(0)
+    assert.equal(firstOption.prop("value"), "")
+    assert.equal(firstOption.text(), "Select a course run")
+
+    const secondOption = select.find("option").at(1)
+    assert.equal(secondOption.prop("value"), runs[0].id)
+    assert.equal(secondOption.text(), formatRunTitle(runs[0]))
+  })
+
   it("updates the product when the course run select is changed", async () => {
     basketItem.type = PRODUCT_TYPE_COURSERUN
     basketItem.courses = [basketItem.courses[0]]
@@ -363,6 +394,7 @@ describe("CheckoutForm", () => {
         setValues={sandbox.stub()}
         resetForm={resetFormStub}
         updateProduct={updateProductStub}
+        isVoucherApplied={isVoucherApplied}
         values={{}}
       />
     )
@@ -408,6 +440,7 @@ describe("CheckoutForm", () => {
           item={basketItem}
           onMount={sandbox.stub()}
           updateProduct={updateProductStub}
+          isVoucherApplied={isVoucherApplied}
           values={{
             dataConsent: checked
           }}
@@ -433,6 +466,7 @@ describe("CheckoutForm", () => {
         item={basketItem}
         onMount={sandbox.stub()}
         updateProduct={updateProductStub}
+        isVoucherApplied={isVoucherApplied}
         values={{}}
       />
     )
@@ -462,6 +496,7 @@ describe("CheckoutForm", () => {
             item={basketItem}
             onMount={sandbox.stub()}
             updateProduct={updateProductStub}
+            isVoucherApplied={isVoucherApplied}
             values={{}}
           />
         )
