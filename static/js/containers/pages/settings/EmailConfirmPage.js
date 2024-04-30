@@ -41,7 +41,7 @@ export class EmailConfirmPage extends React.Component<Props> {
     if (updateEmail && updateEmail !== prevState && updateEmail.confirmed) {
       addUserNotification({
         "email-verified": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           props: {
             text: "Success! We've verified your email. Your email has been updated.",
           },
@@ -51,7 +51,7 @@ export class EmailConfirmPage extends React.Component<Props> {
     } else {
       addUserNotification({
         "email-verified": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: "danger",
           props: {
             text: "Error! No confirmation code was provided or it has expired.",
@@ -79,14 +79,14 @@ export class EmailConfirmPage extends React.Component<Props> {
 
               {!isLoading &&
                 ((updateEmail && !updateEmail.confirmed) || !updateEmail) && (
-                <React.Fragment>
-                  <p>No confirmation code was provided or it has expired.</p>
-                  <Link to={routes.accountSettings}>
+                  <React.Fragment>
+                    <p>No confirmation code was provided or it has expired.</p>
+                    <Link to={routes.accountSettings}>
                       Click Account Settings
-                  </Link>{" "}
+                    </Link>{" "}
                     to change the email again.
-                </React.Fragment>
-              )}
+                  </React.Fragment>
+                )}
             </div>
           </div>
         </div>
@@ -97,8 +97,8 @@ export class EmailConfirmPage extends React.Component<Props> {
 
 const mapStateToProps = createStructuredSelector({
   updateEmail: updateEmailSelector,
-  isLoading:   pathOr(true, ["queries", "updateEmail", "isPending"]),
-  params:      createStructuredSelector({
+  isLoading: pathOr(true, ["queries", "updateEmail", "isPending"]),
+  params: createStructuredSelector({
     verificationCode: qsVerificationCodeSelector,
   }),
 })

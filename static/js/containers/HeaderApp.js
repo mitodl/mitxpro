@@ -35,9 +35,9 @@ export class HeaderApp extends React.Component<Props, void> {
       const unusedCoupon = currentUser.unused_coupons[0]
       addUserNotification({
         "unused-coupon": {
-          type:  ALERT_TYPE_UNUSED_COUPON,
+          type: ALERT_TYPE_UNUSED_COUPON,
           props: {
-            productId:  unusedCoupon.product_id,
+            productId: unusedCoupon.product_id,
             couponCode: unusedCoupon.coupon_code,
           },
         },
@@ -71,7 +71,7 @@ export class HeaderApp extends React.Component<Props, void> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  currentUser:  currentUserSelector,
+  currentUser: currentUserSelector,
   courseTopics: catalog.courseTopicsSelector,
 })
 
@@ -79,9 +79,9 @@ const mapPropsToConfig = () =>
   errorPageHeader
     ? []
     : [
-      users.currentUserQuery(),
-      SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : [],
-    ]
+        users.currentUserQuery(),
+        SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : [],
+      ]
 
 const mapDispatchToProps = {
   addUserNotification,

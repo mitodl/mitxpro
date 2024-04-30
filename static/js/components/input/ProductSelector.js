@@ -22,7 +22,7 @@ import queries from "../../lib/queries"
 
 export const productTypeLabels = {
   [PRODUCT_TYPE_COURSERUN]: "Course",
-  [PRODUCT_TYPE_PROGRAM]:   "Program",
+  [PRODUCT_TYPE_PROGRAM]: "Program",
 }
 const defaultSelectComponentsProp = { IndicatorSeparator: null }
 
@@ -122,10 +122,10 @@ const buildProgramDateOptions = R.compose(
 
 export class ProductSelector extends React.Component<Props, State> {
   state = {
-    productType:           PRODUCT_TYPE_COURSERUN,
+    productType: PRODUCT_TYPE_COURSERUN,
     selectedCoursewareObj: null,
-    selectedCourseDate:    null,
-    initialized:           false,
+    selectedCourseDate: null,
+    initialized: false,
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
@@ -139,7 +139,7 @@ export class ProductSelector extends React.Component<Props, State> {
     const { productType } = this.state
 
     const filteredProducts = products.filter(
-      product => product.product_type === productType,
+      (product) => product.product_type === productType,
     )
     if (productType === PRODUCT_TYPE_PROGRAM) {
       return buildProgramOptions(filteredProducts)
@@ -163,7 +163,7 @@ export class ProductSelector extends React.Component<Props, State> {
     const todaysDate = new Date()
     if (productType === PRODUCT_TYPE_PROGRAM) {
       return buildProgramDateOptions(
-        programRuns.filter(programRun => {
+        programRuns.filter((programRun) => {
           let endDate = null
           if (programRun.end_date) {
             endDate = new Date(programRun.end_date)
@@ -173,7 +173,7 @@ export class ProductSelector extends React.Component<Props, State> {
       )
     } else {
       return buildCourseDateOptions(
-        products.filter(product => {
+        products.filter((product) => {
           let enrollmentEndDate = null
           if (product.content_object.enrollment_end) {
             enrollmentEndDate = new Date(product.content_object.enrollment_end)
@@ -196,9 +196,9 @@ export class ProductSelector extends React.Component<Props, State> {
       return
     }
     this.setState({
-      productType:           selectedOption.value,
+      productType: selectedOption.value,
       selectedCoursewareObj: null,
-      selectedCourseDate:    null,
+      selectedCourseDate: null,
     })
   }
 
@@ -211,7 +211,7 @@ export class ProductSelector extends React.Component<Props, State> {
     }
     this.setState({
       selectedCoursewareObj: selectedOption,
-      selectedCourseDate:    null,
+      selectedCourseDate: null,
     })
     if (productType === PRODUCT_TYPE_PROGRAM) {
       fetchProgramRuns(selectedOption.value)
@@ -253,13 +253,13 @@ export class ProductSelector extends React.Component<Props, State> {
       // This is a dirty hack to support program run tags. Refer to `B2bPurchasePage.onSubmit` for further info.
       productValue = {
         // $FlowFixMe: Can't be null/undefined
-        productId:    selectedCoursewareObj.value,
+        productId: selectedCoursewareObj.value,
         programRunId: selectedCourseDate ? selectedCourseDate.value : null,
       }
     } else {
       productValue = {
         // $FlowFixMe: Can't be null/undefined
-        productId:    selectedCourseDate.value,
+        productId: selectedCourseDate.value,
         programRunId: null,
       }
     }
@@ -327,7 +327,7 @@ export class ProductSelector extends React.Component<Props, State> {
             </span>
             <Select
               className="select"
-              options={Object.keys(productTypeLabels).map(productTypeKey => ({
+              options={Object.keys(productTypeLabels).map((productTypeKey) => ({
                 value: productTypeKey,
                 label: productTypeLabels[productTypeKey],
               }))}
@@ -358,12 +358,12 @@ export class ProductSelector extends React.Component<Props, State> {
         {productType === PRODUCT_TYPE_PROGRAM &&
           selectedCoursewareObj !== null &&
           programRunsLoading && (
-          <img
-            src="/static/images/loader.gif"
-            className="mx-auto d-block"
-            alt="Loading..."
-          />
-        )}
+            <img
+              src="/static/images/loader.gif"
+              className="mx-auto d-block"
+              alt="Loading..."
+            />
+          )}
         {this.shouldShowDateSelector() && !programRunsLoading && (
           <div className="row course-date-row">
             <div className="col-12">
@@ -383,13 +383,13 @@ export class ProductSelector extends React.Component<Props, State> {
   }
 }
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   fetchProgramRuns: (productId: string) =>
     dispatch(requestAsync(queries.ecommerce.programRunsQuery(productId))),
 })
 
-const mapStateToProps = state => ({
-  programRuns:        state.entities.programRuns,
+const mapStateToProps = (state) => ({
+  programRuns: state.entities.programRuns,
   programRunsLoading: R.pathOr(
     false,
     ["queries", "programRuns", "isPending"],

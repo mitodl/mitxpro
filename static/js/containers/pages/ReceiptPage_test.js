@@ -17,40 +17,40 @@ describe("ReceiptPage", () => {
   const countries = makeCountries()
   const receiptObject = {
     purchaser: {
-      first_name:         "John",
-      last_name:          "Doe",
-      street_address:     ["Ashley-Street"],
-      city:               "Montobello",
+      first_name: "John",
+      last_name: "Doe",
+      street_address: ["Ashley-Street"],
+      city: "Montobello",
       state_or_territory: "US-CA",
-      country:            "US",
-      postal_code:        "90640",
-      company:            "ABC",
-      email:              "john.doe@acme.com",
-      vat_id:             "AT12349876",
+      country: "US",
+      postal_code: "90640",
+      company: "ABC",
+      email: "john.doe@acme.com",
+      vat_id: "AT12349876",
     },
     lines: [
       {
-        quantity:      1,
-        total_paid:    "200",
-        discount:      "200",
-        price:         "400",
+        quantity: 1,
+        total_paid: "200",
+        discount: "200",
+        price: "400",
         content_title: "Demon Course",
-        readable_id:   "course-v1:edX+DemoX+Demo_Course",
-        start_date:    "2018-04-30T00:00:00Z",
-        end_date:      "2018-07-02T00:00:00Z",
+        readable_id: "course-v1:edX+DemoX+Demo_Course",
+        start_date: "2018-04-30T00:00:00Z",
+        end_date: "2018-07-02T00:00:00Z",
       },
     ],
     coupon: "50OFF",
-    order:  {
-      id:               1,
-      created_on:       "2019-10-09T09:47:09.219354Z",
+    order: {
+      id: 1,
+      created_on: "2019-10-09T09:47:09.219354Z",
       reference_number: "xpro-b2c-dev-1",
     },
     receipt: {
       bill_to_forename: "John",
-      card_number:      "xxxxxxxxxxxx1234",
-      card_type:        "Visa",
-      payment_method:   "card",
+      card_number: "xxxxxxxxxxxx1234",
+      card_type: "Visa",
+      payment_method: "card",
     },
   }
 
@@ -62,8 +62,8 @@ describe("ReceiptPage", () => {
       InnerReceiptPage,
       {
         entities: {
-          currentUser:  user,
-          countries:    countries,
+          currentUser: user,
+          countries: countries,
           orderReceipt: receiptObject,
         },
         queries: {
@@ -93,7 +93,7 @@ describe("ReceiptPage", () => {
     const { inner } = await renderPage()
     assert.isTrue(inner.find(".receipt-wrapper").exists())
   })
-  ;["AT12349876", ""].forEach(vatId => {
+  ;["AT12349876", ""].forEach((vatId) => {
     it("renders the receipt with correct information for a logged in user", async () => {
       receiptObject.purchaser.vat_id = vatId
       const { inner } = await renderPage()
@@ -119,11 +119,11 @@ describe("ReceiptPage", () => {
       )
       vatId
         ? assert.equal(
-          inner.find("#purchaserVATNumber").text(),
-          receiptObject.purchaser.vat_id,
-        )
+            inner.find("#purchaserVATNumber").text(),
+            receiptObject.purchaser.vat_id,
+          )
         : assert.isNotTrue(inner.find("#purchaserVATNumber").exists())
-      receiptObject.purchaser.street_address.map(item =>
+      receiptObject.purchaser.street_address.map((item) =>
         assert.equal(inner.find(`#${item}`).text(), item),
       )
       assert.equal(
@@ -136,7 +136,7 @@ describe("ReceiptPage", () => {
       )
       // $FlowFixMe: Flow doesn't know we will definitely find a match here
       const countryName = countries.find(
-        country => country.code === receiptObject.purchaser.country,
+        (country) => country.code === receiptObject.purchaser.country,
       ).name
       assert.equal(inner.find("#purchaserCountry").text(), countryName)
       if (inner.find("#paymentMethod").text() === "card") {
@@ -154,7 +154,7 @@ describe("ReceiptPage", () => {
       {
         entities: {
           currentUser: makeAnonymousUser(),
-          countries:   countries,
+          countries: countries,
         },
       },
       {

@@ -197,8 +197,9 @@ def test_zero_price_checkout(  # noqa: PLR0913
         "ecommerce.api.enroll_user_in_order_items", autospec=True
     )
     resp = basket_client.post(reverse("checkout"))
-    assert str(line) == "Line for order #{}, {} (qty: {})".format(
-        line.order.id, str(line.product_version), line.quantity
+    assert (
+        str(line)
+        == f"Line for order #{line.order.id}, {line.product_version!s} (qty: {line.quantity})"
     )
     text_id = line.product_version.product.content_object.text_id
 
@@ -480,8 +481,9 @@ def test_patch_basket_new_item_with_product_id(
     mocker.patch("ipware.get_client_ip", return_value="127.0.0.1")
     data = {"items": [{"product_id": basket_and_coupons.product_version.product.id}]}
     basket_item = BasketItem.objects.all().first()
-    assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
-        str(basket_item.product), basket_item.quantity
+    assert (
+        str(basket_item)
+        == f"BasketItem of product {basket_item.product!s} (qty: {basket_item.quantity})"
     )
     BasketItem.objects.all().delete()  # clear the basket first
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -504,8 +506,9 @@ def test_patch_basket_new_item_with_text_id(
         ]
     }
     basket_item = BasketItem.objects.all().first()
-    assert str(basket_item) == "BasketItem of product {} (qty: {})".format(
-        str(basket_item.product), basket_item.quantity
+    assert (
+        str(basket_item)
+        == f"BasketItem of product {basket_item.product!s} (qty: {basket_item.quantity})"
     )
     BasketItem.objects.all().delete()  # clear the basket first
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -547,15 +550,17 @@ def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement
         CourseRunSelection.objects.values_list("run", flat=True)
     )
     dcu = DataConsentUser.objects.get(user=basket_and_agreement.basket.user)
-    assert str(dcu) == "DataConsentUser {} for {}, consent date {}".format(
-        str(dcu.user), str(dcu.agreement), str(dcu.consent_date)
+    assert (
+        str(dcu)
+        == f"DataConsentUser {dcu.user!s} for {dcu.agreement!s}, consent date {dcu.consent_date!s}"
     )
     assert resp.json()["data_consents"] == [DataConsentUserSerializer(dcu).data]
     selection = CouponSelection.objects.get(
         basket=basket_and_agreement.basket, coupon=basket_and_agreement.coupon
     )
-    assert str(selection) == "CouponSelection for basket {}, coupon {}".format(
-        str(selection.basket), str(selection.coupon)
+    assert (
+        str(selection)
+        == f"CouponSelection for basket {selection.basket!s}, coupon {selection.coupon!s}"
     )
     assert resp.json()["coupons"] == [CouponSelectionSerializer(selection).data]
 
@@ -1025,8 +1030,9 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
-    assert str(model_version) == "CouponPaymentVersion for {} of type {}".format(
-        model_version.num_coupon_codes, model_version.coupon_type
+    assert (
+        str(model_version)
+        == f"CouponPaymentVersion for {model_version.num_coupon_codes} of type {model_version.coupon_type}"
     )
     assert model_version.couponversion_set.count() == 5
     assert model_version.payment.coupon_set.count() == 5
@@ -1051,8 +1057,9 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
     resp = admin_drf_client.post(reverse("coupon_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     model_version = CouponPaymentVersion.objects.get(id=resp.json().get("id"))
-    assert str(model_version) == "CouponPaymentVersion for {} of type {}".format(
-        model_version.num_coupon_codes, model_version.coupon_type
+    assert (
+        str(model_version)
+        == f"CouponPaymentVersion for {model_version.num_coupon_codes} of type {model_version.coupon_type}"
     )
     assert model_version.couponversion_set.count() == 5
     assert model_version.payment.coupon_set.count() == 5
@@ -1240,12 +1247,9 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
     individual_assignments = ProductCouponAssignmentFactory.create_batch(
         3, bulk_assignment=bulk_assignment
     )
-    assert str(
-        individual_assignments[0]
-    ) == "ProductCouponAssignment for {}, product coupon {} (redeemed: {})".format(
-        individual_assignments[0].email,
-        individual_assignments[0].product_coupon_id,
-        individual_assignments[0].redeemed,
+    assert (
+        str(individual_assignments[0])
+        == f"ProductCouponAssignment for {individual_assignments[0].email}, product coupon {individual_assignments[0].product_coupon_id} (redeemed: {individual_assignments[0].redeemed})"
     )
     csv_response = admin_client.get(
         reverse("bulk_assign_csv", kwargs={"bulk_assignment_id": bulk_assignment.id})

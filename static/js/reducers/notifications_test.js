@@ -10,7 +10,7 @@ describe("notifications reducer", () => {
     const messageId = "some-text-alert"
     const payload = {
       [messageId]: {
-        type:  ALERT_TYPE_TEXT,
+        type: ALERT_TYPE_TEXT,
         props: {
           text: "some message",
         },
@@ -18,17 +18,17 @@ describe("notifications reducer", () => {
     }
 
     let action = {
-      type:    ADD_USER_NOTIFICATION,
+      type: ADD_USER_NOTIFICATION,
       payload: payload,
-      meta:    null,
+      meta: null,
     }
     let resultState = notificationsReducer(undefined, action)
     assert.deepEqual(resultState, payload)
 
     action = {
-      type:    REMOVE_USER_NOTIFICATION,
+      type: REMOVE_USER_NOTIFICATION,
       payload: messageId,
-      meta:    null,
+      meta: null,
     }
     resultState = notificationsReducer(resultState, action)
     assert.deepEqual(notificationsReducer(resultState, action), {})

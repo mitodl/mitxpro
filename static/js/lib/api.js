@@ -43,7 +43,7 @@ const csrfToken = R.unless(
 const jsonHeaders = R.merge({
   headers: {
     "Content-Type": "application/json",
-    Accept:         "application/json",
+    Accept: "application/json",
   },
 })
 
@@ -115,6 +115,6 @@ import { fetchJSONWithCSRF } from "./api"
 export function patchThing(username: string, newThing: Object) {
   return fetchJSONWithCSRF(`/api/v0/thing/${username}/`, {
     method: "PATCH",
-    body:   JSON.stringify(newThing),
+    body: JSON.stringify(newThing),
   })
 }

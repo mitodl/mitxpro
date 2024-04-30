@@ -10,7 +10,7 @@ import {
 } from "./selectors"
 
 describe("selector utils", () => {
-  const makeSearchProps = search => ({
+  const makeSearchProps = (search) => ({
     location: {
       search,
     },

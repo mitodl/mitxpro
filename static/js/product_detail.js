@@ -7,7 +7,7 @@ export default function productDetails() {
   // Makes sure to run the script only when DOM conatins #subNavBarContainer (i.e on product page)
   if (navbar.length) {
     // FAQs
-    $("body").on("click", ".readmore", function(e) {
+    $("body").on("click", ".readmore", function (e) {
       const $readmoreText = $(this).find(".readmore-text");
       e.preventDefault();
       $("li.extra-faq").toggleClass("d-none");
@@ -30,13 +30,13 @@ export default function productDetails() {
       offset: navbar.outerHeight() + 5.0,
     });
 
-    $(window).on("activate.bs.scrollspy", function(e, obj) {
+    $(window).on("activate.bs.scrollspy", function (e, obj) {
       $("#subNavBarSelector").text(
         $(`.navbar-nav>li>a[href='${obj.relatedTarget}']`).text(),
       );
     });
 
-    $(".navbar-nav>li>a").on("click", function(event) {
+    $(".navbar-nav>li>a").on("click", function (event) {
       event.preventDefault();
 
       const target = $($(this).attr("href"));

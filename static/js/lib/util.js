@@ -42,7 +42,7 @@ import {
  * Returns a promise which resolves after a number of milliseconds have elapsed
  */
 export const wait = (millis: number): Promise<void> =>
-  new Promise(resolve => setTimeout(resolve, millis))
+  new Promise((resolve) => setTimeout(resolve, millis))
 
 /**
  * Adds on an index for each item in an iterable
@@ -91,7 +91,7 @@ export const getTokenFromUrl = (props: Object): string => {
 
 export const makeUUID = (len: number) =>
   Array.from(window.crypto.getRandomValues(new Uint8Array(len)))
-    .map(int => int.toString(16))
+    .map((int) => int.toString(16))
     .join("")
     .slice(0, len)
 
@@ -105,7 +105,7 @@ export const allEmptyOrNil = all(emptyOrNil)
 export const anyNil = R.any(R.isNil)
 
 export const spaceSeparated = (strings: Array<?string>): string =>
-  strings.filter(str => str).join(" ")
+  strings.filter((str) => str).join(" ")
 
 export function* incrementer(): Generator<number, *, *> {
   let int = 1
@@ -164,7 +164,7 @@ export const timeoutPromise = (
   funcToExecute: Function,
   timeoutMs: number,
 ): Promise<*> => {
-  return new Promise(resolve =>
+  return new Promise((resolve) =>
     setTimeout(() => {
       funcToExecute()
       resolve()

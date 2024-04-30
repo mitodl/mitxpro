@@ -18,9 +18,9 @@ const RECAPTCHA_NATURAL_WIDTH = 304
 const RECAPTCHA_NATURAL_HEIGHT = 78
 
 const StyledReCAPTCHA = styled(ReCAPTCHA)`
-  transform: scale(${props => props.scale.toFixed(3)});
+  transform: scale(${(props) => props.scale.toFixed(3)});
   transform-origin: 0 0;
-  height: ${props => (props.scale * RECAPTCHA_NATURAL_HEIGHT).toFixed(0)}px;
+  height: ${(props) => (props.scale * RECAPTCHA_NATURAL_HEIGHT).toFixed(0)}px;
 `
 
 export default class ScaledRecaptcha extends React.Component<Props, State> {

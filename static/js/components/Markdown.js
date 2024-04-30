@@ -17,7 +17,7 @@ const Markdown = (props: MarkdownProps) => (
     escapeHtml
     className="markdown"
     renderers={{
-      linkReference: reference =>
+      linkReference: (reference) =>
         reference.href ? (
           <a href={reference.$ref}>{reference.children}</a>
         ) : (

@@ -32,7 +32,7 @@ describe("Expandable", () => {
   })
 
   //
-  ;[true, false].forEach(expanded => {
+  ;[true, false].forEach((expanded) => {
     it(`${shouldIf(expanded)} render the explanation text`, () => {
       const title = "title"
       const children = "children"

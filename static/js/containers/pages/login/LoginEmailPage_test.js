@@ -57,7 +57,7 @@ describe("LoginEmailPage", () => {
   })
 
   //
-  ;[STATE_ERROR, STATE_REGISTER_REQUIRED].forEach(state => {
+  ;[STATE_ERROR, STATE_REGISTER_REQUIRED].forEach((state) => {
     it(`handles onSubmit by calling setErrors given state=${state}`, async () => {
       const { inner } = await renderPage()
       const fieldErrors = {
@@ -103,7 +103,7 @@ describe("LoginEmailPage", () => {
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.login.password,
-      search:   "",
+      search: "",
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)

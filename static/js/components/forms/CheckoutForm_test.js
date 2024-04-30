@@ -45,7 +45,7 @@ describe("CheckoutForm", () => {
     isVoucherApplied = false
     SETTINGS.zendesk_config = {
       help_widget_enabled: false,
-      help_widget_key:     "fake_key",
+      help_widget_key: "fake_key",
     }
   })
 
@@ -70,7 +70,7 @@ describe("CheckoutForm", () => {
       />,
     )
 
-  ;[true, false].forEach(hasCoupon => {
+  ;[true, false].forEach((hasCoupon) => {
     it(`shows your basket ${
       hasCoupon ? "with" : "without"
     } a coupon`, async () => {
@@ -112,7 +112,7 @@ describe("CheckoutForm", () => {
       )
     })
   })
-  ;[true, false].forEach(taxDisplayEnabled => {
+  ;[true, false].forEach((taxDisplayEnabled) => {
     it(`handles basket tax details display as per feature flag`, async () => {
       SETTINGS.enable_taxes_display = taxDisplayEnabled
 
@@ -171,7 +171,7 @@ describe("CheckoutForm", () => {
   })
 
   //
-  ;[true, false].forEach(hasRuns => {
+  ;[true, false].forEach((hasRuns) => {
     it(`validates ${hasRuns ? "existing" : "present"} runs`, async () => {
       basketItem.type = PRODUCT_TYPE_PROGRAM
       const runs = {}
@@ -190,8 +190,8 @@ describe("CheckoutForm", () => {
         hasRuns
           ? undefined
           : `No run selected for ${basketItem.courses
-            .map(course => course.title)
-            .join(", ")}`,
+              .map((course) => course.title)
+              .join(", ")}`,
       )
     })
   })
@@ -214,7 +214,7 @@ describe("CheckoutForm", () => {
       const inner = await renderForm()
       const errors = inner.find(Formik).prop("validate")({
         dataConsent: checkedDataConsent,
-        runs:        {},
+        runs: {},
       })
       assert.equal(
         errors.data_consents,
@@ -242,7 +242,7 @@ describe("CheckoutForm", () => {
   })
 
   //
-  ;[true, false].forEach(hasQueryParam => {
+  ;[true, false].forEach((hasQueryParam) => {
     it(`displays the coupon code${
       hasQueryParam ? " from a query parameter" : " from the coupon object"
     }`, async () => {
@@ -279,13 +279,13 @@ describe("CheckoutForm", () => {
   })
 
   //
-  ;[true, false].forEach(hasCouponCode => {
+  ;[true, false].forEach((hasCouponCode) => {
     it(`${
       hasCouponCode ? "submits" : "clears"
     } the coupon code after the apply button is clicked`, async () => {
       const inner = await renderForm({
         couponCode: hasCouponCode ? couponCode : "",
-        coupon:     hasCouponCode ? coupon : null,
+        coupon: hasCouponCode ? coupon : null,
       })
       submitCouponStub.reset()
 
@@ -298,12 +298,12 @@ describe("CheckoutForm", () => {
     } the coupon code after the enter key is pressed`, async () => {
       const inner = await renderForm({
         couponCode: hasCouponCode ? couponCode : "",
-        coupon:     hasCouponCode ? coupon : null,
+        coupon: hasCouponCode ? coupon : null,
       })
       submitCouponStub.reset()
 
       inner.find("input.coupon-code-entry").prop("onKeyDown")({
-        key:            "Enter",
+        key: "Enter",
         preventDefault: sandbox.stub(),
       })
       sinon.assert.calledWith(submitCouponStub, hasCouponCode ? couponCode : "")
@@ -318,8 +318,7 @@ describe("CheckoutForm", () => {
     })
     sinon.assert.notCalled(submitCouponStub)
   })
-
-  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach(type => {
+  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach((type) => {
     it(`shows a select with options for a product, and updates a ${type} run`, async () => {
       basketItem.type = type
       if (type === PRODUCT_TYPE_COURSERUN) {
@@ -357,7 +356,7 @@ describe("CheckoutForm", () => {
     const isVoucherApplied = true
     const inner = await renderForm({
       selectedRuns,
-      isVoucherApplied
+      isVoucherApplied,
     })
     assert.equal(inner.find("select").length, basketItem.courses.length)
     const course = basketItem.courses[0]
@@ -404,7 +403,7 @@ describe("CheckoutForm", () => {
   })
 
   //
-  ;[true, false].forEach(hasDataConsent => {
+  ;[true, false].forEach((hasDataConsent) => {
     it(`${
       hasDataConsent ? "has" : "doesn't have"
     } a data consent checkbox`, async () => {
@@ -469,8 +468,8 @@ describe("CheckoutForm", () => {
     toggle()
     assert.isFalse(inner.state().dataSharingModalVisibility)
   })
-  ;[true, false].forEach(hasDataConsent => {
-    [true, false].forEach(modalVisible => {
+  ;[true, false].forEach((hasDataConsent) => {
+    ;[true, false].forEach((modalVisible) => {
       it(`${
         hasDataConsent ? "has" : "doesn't have"
       } the data consent modal and the modal is ${
@@ -528,7 +527,7 @@ describe("CheckoutForm", () => {
   })
 
   //
-  ;[true, false].forEach(requestPending => {
+  ;[true, false].forEach((requestPending) => {
     it(`${shouldIf(
       requestPending,
     )} disable submit buttons while the request ${isIf(

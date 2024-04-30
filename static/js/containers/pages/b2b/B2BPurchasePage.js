@@ -64,12 +64,12 @@ export class B2BPurchasePage extends React.Component<Props, State> {
 
     try {
       const checkoutResponse = await checkout({
-        num_seats:          numSeats,
-        email:              values.email,
+        num_seats: numSeats,
+        email: values.email,
         product_version_id: productVersion.id,
-        discount_code:      couponStatus ? couponStatus.code : null,
-        contract_number:    values.contract_number || null,
-        run_id:             programRunId,
+        discount_code: couponStatus ? couponStatus.code : null,
+        contract_number: values.contract_number || null,
+        run_id: programRunId,
       })
 
       if (checkoutResponse.status !== 200) {
@@ -130,7 +130,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           <B2BPurchaseForm
             onSubmit={this.onSubmit}
             products={products.filter(
-              product => product.is_private === false,
+              (product) => product.is_private === false,
             )}
             checkout={checkout}
             couponStatus={couponStatus}
@@ -148,10 +148,10 @@ export class B2BPurchasePage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state =>
+const mapStateToProps = (state) =>
   createStructuredSelector({
-    products:       queries.ecommerce.productsSelector,
-    couponStatus:   queries.ecommerce.b2bCouponStatusSelector,
+    products: queries.ecommerce.productsSelector,
+    couponStatus: queries.ecommerce.b2bCouponStatusSelector,
     requestPending: pathOr(false, [
       "queries",
       "b2bCheckoutMutation",
@@ -159,7 +159,7 @@ const mapStateToProps = state =>
     ]),
     isLoading: pathOr(true, ["queries", "products", "isPending"]),
   })
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   checkout: (payload: B2BCheckoutPayload) =>
     dispatch(mutateAsync(queries.ecommerce.b2bCheckoutMutation(payload))),
   clearCouponStatus: () =>

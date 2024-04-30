@@ -21,8 +21,8 @@ require("react-hot-loader/patch")
 __webpack_public_path__ = SETTINGS.public_path // eslint-disable-line no-undef, camelcase
 
 Sentry.init({
-  dsn:         SETTINGS.sentry_dsn,
-  release:     SETTINGS.release_version,
+  dsn: SETTINGS.sentry_dsn,
+  release: SETTINGS.release_version,
   environment: SETTINGS.environment,
 })
 
@@ -38,7 +38,7 @@ const loadZendesk = () => {
   return <Zendesk zendeskKey={ZENDESK_KEY} />
 }
 
-const renderApp = Component => {
+const renderApp = (Component) => {
   const history = createBrowserHistory()
   if (ZENDESK_ENABLED && ZENDESK_KEY) {
     loadZendesk()

@@ -22,7 +22,7 @@ import blogPostsCarousel from "../blog_posts_carousel"
 import companiesLogoCarousel from "../companies_logo_carousel.js"
 import successStoriesCarousel from "../success_stories_carousel.js"
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   notifications()
   tooltip()
   hero()

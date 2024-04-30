@@ -26,7 +26,7 @@ describe("B2BReceiptPage", () => {
     helper.handleRequestStub
       .withArgs(`/api/b2b/orders/${orderHash}/status/`, "GET")
       .returns({
-        body:   orderStatus,
+        body: orderStatus,
         status: 200,
       })
     renderPage = helper.configureHOCRenderer(
@@ -94,7 +94,7 @@ describe("B2BReceiptPage", () => {
       .withArgs(`/api/b2b/orders/${newHash}/status/`, "GET")
       .returns({
         status: 200,
-        body:   newOrderStatus,
+        body: newOrderStatus,
       })
 
     const { wrapper } = await renderPage(
@@ -114,12 +114,12 @@ describe("B2BReceiptPage", () => {
   })
 
   //
-  ;[true, false].forEach(outOfTime => {
+  ;[true, false].forEach((outOfTime) => {
     it(`if a run or program is not immediately found it waits 3 seconds and ${
       outOfTime ? "errors" : "force reloads"
     }`, async () => {
       let waitResolve = null
-      const waitPromise = new Promise(resolve => {
+      const waitPromise = new Promise((resolve) => {
         waitResolve = resolve
       })
       const waitStub = helper.sandbox
@@ -138,7 +138,7 @@ describe("B2BReceiptPage", () => {
       helper.handleRequestStub
         .withArgs(`/api/b2b/orders/${orderHash}/status/`, "GET")
         .returns({
-          body:   fulfilledOrderStatus,
+          body: fulfilledOrderStatus,
           status: 200,
         })
       helper.sandbox.stub(momentProto, "isBefore").returns(!outOfTime)
@@ -150,7 +150,7 @@ describe("B2BReceiptPage", () => {
         assert.deepEqual(store.getState().ui.userNotifications, {
           "b2b-order-status": {
             color: "danger",
-            type:  "b2b-order-status",
+            type: "b2b-order-status",
           },
         })
       } else {

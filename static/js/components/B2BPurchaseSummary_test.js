@@ -8,8 +8,8 @@ import B2BPurchaseSummary from "./B2BPurchaseSummary"
 import { formatPrice } from "../lib/ecommerce"
 
 describe("B2BPurchaseSummary", () => {
-  [true, false].forEach(alreadyPaid => {
-    [true, false].forEach(hasDiscount => {
+  ;[true, false].forEach((alreadyPaid) => {
+    ;[true, false].forEach((hasDiscount) => {
       it(`renders a summary of a B2B order ${
         alreadyPaid ? "after" : "before"
       } payment${hasDiscount ? ", with a discount" : ""}`, () => {

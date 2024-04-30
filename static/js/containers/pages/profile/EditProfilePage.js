@@ -65,18 +65,18 @@ export class EditProfilePage extends React.Component<Props, State> {
       ...profileData,
       ...(profileData.profile
         ? {
-          profile: {
-            ...profileData.profile,
-            company_size:
+            profile: {
+              ...profileData.profile,
+              company_size:
                 profileData.profile.company_size === ""
                   ? null
                   : profileData.profile.company_size,
-            years_experience:
+              years_experience:
                 profileData.profile.years_experience === ""
                   ? null
                   : profileData.profile.years_experience,
-          },
-        }
+            },
+          }
         : {}),
     }
 
@@ -147,7 +147,7 @@ const getCurrentUser = () =>
 
 const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector,
-  countries:   queries.users.countriesSelector,
+  countries: queries.users.countriesSelector,
 })
 
 const mapDispatchToProps = {

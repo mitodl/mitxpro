@@ -4,9 +4,9 @@ import { nextState } from "./util"
 
 export default {
   enrollmentsSelector: pathOr(null, ["entities", "enrollments"]),
-  enrollmentsQuery:    () => ({
-    url:       "/api/enrollments/",
-    transform: json => ({
+  enrollmentsQuery: () => ({
+    url: "/api/enrollments/",
+    transform: (json) => ({
       enrollments: json,
     }),
     update: {

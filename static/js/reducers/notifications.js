@@ -44,10 +44,10 @@ export const userNotifications = (
   action: Action<any, null>,
 ): NotificationState => {
   switch (action.type) {
-  case ADD_USER_NOTIFICATION:
-    return mergeRight(state, action.payload)
-  case REMOVE_USER_NOTIFICATION:
-    return omit([action.payload], state)
+    case ADD_USER_NOTIFICATION:
+      return mergeRight(state, action.payload)
+    case REMOVE_USER_NOTIFICATION:
+      return omit([action.payload], state)
   }
   return state
 }

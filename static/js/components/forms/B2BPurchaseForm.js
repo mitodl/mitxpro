@@ -35,7 +35,7 @@ export const emailValidation = yup.object().shape({
   email: emailFieldValidation,
 })
 
-const errorMessageRenderer = msg => <span className="error">{msg}</span>
+const errorMessageRenderer = (msg) => <span className="error">{msg}</span>
 
 export const validate = (values: Object) => {
   const errors = {}
@@ -97,7 +97,7 @@ class B2BPurchaseForm extends React.Component<Props> {
 
       const response = await fetchCouponStatus({
         product_id: values.product.productId,
-        code:       values.coupon.trim(),
+        code: values.coupon.trim(),
       })
       if (response && response.status !== 200) {
         setFieldError("coupon", "Invalid coupon code")
@@ -261,12 +261,12 @@ class B2BPurchaseForm extends React.Component<Props> {
         onSubmit={onSubmit}
         initialValues={{
           num_seats: this.props.seats || 1,
-          email:     "",
-          product:   {
-            productId:    this.props.productId || "",
+          email: "",
+          product: {
+            productId: this.props.productId || "",
             programRunId: null,
           },
-          coupon:          this.props.discountCode || "",
+          coupon: this.props.discountCode || "",
           contract_number: this.props.contractNumber || "",
         }}
         validationSchema={emailValidation}

@@ -15,7 +15,7 @@ import { pathOr } from "ramda"
 
 import {
   CheckoutForm,
-  renderGenericError
+  renderGenericError,
 } from "../../components/forms/CheckoutForm"
 
 import queries from "../../lib/queries"
@@ -26,7 +26,7 @@ import {
   getErrorMessages,
   isErrorResponse,
   isSuccessResponse,
-  isUnauthorizedResponse
+  isUnauthorizedResponse,
 } from "../../lib/util"
 
 import type { Response } from "redux-query"
@@ -35,13 +35,13 @@ import type {
   BasketPayload,
   CheckoutResponse,
   BasketItem,
-  CheckoutPayload
+  CheckoutPayload,
 } from "../../flow/ecommerceTypes"
 import type { HttpRespErrorMessage, HttpResponse } from "../../flow/httpTypes"
 import type {
   Actions,
   SetFieldError,
-  Values
+  Values,
 } from "../../components/forms/CheckoutForm"
 
 type Props = RouteComponentProps & {
@@ -49,7 +49,7 @@ type Props = RouteComponentProps & {
   requestPending: boolean,
   checkout: () => Promise<Response<CheckoutResponse>>,
   fetchBasket: () => Promise<*>,
-  updateBasket: (payload: BasketPayload) => Promise<*>
+  updateBasket: (payload: BasketPayload) => Promise<*>,
 }
 type State = {
   appliedInitialCoupon: boolean,
@@ -58,30 +58,32 @@ type State = {
   isLoading: boolean,
   isSubmitting: boolean,
   isLoggedOut: boolean,
-  basketProduct: string
+  basketProduct: string,
 }
 
 export class CheckoutPage extends React.Component<Props, State> {
   state = {
     appliedInitialCoupon: false,
-    loadingFailed:        false,
+    loadingFailed: false,
     loadingErrorMessages: null,
-    isLoading:            true,
-    isSubmitting:         false,
-    isLoggedOut:          false,
-    basketProduct:        ""
+    isLoading: true,
+    isSubmitting: false,
+    isLoggedOut: false,
+    basketProduct: "",
   }
 
   getQueryParams = () => {
     const {
-      location: { search }
+      location: { search },
     } = this.props
     const params = queryString.parse(search)
     return {
-      productId:        params.product,
-      preselectId:      parseInt(params.preselect),
-      couponCode:       params.code,
-      isVoucherApplied: params.is_voucher_applied && params.is_voucher_applied.toLowerCase() === "true",
+      productId: params.product,
+      preselectId: parseInt(params.preselect),
+      couponCode: params.code,
+      isVoucherApplied:
+        params.is_voucher_applied &&
+        params.is_voucher_applied.toLowerCase() === "true",
     }
   }
 
@@ -92,22 +94,22 @@ export class CheckoutPage extends React.Component<Props, State> {
     if (!productId) {
       await fetchBasket()
       this.setState({
-        isLoading: false
+        isLoading: false,
       })
       return
     }
 
     const basketResponse = await updateBasket({
-      items: [{ product_id: productId }]
+      items: [{ product_id: productId }],
     })
     if (isSuccessResponse(basketResponse)) {
       if (basketResponse.body && basketResponse.body.items) {
         this.trackAddToCartEvent(basketResponse.body.items)
       }
       this.setState({
-        isLoading:     false,
+        isLoading: false,
         loadingFailed: false,
-        basketProduct: productId
+        basketProduct: productId,
       })
     } else {
       const errors = this.getErrorsOrRedirect(basketResponse)
@@ -115,9 +117,9 @@ export class CheckoutPage extends React.Component<Props, State> {
         return
       }
       this.setState({
-        isLoading:            false,
-        loadingFailed:        true,
-        loadingErrorMessages: errors
+        isLoading: false,
+        loadingFailed: true,
+        loadingErrorMessages: errors,
       })
     }
   }
@@ -134,9 +136,9 @@ export class CheckoutPage extends React.Component<Props, State> {
   trackAddToCartEvent = (items: Array<BasketItem>) => {
     if (SETTINGS.gtmTrackingID) {
       dataLayer.push({
-        event:          "addToCart",
-        "course-id":    items[0].readable_id,
-        "course-price": items[0].price || "0"
+        event: "addToCart",
+        "course-id": items[0].readable_id,
+        "course-price": items[0].price || "0",
       })
     }
   }
@@ -144,24 +146,24 @@ export class CheckoutPage extends React.Component<Props, State> {
   trackSubmitEvent = (url: string, payload: CheckoutPayload) => {
     if (SETTINGS.gtmTrackingID) {
       dataLayer.push({
-        event:            "purchase",
-        transactionId:    payload.transaction_id || null,
+        event: "purchase",
+        transactionId: payload.transaction_id || null,
         transactionTotal: payload.transaction_total || null,
-        productType:      payload.product_type || null,
-        coursewareId:     payload.courseware_id || null,
-        referenceNumber:  payload.reference_number,
-        eventTimeout:     2000,
-        eventCallback:    () => {
+        productType: payload.product_type || null,
+        coursewareId: payload.courseware_id || null,
+        referenceNumber: payload.reference_number,
+        eventTimeout: 2000,
+        eventCallback: () => {
           setTimeout(() => {
             window.location = url
           }, 1500)
-        }
+        },
       })
     }
   }
 
   getErrorsOrRedirect = (
-    errorResponse: HttpResponse
+    errorResponse: HttpResponse,
   ): ?HttpRespErrorMessage => {
     if (isUnauthorizedResponse(errorResponse)) {
       this.setState({ isLoggedOut: true, isLoading: false })
@@ -182,12 +184,12 @@ export class CheckoutPage extends React.Component<Props, State> {
 
     // update basket with selected runs
     const basketPayload = {
-      items: basket.items.map(item => ({
+      items: basket.items.map((item) => ({
         product_id: basketProduct,
-        run_ids:    Object.values(values.runs).map(runId => parseInt(runId))
+        run_ids: Object.values(values.runs).map((runId) => parseInt(runId)),
       })),
-      coupons:       values.couponCode ? [{ code: values.couponCode }] : [],
-      data_consents: values.dataConsent ? [basket.data_consents[0].id] : []
+      coupons: values.couponCode ? [{ code: values.couponCode }] : [],
+      data_consents: values.dataConsent ? [basket.data_consents[0].id] : [],
     }
     try {
       const basketResponse = await updateBasket(basketPayload)
@@ -198,8 +200,8 @@ export class CheckoutPage extends React.Component<Props, State> {
         }
         actions.setErrors(
           basketErrors || {
-            genericBasket: true
-          }
+            genericBasket: true,
+          },
         )
         return
       }
@@ -212,8 +214,8 @@ export class CheckoutPage extends React.Component<Props, State> {
         }
         actions.setErrors(
           checkoutErrors || {
-            genericSubmit: true
-          }
+            genericSubmit: true,
+          },
         )
         return
       }
@@ -242,11 +244,11 @@ export class CheckoutPage extends React.Component<Props, State> {
     const response = await updateBasket({
       coupons: couponCode
         ? [
-          {
-            code: couponCode.trim()
-          }
-        ]
-        : []
+            {
+              code: couponCode.trim(),
+            },
+          ]
+        : [],
     })
     if (isSuccessResponse(response)) {
       setFieldError("coupons", null)
@@ -266,11 +268,11 @@ export class CheckoutPage extends React.Component<Props, State> {
   updateProduct = async (
     productId: number | string,
     runId: number,
-    setFieldError: SetFieldError
+    setFieldError: SetFieldError,
   ) => {
     const { updateBasket, history } = this.props
     const response = await updateBasket({
-      items: [{ product_id: productId, run_ids: runId ? [runId] : [] }]
+      items: [{ product_id: productId, run_ids: runId ? [runId] : [] }],
     })
     if (isSuccessResponse(response)) {
       setFieldError("runs", "")
@@ -311,11 +313,9 @@ export class CheckoutPage extends React.Component<Props, State> {
           <React.Fragment>
             No item in basket
             {formatErrors(loadingErrorMessages)}
-            <br/>
+            <br />
             {"Please contact "}
-            <a href={`mailto:${SETTINGS.support_email}`}>
-              customer support
-            </a>
+            <a href={`mailto:${SETTINGS.support_email}`}>customer support</a>
             {" for more information."}
           </React.Fragment>
         ) : (
@@ -337,10 +337,11 @@ export class CheckoutPage extends React.Component<Props, State> {
     } else if (!basket || !item) {
       pageBody = this.renderLoadingError()
     } else {
-      const coupon = basket.coupons.find(coupon =>
-        coupon.targets.includes(item.id)
+      const coupon = basket.coupons.find((coupon) =>
+        coupon.targets.includes(item.id),
       )
-      const { couponCode, preselectId, isVoucherApplied } = this.getQueryParams()
+      const { couponCode, preselectId, isVoucherApplied } =
+        this.getQueryParams()
       const selectedRuns = calcSelectedRunIds(item, preselectId)
       pageBody = (
         <CheckoutForm
@@ -365,23 +366,20 @@ export class CheckoutPage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => ({
-  basket:         state.entities.basket,
+const mapStateToProps = (state) => ({
+  basket: state.entities.basket,
   requestPending:
     pathOr(false, ["queries", "basketMutation", "isPending"], state) ||
     pathOr(false, ["queries", "couponsMutation", "isPending"], state) ||
-    pathOr(false, ["queries", "checkoutMutation", "isPending"], state)
+    pathOr(false, ["queries", "checkoutMutation", "isPending"], state),
 })
-const mapDispatchToProps = dispatch => ({
-  checkout:     () => dispatch(mutateAsync(queries.ecommerce.checkoutMutation())),
-  fetchBasket:  () => dispatch(requestAsync(queries.ecommerce.basketQuery())),
+const mapDispatchToProps = (dispatch) => ({
+  checkout: () => dispatch(mutateAsync(queries.ecommerce.checkoutMutation())),
+  fetchBasket: () => dispatch(requestAsync(queries.ecommerce.basketQuery())),
   updateBasket: (payload: BasketPayload) =>
-    dispatch(mutateAsync(queries.ecommerce.basketMutation(payload)))
+    dispatch(mutateAsync(queries.ecommerce.basketMutation(payload))),
 })
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(CheckoutPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  CheckoutPage,
+)

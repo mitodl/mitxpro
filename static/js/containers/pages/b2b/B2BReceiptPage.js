@@ -42,7 +42,7 @@ const NUM_MILLIS_PER_POLL = 3000
 
 export class B2BReceiptPage extends React.Component<Props, State> {
   state = {
-    now:           moment(),
+    now: moment(),
     timeoutActive: false,
   }
 
@@ -93,7 +93,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
     } else {
       addUserNotification({
         "b2b-order-status": {
-          type:  ALTER_TYPE_B2B_ORDER_STATUS,
+          type: ALTER_TYPE_B2B_ORDER_STATUS,
           color: "danger",
         },
       })
@@ -230,7 +230,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   orderStatus: state.entities.b2b_order_status,
 })
 
@@ -238,7 +238,7 @@ const mapDispatchToProps = {
   addUserNotification,
 }
 
-const mapPropsToConfig = props => [
+const mapPropsToConfig = (props) => [
   queries.ecommerce.b2bOrderStatus(qs.parse(props.location.search).hash),
 ]
 

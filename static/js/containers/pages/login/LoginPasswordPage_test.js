@@ -57,7 +57,7 @@ describe("LoginPasswordPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeLoginAuthResponse({
-        state:        STATE_ERROR,
+        state: STATE_ERROR,
         field_errors: fieldErrors,
       }),
     })

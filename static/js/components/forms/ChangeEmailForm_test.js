@@ -44,7 +44,7 @@ describe("ChangeEmailForm", () => {
     try {
       await wrapper.find(Formik).prop("validate")(
         {
-          email:           "abc@example.com",
+          email: "abc@example.com",
           confirmPassword: "",
         },
         {

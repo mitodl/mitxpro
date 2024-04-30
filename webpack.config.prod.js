@@ -20,7 +20,7 @@ prodConfig.module.rules = [
   ...config.module.rules,
   {
     test: /\.css$|\.scss$/,
-    use:  [
+    use: [
       {
         loader: MiniCssExtractPlugin.loader,
       },
@@ -33,11 +33,11 @@ prodConfig.module.rules = [
 
 module.exports = Object.assign(prodConfig, {
   context: __dirname,
-  mode:    "production",
-  output:  {
-    path:               path.resolve("./static/bundles/"),
-    filename:           "[name]-[chunkhash].js",
-    chunkFilename:      "[id]-[chunkhash].js",
+  mode: "production",
+  output: {
+    path: path.resolve("./static/bundles/"),
+    filename: "[name]-[chunkhash].js",
+    chunkFilename: "[id]-[chunkhash].js",
     crossOriginLoading: "anonymous",
   },
 
@@ -57,16 +57,16 @@ module.exports = Object.assign(prodConfig, {
     }),
   ],
   optimization: {
-    minimize:    true,
-    chunkIds:    "named",
+    minimize: true,
+    chunkIds: "named",
     splitChunks: {
-      chunks:                 "all",
-      minChunks:              2,
+      chunks: "all",
+      minChunks: 2,
       automaticNameDelimiter: "-",
-      cacheGroups:            {
+      cacheGroups: {
         common: {
-          test:   /[\\/]node_modules[\\/]/,
-          name:   "common",
+          test: /[\\/]node_modules[\\/]/,
+          name: "common",
           chunks: "all",
         },
       },

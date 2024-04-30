@@ -64,7 +64,7 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
 
       addUserNotification({
         "forgot-password-confirm": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           props: {
             text: alertText,
           },

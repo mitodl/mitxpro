@@ -19,7 +19,7 @@ describe("Top-level App", () => {
       InnerApp,
       {},
       {
-        match:    { url: routes.root },
+        match: { url: routes.root },
         location: {
           pathname: routes.root,
         },
@@ -48,9 +48,9 @@ describe("Top-level App", () => {
       })
       expectedNotificationState = {
         "unused-coupon": {
-          type:  ALERT_TYPE_UNUSED_COUPON,
+          type: ALERT_TYPE_UNUSED_COUPON,
           props: {
-            productId:  unusedCoupon.product_id,
+            productId: unusedCoupon.product_id,
             couponCode: unusedCoupon.coupon_code,
           },
         },

@@ -19,10 +19,10 @@ import { makeRegisterAuthResponse } from "../../../factories/auth"
 describe("RegisterExtraDetailsPage", () => {
   const profileData = {
     profile: {
-      gender:     "N/A",
+      gender: "N/A",
       birth_year: "2000",
-      company:    "Employer",
-      job_title:  "Employee",
+      company: "Employer",
+      job_title: "Employee",
     },
   }
 
@@ -43,7 +43,7 @@ describe("RegisterExtraDetailsPage", () => {
     partialToken = authResponse.partial_token
 
     body = {
-      flow:          authResponse.flow,
+      flow: authResponse.flow,
       partial_token: partialToken,
       ...profileData.profile,
     }
@@ -83,7 +83,7 @@ describe("RegisterExtraDetailsPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state:        STATE_ERROR,
+        state: STATE_ERROR,
         field_errors: fieldErrors,
       }),
     })
@@ -92,7 +92,7 @@ describe("RegisterExtraDetailsPage", () => {
 
     await onSubmit(profileData, {
       setSubmitting: setSubmittingStub,
-      setErrors:     setErrorsStub,
+      setErrors: setErrorsStub,
     })
 
     sinon.assert.calledWith(
@@ -112,7 +112,7 @@ describe("RegisterExtraDetailsPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state:         STATE_SUCCESS,
+        state: STATE_SUCCESS,
         partial_token: undefined,
       }),
     })
@@ -121,7 +121,7 @@ describe("RegisterExtraDetailsPage", () => {
 
     await onSubmit(profileData, {
       setSubmitting: setSubmittingStub,
-      setErrors:     setErrorsStub,
+      setErrors: setErrorsStub,
     })
 
     sinon.assert.calledWith(
@@ -163,7 +163,7 @@ describe("RegisterExtraDetailsPage", () => {
 
       await onSubmit(profileData, {
         setSubmitting: setSubmittingStub,
-        setErrors:     setErrorsStub,
+        setErrors: setErrorsStub,
       })
 
       sinon.assert.calledWith(

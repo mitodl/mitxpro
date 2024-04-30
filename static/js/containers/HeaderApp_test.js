@@ -37,9 +37,9 @@ describe("Top-level HeaderApp", () => {
       })
       expectedNotificationState = {
         "unused-coupon": {
-          type:  ALERT_TYPE_UNUSED_COUPON,
+          type: ALERT_TYPE_UNUSED_COUPON,
           props: {
-            productId:  unusedCoupon.product_id,
+            productId: unusedCoupon.product_id,
             couponCode: unusedCoupon.coupon_code,
           },
         },

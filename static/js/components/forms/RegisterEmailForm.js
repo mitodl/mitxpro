@@ -11,7 +11,7 @@ import FormError from "./elements/FormError"
 import { emailFieldValidation } from "../../lib/validation"
 
 const emailValidation = yup.object().shape({
-  email:     emailFieldValidation,
+  email: emailFieldValidation,
   recaptcha: SETTINGS.recaptchaKey
     ? yup.string().required("Please verify you're not a robot")
     : yup.mixed().notRequired(),
@@ -31,7 +31,7 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
     onSubmit={onSubmit}
     validationSchema={emailValidation}
     initialValues={{
-      email:     "",
+      email: "",
       recaptcha: SETTINGS.recaptchaKey ? "" : undefined,
     }}
     render={({ isSubmitting, setFieldValue }) => (
@@ -49,7 +49,7 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
         {SETTINGS.recaptchaKey ? (
           <div className="form-group">
             <ScaledRecaptcha
-              onRecaptcha={value => setFieldValue("recaptcha", value)}
+              onRecaptcha={(value) => setFieldValue("recaptcha", value)}
               recaptchaKey={SETTINGS.recaptchaKey}
             />
             <ErrorMessage name="recaptcha" component={FormError} />

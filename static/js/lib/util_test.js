@@ -50,7 +50,7 @@ const assertRaises = async (asyncFunc: Function, expectedMessage: string) => {
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
 
 describe("utility functions", () => {
-  it("waits some milliseconds", done => {
+  it("waits some milliseconds", (done) => {
     let executed = false
     wait(30).then(() => {
       executed = true
@@ -87,7 +87,7 @@ describe("utility functions", () => {
   })
 
   it("isEmptyText works as expected", () => {
-    [
+    ;[
       [" ", true],
       ["", true],
       ["\n\t   ", true],
@@ -101,7 +101,7 @@ describe("utility functions", () => {
   })
 
   it("truncate works as expected", () => {
-    [
+    ;[
       ["", ""],
       [null, ""],
       ["A random string", "A random string"],
@@ -124,7 +124,7 @@ describe("utility functions", () => {
   })
 
   it("notNil works as expected", () => {
-    [
+    ;[
       [null, false],
       [undefined, false],
       [0, true],
@@ -152,7 +152,7 @@ describe("utility functions", () => {
   })
 
   it("getTokenFromUrl gets a token value from a url match or the querystring", () => {
-    [
+    ;[
       ["url_token", undefined, "url_token"],
       [undefined, "?token=querystring_token", "querystring_token"],
       ["url_token", "?token=querystring_token", "url_token"],
@@ -181,7 +181,7 @@ describe("utility functions", () => {
     })
 
     it("should be as long as you specify", () => {
-      [10, 11, 12, 20, 3].forEach(len => {
+      ;[10, 11, 12, 20, 3].forEach((len) => {
         assert.equal(makeUUID(len).length, len)
       })
     })
@@ -193,7 +193,7 @@ describe("utility functions", () => {
 
   describe("spaceSeparated", () => {
     it("should return a space separated string when given an array of strings or nulls", () => {
-      [
+      ;[
         [["a", "b", "c"], "a b c"],
         [[null, null], ""],
         [[null, "a", "b"], "a b"],
@@ -338,7 +338,7 @@ describe("utility functions", () => {
     )}`, () => {
       const response = {
         status: status,
-        body:   {},
+        body: {},
       }
       assert.equal(isErrorResponse(response), expResult)
     })
@@ -357,7 +357,7 @@ describe("utility functions", () => {
     )}`, () => {
       const response = {
         status: status,
-        body:   {},
+        body: {},
       }
       assert.equal(isSuccessResponse(response), expResult)
     })
@@ -376,7 +376,7 @@ describe("utility functions", () => {
     )} when status=${String(status)}`, () => {
       const response = {
         status: status,
-        body:   {},
+        body: {},
       }
       assert.equal(isUnauthorizedResponse(response), expResult)
     })

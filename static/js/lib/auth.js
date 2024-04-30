@@ -69,8 +69,8 @@ export type StateHandlers = {
 const getErrorQs = (errors: Array<string>) =>
   !isEmpty(errors)
     ? qs.stringify({
-      error: errors[0],
-    })
+        error: errors[0],
+      })
     : ""
 
 export const handleAuthResponse = (

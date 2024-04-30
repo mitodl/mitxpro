@@ -45,7 +45,7 @@ describe("ecommerce", () => {
   })
 
   describe("calculateTax", () => {
-    [
+    ;[
       ["100", "0", 20, "20"],
       ["123", "1", 20, "0"],
       ["200", "0.5", 20, "20"],
@@ -65,7 +65,7 @@ describe("ecommerce", () => {
   })
 
   describe("calculateTotalAfterTax", () => {
-    [
+    ;[
       ["100", "0", 20, "120"],
       ["123", "1", 20, "0"],
       ["200", "0.5", 20, "120"],
@@ -155,7 +155,7 @@ describe("ecommerce", () => {
       const run = {
         ...makeCourseRun(),
         start_date: null,
-        end_date:   null,
+        end_date: null,
       }
       assert.equal(formatRunTitle(run), "? - ?")
     })
@@ -181,7 +181,7 @@ describe("ecommerce", () => {
       programBasketItem.run_tag = "R2"
       const expectedResult = R.compose(
         R.fromPairs,
-        R.map(course =>
+        R.map((course) =>
           // Expecting index 1 since the run_tag is "R2", and those values were incrementally generated
           // starting with "R1"
           [course.id, course.courseruns[1].id],
@@ -195,7 +195,7 @@ describe("ecommerce", () => {
       const preselectRunId = programBasketItem.courses[0].courseruns[1].id
       const expectedResult = R.compose(
         R.fromPairs,
-        R.map(course => [course.id, course.courseruns[1].id]),
+        R.map((course) => [course.id, course.courseruns[1].id]),
       )(programBasketItem.courses)
       const result = calcSelectedRunIds(programBasketItem, preselectRunId)
       assert.deepEqual(result, expectedResult)

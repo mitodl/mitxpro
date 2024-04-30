@@ -89,15 +89,15 @@ describe("CreateCouponPage", () => {
 
   it("sets state.couponId to new coupon id if submission is successful", async () => {
     const testCouponData = {
-      coupon_type:     COUPON_TYPE_PROMO,
-      products:        [products[0]],
+      coupon_type: COUPON_TYPE_PROMO,
+      products: [products[0]],
       max_redemptions: 100,
-      coupon_code:     "HALFOFF",
-      amount:          50,
+      coupon_code: "HALFOFF",
+      amount: 50,
     }
     const newCoupon = makeCouponPaymentVersion()
     helper.handleRequestStub.returns({
-      body:        newCoupon,
+      body: newCoupon,
       transformed: { coupons: { [newCoupon.id]: newCoupon } },
     })
     const { inner } = await renderCreateCouponPage(
@@ -109,12 +109,12 @@ describe("CreateCouponPage", () => {
 
     await inner.instance().onSubmit(testCouponData, {
       setSubmitting: setSubmittingStub,
-      setErrors:     setErrorsStub,
+      setErrors: setErrorsStub,
     })
     sinon.assert.calledWith(setSubmittingStub, false)
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "POST", {
-      body:    testCouponData,
+      body: testCouponData,
       headers: {
         "X-CSRFTOKEN": null,
       },
@@ -125,10 +125,10 @@ describe("CreateCouponPage", () => {
 
   it("sets max_redemptions to 1 if coupon type is single-use", async () => {
     const testCouponData = {
-      coupon_type:      COUPON_TYPE_SINGLE_USE,
-      products:         [products[0]],
+      coupon_type: COUPON_TYPE_SINGLE_USE,
+      products: [products[0]],
       num_coupon_codes: 100,
-      amount:           50,
+      amount: 50,
     }
     const { inner } = await renderCreateCouponPage(
       {},
@@ -138,7 +138,7 @@ describe("CreateCouponPage", () => {
     )
     await inner.instance().onSubmit(testCouponData, {
       setSubmitting: setSubmittingStub,
-      setErrors:     setErrorsStub,
+      setErrors: setErrorsStub,
     })
     sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "POST", {
       body: {
@@ -157,11 +157,11 @@ describe("CreateCouponPage", () => {
   ].forEach(([discountType, discount, amount]) => {
     it("Amount is converted for percent-off discount", async () => {
       const testCouponData = {
-        coupon_type:      COUPON_TYPE_SINGLE_USE,
-        discount_type:    discountType,
-        products:         [products[0]],
+        coupon_type: COUPON_TYPE_SINGLE_USE,
+        discount_type: discountType,
+        products: [products[0]],
         num_coupon_codes: 100,
-        discount:         discount,
+        discount: discount,
       }
       const { inner } = await renderCreateCouponPage(
         {},
@@ -171,7 +171,7 @@ describe("CreateCouponPage", () => {
       )
       await inner.instance().onSubmit(testCouponData, {
         setSubmitting: setSubmittingStub,
-        setErrors:     setErrorsStub,
+        setErrors: setErrorsStub,
       })
       sinon.assert.calledWith(
         helper.handleRequestStub,
@@ -204,12 +204,12 @@ describe("CreateCouponPage", () => {
     const { inner } = await renderCreateCouponPage()
     await inner.instance().onSubmit(testCouponData, {
       setSubmitting: setSubmittingStub,
-      setErrors:     setErrorsStub,
+      setErrors: setErrorsStub,
     })
     sinon.assert.calledWith(setSubmittingStub, false)
     sinon.assert.calledWith(setErrorsStub, {
       products: "Must select a product",
-      name:     "Must be unique",
+      name: "Must be unique",
     })
     assert.isTrue(inner.instance().state.couponId === null)
   })

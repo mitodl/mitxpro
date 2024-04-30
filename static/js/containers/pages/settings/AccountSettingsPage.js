@@ -62,7 +62,7 @@ export class AccountSettingsPage extends React.Component<Props> {
 
       addUserNotification({
         "password-change": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: color,
           props: {
             text: alertText,
@@ -99,7 +99,7 @@ export class AccountSettingsPage extends React.Component<Props> {
 
       addUserNotification({
         "email-change": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: color,
           props: {
             text: alertText,

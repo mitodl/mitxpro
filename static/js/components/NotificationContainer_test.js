@@ -12,13 +12,13 @@ import IntegrationTestHelper from "../util/integration_test_helper"
 describe("NotificationContainer component", () => {
   const messages = {
     message1: {
-      type:  ALERT_TYPE_TEXT,
+      type: ALERT_TYPE_TEXT,
       props: { text: "derp" },
     },
     message2: {
-      type:  ALERT_TYPE_UNUSED_COUPON,
+      type: ALERT_TYPE_UNUSED_COUPON,
       props: {
-        productId:  1,
+        productId: 1,
         couponCode: "code",
       },
     },
@@ -68,7 +68,7 @@ describe("NotificationContainer component", () => {
         ui: {
           userNotifications: {
             aMessage: {
-              type:  ALERT_TYPE_TEXT,
+              type: ALERT_TYPE_TEXT,
               color: color,
               props: { text: "derp" },
             },

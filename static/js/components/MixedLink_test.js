@@ -21,8 +21,8 @@ describe("MixedLink component", () => {
 
   it(`renders a react router Link when the app type is '${SPA_APP_CONTEXT}'`, () => {
     const wrapper = renderMixedLink(SPA_APP_CONTEXT, {
-      dest:         testDest,
-      children:     testLinkText,
+      dest: testDest,
+      children: testLinkText,
       "aria-label": testAriaLabel,
     })
 
@@ -37,8 +37,8 @@ describe("MixedLink component", () => {
 
   it(`renders a normal anchor link when the app type is '${MIXED_APP_CONTEXT}'`, () => {
     const wrapper = renderMixedLink(MIXED_APP_CONTEXT, {
-      dest:         testDest,
-      children:     testLinkText,
+      dest: testDest,
+      children: testLinkText,
       "aria-label": testAriaLabel,
     })
 

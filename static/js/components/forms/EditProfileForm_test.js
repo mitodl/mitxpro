@@ -51,7 +51,7 @@ describe("EditProfileForm", () => {
     assert.ok(form.find(".add-vat-id").exists())
     assert.ok(form.find("button[type='submit']").exists())
   })
-  ;[true, false].forEach(isVatEnabled => {
+  ;[true, false].forEach((isVatEnabled) => {
     it(`Validate that VAT ID is ${
       isVatEnabled ? "enabled" : "disabled"
     } for EditProfileForm`, () => {
@@ -70,7 +70,7 @@ describe("EditProfileForm", () => {
     const street = wrapper.find(`input[name="legal_address.street_address[0]"]`)
     street.simulate("change", {
       persist: () => {},
-      target:  { name: "legal_address.street_address[0]", value: "" },
+      target: { name: "legal_address.street_address[0]", value: "" },
     })
     street.simulate("blur")
     await wait()
@@ -141,7 +141,7 @@ describe("EditProfileForm", () => {
   })
 
   //
-  ;[true, false].forEach(hasEmpty => {
+  ;[true, false].forEach((hasEmpty) => {
     it(`sets initialValues for the form${
       hasEmpty ? "with some empty fields" : ""
     }`, async () => {
@@ -162,7 +162,7 @@ describe("EditProfileForm", () => {
       assert.equal(initialValues.email, user.email)
       assert.deepEqual(initialValues.legal_address, user.legal_address)
 
-      Object.keys(initialValues.profile).forEach(key => {
+      Object.keys(initialValues.profile).forEach((key) => {
         if (keys.includes(key)) {
           assert.equal(initialValues.profile[key], hasEmpty ? "" : key)
         } else {

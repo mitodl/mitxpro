@@ -15,26 +15,26 @@ import {
   formatDiscount,
   formatPrice,
   formatNumber,
-  formatRunTitle
+  formatRunTitle,
 } from "../../lib/ecommerce"
 
 import type {
   BasketItem,
   BasketResponse,
-  CouponSelection
+  CouponSelection,
 } from "../../flow/ecommerceTypes"
 export type SetFieldError = (fieldName: string, fieldValue: any) => void
 export type Values = {
   runs: { [number]: string },
   couponCode: ?string,
-  dataConsent: boolean
+  dataConsent: boolean,
 }
 export type Actions = {
   setFieldError: SetFieldError,
   setErrors: (errors: Object) => void,
   setSubmitting: (submitting: boolean) => void,
   setValues: (values: Values) => void,
-  resetForm: () => void
+  resetForm: () => void,
 }
 type Errors = {
   runs?: string,
@@ -42,7 +42,7 @@ type Errors = {
   items?: string,
   data_consents?: string,
   genericBasket: boolean,
-  genericSubmit: boolean
+  genericSubmit: boolean,
 }
 type CommonProps = {
   item: BasketItem,
@@ -52,29 +52,29 @@ type CommonProps = {
   onSubmit: (Values, Actions) => Promise<void>,
   submitCoupon: (
     couponCode: ?string,
-    setFieldError: SetFieldError
+    setFieldError: SetFieldError,
   ) => Promise<void>,
   updateProduct: (
     productId: number | string,
     runId: number,
-    setFieldError: SetFieldError
+    setFieldError: SetFieldError,
   ) => Promise<void>,
-  isVoucherApplied: boolean
+  isVoucherApplied: boolean,
 }
 type OuterProps = CommonProps & {
   couponCode: ?string,
   selectedRuns: Object,
-  basket: BasketResponse
+  basket: BasketResponse,
 }
 type InnerProps = CommonProps &
   Actions & {
     errors: Errors,
     values: Values,
-    onMount: () => void
+    onMount: () => void,
   }
 
 type InnerState = {
-  dataSharingModalVisibility: boolean
+  dataSharingModalVisibility: boolean,
 }
 
 export const renderGenericError = () => {
@@ -103,7 +103,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   constructor(props: InnerProps) {
     super(props)
     this.state = {
-      dataSharingModalVisibility: false
+      dataSharingModalVisibility: false,
     }
   }
 
@@ -124,13 +124,13 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
       setValues,
       resetForm,
       updateProduct,
-      isVoucherApplied
+      isVoucherApplied,
     } = this.props
 
     if (item.type === "program") {
       return (
         <React.Fragment>
-          {item.courses.map(course => (
+          {item.courses.map((course) => (
             <div className="flex-row item-row" key={course.id}>
               <div className="flex-row item-column">
                 <img src={course.thumbnail_url} alt={course.title} />
@@ -145,7 +145,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                   <option value={""} key={"null"}>
                     Select a course run
                   </option>
-                  {course.courseruns.map(run => (
+                  {course.courseruns.map((run) => (
                     <option value={run.id} key={run.id}>
                       {formatRunTitle(run)}
                     </option>
@@ -169,13 +169,13 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
               component="select"
               name={`runs.${course.id}`}
               className="run-selector"
-              onChange={async e => {
+              onChange={async (e) => {
                 setValues({
                   ...values,
                   runs: {
                     ...values.runs,
-                    [course.id]: e.target.value
-                  }
+                    [course.id]: e.target.value,
+                  },
                 })
 
                 if (!e.target.value) {
@@ -184,7 +184,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
 
                 const selectedRunId = parseInt(e.target.value)
                 const run = course.courseruns.find(
-                  run => run.id === selectedRunId
+                  (run) => run.id === selectedRunId,
                 )
                 if (run && run.product_id) {
                   await updateProduct(run.product_id, run.id, setFieldError)
@@ -197,12 +197,14 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
               <option value={""} key={"null"}>
                 Select a course run
               </option>
-              {course.courseruns.map(run =>
-                run.product_id && ((!isVoucherApplied) || (isVoucherApplied && run.product_id === item.product_id)) ? (
+              {course.courseruns.map((run) =>
+                run.product_id &&
+                (!isVoucherApplied ||
+                  (isVoucherApplied && run.product_id === item.product_id)) ? (
                   <option value={run.id} key={run.id}>
                     {formatRunTitle(run)}
                   </option>
-                ) : null
+                ) : null,
               )}
             </Field>
           </div>
@@ -214,7 +216,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
   toggleDataSharingModalVisibility = () => {
     const { dataSharingModalVisibility } = this.state
     this.setState({
-      dataSharingModalVisibility: !dataSharingModalVisibility
+      dataSharingModalVisibility: !dataSharingModalVisibility,
     })
   }
 
@@ -240,7 +242,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
       setFieldError,
       item,
       coupon,
-      submitCoupon
+      submitCoupon,
     } = this.props
     const { dataSharingModalVisibility } = this.state
 
@@ -280,7 +282,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     type="text"
                     name="couponCode"
                     className="coupon-code-entry"
-                    onKeyDown={event => {
+                    onKeyDown={(event) => {
                       if (event.key === "Enter") {
                         event.preventDefault()
                         submitCoupon(values.couponCode, setFieldError)
@@ -338,7 +340,9 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                 {coupon ? (
                   <div className="flex-row discount-row">
                     <span>Discount:</span>
-                    <span>{formatDiscount(calculateDiscount(item, coupon))}</span>
+                    <span>
+                      {formatDiscount(calculateDiscount(item, coupon))}
+                    </span>
                   </div>
                 ) : null}
                 {SETTINGS.enable_taxes_display ? (
@@ -349,15 +353,29 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                       <span>{formatPrice(calculatePrice(item, coupon))}</span>
                     </div>
                     <div className="flex-row tax-row">
-                      <span>Tax ({formatNumber(basket.tax_info.tax_rate)}%):</span>
-                      <span>{formatPrice(calculateTax(item, coupon, basket.tax_info.tax_rate))}</span>
+                      <span>
+                        Tax ({formatNumber(basket.tax_info.tax_rate)}%):
+                      </span>
+                      <span>
+                        {formatPrice(
+                          calculateTax(item, coupon, basket.tax_info.tax_rate),
+                        )}
+                      </span>
                     </div>
                   </div>
                 ) : null}
                 <div className="bar" />
                 <div className="flex-row total-row">
                   <span>Total:</span>
-                  <span>{formatPrice(calculateTotalAfterTax(item, coupon, basket.tax_info.tax_rate))}</span>
+                  <span>
+                    {formatPrice(
+                      calculateTotalAfterTax(
+                        item,
+                        coupon,
+                        basket.tax_info.tax_rate,
+                      ),
+                    )}
+                  </span>
                 </div>
               </div>
               <div>
@@ -445,19 +463,19 @@ export class CheckoutForm extends React.Component<OuterProps> {
       selectedRuns,
       submitCoupon,
       updateProduct,
-      isVoucherApplied
+      isVoucherApplied,
     } = this.props
 
     return (
       <Formik
         onSubmit={onSubmit}
         initialValues={{
-          couponCode:  couponCode || (coupon ? coupon.code : ""),
-          runs:        selectedRuns,
-          dataConsent: false
+          couponCode: couponCode || (coupon ? coupon.code : ""),
+          runs: selectedRuns,
+          dataConsent: false,
         }}
         validate={this.validate}
-        render={props => (
+        render={(props) => (
           <InnerCheckoutForm
             {...props}
             basket={basket}

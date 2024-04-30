@@ -4,35 +4,35 @@ const webpack = require("webpack")
 module.exports = {
   config: {
     entry: {
-      root:   ["@babel/polyfill", "./static/js/entry/root"],
+      root: ["@babel/polyfill", "./static/js/entry/root"],
       header: ["@babel/polyfill", "./static/js/entry/header"],
-      style:  "./static/js/entry/style",
+      style: "./static/js/entry/style",
       django: ["@babel/polyfill", "./static/js/entry/django"],
     },
     module: {
       rules: [
         {
           test: /\.(svg|ttf|woff|woff2|eot|gif)$/,
-          use:  "url-loader",
+          use: "url-loader",
         },
         {
           test: require.resolve("jquery"),
-          use:  [
+          use: [
             {
-              loader:  "expose-loader",
+              loader: "expose-loader",
               options: "jQuery",
             },
             {
-              loader:  "expose-loader",
+              loader: "expose-loader",
               options: "$",
             },
           ],
         },
         {
           test: require.resolve("hls.js"),
-          use:  [
+          use: [
             {
-              loader:  "expose-loader",
+              loader: "expose-loader",
               options: "Hls",
             },
           ],
@@ -40,7 +40,7 @@ module.exports = {
       ],
     },
     resolve: {
-      modules:    [path.join(__dirname, "static/js"), "node_modules"],
+      modules: [path.join(__dirname, "static/js"), "node_modules"],
       extensions: [".js", ".jsx"],
     },
     performance: {
@@ -48,14 +48,14 @@ module.exports = {
     },
   },
   babelSharedLoader: {
-    test:    /\.jsx?$/,
+    test: /\.jsx?$/,
     include: [
       path.resolve(__dirname, "static/js"),
       path.resolve(__dirname, "node_modules/query-string"),
       path.resolve(__dirname, "node_modules/strict-uri-encode"),
     ],
     loader: "babel-loader",
-    query:  {
+    query: {
       presets: [
         ["@babel/preset-env", { modules: false }],
         "@babel/preset-react",

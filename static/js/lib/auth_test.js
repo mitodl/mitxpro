@@ -33,7 +33,7 @@ describe("auth lib function", () => {
       sandbox.restore()
     })
 
-    ALL_STATES.forEach(state => {
+    ALL_STATES.forEach((state) => {
       it(`calls a corresponding handlers function for state=${state}`, () => {
         // the flow type doesn't pertain here so register response is fine
         const response = makeRegisterAuthResponse({ state })

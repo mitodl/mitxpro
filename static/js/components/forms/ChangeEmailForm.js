@@ -31,13 +31,13 @@ const ChangeEmailForm = ({ onSubmit, user }: Props) => (
   <Formik
     onSubmit={onSubmit}
     initialValues={{
-      email:           user.email,
+      email: user.email,
       confirmPassword: "",
     }}
-    validate={values =>
+    validate={(values) =>
       validateYupSchema(values, changeEmailFormValidation, false, {
         currentEmail: user.email,
-      }).catch(err => Promise.reject(yupToFormErrors(err)))
+      }).catch((err) => Promise.reject(yupToFormErrors(err)))
     }
     render={({ isSubmitting }) => (
       <Form>

@@ -59,14 +59,14 @@ describe("LoginForgotPasswordPage", () => {
           email,
         },
         credentials: undefined,
-        headers:     { "X-CSRFTOKEN": null },
+        headers: { "X-CSRFTOKEN": null },
       },
     )
 
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.root,
-      search:   "",
+      search: "",
     })
     sinon.assert.calledWith(setSubmittingStub, false)
   })

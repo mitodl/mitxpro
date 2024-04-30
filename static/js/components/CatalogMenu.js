@@ -31,15 +31,15 @@ const CatalogMenu = ({ courseTopics }: Props) => {
         </a>
         {courseTopics
           ? courseTopics.map((courseTopic, index) => (
-            <a
-              className="dropdown-item"
-              key={index}
-              href={`/catalog/?topic=${courseTopic.name}`}
-              aria-label={courseTopic.name}
-            >
-              {courseTopic.name} ({courseTopic.course_count})
-            </a>
-          ))
+              <a
+                className="dropdown-item"
+                key={index}
+                href={`/catalog/?topic=${courseTopic.name}`}
+                aria-label={courseTopic.name}
+              >
+                {courseTopic.name} ({courseTopic.course_count})
+              </a>
+            ))
           : null}
         <div className="dropdown-divider" />
         <a

@@ -48,7 +48,7 @@ describe("RegisterDetailsForm", () => {
     assert.ok(form.find("button[type='submit']").exists())
     assert.ok(form.find(".add-vat-id").exists())
   })
-  ;[true, false].forEach(isVatEnabled => {
+  ;[true, false].forEach((isVatEnabled) => {
     it(`Validate that VAT ID is ${
       isVatEnabled ? "enabled" : "disabled"
     } for RegisterDetailsForm`, () => {
@@ -108,7 +108,7 @@ describe("RegisterDetailsForm", () => {
       const country = wrapper.find(`select[name="legal_address.country"]`)
       country.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.country", value: countryState },
+        target: { name: "legal_address.country", value: countryState },
       })
       country.simulate("blur")
       await wait()
@@ -119,7 +119,7 @@ describe("RegisterDetailsForm", () => {
       assert.isTrue(stateTerritory.exists())
       stateTerritory.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.state_or_territory", value: "" },
+        target: { name: "legal_address.state_or_territory", value: "" },
       })
       stateTerritory.simulate("blur")
       await wait()
@@ -128,7 +128,7 @@ describe("RegisterDetailsForm", () => {
       assert.isTrue(postalCode.exists())
       postalCode.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.postalCode", value: "" },
+        target: { name: "legal_address.postalCode", value: "" },
       })
       postalCode.simulate("blur")
       await wait()
@@ -150,7 +150,7 @@ describe("RegisterDetailsForm", () => {
       // Select country not requiring state and zipcode
       country.simulate("change", {
         persist: () => {},
-        target:  { name: "legal_address.country", value: countryNoState },
+        target: { name: "legal_address.country", value: countryNoState },
       })
       country.simulate("blur")
       await wait()
@@ -192,7 +192,7 @@ describe("RegisterDetailsForm", () => {
     const street = wrapper.find(`input[name="legal_address.street_address[0]"]`)
     street.simulate("change", {
       persist: () => {},
-      target:  { name: "legal_address.street_address[0]", value: "" },
+      target: { name: "legal_address.street_address[0]", value: "" },
     })
     street.simulate("blur")
     await wait()
@@ -226,7 +226,7 @@ describe("RegisterDetailsForm", () => {
   const invalidNameMessage =
     "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"
   ;["legal_address.first_name", "legal_address.last_name"].forEach(
-    fieldName => {
+    (fieldName) => {
       const wrapper = renderForm()
       const field = wrapper.find(`input[name="${fieldName}"]`)
 
@@ -246,7 +246,7 @@ describe("RegisterDetailsForm", () => {
         ",",
         "`",
         "-",
-      ].forEach(validCharacter => {
+      ].forEach((validCharacter) => {
         it(`validates the field name=${fieldName}, value=${JSON.stringify(
           `${validCharacter}Name`,
         )} and expects error=${JSON.stringify(
@@ -256,7 +256,7 @@ describe("RegisterDetailsForm", () => {
           const value = `${validCharacter}Name`
           field.simulate("change", {
             persist: () => {},
-            target:  { name: fieldName, value: value },
+            target: { name: fieldName, value: value },
           })
           field.simulate("blur")
           await wait()
@@ -287,7 +287,7 @@ describe("RegisterDetailsForm", () => {
         "}",
         '"',
         "|",
-      ].forEach(invalidCharacter => {
+      ].forEach((invalidCharacter) => {
         it(`validates the field name=${fieldName}, value=${JSON.stringify(
           `${invalidCharacter}Name${invalidCharacter}`,
         )} and expects error=${JSON.stringify(
@@ -297,7 +297,7 @@ describe("RegisterDetailsForm", () => {
           const value = `${invalidCharacter}Name${invalidCharacter}`
           field.simulate("change", {
             persist: () => {},
-            target:  { name: fieldName, value: value },
+            target: { name: fieldName, value: value },
           })
           field.simulate("blur")
           await wait()

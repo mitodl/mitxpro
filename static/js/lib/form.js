@@ -37,7 +37,7 @@ export const formatErrors = (
 
   let errorString
   if (typeof errors === "object") {
-    errorString = Object.values(errors).filter(error => error)[0]
+    errorString = Object.values(errors).filter((error) => error)[0]
   } else {
     errorString = errors
   }

@@ -44,8 +44,8 @@ describe("Notification component", () => {
     const link = wrapper.find("MixedLink")
     assert.isTrue(link.exists())
     assert.deepInclude(link.props(), {
-      dest:      `${routes.checkout}?product=${productId}&code=${couponCode}`,
-      onClick:   dismissStub,
+      dest: `${routes.checkout}?product=${productId}&code=${couponCode}`,
+      onClick: dismissStub,
       className: "alert-link",
     })
   })
@@ -62,8 +62,8 @@ describe("Notification component", () => {
     assert.isTrue(link.exists())
     assert.equal(link.text(), "Customer Support")
     assert.deepInclude(link.props(), {
-      href:      "https://xpro.zendesk.com/hc/en-us/requests/new",
-      onClick:   dismissStub,
+      href: "https://xpro.zendesk.com/hc/en-us/requests/new",
+      onClick: dismissStub,
       className: "alert-link",
     })
   })

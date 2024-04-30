@@ -24,7 +24,7 @@ export const PrivateRoute = ({
   return (
     <Route
       {...routeProps}
-      render={props => {
+      render={(props) => {
         return currentUser && currentUser.is_authenticated ? (
           <Component {...props} />
         ) : (

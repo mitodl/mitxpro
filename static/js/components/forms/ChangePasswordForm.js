@@ -23,8 +23,8 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
     onSubmit={onSubmit}
     validationSchema={changePasswordFormValidation}
     initialValues={{
-      oldPassword:     "",
-      newPassword:     "",
+      oldPassword: "",
+      newPassword: "",
       confirmPassword: "",
     }}
     render={({ isSubmitting }) => (

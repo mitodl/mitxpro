@@ -42,7 +42,7 @@ describe("EmailConfirmPage", () => {
     inner.instance().componentDidUpdate({}, {})
     assert.deepEqual(store.getState().ui.userNotifications, {
       "email-verified": {
-        type:  "text",
+        type: "text",
         props: {
           text: "Success! We've verified your email. Your email has been updated.",
         },
@@ -64,7 +64,7 @@ describe("EmailConfirmPage", () => {
     inner.instance().componentDidUpdate({}, {})
     assert.deepEqual(store.getState().ui.userNotifications, {
       "email-verified": {
-        type:  "text",
+        type: "text",
         color: "danger",
         props: {
           text: "Error! No confirmation code was provided or it has expired.",

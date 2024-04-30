@@ -11,7 +11,7 @@ import { findFormikFieldByName } from "../../lib/test_utils"
 describe("EmailForm", () => {
   let sandbox, onSubmitStub
 
-  const renderForm = children =>
+  const renderForm = (children) =>
     shallow(
       <EmailForm
         onSubmit={onSubmitStub}

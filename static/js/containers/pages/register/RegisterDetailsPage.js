@@ -150,8 +150,8 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
 
 const mapStateToProps = createStructuredSelector({
   authResponse: authSelector,
-  params:       createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-  countries:    queries.users.countriesSelector,
+  params: createStructuredSelector({ partialToken: qsPartialTokenSelector }),
+  countries: queries.users.countriesSelector,
 })
 
 const mapPropsToConfig = () => [queries.users.countriesQuery()]

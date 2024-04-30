@@ -76,27 +76,27 @@ describe("LoginForgotPasswordConfirmPage", () => {
         "POST",
         {
           body: {
-            new_password:    newPassword,
+            new_password: newPassword,
             re_new_password: confirmPassword,
             token,
             uid,
           },
           credentials: undefined,
-          headers:     { "X-CSRFTOKEN": null },
+          headers: { "X-CSRFTOKEN": null },
         },
       )
 
       assert.lengthOf(helper.browserHistory, 2)
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
-        search:   "",
+        search: "",
       })
       sinon.assert.calledWith(setSubmittingStub, false)
 
       const { ui } = store.getState()
       assert.deepEqual(ui.userNotifications, {
         "forgot-password-confirm": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           props: {
             text: expectedMessage,
           },

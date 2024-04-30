@@ -29,8 +29,8 @@ const DEFAULT_POST_OPTIONS = {
 export default {
   checkoutMutation: () => ({
     queryKey: "checkoutMutation",
-    url:      "/api/checkout/",
-    update:   {
+    url: "/api/checkout/",
+    update: {
       checkout: () => null,
     },
     options: {
@@ -38,7 +38,7 @@ export default {
     },
   }),
   basketQuery: () => ({
-    url:       "/api/basket/",
+    url: "/api/basket/",
     transform: (json: BasketResponse) => ({
       basket: json,
     }),
@@ -48,8 +48,8 @@ export default {
   }),
   basketMutation: (payload: BasketPayload) => ({
     queryKey: "basketMutation",
-    url:      "/api/basket/",
-    update:   {
+    url: "/api/basket/",
+    update: {
       basket: (prev: BasketResponse, next: BasketResponse) => next,
     },
     transform: (json: BasketResponse) => ({
@@ -64,10 +64,10 @@ export default {
     },
   }),
   productsSelector: pathOr(null, ["entities", "products"]),
-  productsQuery:    (productType?: string) => ({
+  productsQuery: (productType?: string) => ({
     queryKey: "products",
-    url:      "/api/products/",
-    body:     {
+    url: "/api/products/",
+    body: {
       ...(productType ? { type: productType } : {}),
     },
     transform: (json: Array<Product>) => ({
@@ -78,18 +78,18 @@ export default {
     },
   }),
   companiesSelector: pathOr(null, ["entities", "companies"]),
-  companiesQuery:    () => ({
-    url:       "/api/companies/",
+  companiesQuery: () => ({
+    url: "/api/companies/",
     transform: (json: Array<Company>) => objOf("companies", json),
-    update:    {
+    update: {
       companies: (prev: Array<Company>, next: Array<Company>) => next,
     },
   }),
   couponsSelector: pathOr(null, ["entities", "coupons"]),
   couponsMutation: (coupon: Object) => ({
-    queryKey:  "couponsMutation",
-    url:       "/api/coupons/",
-    body:      coupon,
+    queryKey: "couponsMutation",
+    url: "/api/coupons/",
+    body: coupon,
     transform: (coupon: CouponPaymentVersion) => ({
       coupons: {
         [coupon.id]: coupon,
@@ -110,8 +110,8 @@ export default {
   }),
   b2bCheckoutMutation: (payload: B2BCheckoutPayload) => ({
     queryKey: "b2bCheckoutMutation",
-    url:      "/api/b2b/checkout/",
-    update:   {
+    url: "/api/b2b/checkout/",
+    update: {
       b2b_checkout: () => null,
     },
     body: {
@@ -122,8 +122,8 @@ export default {
     },
   }),
   b2bOrderStatus: (orderHash: string) => ({
-    queryKey:  "b2bOrderStatus",
-    url:       `/api/b2b/orders/${orderHash}/status/`,
+    queryKey: "b2bOrderStatus",
+    url: `/api/b2b/orders/${orderHash}/status/`,
     transform: (json: B2BOrderStatus) => ({
       b2b_order_status: json,
     }),
@@ -132,9 +132,9 @@ export default {
     },
   }),
   b2bCouponStatusSelector: pathOr(null, ["entities", "b2b_coupon_status"]),
-  b2bCouponStatus:         (payload: B2BCouponStatusPayload) => ({
-    queryKey:  "b2bCouponStatus",
-    url:       "/api/b2b/coupon_status/",
+  b2bCouponStatus: (payload: B2BCouponStatusPayload) => ({
+    queryKey: "b2bCouponStatus",
+    url: "/api/b2b/coupon_status/",
     transform: (json: B2BCouponStatusPayload) => ({
       b2b_coupon_status: json,
     }),
@@ -144,13 +144,13 @@ export default {
         next: B2BCouponStatusResponse,
       ) => next,
     },
-    body:  payload,
+    body: payload,
     force: true,
   }),
   orderReceiptSelector: pathOr(null, ["entities", "orderReceipt"]),
-  orderReceipt:         (orderId: string) => ({
-    queryKey:  "orderReceipt",
-    url:       `/api/order_receipt/${orderId}/`,
+  orderReceipt: (orderId: string) => ({
+    queryKey: "orderReceipt",
+    url: `/api/order_receipt/${orderId}/`,
     transform: (json: OrderReceiptResponse) => ({
       orderReceipt: json,
     }),
@@ -160,9 +160,9 @@ export default {
     },
   }),
   programRunsSelector: pathOr(null, ["entities", "programRuns"]),
-  programRunsQuery:    (productId: string) => ({
-    queryKey:  "programRuns",
-    url:       `/api/products/${productId}/runs/`,
+  programRunsQuery: (productId: string) => ({
+    queryKey: "programRuns",
+    url: `/api/products/${productId}/runs/`,
     transform: (json: [ProgramRunDetail]) => ({
       programRuns: json,
     }),

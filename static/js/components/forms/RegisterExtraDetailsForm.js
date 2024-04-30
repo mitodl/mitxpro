@@ -11,9 +11,9 @@ type Props = {
 const INITIAL_VALUES = {
   profile: {
     birth_year: "",
-    gender:     "",
-    company:    "",
-    job_title:  "",
+    gender: "",
+    company: "",
+    job_title: "",
   },
 }
 

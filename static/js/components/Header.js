@@ -23,16 +23,16 @@ const Header = ({
   courseTopics,
 }: Props) => {
   if (currentUser && currentUser.is_authenticated) {
-    Sentry.configureScope(scope => {
+    Sentry.configureScope((scope) => {
       scope.setUser({
-        id:       currentUser.id,
-        email:    currentUser.email,
+        id: currentUser.id,
+        email: currentUser.email,
         username: currentUser.username,
-        name:     currentUser.name,
+        name: currentUser.name,
       })
     })
   } else {
-    Sentry.configureScope(scope => {
+    Sentry.configureScope((scope) => {
       scope.setUser(null)
     })
   }

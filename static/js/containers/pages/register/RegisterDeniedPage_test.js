@@ -42,7 +42,7 @@ describe("RegisterDeniedPage", () => {
   })
 
   //
-  ;[true, false].forEach(hasError => {
+  ;[true, false].forEach((hasError) => {
     it(`${shouldIf(hasError)} show an error message if ${isIf(
       hasError,
     )} in the query string`, async () => {
@@ -50,10 +50,10 @@ describe("RegisterDeniedPage", () => {
         {},
         hasError
           ? {
-            location: {
-              search: `?error=${error}`,
-            },
-          }
+              location: {
+                search: `?error=${error}`,
+              },
+            }
           : {},
       )
 

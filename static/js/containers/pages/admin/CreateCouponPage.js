@@ -57,7 +57,7 @@ export class CreateCouponPage extends React.Component<Props, State> {
     { setSubmitting, setErrors }: Object,
   ) => {
     const { createCoupon } = this.props
-    couponData.product_ids = couponData.products.map(product => product.id)
+    couponData.product_ids = couponData.products.map((product) => product.id)
     if (couponData.coupon_type === COUPON_TYPE_SINGLE_USE) {
       couponData.max_redemptions = 1
     } else {
@@ -141,9 +141,9 @@ const mapPropsToConfig = () => [
 ]
 
 const mapStateToProps = createStructuredSelector({
-  products:  queries.ecommerce.productsSelector,
+  products: queries.ecommerce.productsSelector,
   companies: queries.ecommerce.companiesSelector,
-  coupons:   queries.ecommerce.couponsSelector,
+  coupons: queries.ecommerce.couponsSelector,
 })
 
 const mapDispatchToProps = {

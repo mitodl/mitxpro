@@ -11,9 +11,9 @@ describe("Form input", () => {
     const fieldName = "myField"
     const defaultProps = {
       field: { name: fieldName },
-      form:  {
+      form: {
         touched: { [fieldName]: false },
-        errors:  { [fieldName]: null },
+        errors: { [fieldName]: null },
       },
     }
 

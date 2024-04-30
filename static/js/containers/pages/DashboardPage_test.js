@@ -104,7 +104,7 @@ describe("DashboardPage", () => {
     const { inner } = await renderPage({
       entities: {
         enrollments: {
-          program_enrollments:    [],
+          program_enrollments: [],
           course_run_enrollments: [],
         },
         currentUser: {
@@ -152,7 +152,7 @@ describe("DashboardPage", () => {
   })
 
   //
-  ;[true, false].forEach(willExpand => {
+  ;[true, false].forEach((willExpand) => {
     it(`${
       willExpand ? "expands" : "collapses"
     } a program courses section`, async () => {
@@ -160,7 +160,7 @@ describe("DashboardPage", () => {
       const { inner } = await renderPage({
         entities: {
           enrollments: {
-            program_enrollments:      userEnrollments.program_enrollments,
+            program_enrollments: userEnrollments.program_enrollments,
             past_program_enrollments: [],
           },
         },
@@ -229,16 +229,16 @@ describe("DashboardPage", () => {
         const userRunEnrollment = mergeDeepRight(makeCourseRunEnrollment(), {
           run: {
             courseware_url: coursewareUrl,
-            start_date:     startDate,
-            end_date:       endDate,
+            start_date: startDate,
+            end_date: endDate,
           },
         })
         const { inner } = await renderPage({
           entities: {
             enrollments: {
-              program_enrollments:         [],
-              past_program_enrollments:    [],
-              course_run_enrollments:      [userRunEnrollment],
+              program_enrollments: [],
+              past_program_enrollments: [],
+              course_run_enrollments: [userRunEnrollment],
               past_course_run_enrollments: [],
             },
           },
@@ -296,9 +296,9 @@ describe("DashboardPage", () => {
       )} render link to archived course if course run ${runDescription}`, async () => {
         const pastRunEnrollments = mergeDeepRight(makeCourseRunEnrollment(), {
           run: {
-            courseware_url:  coursewareUrl,
-            start_date:      startDate,
-            end_date:        endDate,
+            courseware_url: coursewareUrl,
+            start_date: startDate,
+            end_date: endDate,
             expiration_date: expirationDate,
           },
         })
@@ -307,9 +307,9 @@ describe("DashboardPage", () => {
         const { inner } = await renderPage({
           entities: {
             enrollments: {
-              program_enrollments:         [],
-              past_program_enrollments:    [],
-              course_run_enrollments:      [],
+              program_enrollments: [],
+              past_program_enrollments: [],
+              course_run_enrollments: [],
               past_course_run_enrollments: [pastRunEnrollments],
             },
           },
@@ -344,7 +344,7 @@ describe("DashboardPage", () => {
       )
       assert.deepEqual(store.getState().ui.userNotifications, {
         "order-status": {
-          type:  "text",
+          type: "text",
           props: {
             text: `You are now enrolled in ${program.title}!`,
           },
@@ -355,12 +355,12 @@ describe("DashboardPage", () => {
     })
 
     //
-    ;[true, false].forEach(outOfTime => {
+    ;[true, false].forEach((outOfTime) => {
       it(`if a run or program is not immediately found it waits 3 seconds and ${
         outOfTime ? "errors" : "force reloads"
       }`, async () => {
         let waitResolve = null
-        const waitPromise = new Promise(resolve => {
+        const waitPromise = new Promise((resolve) => {
           waitResolve = resolve
         })
         const waitStub = helper.sandbox
@@ -392,7 +392,7 @@ describe("DashboardPage", () => {
           assert.deepEqual(store.getState().ui.userNotifications, {
             "order-status": {
               color: "danger",
-              type:  "text",
+              type: "text",
               props: {
                 text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`,
               },
@@ -421,7 +421,7 @@ describe("DashboardPage", () => {
       const { inner } = await renderPage({
         entities: {
           enrollments: {
-            program_enrollments:    programEnrollments,
+            program_enrollments: programEnrollments,
             course_run_enrollments: courseRunEnrollments,
           },
           currentUser: {
@@ -440,7 +440,7 @@ describe("DashboardPage", () => {
     const { inner } = await renderPage({
       entities: {
         enrollments: {
-          program_enrollments:    userEnrollments.program_enrollments,
+          program_enrollments: userEnrollments.program_enrollments,
           course_run_enrollments:
             userEnrollments.program_enrollments[0].course_run_enrollments.concat(
               userEnrollments.past_program_enrollments[0]

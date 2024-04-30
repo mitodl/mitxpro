@@ -71,7 +71,7 @@ export class RegisterEmailPage extends React.Component<Props> {
         [STATE_REGISTER_EMAIL]: () => {
           addUserNotification({
             "account-blocked": {
-              type:  ALERT_TYPE_TEXT,
+              type: ALERT_TYPE_TEXT,
               color: "danger",
               props: {
                 text: [
@@ -94,7 +94,7 @@ export class RegisterEmailPage extends React.Component<Props> {
         [STATE_LOGIN_PASSWORD]: () => {
           addUserNotification({
             "account-exists": {
-              type:  ALERT_TYPE_TEXT,
+              type: ALERT_TYPE_TEXT,
               color: "danger",
               props: {
                 text: accountExistsNotificationText(email),

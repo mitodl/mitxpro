@@ -18,7 +18,7 @@ export default class MixedLink extends React.Component<MixedLinkProps, *> {
 
     return (
       <AppTypeContext.Consumer>
-        {appType =>
+        {(appType) =>
           appType === SPA_APP_CONTEXT ? (
             <Link to={dest} {...otherProps}>
               {children}

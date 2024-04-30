@@ -61,7 +61,7 @@ export const B2BOrderStatusNotification = (props: ComponentProps) => {
 }
 
 export const notificationTypeMap = {
-  [ALERT_TYPE_TEXT]:             TextNotification,
-  [ALERT_TYPE_UNUSED_COUPON]:    UnusedCouponNotification,
+  [ALERT_TYPE_TEXT]: TextNotification,
+  [ALERT_TYPE_UNUSED_COUPON]: UnusedCouponNotification,
   [ALTER_TYPE_B2B_ORDER_STATUS]: B2BOrderStatusNotification,
 }

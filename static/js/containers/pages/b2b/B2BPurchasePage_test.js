@@ -53,7 +53,7 @@ describe("B2BPurchasePage", () => {
   it("loads products on mount", async () => {
     await renderPage()
     helper.handleRequestStub.withArgs("/api/products/", "POST").returns({
-      body:   undefined,
+      body: undefined,
       status: 200,
     })
   })
@@ -72,7 +72,7 @@ describe("B2BPurchasePage", () => {
     const props = inner.find("B2BPurchaseForm").props()
     assert.deepEqual(
       props.products,
-      products.filter(product => product.is_private === false),
+      products.filter((product) => product.is_private === false),
     )
   })
 
@@ -82,7 +82,7 @@ describe("B2BPurchasePage", () => {
     beforeEach(() => {
       actions = {
         setSubmitting: helper.sandbox.stub(),
-        setErrors:     helper.sandbox.stub(),
+        setErrors: helper.sandbox.stub(),
       }
     })
     ;[
@@ -117,9 +117,9 @@ describe("B2BPurchasePage", () => {
           .returns(form)
         const selectedProduct = products[1]
         const values = {
-          product:   { productId: selectedProduct.id, programRunId: null },
+          product: { productId: selectedProduct.id, programRunId: null },
           num_seats: 5,
-          email:     "email@example.com",
+          email: "email@example.com",
         }
         await inner.find("B2BPurchaseForm").prop("onSubmit")(values, actions)
         sinon.assert.calledWith(createFormStub, url, payload)
@@ -130,12 +130,12 @@ describe("B2BPurchasePage", () => {
           "POST",
           {
             body: {
-              email:              values.email,
+              email: values.email,
               product_version_id: selectedProduct.latest_version.id,
-              num_seats:          values.num_seats,
-              discount_code:      couponStatus ? couponStatus.code : null,
-              contract_number:    null,
-              run_id:             null,
+              num_seats: values.num_seats,
+              discount_code: couponStatus ? couponStatus.code : null,
+              contract_number: null,
+              run_id: null,
             },
             headers: {
               "X-CSRFTOKEN": null,
@@ -167,9 +167,9 @@ describe("B2BPurchasePage", () => {
       form.submit = submitStub
       const selectedProduct = products[1]
       const values = {
-        product:   { productId: "test+Aug_2016", programRunId: null },
+        product: { productId: "test+Aug_2016", programRunId: null },
         num_seats: 5,
-        email:     "email@example.com",
+        email: "email@example.com",
       }
       await inner.find("B2BPurchaseForm").prop("onSubmit")(values, actions)
 
@@ -190,9 +190,9 @@ describe("B2BPurchasePage", () => {
       })
       const selectedProduct = products[1]
       const values = {
-        product:   { productId: selectedProduct.id, programRunId: null },
+        product: { productId: selectedProduct.id, programRunId: null },
         num_seats: 5,
-        email:     "email@example.com",
+        email: "email@example.com",
       }
       await inner.find("B2BPurchaseForm").prop("onSubmit")(values, actions)
       sinon.assert.calledWith(actions.setErrors, errors)
@@ -206,7 +206,7 @@ describe("B2BPurchasePage", () => {
     helper.handleRequestStub
       .withArgs("/api/b2b/coupon_status/", "GET")
       .returns({
-        body:   couponStatus,
+        body: couponStatus,
         status: 200,
       })
     const payload = { pay: "load" }
@@ -217,8 +217,8 @@ describe("B2BPurchasePage", () => {
       "/api/b2b/coupon_status/",
       "GET",
       {
-        body:        payload,
-        headers:     undefined,
+        body: payload,
+        headers: undefined,
         credentials: undefined,
       },
     )

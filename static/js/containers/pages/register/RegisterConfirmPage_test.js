@@ -40,9 +40,9 @@ describe("RegisterConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         auth: {
-          state:         STATE_REGISTER_DETAILS,
+          state: STATE_REGISTER_DETAILS,
           partial_token: token,
-          extra_data:    {
+          extra_data: {
             name: "name",
           },
         },
@@ -52,7 +52,7 @@ describe("RegisterConfirmPage", () => {
     inner.instance().componentDidUpdate({}, {})
     assert.deepEqual(store.getState().ui.userNotifications, {
       "email-verified": {
-        type:  "text",
+        type: "text",
         props: {
           text: "Success! We've verified your email. Please finish your account creation below.",
         },
@@ -68,9 +68,9 @@ describe("RegisterConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         auth: {
-          state:         STATE_INVALID_LINK,
+          state: STATE_INVALID_LINK,
           partial_token: token,
-          extra_data:    {},
+          extra_data: {},
         },
       },
     })
@@ -88,9 +88,9 @@ describe("RegisterConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         auth: {
-          state:         STATE_EXISTING_ACCOUNT,
+          state: STATE_EXISTING_ACCOUNT,
           partial_token: token,
-          extra_data:    {},
+          extra_data: {},
         },
       },
     })
@@ -108,9 +108,9 @@ describe("RegisterConfirmPage", () => {
     const { inner, store } = await renderPage({
       entities: {
         auth: {
-          state:         STATE_INVALID_EMAIL,
+          state: STATE_INVALID_EMAIL,
           partial_token: token,
-          extra_data:    {},
+          extra_data: {},
         },
       },
     })

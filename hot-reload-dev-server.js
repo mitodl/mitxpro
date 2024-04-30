@@ -15,7 +15,7 @@ const app = express()
 
 const compiler = webpack(config)
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*")
   next()
 })
@@ -28,7 +28,7 @@ app.use(
 
 app.use(hotMiddleware(compiler))
 
-app.listen(port, err => {
+app.listen(port, (err) => {
   if (err) {
     return console.error(err)
   }

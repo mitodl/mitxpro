@@ -21,17 +21,17 @@ type Props = {
 }
 
 const getInitialValues = (user: User) => ({
-  name:          user.name,
-  email:         user.email,
+  name: user.name,
+  email: user.email,
   legal_address: user.legal_address,
-  profile:       {
+  profile: {
     ...user.profile,
     // Should be null but React complains about null values in form fields. So we need to convert to
     // string and then back to null on submit.
-    job_function:      pathOr("", ["job_function"], user.profile),
-    company_size:      pathOr("", ["company_size"], user.profile),
-    leadership_level:  pathOr("", ["leadership_level"], user.profile),
-    years_experience:  pathOr("", ["years_experience"], user.profile),
+    job_function: pathOr("", ["job_function"], user.profile),
+    company_size: pathOr("", ["company_size"], user.profile),
+    leadership_level: pathOr("", ["leadership_level"], user.profile),
+    years_experience: pathOr("", ["years_experience"], user.profile),
     highest_education: pathOr("", ["highest_education"], user.profile),
   },
 })

@@ -79,8 +79,8 @@ describe("TopAppBar component", () => {
     it("does not have a login/register on ecommerce bulk receipt page", () => {
       const location = {
         pathname: "/ecommerce/bulk/receipt/",
-        hash:     "",
-        search:   "",
+        hash: "",
+        search: "",
       }
       const wrapper = shallow(
         <TopAppBar
@@ -112,7 +112,7 @@ describe("TopAppBar component", () => {
           .exists(),
       )
     })
-    ;[true, false].forEach(courseDropdown => {
+    ;[true, false].forEach((courseDropdown) => {
       it("has a CatalogMenu component", () => {
         SETTINGS.course_dropdown = courseDropdown
         if (courseDropdown) {
@@ -220,8 +220,8 @@ describe("TopAppBar component", () => {
       SETTINGS.course_dropdown = true
       const location = {
         pathname: "/ecommerce/bulk/receipt/",
-        hash:     "",
-        search:   "",
+        hash: "",
+        search: "",
       }
       const wrapper = shallow(
         <TopAppBar

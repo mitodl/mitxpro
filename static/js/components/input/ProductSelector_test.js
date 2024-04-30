@@ -63,24 +63,24 @@ describe("ProductSelector", () => {
     ]
     defaultProps = {
       field: {
-        name:     "derp",
-        value:    null,
+        name: "derp",
+        value: null,
         onChange: onChangeStub,
-        onBlur:   () => {},
+        onBlur: () => {},
       },
       form: {
         touched: false,
-        errors:  {},
-        values:  {},
+        errors: {},
+        values: {},
       },
-      products:           products,
-      selectedProduct:    null,
+      products: products,
+      selectedProduct: null,
       programRunsLoading: false,
-      programRuns:        [],
-      fetchProgramRuns:   () => {},
+      programRuns: [],
+      fetchProgramRuns: () => {},
     }
   })
-  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach(productType => {
+  ;[PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM].forEach((productType) => {
     describe(`for productType ${productType}`, () => {
       it("renders product type and courseware object Select widgets", () => {
         const wrapper = shallow(<InnerProductSelector {...defaultProps} />)
@@ -153,7 +153,7 @@ describe("ProductSelector", () => {
     wrapper.setState({ productType: PRODUCT_TYPE_COURSERUN })
     const selectWrapper = wrapper.find(SelectComponentSelector).at(1)
     const courseProducts = products.filter(
-      product => product.product_type === PRODUCT_TYPE_COURSERUN,
+      (product) => product.product_type === PRODUCT_TYPE_COURSERUN,
     )
     // If multiple runs belong to the same course, that course should only show up once in the options
     const expectedOptions = [
@@ -196,7 +196,7 @@ describe("ProductSelector", () => {
   it("renders a list of course run dates if the course type is selected", () => {
     const wrapper = shallow(<InnerProductSelector {...defaultProps} />)
     wrapper.setState({
-      productType:           PRODUCT_TYPE_COURSERUN,
+      productType: PRODUCT_TYPE_COURSERUN,
       selectedCoursewareObj: {
         label: runProduct2Course1.content_object.course.title,
         value: runProduct2Course1.content_object.course.id,
@@ -207,7 +207,7 @@ describe("ProductSelector", () => {
     const expectedProducts = [runProduct1Course1, runProduct2Course1]
     assert.deepEqual(
       selectWrapper.prop("options"),
-      expectedProducts.sort(productDateSortCompare).map(product => ({
+      expectedProducts.sort(productDateSortCompare).map((product) => ({
         label: `${formatCoursewareDate(
           product.content_object.start_date,
         )} - ${formatCoursewareDate(product.content_object.end_date)}`,
@@ -223,7 +223,7 @@ describe("ProductSelector", () => {
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
-        name:  defaultProps.field.name,
+        name: defaultProps.field.name,
         value: { productId: null, programRunId: null },
       },
     })
@@ -236,7 +236,7 @@ describe("ProductSelector", () => {
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
-        name:  defaultProps.field.name,
+        name: defaultProps.field.name,
         value: { productId: programProduct.id, programRunId: null },
       },
     })
@@ -250,7 +250,7 @@ describe("ProductSelector", () => {
     const props = Object.assign(defaultProps, { programRuns })
     const wrapper = shallow(<InnerProductSelector {...props} />)
     wrapper.setState({
-      productType:           PRODUCT_TYPE_PROGRAM,
+      productType: PRODUCT_TYPE_PROGRAM,
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
         value: programProduct.id,
@@ -259,7 +259,7 @@ describe("ProductSelector", () => {
     const selectWrapper = wrapper.find(SelectComponentSelector).at(2)
     assert.deepEqual(
       selectWrapper.prop("options"),
-      programRuns.sort(programRunDateSortCompare).map(programRun => ({
+      programRuns.sort(programRunDateSortCompare).map((programRun) => ({
         label: `${formatCoursewareDate(
           programRun.start_date,
         )} - ${formatCoursewareDate(programRun.end_date)}`,
@@ -276,7 +276,7 @@ describe("ProductSelector", () => {
     const props = Object.assign(defaultProps, { programRuns })
     const wrapper = shallow(<InnerProductSelector {...props} />)
     wrapper.setState({
-      productType:           PRODUCT_TYPE_PROGRAM,
+      productType: PRODUCT_TYPE_PROGRAM,
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
         value: programProduct.id,
@@ -293,7 +293,7 @@ describe("ProductSelector", () => {
     const props = Object.assign(defaultProps, { programRuns })
     const wrapper = shallow(<InnerProductSelector {...props} />)
     wrapper.setState({
-      productType:           PRODUCT_TYPE_PROGRAM,
+      productType: PRODUCT_TYPE_PROGRAM,
       selectedCoursewareObj: {
         label: programProduct.latest_version.content_title,
         value: programProduct.id,
@@ -302,7 +302,7 @@ describe("ProductSelector", () => {
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
-        name:  defaultProps.field.name,
+        name: defaultProps.field.name,
         value: { productId: programProduct.id, programRunId: null },
       },
     })
@@ -311,7 +311,7 @@ describe("ProductSelector", () => {
     dateSelectWrapper.prop("onChange")(option)
     sinon.assert.calledWith(onChangeStub, {
       target: {
-        name:  defaultProps.field.name,
+        name: defaultProps.field.name,
         value: { productId: programProduct.id, programRunId: option.value },
       },
     })
@@ -321,7 +321,7 @@ describe("ProductSelector", () => {
     const wrapper = shallow(<InnerProductSelector {...defaultProps} />)
     const product = runProduct1Course1
     wrapper.setState({
-      productType:           PRODUCT_TYPE_COURSERUN,
+      productType: PRODUCT_TYPE_COURSERUN,
       selectedCoursewareObj: {
         label: product.content_object.course.title,
         value: product.content_object.course.id,
@@ -329,7 +329,7 @@ describe("ProductSelector", () => {
     })
     sinon.assert.calledWith(onChangeStub, {
       target: {
-        name:  defaultProps.field.name,
+        name: defaultProps.field.name,
         value: { productId: null, programRunId: null },
       },
     })
@@ -338,7 +338,7 @@ describe("ProductSelector", () => {
     dateSelectWrapper.prop("onChange")(option)
     sinon.assert.calledWith(onChangeStub, {
       target: {
-        name:  defaultProps.field.name,
+        name: defaultProps.field.name,
         value: { productId: option.value, programRunId: null },
       },
     })

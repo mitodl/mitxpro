@@ -11,16 +11,16 @@ const hotEntry = (host, port) =>
 
 const insertHotReload = (host, port, entries) =>
   R.map(
-    R.compose(R.flatten, v => [v].concat(hotEntry(host, port))),
+    R.compose(R.flatten, (v) => [v].concat(hotEntry(host, port))),
     entries,
   )
 
 const devConfig = Object.assign({}, config, {
   context: __dirname,
-  mode:    "development",
+  mode: "development",
   devtool: "inline-source-map",
-  output:  {
-    path:     path.resolve("./static/bundles/"),
+  output: {
+    path: path.resolve("./static/bundles/"),
     filename: "[name].js",
   },
   plugins: [
@@ -28,16 +28,16 @@ const devConfig = Object.assign({}, config, {
     new BundleTracker({ filename: "./webpack-stats.json" }),
   ],
   optimization: {
-    chunkIds:    "named",
-    moduleIds:   "named",
+    chunkIds: "named",
+    moduleIds: "named",
     splitChunks: {
-      chunks:                 "all",
-      minChunks:              2,
+      chunks: "all",
+      minChunks: 2,
       automaticNameDelimiter: "-",
-      cacheGroups:            {
+      cacheGroups: {
         common: {
-          test:   /[\\/]node_modules[\\/]/,
-          name:   "common",
+          test: /[\\/]node_modules[\\/]/,
+          name: "common",
           chunks: "all",
         },
       },
@@ -50,7 +50,7 @@ devConfig.module.rules = [
   ...config.module.rules,
   {
     test: /\.css$|\.scss$/,
-    use:  [
+    use: [
       { loader: "style-loader" },
       { loader: "css-loader" },
       { loader: "postcss-loader" },

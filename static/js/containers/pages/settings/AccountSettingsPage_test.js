@@ -80,17 +80,17 @@ describe("AccountSettingsPage", () => {
         {
           body: {
             current_password: oldPassword,
-            new_password:     newPassword,
+            new_password: newPassword,
           },
           credentials: undefined,
-          headers:     { "X-CSRFTOKEN": null },
+          headers: { "X-CSRFTOKEN": null },
         },
       )
 
       assert.lengthOf(helper.browserHistory, 2)
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
-        search:   "",
+        search: "",
       })
       sinon.assert.calledWith(setSubmittingStub, false)
       sinon.assert.calledWith(resetFormStub)
@@ -98,7 +98,7 @@ describe("AccountSettingsPage", () => {
       const { ui } = store.getState()
       assert.deepEqual(ui.userNotifications, {
         "password-change": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: expectedColor,
           props: {
             text: expectedMessage,
@@ -150,17 +150,17 @@ describe("AccountSettingsPage", () => {
         {
           body: {
             new_email: email,
-            password:  undefined,
+            password: undefined,
           },
           credentials: undefined,
-          headers:     { "X-CSRFTOKEN": null },
+          headers: { "X-CSRFTOKEN": null },
         },
       )
 
       assert.lengthOf(helper.browserHistory, 2)
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
-        search:   "",
+        search: "",
       })
       sinon.assert.calledWith(setSubmittingStub, false)
       sinon.assert.calledWith(resetFormStub)
@@ -168,7 +168,7 @@ describe("AccountSettingsPage", () => {
       const { ui } = store.getState()
       assert.deepEqual(ui.userNotifications, {
         "email-change": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: expectedColor,
           props: {
             text: expectedMessage,

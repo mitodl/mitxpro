@@ -59,7 +59,7 @@ describe("RegisterEmailPage", () => {
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state:        STATE_ERROR,
+        state: STATE_ERROR,
         field_errors: fieldErrors,
       }),
     })
@@ -95,7 +95,7 @@ describe("RegisterEmailPage", () => {
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.login.password,
-      search:   "",
+      search: "",
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)
@@ -104,7 +104,7 @@ describe("RegisterEmailPage", () => {
 
     assert.deepEqual(ui.userNotifications, {
       "account-exists": {
-        type:  ALERT_TYPE_TEXT,
+        type: ALERT_TYPE_TEXT,
         color: "danger",
         props: {
           text: `You already have an account with ${email}. Enter password to sign in.`,
@@ -136,7 +136,7 @@ describe("RegisterEmailPage", () => {
 
     assert.deepEqual(ui.userNotifications, {
       "account-blocked": {
-        type:  ALERT_TYPE_TEXT,
+        type: ALERT_TYPE_TEXT,
         color: "danger",
         props: {
           text: [
@@ -176,7 +176,7 @@ describe("RegisterEmailPage", () => {
     assert.lengthOf(helper.browserHistory, 2)
     assert.include(helper.browserHistory.location, {
       pathname: routes.register.confirmSent,
-      search:   `?email=${encodeURIComponent(email)}`,
+      search: `?email=${encodeURIComponent(email)}`,
     })
     sinon.assert.notCalled(setErrorsStub)
     sinon.assert.calledWith(setSubmittingStub, false)

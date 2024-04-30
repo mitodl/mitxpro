@@ -44,7 +44,7 @@ describe("PrivateRoute component", () => {
           },
         },
         {
-          path:      fakeRoutePath,
+          path: fakeRoutePath,
           component: DummyComponent,
         },
       )

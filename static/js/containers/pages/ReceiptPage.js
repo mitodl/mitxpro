@@ -57,7 +57,7 @@ export class ReceiptPage extends React.Component<Props> {
 
       if (countries) {
         const country = countries.find(
-          element => element.code === orderReceipt.purchaser.country,
+          (element) => element.code === orderReceipt.purchaser.country,
         )
         if (country) {
           countryName = country.name
@@ -154,7 +154,7 @@ export class ReceiptPage extends React.Component<Props> {
                     <dl>
                       <dt>Address:</dt>
                       <dd>
-                        {orderReceipt.purchaser.street_address.map(line => (
+                        {orderReceipt.purchaser.street_address.map((line) => (
                           <div
                             className="value low-line-height"
                             key={line}
@@ -198,39 +198,39 @@ export class ReceiptPage extends React.Component<Props> {
                     <div className="receipt-col">
                       {orderReceipt.receipt &&
                       orderReceipt.receipt.payment_method === "card" ? (
-                          <div>
-                            <dl>
-                              <dt>Name:</dt>
-                              <dd>{orderReceipt.receipt.name}</dd>
-                            </dl>
-                            <dl>
-                              <dt>Payment Method:</dt>
-                              <dd id="paymentMethod">
-                                {orderReceipt.receipt.card_type
-                                  ? `${orderReceipt.receipt.card_type} | `
-                                  : null}
-                                {orderReceipt.receipt.card_number
-                                  ? orderReceipt.receipt.card_number
-                                  : null}
-                              </dd>
-                            </dl>
-                          </div>
-                        ) : orderReceipt.receipt.payment_method === "paypal" ? (
-                          <div>
-                            <dl>
-                              {orderReceipt.receipt.bill_to_email ? (
-                                <dl>
-                                  <dt>Email:</dt>
-                                  <dd>{orderReceipt.receipt.bill_to_email}</dd>
-                                </dl>
-                              ) : null}
-                            </dl>
-                            <dl>
-                              <dt>Payment Method:</dt>
-                              <dd id="paymentMethod">Paypal</dd>
-                            </dl>
-                          </div>
-                        ) : null}
+                        <div>
+                          <dl>
+                            <dt>Name:</dt>
+                            <dd>{orderReceipt.receipt.name}</dd>
+                          </dl>
+                          <dl>
+                            <dt>Payment Method:</dt>
+                            <dd id="paymentMethod">
+                              {orderReceipt.receipt.card_type
+                                ? `${orderReceipt.receipt.card_type} | `
+                                : null}
+                              {orderReceipt.receipt.card_number
+                                ? orderReceipt.receipt.card_number
+                                : null}
+                            </dd>
+                          </dl>
+                        </div>
+                      ) : orderReceipt.receipt.payment_method === "paypal" ? (
+                        <div>
+                          <dl>
+                            {orderReceipt.receipt.bill_to_email ? (
+                              <dl>
+                                <dt>Email:</dt>
+                                <dd>{orderReceipt.receipt.bill_to_email}</dd>
+                              </dl>
+                            ) : null}
+                          </dl>
+                          <dl>
+                            <dt>Payment Method:</dt>
+                            <dd id="paymentMethod">Paypal</dd>
+                          </dl>
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
                   {orderReceipt.coupon ? (
@@ -263,7 +263,7 @@ export class ReceiptPage extends React.Component<Props> {
                       </tr>
                     </thead>
                     <tbody>
-                      {orderReceipt.lines.map(line => {
+                      {orderReceipt.lines.map((line) => {
                         const startDate = parseDateString(line.start_date)
                         const endDate = parseDateString(line.end_date)
                         return (
@@ -342,16 +342,16 @@ export class ReceiptPage extends React.Component<Props> {
   }
 }
 
-const mapStateToProps = state => ({
-  currentUser:  state.entities.currentUser,
-  countries:    state.entities.countries,
+const mapStateToProps = (state) => ({
+  currentUser: state.entities.currentUser,
+  countries: state.entities.countries,
   orderReceipt: state.entities.orderReceipt,
   isLoading:
     pathOr(true, ["queries", "countries", "isPending"], state) ||
     pathOr(true, ["queries", "orderReceipt", "isPending"], state),
 })
 
-const mapPropsToConfigs = props => [
+const mapPropsToConfigs = (props) => [
   queries.users.countriesQuery(),
   queries.ecommerce.orderReceipt(props.match.params.orderId),
 ]

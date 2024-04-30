@@ -23,7 +23,7 @@ const updateResult = {
 
 const DEFAULT_OPTIONS = {
   options: {
-    method:  "PATCH",
+    method: "PATCH",
     headers: {
       "X-CSRFTOKEN": getCookie("csrftoken"),
     },
@@ -32,25 +32,25 @@ const DEFAULT_OPTIONS = {
 
 export default {
   currentUserQuery: () => ({
-    url:       "/api/users/me",
+    url: "/api/users/me",
     transform: transformCurrentUser,
-    update:    updateResult,
+    update: updateResult,
   }),
   countriesSelector: pathOr(null, ["entities", "countries"]),
-  countriesQuery:    () => ({
-    queryKey:  "countries",
-    url:       "/api/countries/",
+  countriesQuery: () => ({
+    queryKey: "countries",
+    url: "/api/countries/",
     transform: objOf("countries"),
-    update:    {
+    update: {
       countries: (prev: Array<Country>, next: Array<Country>) => next,
     },
   }),
   editProfileMutation: (profileData: UserProfileForm) => ({
     ...DEFAULT_OPTIONS,
     transform: transformCurrentUser,
-    update:    updateResult,
-    url:       "/api/users/me",
-    body:      {
+    update: updateResult,
+    url: "/api/users/me",
+    body: {
       ...profileData,
     },
   }),

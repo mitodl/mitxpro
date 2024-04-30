@@ -30,16 +30,16 @@ global.document = window.document
 global.navigator = {
   userAgent: "node.js",
 }
-global.requestAnimationFrame = function(callback) {
+global.requestAnimationFrame = function (callback) {
   return setTimeout(callback, 0)
 }
-global.cancelAnimationFrame = function(id) {
+global.cancelAnimationFrame = function (id) {
   clearTimeout(id)
 }
 copyProps(window, global)
 
 Object.defineProperty(window, "location", {
-  set: value => {
+  set: (value) => {
     if (!value.startsWith("http")) {
       value = `http://fake${value}`
     }

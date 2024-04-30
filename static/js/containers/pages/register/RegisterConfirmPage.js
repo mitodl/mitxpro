@@ -46,7 +46,7 @@ export class RegisterConfirmPage extends React.Component<Props> {
         [STATE_REGISTER_DETAILS]: () => {
           addUserNotification({
             "email-verified": {
-              type:  ALERT_TYPE_TEXT,
+              type: ALERT_TYPE_TEXT,
               props: {
                 text: "Success! We've verified your email. Please finish your account creation below.",
               },
@@ -81,7 +81,7 @@ export class RegisterConfirmPage extends React.Component<Props> {
 }
 
 const mapStateToProps = createStructuredSelector({
-  auth:     authSelector,
+  auth: authSelector,
   qsParams: qsSelector,
 })
 

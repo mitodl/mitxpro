@@ -18,17 +18,17 @@ type Props = {
 }
 
 const INITIAL_VALUES = {
-  name:          "",
-  password:      "",
+  name: "",
+  password: "",
   legal_address: {
-    first_name:         "",
-    last_name:          "",
-    street_address:     ["", ""],
-    city:               "",
-    country:            "",
+    first_name: "",
+    last_name: "",
+    street_address: ["", ""],
+    city: "",
+    country: "",
     state_or_territory: "",
-    postal_code:        "",
-    vat_id:             "",
+    postal_code: "",
+    vat_id: "",
   },
 }
 

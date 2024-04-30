@@ -26,7 +26,7 @@ describe("EditProfilePage", () => {
       {
         entities: {
           currentUser: user,
-          countries:   countries,
+          countries: countries,
         },
       },
       {},
@@ -46,7 +46,7 @@ describe("EditProfilePage", () => {
     const { inner } = await renderPage({
       entities: {
         currentUser: makeAnonymousUser(),
-        countries:   countries,
+        countries: countries,
       },
     })
     assert.isFalse(inner.find("EditProfileForm").exists())
@@ -112,9 +112,9 @@ describe("EditProfilePage", () => {
         "/api/users/me",
         "PATCH",
         {
-          body:        expectedPayload,
+          body: expectedPayload,
           credentials: undefined,
-          headers:     { "X-CSRFTOKEN": null },
+          headers: { "X-CSRFTOKEN": null },
         },
       )
       sinon.assert.calledWith(setSubmitting, false)

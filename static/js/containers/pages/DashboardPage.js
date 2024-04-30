@@ -59,19 +59,19 @@ const NUM_MILLIS_PER_POLL = 3000
 export class DashboardPage extends React.Component<Props, State> {
   state = {
     collapseVisible: {},
-    now:             moment(),
-    timeoutActive:   false,
+    now: moment(),
+    timeoutActive: false,
   }
 
   componentDidMount() {
     if (CSOURCE_PAYLOAD && SETTINGS.gtmTrackingID) {
       dataLayer.push({
-        event:            "purchase",
-        transactionId:    CSOURCE_PAYLOAD.transaction_id,
+        event: "purchase",
+        transactionId: CSOURCE_PAYLOAD.transaction_id,
         transactionTotal: CSOURCE_PAYLOAD.transaction_total,
-        productType:      CSOURCE_PAYLOAD.product_type,
-        coursewareId:     CSOURCE_PAYLOAD.courseware_id,
-        referenceNumber:  CSOURCE_PAYLOAD.reference_number,
+        productType: CSOURCE_PAYLOAD.product_type,
+        coursewareId: CSOURCE_PAYLOAD.courseware_id,
+        referenceNumber: CSOURCE_PAYLOAD.reference_number,
       })
       CSOURCE_PAYLOAD = null
     }
@@ -117,7 +117,7 @@ export class DashboardPage extends React.Component<Props, State> {
 
       addUserNotification({
         "order-status": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           props: {
             text: `You are now enrolled in ${item.title}!`,
           },
@@ -137,7 +137,7 @@ export class DashboardPage extends React.Component<Props, State> {
     } else {
       addUserNotification({
         "order-status": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: "danger",
           props: {
             text: `Something went wrong. Please contact support at ${SETTINGS.support_email}.`,
@@ -236,14 +236,14 @@ export class DashboardPage extends React.Component<Props, State> {
               <div className="archived-course-link col-lg-7 col-md-8">
                 {dateSummary.archived &&
                 courseRunEnrollment.run.courseware_url ? (
-                    <a
-                      href={courseRunEnrollment.run.courseware_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                  <a
+                    href={courseRunEnrollment.run.courseware_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     View Archived Course
-                    </a>
-                  ) : null}
+                  </a>
+                ) : null}
               </div>
               <div className="d-sm-flex justify-content-sm-between col-12 mt-3 mb-2">
                 {courseRunEnrollment.receipt ? (
@@ -266,23 +266,23 @@ export class DashboardPage extends React.Component<Props, State> {
                     {this.isDigitalCredentialSupported(
                       courseRunEnrollment.run.courseware_id,
                     ) ? (
-                        <div className="digital-credential-link">
-                          <a
-                            data-toggle="modal"
-                            href={`#${courseDialogIdentifier}`}
-                            className="read-more"
-                          >
-                            {" "}
+                      <div className="digital-credential-link">
+                        <a
+                          data-toggle="modal"
+                          href={`#${courseDialogIdentifier}`}
+                          className="read-more"
+                        >
+                          {" "}
                           Digital Credential
-                          </a>
-                          {this.renderDigitalCredentialDialog(
+                        </a>
+                        {this.renderDigitalCredentialDialog(
                           // $FlowFixMe: Flow thinks certificate can be null or undefined but it can't be
-                            courseRunEnrollment.certificate.uuid,
-                            courseDialogIdentifier,
-                            true,
-                          )}
-                        </div>
-                      ) : null}
+                          courseRunEnrollment.certificate.uuid,
+                          courseDialogIdentifier,
+                          true,
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -409,23 +409,23 @@ export class DashboardPage extends React.Component<Props, State> {
                   {this.isDigitalCredentialSupported(
                     programEnrollment.program.readable_id,
                   ) ? (
-                      <div className="digital-credential-link">
-                        <a
-                          data-toggle="modal"
-                          href={`#${programDialogIdentifier}`}
-                          className="read-more"
-                        >
-                          {" "}
+                    <div className="digital-credential-link">
+                      <a
+                        data-toggle="modal"
+                        href={`#${programDialogIdentifier}`}
+                        className="read-more"
+                      >
+                        {" "}
                         Digital Credential
-                        </a>
-                        {this.renderDigitalCredentialDialog(
+                      </a>
+                      {this.renderDigitalCredentialDialog(
                         // $FlowFixMe: Flow thinks certificate can be null or undefined but it can't be
-                          programEnrollment.certificate.uuid,
-                          programDialogIdentifier,
-                          false,
-                        )}
-                      </div>
-                    ) : null}
+                        programEnrollment.certificate.uuid,
+                        programDialogIdentifier,
+                        false,
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -542,7 +542,7 @@ export class DashboardPage extends React.Component<Props, State> {
                       onClick={() => {
                         this.props
                           .requestDigitalCredentials(certificateUUID, isCourse)
-                          .then(response => {
+                          .then((response) => {
                             Promise.resolve(
                               (window.location = response.body.deep_link_url),
                             )

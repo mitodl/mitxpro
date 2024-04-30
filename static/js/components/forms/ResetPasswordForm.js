@@ -22,7 +22,7 @@ const ResetPasswordForm = ({ onSubmit }: Props) => (
     onSubmit={onSubmit}
     validationSchema={resetPasswordFormValidation}
     initialValues={{
-      newPassword:   "",
+      newPassword: "",
       reNewPassword: "",
     }}
     render={({ isSubmitting }) => (
