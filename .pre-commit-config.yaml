@@ -4,8 +4,9 @@
 ci:
   skip:
     # Because these are local hooks it seems like they won't easily run in pre-commit CI
+    - prettier
     - eslint
-    - scss-lint
+    - stylelint
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -18,25 +19,6 @@ repos:
       - id: check-merge-conflict
       - id: check-toml
       - id: debug-statements
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
-    hooks:
-      - id: prettier
-        types_or:
-          [javascript, jsx, ts, tsx, json, scss, sass, css, yaml, markdown]
-        args:
-          - --no-config
-          - --no-semi
-        additional_dependencies:
-          - prettier
-          - flow
-      - id: prettier
-        alias: prettier-django
-        name: prettier-django
-        types: [html]
-        additional_dependencies:
-          - prettier
-          - prettier-plugin-django-alpine
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.8.0-1
     hooks:
@@ -68,7 +50,7 @@ repos:
           - --exclude-files
           - ".*_test.js"
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.3.7"
+    rev: "v0.4.0"
     hooks:
       - id: ruff-format
       - id: ruff
@@ -77,23 +59,42 @@ repos:
           - --fix
   - repo: local
     hooks:
+      - id: prettier
+        name: Prettier
+        language: node
+        entry: yarn
+        args: [run, prettier, --write, --ignore-unknown]
+        types_or:
+          [
+            javascript,
+            jsx,
+            ts,
+            tsx,
+            json,
+            scss,
+            sass,
+            css,
+            yaml,
+            markdown,
+            html,
+          ]
       - id: eslint
         name: eslint
         description: "Lint JS/TS files and apply automatic fixes"
-        entry: bash -c "npx eslint --fix $@"
+        entry: yarn
         language: node
         types_or: [javascript, jsx, ts, tsx]
-        args: []
+        args: [run, eslint, --fix, --quiet]
         exclude: "(node_modules/|.yarn/)"
         require_serial: false
-      - id: scss-lint
-        name: scss-lint
+      - id: stylelint
+        name: stylelint
         description: "Lint SCSS files"
-        entry: bash -c "npx stylelint --allow-empty-input --fix $@"
+        entry: yarn
         language: node
-        types: [scss]
-        args: []
-        exclude: node_modules/
+        types_or: [scss, css, sass]
+        args: [run, stylelint, --allow-empty-input, --fix]
+        exclude: "(node_modules/|static/css/vendor/)"
         require_serial: false
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.10.0.1

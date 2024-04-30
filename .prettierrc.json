@@ -1,6 +1,6 @@
 {
   "$schema": "http://json.schemastore.org/prettierrc",
-  "semi": false,
+  "semi": true,
   "overrides": [
     {
       "files": "**/*.js",
