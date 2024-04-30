@@ -130,7 +130,7 @@ jobs:
           SECRET_KEY: local_unsafe_key  # pragma: allowlist secret
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@3
+        uses: codecov/codecov-action@v3
         with:
           file: ./coverage.xml
 
