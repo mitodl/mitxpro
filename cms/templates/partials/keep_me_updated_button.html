@@ -111,23 +111,23 @@
                   '#confirmation-modal-{{unique_identifier}} .modal-title',
                 ).text(
                   'Got it! Thanks, ' + data.submissionValues.firstname + '.',
-                )
+                );
               }
-              $('#signup-modal-{{unique_identifier}}').modal('hide')
-              $('#confirmation-modal-{{unique_identifier}}').modal('show')
-              resetForm()
+              $('#signup-modal-{{unique_identifier}}').modal('hide');
+              $('#confirmation-modal-{{unique_identifier}}').modal('show');
+              resetForm();
             }
           },
-        })
+        });
       }
     }
 
     function resetForm() {
-      $('#marketing-hubspot-form-{{unique_identifier}}').html('')
-      renderForm()
+      $('#marketing-hubspot-form-{{unique_identifier}}').html('');
+      renderForm();
     }
 
-    renderForm()
-  })
+    renderForm();
+  });
 </script>
 {% endif %}

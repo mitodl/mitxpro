@@ -1,10 +1,10 @@
 // @flow
-import casual from "casual-browserify"
-import { range } from "ramda"
-import Decimal from "decimal.js-light"
+import casual from "casual-browserify";
+import { range } from "ramda";
+import Decimal from "decimal.js-light";
 
-import { makeCourse } from "./course"
-import { incrementer } from "./util"
+import { makeCourse } from "./course";
+import { incrementer } from "./util";
 
 import type {
   BasketItem,
@@ -23,20 +23,20 @@ import type {
   CourseRunContentObject,
   CourseRunProduct,
   BaseProductVersion,
-} from "../flow/ecommerceTypes"
+} from "../flow/ecommerceTypes";
 import {
   DISCOUNT_TYPE_PERCENT_OFF,
   ENROLLABLE_ITEM_ID_SEPARATOR,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM,
-} from "../constants"
+} from "../constants";
 
-const genBasketItemId = incrementer()
-const genBasketItemObjectId = incrementer()
-const genProductId = incrementer()
-const genDataConsentUserId = incrementer()
-const genProgramRunId = incrementer()
-const genProductContentObjectId = incrementer()
+const genBasketItemId = incrementer();
+const genBasketItemObjectId = incrementer();
+const genProductId = incrementer();
+const genDataConsentUserId = incrementer();
+const genProgramRunId = incrementer();
+const genProductContentObjectId = incrementer();
 
 export const makeDataConsent = (): DataConsentUser => ({
   // $FlowFixMe: flow doesn't understand generators well
@@ -44,33 +44,33 @@ export const makeDataConsent = (): DataConsentUser => ({
   company: makeCompany(),
   consent_date: casual.moment.format(),
   consent_text: casual.text,
-})
+});
 
-const genRunTagNumber = incrementer()
+const genRunTagNumber = incrementer();
 export const makeItem = (
   productType: ?string,
   readableId: ?string,
 ): BasketItem => {
   const basketItemType =
     productType ||
-    casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM])
-  const numCourses = basketItemType === PRODUCT_TYPE_COURSERUN ? 1 : 4
-  const courses = range(0, numCourses).map(() => makeCourse())
-  const runIds = courses.map((course) => course.courseruns[0].id)
-  let productReadableId = casual.text
+    casual.random_element([PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM]);
+  const numCourses = basketItemType === PRODUCT_TYPE_COURSERUN ? 1 : 4;
+  const courses = range(0, numCourses).map(() => makeCourse());
+  const runIds = courses.map((course) => course.courseruns[0].id);
+  let productReadableId = casual.text;
   if (readableId) {
-    productReadableId = readableId
+    productReadableId = readableId;
   }
 
-  let objectId = genBasketItemObjectId.next().value
+  let objectId = genBasketItemObjectId.next().value;
   if (productType === PRODUCT_TYPE_COURSERUN) {
-    const choices = []
+    const choices = [];
     for (const course of courses) {
       for (const run of course.courseruns) {
-        choices.push(run.id)
+        choices.push(run.id);
       }
     }
-    objectId = casual.random_element(choices)
+    objectId = casual.random_element(choices);
   }
 
   return {
@@ -91,31 +91,31 @@ export const makeItem = (
     run_tag: casual.word.concat(genRunTagNumber.next().value),
     created_on: casual.moment.format(),
     start_date: casual.moment.format(),
-  }
-}
+  };
+};
 
 export const makeCouponSelection = (item: ?BasketItem): CouponSelection => ({
   code: casual.word,
   amount: String(casual.double(0, 1)),
   discount_type: DISCOUNT_TYPE_PERCENT_OFF,
   targets: item ? [item.id] : [],
-})
+});
 
 export const makeBasketResponse = (itemType: ?string): BasketResponse => {
-  const item = makeItem(itemType)
+  const item = makeItem(itemType);
   return {
     items: [item],
     coupons: [makeCouponSelection(item)],
     data_consents: [makeDataConsent()],
     tax_info: makeTaxInfo(),
-  }
-}
+  };
+};
 
 export const makeTaxInfo = (): TaxInfo => ({
   country_code: "",
   tax_rate: 0,
   tax_rate_name: "",
-})
+});
 
 export const makeProductVersion = (
   productType: string = PRODUCT_TYPE_COURSERUN,
@@ -130,7 +130,7 @@ export const makeProductVersion = (
   object_id: casual.random,
   // $FlowFixMe
   product_id: genProductId.next().value,
-})
+});
 
 export const makeProgramContentObject = (
   readableId: string,
@@ -139,12 +139,12 @@ export const makeProgramContentObject = (
   id: genProductContentObjectId.next().value,
   readable_id: readableId,
   title: casual.word,
-})
+});
 
 export const makeCourseRunContentObject = (
   readableId: string,
 ): CourseRunContentObject => {
-  const course = makeCourse()
+  const course = makeCourse();
   return {
     // $FlowFixMe: flow doesn't understand generators well
     id: genProductContentObjectId.next().value,
@@ -155,8 +155,8 @@ export const makeCourseRunContentObject = (
     enrollment_start: casual.moment.format("2020-01-01"),
     enrollment_end: casual.moment.format("2050-12-12"),
     course: { id: course.id, title: course.title },
-  }
-}
+  };
+};
 
 export const makeCourseRunProduct = (
   readableId: string = casual.text,
@@ -168,7 +168,7 @@ export const makeCourseRunProduct = (
   is_private: casual.boolean,
   content_object: makeCourseRunContentObject(readableId),
   latest_version: makeItem(PRODUCT_TYPE_COURSERUN, readableId),
-})
+});
 
 export const makeProgramProduct = (
   readableId: string = casual.text,
@@ -180,7 +180,7 @@ export const makeProgramProduct = (
   is_private: casual.boolean,
   content_object: makeProgramContentObject(readableId),
   latest_version: makeItem(PRODUCT_TYPE_PROGRAM, readableId),
-})
+});
 
 export const makeProgramRun = (
   program: BaseProductVersion,
@@ -193,7 +193,7 @@ export const makeProgramRun = (
   }`,
   start_date: casual.moment.format("2050-01-01"),
   end_date: casual.moment.format("2050-12-12"),
-})
+});
 
 export const makePastProgramRun = (
   program: BaseProductVersion,
@@ -206,27 +206,27 @@ export const makePastProgramRun = (
   }`,
   start_date: casual.moment.format("2019-01-01"),
   end_date: casual.moment.format("2050-12-12"),
-})
+});
 
-const genCompanyId = incrementer()
+const genCompanyId = incrementer();
 export const makeCompany = (): Company => ({
   // $FlowFixMe
   id: genCompanyId.next().value,
   name: casual.word,
   created_on: casual.moment.format(),
   updated_on: casual.moment.format(),
-})
+});
 
-const genCouponPaymentId = incrementer()
+const genCouponPaymentId = incrementer();
 export const makeCouponPayment = (): CouponPayment => ({
   // $FlowFixMe
   id: genCouponPaymentId.next().value,
   name: casual.word,
   created_on: casual.moment.format(),
   updated_on: casual.moment.format(),
-})
+});
 
-const genCouponPaymentVersionId = incrementer()
+const genCouponPaymentVersionId = incrementer();
 export const makeCouponPaymentVersion = (
   isPromo: boolean = false,
 ): CouponPaymentVersion => ({
@@ -254,18 +254,18 @@ export const makeCouponPaymentVersion = (
   created_on: casual.moment.format(),
   updated_on: casual.moment.format(),
   include_future_runs: true,
-})
+});
 
 export const makeB2BOrderStatus = (): B2BOrderStatus => {
-  const itemPrice = new Decimal(casual.integer(0, 1000))
-  const numSeats = casual.integer(0, 1000)
-  const contractNumber = casual.integer(1000, 5000)
+  const itemPrice = new Decimal(casual.integer(0, 1000));
+  const numSeats = casual.integer(0, 1000);
+  const contractNumber = casual.integer(1000, 5000);
   const discount = casual.coin_flip
     ? new Decimal(casual.double(0, 1)).times(numSeats).times(itemPrice)
-    : null
-  let totalPrice = itemPrice.times(numSeats)
+    : null;
+  let totalPrice = itemPrice.times(numSeats);
   if (discount !== null) {
-    totalPrice = totalPrice.minus(discount)
+    totalPrice = totalPrice.minus(discount);
   }
 
   return {
@@ -282,11 +282,11 @@ export const makeB2BOrderStatus = (): B2BOrderStatus => {
     receipt_data: { card_type: null, card_number: null },
     contract_number: contractNumber,
     customer_name: "Some Name",
-  }
-}
+  };
+};
 
 export const makeB2BCouponStatus = (): B2BCouponStatusResponse => ({
   code: casual.text,
   product_id: makeCourseRunProduct().id,
   discount_percent: new Decimal(casual.integer(0, 100)).dividedBy(100),
-})
+});

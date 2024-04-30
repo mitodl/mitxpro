@@ -1,24 +1,24 @@
 // @flow
-import { pathOr, nthArg } from "ramda"
+import { pathOr, nthArg } from "ramda";
 
-import { FLOW_LOGIN, FLOW_REGISTER } from "../auth"
+import { FLOW_LOGIN, FLOW_REGISTER } from "../auth";
 
-import { getCookie } from "../api"
+import { getCookie } from "../api";
 
 import type {
   AuthResponse,
   LegalAddress,
   ProfileForm,
-} from "../../flow/authTypes"
+} from "../../flow/authTypes";
 
-import type { updateEmailResponse } from "../../flow/authTypes"
+import type { updateEmailResponse } from "../../flow/authTypes";
 
-export const authSelector = (state: any) => state.entities.auth
+export const authSelector = (state: any) => state.entities.auth;
 
-export const updateEmailSelector = pathOr(null, ["entities", "updateEmail"])
+export const updateEmailSelector = pathOr(null, ["entities", "updateEmail"]);
 
 // uses the next piece of state which is the second argument
-const nextState = nthArg(1)
+const nextState = nthArg(1);
 
 const DEFAULT_OPTIONS = {
   transform: (auth: AuthResponse) => ({ auth }),
@@ -28,7 +28,7 @@ const DEFAULT_OPTIONS = {
   options: {
     method: "POST",
   },
-}
+};
 
 export default {
   loginEmailMutation: (email: string, next: ?string) => ({
@@ -171,4 +171,4 @@ export default {
       confirmed: true,
     },
   }),
-}
+};

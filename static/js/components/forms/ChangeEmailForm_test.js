@@ -1,46 +1,46 @@
 // @flow
-import React from "react"
-import sinon from "sinon"
-import { assert } from "chai"
-import { shallow } from "enzyme"
-import { Formik } from "formik"
+import React from "react";
+import sinon from "sinon";
+import { assert } from "chai";
+import { shallow } from "enzyme";
+import { Formik } from "formik";
 
-import ChangeEmailForm from "./ChangeEmailForm"
+import ChangeEmailForm from "./ChangeEmailForm";
 
-import { findFormikFieldByName } from "../../lib/test_utils"
+import { findFormikFieldByName } from "../../lib/test_utils";
 
-import { makeUser } from "../../factories/user"
+import { makeUser } from "../../factories/user";
 
 describe("ChangeEmailForm", () => {
-  let sandbox, onSubmitStub
+  let sandbox, onSubmitStub;
 
-  const user = makeUser()
+  const user = makeUser();
 
   const renderForm = () =>
-    shallow(<ChangeEmailForm onSubmit={onSubmitStub} user={user} />)
+    shallow(<ChangeEmailForm onSubmit={onSubmitStub} user={user} />);
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
-    onSubmitStub = sandbox.stub()
-  })
+    sandbox = sinon.createSandbox();
+    onSubmitStub = sandbox.stub();
+  });
 
   it("passes onSubmit to Formik", () => {
-    const wrapper = renderForm()
+    const wrapper = renderForm();
 
-    assert.equal(wrapper.find("Formik").props().onSubmit, onSubmitStub)
-  })
+    assert.equal(wrapper.find("Formik").props().onSubmit, onSubmitStub);
+  });
 
   it("renders the form", () => {
-    const wrapper = renderForm()
+    const wrapper = renderForm();
 
-    const form = wrapper.find("Formik").dive()
-    assert.ok(findFormikFieldByName(form, "email").exists())
-    assert.ok(findFormikFieldByName(form, "confirmPassword").exists())
-    assert.ok(form.find("button[type='submit']").exists())
-  })
+    const form = wrapper.find("Formik").dive();
+    assert.ok(findFormikFieldByName(form, "email").exists());
+    assert.ok(findFormikFieldByName(form, "confirmPassword").exists());
+    assert.ok(form.find("button[type='submit']").exists());
+  });
 
   it("confirm password is required to change the email address", async () => {
-    const wrapper = renderForm()
+    const wrapper = renderForm();
     try {
       await wrapper.find(Formik).prop("validate")(
         {
@@ -50,12 +50,12 @@ describe("ChangeEmailForm", () => {
         {
           context: { currentEmail: "abc@example.com" },
         },
-      )
+      );
     } catch (errors) {
       assert.equal(
         errors.confirmPassword,
         "Confirm Password is a required field",
-      )
+      );
     }
-  })
-})
+  });
+});

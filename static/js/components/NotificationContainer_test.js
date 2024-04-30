@@ -1,13 +1,13 @@
 // @flow
-import { assert } from "chai"
-import { omit } from "ramda"
+import { assert } from "chai";
+import { omit } from "ramda";
 
 import NotificationContainer, {
   NotificationContainer as InnerNotificationContainer,
-} from "./NotificationContainer"
-import { TextNotification, UnusedCouponNotification } from "./notifications"
-import { ALERT_TYPE_TEXT, ALERT_TYPE_UNUSED_COUPON } from "../constants"
-import IntegrationTestHelper from "../util/integration_test_helper"
+} from "./NotificationContainer";
+import { TextNotification, UnusedCouponNotification } from "./notifications";
+import { ALERT_TYPE_TEXT, ALERT_TYPE_UNUSED_COUPON } from "../constants";
+import IntegrationTestHelper from "../util/integration_test_helper";
 
 describe("NotificationContainer component", () => {
   const messages = {
@@ -22,12 +22,12 @@ describe("NotificationContainer component", () => {
         couponCode: "code",
       },
     },
-  }
+  };
 
-  let helper, render
+  let helper, render;
 
   beforeEach(() => {
-    helper = new IntegrationTestHelper()
+    helper = new IntegrationTestHelper();
     render = helper.configureHOCRenderer(
       NotificationContainer,
       InnerNotificationContainer,
@@ -37,27 +37,27 @@ describe("NotificationContainer component", () => {
         },
       },
       {},
-    )
-  })
+    );
+  });
 
   afterEach(() => {
-    helper.cleanup()
-  })
+    helper.cleanup();
+  });
 
   it("shows notifications", async () => {
     const { inner } = await render({
       ui: {
         userNotifications: messages,
       },
-    })
-    const alerts = inner.find("Alert")
-    assert.lengthOf(alerts, Object.keys(messages).length)
-    assert.equal(alerts.at(0).prop("children").type, TextNotification)
-    assert.equal(alerts.at(1).prop("children").type, UnusedCouponNotification)
-  })
+    });
+    const alerts = inner.find("Alert");
+    assert.lengthOf(alerts, Object.keys(messages).length);
+    assert.equal(alerts.at(0).prop("children").type, TextNotification);
+    assert.equal(alerts.at(1).prop("children").type, UnusedCouponNotification);
+  });
 
   //
-  ;[
+  [
     [undefined, "info"],
     ["danger", "danger"],
   ].forEach(([color, expectedColor]) => {
@@ -74,13 +74,13 @@ describe("NotificationContainer component", () => {
             },
           },
         },
-      })
-      assert.equal(inner.find("Alert").prop("color"), expectedColor)
-    })
-  })
+      });
+      assert.equal(inner.find("Alert").prop("color"), expectedColor);
+    });
+  });
 
   it("hides a message when it's dismissed, then removes it from global state", async () => {
-    const delayMs = 5
+    const delayMs = 5;
     const { inner, wrapper } = await render(
       {
         ui: {
@@ -88,19 +88,19 @@ describe("NotificationContainer component", () => {
         },
       },
       { messageRemoveDelayMs: delayMs },
-    )
-    const alert = inner.find("Alert").at(0)
-    const timeoutPromise = alert.prop("toggle")()
+    );
+    const alert = inner.find("Alert").at(0);
+    const timeoutPromise = alert.prop("toggle")();
     assert.deepEqual(inner.state(), {
       hiddenNotifications: new Set(["message1"]),
-    })
+    });
 
-    await timeoutPromise
-    wrapper.update()
+    await timeoutPromise;
+    wrapper.update();
     assert.deepEqual(
       wrapper.prop("userNotifications"),
       omit(["message1"], messages),
-    )
-    assert.deepEqual(inner.state(), { hiddenNotifications: new Set() })
-  })
-})
+    );
+    assert.deepEqual(inner.state(), { hiddenNotifications: new Set() });
+  });
+});

@@ -172,10 +172,12 @@
       width: 208px;
     }
 
+    /* stylelint-disable selector-class-pattern */
     label,
     .hs_error_rollup {
       display: none;
     }
+    /* stylelint-enable selector-class-pattern */
 
     .hs-form input[type="email"] {
       border: none;
@@ -190,6 +192,7 @@
       width: 100%;
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .hs_email {
       display: inline-block;
       vertical-align: top;
@@ -201,6 +204,7 @@
       }
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .hs_submit {
       display: inline-block;
       vertical-align: top;

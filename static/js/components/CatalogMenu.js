@@ -1,12 +1,12 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
+import React from "react";
 
-import type { CourseTopic } from "../flow/courseTypes"
+import type { CourseTopic } from "../flow/courseTypes";
 
 type Props = {
   courseTopics: Array<CourseTopic>,
-}
+};
 
 const CatalogMenu = ({ courseTopics }: Props) => {
   return (
@@ -51,7 +51,7 @@ const CatalogMenu = ({ courseTopics }: Props) => {
         </a>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CatalogMenu
+export default CatalogMenu;

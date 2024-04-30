@@ -1,31 +1,31 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { REGISTER_EXTRA_DETAILS_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { Link } from "react-router-dom"
-import { mutateAsync, requestAsync } from "redux-query"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { REGISTER_EXTRA_DETAILS_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import { mutateAsync, requestAsync } from "redux-query";
+import { createStructuredSelector } from "reselect";
 
-import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
-import auth from "../../../lib/queries/auth"
-import users from "../../../lib/queries/users"
-import { routes } from "../../../lib/urls"
-import { qsPartialTokenSelector } from "../../../lib/selectors"
+import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth";
+import auth from "../../../lib/queries/auth";
+import users from "../../../lib/queries/users";
+import { routes } from "../../../lib/urls";
+import { qsPartialTokenSelector } from "../../../lib/selectors";
 
-import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDetailsForm"
+import RegisterExtraDetailsForm from "../../../components/forms/RegisterExtraDetailsForm";
 
-import type { RouterHistory, Location } from "react-router"
-import type { Response } from "redux-query"
-import type { AuthResponse, ProfileForm, User } from "../../../flow/authTypes"
+import type { RouterHistory, Location } from "react-router";
+import type { Response } from "redux-query";
+import type { AuthResponse, ProfileForm, User } from "../../../flow/authTypes";
 
 type RegisterProps = {|
   location: Location,
   history: RouterHistory,
   params: { partialToken: string },
-|}
+|};
 
 type DispatchProps = {|
   registerExtraDetails: (
@@ -33,12 +33,12 @@ type DispatchProps = {|
     partialToken: string,
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>,
-|}
+|};
 
 type Props = {|
   ...RegisterProps,
   ...DispatchProps,
-|}
+|};
 
 export class RegisterExtraDetailsPage extends React.Component<Props> {
   async onSubmit(profileData: ProfileForm, { setSubmitting, setErrors }: any) {
@@ -46,18 +46,18 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
       history,
       registerExtraDetails,
       params: { partialToken },
-    } = this.props
+    } = this.props;
 
     try {
-      const { body } = await registerExtraDetails(profileData, partialToken)
+      const { body } = await registerExtraDetails(profileData, partialToken);
 
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
-      })
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -94,28 +94,28 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const mapStateToProps = createStructuredSelector({
   params: createStructuredSelector({ partialToken: qsPartialTokenSelector }),
-})
+});
 
 const registerExtraDetails = (profileData: ProfileForm, partialToken: string) =>
-  mutateAsync(auth.registerExtraDetailsMutation(profileData, partialToken))
+  mutateAsync(auth.registerExtraDetailsMutation(profileData, partialToken));
 
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
     force: true,
-  })
+  });
 
 const mapDispatchToProps = {
   registerExtraDetails: registerExtraDetails,
   getCurrentUser,
-}
+};
 
 export default compose(connect(mapStateToProps, mapDispatchToProps))(
   RegisterExtraDetailsPage,
-)
+);

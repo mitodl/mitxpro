@@ -1,6 +1,6 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
+import React from "react";
 
 import {
   Formik,
@@ -9,23 +9,23 @@ import {
   ErrorMessage,
   yupToFormErrors,
   validateYupSchema,
-} from "formik"
+} from "formik";
 
-import { PasswordInput, EmailInput } from "./elements/inputs"
-import FormError from "./elements/FormError"
-import { changeEmailFormValidation } from "../../lib/validation"
+import { PasswordInput, EmailInput } from "./elements/inputs";
+import FormError from "./elements/FormError";
+import { changeEmailFormValidation } from "../../lib/validation";
 
-import type { User } from "../../flow/authTypes"
+import type { User } from "../../flow/authTypes";
 
 type Props = {
   onSubmit: Function,
   user: User,
-}
+};
 
 export type ChangeEmailFormValues = {
   email: string,
   confirmPassword: string,
-}
+};
 
 const ChangeEmailForm = ({ onSubmit, user }: Props) => (
   <Formik
@@ -78,6 +78,6 @@ const ChangeEmailForm = ({ onSubmit, user }: Props) => (
       </Form>
     )}
   />
-)
+);
 
-export default ChangeEmailForm
+export default ChangeEmailForm;

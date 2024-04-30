@@ -1,95 +1,95 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
+import React from "react";
+import DocumentTitle from "react-document-title";
 import {
   DISCOUNT_TYPE_PERCENT_OFF,
   CREATE_COUPON_PAGE_TITLE,
-} from "../../../constants"
-import { mergeAll } from "ramda"
-import { connectRequest, mutateAsync } from "redux-query"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { Link } from "react-router-dom"
+} from "../../../constants";
+import { mergeAll } from "ramda";
+import { connectRequest, mutateAsync } from "redux-query";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
-import { CouponForm } from "../../../components/forms/CouponForm"
-import queries from "../../../lib/queries"
-import { routes } from "../../../lib/urls"
+import { CouponForm } from "../../../components/forms/CouponForm";
+import queries from "../../../lib/queries";
+import { routes } from "../../../lib/urls";
 
-import type { Response } from "redux-query"
+import type { Response } from "redux-query";
 import type {
   Company,
   CouponPaymentVersion,
   Product,
-} from "../../../flow/ecommerceTypes"
-import { createStructuredSelector } from "reselect"
-import { COUPON_TYPE_SINGLE_USE } from "../../../constants"
+} from "../../../flow/ecommerceTypes";
+import { createStructuredSelector } from "reselect";
+import { COUPON_TYPE_SINGLE_USE } from "../../../constants";
 
 type State = {
   couponId: ?string,
-}
+};
 
 type StateProps = {|
   products: Array<Product>,
   companies: Array<Company>,
   coupons: Map<string, CouponPaymentVersion>,
-|}
+|};
 
 type DispatchProps = {|
   createCoupon: (coupon: Object) => Promise<Response<CouponPaymentVersion>>,
-|}
+|};
 
 type Props = {|
   ...StateProps,
   ...DispatchProps,
-|}
+|};
 
 export class CreateCouponPage extends React.Component<Props, State> {
   constructor(props: Props) {
-    super(props)
+    super(props);
     this.state = {
       couponId: null,
-    }
+    };
   }
 
   onSubmit = async (
     couponData: Object,
     { setSubmitting, setErrors }: Object,
   ) => {
-    const { createCoupon } = this.props
-    couponData.product_ids = couponData.products.map((product) => product.id)
+    const { createCoupon } = this.props;
+    couponData.product_ids = couponData.products.map((product) => product.id);
     if (couponData.coupon_type === COUPON_TYPE_SINGLE_USE) {
-      couponData.max_redemptions = 1
+      couponData.max_redemptions = 1;
     } else {
-      couponData.num_coupon_codes = 1
+      couponData.num_coupon_codes = 1;
     }
     if (couponData.discount_type === DISCOUNT_TYPE_PERCENT_OFF) {
-      couponData.amount = couponData.discount / 100
+      couponData.amount = couponData.discount / 100;
     } else {
-      couponData.amount = couponData.discount
+      couponData.amount = couponData.discount;
     }
 
     try {
-      const result = await createCoupon(couponData)
+      const result = await createCoupon(couponData);
       if (result.body && result.body.id) {
-        this.setState({ couponId: result.body.id })
+        this.setState({ couponId: result.body.id });
       } else if (result.body && result.body.errors) {
-        setErrors(mergeAll(result.body.errors))
+        setErrors(mergeAll(result.body.errors));
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   clearSuccess = async () => {
-    await this.setState({ couponId: null })
-  }
+    await this.setState({ couponId: null });
+  };
 
   render() {
-    const { couponId } = this.state
-    const { coupons, companies, products } = this.props
+    const { couponId } = this.state;
+    const { coupons, companies, products } = this.props;
     // $FlowFixMe: flow doesn't like coupons[couponId] but it works fine
-    const newCoupon = coupons && couponId ? coupons[couponId] : null
+    const newCoupon = coupons && couponId ? coupons[couponId] : null;
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${CREATE_COUPON_PAGE_TITLE}`}
@@ -128,27 +128,27 @@ export class CreateCouponPage extends React.Component<Props, State> {
           )}
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const createCoupon = (coupon: Object) =>
-  mutateAsync(queries.ecommerce.couponsMutation(coupon))
+  mutateAsync(queries.ecommerce.couponsMutation(coupon));
 
 const mapPropsToConfig = () => [
   queries.ecommerce.productsQuery(),
   queries.ecommerce.companiesQuery(),
-]
+];
 
 const mapStateToProps = createStructuredSelector({
   products: queries.ecommerce.productsSelector,
   companies: queries.ecommerce.companiesSelector,
   coupons: queries.ecommerce.couponsSelector,
-})
+});
 
 const mapDispatchToProps = {
   createCoupon: createCoupon,
-}
+};
 
 export default compose(
   connect<Props, _, _, DispatchProps, _, _>(
@@ -156,4 +156,4 @@ export default compose(
     mapDispatchToProps,
   ),
   connectRequest(mapPropsToConfig),
-)(CreateCouponPage)
+)(CreateCouponPage);

@@ -1,22 +1,22 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { REGISTER_DENIED_PAGE_TITLE } from "../../../constants"
-import { connect } from "react-redux"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { REGISTER_DENIED_PAGE_TITLE } from "../../../constants";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
 
-import { qsErrorSelector } from "../../../lib/selectors"
+import { qsErrorSelector } from "../../../lib/selectors";
 
 type Props = {|
   params: { error: ?string },
-|}
+|};
 
 export class RegisterDeniedPage extends React.Component<Props> {
   render() {
     const {
       params: { error },
-    } = this.props
+    } = this.props;
 
     return (
       <DocumentTitle
@@ -38,12 +38,12 @@ export class RegisterDeniedPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const mapStateToProps = createStructuredSelector({
   params: createStructuredSelector({ error: qsErrorSelector }),
-})
+});
 
-export default connect(mapStateToProps)(RegisterDeniedPage)
+export default connect(mapStateToProps)(RegisterDeniedPage);

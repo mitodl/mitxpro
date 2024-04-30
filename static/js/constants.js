@@ -1,20 +1,20 @@
 // Put constants here
 
-export const COUPON_TYPE_PROMO = "promo"
-export const COUPON_TYPE_SINGLE_USE = "single-use"
+export const COUPON_TYPE_PROMO = "promo";
+export const COUPON_TYPE_SINGLE_USE = "single-use";
 
-export const DISCOUNT_TYPE_PERCENT_OFF = "percent-off"
-export const DISCOUNT_TYPE_DOLLARS_OFF = "dollars-off"
+export const DISCOUNT_TYPE_PERCENT_OFF = "percent-off";
+export const DISCOUNT_TYPE_DOLLARS_OFF = "dollars-off";
 
-export const ENROLLABLE_ITEM_ID_SEPARATOR = "+"
-export const PRODUCT_TYPE_PROGRAM = "program"
-export const PRODUCT_TYPE_COURSERUN = "courserun"
+export const ENROLLABLE_ITEM_ID_SEPARATOR = "+";
+export const PRODUCT_TYPE_PROGRAM = "program";
+export const PRODUCT_TYPE_COURSERUN = "courserun";
 
 export const GENDER_CHOICES = [
   ["m", "Male"],
   ["f", "Female"],
   ["o", "Other/Prefer Not to Say"],
-]
+];
 
 export const EMPLOYMENT_INDUSTRY = [
   "Association, Nonprofit Organization, NGO",
@@ -35,7 +35,7 @@ export const EMPLOYMENT_INDUSTRY = [
   "Transportation",
   "Other",
   "Prefer not to say",
-]
+];
 
 export const EMPLOYMENT_EXPERIENCE = [
   [2, "Less than 2 years"],
@@ -45,7 +45,7 @@ export const EMPLOYMENT_EXPERIENCE = [
   [20, "16 - 20 years"],
   [21, "More than 20 years"],
   [0, "Prefer not to say"],
-]
+];
 
 export const EMPLOYMENT_SIZE = [
   [1, "Small/Start-up (1+ employees)"],
@@ -55,7 +55,7 @@ export const EMPLOYMENT_SIZE = [
   [9999, "Medium-sized (1000-9999 employees)"],
   [10000, "Large Enterprise (10,000+ employees)"],
   [0, "Other (N/A or Don't know)"],
-]
+];
 
 export const EMPLOYMENT_FUNCTION = [
   "Accounting",
@@ -82,7 +82,7 @@ export const EMPLOYMENT_FUNCTION = [
   "Research",
   "Support",
   "Other",
-]
+];
 
 export const EMPLOYMENT_LEVEL = [
   "Upper Management",
@@ -93,7 +93,7 @@ export const EMPLOYMENT_LEVEL = [
   "Temporary Employee",
   "Other",
   "Prefer not to say",
-]
+];
 
 export const HIGHEST_EDUCATION_CHOICES = [
   "Doctorate",
@@ -105,35 +105,35 @@ export const HIGHEST_EDUCATION_CHOICES = [
   "Elementary/primary school",
   "No formal education",
   "Other education",
-]
+];
 
-export const ALERT_TYPE_TEXT = "text"
-export const ALERT_TYPE_UNUSED_COUPON = "unused-coupon"
-export const ALTER_TYPE_B2B_ORDER_STATUS = "b2b-order-status"
+export const ALERT_TYPE_TEXT = "text";
+export const ALERT_TYPE_UNUSED_COUPON = "unused-coupon";
+export const ALTER_TYPE_B2B_ORDER_STATUS = "b2b-order-status";
 
 // HTML title for different pages
-export const CHECKOUT_PAGE_TITLE = "Checkout"
-export const DASHBOARD_PAGE_TITLE = "Dashboard"
-export const CREATE_COUPON_PAGE_TITLE = "Create Coupon"
+export const CHECKOUT_PAGE_TITLE = "Checkout";
+export const DASHBOARD_PAGE_TITLE = "Dashboard";
+export const CREATE_COUPON_PAGE_TITLE = "Create Coupon";
 
-export const LOGIN_EMAIL_PAGE_TITLE = "Sign In"
-export const LOGIN_PASSWORD_PAGE_TITLE = LOGIN_EMAIL_PAGE_TITLE
+export const LOGIN_EMAIL_PAGE_TITLE = "Sign In";
+export const LOGIN_PASSWORD_PAGE_TITLE = LOGIN_EMAIL_PAGE_TITLE;
 
-export const FORGOT_PASSWORD_PAGE_TITLE = "Forgot Password"
-export const FORGOT_PASSWORD_CONFIRM_PAGE_TITLE = FORGOT_PASSWORD_PAGE_TITLE
+export const FORGOT_PASSWORD_PAGE_TITLE = "Forgot Password";
+export const FORGOT_PASSWORD_CONFIRM_PAGE_TITLE = FORGOT_PASSWORD_PAGE_TITLE;
 
-export const EDIT_PROFILE_PAGE_TITLE = "Edit Profile"
-export const VIEW_PROFILE_PAGE_TITLE = "View Profile"
+export const EDIT_PROFILE_PAGE_TITLE = "Edit Profile";
+export const VIEW_PROFILE_PAGE_TITLE = "View Profile";
 
-export const REGISTER_EMAIL_PAGE_TITLE = "Register"
-export const REGISTER_CONFIRM_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE
-export const REGISTER_DETAILS_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE
-export const REGISTER_EXTRA_DETAILS_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE
+export const REGISTER_EMAIL_PAGE_TITLE = "Register";
+export const REGISTER_CONFIRM_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE;
+export const REGISTER_DETAILS_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE;
+export const REGISTER_EXTRA_DETAILS_PAGE_TITLE = REGISTER_EMAIL_PAGE_TITLE;
 
-export const REGISTER_ERROR_PAGE_TITLE = "Registration Error"
-export const REGISTER_DENIED_PAGE_TITLE = REGISTER_ERROR_PAGE_TITLE
+export const REGISTER_ERROR_PAGE_TITLE = "Registration Error";
+export const REGISTER_DENIED_PAGE_TITLE = REGISTER_ERROR_PAGE_TITLE;
 
-export const ACCOUNT_SETTINGS_PAGE_TITLE = "Account Settings"
-export const EMAIL_CONFIRM_PAGE_TITLE = "Confirm Email Change"
+export const ACCOUNT_SETTINGS_PAGE_TITLE = "Account Settings";
+export const EMAIL_CONFIRM_PAGE_TITLE = "Confirm Email Change";
 
-export const RECEIPT_PAGE_TITLE = "Receipt"
+export const RECEIPT_PAGE_TITLE = "Receipt";

@@ -1,25 +1,25 @@
 // @flow
-import { nthArg, objOf, pathOr } from "ramda"
+import { nthArg, objOf, pathOr } from "ramda";
 
 import type {
   CurrentUser,
   Country,
   UserProfileForm,
-} from "../../flow/authTypes"
-import { getCookie } from "../api"
+} from "../../flow/authTypes";
+import { getCookie } from "../api";
 
 export const currentUserSelector = (state: any): ?CurrentUser =>
-  state.entities.currentUser
+  state.entities.currentUser;
 
 // replace the previous state with the next state without merging
-const nextState = nthArg(1)
+const nextState = nthArg(1);
 
 // project the result into entities.currentUser
-const transformCurrentUser = objOf("currentUser")
+const transformCurrentUser = objOf("currentUser");
 
 const updateResult = {
   currentUser: nextState,
-}
+};
 
 const DEFAULT_OPTIONS = {
   options: {
@@ -28,7 +28,7 @@ const DEFAULT_OPTIONS = {
       "X-CSRFTOKEN": getCookie("csrftoken"),
     },
   },
-}
+};
 
 export default {
   currentUserQuery: () => ({
@@ -54,4 +54,4 @@ export default {
       ...profileData,
     },
   }),
-}
+};

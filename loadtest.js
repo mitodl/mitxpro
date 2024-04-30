@@ -1,12 +1,12 @@
 // Creator: k6 Browser Recorder 0.6.0
 
-import { sleep, group } from "k6"
-import http from "k6/http"
+import { sleep, group } from "k6";
+import http from "k6/http";
 
-export const options = {}
+export const options = {};
 
 export default function main() {
-  let response
+  let response;
 
   group("page_2 - http://xpro.odl.local:8053/catalog/", function () {
     for (let i = 0; i < 10; i++) {
@@ -24,10 +24,10 @@ export default function main() {
             "csrftoken=fdY1Ywpf39ohyKG3wTNAGGGHkFGSKAzH5oCKLtfiQ9NuWHrTh0JHVNljUKiMG7IV; sessionid=.eJxVjDsOwjAQBe_iGlnxf6Gkzxksr3eNA8iR4qRC3B0ipYD2zcx7iZi2tcat8xInEhehxOl3w5Qf3HZA99Rus8xzW5cJ5a7Ig3Y5zsTP6-H-HdTU67e2gyKmgsAlaOOd8mzQIzijLThwweYQAFwiCoNVdGYwbAqSIc6kUbw_2po4GA:1ozibr:f80fQ7ovkY4wsmpk1DugFyxzjm7bgrRXbDKVQ8J8b7c",
           "upgrade-insecure-requests": "1",
         },
-      })
+      });
     }
-  })
+  });
 
   // Automatically added sleep
-  sleep(1)
+  sleep(1);
 }

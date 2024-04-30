@@ -1,30 +1,30 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
-import * as yup from "yup"
+import React from "react";
+import * as yup from "yup";
 
-import { Formik, Field, Form, ErrorMessage } from "formik"
+import { Formik, Field, Form, ErrorMessage } from "formik";
 
-import ScaledRecaptcha from "../ScaledRecaptcha"
-import { EmailInput } from "./elements/inputs"
-import FormError from "./elements/FormError"
-import { emailFieldValidation } from "../../lib/validation"
+import ScaledRecaptcha from "../ScaledRecaptcha";
+import { EmailInput } from "./elements/inputs";
+import FormError from "./elements/FormError";
+import { emailFieldValidation } from "../../lib/validation";
 
 const emailValidation = yup.object().shape({
   email: emailFieldValidation,
   recaptcha: SETTINGS.recaptchaKey
     ? yup.string().required("Please verify you're not a robot")
     : yup.mixed().notRequired(),
-})
+});
 
 type Props = {
   onSubmit: Function,
-}
+};
 
 export type RegisterEmailFormValues = {
   email: string,
   recaptcha: ?string,
-}
+};
 
 const RegisterEmailForm = ({ onSubmit }: Props) => (
   <Formik
@@ -67,6 +67,6 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
       </Form>
     )}
   />
-)
+);
 
-export default RegisterEmailForm
+export default RegisterEmailForm;

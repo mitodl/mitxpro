@@ -21,4 +21,4 @@ export const CYBERSOURCE_CHECKOUT_RESPONSE = {
   },
   url: "https://testsecureacceptance.cybersource.com/pay",
   method: "POST",
-}
+};

@@ -7,12 +7,12 @@ if [ -z $APP_NAME ]; then
 	exit 1
 fi
 
-if [ -z $(which heroku) ]; then
+if [ -z "$(which heroku)" ]; then
 	echo "You need to install the Heroku CLI for this script to work. https://devcenter.heroku.com/articles/heroku-cli"
 	exit 1
 fi
 
-if [ -z $(which jq) ]; then
+if [ -z "$(which jq)" ]; then
 	echo "You need to install the 'jq' command line tool for this script to work. https://stedolan.github.io/jq/"
 	exit 1
 fi

@@ -1,48 +1,48 @@
 // @flow
 /* global SETTINGS: false */
 
-declare var dataLayer: Object[]
+declare var dataLayer: Object[];
 
-import React from "react"
-import { RouteComponentProps } from "react-router-dom"
-import DocumentTitle from "react-document-title"
-import { CHECKOUT_PAGE_TITLE } from "../../constants"
-import { connect } from "react-redux"
-import { mutateAsync, requestAsync } from "redux-query"
-import { compose } from "redux"
-import queryString from "query-string"
-import { pathOr } from "ramda"
+import React from "react";
+import { RouteComponentProps } from "react-router-dom";
+import DocumentTitle from "react-document-title";
+import { CHECKOUT_PAGE_TITLE } from "../../constants";
+import { connect } from "react-redux";
+import { mutateAsync, requestAsync } from "redux-query";
+import { compose } from "redux";
+import queryString from "query-string";
+import { pathOr } from "ramda";
 
 import {
   CheckoutForm,
   renderGenericError,
-} from "../../components/forms/CheckoutForm"
+} from "../../components/forms/CheckoutForm";
 
-import queries from "../../lib/queries"
-import { createCyberSourceForm, formatErrors } from "../../lib/form"
-import { calcSelectedRunIds } from "../../lib/ecommerce"
-import { generateLoginRedirectUrl } from "../../lib/auth"
+import queries from "../../lib/queries";
+import { createCyberSourceForm, formatErrors } from "../../lib/form";
+import { calcSelectedRunIds } from "../../lib/ecommerce";
+import { generateLoginRedirectUrl } from "../../lib/auth";
 import {
   getErrorMessages,
   isErrorResponse,
   isSuccessResponse,
   isUnauthorizedResponse,
-} from "../../lib/util"
+} from "../../lib/util";
 
-import type { Response } from "redux-query"
+import type { Response } from "redux-query";
 import type {
   BasketResponse,
   BasketPayload,
   CheckoutResponse,
   BasketItem,
   CheckoutPayload,
-} from "../../flow/ecommerceTypes"
-import type { HttpRespErrorMessage, HttpResponse } from "../../flow/httpTypes"
+} from "../../flow/ecommerceTypes";
+import type { HttpRespErrorMessage, HttpResponse } from "../../flow/httpTypes";
 import type {
   Actions,
   SetFieldError,
   Values,
-} from "../../components/forms/CheckoutForm"
+} from "../../components/forms/CheckoutForm";
 
 type Props = RouteComponentProps & {
   basket: ?BasketResponse,
@@ -50,7 +50,7 @@ type Props = RouteComponentProps & {
   checkout: () => Promise<Response<CheckoutResponse>>,
   fetchBasket: () => Promise<*>,
   updateBasket: (payload: BasketPayload) => Promise<*>,
-}
+};
 type State = {
   appliedInitialCoupon: boolean,
   loadingFailed: boolean,
@@ -59,7 +59,7 @@ type State = {
   isSubmitting: boolean,
   isLoggedOut: boolean,
   basketProduct: string,
-}
+};
 
 export class CheckoutPage extends React.Component<Props, State> {
   state = {
@@ -70,13 +70,13 @@ export class CheckoutPage extends React.Component<Props, State> {
     isSubmitting: false,
     isLoggedOut: false,
     basketProduct: "",
-  }
+  };
 
   getQueryParams = () => {
     const {
       location: { search },
-    } = this.props
-    const params = queryString.parse(search)
+    } = this.props;
+    const params = queryString.parse(search);
     return {
       productId: params.product,
       preselectId: parseInt(params.preselect),
@@ -84,52 +84,52 @@ export class CheckoutPage extends React.Component<Props, State> {
       isVoucherApplied:
         params.is_voucher_applied &&
         params.is_voucher_applied.toLowerCase() === "true",
-    }
-  }
+    };
+  };
 
   componentDidMount = async () => {
-    const { fetchBasket, updateBasket } = this.props
-    const { productId } = this.getQueryParams()
+    const { fetchBasket, updateBasket } = this.props;
+    const { productId } = this.getQueryParams();
 
     if (!productId) {
-      await fetchBasket()
+      await fetchBasket();
       this.setState({
         isLoading: false,
-      })
-      return
+      });
+      return;
     }
 
     const basketResponse = await updateBasket({
       items: [{ product_id: productId }],
-    })
+    });
     if (isSuccessResponse(basketResponse)) {
       if (basketResponse.body && basketResponse.body.items) {
-        this.trackAddToCartEvent(basketResponse.body.items)
+        this.trackAddToCartEvent(basketResponse.body.items);
       }
       this.setState({
         isLoading: false,
         loadingFailed: false,
         basketProduct: productId,
-      })
+      });
     } else {
-      const errors = this.getErrorsOrRedirect(basketResponse)
+      const errors = this.getErrorsOrRedirect(basketResponse);
       if (isUnauthorizedResponse(basketResponse)) {
-        return
+        return;
       }
       this.setState({
         isLoading: false,
         loadingFailed: true,
         loadingErrorMessages: errors,
-      })
+      });
     }
-  }
+  };
 
   componentDidUpdate() {
-    const { isLoggedOut, isLoading, isSubmitting } = this.state
-    const { history } = this.props
+    const { isLoggedOut, isLoading, isSubmitting } = this.state;
+    const { history } = this.props;
     if (isLoggedOut && !isLoading && !isSubmitting) {
       // Using history.push instead of <Redirect /> due to testing difficulties
-      history.push(generateLoginRedirectUrl())
+      history.push(generateLoginRedirectUrl());
     }
   }
 
@@ -139,9 +139,9 @@ export class CheckoutPage extends React.Component<Props, State> {
         event: "addToCart",
         "course-id": items[0].readable_id,
         "course-price": items[0].price || "0",
-      })
+      });
     }
-  }
+  };
 
   trackSubmitEvent = (url: string, payload: CheckoutPayload) => {
     if (SETTINGS.gtmTrackingID) {
@@ -155,32 +155,32 @@ export class CheckoutPage extends React.Component<Props, State> {
         eventTimeout: 2000,
         eventCallback: () => {
           setTimeout(() => {
-            window.location = url
-          }, 1500)
+            window.location = url;
+          }, 1500);
         },
-      })
+      });
     }
-  }
+  };
 
   getErrorsOrRedirect = (
     errorResponse: HttpResponse,
   ): ?HttpRespErrorMessage => {
     if (isUnauthorizedResponse(errorResponse)) {
-      this.setState({ isLoggedOut: true, isLoading: false })
-      return
+      this.setState({ isLoggedOut: true, isLoading: false });
+      return;
     }
-    return getErrorMessages(errorResponse)
-  }
+    return getErrorMessages(errorResponse);
+  };
 
   submit = async (values: Values, actions: Actions) => {
-    const { basket, updateBasket, checkout, history } = this.props
-    const { basketProduct } = this.state
+    const { basket, updateBasket, checkout, history } = this.props;
+    const { basketProduct } = this.state;
 
     if (!basket) {
       // if there is no basket there shouldn't be any submit button rendered
-      throw new Error("Expected basket to exist")
+      throw new Error("Expected basket to exist");
     }
-    this.setState({ isSubmitting: true })
+    this.setState({ isSubmitting: true });
 
     // update basket with selected runs
     const basketPayload = {
@@ -190,57 +190,57 @@ export class CheckoutPage extends React.Component<Props, State> {
       })),
       coupons: values.couponCode ? [{ code: values.couponCode }] : [],
       data_consents: values.dataConsent ? [basket.data_consents[0].id] : [],
-    }
+    };
     try {
-      const basketResponse = await updateBasket(basketPayload)
+      const basketResponse = await updateBasket(basketPayload);
       if (isErrorResponse(basketResponse)) {
-        const basketErrors = this.getErrorsOrRedirect(basketResponse)
+        const basketErrors = this.getErrorsOrRedirect(basketResponse);
         if (isUnauthorizedResponse(basketResponse)) {
-          return
+          return;
         }
         actions.setErrors(
           basketErrors || {
             genericBasket: true,
           },
-        )
-        return
+        );
+        return;
       }
 
-      const checkoutResponse = await checkout()
+      const checkoutResponse = await checkout();
       if (isErrorResponse(checkoutResponse)) {
-        const checkoutErrors = this.getErrorsOrRedirect(checkoutResponse)
+        const checkoutErrors = this.getErrorsOrRedirect(checkoutResponse);
         if (isUnauthorizedResponse(checkoutResponse)) {
-          return
+          return;
         }
         actions.setErrors(
           checkoutErrors || {
             genericSubmit: true,
           },
-        )
-        return
+        );
+        return;
       }
 
-      const { method, url, payload } = checkoutResponse.body
+      const { method, url, payload } = checkoutResponse.body;
       if (method === "GET") {
         if (SETTINGS.gtmTrackingID) {
-          this.trackSubmitEvent(url, payload)
+          this.trackSubmitEvent(url, payload);
         } else {
-          window.location = url
+          window.location = url;
         }
       } else {
-        const form = createCyberSourceForm(url, payload)
-        const body: HTMLElement = (document.querySelector("body"): any)
-        body.appendChild(form)
-        form.submit()
+        const form = createCyberSourceForm(url, payload);
+        const body: HTMLElement = (document.querySelector("body"): any);
+        body.appendChild(form);
+        form.submit();
       }
     } finally {
-      actions.setSubmitting(false)
-      this.setState({ isSubmitting: false })
+      actions.setSubmitting(false);
+      this.setState({ isSubmitting: false });
     }
-  }
+  };
 
   submitCoupon = async (couponCode: ?string, setFieldError: SetFieldError) => {
-    const { updateBasket, history } = this.props
+    const { updateBasket, history } = this.props;
     const response = await updateBasket({
       coupons: couponCode
         ? [
@@ -249,46 +249,46 @@ export class CheckoutPage extends React.Component<Props, State> {
             },
           ]
         : [],
-    })
+    });
     if (isSuccessResponse(response)) {
-      setFieldError("coupons", null)
+      setFieldError("coupons", null);
     } else {
-      const errors = this.getErrorsOrRedirect(response)
+      const errors = this.getErrorsOrRedirect(response);
       if (isUnauthorizedResponse(response)) {
-        return
+        return;
       }
       if (errors && errors.coupons) {
-        setFieldError("coupons", errors.coupons)
+        setFieldError("coupons", errors.coupons);
       } else {
-        setFieldError("genericBasket", true)
+        setFieldError("genericBasket", true);
       }
     }
-  }
+  };
 
   updateProduct = async (
     productId: number | string,
     runId: number,
     setFieldError: SetFieldError,
   ) => {
-    const { updateBasket, history } = this.props
+    const { updateBasket, history } = this.props;
     const response = await updateBasket({
       items: [{ product_id: productId, run_ids: runId ? [runId] : [] }],
-    })
+    });
     if (isSuccessResponse(response)) {
-      setFieldError("runs", "")
+      setFieldError("runs", "");
     } else {
-      const errors = this.getErrorsOrRedirect(response)
+      const errors = this.getErrorsOrRedirect(response);
       if (isUnauthorizedResponse(response)) {
-        return
+        return;
       }
       if (errors && errors.runs) {
-        setFieldError("runs", errors.runs)
+        setFieldError("runs", errors.runs);
       } else {
-        setFieldError("genericBasket", true)
+        setFieldError("genericBasket", true);
       }
     }
-    this.setState({ basketProduct: productId.toString() })
-  }
+    this.setState({ basketProduct: productId.toString() });
+  };
 
   renderLoading = () => {
     return (
@@ -302,11 +302,11 @@ export class CheckoutPage extends React.Component<Props, State> {
           One moment while we prepare checkout
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   renderLoadingError = () => {
-    const { loadingFailed, loadingErrorMessages } = this.state
+    const { loadingFailed, loadingErrorMessages } = this.state;
     return (
       <div className="checkout-page">
         {!loadingFailed || loadingErrorMessages ? (
@@ -322,27 +322,27 @@ export class CheckoutPage extends React.Component<Props, State> {
           renderGenericError()
         )}
       </div>
-    )
-  }
+    );
+  };
 
   render() {
-    const { basket, requestPending } = this.props
-    const { isLoading } = this.state
+    const { basket, requestPending } = this.props;
+    const { isLoading } = this.state;
 
-    let pageBody
-    const item = basket && basket.items[0]
+    let pageBody;
+    const item = basket && basket.items[0];
 
     if (isLoading) {
-      pageBody = this.renderLoading()
+      pageBody = this.renderLoading();
     } else if (!basket || !item) {
-      pageBody = this.renderLoadingError()
+      pageBody = this.renderLoadingError();
     } else {
       const coupon = basket.coupons.find((coupon) =>
         coupon.targets.includes(item.id),
-      )
+      );
       const { couponCode, preselectId, isVoucherApplied } =
-        this.getQueryParams()
-      const selectedRuns = calcSelectedRunIds(item, preselectId)
+        this.getQueryParams();
+      const selectedRuns = calcSelectedRunIds(item, preselectId);
       pageBody = (
         <CheckoutForm
           item={item}
@@ -356,13 +356,13 @@ export class CheckoutPage extends React.Component<Props, State> {
           requestPending={requestPending}
           isVoucherApplied={isVoucherApplied}
         />
-      )
+      );
     }
     return (
       <DocumentTitle title={`${SETTINGS.site_name} | ${CHECKOUT_PAGE_TITLE}`}>
         {pageBody}
       </DocumentTitle>
-    )
+    );
   }
 }
 
@@ -372,14 +372,14 @@ const mapStateToProps = (state) => ({
     pathOr(false, ["queries", "basketMutation", "isPending"], state) ||
     pathOr(false, ["queries", "couponsMutation", "isPending"], state) ||
     pathOr(false, ["queries", "checkoutMutation", "isPending"], state),
-})
+});
 const mapDispatchToProps = (dispatch) => ({
   checkout: () => dispatch(mutateAsync(queries.ecommerce.checkoutMutation())),
   fetchBasket: () => dispatch(requestAsync(queries.ecommerce.basketQuery())),
   updateBasket: (payload: BasketPayload) =>
     dispatch(mutateAsync(queries.ecommerce.basketMutation(payload))),
-})
+});
 
 export default compose(connect(mapStateToProps, mapDispatchToProps))(
   CheckoutPage,
-)
+);

@@ -1,43 +1,43 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { LOGIN_EMAIL_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { mutateAsync } from "redux-query"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { LOGIN_EMAIL_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { mutateAsync } from "redux-query";
 
-import auth from "../../../lib/queries/auth"
-import { routes, getNextParam } from "../../../lib/urls"
+import auth from "../../../lib/queries/auth";
+import { routes, getNextParam } from "../../../lib/urls";
 import {
   STATE_ERROR,
   STATE_REGISTER_REQUIRED,
   handleAuthResponse,
-} from "../../../lib/auth"
+} from "../../../lib/auth";
 
-import EmailForm from "../../../components/forms/EmailForm"
+import EmailForm from "../../../components/forms/EmailForm";
 
-import type { RouterHistory, Location } from "react-router"
-import type { Response } from "redux-query"
-import type { AuthResponse, EmailFormValues } from "../../../flow/authTypes"
-import { Link } from "react-router-dom"
+import type { RouterHistory, Location } from "react-router";
+import type { Response } from "redux-query";
+import type { AuthResponse, EmailFormValues } from "../../../flow/authTypes";
+import { Link } from "react-router-dom";
 
 type Props = {
   location: Location,
   history: RouterHistory,
   loginEmail: (email: string, next: ?string) => Promise<Response<AuthResponse>>,
-}
+};
 
 export class LoginEmailPage extends React.Component<Props> {
   async onSubmit(
     { email }: EmailFormValues,
     { setSubmitting, setErrors }: any,
   ) {
-    const { loginEmail, location, history } = this.props
-    const nextUrl = getNextParam(location.search)
+    const { loginEmail, location, history } = this.props;
+    const nextUrl = getNextParam(location.search);
 
     try {
-      const { body } = await loginEmail(email, nextUrl)
+      const { body } = await loginEmail(email, nextUrl);
 
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
@@ -46,14 +46,14 @@ export class LoginEmailPage extends React.Component<Props> {
         // eslint-disable-next-line camelcase
         [STATE_REGISTER_REQUIRED]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
-      })
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
   render() {
-    const link = `${routes.register.begin}${this.props.location.search}`
+    const link = `${routes.register.begin}${this.props.location.search}`;
 
     return (
       <DocumentTitle
@@ -77,15 +77,15 @@ export class LoginEmailPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const loginEmail = (email: string, nextUrl: ?string) =>
-  mutateAsync(auth.loginEmailMutation(email, nextUrl))
+  mutateAsync(auth.loginEmailMutation(email, nextUrl));
 
 const mapDispatchToProps = {
   loginEmail,
-}
+};
 
-export default compose(connect(null, mapDispatchToProps))(LoginEmailPage)
+export default compose(connect(null, mapDispatchToProps))(LoginEmailPage);

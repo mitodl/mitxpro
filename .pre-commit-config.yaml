@@ -38,7 +38,7 @@ repos:
           - --exclude-files
           - .yarn/
           - --exclude-files
-          - ".*_test.py"
+          - "_test.py$"
           - --exclude-files
           - "test_.*.py"
           - --exclude-files
@@ -48,7 +48,7 @@ repos:
           - --exclude-files
           - compliance/test_data/cybersource/
           - --exclude-files
-          - ".*_test.js"
+          - "_test.js$"
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.4.0"
     hooks:

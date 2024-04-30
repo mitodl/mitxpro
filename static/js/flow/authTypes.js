@@ -17,19 +17,19 @@ export type AuthStates =
   | "register/confirm"
   | "register/details"
   | "register/extra"
-  | "register/required"
+  | "register/required";
 
-export type AuthFlow = "register" | "login"
+export type AuthFlow = "register" | "login";
 
-export type AuthErrors = Array<string>
+export type AuthErrors = Array<string>;
 
 export type AuthFieldErrors = {
   [string]: string,
-}
+};
 
 export type AuthExtraData = {
   name?: string,
-}
+};
 
 export type AuthResponse = {
   partial_token: ?string,
@@ -39,7 +39,7 @@ export type AuthResponse = {
   field_errors: AuthFieldErrors,
   redirect_url: ?string,
   extra_data: AuthExtraData,
-}
+};
 
 export type LegalAddress = {
   first_name: string,
@@ -50,18 +50,18 @@ export type LegalAddress = {
   postal_code?: string,
   company?: string,
   vat_id?: string,
-}
+};
 
 export type ExtendedLegalAddress = LegalAddress & {
   city: string,
   email: string,
-}
+};
 
 export type UnusedCoupon = {
   coupon_code: string,
   product_id: number,
   expiration_date: string,
-}
+};
 
 export type Profile = {
   gender: string,
@@ -74,7 +74,7 @@ export type Profile = {
   company_size: ?number,
   leadership_level: ?string,
   highest_education: ?string,
-}
+};
 
 export type User = {
   id: number,
@@ -86,51 +86,51 @@ export type User = {
   profile: ?Profile,
   legal_address: ?LegalAddress,
   unused_coupons: Array<UnusedCoupon>,
-}
+};
 
 export type AnonymousUser = {
   is_anonymous: true,
   is_authenticated: false,
-}
+};
 
 export type LoggedInUser = {
   is_anonymous: false,
   is_authenticated: true,
-} & User
+} & User;
 
-export type CurrentUser = AnonymousUser | LoggedInUser
+export type CurrentUser = AnonymousUser | LoggedInUser;
 
 export type StateOrTerritory = {
   name: string,
   code: string,
-}
+};
 
 export type Country = {
   name: string,
   code: string,
   states: Array<StateOrTerritory>,
-}
+};
 
 export type ProfileForm = {
   profile: Profile,
-}
+};
 
 export type EmailFormValues = {
   email: string,
-}
+};
 
 export type PasswordFormValues = {
   password: string,
-}
+};
 
 export type UserProfileForm = {
   email: string,
   name: string,
   legal_address: ?LegalAddress,
   profile: ?Profile,
-}
+};
 
 export type updateEmailResponse = {
   confirmed: boolean,
   detail: ?string,
-}
+};

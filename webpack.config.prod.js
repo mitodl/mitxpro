@@ -1,20 +1,20 @@
-const webpack = require("webpack")
-const path = require("path")
-const BundleTracker = require("webpack-bundle-tracker")
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const webpack = require("webpack");
+const path = require("path");
+const BundleTracker = require("webpack-bundle-tracker");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const { config, babelSharedLoader } = require(
   path.resolve("./webpack.config.shared.js"),
-)
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
+);
+const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
-const prodBabelConfig = Object.assign({}, babelSharedLoader)
+const prodBabelConfig = Object.assign({}, babelSharedLoader);
 
 prodBabelConfig.query.plugins.push(
   "@babel/plugin-transform-react-constant-elements",
   "@babel/plugin-transform-react-inline-elements",
-)
+);
 
-const prodConfig = Object.assign({}, config)
+const prodConfig = Object.assign({}, config);
 prodConfig.module.rules = [
   prodBabelConfig,
   ...config.module.rules,
@@ -29,7 +29,7 @@ prodConfig.module.rules = [
       "sass-loader",
     ],
   },
-]
+];
 
 module.exports = Object.assign(prodConfig, {
   context: __dirname,
@@ -73,4 +73,4 @@ module.exports = Object.assign(prodConfig, {
     },
   },
   devtool: "source-map",
-})
+});

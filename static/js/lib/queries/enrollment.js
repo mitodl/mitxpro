@@ -1,6 +1,6 @@
-import { pathOr } from "ramda"
+import { pathOr } from "ramda";
 
-import { nextState } from "./util"
+import { nextState } from "./util";
 
 export default {
   enrollmentsSelector: pathOr(null, ["entities", "enrollments"]),
@@ -13,4 +13,4 @@ export default {
       enrollments: nextState,
     },
   }),
-}
+};

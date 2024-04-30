@@ -1,7 +1,7 @@
 // @flow
-import { pathOr, objOf, nthArg } from "ramda"
+import { pathOr, objOf, nthArg } from "ramda";
 
-import { getCookie } from "../api"
+import { getCookie } from "../api";
 
 import type {
   B2BOrderStatus,
@@ -15,16 +15,16 @@ import type {
   B2BCouponStatusResponse,
   OrderReceiptResponse,
   ProgramRunDetail,
-} from "../../flow/ecommerceTypes"
+} from "../../flow/ecommerceTypes";
 
 // uses the next piece of state which is the second argument
-const nextState = nthArg(1)
+const nextState = nthArg(1);
 
 const DEFAULT_POST_OPTIONS = {
   headers: {
     "X-CSRFTOKEN": getCookie("csrftoken"),
   },
-}
+};
 
 export default {
   checkoutMutation: () => ({
@@ -171,4 +171,4 @@ export default {
     },
     force: true,
   }),
-}
+};

@@ -1,20 +1,20 @@
 // @flow
-import React from "react"
-import * as Sentry from "@sentry/browser"
+import React from "react";
+import * as Sentry from "@sentry/browser";
 
-import TopAppBar from "./TopAppBar"
-import NotificationContainer from "./NotificationContainer"
+import TopAppBar from "./TopAppBar";
+import NotificationContainer from "./NotificationContainer";
 
-import type { CurrentUser } from "../flow/authTypes"
-import type { Location } from "react-router"
-import type { CourseTopic } from "../flow/courseTypes"
+import type { CurrentUser } from "../flow/authTypes";
+import type { Location } from "react-router";
+import type { CourseTopic } from "../flow/courseTypes";
 
 type Props = {
   currentUser: ?CurrentUser,
   location: ?Location,
   errorPageHeader: ?boolean,
   courseTopics: Array<CourseTopic>,
-}
+};
 
 const Header = ({
   currentUser,
@@ -29,12 +29,12 @@ const Header = ({
         email: currentUser.email,
         username: currentUser.username,
         name: currentUser.name,
-      })
-    })
+      });
+    });
   } else {
     Sentry.configureScope((scope) => {
-      scope.setUser(null)
-    })
+      scope.setUser(null);
+    });
   }
   return (
     <React.Fragment>
@@ -46,7 +46,7 @@ const Header = ({
       />
       <NotificationContainer />
     </React.Fragment>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

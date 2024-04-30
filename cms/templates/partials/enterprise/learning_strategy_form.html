@@ -24,9 +24,9 @@
             hbspt.forms.create({
               portalId: '{{ hubspot_portal_id | safe }}',
               formId: '{{ hubspot_enterprise_page_form_id | safe }}',
-            })
+            });
           }
-        })
+        });
       </script>
       <div class="consent">
         <div class="consent-msg">{{ page.consent|richtext }}</div>

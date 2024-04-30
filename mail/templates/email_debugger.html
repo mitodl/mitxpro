@@ -11,15 +11,15 @@
       }
     </style>
     <script type="text/javascript">
-      ;(function () {
+      (function () {
         document.addEventListener('DOMContentLoaded', function () {
           document
             .querySelector('form')
             .addEventListener('submit', function (event) {
               // Set up our HTTP request
-              event.preventDefault()
-              var form = event.target
-              var data = new FormData(form)
+              event.preventDefault();
+              var form = event.target;
+              var data = new FormData(form);
               fetch(
                 new Request(form.action, {
                   method: form.method,
@@ -27,37 +27,37 @@
                 }),
               ).then(function (response) {
                 response.json().then(function (res) {
-                  var output = document.getElementById('output')
-                  var error = document.getElementById('error')
+                  var output = document.getElementById('output');
+                  var error = document.getElementById('error');
 
                   // reset display styles
-                  output.style.display = 'none'
-                  error.style.display = 'none'
+                  output.style.display = 'none';
+                  error.style.display = 'none';
 
                   // Process our return data
                   if (response.status >= 200 && response.status < 300) {
                     // show the output and u
-                    output.style.display = 'block'
+                    output.style.display = 'block';
 
                     // update
-                    document.getElementById('subject').innerHTML = res.subject
-                    var iframe = document.getElementById('html-body')
-                    iframe.contentWindow.document.write(res.html_body)
-                    iframe.contentWindow.document.close()
+                    document.getElementById('subject').innerHTML = res.subject;
+                    var iframe = document.getElementById('html-body');
+                    iframe.contentWindow.document.write(res.html_body);
+                    iframe.contentWindow.document.close();
                     iframe.style.height =
-                      iframe.contentWindow.document.body.scrollHeight + 'px'
+                      iframe.contentWindow.document.body.scrollHeight + 'px';
                     document.getElementById('text-body').innerHTML =
-                      res.text_body
+                      res.text_body;
                   } else {
                     // show the error and update it
-                    error.style.display = 'block'
-                    error.innerHTML = res.error
+                    error.style.display = 'block';
+                    error.innerHTML = res.error;
                   }
-                })
-              })
-            })
-        })
-      })()
+                });
+              });
+            });
+        });
+      })();
     </script>
   </head>
   <body>

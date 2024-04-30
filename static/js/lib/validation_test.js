@@ -1,12 +1,12 @@
 // @flow
-import { assert } from "chai"
-import { ValidationError } from "yup"
+import { assert } from "chai";
+import { ValidationError } from "yup";
 
 import {
   changeEmailFormValidation,
   changePasswordFormValidation,
   resetPasswordFormValidation,
-} from "./validation"
+} from "./validation";
 
 describe("validation utils", () => {
   describe("resetPasswordFormValidation", () => {
@@ -14,14 +14,14 @@ describe("validation utils", () => {
       const inputs = {
         newPassword: "password1",
         confirmPassword: "password1",
-      }
-      const result = await resetPasswordFormValidation.validate(inputs)
+      };
+      const result = await resetPasswordFormValidation.validate(inputs);
 
-      assert.deepEqual(result, inputs)
-    })
+      assert.deepEqual(result, inputs);
+    });
 
     //
-    ;[
+    [
       [
         { newPassword: "", confirmPassword: "" },
         ["Confirm Password is a required field"],
@@ -34,14 +34,14 @@ describe("validation utils", () => {
       it(`should throw an error with inputs=${JSON.stringify(
         inputs,
       )}`, async () => {
-        const promise = resetPasswordFormValidation.validate(inputs)
+        const promise = resetPasswordFormValidation.validate(inputs);
 
-        const result = await assert.isRejected(promise, ValidationError)
+        const result = await assert.isRejected(promise, ValidationError);
 
-        assert.deepEqual(result.errors, errors)
-      })
-    })
-  })
+        assert.deepEqual(result.errors, errors);
+      });
+    });
+  });
 
   describe("ChangePasswordFormValidation", () => {
     it(`should validate with matching passwords`, async () => {
@@ -49,14 +49,14 @@ describe("validation utils", () => {
         oldPassword: "old-password",
         newPassword: "password1",
         confirmPassword: "password1",
-      }
-      const result = await changePasswordFormValidation.validate(inputs)
+      };
+      const result = await changePasswordFormValidation.validate(inputs);
 
-      assert.deepEqual(result, inputs)
-    })
+      assert.deepEqual(result, inputs);
+    });
 
     //
-    ;[
+    [
       [
         {
           oldPassword: "",
@@ -101,29 +101,29 @@ describe("validation utils", () => {
       it(`should throw an error with inputs=${JSON.stringify(
         inputs,
       )}`, async () => {
-        const promise = changePasswordFormValidation.validate(inputs)
+        const promise = changePasswordFormValidation.validate(inputs);
 
-        const result = await assert.isRejected(promise, ValidationError)
+        const result = await assert.isRejected(promise, ValidationError);
 
-        assert.deepEqual(result.errors, errors)
-      })
-    })
+        assert.deepEqual(result.errors, errors);
+      });
+    });
   }),
     describe("ChangeEmailFormValidation", () => {
       it(`should validate with different email`, async () => {
         const inputs = {
           email: "test@example.com",
           confirmPassword: "password1",
-        }
+        };
         const result = await changeEmailFormValidation.validate(inputs, {
           context: { currentEmail: "abc@example.com" },
-        })
+        });
 
-        assert.deepEqual(result, inputs)
-      })
+        assert.deepEqual(result, inputs);
+      });
 
       //
-      ;[
+      [
         [
           {
             email: "abc@example.com",
@@ -151,12 +151,12 @@ describe("validation utils", () => {
         )}`, async () => {
           const promise = changeEmailFormValidation.validate(inputs, {
             context: { currentEmail: "abc@example.com" },
-          })
+          });
 
-          const result = await assert.isRejected(promise, ValidationError)
+          const result = await assert.isRejected(promise, ValidationError);
 
-          assert.deepEqual(result.errors, errors)
-        })
-      })
-    })
-})
+          assert.deepEqual(result.errors, errors);
+        });
+      });
+    });
+});

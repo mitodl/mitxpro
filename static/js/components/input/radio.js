@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 
 export const RadioButton = ({
   field: { name, value, onChange, onBlur },
@@ -20,9 +20,9 @@ export const RadioButton = ({
       />
       <label htmlFor={id}>{label}</label>
     </div>
-  )
-}
+  );
+};
 
 export const RadioButtonGroup = ({ className, children }) => {
-  return <div className={className}>{children}</div>
-}
+  return <div className={className}>{children}</div>;
+};

@@ -1,48 +1,48 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { REGISTER_DETAILS_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { Link } from "react-router-dom"
-import { connectRequest, mutateAsync, requestAsync } from "redux-query"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { REGISTER_DETAILS_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import { connectRequest, mutateAsync, requestAsync } from "redux-query";
+import { createStructuredSelector } from "reselect";
 
-import { authSelector } from "../../../lib/queries/auth"
-import auth from "../../../lib/queries/auth"
-import users from "../../../lib/queries/users"
-import { routes } from "../../../lib/urls"
-import { getAppropriateInformationFragment } from "../../../lib/util"
+import { authSelector } from "../../../lib/queries/auth";
+import auth from "../../../lib/queries/auth";
+import users from "../../../lib/queries/users";
+import { routes } from "../../../lib/urls";
+import { getAppropriateInformationFragment } from "../../../lib/util";
 import {
   STATE_ERROR,
   STATE_EXISTING_ACCOUNT,
   handleAuthResponse,
-} from "../../../lib/auth"
-import queries from "../../../lib/queries"
-import { qsPartialTokenSelector } from "../../../lib/selectors"
+} from "../../../lib/auth";
+import queries from "../../../lib/queries";
+import { qsPartialTokenSelector } from "../../../lib/selectors";
 
-import RegisterDetailsForm from "../../../components/forms/RegisterDetailsForm"
+import RegisterDetailsForm from "../../../components/forms/RegisterDetailsForm";
 
-import type { RouterHistory, Location } from "react-router"
-import type { Response } from "redux-query"
+import type { RouterHistory, Location } from "react-router";
+import type { Response } from "redux-query";
 import type {
   AuthResponse,
   LegalAddress,
   User,
   Country,
-} from "../../../flow/authTypes"
+} from "../../../flow/authTypes";
 
 type RegisterProps = {|
   location: Location,
   history: RouterHistory,
   authResponse: ?AuthResponse,
   params: { partialToken: string },
-|}
+|};
 
 type StateProps = {|
   countries: Array<Country>,
-|}
+|};
 
 type DispatchProps = {|
   registerDetails: (
@@ -52,29 +52,29 @@ type DispatchProps = {|
     partialToken: string,
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>,
-|}
+|};
 
 type Props = {|
   ...RegisterProps,
   ...StateProps,
   ...DispatchProps,
-|}
+|};
 
 type State = {
   isVatEnabled: boolean,
-}
+};
 
 export class RegisterDetailsPage extends React.Component<Props, State> {
   state = {
     isVatEnabled: false,
-  }
+  };
 
   async onSubmit(detailsData: any, { setSubmitting, setErrors }: any) {
     const {
       history,
       registerDetails,
       params: { partialToken },
-    } = this.props
+    } = this.props;
 
     try {
       const { body } = await registerDetails(
@@ -82,22 +82,22 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
         detailsData.password,
         detailsData.legal_address,
         partialToken,
-      )
+      );
 
       handleAuthResponse(history, body, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
-      })
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
-  enableVatID = () => this.setState({ isVatEnabled: true })
+  enableVatID = () => this.setState({ isVatEnabled: true });
 
   render() {
-    const { authResponse, countries } = this.props
+    const { authResponse, countries } = this.props;
 
     return (
       <DocumentTitle
@@ -144,7 +144,7 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
           </div>
         )}
       </DocumentTitle>
-    )
+    );
   }
 }
 
@@ -152,9 +152,9 @@ const mapStateToProps = createStructuredSelector({
   authResponse: authSelector,
   params: createStructuredSelector({ partialToken: qsPartialTokenSelector }),
   countries: queries.users.countriesSelector,
-})
+});
 
-const mapPropsToConfig = () => [queries.users.countriesQuery()]
+const mapPropsToConfig = () => [queries.users.countriesQuery()];
 
 const registerDetails = (
   name: string,
@@ -164,20 +164,20 @@ const registerDetails = (
 ) =>
   mutateAsync(
     auth.registerDetailsMutation(name, password, legalAddress, partialToken),
-  )
+  );
 
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
     force: true,
-  })
+  });
 
 const mapDispatchToProps = {
   registerDetails,
   getCurrentUser,
-}
+};
 
 export default compose(
   connect(mapStateToProps, mapDispatchToProps),
   connectRequest(mapPropsToConfig),
-)(RegisterDetailsPage)
+)(RegisterDetailsPage);

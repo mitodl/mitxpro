@@ -1,31 +1,31 @@
 // @flow
-import React from "react"
-import sinon from "sinon"
-import moment from "moment"
-import { assert } from "chai"
-import { mount } from "enzyme"
-import wait from "waait"
+import React from "react";
+import sinon from "sinon";
+import moment from "moment";
+import { assert } from "chai";
+import { mount } from "enzyme";
+import wait from "waait";
 
-import { CouponForm } from "./CouponForm"
+import { CouponForm } from "./CouponForm";
 import {
   COUPON_TYPE_PROMO,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM,
-} from "../../constants"
+} from "../../constants";
 import {
   makeCompany,
   makeCourseRunProduct,
   makeProgramProduct,
-} from "../../factories/ecommerce"
+} from "../../factories/ecommerce";
 import {
   findFormikFieldByName,
   findFormikErrorByName,
-} from "../../lib/test_utils"
-import { formatPrettyDate } from "../../lib/util"
+} from "../../lib/test_utils";
+import { formatPrettyDate } from "../../lib/util";
 
 describe("CouponForm", () => {
-  let sandbox, onSubmitStub
-  const products = [makeCourseRunProduct(), makeProgramProduct()]
+  let sandbox, onSubmitStub;
+  const products = [makeCourseRunProduct(), makeProgramProduct()];
 
   const renderForm = () =>
     mount(
@@ -34,31 +34,31 @@ describe("CouponForm", () => {
         products={products}
         companies={[makeCompany(), makeCompany()]}
       />,
-    )
+    );
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
-    onSubmitStub = sandbox.stub()
-  })
+    sandbox = sinon.createSandbox();
+    onSubmitStub = sandbox.stub();
+  });
 
   it("passes onSubmit to Formik", () => {
-    const wrapper = renderForm()
-    assert.equal(wrapper.find("Formik").props().onSubmit, onSubmitStub)
-  })
+    const wrapper = renderForm();
+    assert.equal(wrapper.find("Formik").props().onSubmit, onSubmitStub);
+  });
 
   it("renders the form", () => {
-    const wrapper = renderForm()
-    const form = wrapper.find("Formik")
-    assert.ok(wrapper.find(".picky").exists())
-    assert.ok(wrapper.find("DayPickerInput").at(1).exists)
-    assert.ok(findFormikFieldByName(form, "product_type").exists())
-    assert.ok(findFormikFieldByName(form, "coupon_type").exists())
-    assert.ok(findFormikFieldByName(form, "is_global").exists())
-    assert.ok(form.find("button[type='submit']").exists())
-  })
+    const wrapper = renderForm();
+    const form = wrapper.find("Formik");
+    assert.ok(wrapper.find(".picky").exists());
+    assert.ok(wrapper.find("DayPickerInput").at(1).exists);
+    assert.ok(findFormikFieldByName(form, "product_type").exists());
+    assert.ok(findFormikFieldByName(form, "coupon_type").exists());
+    assert.ok(findFormikFieldByName(form, "is_global").exists());
+    assert.ok(form.find("button[type='submit']").exists());
+  });
 
   //
-  ;[
+  [
     ["name", "", "Coupon name is required"],
     ["name", "Valid_name", ""],
     ["name", "Invalid name", "Only letters, numbers, and underscores allowed"],
@@ -76,22 +76,22 @@ describe("CouponForm", () => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
-      const wrapper = renderForm()
+      const wrapper = renderForm();
 
-      const input = wrapper.find(`input[name="${name}"]`)
-      input.simulate("change", { persist: () => {}, target: { name, value } })
-      input.simulate("blur")
-      await wait()
-      wrapper.update()
+      const input = wrapper.find(`input[name="${name}"]`);
+      input.simulate("change", { persist: () => {}, target: { name, value } });
+      input.simulate("blur");
+      await wait();
+      wrapper.update();
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
         errorMessage,
-      )
-    })
-  })
+      );
+    });
+  });
 
   //
-  ;[
+  [
     ["expiration_date", 1, "", "Valid expiration date required"],
     ["activation_date", 0, "", "Valid activation date required"],
     ["expiration_date", 1, "bad_date", "Valid expiration date required"],
@@ -108,43 +108,43 @@ describe("CouponForm", () => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
-      const wrapper = renderForm()
+      const wrapper = renderForm();
 
-      const input = wrapper.find("DayPickerInput").at(idx).find("input")
-      input.simulate("click")
-      input.simulate("change", { persist: () => {}, target: { name, value } })
-      input.simulate("blur")
-      await wait()
-      wrapper.update()
+      const input = wrapper.find("DayPickerInput").at(idx).find("input");
+      input.simulate("click");
+      input.simulate("change", { persist: () => {}, target: { name, value } });
+      input.simulate("blur");
+      await wait();
+      wrapper.update();
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
         errorMessage,
-      )
-    })
-  })
+      );
+    });
+  });
 
   //
-  ;[
+  [
     ["activation_date", 0, "06/27/2019", "2019-06-27T00:00:00.000Z"],
     ["expiration_date", 1, "06/27/2519", "2519-06-27T23:59:59.999Z"],
   ].forEach(([name, idx, value, formattedDate]) => {
     it(`converts the field name=${name}, value=${JSON.stringify(
       value,
     )} to date string ${JSON.stringify(formattedDate)}`, async () => {
-      const wrapper = renderForm()
-      const formik = wrapper.find("Formik").instance()
-      const input = wrapper.find("DayPickerInput").at(idx).find("input")
-      input.simulate("click")
-      input.simulate("change", { persist: () => {}, target: { name, value } })
-      input.simulate("blur")
-      await wait()
-      wrapper.update()
-      assert.equal(formik.state.values[name].toISOString(), formattedDate)
-    })
-  })
+      const wrapper = renderForm();
+      const formik = wrapper.find("Formik").instance();
+      const input = wrapper.find("DayPickerInput").at(idx).find("input");
+      input.simulate("click");
+      input.simulate("change", { persist: () => {}, target: { name, value } });
+      input.simulate("blur");
+      await wait();
+      wrapper.update();
+      assert.equal(formik.state.values[name].toISOString(), formattedDate);
+    });
+  });
 
   //
-  ;[
+  [
     [[], "1 or more products must be selected"],
     [[makeCourseRunProduct()], ""],
   ].forEach(([value, errorMessage]) => {
@@ -153,54 +153,56 @@ describe("CouponForm", () => {
     )}" and expects error=${JSON.stringify(
       errorMessage,
     )} for coupons`, async () => {
-      const wrapper = renderForm()
-      const formik = wrapper.find("Formik").instance()
-      formik.setFieldValue("products", value)
-      formik.setFieldTouched("products")
-      await wait()
-      wrapper.update()
+      const wrapper = renderForm();
+      const formik = wrapper.find("Formik").instance();
+      formik.setFieldValue("products", value);
+      formik.setFieldTouched("products");
+      await wait();
+      wrapper.update();
       assert.deepEqual(
         findFormikErrorByName(wrapper, "products").text(),
         errorMessage,
-      )
-    })
-  })
+      );
+    });
+  });
 
   //
-  ;[
+  [
     [PRODUCT_TYPE_COURSERUN, [products[0]]],
     [PRODUCT_TYPE_PROGRAM, [products[1]]],
     ["", products],
   ].forEach(([productType, availableProduct]) => {
     it(`displays correct product checkboxes when productType radio button value="${productType}"`, async () => {
-      const wrapper = renderForm()
+      const wrapper = renderForm();
       wrapper
         .find(`input[name='product_type'][value='${productType}']`)
-        .simulate("click")
-      await wait()
-      wrapper.update()
-      const picky = wrapper.find(".picky")
-      const options = picky.find("input[type='checkbox']")
-      assert.equal(options.at(1).exists(), productType === "")
-      assert.ok(picky.text().includes(availableProduct[0].content_object.title))
+        .simulate("click");
+      await wait();
+      wrapper.update();
+      const picky = wrapper.find(".picky");
+      const options = picky.find("input[type='checkbox']");
+      assert.equal(options.at(1).exists(), productType === "");
+      assert.ok(
+        picky.text().includes(availableProduct[0].content_object.title),
+      );
       if (productType === "") {
         assert.ok(
           picky.text().includes(availableProduct[1].content_object.title),
-        )
+        );
       }
-    })
-  })
+    });
+  });
 
   //
   it(`displays correct product labels`, async () => {
-    const wrapper = renderForm()
+    const wrapper = renderForm();
     wrapper
       .find(`input[name='product_type']`)
       .findWhere((checkBox) => checkBox.prop("value") === "")
-      .simulate("click")
-    await wait()
-    wrapper.update()
-    const picky = wrapper.find(".picky")
+      .simulate("click");
+    await wait();
+    wrapper.update();
+    const picky = wrapper.find(".picky");
     assert.ok(
       picky
         .text()
@@ -211,18 +213,18 @@ describe("CouponForm", () => {
             moment(products[0].content_object.start_date),
           )}`,
         ),
-    )
+    );
     assert.ok(
       picky
         .text()
         .includes(
           `${products[1].latest_version.readable_id} | ${products[1].content_object.title}`,
         ),
-    )
-  })
+    );
+  });
 
   //
-  ;[
+  [
     ["payment_type", "", "Payment type is required"],
     ["payment_type", "staff", ""],
   ].forEach(([name, value, errorMessage]) => {
@@ -231,22 +233,22 @@ describe("CouponForm", () => {
     )} and expects error=${JSON.stringify(
       errorMessage,
     )} for single-use coupons`, async () => {
-      const wrapper = renderForm()
-      wrapper.find(`input[value="single-use"]`).simulate("click")
-      const input = wrapper.find(`select[name="${name}"]`)
-      input.simulate("change", { persist: () => {}, target: { name, value } })
-      input.simulate("blur")
-      await wait()
-      wrapper.update()
+      const wrapper = renderForm();
+      wrapper.find(`input[value="single-use"]`).simulate("click");
+      const input = wrapper.find(`select[name="${name}"]`);
+      input.simulate("change", { persist: () => {}, target: { name, value } });
+      input.simulate("blur");
+      await wait();
+      wrapper.update();
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
         errorMessage,
-      )
-    })
-  })
+      );
+    });
+  });
 
   //
-  ;[
+  [
     ["discount_type", "", "Discount type is required"],
     ["discount_type", "percent-off", ""],
     ["discount_type", "dollars-off", ""],
@@ -256,22 +258,22 @@ describe("CouponForm", () => {
     )} and expects error=${JSON.stringify(
       errorMessage,
     )} for percent-off coupons`, async () => {
-      const wrapper = renderForm()
+      const wrapper = renderForm();
       // wrapper.find(`input[value="percent-off"]`).simulate("click")
-      const input = wrapper.find(`select[name="${name}"]`)
-      input.simulate("change", { persist: () => {}, target: { name, value } })
-      input.simulate("blur")
-      await wait()
-      wrapper.update()
+      const input = wrapper.find(`select[name="${name}"]`);
+      input.simulate("change", { persist: () => {}, target: { name, value } });
+      input.simulate("blur");
+      await wait();
+      wrapper.update();
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
         errorMessage,
-      )
-    })
-  })
+      );
+    });
+  });
 
   //
-  ;[
+  [
     ["coupon_code", "", "Coupon code is required"],
     ["coupon_code", "VALIDCODE", ""],
     [
@@ -286,27 +288,27 @@ describe("CouponForm", () => {
     it(`validates the field name=${name}, value="${value}" and expects error=${JSON.stringify(
       errorMessage,
     )} for promo coupons`, async () => {
-      const wrapper = renderForm()
+      const wrapper = renderForm();
       findFormikFieldByName(wrapper, "coupon_type")
         .at(1)
         .simulate("change", {
           persist: () => {},
           target: { name: "coupon_type", value: COUPON_TYPE_PROMO },
-        })
-      await wait()
-      wrapper.update()
-      const input = findFormikFieldByName(wrapper, name)
+        });
+      await wait();
+      wrapper.update();
+      const input = findFormikFieldByName(wrapper, name);
       input.simulate("change", {
         persist: () => {},
         target: { name, value },
-      })
-      input.simulate("blur")
-      await wait()
-      wrapper.update()
+      });
+      input.simulate("blur");
+      await wait();
+      wrapper.update();
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
         errorMessage,
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

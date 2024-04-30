@@ -23,18 +23,18 @@ declare type Settings = {
   enable_blog: boolean,
   enable_taxes_display: boolean,
   enable_enterprise: boolean,
-}
-declare var SETTINGS: Settings
+};
+declare var SETTINGS: Settings;
 
 // mocha
-declare var it: Function
-declare var beforeEach: Function
-declare var afterEach: Function
-declare var describe: Function
+declare var it: Function;
+declare var beforeEach: Function;
+declare var afterEach: Function;
+declare var describe: Function;
 
 // webpack
-declare var __webpack_public_path__: string // eslint-disable-line camelcase
+declare var __webpack_public_path__: string; // eslint-disable-line camelcase
 
 declare var module: {
   hot: any,
-}
+};

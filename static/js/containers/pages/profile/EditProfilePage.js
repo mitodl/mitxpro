@@ -1,65 +1,65 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { EDIT_PROFILE_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { connectRequest, mutateAsync, requestAsync } from "redux-query"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { EDIT_PROFILE_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { connectRequest, mutateAsync, requestAsync } from "redux-query";
+import { createStructuredSelector } from "reselect";
 
-import users, { currentUserSelector } from "../../../lib/queries/users"
-import { routes } from "../../../lib/urls"
-import queries from "../../../lib/queries"
-import EditProfileForm from "../../../components/forms/EditProfileForm"
+import users, { currentUserSelector } from "../../../lib/queries/users";
+import { routes } from "../../../lib/urls";
+import queries from "../../../lib/queries";
+import EditProfileForm from "../../../components/forms/EditProfileForm";
 
-import type { Response } from "redux-query"
-import type { Country, LoggedInUser, User } from "../../../flow/authTypes"
-import type { RouterHistory } from "react-router"
+import type { Response } from "redux-query";
+import type { Country, LoggedInUser, User } from "../../../flow/authTypes";
+import type { RouterHistory } from "react-router";
 
 type StateProps = {|
   countries: ?Array<Country>,
   currentUser: LoggedInUser,
-|}
+|};
 
 type DispatchProps = {|
   editProfile: (userProfileData: User) => Promise<Response<User>>,
   getCurrentUser: () => Promise<Response<User>>,
-|}
+|};
 
 type ProfileProps = {|
   history: RouterHistory,
-|}
+|};
 
 type Props = {|
   ...StateProps,
   ...DispatchProps,
   ...ProfileProps,
-|}
+|};
 
 type State = {
   isVatEnabled: boolean,
-}
+};
 
 export class EditProfilePage extends React.Component<Props, State> {
   state = {
     isVatEnabled: false,
-  }
+  };
   componentDidMount() {
-    const { currentUser } = this.props
+    const { currentUser } = this.props;
     if (
       currentUser &&
       currentUser.legal_address &&
       currentUser.legal_address.vat_id
     ) {
-      this.setState({ isVatEnabled: true })
+      this.setState({ isVatEnabled: true });
     }
   }
 
-  enableVatID = () => this.setState({ isVatEnabled: true })
+  enableVatID = () => this.setState({ isVatEnabled: true });
 
   async onSubmit(profileData: User, { setSubmitting, setErrors }: Object) {
-    const { editProfile, history } = this.props
+    const { editProfile, history } = this.props;
 
     const payload = {
       ...profileData,
@@ -78,27 +78,27 @@ export class EditProfilePage extends React.Component<Props, State> {
             },
           }
         : {}),
-    }
+    };
 
     try {
       const {
         body: { errors },
-      }: { body: Object } = await editProfile(payload)
+      }: { body: Object } = await editProfile(payload);
 
       if (errors && errors.length > 0) {
         setErrors({
           email: errors[0],
-        })
+        });
       } else {
-        history.push(routes.profile.view)
+        history.push(routes.profile.view);
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
   render() {
-    const { countries, currentUser } = this.props
+    const { countries, currentUser } = this.props;
     return countries ? (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${EDIT_PROFILE_PAGE_TITLE}`}
@@ -132,32 +132,32 @@ export class EditProfilePage extends React.Component<Props, State> {
           </div>
         </div>
       </DocumentTitle>
-    ) : null
+    ) : null;
   }
 }
 
 const editProfile = (userProfileData: User) =>
-  mutateAsync(users.editProfileMutation(userProfileData))
+  mutateAsync(users.editProfileMutation(userProfileData));
 
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
     force: true,
-  })
+  });
 
 const mapStateToProps = createStructuredSelector({
   currentUser: currentUserSelector,
   countries: queries.users.countriesSelector,
-})
+});
 
 const mapDispatchToProps = {
   editProfile: editProfile,
   getCurrentUser,
-}
+};
 
-const mapPropsToConfigs = () => [queries.users.countriesQuery()]
+const mapPropsToConfigs = () => [queries.users.countriesQuery()];
 
 export default compose(
   connect(mapStateToProps, mapDispatchToProps),
   connectRequest(mapPropsToConfigs),
-)(EditProfilePage)
+)(EditProfilePage);

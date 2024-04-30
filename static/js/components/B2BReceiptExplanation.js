@@ -1,11 +1,11 @@
 // @flow
-import React from "react"
+import React from "react";
 
-import Expandable from "./Expandable"
+import Expandable from "./Expandable";
 
 type Props = {
   className?: string,
-}
+};
 const B2BReceiptExplanation = ({ className }: Props) => (
   <div className={`container b2b-explanation ${className ? className : ""}`}>
     <div className="row">
@@ -25,5 +25,5 @@ const B2BReceiptExplanation = ({ className }: Props) => (
       </div>
     </div>
   </div>
-)
-export default B2BReceiptExplanation
+);
+export default B2BReceiptExplanation;

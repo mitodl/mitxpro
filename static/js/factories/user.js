@@ -1,27 +1,27 @@
 // @flow
-import casual from "casual-browserify"
+import casual from "casual-browserify";
 
-import { incrementer } from "../lib/util"
+import { incrementer } from "../lib/util";
 
 import type {
   AnonymousUser,
   LoggedInUser,
   UnusedCoupon,
-} from "../flow/authTypes"
+} from "../flow/authTypes";
 
-const incr = incrementer()
+const incr = incrementer();
 
 export const makeAnonymousUser = (): AnonymousUser => ({
   is_anonymous: true,
   is_authenticated: false,
-})
+});
 
 export const makeUnusedCoupon = (): UnusedCoupon => ({
   // $FlowFixMe: Flow thinks incr.next().value may be undefined, but it won't ever be
   product_id: incr.next().value,
   coupon_code: casual.word,
   expiration_date: casual.moment.format(),
-})
+});
 
 export const makeUser = (username: ?string): LoggedInUser => ({
   // $FlowFixMe: Flow thinks incr.next().value may be undefined, but it won't ever be
@@ -57,7 +57,7 @@ export const makeUser = (username: ?string): LoggedInUser => ({
     vat_id: "",
   },
   unused_coupons: [],
-})
+});
 
 export const makeCountries = () => [
   {
@@ -78,4 +78,4 @@ export const makeCountries = () => [
   },
   { code: "FR", name: "France", states: [] },
   { code: "GB", name: "United Kingdom", states: [] },
-]
+];

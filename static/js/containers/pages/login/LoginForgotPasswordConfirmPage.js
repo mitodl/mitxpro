@@ -1,21 +1,21 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { FORGOT_PASSWORD_CONFIRM_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { mutateAsync } from "redux-query"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { FORGOT_PASSWORD_CONFIRM_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { mutateAsync } from "redux-query";
 
-import { addUserNotification } from "../../../actions"
-import auth from "../../../lib/queries/auth"
-import { routes } from "../../../lib/urls"
-import { ALERT_TYPE_TEXT } from "../../../constants"
+import { addUserNotification } from "../../../actions";
+import auth from "../../../lib/queries/auth";
+import { routes } from "../../../lib/urls";
+import { ALERT_TYPE_TEXT } from "../../../constants";
 
-import ResetPasswordForm from "../../../components/forms/ResetPasswordForm"
+import ResetPasswordForm from "../../../components/forms/ResetPasswordForm";
 
-import type { Match, RouterHistory } from "react-router"
-import type { ResetPasswordFormValues } from "../../../components/forms/ResetPasswordForm"
+import type { Match, RouterHistory } from "react-router";
+import type { ResetPasswordFormValues } from "../../../components/forms/ResetPasswordForm";
 
 type Props = {
   match: Match,
@@ -27,7 +27,7 @@ type Props = {
     uid: string,
   ) => Promise<any>,
   addUserNotification: Function,
-}
+};
 
 export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
   async onSubmit(
@@ -35,12 +35,12 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
     { setSubmitting }: any,
   ) {
     const { addUserNotification, forgotPasswordConfirm, history, match } =
-      this.props
-    const { token, uid } = match.params
+      this.props;
+    const { token, uid } = match.params;
 
     if (!token || !uid) {
       // this is here to satisfy flow
-      return
+      return;
     }
 
     try {
@@ -49,17 +49,17 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
         confirmPassword,
         token,
         uid,
-      )
+      );
 
-      let alertText, redirectRoute
+      let alertText, redirectRoute;
       if (response.status === 200 || response.status === 204) {
         alertText =
-          "Your password has been updated, you may use it to sign in now."
-        redirectRoute = routes.login.begin
+          "Your password has been updated, you may use it to sign in now.";
+        redirectRoute = routes.login.begin;
       } else {
         alertText =
-          "Unable to reset your password with that link, please try again."
-        redirectRoute = routes.login.forgot.begin
+          "Unable to reset your password with that link, please try again.";
+        redirectRoute = routes.login.forgot.begin;
       }
 
       addUserNotification({
@@ -69,10 +69,10 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
             text: alertText,
           },
         },
-      })
-      history.push(redirectRoute)
+      });
+      history.push(redirectRoute);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -95,7 +95,7 @@ export class LoginForgotPasswordConfirmPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
@@ -107,13 +107,13 @@ const forgotPasswordConfirm = (
 ) =>
   mutateAsync(
     auth.forgotPasswordConfirmMutation(newPassword, reNewPassword, token, uid),
-  )
+  );
 
 const mapDispatchToProps = {
   forgotPasswordConfirm,
   addUserNotification,
-}
+};
 
 export default compose(connect(null, mapDispatchToProps))(
   LoginForgotPasswordConfirmPage,
-)
+);

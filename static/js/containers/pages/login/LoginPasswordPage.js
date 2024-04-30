@@ -1,27 +1,27 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { LOGIN_PASSWORD_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { mutateAsync, requestAsync } from "redux-query"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { LOGIN_PASSWORD_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { mutateAsync, requestAsync } from "redux-query";
+import { createStructuredSelector } from "reselect";
 
-import auth, { authSelector } from "../../../lib/queries/auth"
-import users from "../../../lib/queries/users"
-import { routes } from "../../../lib/urls"
-import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth"
+import auth, { authSelector } from "../../../lib/queries/auth";
+import users from "../../../lib/queries/users";
+import { routes } from "../../../lib/urls";
+import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth";
 
-import LoginPasswordForm from "../../../components/forms/LoginPasswordForm"
+import LoginPasswordForm from "../../../components/forms/LoginPasswordForm";
 
-import type { RouterHistory, Location } from "react-router"
-import type { Response } from "redux-query"
+import type { RouterHistory, Location } from "react-router";
+import type { Response } from "redux-query";
 import type {
   AuthResponse,
   User,
   PasswordFormValues,
-} from "../../../flow/authTypes"
+} from "../../../flow/authTypes";
 
 type Props = {
   location: Location,
@@ -32,16 +32,16 @@ type Props = {
     partialToken: string,
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>,
-}
+};
 
 export class LoginPasswordPage extends React.Component<Props> {
   componentDidMount() {
-    const { history, auth } = this.props
+    const { history, auth } = this.props;
 
     if (!auth || !auth.partial_token) {
       // if there's no partialToken in the state
       // this page was navigated to directly and login needs to be started over
-      history.push(routes.login.begin)
+      history.push(routes.login.begin);
     }
   }
 
@@ -54,27 +54,27 @@ export class LoginPasswordPage extends React.Component<Props> {
       loginPassword,
       history,
       auth: { partial_token },
-    } = this.props
+    } = this.props;
 
     if (!partial_token) {
-      throw Error("Invalid state: password page with no partialToken")
+      throw Error("Invalid state: password page with no partialToken");
     }
 
     try {
-      const { body } = await loginPassword(password, partial_token)
+      const { body } = await loginPassword(password, partial_token);
 
       handleAuthResponse(history, body, {
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
-      })
+      });
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
     /* eslint-enable camelcase */
   }
 
   render() {
-    const { auth } = this.props
+    const { auth } = this.props;
 
     if (!auth) {
       return (
@@ -83,10 +83,10 @@ export class LoginPasswordPage extends React.Component<Props> {
         >
           <div />
         </DocumentTitle>
-      )
+      );
     }
 
-    const name = auth.extra_data.name
+    const name = auth.extra_data.name;
 
     return (
       <DocumentTitle
@@ -108,28 +108,28 @@ export class LoginPasswordPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const mapStateToProps = createStructuredSelector({
   auth: authSelector,
-})
+});
 
 const loginPassword = (password: string, partialToken: string) =>
-  mutateAsync(auth.loginPasswordMutation(password, partialToken))
+  mutateAsync(auth.loginPasswordMutation(password, partialToken));
 
 const getCurrentUser = () =>
   requestAsync({
     ...users.currentUserQuery(),
     force: true,
-  })
+  });
 
 const mapDispatchToProps = {
   loginPassword,
   getCurrentUser,
-}
+};
 
 export default compose(connect(mapStateToProps, mapDispatchToProps))(
   LoginPasswordPage,
-)
+);

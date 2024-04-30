@@ -1,11 +1,11 @@
 // @flow
-import React from "react"
-import { Route, Switch } from "react-router-dom"
+import React from "react";
+import { Route, Switch } from "react-router-dom";
 
-import { routes } from "../../../lib/urls"
+import { routes } from "../../../lib/urls";
 
-import B2BPurchasePage from "./B2BPurchasePage"
-import B2BReceiptPage from "./B2BReceiptPage"
+import B2BPurchasePage from "./B2BPurchasePage";
+import B2BReceiptPage from "./B2BReceiptPage";
 
 const EcommerceBulkPages = () => (
   <React.Fragment>
@@ -22,6 +22,6 @@ const EcommerceBulkPages = () => (
       />
     </Switch>
   </React.Fragment>
-)
+);
 
-export default EcommerceBulkPages
+export default EcommerceBulkPages;

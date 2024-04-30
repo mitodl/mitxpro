@@ -1,12 +1,12 @@
 // @flow
-import React from "react"
-import moment from "moment"
-import { Picky } from "react-picky"
-import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda"
-import { formatDate, parseDate } from "react-day-picker/moment"
-import DayPickerInput from "react-day-picker/DayPickerInput"
-import { Formik, Field, Form, ErrorMessage } from "formik"
-import * as yup from "yup"
+import React from "react";
+import moment from "moment";
+import { Picky } from "react-picky";
+import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda";
+import { formatDate, parseDate } from "react-day-picker/moment";
+import DayPickerInput from "react-day-picker/DayPickerInput";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as yup from "yup";
 
 import {
   DISCOUNT_TYPE_PERCENT_OFF,
@@ -14,18 +14,18 @@ import {
   COUPON_TYPE_SINGLE_USE,
   PRODUCT_TYPE_COURSERUN,
   PRODUCT_TYPE_PROGRAM,
-} from "../../constants"
-import { isPromo } from "../../lib/ecommerce"
-import { getProductSelectLabel } from "../../lib/util"
-import FormError from "../../components/forms/elements/FormError"
+} from "../../constants";
+import { isPromo } from "../../lib/ecommerce";
+import { getProductSelectLabel } from "../../lib/util";
+import FormError from "../../components/forms/elements/FormError";
 
-import type { Company, Product } from "../../flow/ecommerceTypes"
+import type { Company, Product } from "../../flow/ecommerceTypes";
 
 type CouponFormProps = {
   onSubmit: Function,
   companies: Array<Company>,
   products: Array<Product>,
-}
+};
 
 const couponValidations = yup.object().shape({
   name: yup
@@ -97,19 +97,19 @@ const couponValidations = yup.object().shape({
     is: COUPON_TYPE_SINGLE_USE,
     then: yup.string().required("Payment type is required"),
   }),
-})
+});
 
 const zeroHour = (value) => {
   if (value instanceof Date) {
-    value.setHours(0, 0, 0, 0)
+    value.setHours(0, 0, 0, 0);
   }
-}
+};
 
 const finalHour = (value) => {
   if (value instanceof Date) {
-    value.setHours(23, 59, 59, 999)
+    value.setHours(23, 59, 59, 999);
   }
-}
+};
 
 export const CouponForm = ({
   onSubmit,
@@ -253,8 +253,8 @@ export const CouponForm = ({
                 formatDate={formatDate}
                 parseDate={parseDate}
                 onDayChange={(value) => {
-                  zeroHour(value)
-                  setFieldValue("activation_date", value)
+                  zeroHour(value);
+                  setFieldValue("activation_date", value);
                 }}
                 onDayPickerHide={() => setFieldTouched("activation_date")}
                 error={errors.activation_date}
@@ -273,8 +273,8 @@ export const CouponForm = ({
                 formatDate={formatDate}
                 parseDate={parseDate}
                 onDayChange={(value) => {
-                  finalHour(value)
-                  setFieldValue("expiration_date", value)
+                  finalHour(value);
+                  setFieldValue("expiration_date", value);
                 }}
                 onDayPickerHide={() => setFieldTouched("expiration_date")}
                 error={errors.expiration_date}
@@ -302,11 +302,11 @@ export const CouponForm = ({
               name="is_global"
               checked={values.is_global}
               onChange={() => {
-                values.is_global = !values.is_global
-                setFieldValue("is_global", values.is_global)
+                values.is_global = !values.is_global;
+                setFieldValue("is_global", values.is_global);
                 if (values.is_global) {
-                  setFieldValue("products", [])
-                  setFieldTouched("products")
+                  setFieldValue("products", []);
+                  setFieldTouched("products");
                 }
               }}
               disabled={values.include_future_runs}
@@ -320,8 +320,8 @@ export const CouponForm = ({
             name="product_type"
             value={PRODUCT_TYPE_PROGRAM}
             onClick={(evt) => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
+              setFieldValue("product_type", evt.target.value);
+              setFieldValue("products", []);
             }}
             checked={values.product_type === PRODUCT_TYPE_PROGRAM}
           />
@@ -331,8 +331,8 @@ export const CouponForm = ({
             name="product_type"
             value={PRODUCT_TYPE_COURSERUN}
             onClick={(evt) => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
+              setFieldValue("product_type", evt.target.value);
+              setFieldValue("products", []);
             }}
             checked={values.product_type === PRODUCT_TYPE_COURSERUN}
           />
@@ -342,8 +342,8 @@ export const CouponForm = ({
             name="product_type"
             value=""
             onClick={(evt) => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
+              setFieldValue("product_type", evt.target.value);
+              setFieldValue("products", []);
             }}
             checked={values.product_type === ""}
           />
@@ -373,8 +373,8 @@ export const CouponForm = ({
             includeSelectAll={false}
             includeFilter={true}
             onChange={(value) => {
-              setFieldValue("products", value)
-              setFieldTouched("products")
+              setFieldValue("products", value);
+              setFieldTouched("products");
             }}
             dropdownHeight={200}
             className="product-picker"
@@ -442,4 +442,4 @@ export const CouponForm = ({
       </Form>
     )}
   />
-)
+);

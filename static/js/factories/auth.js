@@ -1,9 +1,9 @@
 // @flow
-import casual from "casual-browserify"
+import casual from "casual-browserify";
 
-import { FLOW_LOGIN, FLOW_REGISTER } from "../lib/auth"
+import { FLOW_LOGIN, FLOW_REGISTER } from "../lib/auth";
 
-import type { AuthResponse, AuthFlow, AuthStates } from "../flow/authTypes"
+import type { AuthResponse, AuthFlow, AuthStates } from "../flow/authTypes";
 
 export const makeAuthResponse = (
   values: $Shape<AuthResponse> & {
@@ -17,7 +17,7 @@ export const makeAuthResponse = (
   redirect_url: undefined,
   extra_data: {},
   ...values,
-})
+});
 
 export const makeLoginAuthResponse = (
   values: $Shape<AuthResponse> & {
@@ -27,7 +27,7 @@ export const makeLoginAuthResponse = (
   makeAuthResponse({
     flow: FLOW_LOGIN,
     ...values,
-  })
+  });
 
 export const makeRegisterAuthResponse = (
   values: $Shape<AuthResponse> & {
@@ -37,4 +37,4 @@ export const makeRegisterAuthResponse = (
   makeAuthResponse({
     flow: FLOW_REGISTER,
     ...values,
-  })
+  });

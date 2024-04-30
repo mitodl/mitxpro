@@ -1,11 +1,11 @@
 // @flow
-import { include } from "named-urls"
-import qs from "query-string"
+import { include } from "named-urls";
+import qs from "query-string";
 
-export const getNextParam = (search: string) => qs.parse(search).next || "/"
+export const getNextParam = (search: string) => qs.parse(search).next || "/";
 
 export const bulkReceiptCsvUrl = (hash: string) =>
-  `/api/b2b/orders/${hash}/codes/`
+  `/api/b2b/orders/${hash}/codes/`;
 
 export const routes = {
   root: "/",
@@ -58,4 +58,4 @@ export const routes = {
   account: include("/account/", {
     confirmEmail: "confirm-email",
   }),
-}
+};

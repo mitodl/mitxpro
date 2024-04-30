@@ -1,28 +1,28 @@
 /* global SETTINGS: false */
 // @flow
-import React from "react"
-import { connect } from "react-redux"
-import { compose } from "redux"
-import { connectRequest } from "redux-query"
-import qs from "query-string"
-import moment from "moment"
-import Decimal from "decimal.js-light"
+import React from "react";
+import { connect } from "react-redux";
+import { compose } from "redux";
+import { connectRequest } from "redux-query";
+import qs from "query-string";
+import moment from "moment";
+import Decimal from "decimal.js-light";
 
-import B2BPurchaseSummary from "../../../components/B2BPurchaseSummary"
-import B2BReceiptExplanation from "../../../components/B2BReceiptExplanation"
+import B2BPurchaseSummary from "../../../components/B2BPurchaseSummary";
+import B2BReceiptExplanation from "../../../components/B2BReceiptExplanation";
 
-import queries from "../../../lib/queries"
-import { addUserNotification } from "../../../actions"
-import { wait } from "../../../lib/util"
-import { formatPrice } from "../../../lib/ecommerce"
-import { ALTER_TYPE_B2B_ORDER_STATUS } from "../../../constants"
-import { bulkReceiptCsvUrl } from "../../../lib/urls"
-import { formatPrettyDate } from "../../../lib/util"
+import queries from "../../../lib/queries";
+import { addUserNotification } from "../../../actions";
+import { wait } from "../../../lib/util";
+import { formatPrice } from "../../../lib/ecommerce";
+import { ALTER_TYPE_B2B_ORDER_STATUS } from "../../../constants";
+import { bulkReceiptCsvUrl } from "../../../lib/urls";
+import { formatPrettyDate } from "../../../lib/util";
 
-import type { B2BOrderStatus } from "../../../flow/ecommerceTypes"
-import type { CurrentUser } from "../../../flow/authTypes"
-import type { Location } from "react-router"
-import type Moment from "moment"
+import type { B2BOrderStatus } from "../../../flow/ecommerceTypes";
+import type { CurrentUser } from "../../../flow/authTypes";
+import type { Location } from "react-router";
+import type Moment from "moment";
 
 type Props = {
   addUserNotification: Function,
@@ -31,89 +31,89 @@ type Props = {
   currentUser: CurrentUser,
   forceRequest: () => Promise<void>,
   requestPending: boolean,
-}
+};
 type State = {
   now: Moment,
   timeoutActive: boolean,
-}
+};
 
-const NUM_MINUTES_TO_POLL = 2
-const NUM_MILLIS_PER_POLL = 3000
+const NUM_MINUTES_TO_POLL = 2;
+const NUM_MILLIS_PER_POLL = 3000;
 
 export class B2BReceiptPage extends React.Component<Props, State> {
   state = {
     now: moment(),
     timeoutActive: false,
-  }
+  };
 
   componentDidMount() {
-    this.handleOrderStatus()
+    this.handleOrderStatus();
   }
 
   componentDidUpdate(prevProps: Props) {
     // This is meant to be an identity check, not a deep equality check. This shows whether we received an update
     // for enrollments based on the forceReload
     if (prevProps.orderStatus !== this.props.orderStatus) {
-      this.handleOrderStatus()
+      this.handleOrderStatus();
     }
   }
 
   handleOrderStatus = async () => {
-    const { orderStatus } = this.props
+    const { orderStatus } = this.props;
 
     if (!orderStatus) {
       // wait until we have a order status
-      return
+      return;
     }
 
-    this.handleOrderPending()
-  }
+    this.handleOrderPending();
+  };
 
   handleOrderPending = async () => {
-    const { addUserNotification, orderStatus, forceRequest } = this.props
-    const { timeoutActive, now: initialTime } = this.state
+    const { addUserNotification, orderStatus, forceRequest } = this.props;
+    const { timeoutActive, now: initialTime } = this.state;
 
     if (timeoutActive) {
-      return
+      return;
     }
 
     if (orderStatus.status === "fulfilled") {
       // all set
-      return
+      return;
     }
 
-    this.setState({ timeoutActive: true })
-    await wait(NUM_MILLIS_PER_POLL)
-    this.setState({ timeoutActive: false })
+    this.setState({ timeoutActive: true });
+    await wait(NUM_MILLIS_PER_POLL);
+    this.setState({ timeoutActive: false });
 
-    const deadline = moment(initialTime).add(NUM_MINUTES_TO_POLL, "minutes")
-    const now = moment()
+    const deadline = moment(initialTime).add(NUM_MINUTES_TO_POLL, "minutes");
+    const now = moment();
     if (now.isBefore(deadline)) {
-      await forceRequest()
+      await forceRequest();
     } else {
       addUserNotification({
         "b2b-order-status": {
           type: ALTER_TYPE_B2B_ORDER_STATUS,
           color: "danger",
         },
-      })
+      });
     }
-  }
+  };
 
   render() {
     const {
       orderStatus,
       location: { search },
-    } = this.props
+    } = this.props;
 
-    const hash = qs.parse(search).hash
+    const hash = qs.parse(search).hash;
 
     if (!orderStatus || orderStatus.status !== "fulfilled") {
-      return <div className="b2b-receipt-page">Loading...</div>
+      return <div className="b2b-receipt-page">Loading...</div>;
     }
 
-    const totalPrice = new Decimal(orderStatus.total_price)
-    const itemPrice = new Decimal(orderStatus.item_price)
+    const totalPrice = new Decimal(orderStatus.total_price);
+    const itemPrice = new Decimal(orderStatus.item_price);
 
     const {
       num_seats: numSeats,
@@ -125,7 +125,7 @@ export class B2BReceiptPage extends React.Component<Props, State> {
       reference_number: referenceNumber,
       customer_name: customerName,
       product_version: { content_title: title, readable_id: readableId },
-    } = orderStatus
+    } = orderStatus;
     return (
       <React.Fragment>
         <div className="b2b-receipt-page container">
@@ -226,23 +226,23 @@ export class B2BReceiptPage extends React.Component<Props, State> {
           </div>
         </div>
       </React.Fragment>
-    )
+    );
   }
 }
 
 const mapStateToProps = (state) => ({
   orderStatus: state.entities.b2b_order_status,
-})
+});
 
 const mapDispatchToProps = {
   addUserNotification,
-}
+};
 
 const mapPropsToConfig = (props) => [
   queries.ecommerce.b2bOrderStatus(qs.parse(props.location.search).hash),
-]
+];
 
 export default compose(
   connect(mapStateToProps, mapDispatchToProps),
   connectRequest(mapPropsToConfig),
-)(B2BReceiptPage)
+)(B2BReceiptPage);

@@ -1,6 +1,6 @@
 // @flow
-import React from "react"
-import ReactMarkdown from "react-markdown"
+import React from "react";
+import ReactMarkdown from "react-markdown";
 
 // this is our patched version of react-markdown
 // we need to fiddle with it to address this issue:
@@ -9,7 +9,7 @@ import ReactMarkdown from "react-markdown"
 
 type MarkdownProps = {
   source: string,
-}
+};
 
 const Markdown = (props: MarkdownProps) => (
   <ReactMarkdown
@@ -26,5 +26,5 @@ const Markdown = (props: MarkdownProps) => (
     }}
     {...props}
   />
-)
-export default Markdown
+);
+export default Markdown;

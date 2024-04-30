@@ -1,22 +1,22 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
+import React from "react";
 
-import { Formik, Field, Form, ErrorMessage } from "formik"
+import { Formik, Field, Form, ErrorMessage } from "formik";
 
-import { PasswordInput } from "./elements/inputs"
-import FormError from "./elements/FormError"
-import { changePasswordFormValidation } from "../../lib/validation"
+import { PasswordInput } from "./elements/inputs";
+import FormError from "./elements/FormError";
+import { changePasswordFormValidation } from "../../lib/validation";
 
 type Props = {
   onSubmit: Function,
-}
+};
 
 export type ChangePasswordFormValues = {
   oldPassword: string,
   newPassword: string,
   confirmPassword: string,
-}
+};
 
 const ChangePasswordForm = ({ onSubmit }: Props) => (
   <Formik
@@ -71,6 +71,6 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
       </Form>
     )}
   />
-)
+);
 
-export default ChangePasswordForm
+export default ChangePasswordForm;

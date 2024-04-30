@@ -1,21 +1,21 @@
 // @flow
-import React from "react"
-import { Formik, Form } from "formik"
+import React from "react";
+import { Formik, Form } from "formik";
 
 import {
   passwordValidation,
   legalAddressValidation,
   LegalAddressFields,
-} from "./ProfileFormFields"
+} from "./ProfileFormFields";
 
-import type { Country } from "../../flow/authTypes"
+import type { Country } from "../../flow/authTypes";
 
 type Props = {
   onSubmit: Function,
   countries: Array<Country>,
   isVatEnabled: boolean,
   enableVatID: Function,
-}
+};
 
 const INITIAL_VALUES = {
   name: "",
@@ -30,7 +30,7 @@ const INITIAL_VALUES = {
     postal_code: "",
     vat_id: "",
   },
-}
+};
 
 const RegisterDetailsForm = ({
   onSubmit,
@@ -65,6 +65,6 @@ const RegisterDetailsForm = ({
       </Form>
     )}
   />
-)
+);
 
-export default RegisterDetailsForm
+export default RegisterDetailsForm;

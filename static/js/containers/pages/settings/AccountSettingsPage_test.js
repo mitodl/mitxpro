@@ -1,49 +1,49 @@
 // @flow
-import { assert } from "chai"
-import sinon from "sinon"
+import { assert } from "chai";
+import sinon from "sinon";
 
 import AccountSettingsPage, {
   AccountSettingsPage as InnerAccountSettingsPage,
-} from "./AccountSettingsPage"
-import IntegrationTestHelper from "../../../util/integration_test_helper"
-import { routes } from "../../../lib/urls"
-import { ALERT_TYPE_TEXT } from "../../../constants"
-import { makeUser } from "../../../factories/user"
+} from "./AccountSettingsPage";
+import IntegrationTestHelper from "../../../util/integration_test_helper";
+import { routes } from "../../../lib/urls";
+import { ALERT_TYPE_TEXT } from "../../../constants";
+import { makeUser } from "../../../factories/user";
 
 describe("AccountSettingsPage", () => {
-  const oldPassword = "password1"
-  const newPassword = "password2"
-  const user = makeUser()
-  const email = "abc@example.com"
-  const confirmPassword = newPassword
+  const oldPassword = "password1";
+  const newPassword = "password2";
+  const user = makeUser();
+  const email = "abc@example.com";
+  const confirmPassword = newPassword;
 
-  let helper, renderPage, setSubmittingStub
+  let helper, renderPage, setSubmittingStub;
 
   beforeEach(() => {
-    helper = new IntegrationTestHelper()
+    helper = new IntegrationTestHelper();
 
-    setSubmittingStub = helper.sandbox.stub()
+    setSubmittingStub = helper.sandbox.stub();
 
     renderPage = helper.configureHOCRenderer(
       AccountSettingsPage,
       InnerAccountSettingsPage,
       {},
       {},
-    )
-  })
+    );
+  });
 
   afterEach(() => {
-    helper.cleanup()
-  })
+    helper.cleanup();
+  });
 
   it("displays a form", async () => {
-    const { inner } = await renderPage()
+    const { inner } = await renderPage();
 
-    assert.ok(inner.find("ChangePasswordForm").exists())
-  })
+    assert.ok(inner.find("ChangePasswordForm").exists());
+  });
 
   //
-  ;[
+  [
     [
       200,
       routes.accountSettings,
@@ -59,20 +59,20 @@ describe("AccountSettingsPage", () => {
     ],
   ].forEach(([status, expectedUrl, expectedColor, expectedMessage]) => {
     it(`handles onSubmit with status=${status}`, async () => {
-      const { inner, store } = await renderPage()
+      const { inner, store } = await renderPage();
 
       helper.handleRequestStub.returns({
         status,
-      })
+      });
 
-      const onSubmit = inner.find("ChangePasswordForm").prop("onSubmit")
+      const onSubmit = inner.find("ChangePasswordForm").prop("onSubmit");
 
-      const resetFormStub = helper.sandbox.stub()
+      const resetFormStub = helper.sandbox.stub();
 
       await onSubmit(
         { oldPassword, newPassword, confirmPassword },
         { setSubmitting: setSubmittingStub, resetForm: resetFormStub },
-      )
+      );
       sinon.assert.calledWith(
         helper.handleRequestStub,
         "/api/set_password/",
@@ -85,17 +85,17 @@ describe("AccountSettingsPage", () => {
           credentials: undefined,
           headers: { "X-CSRFTOKEN": null },
         },
-      )
+      );
 
-      assert.lengthOf(helper.browserHistory, 2)
+      assert.lengthOf(helper.browserHistory, 2);
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
         search: "",
-      })
-      sinon.assert.calledWith(setSubmittingStub, false)
-      sinon.assert.calledWith(resetFormStub)
+      });
+      sinon.assert.calledWith(setSubmittingStub, false);
+      sinon.assert.calledWith(resetFormStub);
 
-      const { ui } = store.getState()
+      const { ui } = store.getState();
       assert.deepEqual(ui.userNotifications, {
         "password-change": {
           type: ALERT_TYPE_TEXT,
@@ -104,12 +104,12 @@ describe("AccountSettingsPage", () => {
             text: expectedMessage,
           },
         },
-      })
-    })
-  })
+      });
+    });
+  });
 
   //
-  ;[
+  [
     [
       200,
       routes.accountSettings,
@@ -129,20 +129,20 @@ describe("AccountSettingsPage", () => {
         entities: {
           currentUser: user,
         },
-      })
+      });
 
       helper.handleRequestStub.returns({
         status,
-      })
+      });
 
-      const onSubmit = inner.find("ChangeEmailForm").prop("onSubmit")
+      const onSubmit = inner.find("ChangeEmailForm").prop("onSubmit");
 
-      const resetFormStub = helper.sandbox.stub()
+      const resetFormStub = helper.sandbox.stub();
 
       await onSubmit(
         { email, oldPassword, newPassword, user },
         { setSubmitting: setSubmittingStub, resetForm: resetFormStub },
-      )
+      );
       sinon.assert.calledWith(
         helper.handleRequestStub,
         "/api/change-emails/",
@@ -155,17 +155,17 @@ describe("AccountSettingsPage", () => {
           credentials: undefined,
           headers: { "X-CSRFTOKEN": null },
         },
-      )
+      );
 
-      assert.lengthOf(helper.browserHistory, 2)
+      assert.lengthOf(helper.browserHistory, 2);
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
         search: "",
-      })
-      sinon.assert.calledWith(setSubmittingStub, false)
-      sinon.assert.calledWith(resetFormStub)
+      });
+      sinon.assert.calledWith(setSubmittingStub, false);
+      sinon.assert.calledWith(resetFormStub);
 
-      const { ui } = store.getState()
+      const { ui } = store.getState();
       assert.deepEqual(ui.userNotifications, {
         "email-change": {
           type: ALERT_TYPE_TEXT,
@@ -174,7 +174,7 @@ describe("AccountSettingsPage", () => {
             text: expectedMessage,
           },
         },
-      })
-    })
-  })
-})
+      });
+    });
+  });
+});

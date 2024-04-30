@@ -1,29 +1,29 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
+import React from "react";
 
-import { routes } from "../lib/urls"
-import MixedLink from "./MixedLink"
-import UserMenu from "./UserMenu"
-import CatalogMenu from "./CatalogMenu"
-import type { Location } from "react-router"
+import { routes } from "../lib/urls";
+import MixedLink from "./MixedLink";
+import UserMenu from "./UserMenu";
+import CatalogMenu from "./CatalogMenu";
+import type { Location } from "react-router";
 
-import type { CurrentUser } from "../flow/authTypes"
-import type { CourseTopic } from "../flow/courseTypes"
+import type { CurrentUser } from "../flow/authTypes";
+import type { CourseTopic } from "../flow/courseTypes";
 
 type Props = {
   currentUser: ?CurrentUser,
   location: ?Location,
   errorPageHeader: ?boolean,
   courseTopics: Array<CourseTopic>,
-}
+};
 
 const shouldShowLoginSignup = (location) =>
   !location ||
   !(
     location.pathname === routes.ecommerceBulk.bulkPurchase ||
     location.pathname === routes.ecommerceBulk.receipt
-  )
+  );
 
 const TopAppBar = ({
   currentUser,
@@ -131,6 +131,6 @@ const TopAppBar = ({
       </nav>
     </div>
   </header>
-)
+);
 
-export default TopAppBar
+export default TopAppBar;

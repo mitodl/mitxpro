@@ -1,16 +1,16 @@
 // @flow
-import React from "react"
-import { pathOr } from "ramda"
-import { Formik, Form } from "formik"
+import React from "react";
+import { pathOr } from "ramda";
+import { Formik, Form } from "formik";
 
 import {
   profileValidation,
   legalAddressValidation,
   LegalAddressFields,
   ProfileFields,
-} from "./ProfileFormFields"
+} from "./ProfileFormFields";
 
-import type { Country, User } from "../../flow/authTypes"
+import type { Country, User } from "../../flow/authTypes";
 
 type Props = {
   onSubmit: Function,
@@ -18,7 +18,7 @@ type Props = {
   user: User,
   isVatEnabled: boolean,
   enableVatID: Function,
-}
+};
 
 const getInitialValues = (user: User) => ({
   name: user.name,
@@ -34,7 +34,7 @@ const getInitialValues = (user: User) => ({
     years_experience: pathOr("", ["years_experience"], user.profile),
     highest_education: pathOr("", ["highest_education"], user.profile),
   },
-})
+});
 
 const EditProfileForm = ({
   onSubmit,
@@ -73,6 +73,6 @@ const EditProfileForm = ({
       </Form>
     )}
   />
-)
+);
 
-export default EditProfileForm
+export default EditProfileForm;

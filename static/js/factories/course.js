@@ -1,8 +1,8 @@
 // @flow
-import { range } from "ramda"
-import casual from "casual-browserify"
+import { range } from "ramda";
+import casual from "casual-browserify";
 
-import { incrementer } from "./util"
+import { incrementer } from "./util";
 
 import type {
   CourseRun,
@@ -15,13 +15,13 @@ import type {
   UserEnrollments,
   CourseRunCertificate,
   ProgramCertificate,
-} from "../flow/courseTypes"
+} from "../flow/courseTypes";
 
-const genCourseRunId = incrementer()
-const genProductId = incrementer()
-const genCoursewareId = incrementer()
-const genRunTagNumber = incrementer()
-const genReadableId = incrementer()
+const genCourseRunId = incrementer();
+const genProductId = incrementer();
+const genCoursewareId = incrementer();
+const genRunTagNumber = incrementer();
+const genReadableId = incrementer();
 
 export const makeCourseRun = (): CourseRun => ({
   title: casual.text,
@@ -35,9 +35,9 @@ export const makeCourseRun = (): CourseRun => ({
   // $FlowFixMe
   id: genCourseRunId.next().value,
   product_id: genProductId.next().value,
-})
+});
 
-const genCourseId = incrementer()
+const genCourseId = incrementer();
 const makeBaseCourse = (nextRunId: ?number): BaseCourse => ({
   // $FlowFixMe
   id: genCourseId.next().value,
@@ -46,19 +46,19 @@ const makeBaseCourse = (nextRunId: ?number): BaseCourse => ({
   thumbnail_url: casual.url,
   readable_id: casual.word,
   next_run_id: nextRunId,
-})
+});
 
 export const makeCourse = (): Course => {
-  const runs = range(0, 3).map(() => makeCourseRun())
-  const baseCourse = makeBaseCourse(runs[1].id)
+  const runs = range(0, 3).map(() => makeCourseRun());
+  const baseCourse = makeBaseCourse(runs[1].id);
 
   return {
     ...baseCourse,
     courseruns: runs,
-  }
-}
+  };
+};
 
-const genProgramId = incrementer()
+const genProgramId = incrementer();
 export const makeProgram = (): Program => ({
   // $FlowFixMe
   id: genProgramId.next().value,
@@ -66,23 +66,23 @@ export const makeProgram = (): Program => ({
   description: casual.text,
   thumbnail_url: casual.url,
   readable_id: casual.word.concat(genReadableId.next().value),
-})
+});
 
 export const makeCourseRunDetail = (): CourseRunDetail => {
-  const run = makeCourseRun()
+  const run = makeCourseRun();
   return {
     ...makeCourseRun(),
     course: makeBaseCourse(run.id),
-  }
-}
+  };
+};
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
   run: makeCourseRunDetail(),
   certificate: makeCourseCertificate(),
   receipt: null,
-})
+});
 
-const genProgramEnrollmentId = incrementer()
+const genProgramEnrollmentId = incrementer();
 export const makeProgramEnrollment = (): ProgramEnrollment => ({
   // $FlowFixMe
   id: genProgramEnrollmentId.next().value,
@@ -93,7 +93,7 @@ export const makeProgramEnrollment = (): ProgramEnrollment => ({
   ],
   certificate: makeProgramCertificate(),
   receipt: null,
-})
+});
 
 export const makeUserEnrollments = (): UserEnrollments => ({
   program_enrollments: [makeProgramEnrollment()],
@@ -106,17 +106,17 @@ export const makeUserEnrollments = (): UserEnrollments => ({
     makeCourseRunEnrollment(),
     makeCourseRunEnrollment(),
   ],
-})
+});
 
 export const makeCourseCertificate = (): CourseRunCertificate => ({
   uuid: "some-uuid",
   link: "some-link",
-})
+});
 
 export const makeProgramCertificate = (): ProgramCertificate => ({
   uuid: "some-uuid",
   link: "some-link",
-})
+});
 
 export const makeCourseTopics = () => [
   {
@@ -131,4 +131,4 @@ export const makeCourseTopics = () => [
     name: "Commerce",
     course_count: 5,
   },
-]
+];

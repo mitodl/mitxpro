@@ -1,19 +1,19 @@
-const webpack = require("webpack")
-const path = require("path")
-const R = require("ramda")
-const BundleTracker = require("webpack-bundle-tracker")
+const webpack = require("webpack");
+const path = require("path");
+const R = require("ramda");
+const BundleTracker = require("webpack-bundle-tracker");
 const { config, babelSharedLoader } = require(
   path.resolve("./webpack.config.shared.js"),
-)
+);
 
 const hotEntry = (host, port) =>
-  `webpack-hot-middleware/client?path=http://${host}:${port}/__webpack_hmr&timeout=20000&reload=true`
+  `webpack-hot-middleware/client?path=http://${host}:${port}/__webpack_hmr&timeout=20000&reload=true`;
 
 const insertHotReload = (host, port, entries) =>
   R.map(
     R.compose(R.flatten, (v) => [v].concat(hotEntry(host, port))),
     entries,
-  )
+  );
 
 const devConfig = Object.assign({}, config, {
   context: __dirname,
@@ -43,7 +43,7 @@ const devConfig = Object.assign({}, config, {
       },
     },
   },
-})
+});
 
 devConfig.module.rules = [
   babelSharedLoader,
@@ -57,14 +57,14 @@ devConfig.module.rules = [
       { loader: "sass-loader" },
     ],
   },
-]
+];
 
 const makeDevConfig = (host, port) =>
   Object.assign({}, devConfig, {
     entry: insertHotReload(host, port, devConfig.entry),
-  })
+  });
 
 module.exports = {
   makeDevConfig,
   devConfig,
-}
+};

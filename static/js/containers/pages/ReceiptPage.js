@@ -1,22 +1,22 @@
 // @flow
 /* global SETTINGS: false */
 
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { RECEIPT_PAGE_TITLE } from "../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { connectRequest } from "redux-query"
-import moment from "moment"
-import { pathOr } from "ramda"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { RECEIPT_PAGE_TITLE } from "../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { connectRequest } from "redux-query";
+import moment from "moment";
+import { pathOr } from "ramda";
 
-import queries from "../../lib/queries"
-import { formatPrettyDate, parseDateString } from "../../lib/util"
-import { formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce"
-import type Moment from "moment"
-import type { Match } from "react-router"
-import type { OrderReceiptResponse } from "../../flow/ecommerceTypes"
-import type { Country, CurrentUser } from "../../flow/authTypes"
+import queries from "../../lib/queries";
+import { formatPrettyDate, parseDateString } from "../../lib/util";
+import { formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce";
+import type Moment from "moment";
+import type { Match } from "react-router";
+import type { OrderReceiptResponse } from "../../flow/ecommerceTypes";
+import type { Country, CurrentUser } from "../../flow/authTypes";
 
 type Props = {
   isLoading: boolean,
@@ -25,7 +25,7 @@ type Props = {
   match: Match,
   currentUser: CurrentUser,
   forceRequest: () => Promise<*>,
-}
+};
 
 export class ReceiptPage extends React.Component<Props> {
   async componentDidMount() {
@@ -35,37 +35,37 @@ export class ReceiptPage extends React.Component<Props> {
       this.props.orderReceipt.order.id !==
         parseInt(this.props.match.params.orderId)
     ) {
-      await this.props.forceRequest()
+      await this.props.forceRequest();
     }
   }
 
   async componentDidUpdate(prevProps: Props) {
     if (prevProps.match.params.orderId !== this.props.match.params.orderId) {
-      await this.props.forceRequest()
+      await this.props.forceRequest();
     }
   }
 
   render() {
     const { orderReceipt, isLoading, countries, match, currentUser } =
-      this.props
-    let orderDate = null
-    let stateCode = null
-    let countryName = null
+      this.props;
+    let orderDate = null;
+    let stateCode = null;
+    let countryName = null;
 
     if (orderReceipt) {
-      orderDate = parseDateString(orderReceipt.order.created_on)
+      orderDate = parseDateString(orderReceipt.order.created_on);
 
       if (countries) {
         const country = countries.find(
           (element) => element.code === orderReceipt.purchaser.country,
-        )
+        );
         if (country) {
-          countryName = country.name
+          countryName = country.name;
         }
       }
 
       if (orderReceipt.purchaser.state_or_territory) {
-        stateCode = orderReceipt.purchaser.state_or_territory.split("-").pop()
+        stateCode = orderReceipt.purchaser.state_or_territory.split("-").pop();
       }
     }
 
@@ -264,8 +264,8 @@ export class ReceiptPage extends React.Component<Props> {
                     </thead>
                     <tbody>
                       {orderReceipt.lines.map((line) => {
-                        const startDate = parseDateString(line.start_date)
-                        const endDate = parseDateString(line.end_date)
+                        const startDate = parseDateString(line.start_date);
+                        const endDate = parseDateString(line.end_date);
                         return (
                           <tr key={line.readable_id}>
                             <td>
@@ -315,7 +315,7 @@ export class ReceiptPage extends React.Component<Props> {
                               <div>${line.total_paid}</div>
                             </td>
                           </tr>
-                        )
+                        );
                       })}
                     </tbody>
                   </table>
@@ -338,7 +338,7 @@ export class ReceiptPage extends React.Component<Props> {
           </div>
         </DocumentTitle>
       </React.Fragment>
-    )
+    );
   }
 }
 
@@ -349,14 +349,14 @@ const mapStateToProps = (state) => ({
   isLoading:
     pathOr(true, ["queries", "countries", "isPending"], state) ||
     pathOr(true, ["queries", "orderReceipt", "isPending"], state),
-})
+});
 
 const mapPropsToConfigs = (props) => [
   queries.users.countriesQuery(),
   queries.ecommerce.orderReceipt(props.match.params.orderId),
-]
+];
 
 export default compose(
   connect(mapStateToProps),
   connectRequest(mapPropsToConfigs),
-)(ReceiptPage)
+)(ReceiptPage);

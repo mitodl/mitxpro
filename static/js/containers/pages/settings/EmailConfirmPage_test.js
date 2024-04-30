@@ -1,17 +1,17 @@
 // @flow
-import { assert } from "chai"
+import { assert } from "chai";
 
-import IntegrationTestHelper from "../../../util/integration_test_helper"
+import IntegrationTestHelper from "../../../util/integration_test_helper";
 import EmailConfirmPage, {
   EmailConfirmPage as InnerEmailConfirmPage,
-} from "./EmailConfirmPage"
-import { STATE_REGISTER_DETAILS } from "../../../lib/auth"
+} from "./EmailConfirmPage";
+import { STATE_REGISTER_DETAILS } from "../../../lib/auth";
 
 describe("EmailConfirmPage", () => {
-  let helper, renderPage
+  let helper, renderPage;
 
   beforeEach(() => {
-    helper = new IntegrationTestHelper()
+    helper = new IntegrationTestHelper();
     renderPage = helper.configureHOCRenderer(
       EmailConfirmPage,
       InnerEmailConfirmPage,
@@ -21,25 +21,25 @@ describe("EmailConfirmPage", () => {
           search: "",
         },
       },
-    )
-  })
+    );
+  });
 
   afterEach(() => {
-    helper.cleanup()
-  })
+    helper.cleanup();
+  });
 
   it("shows a message when the confirmation page is displayed", async () => {
-    helper.handleRequestStub.returns({})
-    const token = "asdf"
+    helper.handleRequestStub.returns({});
+    const token = "asdf";
     const { inner, store } = await renderPage({
       entities: {
         updateEmail: {
           confirmed: true,
         },
       },
-    })
+    });
 
-    inner.instance().componentDidUpdate({}, {})
+    inner.instance().componentDidUpdate({}, {});
     assert.deepEqual(store.getState().ui.userNotifications, {
       "email-verified": {
         type: "text",
@@ -47,21 +47,21 @@ describe("EmailConfirmPage", () => {
           text: "Success! We've verified your email. Your email has been updated.",
         },
       },
-    })
-  })
+    });
+  });
 
   it("shows a message when the error page is displayed", async () => {
-    helper.handleRequestStub.returns({})
-    const token = "asdf"
+    helper.handleRequestStub.returns({});
+    const token = "asdf";
     const { inner, store } = await renderPage({
       entities: {
         updateEmail: {
           confirmed: false,
         },
       },
-    })
+    });
 
-    inner.instance().componentDidUpdate({}, {})
+    inner.instance().componentDidUpdate({}, {});
     assert.deepEqual(store.getState().ui.userNotifications, {
       "email-verified": {
         type: "text",
@@ -70,6 +70,6 @@ describe("EmailConfirmPage", () => {
           text: "Error! No confirmation code was provided or it has expired.",
         },
       },
-    })
-  })
-})
+    });
+  });
+});

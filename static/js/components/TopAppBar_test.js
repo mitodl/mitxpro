@@ -1,18 +1,18 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import { assert } from "chai"
-import { shallow } from "enzyme"
+import React from "react";
+import { assert } from "chai";
+import { shallow } from "enzyme";
 
-import TopAppBar from "./TopAppBar"
+import TopAppBar from "./TopAppBar";
 
-import { routes } from "../lib/urls"
-import { makeUser, makeAnonymousUser } from "../factories/user"
-import { makeCourseTopics } from "../factories/course"
+import { routes } from "../lib/urls";
+import { makeUser, makeAnonymousUser } from "../factories/user";
+import { makeCourseTopics } from "../factories/course";
 
 describe("TopAppBar component", () => {
   describe("for anonymous users", () => {
-    const user = makeAnonymousUser()
+    const user = makeAnonymousUser();
     it("has a link to login", () => {
       assert.equal(
         shallow(
@@ -27,8 +27,8 @@ describe("TopAppBar component", () => {
           .at(0)
           .prop("dest"),
         routes.login,
-      )
-    })
+      );
+    });
 
     it("has a link to register", () => {
       assert.equal(
@@ -44,8 +44,8 @@ describe("TopAppBar component", () => {
           .at(1)
           .prop("dest"),
         routes.register.begin,
-      )
-    })
+      );
+    });
 
     it("has a button to collapse the menu", () => {
       assert.isOk(
@@ -59,11 +59,11 @@ describe("TopAppBar component", () => {
         )
           .find("button")
           .exists(),
-      )
-    })
+      );
+    });
 
     it("does not have a login/register on ecommerce bulk page", () => {
-      const location = { pathname: "/ecommerce/bulk/", hash: "", search: "" }
+      const location = { pathname: "/ecommerce/bulk/", hash: "", search: "" };
       const wrapper = shallow(
         <TopAppBar
           currentUser={user}
@@ -71,17 +71,17 @@ describe("TopAppBar component", () => {
           errorPageHeader={null}
           courseTopics={[]}
         />,
-      )
-      assert.isNotOk(wrapper.find("UserMenu").exists())
-      assert.isNotOk(wrapper.find("MixedLink").exists())
-    })
+      );
+      assert.isNotOk(wrapper.find("UserMenu").exists());
+      assert.isNotOk(wrapper.find("MixedLink").exists());
+    });
 
     it("does not have a login/register on ecommerce bulk receipt page", () => {
       const location = {
         pathname: "/ecommerce/bulk/receipt/",
         hash: "",
         search: "",
-      }
+      };
       const wrapper = shallow(
         <TopAppBar
           currentUser={user}
@@ -89,14 +89,14 @@ describe("TopAppBar component", () => {
           errorPageHeader={null}
           courseTopics={[]}
         />,
-      )
-      assert.isNotOk(wrapper.find("UserMenu").exists())
-      assert.isNotOk(wrapper.find("MixedLink").exists())
-    })
-  })
+      );
+      assert.isNotOk(wrapper.find("UserMenu").exists());
+      assert.isNotOk(wrapper.find("MixedLink").exists());
+    });
+  });
   describe("for logged in users", () => {
-    const user = makeUser()
-    const courseTopics = makeCourseTopics()
+    const user = makeUser();
+    const courseTopics = makeCourseTopics();
 
     it("has a UserMenu component", () => {
       assert.isOk(
@@ -110,11 +110,11 @@ describe("TopAppBar component", () => {
         )
           .find("UserMenu")
           .exists(),
-      )
-    })
-    ;[true, false].forEach((courseDropdown) => {
+      );
+    });
+    [true, false].forEach((courseDropdown) => {
       it("has a CatalogMenu component", () => {
-        SETTINGS.course_dropdown = courseDropdown
+        SETTINGS.course_dropdown = courseDropdown;
         if (courseDropdown) {
           assert.isOk(
             shallow(
@@ -127,7 +127,7 @@ describe("TopAppBar component", () => {
             )
               .find("CatalogMenu")
               .exists(),
-          )
+          );
           assert.isNotOk(
             shallow(
               <TopAppBar
@@ -140,7 +140,7 @@ describe("TopAppBar component", () => {
               .find("a")
               .at(1)
               .exists(),
-          )
+          );
         } else {
           assert.isNotOk(
             shallow(
@@ -153,7 +153,7 @@ describe("TopAppBar component", () => {
             )
               .find("CatalogMenu")
               .exists(),
-          )
+          );
           assert.equal(
             shallow(
               <TopAppBar
@@ -167,10 +167,10 @@ describe("TopAppBar component", () => {
               .at(1)
               .prop("href"),
             routes.catalog,
-          )
+          );
         }
-      })
-    })
+      });
+    });
 
     it("does have a button to collapse the menu", () => {
       assert.isOk(
@@ -184,8 +184,8 @@ describe("TopAppBar component", () => {
         )
           .find("button")
           .exists(),
-      )
-    })
+      );
+    });
 
     it("does not have MixedLink's for login/registration", () => {
       assert.isNotOk(
@@ -199,11 +199,11 @@ describe("TopAppBar component", () => {
         )
           .find("MixedLink")
           .exists(),
-      )
-    })
+      );
+    });
 
     it("does not have a login/register on ecommerce bulk page", () => {
-      const location = { pathname: "/ecommerce/bulk/", hash: "", search: "" }
+      const location = { pathname: "/ecommerce/bulk/", hash: "", search: "" };
       const wrapper = shallow(
         <TopAppBar
           currentUser={user}
@@ -211,18 +211,18 @@ describe("TopAppBar component", () => {
           errorPageHeader={null}
           courseTopics={[]}
         />,
-      )
-      assert.isNotOk(wrapper.find("UserMenu").exists())
-      assert.isNotOk(wrapper.find("MixedLink").exists())
-    })
+      );
+      assert.isNotOk(wrapper.find("UserMenu").exists());
+      assert.isNotOk(wrapper.find("MixedLink").exists());
+    });
 
     it("does not have a login/register on ecommerce bulk receipt page", () => {
-      SETTINGS.course_dropdown = true
+      SETTINGS.course_dropdown = true;
       const location = {
         pathname: "/ecommerce/bulk/receipt/",
         hash: "",
         search: "",
-      }
+      };
       const wrapper = shallow(
         <TopAppBar
           currentUser={user}
@@ -230,10 +230,10 @@ describe("TopAppBar component", () => {
           errorPageHeader={null}
           courseTopics={courseTopics}
         />,
-      )
-      assert.isNotOk(wrapper.find("UserMenu").exists())
-      assert.isOk(wrapper.find("CatalogMenu").exists())
-      assert.isNotOk(wrapper.find("MixedLink").exists())
-    })
-  })
-})
+      );
+      assert.isNotOk(wrapper.find("UserMenu").exists());
+      assert.isOk(wrapper.find("CatalogMenu").exists());
+      assert.isNotOk(wrapper.find("MixedLink").exists());
+    });
+  });
+});

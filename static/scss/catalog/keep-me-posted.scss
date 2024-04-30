@@ -53,6 +53,7 @@
       }
 
       &.form-columns-1 {
+        /* stylelint-disable-next-line selector-class-pattern */
         .hs_email {
           padding: 0 15px;
           width: 100%;
@@ -81,6 +82,7 @@
       }
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .hs_error_rollup {
       display: none;
     }

@@ -1,14 +1,14 @@
 // @flow
-import type { Course, BaseCourseRun, Program } from "./courseTypes"
-import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants"
-import type { ExtendedLegalAddress } from "./authTypes"
+import type { Course, BaseCourseRun, Program } from "./courseTypes";
+import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants";
+import type { ExtendedLegalAddress } from "./authTypes";
 
 export type CheckoutResponse = {
   url: string,
   payload: CheckoutPayload,
   method?: ?string,
   errors?: string | Array<string>,
-}
+};
 
 export type CheckoutPayload = {
   access_key: string,
@@ -30,7 +30,7 @@ export type CheckoutPayload = {
   transaction_type: string,
   transaction_uuid: string,
   unsigned_field_names: string,
-}
+};
 
 export type BaseProductVersion = {
   type: PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM,
@@ -40,32 +40,32 @@ export type BaseProductVersion = {
   object_id: number,
   product_id: number,
   readable_id: string,
-}
+};
 
 export type ProductVersion = BaseProductVersion & {
   courses: Array<Course>,
   thumbnail_url: string,
   run_tag: ?string,
   description: string,
-}
+};
 
 export type BasketItem = ProductVersion & {
   run_ids: Array<number>,
-}
+};
 
 export type CouponSelection = {
   code: string,
   amount: string,
   discount_type: string,
   targets: Array<number>,
-}
+};
 
 export type DataConsentUser = {
   consent_date: string,
   consent_text: string,
   id: number,
   company: Company,
-}
+};
 
 export type B2BOrderStatus = {
   status: string,
@@ -81,43 +81,43 @@ export type B2BOrderStatus = {
   customer_name: ?string,
   receipt_data: { card_type: ?string, card_number: ?string },
   product_version: ProductVersion,
-}
+};
 
 export type B2BCouponStatusPayload = {
   code: string,
   product_id: number,
-}
+};
 
 export type B2BCouponStatusResponse = {
   code: string,
   product_id: number,
   discount_percent: string,
-}
+};
 
 export type BasketResponse = {
   items: Array<BasketItem>,
   coupons: Array<CouponSelection>,
   data_consents: Array<DataConsentUser>,
   tax_info: TaxInfo,
-}
+};
 
 type BasketItemPayload = {
   product_id: number | string,
   run_ids?: Array<number>,
-}
+};
 
 export type TaxInfo = {
   country_code: string,
   tax_rate: number,
   tax_rate_name: string,
-}
+};
 
 export type BasketPayload = {
   items?: Array<BasketItemPayload>,
   coupons?: Array<{ code: string }>,
   data_consents?: Array<number>,
   tax_info?: TaxInfo,
-}
+};
 
 export type OrderLine = {
   price: string,
@@ -131,14 +131,14 @@ export type OrderLine = {
   start_date: string,
   end_date: string,
   CEUs: string,
-}
+};
 
 export type OrderSummary = {
   id: string,
   created_on: string,
   reference_number: string,
   tax_rate: string,
-}
+};
 
 export type CybersourceReceiptSummary = {
   name: string,
@@ -146,7 +146,7 @@ export type CybersourceReceiptSummary = {
   card_type: ?string,
   bill_to_email: string,
   payment_method: string,
-}
+};
 
 export type OrderReceiptResponse = {
   coupon: ?string,
@@ -154,19 +154,19 @@ export type OrderReceiptResponse = {
   purchaser: ExtendedLegalAddress,
   order: OrderSummary,
   receipt: ?CybersourceReceiptSummary,
-}
+};
 
 export type Company = {
   id: number,
   name: string,
-}
+};
 
 export type CouponPayment = {
   id: number,
   created_on: Date,
   updated_on: Date,
   name: string,
-}
+};
 
 export type CouponPaymentVersion = {
   id: number,
@@ -187,7 +187,7 @@ export type CouponPaymentVersion = {
   payment_transaction: ?string,
   company: ?Company,
   include_future_runs: boolean,
-}
+};
 
 export type Coupon = {
   name: string,
@@ -196,14 +196,14 @@ export type Coupon = {
   created_on: Date,
   updated_on: Date,
   is_global: boolean,
-}
+};
 
 export type ProgramRunDetail = {
   id: number,
   run_tag: string,
   start_date: string,
   end_date: string,
-}
+};
 
 export type CourseRunContentObject = {|
   id: string,
@@ -217,15 +217,15 @@ export type CourseRunContentObject = {|
     id: number,
     title: string,
   },
-|}
+|};
 
-export type ProductType = PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM
+export type ProductType = PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM;
 
 export type ProgramContentObject = {|
   id: string,
   title: string,
   readable_id: string,
-|}
+|};
 
 export type BaseProduct = {
   id: number,
@@ -233,25 +233,25 @@ export type BaseProduct = {
   product_type: ProductType,
   is_private: boolean,
   latest_version: ProductVersion,
-}
+};
 
 export type CourseRunProduct = BaseProduct & {
   product_type: "courserun",
   content_object: CourseRunContentObject,
-}
+};
 
 export type ProgramProduct = BaseProduct & {
   product_type: "program",
   content_object: ProgramContentObject,
-}
+};
 
-export type Product = CourseRunProduct | ProgramProduct
+export type Product = CourseRunProduct | ProgramProduct;
 
 export type ProductMap = {
   [PRODUCT_TYPE_COURSERUN | PRODUCT_TYPE_PROGRAM]: {
     (string): [BaseCourseRun | Program],
   },
-}
+};
 
 export type B2BCheckoutPayload = {
   num_seats: number,
@@ -260,7 +260,7 @@ export type B2BCheckoutPayload = {
   email: string,
   contract_number: ?string,
   run_id: ?number,
-}
+};
 
 export type EnrollmentCode = {
   coupon_code: number,
@@ -270,4 +270,4 @@ export type EnrollmentCode = {
   product_type: string,
   thumbnail_url: string,
   start_date: Date,
-}
+};

@@ -1,5 +1,6 @@
 #!/bin/bash
-export TMP_FILE=$(mktemp)
+TMP_FILE=$(mktemp)
+export TMP_FILE
 
 if [[ -n $COVERAGE ]]; then
 	export CMD="node ./node_modules/nyc/bin/nyc.js --reporter=html mocha"
