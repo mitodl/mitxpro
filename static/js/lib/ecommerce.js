@@ -155,8 +155,8 @@ export const formatDiscount = (
 
   let formattedDiscount = formatNumber(discount, trimTrailingZeros);
 
-  if (formattedDiscount === 0) {
-    // eslint-disable-line eqeqeq
+  // eslint-disable-next-line eqeqeq
+  if (formattedDiscount == 0) {
     return `$${formattedDiscount}`;
   } else if (formattedDiscount < 0) {
     formattedDiscount = (formattedDiscount * -1).toFixed(2);

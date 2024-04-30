@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from hubspot.crm.objects import SimplePublicObject, SimplePublicObjectInput
 from mitol.hubspot_api.api import (
     HubspotApi,
     HubspotAssociationType,
@@ -26,7 +27,6 @@ from mitol.hubspot_api.models import HubspotObject
 from b2b_ecommerce.constants import B2B_ORDER_PREFIX
 from b2b_ecommerce.models import B2BLine, B2BOrder
 from ecommerce.models import Line, Order, Product, ProductVersion
-from hubspot.crm.objects import SimplePublicObject, SimplePublicObjectInput
 from users.models import User
 
 log = logging.getLogger(__name__)
