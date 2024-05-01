@@ -9,8 +9,6 @@ from math import ceil
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from mitol.common.decorators import single_task
 from mitol.common.utils import chunks
 from mitol.hubspot_api.api import HubspotApi, HubspotAssociationType, HubspotObjectType
@@ -20,6 +18,8 @@ from mitol.hubspot_api.models import HubspotObject
 
 from b2b_ecommerce.models import B2BOrder
 from ecommerce.models import Order
+from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
+from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from hubspot_xpro import api
 from hubspot_xpro.api import get_hubspot_id_for_object
 from mitxpro.celery import app

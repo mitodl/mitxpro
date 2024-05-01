@@ -88,7 +88,7 @@
       line-height: 28px;
       padding: 20px 0;
       font-weight: 500;
-      border-top: 1px solid rgb(white 0.2);
+      border-top: 1px solid rgba(white, 0.2); /* stylelint-disable-line */
       text-align: left;
 
       &:first-child {

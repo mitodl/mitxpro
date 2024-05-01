@@ -136,8 +136,8 @@
     "watch": "WATCH=1 ./scripts/test/js_test.sh",
     "repl": "node --require ./scripts/repl.js",
     "flow": "flow check",
-    "fmt": "LOG_LEVEL= prettier --write --no-semi --ignore 'static/js/flow/**/*.js' --ignore $PWD/'static/js/**/*.js'",
-    "fmt:check": "LOG_LEVEL= prettier --check --no-semi --ignore 'static/js/flow/**/*.js' --ignore $PWD/'static/js/**/*.js'"
+    "fmt": "LOG_LEVEL= prettier --config .prettierrc.json --write .",
+    "fmt:check": "LOG_LEVEL= prettier --config .prettierrc.json --check ."
   },
   "resolutions": {
     "mixin-deep": "^1.3.2",

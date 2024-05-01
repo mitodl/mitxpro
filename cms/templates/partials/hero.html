@@ -1,7 +1,7 @@
 {% load wagtailembeds_tags image_version_url %}
 
 {% block extrahead %}
-  <style>
+<style>
   {% if page.background_image %}
     .header-block {
       background-image: url('{% image_version_url page.background_image "fill-768x576" %}');
@@ -18,16 +18,22 @@
       {% endif %}
     }
   {% endif %}
-  </style>
+</style>
 {% endblock %}
 
 <div class="header-block">
   <div class="container header-container">
     {% if background_video_url %}
-      {% if not request.user_agent.is_mobile %}
-        <video autoplay muted loop class="background-video" id="background-video" data-source="{{ background_video_url }}">
-        </video>
-      {% endif %}
+    {% if not request.user_agent.is_mobile %}
+    <video
+      autoplay
+      muted
+      loop
+      class="background-video"
+      id="background-video"
+      data-source="{{ background_video_url }}"
+    ></video>
+    {% endif %}
     {% endif %}
     <div class="row">
       <div class="col-lg-7">
@@ -46,15 +52,19 @@
       </div>
       <div class="col-lg-5">
         {% if page.video_url %}
-          {% embed page.video_url as youtube_video %}
-            {% if youtube_video %}
-              <div class="promo-video youtube-video">{{ youtube_video }}</div>
-            {% else %}
-              <video class="promo-video" id="promo-video" data-source="{{ page.video_url }}" controls></video>
-            {% endif %}
-          <div class="video-caption">{{ page.video_title|safe }}</div>
-          {% endif %}
-        </div>
+        {% embed page.video_url as youtube_video %}
+        {% if youtube_video %}
+        <div class="promo-video youtube-video">{{ youtube_video }}</div>
+        {% else %}
+        <video
+          class="promo-video"
+          id="promo-video"
+          data-source="{{ page.video_url }}"
+          controls
+        ></video>
+        {% endif %}
+        <div class="video-caption">{{ page.video_title|safe }}</div>
+        {% endif %}
       </div>
     </div>
   </div>
