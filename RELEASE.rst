@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.146.0
+Version 0.146.0 (Released May 02, 2024)
 ---------------
 
 - fix: fix codecov workflow version (#2966)
