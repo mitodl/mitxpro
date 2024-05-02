@@ -1,6 +1,7 @@
 """
 Management command to repair missing courseware records
 """
+
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 from requests.exceptions import HTTPError

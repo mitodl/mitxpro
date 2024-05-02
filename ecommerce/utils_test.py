@@ -1,4 +1,5 @@
 """Tests for utility functions for ecommerce"""
+
 from urllib.parse import urljoin
 
 import pytest

@@ -1,4 +1,5 @@
 """Factories for b2b_ecommerce"""
+
 from datetime import timezone
 
 import factory

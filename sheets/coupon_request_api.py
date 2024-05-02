@@ -1,4 +1,5 @@
 """Coupon request API"""
+
 import itertools
 import json
 import logging

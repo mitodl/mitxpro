@@ -1,4 +1,5 @@
 """Custom template tags for email"""
+
 from dateutil.parser import parse
 from django import template
 

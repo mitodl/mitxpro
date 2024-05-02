@@ -1,4 +1,5 @@
 """Functions used in testing ecommerce"""
+
 from contextlib import contextmanager
 
 import faker

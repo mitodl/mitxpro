@@ -1,6 +1,7 @@
 """
 Functions for ecommerce
 """
+
 import decimal
 import hashlib
 import hmac

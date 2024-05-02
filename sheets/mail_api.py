@@ -1,4 +1,5 @@
 """Mail API for sheets app"""
+
 import logging
 from collections import namedtuple
 from urllib.parse import urlencode

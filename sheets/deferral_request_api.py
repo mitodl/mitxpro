@@ -1,4 +1,5 @@
 """Enrollment deferral API"""
+
 import logging
 
 from django.conf import settings

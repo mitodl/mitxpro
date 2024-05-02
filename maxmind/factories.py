@@ -1,6 +1,7 @@
 """
 Factories for MaxMind data
 """
+
 import ipaddress
 
 import faker

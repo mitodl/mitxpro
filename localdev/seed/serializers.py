@@ -1,6 +1,7 @@
 """
 Course model serializers
 """
+
 from rest_framework import serializers
 
 from courses import models

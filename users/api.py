@@ -1,4 +1,5 @@
 """Users api"""
+
 import operator
 import re
 from functools import reduce

@@ -1,6 +1,7 @@
 """
 Factories for voucher models
 """
+
 import factory
 from factory.django import DjangoModelFactory
 

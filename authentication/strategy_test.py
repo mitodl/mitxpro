@@ -1,4 +1,5 @@
 """Tests for the strategy"""
+
 from django.http import HttpRequest
 from rest_framework.request import Request
 

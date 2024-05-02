@@ -1,4 +1,5 @@
 """ecommerce app settings"""
+
 from django.apps import AppConfig
 
 

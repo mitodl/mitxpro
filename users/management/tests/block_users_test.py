@@ -1,4 +1,5 @@
 """block user test"""
+
 import hashlib
 
 import pytest

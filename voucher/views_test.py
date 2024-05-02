@@ -1,6 +1,7 @@
 """
 Test voucher views.py
 """
+
 from urllib.parse import urljoin
 
 import pytest

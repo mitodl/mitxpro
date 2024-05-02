@@ -1,6 +1,7 @@
 """
 Page models for the CMS
 """
+
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta

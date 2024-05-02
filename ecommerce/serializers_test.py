@@ -1,6 +1,7 @@
 """
 Tests for ecommerce serializers
 """
+
 from decimal import Decimal
 
 import pytest

@@ -1,4 +1,5 @@
 """Wagtail admin views"""
+
 from wagtail.admin.viewsets.model import ModelViewSet
 
 from courses.models import CourseTopic

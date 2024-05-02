@@ -1,4 +1,5 @@
 """Exception related classes and functions"""
+
 from rest_framework import exceptions, views
 
 

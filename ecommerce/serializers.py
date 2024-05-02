@@ -1,4 +1,5 @@
 """ecommerce serializers"""
+
 import logging
 from decimal import Decimal
 
@@ -960,9 +961,9 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 "req_bill_to_forename" in receipt.data
                 or "req_bill_to_surname" in receipt.data
             ):
-                data[
-                    "name"
-                ] = f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
+                data["name"] = (
+                    f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
+                )
             return data
         return None
 

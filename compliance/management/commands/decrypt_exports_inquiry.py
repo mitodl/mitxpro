@@ -1,6 +1,7 @@
 """
 Management command to decrypts a user's ExportInquiryLog record
 """
+
 import sys
 
 from django.contrib.auth import get_user_model

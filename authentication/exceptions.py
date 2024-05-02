@@ -1,4 +1,5 @@
 """Authentication exceptions"""
+
 from social_core.exceptions import AuthException
 
 

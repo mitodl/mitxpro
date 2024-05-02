@@ -1,4 +1,5 @@
 """PDF Parsing functions for Vouchers"""
+
 import logging
 import re
 from datetime import datetime
@@ -159,13 +160,15 @@ def read_pdf_domestic(pdf):  # noqa: C901
                         ].split(" ")[-1]
                         try:
                             float(last_val)
-                            column_values[
-                                settings.VOUCHER_DOMESTIC_COURSE_KEY
-                            ] = column_values[settings.VOUCHER_DOMESTIC_COURSE_KEY][
-                                0 : column_values[
+                            column_values[settings.VOUCHER_DOMESTIC_COURSE_KEY] = (
+                                column_values[
                                     settings.VOUCHER_DOMESTIC_COURSE_KEY
-                                ].index(last_val)
-                            ]
+                                ][
+                                    0 : column_values[
+                                        settings.VOUCHER_DOMESTIC_COURSE_KEY
+                                    ].index(last_val)
+                                ]
+                            )
                             column_values[settings.VOUCHER_DOMESTIC_CREDITS_KEY] = (
                                 last_val
                                 + column_values[settings.VOUCHER_DOMESTIC_CREDITS_KEY]

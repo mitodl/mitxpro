@@ -1,4 +1,5 @@
 """Tests for cms pages."""
+
 import json
 from datetime import date, datetime, timedelta
 

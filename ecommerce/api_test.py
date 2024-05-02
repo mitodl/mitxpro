@@ -1,6 +1,7 @@
 """
 Test for ecommerce functions
 """
+
 import hashlib
 import hmac
 import ipaddress

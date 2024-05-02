@@ -1,4 +1,5 @@
 """Utils tests"""
+
 import datetime
 import operator as op
 import os

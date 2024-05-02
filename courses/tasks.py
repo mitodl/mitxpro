@@ -1,6 +1,7 @@
 """
 Tasks for the courses app
 """
+
 import logging
 from datetime import timedelta
 

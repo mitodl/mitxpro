@@ -2,6 +2,7 @@
 Management command to sync all Users, Orders, Products, and Lines with Hubspot
 and Line Items
 """
+
 import sys
 
 from django.contrib.contenttypes.models import ContentType

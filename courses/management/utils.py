@@ -1,4 +1,5 @@
 """Utility functions/classes for course management commands"""
+
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment

@@ -1,4 +1,5 @@
 """JS interop template tag tests"""
+
 from django.template import Context, Template
 
 

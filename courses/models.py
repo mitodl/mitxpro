@@ -1,6 +1,7 @@
 """
 Course models
 """
+
 import logging
 import operator as op
 import uuid

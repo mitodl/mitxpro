@@ -1,4 +1,5 @@
 """Management command to setup courseware index pages"""
+
 from django.core.management.base import BaseCommand
 
 from cms.api import ensure_index_pages

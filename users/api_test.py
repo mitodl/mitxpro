@@ -1,4 +1,5 @@
 """Tests for user api"""
+
 import factory
 import pytest
 from django.contrib.auth import get_user_model

@@ -1,4 +1,5 @@
 """API for the Blog app"""
+
 import logging
 
 import requests

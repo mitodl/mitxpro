@@ -7,6 +7,7 @@ Arguments:
 
 You must specify --program, since that will be used to filter programs for certificate generation
 """
+
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 

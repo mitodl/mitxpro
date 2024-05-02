@@ -1,4 +1,5 @@
 """Generate Hubspot message bodies for various model objects"""
+
 import logging
 import re
 from decimal import Decimal

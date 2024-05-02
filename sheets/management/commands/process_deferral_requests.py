@@ -2,6 +2,7 @@
 Parses deferral request row(s), creates/deactivates enrollments as necessary, and updates the spreadsheet
 to reflect the processed request(s).
 """
+
 from django.core.management import BaseCommand
 
 from sheets.deferral_request_api import DeferralRequestHandler

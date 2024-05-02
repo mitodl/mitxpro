@@ -1,4 +1,5 @@
 """Test courseware views"""
+
 import pytest
 from django.shortcuts import reverse
 from rest_framework import status

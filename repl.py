@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Run Django shell with imported modules"""
+
 if __name__ == "__main__":
     import os
 

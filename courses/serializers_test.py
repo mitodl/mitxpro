@@ -1,6 +1,7 @@
 """
 Tests for course serializers
 """
+
 from datetime import datetime, timedelta, timezone
 
 import factory

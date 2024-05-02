@@ -2,6 +2,7 @@
 Data migration to ensure that all Courses and Programs have a readable_id before
 setting the field to required and unique
 """
+
 from django.db import migrations
 from django.utils.text import slugify
 

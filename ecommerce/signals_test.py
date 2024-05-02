@@ -1,6 +1,7 @@
 """
 Tests for signals
 """
+
 import pytest
 
 from courses.factories import CourseFactory, CourseRunFactory

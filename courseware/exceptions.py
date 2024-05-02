@@ -1,4 +1,5 @@
 """Courseware exceptions"""
+
 from mitxpro.utils import get_error_response_summary
 
 

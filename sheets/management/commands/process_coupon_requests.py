@@ -2,6 +2,7 @@
 Parses coupon request row(s), creates coupons, and updates/creates relevant Sheets
 to reflect the processed request(s).
 """
+
 from django.core.management import BaseCommand
 
 from sheets.coupon_request_api import CouponRequestHandler

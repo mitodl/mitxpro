@@ -1,4 +1,5 @@
 """Factories for sheets app"""
+
 import datetime
 
 from factory import Faker, SubFactory, fuzzy

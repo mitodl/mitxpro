@@ -1,4 +1,5 @@
 """Tests for verification_api"""
+
 from urllib.parse import quote_plus
 
 import pytest

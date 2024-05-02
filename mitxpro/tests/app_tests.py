@@ -1,4 +1,5 @@
 """Application level tests"""
+
 import json
 
 

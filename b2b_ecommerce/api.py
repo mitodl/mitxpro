@@ -1,4 +1,5 @@
 """Functions for b2b_ecommerce"""
+
 import uuid
 from decimal import Decimal
 

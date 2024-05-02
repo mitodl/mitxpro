@@ -1,4 +1,5 @@
 """Tests for sheets.management.utils"""
+
 from unittest.mock import MagicMock
 
 import pytest

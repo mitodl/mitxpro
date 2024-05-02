@@ -1,4 +1,5 @@
 """Factories for creating course data in tests"""
+
 from datetime import timezone
 
 import factory

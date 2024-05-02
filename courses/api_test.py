@@ -1,4 +1,5 @@
 """Courses API tests"""
+
 import contextlib
 from datetime import timedelta
 from types import SimpleNamespace
@@ -221,9 +222,11 @@ def test_create_run_enrollments_enroll_api_fail(
     successful_enrollments = []
     edx_request_success = False
 
-    with pytest.raises(
-        EdxEnrollmentCreateError
-    ) if not keep_failed_enrollments else contextlib.suppress():  # noqa: B022
+    with (
+        pytest.raises(EdxEnrollmentCreateError)
+        if not keep_failed_enrollments
+        else contextlib.suppress()
+    ):  # noqa: B022
         successful_enrollments, edx_request_success = create_run_enrollments(
             user,
             runs,

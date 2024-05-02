@@ -1,6 +1,7 @@
 """
 Management command to configure custom Hubspot properties for Contacts, Deals, Products, and Line Items
 """
+
 import sys
 
 from django.core.management import BaseCommand

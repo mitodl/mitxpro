@@ -1,6 +1,7 @@
 """
 Hubspot tasks
 """
+
 import logging
 import time
 from math import ceil

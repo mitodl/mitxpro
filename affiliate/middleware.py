@@ -1,4 +1,5 @@
 """Middleware for affiliate tracking"""
+
 from affiliate.api import get_affiliate_code_from_qstring
 from affiliate.constants import AFFILIATE_CODE_SESSION_KEY
 

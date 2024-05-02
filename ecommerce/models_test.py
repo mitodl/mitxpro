@@ -1,4 +1,5 @@
 """Tests for ecommerce models"""
+
 import pytest
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError

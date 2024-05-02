@@ -1,6 +1,7 @@
 """
 Django settings for mitxpro.
 """
+
 import logging
 import os
 import platform

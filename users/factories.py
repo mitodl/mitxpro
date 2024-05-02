@@ -1,4 +1,5 @@
 """Factory for Users"""
+
 import pycountry
 from factory import (
     Faker,

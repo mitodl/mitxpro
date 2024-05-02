@@ -1,4 +1,5 @@
 """API with general functionality for all enrollment change spreadsheets"""
+
 import json
 import logging
 import operator as op

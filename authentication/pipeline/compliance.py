@@ -1,4 +1,5 @@
 """Compliance pipeline actions"""
+
 import logging
 
 import pycountry

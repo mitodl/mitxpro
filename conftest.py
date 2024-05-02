@@ -1,4 +1,5 @@
 """Project conftest"""
+
 import os
 import shutil
 

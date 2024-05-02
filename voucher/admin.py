@@ -1,6 +1,7 @@
 """
 Admin bindings for voucher
 """
+
 from django.contrib import admin
 
 from voucher.models import Voucher

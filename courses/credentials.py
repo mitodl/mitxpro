@@ -1,4 +1,5 @@
 """Digital courseware credentials"""
+
 import logging
 from typing import Union
 from urllib.parse import urljoin

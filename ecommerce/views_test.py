@@ -1,4 +1,5 @@
 """ecommerce tests for views"""
+
 import json
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus, urljoin

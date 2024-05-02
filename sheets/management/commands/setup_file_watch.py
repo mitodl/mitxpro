@@ -1,6 +1,7 @@
 """
 Makes a request to receive push notifications when xPro spreadsheets are updated
 """
+
 import sys
 from collections import namedtuple
 

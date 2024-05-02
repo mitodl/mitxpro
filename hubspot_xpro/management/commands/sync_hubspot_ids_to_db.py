@@ -1,6 +1,7 @@
 """
 Management command to sync hubspot ids to database
 """
+
 import sys
 
 from django.contrib.contenttypes.models import ContentType

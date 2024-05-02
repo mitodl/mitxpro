@@ -1,6 +1,7 @@
 """
 Management command to revoke and un revoke a certificate for a course run or program for the given user.
 """
+
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.utils import revoke_course_run_certificate, revoke_program_certificate

@@ -1,4 +1,5 @@
 """Sheets API tests"""
+
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 from google.oauth2.credentials import Credentials

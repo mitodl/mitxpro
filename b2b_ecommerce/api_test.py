@@ -1,4 +1,5 @@
 """Tests for b2b_ecommerce functions"""
+
 from decimal import Decimal
 
 import faker

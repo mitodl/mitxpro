@@ -1,4 +1,5 @@
 """Models for ecommerce"""
+
 import logging
 from decimal import Decimal
 

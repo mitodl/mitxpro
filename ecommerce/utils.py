@@ -1,4 +1,5 @@
 """Utility functions for ecommerce"""
+
 import logging
 from urllib.parse import urlencode, urljoin
 

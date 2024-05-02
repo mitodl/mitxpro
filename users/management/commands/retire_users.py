@@ -1,6 +1,7 @@
 """
 Retire user(s) from MIT xPRO
 """
+
 import sys
 from argparse import RawTextHelpFormatter
 from urllib.parse import urlparse

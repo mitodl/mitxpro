@@ -1,4 +1,5 @@
 """mitxpro utilities"""
+
 import csv
 import datetime
 import itertools

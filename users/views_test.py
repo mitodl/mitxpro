@@ -1,4 +1,5 @@
 """Test for user views"""
+
 from datetime import timedelta
 
 import pytest

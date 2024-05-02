@@ -1,4 +1,5 @@
 """Tests for custom embed providers and finders"""
+
 import pytest
 from django.core.exceptions import ImproperlyConfigured
 from wagtail.embeds.oembed_providers import vimeo

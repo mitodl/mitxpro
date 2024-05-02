@@ -1,4 +1,5 @@
 """Utility functions for celery"""
+
 from datetime import timedelta
 
 from celery.schedules import schedule

@@ -1,6 +1,7 @@
 """
 Tests for signals
 """
+
 from unittest.mock import patch
 
 import pytest

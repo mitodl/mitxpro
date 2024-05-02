@@ -1,4 +1,5 @@
 """Management command to fully configure Wagtail"""
+
 from django.core.management.base import BaseCommand
 
 from cms.api import configure_wagtail

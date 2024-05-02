@@ -1,6 +1,7 @@
 """
 Custom forms for the cms
 """
+
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from wagtail.admin.forms import WagtailAdminPageForm

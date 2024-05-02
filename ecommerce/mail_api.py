@@ -1,4 +1,5 @@
 """Ecommerce mail API"""
+
 import logging
 from urllib.parse import urlencode, urljoin
 

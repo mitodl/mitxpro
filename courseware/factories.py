@@ -1,4 +1,5 @@
 """Courseware factories"""
+
 from datetime import timedelta, timezone
 
 from factory import Faker, LazyAttribute, SubFactory, Trait

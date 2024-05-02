@@ -1,4 +1,5 @@
 """Tests for hubspot_xpro.api"""
+
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory

@@ -1,4 +1,5 @@
 """API for email verifications"""
+
 from urllib.parse import quote_plus
 
 from django.urls import reverse
