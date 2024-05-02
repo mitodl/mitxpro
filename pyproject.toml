@@ -83,7 +83,7 @@ responses = "*"
 safety = "*"
 semantic-version = "*"
 wagtail-factories = "*"
-ruff = "^0.1.11"
+ruff = "^0.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
