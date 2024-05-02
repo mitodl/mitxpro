@@ -60,8 +60,8 @@
   <body class="{% block bodyclass %}{% endblock %}">
     <div class="main-panel">
       {% include "partials/gtm_body.html" %}
-      {# Site-wide notifications should not show up on the ecommerce bulk pages
-      #}
+      <!-- prettier-ignore -->
+      {# Site-wide notifications should not show up on the ecommerce bulk pages #}
       {% if not request.path|startswith:'/ecommerce/bulk/,/certificate/' %}
       {% latest_notification %}
       {% endif %}
