@@ -1,4 +1,5 @@
 """Tests for admin interface for b2b_ecommerce"""
+
 import pytest
 
 from b2b_ecommerce.admin import B2BCouponAdmin, B2BOrderAdmin

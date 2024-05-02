@@ -1,4 +1,5 @@
 """models for b2b_ecommerce"""
+
 from datetime import timedelta
 
 import pytest

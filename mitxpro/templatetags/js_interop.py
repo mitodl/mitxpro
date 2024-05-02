@@ -1,4 +1,5 @@
 """JS interopability template tags"""
+
 import json
 
 from django import template

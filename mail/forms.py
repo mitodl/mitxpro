@@ -1,4 +1,5 @@
 """Mail forms"""
+
 from django import forms
 
 from mail.constants import EMAIL_TYPE_DESCRIPTIONS

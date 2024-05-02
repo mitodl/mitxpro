@@ -1,6 +1,7 @@
 """
 Tests for course views
 """
+
 import operator as op
 from datetime import timedelta
 

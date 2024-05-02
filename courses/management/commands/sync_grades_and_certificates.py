@@ -1,6 +1,7 @@
 """
 Management command to sync grades and certificates for a course run
 """
+
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun

@@ -1,4 +1,5 @@
 """Wagtail hooks for courses app"""
+
 from wagtail import hooks
 
 from ecommerce.wagtail_views import ProductViewSetGroup

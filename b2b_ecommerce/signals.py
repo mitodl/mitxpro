@@ -1,4 +1,5 @@
 """Signals for b2b_ecommerce models"""
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 

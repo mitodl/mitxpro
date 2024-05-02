@@ -1,4 +1,5 @@
 """b2b_ecommerce app settings"""
+
 from django.apps import AppConfig
 
 

@@ -1,4 +1,5 @@
 """Affiliate middleware tests"""
+
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.test.client import RequestFactory
 

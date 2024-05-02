@@ -1,6 +1,7 @@
 """
 Tests for hubspot_xpro tasks
 """
+
 from decimal import Decimal
 from math import ceil
 

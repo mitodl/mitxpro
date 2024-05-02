@@ -1,4 +1,5 @@
 """Courseware Django app"""
+
 from django.apps import AppConfig
 
 

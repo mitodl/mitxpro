@@ -1,4 +1,5 @@
 """Serializers tests"""
+
 import pytest
 from rest_framework.serializers import ValidationError
 from social_core.backends.email import EmailAuth

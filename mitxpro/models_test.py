@@ -1,4 +1,5 @@
 """Tests for mitxpro models"""
+
 from random import choice, randint, sample
 from types import SimpleNamespace
 

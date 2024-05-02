@@ -1,4 +1,5 @@
 """tests for admin classes"""
+
 import pytest
 
 from courses.factories import CourseFactory

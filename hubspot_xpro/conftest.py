@@ -1,6 +1,7 @@
 """
 Fixtures for hubspot_xpro tests
 """
+
 from datetime import datetime, timezone
 from types import SimpleNamespace
 

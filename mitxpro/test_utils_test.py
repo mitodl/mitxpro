@@ -1,4 +1,5 @@
 """Tests for test utils"""
+
 import pickle
 
 import pytest

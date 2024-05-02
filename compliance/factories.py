@@ -1,4 +1,5 @@
 """Factories for compliance app"""
+
 from factory import Faker, SubFactory, Trait
 from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyChoice

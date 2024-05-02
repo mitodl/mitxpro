@@ -1,4 +1,5 @@
 """Custom template tags for email"""
+
 from decimal import Decimal
 
 from django import template

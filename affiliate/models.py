@@ -1,4 +1,5 @@
 """Model definitions for affiliate tracking"""
+
 from django.conf import settings
 from django.db import models
 

@@ -18,6 +18,7 @@ messages = messages_for_recipients([
 # send the emails
 send_messages(messages)
 """
+
 import logging
 import re
 from collections import namedtuple

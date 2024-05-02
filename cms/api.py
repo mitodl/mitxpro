@@ -1,4 +1,5 @@
 """API for the CMS app"""
+
 import itertools
 import logging
 from datetime import MAXYEAR, datetime, timezone

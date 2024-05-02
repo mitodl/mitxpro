@@ -1,4 +1,5 @@
 """Models for business to business ecommerce"""
+
 import uuid
 
 from django.conf import settings

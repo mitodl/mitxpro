@@ -1,4 +1,5 @@
 """Management command to create program runs for programs that have a complete sets of course runs"""
+
 import re
 from collections import defaultdict
 

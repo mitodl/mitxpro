@@ -1,4 +1,5 @@
 """Views for ecommerce"""
+
 import logging
 from urllib.parse import urljoin
 

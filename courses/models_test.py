@@ -1,4 +1,5 @@
 """Tests for course models"""
+
 from datetime import timedelta
 
 import factory

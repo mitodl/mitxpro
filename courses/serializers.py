@@ -1,6 +1,7 @@
 """
 Course model serializers
 """
+
 from urllib.parse import urljoin
 
 from django.conf import settings

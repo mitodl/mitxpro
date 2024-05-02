@@ -1,4 +1,5 @@
 """User serializers"""
+
 import logging
 import re
 from collections import defaultdict

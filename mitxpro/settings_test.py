@@ -1,6 +1,7 @@
 """
 Validate that our settings functions work
 """
+
 import sys
 from types import SimpleNamespace
 

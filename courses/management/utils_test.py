@@ -1,4 +1,5 @@
 """Tests for command utils"""
+
 from datetime import timedelta
 
 import pytest

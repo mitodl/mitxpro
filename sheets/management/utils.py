@@ -1,4 +1,5 @@
 """Sheets app management command utils"""
+
 from django.core.management import CommandError
 
 from sheets.coupon_assign_api import CouponAssignmentHandler

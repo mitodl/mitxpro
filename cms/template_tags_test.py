@@ -1,4 +1,5 @@
 """Tests for custom CMS templatetags"""
+
 from urllib.parse import urljoin
 
 import pytest

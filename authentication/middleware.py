@@ -1,4 +1,5 @@
 """Authentication middleware"""
+
 from urllib.parse import quote
 
 from django.shortcuts import redirect

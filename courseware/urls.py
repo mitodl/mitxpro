@@ -1,4 +1,5 @@
 """Courseware urls"""
+
 from django.urls import path
 
 from courseware import views

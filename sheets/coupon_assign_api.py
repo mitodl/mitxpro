@@ -1,4 +1,5 @@
 """Coupon assignment API"""
+
 import logging
 from collections import defaultdict
 from datetime import timedelta
@@ -441,9 +442,9 @@ def update_incomplete_assignment_message_statuses(bulk_assignments):
     # to reflect those new statuses.
     for bulk_assignment in bulk_assignments:
         coupon_assign_handler = assignment_sheet_handlers[bulk_assignment.id]
-        updated_assignment_map[
-            bulk_assignment.id
-        ] = coupon_assign_handler.update_coupon_delivery_statuses(assignment_status_map)
+        updated_assignment_map[bulk_assignment.id] = (
+            coupon_assign_handler.update_coupon_delivery_statuses(assignment_status_map)
+        )
 
     return updated_assignment_map
 

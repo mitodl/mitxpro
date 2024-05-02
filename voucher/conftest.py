@@ -1,6 +1,7 @@
 """
 Fixtures for voucher tests
 """
+
 from datetime import datetime, timezone
 from types import SimpleNamespace
 

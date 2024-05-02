@@ -1,6 +1,7 @@
 """
 mitxpro views
 """
+
 import json
 
 from django.conf import settings
@@ -23,9 +24,9 @@ def get_base_context(request):  # noqa: ARG001
     """
     context = {}
     if settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE:
-        context[
-            "domain_verification_tag"
-        ] = settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
+        context["domain_verification_tag"] = (
+            settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
+        )
     return context
 
 

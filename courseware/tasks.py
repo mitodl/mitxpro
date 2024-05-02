@@ -1,4 +1,5 @@
 """Courseware tasks"""
+
 from courseware import api
 from mitxpro.celery import app
 from users.api import get_user_by_id

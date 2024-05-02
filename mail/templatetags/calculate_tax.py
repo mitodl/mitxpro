@@ -1,4 +1,5 @@
 """Calculate tax charged for an item"""
+
 from decimal import Decimal
 
 from django import template

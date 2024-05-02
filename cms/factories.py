@@ -1,4 +1,5 @@
 """Wagtail page factories"""
+
 import factory
 import faker
 import wagtail_factories

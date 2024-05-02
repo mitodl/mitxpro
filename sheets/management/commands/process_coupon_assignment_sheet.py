@@ -2,6 +2,7 @@
 Fetches a coupon assignment spreadsheet, parses it, creates product coupon assignments
 based on the sheet data, and sends a message to all recipients who received a coupon assignment.
 """
+
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment

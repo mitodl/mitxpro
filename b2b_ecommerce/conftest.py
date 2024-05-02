@@ -1,4 +1,5 @@
 """Fixtures for b2b_ecommerce"""
+
 from types import SimpleNamespace
 
 import pytest

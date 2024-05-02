@@ -1,4 +1,5 @@
 """API tests"""
+
 import pytest
 from django.db import IntegrityError
 

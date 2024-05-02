@@ -1,6 +1,7 @@
 """
 Management command to sync dates and title for all or a specific course run from edX
 """
+
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 

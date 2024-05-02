@@ -1,4 +1,5 @@
 """Tests for courses constants"""
+
 import pytest
 from django.contrib.contenttypes.models import ContentType
 

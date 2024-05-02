@@ -1,4 +1,5 @@
 """Management command to change enrollment status"""
+
 from django.contrib.auth import get_user_model
 
 from courses.api import deactivate_program_enrollment, deactivate_run_enrollment

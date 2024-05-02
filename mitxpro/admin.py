@@ -1,4 +1,5 @@
 """Django admin functionality that is relevant to the entire app"""
+
 from django.contrib import admin
 
 

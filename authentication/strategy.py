@@ -1,4 +1,5 @@
 """Custom strategy"""
+
 from social_django.strategy import DjangoStrategy
 
 

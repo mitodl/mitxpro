@@ -1,4 +1,5 @@
 """Views for b2b_ecommerce"""
+
 import uuid
 from urllib.parse import urlencode, urljoin
 

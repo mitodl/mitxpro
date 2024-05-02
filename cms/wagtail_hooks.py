@@ -1,4 +1,5 @@
 """Custom hooks to configure wagtail behavior"""
+
 from wagtail import hooks
 from wagtail.admin.api.views import PagesAdminAPIViewSet
 

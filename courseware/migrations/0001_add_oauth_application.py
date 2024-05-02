@@ -1,4 +1,5 @@
 """This migration has been moved into seed_data command. The Application model keeps on changing over time hance breaking this migration on fresh installations"""
+
 from django.db import migrations
 
 

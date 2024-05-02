@@ -1,6 +1,7 @@
 """
 context processors for bootcamp
 """
+
 from django.conf import settings
 
 

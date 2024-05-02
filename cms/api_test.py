@@ -1,4 +1,5 @@
 """Tests for CMS API"""
+
 from datetime import timedelta
 
 import pytest

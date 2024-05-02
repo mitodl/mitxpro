@@ -1,4 +1,5 @@
 """Test permissions"""
+
 import pytest
 
 from mitxpro.permissions import UserIsOwnerPermission

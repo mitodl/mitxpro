@@ -1,4 +1,5 @@
 """URLs for business to business ecommerce"""
+
 from django.urls import path
 
 from b2b_ecommerce.views import (

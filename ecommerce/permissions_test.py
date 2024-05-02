@@ -1,6 +1,7 @@
 """
 Tests for ecommerce permissions
 """
+
 from ecommerce.api import generate_cybersource_sa_signature
 from ecommerce.permissions import IsSignedByCyberSource
 

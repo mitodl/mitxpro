@@ -1,4 +1,5 @@
 """Affiliate tracking logic"""
+
 import pytest
 from django.test.client import RequestFactory
 

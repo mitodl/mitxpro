@@ -1,4 +1,5 @@
 """Ecommerce mail API tests"""
+
 import datetime
 from urllib.parse import quote_plus, urljoin
 

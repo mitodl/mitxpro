@@ -1,4 +1,5 @@
 """Tests for CMS views"""
+
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 

@@ -1,4 +1,5 @@
 """Sentry setup and configuration"""
+
 import sentry_sdk
 from celery.exceptions import WorkerLostError
 from sentry_sdk.integrations.celery import CeleryIntegration

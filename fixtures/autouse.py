@@ -1,4 +1,5 @@
 """Fixtures that will be used by default"""
+
 import pytest
 
 

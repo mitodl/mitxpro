@@ -1,4 +1,5 @@
 """User views"""
+
 import pycountry
 from django.db import transaction
 from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope

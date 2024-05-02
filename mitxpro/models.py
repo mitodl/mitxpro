@@ -1,6 +1,7 @@
 """
 Common model classes
 """
+
 import copy
 from typing import Iterable  # noqa: UP035
 

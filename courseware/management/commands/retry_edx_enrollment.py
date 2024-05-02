@@ -1,6 +1,7 @@
 """
 Management command to retry edX enrollment for a user's course run enrollments
 """
+
 from django.contrib.auth import get_user_model
 from django.core.management import BaseCommand
 

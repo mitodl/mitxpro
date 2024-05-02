@@ -1,4 +1,5 @@
 """Tests for sheets app views"""
+
 import pytest
 
 from sheets.tasks import (

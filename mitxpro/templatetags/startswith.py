@@ -1,4 +1,5 @@
 """Module for custom string utility template tags and filters"""
+
 from django import template
 
 register = template.Library()

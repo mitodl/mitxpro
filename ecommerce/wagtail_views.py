@@ -1,4 +1,5 @@
 """Wagtail admin views"""
+
 from wagtail.admin.views.generic.models import IndexView, InspectView
 from wagtail.admin.viewsets.base import ViewSetGroup
 from wagtail.admin.viewsets.model import ModelViewSet

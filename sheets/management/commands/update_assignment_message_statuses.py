@@ -2,6 +2,7 @@
 Updates the database records and coupon assignment Sheet associated with a bulk coupon assignment record depending
 on what messages were delivered, failed delivery, etc.
 """
+
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import BulkCouponAssignment

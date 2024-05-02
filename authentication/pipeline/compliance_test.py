@@ -1,4 +1,5 @@
 """Compliance pipeline tests"""
+
 import pytest
 from social_core.exceptions import AuthException
 

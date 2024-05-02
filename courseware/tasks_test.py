@@ -1,4 +1,5 @@
 """Courseware tasks"""
+
 import pytest
 
 from courseware import tasks

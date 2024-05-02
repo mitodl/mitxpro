@@ -1,4 +1,5 @@
 """User app utility functions"""
+
 import logging
 import re
 from email.utils import formataddr

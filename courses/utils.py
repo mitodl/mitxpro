@@ -1,6 +1,7 @@
 """
 Utilities for courses/certificates
 """
+
 import logging
 
 from django.conf import settings

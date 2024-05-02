@@ -1,4 +1,5 @@
 """fixtures for ecommerce tests"""
+
 from collections import namedtuple
 from decimal import Decimal
 from types import SimpleNamespace

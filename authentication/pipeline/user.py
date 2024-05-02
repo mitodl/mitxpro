@@ -1,4 +1,5 @@
 """Auth pipline functions for user authentication"""
+
 import json
 import logging
 

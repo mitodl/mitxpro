@@ -1,4 +1,5 @@
 """Ecommerce filters"""
+
 from django_filters import rest_framework as filters
 
 from courses.constants import VALID_PRODUCT_TYPE_CHOICES

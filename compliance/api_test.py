@@ -1,4 +1,5 @@
 """Tests for compliance api"""
+
 import time
 
 import pytest

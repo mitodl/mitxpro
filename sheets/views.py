@@ -1,4 +1,5 @@
 """HTTP views for sheets app"""
+
 import logging
 from urllib.parse import urljoin
 

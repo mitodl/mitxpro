@@ -1,4 +1,5 @@
 """Serializers for HubSpot"""
+
 from django.conf import settings
 from mitol.hubspot_api.api import format_app_id
 from rest_framework import serializers

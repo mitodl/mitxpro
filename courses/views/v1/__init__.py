@@ -1,4 +1,5 @@
 """Course views verson 1"""
+
 from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets

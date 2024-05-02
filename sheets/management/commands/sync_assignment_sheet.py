@@ -2,6 +2,7 @@
 Compares assignment sheet rows to enrollment records in the database and message delivery data in Mailgun.
 If the data in the sheet does not match, a request is sent to update/"sync" the sheet data.
 """
+
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.mail_api import send_bulk_enroll_emails

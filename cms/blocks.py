@@ -1,6 +1,7 @@
 """
 Wagtail custom blocks for the CMS
 """
+
 from django import forms
 from django.apps import apps
 from django.core.exceptions import ValidationError

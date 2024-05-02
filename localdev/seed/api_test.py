@@ -1,4 +1,5 @@
 """Seed data API tests"""
+
 from types import SimpleNamespace
 
 import pytest

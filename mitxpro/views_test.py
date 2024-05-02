@@ -1,6 +1,7 @@
 """
 Test end to end django views.
 """
+
 import pytest
 from django.test import Client
 from django.urls import reverse

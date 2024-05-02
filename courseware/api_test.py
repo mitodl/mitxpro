@@ -1,4 +1,5 @@
 """Courseware API tests"""
+
 import itertools
 from datetime import timedelta
 from types import SimpleNamespace

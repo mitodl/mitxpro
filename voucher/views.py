@@ -1,6 +1,7 @@
 """
 Voucher views
 """
+
 import logging
 from datetime import datetime, timezone
 

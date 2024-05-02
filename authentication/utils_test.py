@@ -1,4 +1,5 @@
 """Utils tests"""
+
 from authentication.strategy import DjangoRestFrameworkStrategy
 from authentication.utils import load_drf_strategy
 

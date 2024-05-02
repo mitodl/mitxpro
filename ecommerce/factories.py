@@ -1,6 +1,7 @@
 """
 Factories for ecommerce models
 """
+
 from datetime import timezone
 
 import faker

@@ -1,4 +1,5 @@
 """Tests for Blog API"""
+
 import pytest
 
 from blog.api import fetch_blog, parse_blog

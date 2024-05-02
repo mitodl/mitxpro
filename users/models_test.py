@@ -1,4 +1,5 @@
 """Tests for user models"""
+
 import factory
 import pytest
 from django.core.exceptions import ValidationError

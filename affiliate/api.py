@@ -1,4 +1,5 @@
 """Affiliate tracking logic"""
+
 from affiliate.constants import AFFILIATE_QS_PARAM
 from affiliate.models import Affiliate
 from mitxpro.utils import first_or_none

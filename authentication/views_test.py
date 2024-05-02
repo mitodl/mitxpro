@@ -1,4 +1,5 @@
 """Tests for authentication views"""
+
 from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
@@ -105,9 +106,10 @@ def noop():
 @contextmanager
 def export_check_response(response_name):
     """Context manager for configuring export check responses"""
-    with override_settings(
-        **get_cybersource_test_settings()
-    ), responses.RequestsMock() as mocked_responses:
+    with (
+        override_settings(**get_cybersource_test_settings()),
+        responses.RequestsMock() as mocked_responses,
+    ):
         mock_cybersource_wsdl(mocked_responses, settings)
         mock_cybersource_wsdl_operation(mocked_responses, response_name)
         yield
@@ -264,14 +266,15 @@ class AuthStateMachine(RuleBasedStateMachine):
     def register_email_not_exists_with_recaptcha_invalid(self):
         """Yield a function for this step"""
         self.flow_started = True
-        with patch(
-            "authentication.views.requests.post",
-            return_value=MockResponse(
-                content='{"success": false, "error-codes": ["bad-request"]}',
-                status_code=status.HTTP_200_OK,
-            ),
-        ) as mock_recaptcha_failure, override_settings(
-            **{"RECAPTCHA_SITE_KEY": "fakse"}
+        with (
+            patch(
+                "authentication.views.requests.post",
+                return_value=MockResponse(
+                    content='{"success": false, "error-codes": ["bad-request"]}',
+                    status_code=status.HTTP_200_OK,
+                ),
+            ) as mock_recaptcha_failure,
+            override_settings(**{"RECAPTCHA_SITE_KEY": "fakse"}),
         ):
             assert_api_call(
                 self.client,
@@ -449,9 +452,12 @@ class AuthStateMachine(RuleBasedStateMachine):
     @rule(auth_state=consumes(LoginPasswordAuthStates))
     def login_password_exports_temporary_error(self, auth_state):
         """Login for a user who hasn't been OFAC verified yet"""
-        with override_settings(**get_cybersource_test_settings()), patch(
-            "authentication.pipeline.compliance.api.verify_user_with_exports",
-            side_effect=Exception("register_details_export_temporary_error"),
+        with (
+            override_settings(**get_cybersource_test_settings()),
+            patch(
+                "authentication.pipeline.compliance.api.verify_user_with_exports",
+                side_effect=Exception("register_details_export_temporary_error"),
+            ),
         ):
             assert_api_call(
                 self.client,
@@ -646,9 +652,12 @@ class AuthStateMachine(RuleBasedStateMachine):
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
     def register_details_export_temporary_error(self, auth_state):
         """Complete the register confirmation details page with exports raising a temporary error"""
-        with override_settings(**get_cybersource_test_settings()), patch(
-            "authentication.pipeline.compliance.api.verify_user_with_exports",
-            side_effect=Exception("register_details_export_temporary_error"),
+        with (
+            override_settings(**get_cybersource_test_settings()),
+            patch(
+                "authentication.pipeline.compliance.api.verify_user_with_exports",
+                side_effect=Exception("register_details_export_temporary_error"),
+            ),
         ):
             assert_api_call(
                 self.client,
