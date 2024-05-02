@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.146.0 (Released May 02, 2024)
+---------------
+
+- fix: fix codecov workflow version (#2966)
+- feat: hide extra course runs in checkout if voucher is applied (#2960)
+- fix(deps): update dependency uwsgi to v2.0.25.1 (#2958)
+- fix(deps): update dependency boto3 to v1.34.88 (#2957)
+- chore(deps): update nginx docker tag to v1.25.5 (#2956)
+- chore(deps-dev): bump cryptography from 41.0.5 to 42.0.4 (#2903)
+- feat!: remove partial voucher matching (#2940)
+- Fix: This commit adds two Celery configurables
+
 Version 0.145.1 (Released April 18, 2024)
 ---------------
 
