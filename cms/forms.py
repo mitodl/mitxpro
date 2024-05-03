@@ -45,12 +45,12 @@ class CoursewareForm(WagtailAdminPageForm):
 
         instance = kwargs.get("instance", None)
         if instance and instance.id:
-            if instance.is_internal_or_external_course_page:
+            if instance.is_internal_or_external_course_page and instance.course:
                 course_runs = instance.course.courseruns.all()
                 course_run_choices = [("", "")] + [(run.id, run) for run in course_runs]
                 self.fields["course_run"].choices = course_run_choices
 
-            elif instance.is_internal_or_external_program_page:
+            elif instance.is_internal_or_external_program_page and instance.program:
                 self.fields["price"].initial = instance.program.current_price
 
     def save(self, commit=True):  # noqa: FBT002
