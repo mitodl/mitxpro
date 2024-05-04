@@ -59,7 +59,7 @@ uwsgi = "2.0.25.1"
 wagtail = "5.2.5"
 wagtail-metadata = "5.0.0"
 zeep = "3.4.0"
-flaky = "3.7.0"
+flaky = "3.8.1"
 xmltodict = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
