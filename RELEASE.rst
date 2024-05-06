@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.146.1
+Version 0.146.1 (Released May 06, 2024)
 ---------------
 
 - fix: check for courseware object in cms (#2968)
