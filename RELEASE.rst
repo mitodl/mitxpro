@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.146.1 (Released May 06, 2024)
+---------------
+
+- fix: check for courseware object in cms (#2968)
+- chore(deps): update dependency ruff to ^0.4.0 (#2962)
+- chore(deps): update nginx docker tag to v1.26.0
+- fix(deps): update dependency boto3 to v1.34.96
+
 Version 0.146.0 (Released May 02, 2024)
 ---------------
 
