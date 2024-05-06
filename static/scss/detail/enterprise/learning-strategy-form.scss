@@ -3,11 +3,12 @@
 .learning-strategy-block {
   width: 100%;
   padding: 75px 0 0;
-  background: url('#{$static-path}/images/enterprise/enterprise-page-dots-bg.png') repeat-x 0% 60% $alice-blue;
+  background: url("#{$static-path}/images/enterprise/enterprise-page-dots-bg.png")
+    repeat-x 0% 60% $alice-blue;
   background-size: contain;
 
-  @include media-breakpoint-down (sm) {
-    padding: 30px 5px 40px 5px;
+  @include media-breakpoint-down(sm) {
+    padding: 30px 5px 40px;
     background: $alice-blue;
   }
 
@@ -21,10 +22,10 @@
     margin-bottom: 24px;
 
     p {
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       font-size: 24px;
       text-align: initial;
       margin-bottom: 15px;
@@ -40,29 +41,29 @@
     margin-bottom: 50px;
 
     p {
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       font-size: 18px;
       text-align: initial;
       font-weight: 500;
       line-height: 27px;
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
   }
 }
 
 .learning-strategy-form {
-  border-radius: 5px 5px 0px 0px;
+  border-radius: 5px 5px 0 0;
   background: $white;
-  margin: 0px 45px;
+  margin: 0 45px;
   padding: 40px 35px;
 
-  @include media-breakpoint-down (sm) {
+  @include media-breakpoint-down(sm) {
     background: none;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     width: 100%;
   }
 
@@ -72,10 +73,10 @@
     justify-content: center;
     border-radius: 5px;
     background: $alice-blue;
-    margin: 10px 15px 0px;
+    margin: 10px 15px 0;
 
-    @include media-breakpoint-down (sm) {
-      margin: 20px 0px 0px;
+    @include media-breakpoint-down(sm) {
+      margin: 20px 0 0;
       background: $white;
     }
 
@@ -86,26 +87,24 @@
       font-weight: 500;
       line-height: normal;
       text-align: center;
-      margin: 0px;
+      margin: 0;
       padding: 15px;
 
-      @include media-breakpoint-down (sm) {
-        margin: 0px;
+      @include media-breakpoint-down(sm) {
+        margin: 0;
         padding: 20px;
         text-align: initial;
       }
 
       p {
-        margin-bottom: 0px;
+        margin-bottom: 0;
       }
     }
   }
 }
 
 .hbspt-form {
-
   form {
-
     .hs-form-field:first-child {
       width: 100%;
     }
@@ -114,24 +113,24 @@
       display: inline-flex;
       flex-direction: column;
       align-items: initial;
-      padding: 0px 15px 30px 15px;
+      padding: 0 15px 30px;
       width: 50%;
 
-      @include media-breakpoint-down (sm) {
+      @include media-breakpoint-down(sm) {
         display: block;
-        padding: 0px;
+        padding: 0;
         width: 100%;
-        margin-bottom: 0px;
+        margin-bottom: 0;
       }
 
       label {
-        color: rgba(0, 0, 0, 0.60);
+        color: rgb(0 0 0 / 60%);
         font-size: 18px;
         font-style: normal;
         font-weight: 500;
         line-height: normal;
 
-        @include media-breakpoint-down (sm) {
+        @include media-breakpoint-down(sm) {
           padding-top: 20px;
         }
       }
@@ -146,7 +145,7 @@
         border-radius: 5px;
         border: 1px solid #dbe3eb;
         background: $white;
-        box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%);
         padding: 10px 15px;
         color: $black;
         font-size: 18px;
@@ -172,7 +171,7 @@
       }
     }
 
-    .hs-form-field:nth-child(n+2) {
+    .hs-form-field:nth-child(n + 2) {
       box-sizing: border-box;
     }
 
@@ -180,18 +179,19 @@
       padding: 20px 155px;
 
       @include media-breakpoint-down(md) {
-        padding: 0px;
-        margin: 20px 0px 0px;
+        padding: 0;
+        margin: 20px 0 0;
       }
 
       input[type="submit"] {
         @extend .btn;
         @extend .btn-primary;
+
         border-radius: 5px;
         background: $primary;
         width: 500px;
         height: 55px;
-        margin: 0px auto 0px;
+        margin: 0 auto;
         display: block;
         position: relative;
         padding: 5px 10px;
@@ -211,7 +211,7 @@
         &:hover {
           background: $dark-blue;
           text-decoration: none;
-          transition: all .2s ease-in;
+          transition: all 0.2s ease-in;
         }
       }
     }
@@ -219,17 +219,18 @@
     .hs-recaptcha {
       align-items: center;
       width: 100%;
-      padding: 10px 0px;
+      padding: 10px 0;
 
       @include media-breakpoint-down(sm) {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 0px;
-        margin: 20px 0px 0px;
+        padding: 0;
+        margin: 20px 0 0;
       }
     }
 
+    /* stylelint-disable-next-line selector-class-pattern */
     .hs_error_rollup {
       display: none;
     }

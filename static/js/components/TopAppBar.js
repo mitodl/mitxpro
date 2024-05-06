@@ -1,36 +1,39 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
+import React from "react";
 
-import { routes } from "../lib/urls"
-import MixedLink from "./MixedLink"
-import UserMenu from "./UserMenu"
-import CatalogMenu from "./CatalogMenu"
-import type { Location } from "react-router"
+import { routes } from "../lib/urls";
+import MixedLink from "./MixedLink";
+import UserMenu from "./UserMenu";
+import CatalogMenu from "./CatalogMenu";
+import type { Location } from "react-router";
 
-import type { CurrentUser } from "../flow/authTypes"
-import type {CourseTopic} from "../flow/courseTypes"
+import type { CurrentUser } from "../flow/authTypes";
+import type { CourseTopic } from "../flow/courseTypes";
 
 type Props = {
   currentUser: ?CurrentUser,
   location: ?Location,
   errorPageHeader: ?boolean,
-  courseTopics: Array<CourseTopic>
-}
+  courseTopics: Array<CourseTopic>,
+};
 
-const shouldShowLoginSignup = location =>
+const shouldShowLoginSignup = (location) =>
   !location ||
   !(
     location.pathname === routes.ecommerceBulk.bulkPurchase ||
     location.pathname === routes.ecommerceBulk.receipt
-  )
+  );
 
-const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Props) => (
+const TopAppBar = ({
+  currentUser,
+  location,
+  errorPageHeader,
+  courseTopics,
+}: Props) => (
   <header className="header-holder">
     <div className="container">
-      <nav
-        className="sub-nav navbar navbar-expand-md link-section"
-      >
+      <nav className="sub-nav navbar navbar-expand-md link-section">
         <a href={routes.root} className="xpro-link">
           <img
             src="/static/images/mit-xpro-logo.svg"
@@ -58,43 +61,43 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
             className="collapse navbar-collapse px-0 justify-content-end"
           >
             <li>
-              {
-                SETTINGS.course_dropdown ? (
-                  <CatalogMenu courseTopics={courseTopics} />
-                ) : (
-                  <a href={routes.catalog} className="" aria-label="catalog">
-                    Catalog
-                  </a>
-                )
-              }
+              {SETTINGS.course_dropdown ? (
+                <CatalogMenu courseTopics={courseTopics} />
+              ) : (
+                <a href={routes.catalog} className="" aria-label="catalog">
+                  Catalog
+                </a>
+              )}
             </li>
-            {
-              SETTINGS.enable_enterprise ? (
-                <li>
-                  <a href={routes.enterprise} className="enterprise-link" aria-label="enterprise">
-                    Enterprise
-                  </a>
-                </li>
-              ) : null
-            }
-            {
-              SETTINGS.webinars ? (
-                <li>
-                  <a href={routes.webinars} className="webinar-link" aria-label="webinars">
-                    Webinars
-                  </a>
-                </li>
-              ) : null
-            }
-            {
-              SETTINGS.enable_blog ? (
-                <li>
-                  <a href={routes.blog} className="blog-link" aria-label="blog">
-                    Blog
-                  </a>
-                </li>
-              ) : null
-            }
+            {SETTINGS.enable_enterprise ? (
+              <li>
+                <a
+                  href={routes.enterprise}
+                  className="enterprise-link"
+                  aria-label="enterprise"
+                >
+                  Enterprise
+                </a>
+              </li>
+            ) : null}
+            {SETTINGS.webinars ? (
+              <li>
+                <a
+                  href={routes.webinars}
+                  className="webinar-link"
+                  aria-label="webinars"
+                >
+                  Webinars
+                </a>
+              </li>
+            ) : null}
+            {SETTINGS.enable_blog ? (
+              <li>
+                <a href={routes.blog} className="blog-link" aria-label="blog">
+                  Blog
+                </a>
+              </li>
+            ) : null}
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (
                 <li>
@@ -128,6 +131,6 @@ const TopAppBar = ({ currentUser, location, errorPageHeader, courseTopics }: Pro
       </nav>
     </div>
   </header>
-)
+);
 
-export default TopAppBar
+export default TopAppBar;

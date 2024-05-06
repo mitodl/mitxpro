@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     help = "Revoke and un revoke a certificate for a specified user against a program or course run."
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--user",
             type=str,

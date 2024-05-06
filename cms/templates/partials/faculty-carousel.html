@@ -4,20 +4,23 @@
     <div class="head">
       <h1>{{ page.heading }}</h1>
       {% if page.subhead %}
-        <h3>{{ page.subhead }}</h3>
+      <h3>{{ page.subhead }}</h3>
       {% endif %}
     </div>
     <div class="faculty-slider">
       {% for member in page.members %}
-        <div class="slide">
-          <div class="slide-holder">
-            <img src="{% image_version_url member.value.image "fill-300x300" %}" alt="{{ member.value.name }}">
-            <h2>{{ member.value.name }}</h2>
-            <div class="text-holder">
-              {{ member.value.description|richtext }}
-            </div>
+      <div class="slide">
+        <div class="slide-holder">
+          <img
+            src="{% image_version_url member.value.image "fill-300x300" %}"
+            alt="{{ member.value.name }}"
+          />
+          <h2>{{ member.value.name }}</h2>
+          <div class="text-holder">
+            {{ member.value.description|richtext }}
           </div>
         </div>
+      </div>
       {% endfor %}
     </div>
   </div>

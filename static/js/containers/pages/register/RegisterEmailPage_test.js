@@ -1,33 +1,33 @@
 // @flow
-import { assert } from "chai"
-import sinon from "sinon"
-import React from "react"
+import { assert } from "chai";
+import sinon from "sinon";
+import React from "react";
 
 import RegisterEmailPage, {
-  RegisterEmailPage as InnerRegisterEmailPage
-} from "./RegisterEmailPage"
-import IntegrationTestHelper from "../../../util/integration_test_helper"
+  RegisterEmailPage as InnerRegisterEmailPage,
+} from "./RegisterEmailPage";
+import IntegrationTestHelper from "../../../util/integration_test_helper";
 import {
   STATE_REGISTER_CONFIRM_SENT,
   STATE_LOGIN_PASSWORD,
   STATE_REGISTER_EMAIL,
-  STATE_ERROR
-} from "../../../lib/auth"
-import { makeRegisterAuthResponse } from "../../../factories/auth"
-import { routes } from "../../../lib/urls"
-import { ALERT_TYPE_TEXT } from "../../../constants"
+  STATE_ERROR,
+} from "../../../lib/auth";
+import { makeRegisterAuthResponse } from "../../../factories/auth";
+import { routes } from "../../../lib/urls";
+import { ALERT_TYPE_TEXT } from "../../../constants";
 
 describe("RegisterEmailPage", () => {
-  const email = "email@example.com"
-  const recaptcha = "recaptchaTestValue"
-  const partialToken = "partialTokenTestValue"
-  let helper, renderPage, setSubmittingStub, setErrorsStub
+  const email = "email@example.com";
+  const recaptcha = "recaptchaTestValue";
+  const partialToken = "partialTokenTestValue";
+  let helper, renderPage, setSubmittingStub, setErrorsStub;
 
   beforeEach(() => {
-    helper = new IntegrationTestHelper()
+    helper = new IntegrationTestHelper();
 
-    setSubmittingStub = helper.sandbox.stub()
-    setErrorsStub = helper.sandbox.stub()
+    setSubmittingStub = helper.sandbox.stub();
+    setErrorsStub = helper.sandbox.stub();
 
     renderPage = helper.configureHOCRenderer(
       RegisterEmailPage,
@@ -35,108 +35,108 @@ describe("RegisterEmailPage", () => {
       {},
       {
         location: {
-          search: `partial_token=${partialToken}`
-        }
-      }
-    )
-  })
+          search: `partial_token=${partialToken}`,
+        },
+      },
+    );
+  });
 
   afterEach(() => {
-    helper.cleanup()
-  })
+    helper.cleanup();
+  });
 
   it("displays a form", async () => {
-    const { inner } = await renderPage()
+    const { inner } = await renderPage();
 
-    assert.ok(inner.find("RegisterEmailForm").exists())
-  })
+    assert.ok(inner.find("RegisterEmailForm").exists());
+  });
 
   it("handles onSubmit for an error response", async () => {
-    const { inner } = await renderPage()
+    const { inner } = await renderPage();
     const fieldErrors = {
-      email: "error message"
-    }
+      email: "error message",
+    };
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state:        STATE_ERROR,
-        field_errors: fieldErrors
-      })
-    })
+        state: STATE_ERROR,
+        field_errors: fieldErrors,
+      }),
+    });
 
-    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
+    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit");
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
-    )
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
+    );
 
-    assert.lengthOf(helper.browserHistory, 1)
-    sinon.assert.calledWith(setErrorsStub, fieldErrors)
-    sinon.assert.calledWith(setSubmittingStub, false)
-  })
+    assert.lengthOf(helper.browserHistory, 1);
+    sinon.assert.calledWith(setErrorsStub, fieldErrors);
+    sinon.assert.calledWith(setSubmittingStub, false);
+  });
 
   it("handles onSubmit for an existing user password login", async () => {
-    const { inner, store } = await renderPage()
+    const { inner, store } = await renderPage();
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state: STATE_LOGIN_PASSWORD
-      })
-    })
+        state: STATE_LOGIN_PASSWORD,
+      }),
+    });
 
-    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
+    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit");
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
-    )
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
+    );
 
-    assert.lengthOf(helper.browserHistory, 2)
+    assert.lengthOf(helper.browserHistory, 2);
     assert.include(helper.browserHistory.location, {
       pathname: routes.login.password,
-      search:   ""
-    })
-    sinon.assert.notCalled(setErrorsStub)
-    sinon.assert.calledWith(setSubmittingStub, false)
+      search: "",
+    });
+    sinon.assert.notCalled(setErrorsStub);
+    sinon.assert.calledWith(setSubmittingStub, false);
 
-    const { ui } = store.getState()
+    const { ui } = store.getState();
 
     assert.deepEqual(ui.userNotifications, {
       "account-exists": {
-        type:  ALERT_TYPE_TEXT,
+        type: ALERT_TYPE_TEXT,
         color: "danger",
         props: {
-          text: `You already have an account with ${email}. Enter password to sign in.`
-        }
-      }
-    })
-  })
+          text: `You already have an account with ${email}. Enter password to sign in.`,
+        },
+      },
+    });
+  });
 
   it("handles onSubmit for blocked email", async () => {
-    const { inner, store } = await renderPage()
+    const { inner, store } = await renderPage();
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state: STATE_REGISTER_EMAIL
-      })
-    })
+        state: STATE_REGISTER_EMAIL,
+      }),
+    });
 
-    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
+    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit");
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
-    )
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
+    );
 
-    sinon.assert.notCalled(setErrorsStub)
-    sinon.assert.calledWith(setSubmittingStub, false)
+    sinon.assert.notCalled(setErrorsStub);
+    sinon.assert.calledWith(setSubmittingStub, false);
 
-    const { ui } = store.getState()
+    const { ui } = store.getState();
 
     assert.deepEqual(ui.userNotifications, {
       "account-blocked": {
-        type:  ALERT_TYPE_TEXT,
+        type: ALERT_TYPE_TEXT,
         color: "danger",
         props: {
           text: [
@@ -150,35 +150,35 @@ describe("RegisterEmailPage", () => {
                 customer support
               </a>{" "}
               to complete your registration.
-            </div>
-          ]
-        }
-      }
-    })
-  })
+            </div>,
+          ],
+        },
+      },
+    });
+  });
 
   it("handles onSubmit for a confirmation email", async () => {
-    const { inner, store } = await renderPage()
+    const { inner, store } = await renderPage();
 
     helper.handleRequestStub.returns({
       body: makeRegisterAuthResponse({
-        state: STATE_REGISTER_CONFIRM_SENT
-      })
-    })
+        state: STATE_REGISTER_CONFIRM_SENT,
+      }),
+    });
 
-    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit")
+    const onSubmit = inner.find("RegisterEmailForm").prop("onSubmit");
 
     await onSubmit(
       { email, recaptcha },
-      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub }
-    )
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
+    );
 
-    assert.lengthOf(helper.browserHistory, 2)
+    assert.lengthOf(helper.browserHistory, 2);
     assert.include(helper.browserHistory.location, {
       pathname: routes.register.confirmSent,
-      search:   `?email=${encodeURIComponent(email)}`
-    })
-    sinon.assert.notCalled(setErrorsStub)
-    sinon.assert.calledWith(setSubmittingStub, false)
-  })
-})
+      search: `?email=${encodeURIComponent(email)}`,
+    });
+    sinon.assert.notCalled(setErrorsStub);
+    sinon.assert.calledWith(setSubmittingStub, false);
+  });
+});

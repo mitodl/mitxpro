@@ -143,7 +143,7 @@ def confirmation_sent(request, **kwargs):  # noqa: ARG001
 class CustomLogoutView(LogoutView):
     """Custom view to modify base functionality in django.contrib.auth.views.LogoutView"""
 
-    def get_next_page(self):  # noqa: D102
+    def get_next_page(self):
         next_page = super().get_next_page()
 
         if next_page in (self.next_page, self.request.path):

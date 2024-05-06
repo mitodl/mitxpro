@@ -1,73 +1,70 @@
-const webpack = require("webpack")
-const path = require("path")
-const R = require("ramda")
-const BundleTracker = require("webpack-bundle-tracker")
-const { config, babelSharedLoader } = require(path.resolve(
-  "./webpack.config.shared.js"
-))
+const webpack = require("webpack");
+const path = require("path");
+const R = require("ramda");
+const BundleTracker = require("webpack-bundle-tracker");
+const { config, babelSharedLoader } = require(
+  path.resolve("./webpack.config.shared.js"),
+);
 
 const hotEntry = (host, port) =>
-  `webpack-hot-middleware/client?path=http://${host}:${port}/__webpack_hmr&timeout=20000&reload=true`
+  `webpack-hot-middleware/client?path=http://${host}:${port}/__webpack_hmr&timeout=20000&reload=true`;
 
 const insertHotReload = (host, port, entries) =>
   R.map(
-    R.compose(
-      R.flatten,
-      v => [v].concat(hotEntry(host, port))
-    ),
-    entries
-  )
+    R.compose(R.flatten, (v) => [v].concat(hotEntry(host, port))),
+    entries,
+  );
 
 const devConfig = Object.assign({}, config, {
   context: __dirname,
-  mode:    "development",
+  mode: "development",
   devtool: "inline-source-map",
-  output:  {
-    path:     path.resolve("./static/bundles/"),
-    filename: "[name].js"
+  output: {
+    path: path.resolve("./static/bundles/"),
+    filename: "[name].js",
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new BundleTracker({ filename: "./webpack-stats.json" })
+    new BundleTracker({ filename: "./webpack-stats.json" }),
   ],
   optimization: {
-    chunkIds: 'named',
-    moduleIds: 'named',
+    chunkIds: "named",
+    moduleIds: "named",
     splitChunks: {
       chunks: "all",
       minChunks: 2,
-      automaticNameDelimiter: '-',
+      automaticNameDelimiter: "-",
       cacheGroups: {
         common: {
           test: /[\\/]node_modules[\\/]/,
-          name: 'common',
-          chunks: 'all',
+          name: "common",
+          chunks: "all",
         },
       },
     },
   },
-})
+});
 
 devConfig.module.rules = [
   babelSharedLoader,
   ...config.module.rules,
   {
     test: /\.css$|\.scss$/,
-    use:  [
+    use: [
       { loader: "style-loader" },
       { loader: "css-loader" },
       { loader: "postcss-loader" },
-      { loader: "sass-loader" }
-    ]
-  }
-]
+      { loader: "sass-loader" },
+    ],
+  },
+];
 
 const makeDevConfig = (host, port) =>
   Object.assign({}, devConfig, {
-    entry: insertHotReload(host, port, devConfig.entry)
-  })
+    entry: insertHotReload(host, port, devConfig.entry),
+  });
 
 module.exports = {
   makeDevConfig,
-  devConfig
-}
+  devConfig,
+};

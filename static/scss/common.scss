@@ -34,20 +34,21 @@ a.link-button {
   text-align: center;
   text-decoration: none;
 
-  &:hover, &:visited {
+  &:hover,
+  &:visited {
     text-decoration: none;
   }
 
   &.red {
     border-radius: 5px;
-    background-color: rgb(163, 31, 52);
-    color: #ffffff;
+    background-color: rgb(163 31 52);
+    color: #fff;
   }
 
   &.light-blue {
     border-radius: 5px;
     background-color: $light-blue;
-    color: #ffffff;
+    color: #fff;
   }
 }
 
@@ -87,9 +88,11 @@ a.link-button {
   }
 }
 
-
 .link-light-blue {
-  &, &:hover, &:visited, &:active {
+  &,
+  &:hover,
+  &:visited,
+  &:active {
     color: $light-blue;
   }
 }
@@ -101,9 +104,8 @@ a.link-button {
 
   svg {
     width: 160px;
-    height: 40px;
-    -webkit-filter: drop-shadow(-1px 2px 2px rgba(0, 0, 0, 0.4)); // sass-lint:disable-line no-vendor-prefixes
-    filter: drop-shadow(-1px 2px 2px rgba(0, 0, 0, 0.4));
+    height: 40px; // sass-lint:disable-line no-vendor-prefixes
+    filter: drop-shadow(-1px 2px 2px rgb(0 0 0 / 40%));
     fill: black;
   }
 
@@ -119,18 +121,17 @@ a.link-button {
 }
 
 .card-shadow {
-  -webkit-box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8); // sass-lint:disable-line no-vendor-prefixes
-  -moz-box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8); // sass-lint:disable-line no-vendor-prefixes
-  box-shadow: -4px 5px 8px 0px rgba(204,204,204,0.8);
+  // sass-lint:disable-line no-vendor-prefixes // sass-lint:disable-line no-vendor-prefixes
+  box-shadow: -4px 5px 8px 0 rgb(204 204 204 / 80%);
 }
 
 .profile-container {
-  @include media-breakpoint-down(sm)  {
+  @include media-breakpoint-down(sm) {
     padding: 20px 40px;
   }
 
-  @include media-breakpoint-down(xs)  {
-    padding: 20px 20px;
+  @include media-breakpoint-down(xs) {
+    padding: 20px;
   }
 
   background-color: $very-light-gray;
@@ -145,7 +146,7 @@ a.link-button {
 }
 
 .profile {
-  background: url(/static/images/user.svg) left no-repeat;
+  background: url("/static/images/user.svg") left no-repeat;
   height: 120px;
   width: 120px;
 }

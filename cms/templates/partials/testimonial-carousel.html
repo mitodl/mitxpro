@@ -4,7 +4,7 @@
     <div class="head">
       <h1>{{ page.heading }}</h1>
       {% if page.subhead %}
-        <h3>{{ page.subhead }}</h3>
+      <h3>{{ page.subhead }}</h3>
       {% endif %}
     </div>
     <div class="learners-slider">
@@ -12,42 +12,75 @@
       <div class="slide">
         <div class="slide-holder">
           {% if testimonial.value.image %}
-            <img src="{% image_version_url testimonial.value.image "fill-75x75" %}" alt="{{ testimonial.value.name }}" width="75" height="75" loading="lazy"/>
+          <img
+            src="{% image_version_url testimonial.value.image "fill-75x75" %}"
+            alt="{{ testimonial.value.name }}"
+            width="75"
+            height="75"
+            loading="lazy"
+          />
           {% endif %}
-          <h2>{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
+          <h2>
+            {{ testimonial.value.name }},
+            {{ testimonial.value.title }}
+          </h2>
           <p>{{ testimonial.value.quote|truncatechars:150 }}</p>
-            {% if testimonial.value.quote|length > 150 %}
-              <a data-toggle="modal" href="#testimonial-{{ forloop.counter }}" class="read-more">Continue Reading</a>
-            {% endif %}
+          {% if testimonial.value.quote|length > 150 %}
+          <a
+            data-toggle="modal"
+            href="#testimonial-{{ forloop.counter }}"
+            class="read-more"
+            >Continue Reading</a
+          >
+          {% endif %}
         </div>
       </div>
       {% endfor %}
     </div>
   </div>
   {% for testimonial in page.items %}
-    <div class="modal fade" id="testimonial-{{ forloop.counter }}" role="dialog">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-body">
-            <div class="container no-gutters px-0">
-              <div class="d-flex flex-row-reverse">
-                <a class="text-dark" href="testimonial-{{ forloop.counter }}" data-dismiss="modal"><span class="material-icons" data-icon="cancel" aria-hidden="true"></span></a>
-              </div>
+  <div class="modal fade" id="testimonial-{{ forloop.counter }}" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="container no-gutters px-0">
+            <div class="d-flex flex-row-reverse">
+              <a
+                class="text-dark"
+                href="testimonial-{{ forloop.counter }}"
+                data-dismiss="modal"
+                ><span
+                  class="material-icons"
+                  data-icon="cancel"
+                  aria-hidden="true"
+                ></span
+              ></a>
             </div>
-            <div class="container px-4">
-              <div class="row py-2">
-                <img src="{% image_version_url testimonial.value.image "fill-100x100" %}" class="border rounded-circle headshot-image" alt="Testimonial image" width="100" height="100" loading="lazy"/>
-              </div>
-              <div class="row mb-4">
-                <h2 class="modal-title text-uppercase">{{ testimonial.value.name }}, {{ testimonial.value.title }}</h2>
-              </div>
-              <div class="row quote-container">
-                <p>{{ testimonial.value.quote }}</p>        
-              </div>
+          </div>
+          <div class="container px-4">
+            <div class="row py-2">
+              <img
+                src="{% image_version_url testimonial.value.image "fill-100x100" %}"
+                class="border rounded-circle headshot-image"
+                alt="Testimonial image"
+                width="100"
+                height="100"
+                loading="lazy"
+              />
+            </div>
+            <div class="row mb-4">
+              <h2 class="modal-title text-uppercase">
+                {{ testimonial.value.name }},
+                {{ testimonial.value.title }}
+              </h2>
+            </div>
+            <div class="row quote-container">
+              <p>{{ testimonial.value.quote }}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
   {% endfor %}
 </div>

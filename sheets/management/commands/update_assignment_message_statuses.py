@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group()
         group.add_argument("--id", type=int, help="The BulkCouponAssignment ID")
         group.add_argument(
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         if not any([options["id"], options["sheet_id"], options["title"]]):
             raise CommandError("Need to provide --id, --sheet-id, or --title")  # noqa: EM101
 
@@ -56,9 +56,7 @@ class Command(BaseCommand):
 
         bulk_assignment = BulkCouponAssignment.objects.get(**qset_kwargs)
         self.stdout.write(
-            "Updating bulk coupon assignment ({}, {})...".format(
-                bulk_assignment.id, bulk_assignment.assignment_sheet_id
-            )
+            f"Updating bulk coupon assignment ({bulk_assignment.id}, {bulk_assignment.assignment_sheet_id})..."
         )
 
         updated_assignments = update_incomplete_assignment_message_statuses(
@@ -68,8 +66,8 @@ class Command(BaseCommand):
         if update_count:
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Successfully updated message status for bulk coupon assignment "  # noqa: UP032
-                    "({} individual status(es) added/updated).".format(update_count)
+                    "Successfully updated message status for bulk coupon assignment "
+                    f"({update_count} individual status(es) added/updated)."
                 )
             )
         else:

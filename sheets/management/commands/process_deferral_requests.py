@@ -16,12 +16,12 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "-r", "--row", type=int, help="Row number in the deferral request Sheet"
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         defer_request_handler = DeferralRequestHandler()
         self.stdout.write("Handling deferrals and updating spreadsheet...")
         results = defer_request_handler.process_sheet(

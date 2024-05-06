@@ -31,7 +31,7 @@ class TimestampedModelQuerySet(QuerySet):
         Automatically update updated_on timestamp when .update(). This is because .update()
         does not go through .save(), thus will not auto_now, because it happens on the
         database level without loading objects into memory.
-        """  # noqa: D402
+        """  # noqa: D402, RUF100
         if "updated_on" not in kwargs:
             kwargs["updated_on"] = now_in_utc()
         return super().update(**kwargs)
@@ -149,7 +149,7 @@ class AuditableModel(Model):
 class SingletonModel(Model):
     """Model class for models representing tables that should only have a single record"""
 
-    def save(  # noqa: D102
+    def save(
         self,
         force_insert=False,  # noqa: FBT002
         force_update=False,  # noqa: FBT002
@@ -158,8 +158,8 @@ class SingletonModel(Model):
     ):
         if force_insert and self._meta.model.objects.count() > 0:
             raise ValidationError(
-                "Only one {} object should exist. Update the existing object instead "  # noqa: EM103
-                "of creating a new one.".format(self.__class__.__name__)
+                f"Only one {self.__class__.__name__} object should exist. Update the existing object instead "  # noqa: EM102
+                "of creating a new one."
             )
         return super().save(
             force_insert=force_insert,

@@ -122,7 +122,7 @@ class UserManager(BaseUserManager):
 class FaultyCoursewareUserManager(BaseUserManager):
     """User manager that defines a queryset of Users that are incorrectly configured in the courseware"""
 
-    def get_queryset(self):  # noqa: D102
+    def get_queryset(self):
         return (
             super()
             .get_queryset()

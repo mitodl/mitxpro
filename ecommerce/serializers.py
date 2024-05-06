@@ -409,9 +409,7 @@ class BasketSerializer(serializers.ModelSerializer):
             if coupon_version is None:
                 raise ValidationError(
                     {
-                        "coupons": "Enrollment / Promotional Code '{}' is invalid".format(
-                            coupon_code
-                        )
+                        "coupons": f"Enrollment / Promotional Code '{coupon_code}' is invalid"
                     }
                 )
         elif coupons is not None:
@@ -578,7 +576,7 @@ class BasketSerializer(serializers.ModelSerializer):
         )
         return run_ids if run_ids != existing_run_ids else None
 
-    def update(self, instance, validated_data):  # noqa: D102
+    def update(self, instance, validated_data):
         items = validated_data.get("items")
         coupons = validated_data.get("coupons")
         data_consents = validated_data.get("data_consents")
@@ -832,7 +830,7 @@ class BaseCouponSerializer(serializers.Serializer):
                 )
         return attrs
 
-    def create(self, validated_data):  # noqa: D102
+    def create(self, validated_data):
         return create_coupons(
             company_id=validated_data.get("company"),
             tag=validated_data.get("tag"),

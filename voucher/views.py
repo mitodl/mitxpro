@@ -77,7 +77,7 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
             return redirect(reverse("voucher:resubmit"))
         return super().form_invalid(form)
 
-    def get_context_data(self, **kwargs):  # noqa: D102
+    def get_context_data(self, **kwargs):
         return {**super().get_context_data(**kwargs), **get_base_context(self.request)}
 
 

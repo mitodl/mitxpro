@@ -10,7 +10,7 @@ class RootConfig(AppConfig):
 
     name = "mitxpro"
 
-    def ready(self):  # noqa: D102
+    def ready(self):
         from mitol.common import envs
 
         envs.validate()

@@ -1,8 +1,9 @@
 // sass-lint:disable mixins-before-declarations
 
 .tiles-block {
-  padding: 32px 0px;
-  background: $tiles-background url("#{$static-path}/images/tiles-bg.png") repeat-x 0 100%;
+  padding: 32px 0;
+  background: $tiles-background url("#{$static-path}/images/tiles-bg.png")
+    repeat-x 0 100%;
   min-height: 200px;
 
   @include media-breakpoint-up(lg) {
@@ -20,6 +21,7 @@
   padding: 0 7px;
   list-style: none;
   text-align: center;
+
   @include media-breakpoint-up(lg) {
     display: flex;
   }
@@ -30,6 +32,7 @@
     border-radius: 5px;
     margin: 8px;
     padding: 32px 10px;
+
     @include media-breakpoint-up(lg) {
       display: inline-block;
       vertical-align: top;
@@ -51,7 +54,7 @@
     text-transform: uppercase;
     margin: 0 0 15px;
 
-    &:after {
+    &::after {
       position: absolute;
       left: 50%;
       top: 100%;
@@ -101,7 +104,8 @@
 }
 
 .popover {
-  font-family: Rajdhani, "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-family: Rajdhani, "Open Sans", "Helvetica Neue", Helvetica, Arial,
+    sans-serif !important;
   font-weight: 600;
   max-width: 100% !important;
 

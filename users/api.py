@@ -116,7 +116,7 @@ def fetch_users(filter_values, ignore_case=True):  # noqa: FBT002
     )
     if len(filter_values) > len(unique_filter_values):
         raise ValidationError(
-            "Duplicate values provided ({})".format(  # noqa: EM103
+            "Duplicate values provided ({})".format(  # noqa: EM103, UP032
                 set(filter_values).intersection(unique_filter_values)
             )
         )

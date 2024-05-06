@@ -1,68 +1,68 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { FORGOT_PASSWORD_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { mutateAsync } from "redux-query"
-import { Link } from "react-router-dom"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { FORGOT_PASSWORD_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { mutateAsync } from "redux-query";
+import { Link } from "react-router-dom";
 
-import { addUserNotification } from "../../../actions"
-import auth from "../../../lib/queries/auth"
-import { routes } from "../../../lib/urls"
-import { ALERT_TYPE_TEXT } from "../../../constants"
+import { addUserNotification } from "../../../actions";
+import auth from "../../../lib/queries/auth";
+import { routes } from "../../../lib/urls";
+import { ALERT_TYPE_TEXT } from "../../../constants";
 
-import EmailForm from "../../../components/forms/EmailForm"
+import EmailForm from "../../../components/forms/EmailForm";
 
-import type { RouterHistory } from "react-router"
-import type { EmailFormValues } from "../../../components/forms/EmailForm"
+import type { RouterHistory } from "react-router";
+import type { EmailFormValues } from "../../../components/forms/EmailForm";
 
 type Props = {
   history: RouterHistory,
-  forgotPassword: (email: string) => Promise<any>
-}
+  forgotPassword: (email: string) => Promise<any>,
+};
 
 type State = {
   forgotEmailSent: boolean,
-  text: Object | null
-}
+  text: Object | null,
+};
 
 const passwordResetText = (email: string) => (
   <p>
     If an account with the email <span className="email">{email}</span> <br />{" "}
     exists, an email has been sent with a password reset link.
   </p>
-)
+);
 
 export class LoginForgotPasswordPage extends React.Component<Props, State> {
   constructor(props: Props, state: State) {
-    super(props, state)
-    this.state = { forgotEmailSent: false, text: null }
+    super(props, state);
+    this.state = { forgotEmailSent: false, text: null };
   }
   async onSubmit({ email }: EmailFormValues, { setSubmitting }: any) {
-    const { forgotPassword, history } = this.props
+    const { forgotPassword, history } = this.props;
 
     try {
-      await forgotPassword(email)
+      await forgotPassword(email);
       this.setState((state, props) => {
         return {
           forgotEmailSent: true,
-          text:            passwordResetText(email)
-        }
-      })
+          text: passwordResetText(email),
+        };
+      });
 
-      history.push(routes.login.forgot)
+      history.push(routes.login.forgot);
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
   resetEmailLinkSent() {
     this.setState({
       forgotEmailSent: false,
-      text:            null
-    })
+      text: null,
+    });
   }
 
   render() {
@@ -120,21 +120,18 @@ export class LoginForgotPasswordPage extends React.Component<Props, State> {
           )}
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const forgotPassword = (email: string) =>
-  mutateAsync(auth.forgotPasswordMutation(email))
+  mutateAsync(auth.forgotPasswordMutation(email));
 
 const mapDispatchToProps = {
   forgotPassword,
-  addUserNotification
-}
+  addUserNotification,
+};
 
-export default compose(
-  connect(
-    null,
-    mapDispatchToProps
-  )
-)(LoginForgotPasswordPage)
+export default compose(connect(null, mapDispatchToProps))(
+  LoginForgotPasswordPage,
+);

@@ -45,10 +45,10 @@ class ExportsInquiryLogAdmin(admin.ModelAdmin):
             ensure_active_user(obj.user)
         eligible_objects.update(computed_result=RESULT_MANUALLY_APPROVED)
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         # We want to allow this while debugging
         return settings.DEBUG
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         # We want to allow this while debugging
         return settings.DEBUG

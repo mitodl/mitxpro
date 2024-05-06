@@ -1,16 +1,16 @@
 // @flow
-import React from "react"
-import { pathOr } from "ramda"
-import { Formik, Form } from "formik"
+import React from "react";
+import { pathOr } from "ramda";
+import { Formik, Form } from "formik";
 
 import {
   profileValidation,
   legalAddressValidation,
   LegalAddressFields,
-  ProfileFields
-} from "./ProfileFormFields"
+  ProfileFields,
+} from "./ProfileFormFields";
 
-import type { Country, User } from "../../flow/authTypes"
+import type { Country, User } from "../../flow/authTypes";
 
 type Props = {
   onSubmit: Function,
@@ -18,25 +18,31 @@ type Props = {
   user: User,
   isVatEnabled: boolean,
   enableVatID: Function,
-}
+};
 
 const getInitialValues = (user: User) => ({
-  name:          user.name,
-  email:         user.email,
+  name: user.name,
+  email: user.email,
   legal_address: user.legal_address,
-  profile:       {
+  profile: {
     ...user.profile,
     // Should be null but React complains about null values in form fields. So we need to convert to
     // string and then back to null on submit.
-    job_function:      pathOr("", ["job_function"], user.profile),
-    company_size:      pathOr("", ["company_size"], user.profile),
-    leadership_level:  pathOr("", ["leadership_level"], user.profile),
-    years_experience:  pathOr("", ["years_experience"], user.profile),
-    highest_education: pathOr("", ["highest_education"], user.profile)
-  }
-})
+    job_function: pathOr("", ["job_function"], user.profile),
+    company_size: pathOr("", ["company_size"], user.profile),
+    leadership_level: pathOr("", ["leadership_level"], user.profile),
+    years_experience: pathOr("", ["years_experience"], user.profile),
+    highest_education: pathOr("", ["highest_education"], user.profile),
+  },
+});
 
-const EditProfileForm = ({ onSubmit, countries, user, isVatEnabled, enableVatID }: Props) => (
+const EditProfileForm = ({
+  onSubmit,
+  countries,
+  user,
+  isVatEnabled,
+  enableVatID,
+}: Props) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(profileValidation)}
@@ -67,6 +73,6 @@ const EditProfileForm = ({ onSubmit, countries, user, isVatEnabled, enableVatID 
       </Form>
     )}
   />
-)
+);
 
-export default EditProfileForm
+export default EditProfileForm;

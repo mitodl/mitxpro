@@ -1,22 +1,22 @@
 // @flow
-import React from "react"
+import React from "react";
 
-import { formatPrice } from "../lib/ecommerce"
+import { formatPrice } from "../lib/ecommerce";
 
-import type Decimal from "decimal.js-light"
+import type Decimal from "decimal.js-light";
 type Props = {
   itemPrice: Decimal,
   totalPrice: Decimal,
   discount: ?string,
   numSeats: number,
-  alreadyPaid: boolean
-}
+  alreadyPaid: boolean,
+};
 const B2BPurchaseSummary = ({
   itemPrice,
   totalPrice,
   numSeats,
   discount,
-  alreadyPaid
+  alreadyPaid,
 }: Props) => (
   <div className="b2b-order-summary">
     <div className="container">
@@ -58,5 +58,5 @@ const B2BPurchaseSummary = ({
       </div>
     </div>
   </div>
-)
-export default B2BPurchaseSummary
+);
+export default B2BPurchaseSummary;

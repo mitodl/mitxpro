@@ -2,7 +2,6 @@
 @import "common";
 
 .learning-techniques-block {
-
   h1 {
     text-align: center;
     font-size: 40px;
@@ -15,11 +14,12 @@
 
 .learning-techniques-list {
   margin: 0;
+
   // This is here to hide the outer list item borders
   overflow: hidden;
   padding: 0;
   list-style: none;
-  letter-spacing: -.32em;
+  letter-spacing: -0.32em;
   position: relative;
 
   @include media-breakpoint-up(md) {
@@ -48,18 +48,16 @@
     .img-holder {
       min-height: 110px;
       margin: 0 0 15px;
-
     }
   }
 
   h3 {
     margin: 0 0 10px;
-    color: $blue;  // it's an override of a bootstrap-provided variable.
+    color: $blue; // it's an override of a bootstrap-provided variable.
     text-transform: uppercase;
   }
 
   h4 {
     margin: 0;
   }
-
 }

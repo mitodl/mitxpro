@@ -1,23 +1,23 @@
 // @flow
 /* global SETTINGS: false */
-import { assert } from "chai"
+import { assert } from "chai";
 
 import RegisterDeniedPage, {
-  RegisterDeniedPage as InnerRegisterDeniedPage
-} from "./RegisterDeniedPage"
-import IntegrationTestHelper from "../../../util/integration_test_helper"
-import { isIf, shouldIf } from "../../../lib/test_utils"
+  RegisterDeniedPage as InnerRegisterDeniedPage,
+} from "./RegisterDeniedPage";
+import IntegrationTestHelper from "../../../util/integration_test_helper";
+import { isIf, shouldIf } from "../../../lib/test_utils";
 
 describe("RegisterDeniedPage", () => {
-  const error = "errorTestValue"
-  const email = "email@localhost"
+  const error = "errorTestValue";
+  const email = "email@localhost";
 
-  let helper, renderPage
+  let helper, renderPage;
 
   beforeEach(() => {
-    SETTINGS.support_email = email
+    SETTINGS.support_email = email;
 
-    helper = new IntegrationTestHelper()
+    helper = new IntegrationTestHelper();
 
     renderPage = helper.configureHOCRenderer(
       RegisterDeniedPage,
@@ -25,44 +25,44 @@ describe("RegisterDeniedPage", () => {
       {},
       {
         location: {
-          search: ""
-        }
-      }
-    )
-  })
+          search: "",
+        },
+      },
+    );
+  });
 
   afterEach(() => {
-    helper.cleanup()
-  })
+    helper.cleanup();
+  });
 
   it("displays a link to email support", async () => {
-    const { inner } = await renderPage()
+    const { inner } = await renderPage();
 
-    assert.equal(inner.find("a").prop("href"), `mailto:${email}`)
-  })
+    assert.equal(inner.find("a").prop("href"), `mailto:${email}`);
+  });
 
   //
-  ;[true, false].forEach(hasError => {
+  [true, false].forEach((hasError) => {
     it(`${shouldIf(hasError)} show an error message if ${isIf(
-      hasError
+      hasError,
     )} in the query string`, async () => {
       const { inner } = await renderPage(
         {},
         hasError
           ? {
-            location: {
-              search: `?error=${error}`
+              location: {
+                search: `?error=${error}`,
+              },
             }
-          }
-          : {}
-      )
+          : {},
+      );
 
-      const detail = inner.find(".error-detail")
+      const detail = inner.find(".error-detail");
 
-      assert.equal(detail.exists(), hasError)
+      assert.equal(detail.exists(), hasError);
       if (hasError) {
-        assert.equal(detail.text(), error)
+        assert.equal(detail.text(), error);
       }
-    })
-  })
-})
+    });
+  });
+});

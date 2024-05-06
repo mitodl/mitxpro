@@ -1,4 +1,5 @@
 ## Title for RFC
+
 ecommerce REST APIs in mitxpro
 
 ### Abstract
@@ -44,7 +45,6 @@ The `course_runs` field is used to provide the UI with more information to show
 to the user about what they're buying. A product which is a program bundle would
 have multiple course runs listed, one per course, showing the course run which
 the user would be enrolled in.
-
 
 ### /api/basket/
 
@@ -111,7 +111,7 @@ They could clear just the items in the basket:
     {
         "items": []
     }
-    
+
 However this would leave the coupon code as is. If there was a coupon code it would
 fail validation because there is nothing to apply the coupon to, and the basket would
 be left unchanged. So there is no use case for this.
@@ -124,7 +124,6 @@ A user could clear only the coupon:
 
 However, if there is an automatic coupon which can be applied, it will be automatically
 added to the basket even when `coupons` is explicitly set to an empty list.
-    
 
 ##### Add item to basket
 
@@ -137,18 +136,18 @@ A user could update the basket to have one item by patching:
             }
         ]
     }
-    
+
 Here the coupon is not one of the keys so it would be left as is. However the view
 will revalidate the coupon to make sure it can be applied to the new item list. If this
 validation fails a 400 response is returned and the basket is left unchanged.
 
 Also note:
- - There is no way to incrementally add items to a basket, leaving existing
-items unchanged. The frontend will need to send the complete new list with `id` attributes
-for each product. However in practice we will not have more than one item in a basket.
- - At the moment a user can purchase only one item at a time. This will be validated
- on the backend.
 
+- There is no way to incrementally add items to a basket, leaving existing
+  items unchanged. The frontend will need to send the complete new list with `id` attributes
+  for each product. However in practice we will not have more than one item in a basket.
+- At the moment a user can purchase only one item at a time. This will be validated
+  on the backend.
 
 ##### Add coupon to basket
 
@@ -160,7 +159,7 @@ A user could apply a coupon to a basket:
                 "code": "DISCOUNT_30_OFF"
             }
         ]
-    } 
+    }
 
 Existing items in the basket would be left unchanged. The new coupon code would be validated.
 If the validation fails a 400 response would be returned and the basket would be left
@@ -205,4 +204,4 @@ If the signature verification succeeds the API will first record the whole paylo
 `Receipt` instance. Then it will parse the reference id which we provided earlier
 to get the order primary key so it can link the `Order` with the `Receipt`. Then
 the `Order.status` is changed to `fulfilled`, or to a different status if there is an
-error. Errors will additionally be logged so that this is reported to Sentry. 
+error. Errors will additionally be logged so that this is reported to Sentry.

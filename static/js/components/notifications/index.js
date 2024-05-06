@@ -1,31 +1,31 @@
 // @flow
-import React from "react"
+import React from "react";
 
-import MixedLink from "../MixedLink"
-import { routes } from "../../lib/urls"
+import MixedLink from "../MixedLink";
+import { routes } from "../../lib/urls";
 import {
   ALERT_TYPE_TEXT,
   ALERT_TYPE_UNUSED_COUPON,
-  ALTER_TYPE_B2B_ORDER_STATUS
-} from "../../constants"
+  ALTER_TYPE_B2B_ORDER_STATUS,
+} from "../../constants";
 
 import type {
   TextNotificationProps,
-  UnusedCouponNotificationProps
-} from "../../reducers/notifications"
+  UnusedCouponNotificationProps,
+} from "../../reducers/notifications";
 
 type ComponentProps = {
-  dismiss: Function
-}
+  dismiss: Function,
+};
 
 export const TextNotification = (
-  props: TextNotificationProps & ComponentProps
-) => <span>{props.text}</span>
+  props: TextNotificationProps & ComponentProps,
+) => <span>{props.text}</span>;
 
 export const UnusedCouponNotification = (
-  props: UnusedCouponNotificationProps & ComponentProps
+  props: UnusedCouponNotificationProps & ComponentProps,
 ) => {
-  const { productId, couponCode, dismiss } = props
+  const { productId, couponCode, dismiss } = props;
 
   return (
     <span>
@@ -39,11 +39,11 @@ export const UnusedCouponNotification = (
       </MixedLink>{" "}
       to redeem it.
     </span>
-  )
-}
+  );
+};
 
 export const B2BOrderStatusNotification = (props: ComponentProps) => {
-  const { dismiss } = props
+  const { dismiss } = props;
 
   return (
     <span>
@@ -57,11 +57,11 @@ export const B2BOrderStatusNotification = (props: ComponentProps) => {
       </a>
       .
     </span>
-  )
-}
+  );
+};
 
 export const notificationTypeMap = {
-  [ALERT_TYPE_TEXT]:             TextNotification,
-  [ALERT_TYPE_UNUSED_COUPON]:    UnusedCouponNotification,
-  [ALTER_TYPE_B2B_ORDER_STATUS]: B2BOrderStatusNotification
-}
+  [ALERT_TYPE_TEXT]: TextNotification,
+  [ALERT_TYPE_UNUSED_COUPON]: UnusedCouponNotification,
+  [ALTER_TYPE_B2B_ORDER_STATUS]: B2BOrderStatusNotification,
+};

@@ -1,5 +1,6 @@
 """Tests for CMS views"""
 
+import textwrap
 from datetime import datetime, timedelta
 from types import SimpleNamespace
 
@@ -107,7 +108,13 @@ def test_home_page_view(client, wagtail_basics):
 
     # without watch now button
     assert (
-        '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
+        textwrap.dedent("""\
+        <a
+          id="actionButton"
+          class="btn btn-primary text-uppercase px-5 py-2 action-button"
+          href="#"
+          >Watch Now</a
+        >""")
         not in content
     )
 
@@ -123,7 +130,13 @@ def test_home_page_view(client, wagtail_basics):
 
     # with watch now button
     assert (
-        '<a id="actionButton" class="btn btn-primary text-uppercase px-5 py-2 action-button" href="#">Watch Now</a>'
+        textwrap.dedent("""\
+        <a
+          id="actionButton"
+          class="btn btn-primary text-uppercase px-5 py-2 action-button"
+          href="#"
+          >Watch Now</a
+        >""")
         in content
     )
     assert "dropdown-menu" not in content

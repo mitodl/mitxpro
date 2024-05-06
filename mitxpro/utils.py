@@ -57,8 +57,8 @@ def webpack_dev_server_url(request):
     """
     Get the full URL where the webpack dev server should be running
     """
-    return "http://{}:{}".format(
-        webpack_dev_server_host(request), settings.WEBPACK_DEV_SERVER_PORT
+    return (
+        f"http://{webpack_dev_server_host(request)}:{settings.WEBPACK_DEV_SERVER_PORT}"
     )
 
 
@@ -454,7 +454,7 @@ class ValidateOnSaveMixin(models.Model):
     class Meta:
         abstract = True
 
-    def save(  # noqa: D102
+    def save(
         self,
         force_insert=False,  # noqa: FBT002
         force_update=False,  # noqa: FBT002

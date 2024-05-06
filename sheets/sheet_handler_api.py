@@ -256,10 +256,10 @@ class EnrollmentChangeRequestHandler(SheetHandler):
         self.request_model_cls = request_model_cls
 
     @cached_property
-    def worksheet(self):  # noqa: D102
+    def worksheet(self):
         return self.spreadsheet.worksheet("id", value=self.worksheet_id)
 
-    def get_enumerated_rows(self):  # noqa: D102
+    def get_enumerated_rows(self):
         # Only yield rows in the spreadsheet that come after the legacy rows
         # (i.e.: the rows of data that were manually entered before we started automating this process)
         return enumerate(
@@ -272,14 +272,10 @@ class EnrollmentChangeRequestHandler(SheetHandler):
             start=self.start_row,
         )
 
-    def update_completed_rows(self, success_row_results):  # noqa: D102
+    def update_completed_rows(self, success_row_results):
         for row_result in success_row_results:
             self.worksheet.update_values(
-                crange="{processor_col}{row_index}:{error_col}{row_index}".format(
-                    processor_col=self.sheet_metadata.PROCESSOR_COL_LETTER,
-                    error_col=self.sheet_metadata.ERROR_COL_LETTER,
-                    row_index=row_result.row_index,
-                ),
+                crange=f"{self.sheet_metadata.PROCESSOR_COL_LETTER}{row_result.row_index}:{self.sheet_metadata.ERROR_COL_LETTER}{row_result.row_index}",
                 values=[
                     [
                         ENROLL_CHANGE_SHEET_PROCESSOR_NAME,
@@ -293,7 +289,7 @@ class EnrollmentChangeRequestHandler(SheetHandler):
                 ],
             )
 
-    def get_or_create_request(self, row_data):  # noqa: D102
+    def get_or_create_request(self, row_data):
         form_response_id = int(
             row_data[self.sheet_metadata.FORM_RESPONSE_ID_COL].strip()
         )
@@ -314,7 +310,7 @@ class EnrollmentChangeRequestHandler(SheetHandler):
                 enroll_change_request.save()
         return enroll_change_request, created, raw_data_changed
 
-    def filter_ignored_rows(self, enumerated_rows):  # noqa: D102
+    def filter_ignored_rows(self, enumerated_rows):
         completed_form_response_ids = set(
             self.request_model_cls.objects.exclude(date_completed=None).values_list(
                 "form_response_id", flat=True
@@ -337,5 +333,5 @@ class EnrollmentChangeRequestHandler(SheetHandler):
                 continue
             yield row_index, row_data
 
-    def process_row(self, row_index, row_data):  # noqa: D102
+    def process_row(self, row_index, row_data):
         raise NotImplementedError

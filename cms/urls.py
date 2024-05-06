@@ -18,8 +18,8 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 
 from cms.constants import COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG, WEBINAR_INDEX_SLUG
 
-index_page_pattern = r"(?:{}|{}|{})".format(
-    COURSE_INDEX_SLUG, PROGRAM_INDEX_SLUG, WEBINAR_INDEX_SLUG
+index_page_pattern = (
+    rf"(?:{COURSE_INDEX_SLUG}|{PROGRAM_INDEX_SLUG}|{WEBINAR_INDEX_SLUG})"
 )
 detail_path_char_pattern = r"\w\-+:"
 

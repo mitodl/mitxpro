@@ -16,12 +16,12 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "-r", "--row", type=int, help="Row number in the request Sheet"
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         coupon_request_handler = CouponRequestHandler()
         self.stdout.write("Creating coupons and creating/updating Sheets...")
         results = coupon_request_handler.process_sheet(

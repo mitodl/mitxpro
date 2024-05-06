@@ -25,7 +25,7 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
     )
     if len(matching_spreadsheets) != 1:
         raise CommandError(
-            "There should be 1 coupon assignment sheet that matches the given title ('{}'). "  # noqa: EM103
-            "{} were found.".format(title, len(matching_spreadsheets))
+            f"There should be 1 coupon assignment sheet that matches the given title ('{title}'). "  # noqa: EM102
+            f"{len(matching_spreadsheets)} were found."
         )
     return matching_spreadsheets[0]

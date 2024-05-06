@@ -17,7 +17,7 @@ class Command(EnrollmentChangeCommand):
 
     help = "Sets a user's enrollment to 'transferred' and creates an enrollment for a different user"
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--from-user",
             type=str,
@@ -54,7 +54,7 @@ class Command(EnrollmentChangeCommand):
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         from_user = fetch_user(options["from_user"])
         to_user = fetch_user(options["to_user"])
         keep_failed_enrollments = options["keep_failed_enrollments"]
@@ -68,7 +68,7 @@ class Command(EnrollmentChangeCommand):
             )
             if len(to_user_existing_enrolled_run_ids) > 0:
                 raise CommandError(
-                    "'to' user is already enrolled in program runs ({})".format(  # noqa: EM103
+                    "'to' user is already enrolled in program runs ({})".format(  # noqa: EM103, UP032
                         list(to_user_existing_enrolled_run_ids)
                     )
                 )
@@ -121,7 +121,7 @@ class Command(EnrollmentChangeCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n".format(  # noqa: RUF001
+                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n".format(  # noqa: RUF001, UP032
                         from_user.username,
                         from_user.email,
                         to_user.username,

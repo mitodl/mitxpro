@@ -1,31 +1,31 @@
 // @flow
-import React from "react"
-import moment from "moment"
-import { Picky } from "react-picky"
-import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda"
-import { formatDate, parseDate } from "react-day-picker/moment"
-import DayPickerInput from "react-day-picker/DayPickerInput"
-import { Formik, Field, Form, ErrorMessage } from "formik"
-import * as yup from "yup"
+import React from "react";
+import moment from "moment";
+import { Picky } from "react-picky";
+import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda";
+import { formatDate, parseDate } from "react-day-picker/moment";
+import DayPickerInput from "react-day-picker/DayPickerInput";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import * as yup from "yup";
 
 import {
   DISCOUNT_TYPE_PERCENT_OFF,
   COUPON_TYPE_PROMO,
   COUPON_TYPE_SINGLE_USE,
   PRODUCT_TYPE_COURSERUN,
-  PRODUCT_TYPE_PROGRAM
-} from "../../constants"
-import { isPromo } from "../../lib/ecommerce"
-import { getProductSelectLabel } from "../../lib/util"
-import FormError from "../../components/forms/elements/FormError"
+  PRODUCT_TYPE_PROGRAM,
+} from "../../constants";
+import { isPromo } from "../../lib/ecommerce";
+import { getProductSelectLabel } from "../../lib/util";
+import FormError from "../../components/forms/elements/FormError";
 
-import type { Company, Product } from "../../flow/ecommerceTypes"
+import type { Company, Product } from "../../flow/ecommerceTypes";
 
 type CouponFormProps = {
   onSubmit: Function,
   companies: Array<Company>,
-  products: Array<Product>
-}
+  products: Array<Product>,
+};
 
 const couponValidations = yup.object().shape({
   name: yup
@@ -33,17 +33,17 @@ const couponValidations = yup.object().shape({
     .required("Coupon name is required")
     .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
   coupon_type: yup.string().required("Coupon type is required"),
-  products:    yup.array().when("is_global", {
-    is:   false,
-    then: yup.array().min(1, "${min} or more products must be selected")
+  products: yup.array().when("is_global", {
+    is: false,
+    then: yup.array().min(1, "${min} or more products must be selected"),
   }),
-  is_global:       yup.boolean(),
+  is_global: yup.boolean(),
   activation_date: yup.date().required("Valid activation date required"),
   expiration_date: yup
     .date()
     .min(
       moment.max(yup.ref("activation_date"), moment()),
-      "Expiration date must be after today/activation date"
+      "Expiration date must be after today/activation date",
     )
     .required("Valid expiration date required"),
   discount: yup
@@ -51,89 +51,92 @@ const couponValidations = yup.object().shape({
     .required("Discount amount is required")
     .min(1, "Must be at least ${min}")
     .when("discount_type", {
-      is:   DISCOUNT_TYPE_PERCENT_OFF,
+      is: DISCOUNT_TYPE_PERCENT_OFF,
       then: yup
         .number()
-        .max(100, "The amount should be between (0 - 1) when discount type is percent-off.")
+        .max(
+          100,
+          "The amount should be between (0 - 1) when discount type is percent-off.",
+        ),
     }),
-  discount_type:   yup.string().required("Discount type is required"),
+  discount_type: yup.string().required("Discount type is required"),
   max_redemptions: yup.number().when("coupon_type", {
-    is:   COUPON_TYPE_PROMO,
+    is: COUPON_TYPE_PROMO,
     then: yup
       .number()
       .min(1, "Must be at least ${min}")
-      .required("Number required")
+      .required("Number required"),
   }),
   coupon_code: yup.string().when("coupon_type", {
-    is:   COUPON_TYPE_PROMO,
+    is: COUPON_TYPE_PROMO,
     then: yup
       .string()
       .required("Coupon code is required")
-      .matches(/^\w+$/, "Only letters, numbers, and underscores allowed")
+      .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
   }),
   num_coupon_codes: yup.number().when("coupon_type", {
-    is:   COUPON_TYPE_SINGLE_USE,
+    is: COUPON_TYPE_SINGLE_USE,
     then: yup
       .number()
       .min(1, "Must be at least ${min}")
-      .required("Number required")
+      .required("Number required"),
   }),
   max_redemptions_per_user: yup.number().when("coupon_type", {
-    is:   COUPON_TYPE_PROMO,
+    is: COUPON_TYPE_PROMO,
     then: yup
       .number()
       .required("Number required")
       .min(1, "Must be at least ${min}")
-      .max(100, "Must be at most ${max}")
+      .max(100, "Must be at most ${max}"),
   }),
   payment_transaction: yup.string().when("coupon_type", {
-    is:   COUPON_TYPE_SINGLE_USE,
-    then: yup.string().required("Payment transaction is required")
+    is: COUPON_TYPE_SINGLE_USE,
+    then: yup.string().required("Payment transaction is required"),
   }),
   payment_type: yup.string().when("coupon_type", {
-    is:   COUPON_TYPE_SINGLE_USE,
-    then: yup.string().required("Payment type is required")
-  })
-})
+    is: COUPON_TYPE_SINGLE_USE,
+    then: yup.string().required("Payment type is required"),
+  }),
+});
 
-const zeroHour = value => {
+const zeroHour = (value) => {
   if (value instanceof Date) {
-    value.setHours(0, 0, 0, 0)
+    value.setHours(0, 0, 0, 0);
   }
-}
+};
 
-const finalHour = value => {
+const finalHour = (value) => {
   if (value instanceof Date) {
-    value.setHours(23, 59, 59, 999)
+    value.setHours(23, 59, 59, 999);
   }
-}
+};
 
 export const CouponForm = ({
   onSubmit,
   companies,
-  products
+  products,
 }: CouponFormProps) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={couponValidations}
     initialValues={{
-      coupon_type:              COUPON_TYPE_SINGLE_USE,
-      product_type:             PRODUCT_TYPE_COURSERUN,
-      products:                 [],
-      num_coupon_codes:         1,
-      discount_type:            DISCOUNT_TYPE_PERCENT_OFF,
-      max_redemptions:          1000000,
+      coupon_type: COUPON_TYPE_SINGLE_USE,
+      product_type: PRODUCT_TYPE_COURSERUN,
+      products: [],
+      num_coupon_codes: 1,
+      discount_type: DISCOUNT_TYPE_PERCENT_OFF,
+      max_redemptions: 1000000,
       max_redemptions_per_user: 1,
-      discount:                 "",
-      name:                     "",
-      coupon_code:              "",
-      activation_date:          "",
-      expiration_date:          "",
-      company:                  "",
-      payment_type:             "",
-      payment_transaction:      "",
-      include_future_runs:      false,
-      is_global:                false
+      discount: "",
+      name: "",
+      coupon_code: "",
+      activation_date: "",
+      expiration_date: "",
+      company: "",
+      payment_type: "",
+      payment_transaction: "",
+      include_future_runs: false,
+      is_global: false,
     }}
     render={({
       isSubmitting,
@@ -141,7 +144,7 @@ export const CouponForm = ({
       setFieldTouched,
       errors,
       touched,
-      values
+      values,
     }) => (
       <Form className="coupon-form">
         <div className="flex">
@@ -249,9 +252,9 @@ export const CouponForm = ({
                 format="L"
                 formatDate={formatDate}
                 parseDate={parseDate}
-                onDayChange={value => {
-                  zeroHour(value)
-                  setFieldValue("activation_date", value)
+                onDayChange={(value) => {
+                  zeroHour(value);
+                  setFieldValue("activation_date", value);
                 }}
                 onDayPickerHide={() => setFieldTouched("activation_date")}
                 error={errors.activation_date}
@@ -269,9 +272,9 @@ export const CouponForm = ({
                 format="L"
                 formatDate={formatDate}
                 parseDate={parseDate}
-                onDayChange={value => {
-                  finalHour(value)
-                  setFieldValue("expiration_date", value)
+                onDayChange={(value) => {
+                  finalHour(value);
+                  setFieldValue("expiration_date", value);
                 }}
                 onDayPickerHide={() => setFieldTouched("expiration_date")}
                 error={errors.expiration_date}
@@ -299,11 +302,11 @@ export const CouponForm = ({
               name="is_global"
               checked={values.is_global}
               onChange={() => {
-                values.is_global = !values.is_global
-                setFieldValue("is_global", values.is_global)
+                values.is_global = !values.is_global;
+                setFieldValue("is_global", values.is_global);
                 if (values.is_global) {
-                  setFieldValue("products", [])
-                  setFieldTouched("products")
+                  setFieldValue("products", []);
+                  setFieldTouched("products");
                 }
               }}
               disabled={values.include_future_runs}
@@ -316,9 +319,9 @@ export const CouponForm = ({
             type="radio"
             name="product_type"
             value={PRODUCT_TYPE_PROGRAM}
-            onClick={evt => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
+            onClick={(evt) => {
+              setFieldValue("product_type", evt.target.value);
+              setFieldValue("products", []);
             }}
             checked={values.product_type === PRODUCT_TYPE_PROGRAM}
           />
@@ -327,9 +330,9 @@ export const CouponForm = ({
             type="radio"
             name="product_type"
             value={PRODUCT_TYPE_COURSERUN}
-            onClick={evt => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
+            onClick={(evt) => {
+              setFieldValue("product_type", evt.target.value);
+              setFieldValue("products", []);
             }}
             checked={values.product_type === PRODUCT_TYPE_COURSERUN}
           />
@@ -338,9 +341,9 @@ export const CouponForm = ({
             type="radio"
             name="product_type"
             value=""
-            onClick={evt => {
-              setFieldValue("product_type", evt.target.value)
-              setFieldValue("products", [])
+            onClick={(evt) => {
+              setFieldValue("product_type", evt.target.value);
+              setFieldValue("products", []);
             }}
             checked={values.product_type === ""}
           />
@@ -358,20 +361,20 @@ export const CouponForm = ({
                 : always(true),
               sortBy(
                 prop("label"),
-                (products || []).map(product => ({
+                (products || []).map((product) => ({
                   ...product,
-                  label: getProductSelectLabel(product)
-                }))
-              )
+                  label: getProductSelectLabel(product),
+                })),
+              ),
             )}
             value={values.products}
             open={true}
             multiple={true}
             includeSelectAll={false}
             includeFilter={true}
-            onChange={value => {
-              setFieldValue("products", value)
-              setFieldTouched("products")
+            onChange={(value) => {
+              setFieldValue("products", value);
+              setFieldTouched("products");
             }}
             dropdownHeight={200}
             className="product-picker"
@@ -407,10 +410,10 @@ export const CouponForm = ({
               <option value="">-----</option>
               {companies
                 ? companies.map((company, i) => (
-                  <option key={i} value={company.id}>
-                    {company.name}
-                  </option>
-                ))
+                    <option key={i} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))
                 : null}
             </Field>
           </label>
@@ -439,4 +442,4 @@ export const CouponForm = ({
       </Form>
     )}
   />
-)
+);

@@ -14,10 +14,12 @@
   .alert {
     margin-bottom: 0;
 
-    &.alert-info, &.alert-danger {
+    &.alert-info,
+    &.alert-danger {
       color: white;
 
-      a.alert-link, .close {
+      a.alert-link,
+      .close {
         color: white;
       }
 
@@ -55,7 +57,6 @@
       text-decoration: underline;
       background-color: transparent;
     }
-
   }
 
   .close-notification {
@@ -64,10 +65,10 @@
     float: right;
     margin-right: 10px;
 
-    &:after {
+    &::after {
       content: "cancel";
-      font-family: Material Icons;
+      font-family: "Material Icons";
       margin-left: 10px;
-   }
- }
+    }
+  }
 }

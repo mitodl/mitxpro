@@ -1,23 +1,23 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { connect } from "react-redux"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
 
-import { REGISTER_CONFIRM_PAGE_TITLE } from "../../../constants"
-import { routes } from "../../../lib/urls"
-import { qsEmailSelector } from "../../../lib/selectors"
+import { REGISTER_CONFIRM_PAGE_TITLE } from "../../../constants";
+import { routes } from "../../../lib/urls";
+import { qsEmailSelector } from "../../../lib/selectors";
 
 type Props = {|
-  params: { email: ?string }
-|}
+  params: { email: ?string },
+|};
 
 export class RegisterConfirmSentPage extends React.Component<Props> {
   render() {
     const {
-      params: { email }
-    } = this.props
+      params: { email },
+    } = this.props;
 
     return (
       <DocumentTitle
@@ -68,12 +68,12 @@ export class RegisterConfirmSentPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const mapStateToProps = createStructuredSelector({
-  params: createStructuredSelector({ email: qsEmailSelector })
-})
+  params: createStructuredSelector({ email: qsEmailSelector }),
+});
 
-export default connect(mapStateToProps)(RegisterConfirmSentPage)
+export default connect(mapStateToProps)(RegisterConfirmSentPage);

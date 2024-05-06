@@ -225,8 +225,8 @@ def test_create_run_enrollments_enroll_api_fail(
     with (
         pytest.raises(EdxEnrollmentCreateError)
         if not keep_failed_enrollments
-        else contextlib.suppress()
-    ):  # noqa: B022
+        else contextlib.suppress(EdxEnrollmentCreateError)
+    ):
         successful_enrollments, edx_request_success = create_run_enrollments(
             user,
             runs,
@@ -329,7 +329,7 @@ class TestDeactivateEnrollments:
     """Test cases for functions that deactivate enrollments"""
 
     @pytest.fixture
-    def patches(self, mocker):  # noqa: D102
+    def patches(self, mocker):
         edx_unenroll = mocker.patch("courses.api.unenroll_edx_course_run")
         send_unenrollment_email = mocker.patch(
             "courses.api.mail_api.send_course_run_unenrollment_email"

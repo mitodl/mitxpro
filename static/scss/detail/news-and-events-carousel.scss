@@ -26,7 +26,7 @@
   position: relative;
   margin: 0 -15px;
 
-  &:after {
+  &::after {
     display: block;
     clear: both;
     content: "";
@@ -63,7 +63,7 @@
   .slide-holder {
     background: white;
     border-radius: 5px;
-    box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 5px 5px 10px 0 rgb(0 0 0 / 10%);
     height: 100%;
     padding: 10px;
     position: relative;
@@ -83,7 +83,7 @@
       line-height: 25px;
       margin: 0 0 10px;
       min-height: 50px;
-      padding: 0 5px 5px 5px;
+      padding: 0 5px 5px;
     }
 
     p.content {
@@ -93,7 +93,7 @@
       line-height: 20px;
       margin: 0 0 30px;
       min-height: 50px;
-      padding: 5px 5px 30px 5px;
+      padding: 5px 5px 30px;
     }
   }
 
@@ -119,10 +119,10 @@
     text-transform: uppercase;
     color: white;
 
-    &:after {
+    &::after {
       content: "arrow_circle_up";
       display: inline-block;
-      font-family: Material Icons;
+      font-family: "Material Icons";
       line-height: 24px;
       margin: 0 0 0 10px;
       text-transform: none;

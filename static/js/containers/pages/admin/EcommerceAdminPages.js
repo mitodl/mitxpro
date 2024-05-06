@@ -1,10 +1,10 @@
 // @flow
-import React from "react"
-import { Redirect, Route, Switch, Link } from "react-router-dom"
+import React from "react";
+import { Redirect, Route, Switch, Link } from "react-router-dom";
 
-import { routes } from "../../../lib/urls"
+import { routes } from "../../../lib/urls";
 
-import CouponCreationPage from "./CreateCouponPage"
+import CouponCreationPage from "./CreateCouponPage";
 
 const EcommerceAdminIndexPage = () => (
   <div className="ecommerce-admin-body">
@@ -15,7 +15,7 @@ const EcommerceAdminIndexPage = () => (
       </li>
     </ul>
   </div>
-)
+);
 
 const EcommerceAdminPages = () => (
   <React.Fragment>
@@ -33,6 +33,6 @@ const EcommerceAdminPages = () => (
       <Redirect to={routes.ecommerceAdmin.index} />
     </Switch>
   </React.Fragment>
-)
+);
 
-export default EcommerceAdminPages
+export default EcommerceAdminPages;

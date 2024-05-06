@@ -2,15 +2,20 @@
 $label-color: #8a8b8c;
 
 .receipt-wrapper {
-
   padding: 20px 15px;
   margin: 0 auto;
   max-width: 1018px;
-  font: 500 18px/23px 'Rajdhani', Times New Roman, serif;
+  font:
+    500 18px/23px Rajdhani,
+    "Times New Roman",
+    serif;
   color: black;
 
-  @media only screen and (max-width: 992px) {
-    font: 500 16px/21px 'Rajdhani', Times New Roman, serif;
+  @media only screen and (width <= 992px) {
+    font:
+      500 16px/21px Rajdhani,
+      "Times New Roman",
+      serif;
   }
 
   * {
@@ -35,7 +40,7 @@ $label-color: #8a8b8c;
       width: 160px;
       font-weight: 600;
 
-      @media only screen and (max-width: 767px) {
+      @media only screen and (width <= 767px) {
         width: 120px;
       }
     }
@@ -49,12 +54,18 @@ $label-color: #8a8b8c;
   }
 
   h2 {
-    font: 600 40px/51px 'Rajdhani', Times New Roman, serif;
+    font:
+      600 40px/51px Rajdhani,
+      "Times New Roman",
+      serif;
     margin: 0 0 30px;
     color: black;
 
-    @media only screen and (max-width: 767px) {
-      font: 600 30px/41px 'Rajdhani', Times New Roman, serif;
+    @media only screen and (width <= 767px) {
+      font:
+        600 30px/41px Rajdhani,
+        "Times New Roman",
+        serif;
       margin: 0 0 10px;
     }
   }
@@ -68,7 +79,7 @@ $label-color: #8a8b8c;
   &.p-b-80 {
     padding-bottom: 65px;
 
-    @media only screen and (max-width: 767px) {
+    @media only screen and (width <= 767px) {
       padding-bottom: 0;
     }
   }
@@ -84,7 +95,7 @@ $label-color: #8a8b8c;
     width: 50%;
     padding: 0 15px;
 
-    @media only screen and (max-width: 767px) {
+    @media only screen and (width <= 767px) {
       float: none;
       width: 100%;
       padding-bottom: 40px;
@@ -93,22 +104,28 @@ $label-color: #8a8b8c;
     &.p-t-50 {
       padding-top: 50px;
 
-      @media only screen and (max-width: 767px) {
+      @media only screen and (width <= 767px) {
         padding-top: 0;
       }
     }
   }
 
   h3 {
-    font: 600 20px/26px 'Rajdhani', Times New Roman, serif;
+    font:
+      600 20px/26px Rajdhani,
+      "Times New Roman",
+      serif;
     margin: 0 -15px 20px;
     border: none;
     padding: 5px 15px;
     color: black;
     background: $very-light-gray;
 
-    @media only screen and (max-width: 992px) {
-      font: 600 18px/24px 'Rajdhani', Times New Roman, serif;
+    @media only screen and (width <= 992px) {
+      font:
+        600 18px/24px Rajdhani,
+        "Times New Roman",
+        serif;
     }
   }
 }
@@ -136,7 +153,6 @@ $label-color: #8a8b8c;
   }
 }
 
-
 .receipt-mit-info {
   max-width: 226px;
   font-size: 16px;
@@ -153,7 +169,10 @@ $label-color: #8a8b8c;
   padding: 0 0 15px;
 
   h3 {
-    font: 600 20px/26px 'Rajdhani', Times New Roman, serif;
+    font:
+      600 20px/26px Rajdhani,
+      "Times New Roman",
+      serif;
     margin: 0;
     padding: 5px 15px;
     color: black;
@@ -161,7 +180,7 @@ $label-color: #8a8b8c;
     display: none;
     border: none;
 
-    @media only screen and (max-width: 767px) {
+    @media only screen and (width <= 767px) {
       display: block;
     }
   }
@@ -171,8 +190,7 @@ $label-color: #8a8b8c;
     border-spacing: 0;
 
     thead {
-
-      @media only screen and (max-width: 767px) {
+      @media only screen and (width <= 767px) {
         display: none;
       }
     }
@@ -183,10 +201,16 @@ $label-color: #8a8b8c;
       color: black;
       background: $very-light-gray;
       white-space: nowrap;
-      font: 600 20px/26px 'Rajdhani', Times New Roman, serif;
+      font:
+        600 20px/26px Rajdhani,
+        "Times New Roman",
+        serif;
 
-      @media only screen and (max-width: 992px) {
-        font: 600 18px/24px 'Rajdhani', Times New Roman, serif;
+      @media only screen and (width <= 992px) {
+        font:
+          600 18px/24px Rajdhani,
+          "Times New Roman",
+          serif;
       }
     }
 
@@ -194,7 +218,7 @@ $label-color: #8a8b8c;
       padding: 20px 15px 0;
       vertical-align: top;
 
-      @media only screen and (max-width: 767px) {
+      @media only screen and (width <= 767px) {
         display: block;
         width: 100%;
       }
@@ -204,11 +228,14 @@ $label-color: #8a8b8c;
         color: black;
         white-space: nowrap;
         padding: 0 10px 0 0;
-        font: 600 18px/24px 'Rajdhani', Times New Roman, serif;
+        font:
+          600 18px/24px Rajdhani,
+          "Times New Roman",
+          serif;
         float: left;
         width: 135px;
 
-        @media only screen and (max-width: 767px) {
+        @media only screen and (width <= 767px) {
           display: block;
         }
       }
@@ -236,6 +263,9 @@ $label-color: #8a8b8c;
 
   .receipt-wrapper {
     padding: 0 15px;
-    font: 500 16px/21px 'Rajdhani', Times New Roman, serif;
+    font:
+      500 16px/21px Rajdhani,
+      "Times New Roman",
+      serif;
   }
 }

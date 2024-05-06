@@ -123,13 +123,7 @@ def create_run_enrollments(
         RequestsConnectionError,
         OpenEdXOAuth2Error,
     ):
-        error_message = (
-            "edX enrollment failure for user: {}, runs: {} (order: {})".format(
-                user,
-                [run.courseware_id for run in runs],
-                order.id if order else None,
-            )
-        )
+        error_message = f"edX enrollment failure for user: {user}, runs: {[run.courseware_id for run in runs]} (order: {order.id if order else None})"
 
         edx_request_success = False
         if not keep_failed_enrollments:
@@ -315,10 +309,8 @@ def defer_enrollment(
     )
     if not force and not from_enrollment.active:
         raise ValidationError(
-            "Cannot defer from inactive enrollment (id: {}, run: {}, user: {}). "  # noqa: EM103
-            "Set force=True to defer anyway.".format(
-                from_enrollment.id, from_enrollment.run.courseware_id, user.email
-            )
+            f"Cannot defer from inactive enrollment (id: {from_enrollment.id}, run: {from_enrollment.run.courseware_id}, user: {user.email}). "  # noqa: EM102
+            "Set force=True to defer anyway."
         )
     to_run = CourseRun.objects.get(courseware_id=to_courseware_id)
     if from_enrollment.run == to_run:
@@ -333,10 +325,8 @@ def defer_enrollment(
         )
     if not force and from_enrollment.run.course != to_run.course:
         raise ValidationError(
-            "Cannot defer to a course run of a different course ('{}' -> '{}'). "  # noqa: EM103
-            "Set force=True to defer anyway.".format(
-                from_enrollment.run.course.title, to_run.course.title
-            )
+            f"Cannot defer to a course run of a different course ('{from_enrollment.run.course.title}' -> '{to_run.course.title}'). "  # noqa: EM102
+            "Set force=True to defer anyway."
         )
     try:
         to_enrollments, _ = create_run_enrollments(

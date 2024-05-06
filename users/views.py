@@ -43,7 +43,7 @@ class CurrentUserRetrieveUpdateViewSet(
         # NOTE: this may be a logged in or anonymous user
         return self.request.user
 
-    def update(self, request, *args, **kwargs):  # noqa: D102
+    def update(self, request, *args, **kwargs):
         with transaction.atomic():
             user_name = request.user.name
             update_result = super().update(request, *args, **kwargs)
@@ -59,7 +59,7 @@ class ChangeEmailRequestViewSet(
 
     lookup_field = "code"
 
-    def get_permissions(self):  # noqa: D102
+    def get_permissions(self):
         permission_classes = []
         if self.action == "create":
             permission_classes = [IsAuthenticated]
@@ -72,7 +72,7 @@ class ChangeEmailRequestViewSet(
             expires_on__gt=now_in_utc(), confirmed=False
         )
 
-    def get_serializer_class(self):  # noqa: D102
+    def get_serializer_class(self):
         if self.action == "create":  # noqa: RET503
             return ChangeEmailRequestCreateSerializer
         elif self.action == "partial_update":

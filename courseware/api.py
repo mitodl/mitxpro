@@ -62,7 +62,7 @@ OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
 ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"  # noqa: S105
 AUTH_TOKEN_HEADER_NAME = "Authorization"  # noqa: S105
-API_KEY_HEADER_NAME = "X-EdX-Api-Key"
+API_KEY_HEADER_NAME = "X-EdX-Api-Key"  # pragma: allowlist secret
 
 
 @dataclass(frozen=True)
@@ -128,9 +128,7 @@ def get_existing_openedx_user(user):
     req_session = requests.Session()
     req_session.headers.update(
         {
-            AUTH_TOKEN_HEADER_NAME: "Bearer {}".format(
-                settings.OPENEDX_SERVICE_WORKER_API_TOKEN
-            ),
+            AUTH_TOKEN_HEADER_NAME: f"Bearer {settings.OPENEDX_SERVICE_WORKER_API_TOKEN}",
             API_KEY_HEADER_NAME: settings.OPENEDX_API_KEY,
         }
     )

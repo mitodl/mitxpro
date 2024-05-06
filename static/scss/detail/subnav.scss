@@ -3,7 +3,7 @@
   background: $gray-bg;
   display: flex;
   justify-content: center;
-  box-shadow: 0 0 13px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 13px rgb(0 0 0 / 50%);
 
   .navbar-nav > li > a {
     color: black !important;
@@ -34,7 +34,7 @@
       display: block;
     }
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       width: 100%;
       display: flex;
       justify-content: center;
@@ -55,6 +55,7 @@
 
   .sub-nav-enroll-button-block {
     position: relative;
+
     @include media-breakpoint-up(md) {
       order: 2;
     }
@@ -166,6 +167,7 @@
 
   .sub-nav-signup-button-block {
     position: relative;
+
     @include media-breakpoint-up(md) {
       order: 3;
     }
@@ -180,7 +182,6 @@
       font-weight: 600;
       font-size: 16px;
       margin-left: 20px;
-
       background: $white;
       border: 1px solid $primary;
       white-space: nowrap;
@@ -188,7 +189,6 @@
       &:hover {
         text-decoration: none;
         background: $close-hover-background;
-
       }
     }
   }
@@ -215,7 +215,7 @@ a.active-block {
     display: none;
   }
 
-  &:after {
+  &::after {
     display: inline-block;
     vertical-align: middle;
     content: "";
@@ -229,7 +229,7 @@ a.active-block {
   }
 
   &.collapsed {
-    &:after {
+    &::after {
       transform: rotate(180deg);
     }
   }

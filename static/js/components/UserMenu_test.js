@@ -1,14 +1,14 @@
 // @flow
-import React from "react"
-import { assert } from "chai"
-import { shallow } from "enzyme"
+import React from "react";
+import { assert } from "chai";
+import { shallow } from "enzyme";
 
-import UserMenu from "./UserMenu"
-import { routes } from "../lib/urls"
-import { makeUser } from "../factories/user"
+import UserMenu from "./UserMenu";
+import { routes } from "../lib/urls";
+import { makeUser } from "../factories/user";
 
 describe("UserMenu component", () => {
-  const user = makeUser()
+  const user = makeUser();
 
   it("has a link to profile", () => {
     assert.equal(
@@ -16,9 +16,9 @@ describe("UserMenu component", () => {
         .find("MixedLink")
         .at(0)
         .prop("dest"),
-      routes.profile.view
-    )
-  })
+      routes.profile.view,
+    );
+  });
 
   it("has a link to dashboard", () => {
     assert.equal(
@@ -26,9 +26,9 @@ describe("UserMenu component", () => {
         .find("MixedLink")
         .at(1)
         .prop("dest"),
-      routes.dashboard
-    )
-  })
+      routes.dashboard,
+    );
+  });
 
   it("has a link to logout", () => {
     assert.equal(
@@ -36,7 +36,7 @@ describe("UserMenu component", () => {
         .find("a")
         .at(0)
         .prop("href"),
-      routes.logout
-    )
-  })
-})
+      routes.logout,
+    );
+  });
+});

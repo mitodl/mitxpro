@@ -36,10 +36,9 @@ def test_order_audit(has_user, has_lines):
     Order.save_and_log() should save the order's information to an audit model.
     """
     coupon_redemption = CouponRedemptionFactory.create()
-    assert str(
-        coupon_redemption
-    ) == "CouponRedemption for order {}, coupon version {}".format(
-        str(coupon_redemption.order), str(coupon_redemption.coupon_version)
+    assert (
+        str(coupon_redemption)
+        == f"CouponRedemption for order {coupon_redemption.order!s}, coupon version {coupon_redemption.coupon_version!s}"
     )
     order = coupon_redemption.order
     contents = [CourseRunFactory.create(), ProgramFactory.create()]
@@ -131,8 +130,9 @@ def test_latest_version():
     product = ProductFactory.create()
     versions = ProductVersionFactory.create_batch(versions_to_create, product=product)
     assert str(product) == f"Product for {str(product.content_object)}"  # noqa: RUF010
-    assert str(versions[0]) == "ProductVersion for {}, ${}".format(
-        versions[0].description, versions[0].price
+    assert (
+        str(versions[0])
+        == f"ProductVersion for {versions[0].description}, ${versions[0].price}"
     )
     # Latest version should be the most recently created
     assert product.latest_version == versions[versions_to_create - 1]

@@ -1,15 +1,22 @@
 {% load image_version_url %}
-<div id="learningTechniques" class="container learning-techniques-block section-spacing">
+<div
+  id="learningTechniques"
+  class="container learning-techniques-block section-spacing"
+>
   <h1>{{ page.title }}</h1>
   <ul class="learning-techniques-list">
     {% for technique in page.technique_items %}
-      <li>
-        <div class="img-holder">
-          <img src="{% image_version_url technique.value.image "height-110|format-png" %}" alt="Learning technique" loading="lazy"/>
-        </div>
-        <h3>{{ technique.value.heading }}</h3>
-        <h4>{{ technique.value.sub_heading }}</h4>
-      </li>
+    <li>
+      <div class="img-holder">
+        <img
+          src="{% image_version_url technique.value.image "height-110|format-png" %}"
+          alt="Learning technique"
+          loading="lazy"
+        />
+      </div>
+      <h3>{{ technique.value.heading }}</h3>
+      <h4>{{ technique.value.sub_heading }}</h4>
+    </li>
     {% endfor %}
   </ul>
 </div>

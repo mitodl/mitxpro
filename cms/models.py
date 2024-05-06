@@ -131,7 +131,7 @@ class CourseObjectIndexPage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
         """Fetch a child page by a Program/Course readable_id value"""
         raise NotImplementedError
 
-    def route(self, request, path_components):  # noqa: D102
+    def route(self, request, path_components):
         if path_components:
             # request is for a child of this page
             child_readable_id = path_components[0]
@@ -386,7 +386,7 @@ class WebinarPage(MetadataPageMixin, Page):
             if errors:
                 raise ValidationError(errors)
 
-    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002
         course = CoursePage.objects.filter(course=self.course).first()
         program = ProgramPage.objects.filter(program=self.program).first()
         courseware = program or course
@@ -848,7 +848,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         """
         return self._get_child_page_of_type(ImageCarouselPage)
 
-    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002
         return {
             **super().get_context(request),
             **get_base_context(request),
@@ -995,7 +995,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     # Matches the standard page path that Wagtail returns for this page type.
     slugged_page_path_pattern = re.compile(r"(^.*/)([^/]+)(/?$)")
 
-    def get_url_parts(self, request=None):  # noqa: D102
+    def get_url_parts(self, request=None):
         url_parts = super().get_url_parts(request=request)
         if not url_parts:
             return None
@@ -1013,7 +1013,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             ),
         )
 
-    def get_context(self, request, *args, **kwargs):  # noqa: D102
+    def get_context(self, request, *args, **kwargs):
         return {
             **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
@@ -1232,7 +1232,7 @@ class ProgramPage(ProgramProductPage):
         """
         return self
 
-    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002
         # Hits a circular import at the top of the module
         from courses.models import ProgramEnrollment
 
@@ -1412,7 +1412,7 @@ class CoursePage(CourseProductPage):
 
     template = "product_page.html"
 
-    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002
         # Hits a circular import at the top of the module
         from courses.models import CourseRunEnrollment
 
@@ -1480,14 +1480,14 @@ class CourseProgramChildPage(DisableSitemapURLMixin, Page):
     promote_panels = []
 
     @classmethod
-    def can_create_at(cls, parent):  # noqa: D102
+    def can_create_at(cls, parent):
         # You can only create one of these page under course / program.
         return (
             super(CourseProgramChildPage, cls).can_create_at(parent)  # noqa: UP008
             and parent.get_children().type(cls).count() == 0
         )
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
         if not self.title:
             self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
@@ -1586,7 +1586,7 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
     class Meta:
         verbose_name = "News and Events"
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
             self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
@@ -1950,7 +1950,7 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
 
     content_panels = [InlinePanel("faqs", label="Frequently Asked Questions")]
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
         self.title = "Frequently Asked Questions"
         self.slug = slugify(f"{self.get_parent().id}-{self.title}")
@@ -1993,7 +1993,7 @@ class ResourcePage(Page):
         FieldPanel("content"),
     ]
 
-    def get_context(self, request, *args, **kwargs):  # noqa: ARG002, D102
+    def get_context(self, request, *args, **kwargs):  # noqa: ARG002
         context = super().get_context(request)
         context.update(**get_base_context(request))
 
@@ -2049,7 +2049,7 @@ class SignatoryPage(DisableSitemapURLMixin, Page):
         FieldPanel("signature_image"),
     ]
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
             self.title = self.__class__._meta.verbose_name.title() + "-" + self.name  # noqa: SLF001
@@ -2165,7 +2165,7 @@ class CertificatePage(CourseProgramChildPage):
         self.certificate = None
         super().__init__(*args, **kwargs)
 
-    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: D102, FBT002
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         self.title = (
             self.__class__._meta.verbose_name.title()  # noqa: SLF001
@@ -2196,7 +2196,7 @@ class CertificatePage(CourseProgramChildPage):
         """
         return self.get_parent().specific
 
-    def get_context(self, request, *args, **kwargs):  # noqa: D102
+    def get_context(self, request, *args, **kwargs):
         preview_context = {}
         context = {}
 
@@ -2251,9 +2251,7 @@ class CertificatePage(CourseProgramChildPage):
             ),
             "share_image_width": "1665",
             "share_image_height": "1291",
-            "share_text": "I just earned a certificate in {} from {}".format(
-                self.product_name, settings.SITE_NAME
-            ),
+            "share_text": f"I just earned a certificate in {self.product_name} from {settings.SITE_NAME}",
             **super().get_context(request, *args, **kwargs),
             **get_base_context(request),
             **preview_context,

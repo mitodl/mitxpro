@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
     help = "Deletes seeded data based on raw seed data file or specific properties"
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--type",
             type=str,

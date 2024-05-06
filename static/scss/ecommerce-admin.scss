@@ -24,12 +24,12 @@
     }
   }
 
-  input[type='checkbox']   {
+  input[type="checkbox"] {
     display: unset;
   }
 
   .block {
-
+    /* stylelint-disable-next-line selector-class-pattern */
     .DayPickerInput {
       display: block;
     }
@@ -64,13 +64,14 @@
     max-width: 992px;
   }
 
+  /* stylelint-disable-next-line selector-class-pattern */
   .picky__dropdown {
     z-index: unset;
   }
 
   .dangerous {
     background-color: #ef5350;
-    color: #ffffff;
+    color: #fff;
     padding: 15px;
   }
 }

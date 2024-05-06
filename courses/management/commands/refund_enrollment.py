@@ -16,7 +16,7 @@ class Command(EnrollmentChangeCommand):
 
     help = "Sets a user's enrollment to 'refunded' and deactivates it"
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--user",
             type=str,
@@ -82,9 +82,7 @@ class Command(EnrollmentChangeCommand):
             if enrollment.order:
                 enrollment.order.status = Order.REFUNDED
                 enrollment.order.save_and_log(None)
-                success_msg += "\nOrder status set to '{}' (order id: {})".format(
-                    enrollment.order.status, enrollment.order.id
-                )
+                success_msg += f"\nOrder status set to '{enrollment.order.status}' (order id: {enrollment.order.id})"
             else:
                 self.stdout.write(
                     self.style.WARNING(

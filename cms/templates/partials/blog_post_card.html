@@ -1,16 +1,19 @@
 <div class="post slide" onclick="window.open('{{ post.link }}', '_blank');">
   <div class="card-top">
-    <img src={{ post.banner_image }}>
+    <img src="{{ post.banner_image }}" />
     <div class="post-tags">
       {% for category in post.categories %}
-        <span class="tag">{{ category }}</span>
+      <span class="tag">{{ category }}</span>
       {% endfor %}
     </div>
   </div>
-  <a class="title" target="_blank" href={{ post.link }}>{{ post.title }}</a>
+  <a class="title" target="_blank" href="{{ post.link }}">{{ post.title }}</a>
   <p class="description">{{ post.description }}</p>
   <div class="card-bottom">
-    <div class="author">BY: MIT XPRO | {{ post.published_date }}</div>
-    <a class="read-more" target="_blank" href={{ post.link }}>READ MORE</a>
+    <div class="author">
+      BY: MIT XPRO |
+      {{ post.published_date }}
+    </div>
+    <a class="read-more" target="_blank" href="{{ post.link }}">READ MORE</a>
   </div>
 </div>

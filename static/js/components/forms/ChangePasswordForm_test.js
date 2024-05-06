@@ -1,41 +1,41 @@
 // @flow
-import React from "react"
-import sinon from "sinon"
-import { assert } from "chai"
-import { shallow } from "enzyme"
+import React from "react";
+import sinon from "sinon";
+import { assert } from "chai";
+import { shallow } from "enzyme";
 
-import ChangePasswordForm from "./ChangePasswordForm"
+import ChangePasswordForm from "./ChangePasswordForm";
 
-import { findFormikFieldByName } from "../../lib/test_utils"
+import { findFormikFieldByName } from "../../lib/test_utils";
 
-import { makeUser } from "../../factories/user"
+import { makeUser } from "../../factories/user";
 
 describe("ChangePasswordForm", () => {
-  let sandbox, onSubmitStub
+  let sandbox, onSubmitStub;
 
-  const user = makeUser()
+  const user = makeUser();
 
   const renderForm = () =>
-    shallow(<ChangePasswordForm onSubmit={onSubmitStub} user={user} />)
+    shallow(<ChangePasswordForm onSubmit={onSubmitStub} user={user} />);
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
-    onSubmitStub = sandbox.stub()
-  })
+    sandbox = sinon.createSandbox();
+    onSubmitStub = sandbox.stub();
+  });
 
   it("passes onSubmit to Formik", () => {
-    const wrapper = renderForm()
+    const wrapper = renderForm();
 
-    assert.equal(wrapper.find("Formik").props().onSubmit, onSubmitStub)
-  })
+    assert.equal(wrapper.find("Formik").props().onSubmit, onSubmitStub);
+  });
 
   it("renders the form", () => {
-    const wrapper = renderForm()
+    const wrapper = renderForm();
 
-    const form = wrapper.find("Formik").dive()
-    assert.ok(findFormikFieldByName(form, "oldPassword").exists())
-    assert.ok(findFormikFieldByName(form, "newPassword").exists())
-    assert.ok(findFormikFieldByName(form, "confirmPassword").exists())
-    assert.ok(form.find("button[type='submit']").exists())
-  })
-})
+    const form = wrapper.find("Formik").dive();
+    assert.ok(findFormikFieldByName(form, "oldPassword").exists());
+    assert.ok(findFormikFieldByName(form, "newPassword").exists());
+    assert.ok(findFormikFieldByName(form, "confirmPassword").exists());
+    assert.ok(form.find("button[type='submit']").exists());
+  });
+});

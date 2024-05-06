@@ -6,7 +6,7 @@ from django.contrib import admin
 class AuditableModelAdmin(admin.ModelAdmin):
     """A ModelAdmin which will save and log"""
 
-    def save_model(self, request, obj, form, change):  # noqa: ARG002, D102
+    def save_model(self, request, obj, form, change):  # noqa: ARG002
         obj.save_and_log(request.user)
 
 
@@ -43,7 +43,7 @@ class TimestampedModelAdmin(admin.ModelAdmin):
             field for field in field_names_to_add if field not in existing_field_names
         )
 
-    def get_list_display(self, request):  # noqa: D102
+    def get_list_display(self, request):
         list_display = tuple(super().get_list_display(request) or ())
         added_fields = ()
         if self.include_timestamps_in_list:
@@ -52,12 +52,12 @@ class TimestampedModelAdmin(admin.ModelAdmin):
             added_fields += ("created_on",)
         return self._join_and_dedupe(list_display, added_fields)
 
-    def get_readonly_fields(self, request, obj=None):  # noqa: D102
+    def get_readonly_fields(self, request, obj=None):
         readonly_fields = tuple(super().get_readonly_fields(request, obj=obj) or ())
         if obj is None:
             return readonly_fields
         return self._join_and_dedupe(readonly_fields, ("created_on", "updated_on"))
 
-    def get_exclude(self, request, obj=None):  # noqa: D102
+    def get_exclude(self, request, obj=None):
         exclude = tuple(super().get_exclude(request, obj=obj) or ())
         return self._join_and_dedupe(exclude, ("created_on", "updated_on"))

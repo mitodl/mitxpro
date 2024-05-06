@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import migrations
 
 
-def create_default_robots_txt(apps, schema_editor):  # noqa: D103
+def create_default_robots_txt(apps, schema_editor):
     Site = apps.get_model("sites", "Site")
     Url = apps.get_model("robots", "Url")
     Rule = apps.get_model("robots", "Rule")

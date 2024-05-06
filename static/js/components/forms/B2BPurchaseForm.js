@@ -1,22 +1,22 @@
 // @flow
-import React from "react"
-import * as yup from "yup"
-import { ErrorMessage, Field, Formik, Form } from "formik"
-import Decimal from "decimal.js-light"
-import { curry } from "ramda"
-import { EmailInput } from "./elements/inputs"
-import { emailFieldValidation } from "../../lib/validation"
+import React from "react";
+import * as yup from "yup";
+import { ErrorMessage, Field, Formik, Form } from "formik";
+import Decimal from "decimal.js-light";
+import { curry } from "ramda";
+import { EmailInput } from "./elements/inputs";
+import { emailFieldValidation } from "../../lib/validation";
 
-import B2BPurchaseSummary from "../B2BPurchaseSummary"
-import ProductSelector from "../input/ProductSelector"
-import B2BCheckoutExplanation from "../B2BCheckoutExplanation"
+import B2BPurchaseSummary from "../B2BPurchaseSummary";
+import ProductSelector from "../input/ProductSelector";
+import B2BCheckoutExplanation from "../B2BCheckoutExplanation";
 
 import type {
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  Product
-} from "../../flow/ecommerceTypes"
-import { findProductById } from "../../lib/ecommerce"
+  Product,
+} from "../../flow/ecommerceTypes";
+import { findProductById } from "../../lib/ecommerce";
 
 type Props = {
   products: Array<Product>,
@@ -28,45 +28,45 @@ type Props = {
   contractNumber: ?string,
   discountCode: ?string,
   productId: ?string,
-  seats: ?string
-}
+  seats: ?string,
+};
 
 export const emailValidation = yup.object().shape({
-  email: emailFieldValidation
-})
+  email: emailFieldValidation,
+});
 
-const errorMessageRenderer = msg => <span className="error">{msg}</span>
+const errorMessageRenderer = (msg) => <span className="error">{msg}</span>;
 
 export const validate = (values: Object) => {
-  const errors = {}
+  const errors = {};
 
-  const numSeats = parseInt(values.num_seats)
+  const numSeats = parseInt(values.num_seats);
   if (isNaN(numSeats) || numSeats <= 0) {
-    errors.num_seats = "Number of Seats is required"
+    errors.num_seats = "Number of Seats is required";
   }
 
   if (!values.product.productId) {
-    errors.product = "No product selected"
+    errors.product = "No product selected";
   }
 
-  return errors
-}
+  return errors;
+};
 
 class B2BPurchaseForm extends React.Component<Props> {
-  formikRef = React.createRef<Formik>()
+  formikRef = React.createRef<Formik>();
 
   componentDidMount() {
     // on page load apply the coupon code provided in the URL query paramater
-    const formikRef = this.formikRef
+    const formikRef = this.formikRef;
     if (formikRef) {
-      const formikRefObj = formikRef.current
+      const formikRefObj = formikRef.current;
       if (formikRefObj && formikRefObj.state.values.coupon) {
         this.applyCoupon(
           formikRefObj.state.values,
           formikRefObj.setFieldError,
           formikRefObj.setFieldTouched,
-          null
-        )
+          null,
+        );
       }
     }
   }
@@ -76,35 +76,35 @@ class B2BPurchaseForm extends React.Component<Props> {
       values: Object,
       setFieldError: Function,
       setFieldTouched: Function,
-      event: Event
+      event: Event,
     ) => {
-      const { products, clearCouponStatus, fetchCouponStatus } = this.props
+      const { products, clearCouponStatus, fetchCouponStatus } = this.props;
 
       if (event) {
-        event.preventDefault()
+        event.preventDefault();
       }
 
       if (!values.coupon) {
-        clearCouponStatus()
-        return
+        clearCouponStatus();
+        return;
       }
 
       if (!values.product.productId) {
-        setFieldError("coupon", "No product selected")
-        setFieldTouched("coupon", true, false)
-        return
+        setFieldError("coupon", "No product selected");
+        setFieldTouched("coupon", true, false);
+        return;
       }
 
       const response = await fetchCouponStatus({
         product_id: values.product.productId,
-        code:       values.coupon.trim()
-      })
+        code: values.coupon.trim(),
+      });
       if (response && response.status !== 200) {
-        setFieldError("coupon", "Invalid coupon code")
-        setFieldTouched("coupon", true, false)
+        setFieldError("coupon", "Invalid coupon code");
+        setFieldTouched("coupon", true, false);
       }
-    }
-  )
+    },
+  );
 
   renderForm = ({ values, setFieldError, setFieldTouched }: Object) => {
     const {
@@ -112,38 +112,38 @@ class B2BPurchaseForm extends React.Component<Props> {
       requestPending,
       couponStatus,
       contractNumber,
-      clearCouponStatus
-    } = this.props
+      clearCouponStatus,
+    } = this.props;
 
     let itemPrice = new Decimal(0),
       totalPrice = new Decimal(0),
-      discount
+      discount;
 
-    const product = findProductById(products, values.product.productId)
-    const productVersion = product ? product.latest_version : null
-    let numSeats = parseInt(values.num_seats)
+    const product = findProductById(products, values.product.productId);
+    const productVersion = product ? product.latest_version : null;
+    let numSeats = parseInt(values.num_seats);
 
     if (productVersion && productVersion.price !== null) {
-      itemPrice = new Decimal(productVersion.price)
+      itemPrice = new Decimal(productVersion.price);
       if (!isNaN(numSeats)) {
-        totalPrice = itemPrice.times(numSeats)
+        totalPrice = itemPrice.times(numSeats);
         // $FlowFixMe: product.id is not undefined
         if (couponStatus && couponStatus.product_id === product.id) {
           discount = new Decimal(couponStatus.discount_percent)
             .times(itemPrice)
-            .times(numSeats)
-          totalPrice = totalPrice.minus(discount)
+            .times(numSeats);
+          totalPrice = totalPrice.minus(discount);
         } else if (
           couponStatus &&
           product &&
           couponStatus.product_id !== product.id
         ) {
-          values.coupon = this.props.discountCode || ""
-          clearCouponStatus()
+          values.coupon = this.props.discountCode || "";
+          clearCouponStatus();
         }
       }
     }
-    numSeats = isNaN(numSeats) ? 0 : numSeats
+    numSeats = isNaN(numSeats) ? 0 : numSeats;
 
     return (
       <Form className="b2b-purchase-form container">
@@ -179,7 +179,12 @@ class B2BPurchaseForm extends React.Component<Props> {
 
             <label htmlFor="email">
               <span className="description">*Your email address:</span>
-              <Field type="email" name="email" autoComplete="email" component={EmailInput} />
+              <Field
+                type="email"
+                name="email"
+                autoComplete="email"
+                component={EmailInput}
+              />
               <span className="explanation">
                 * We will email the enrollment codes to this address.
               </span>
@@ -211,7 +216,7 @@ class B2BPurchaseForm extends React.Component<Props> {
                   onClick={this.applyCoupon(
                     values,
                     setFieldError,
-                    setFieldTouched
+                    setFieldTouched,
                   )}
                 >
                   Apply
@@ -246,31 +251,31 @@ class B2BPurchaseForm extends React.Component<Props> {
           </div>
         </div>
       </Form>
-    )
-  }
+    );
+  };
 
   render() {
-    const { onSubmit } = this.props
+    const { onSubmit } = this.props;
     return (
       <Formik
         onSubmit={onSubmit}
         initialValues={{
           num_seats: this.props.seats || 1,
-          email:     "",
-          product:   {
-            productId:    this.props.productId || "",
-            programRunId: null
+          email: "",
+          product: {
+            productId: this.props.productId || "",
+            programRunId: null,
           },
-          coupon:          this.props.discountCode || "",
-          contract_number: this.props.contractNumber || ""
+          coupon: this.props.discountCode || "",
+          contract_number: this.props.contractNumber || "",
         }}
         validationSchema={emailValidation}
         validate={validate}
         render={this.renderForm}
         ref={this.formikRef}
       />
-    )
+    );
   }
 }
 
-export default B2BPurchaseForm
+export default B2BPurchaseForm;

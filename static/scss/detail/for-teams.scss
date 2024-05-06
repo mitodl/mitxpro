@@ -2,7 +2,8 @@
 .for-teams-block {
   width: 100%;
   padding: 100px 0 50px;
-  background: white url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  background: white url("#{$static-path}/images/transparent-pixels-bg.png")
+    repeat-x 0 100%;
   min-height: 400px;
   overflow: hidden;
   position: relative;
@@ -30,11 +31,12 @@
 
   .img-holder {
     padding: 40px 0 0;
+
     @include media-breakpoint-up(lg) {
       position: absolute;
       right: 0;
       top: 100px;
-      width: calc(41.66667% - 40px);
+      width: calc(41.6667% - 40px);
       padding: 0;
     }
 
@@ -42,6 +44,7 @@
       display: block;
       width: 100%;
       height: auto;
+
       @include media-breakpoint-up(lg) {
         height: 505px;
         object-fit: cover;
@@ -55,6 +58,7 @@
     color: $primary;
     font-weight: 600;
     margin: 0 0 10px;
+
     @include media-breakpoint-up(lg) {
       margin: 0 0 40px;
     }
@@ -74,7 +78,7 @@
       line-height: 28px;
       padding: 20px 0;
       font-weight: 500;
-      border-top: 1px solid rgba(white, 0.2);
+      border-top: 1px solid rgba(white, 0.2); /* stylelint-disable-line */
 
       &:first-child {
         border: none;
@@ -85,7 +89,8 @@
 
 // Dark theme
 .for-teams-block.dark-theme {
-  background: $darker-grey-bg url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
+  background: $darker-grey-bg
+    url("#{$static-path}/images/transparent-pixels-bg.png") repeat-x 0 100%;
   color: white;
 
   h1 {

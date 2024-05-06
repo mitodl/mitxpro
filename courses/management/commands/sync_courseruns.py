@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     help = "Sync dates and title for all or a specific course run from edX."
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--run",
             type=str,

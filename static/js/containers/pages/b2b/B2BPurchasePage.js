@@ -1,29 +1,29 @@
 // @flow
-import React from "react"
-import { connect } from "react-redux"
-import { compose } from "redux"
-import { pathOr } from "ramda"
-import { createStructuredSelector } from "reselect"
+import React from "react";
+import { connect } from "react-redux";
+import { compose } from "redux";
+import { pathOr } from "ramda";
+import { createStructuredSelector } from "reselect";
 
 import {
   connectRequest,
   mutateAsync,
   requestAsync,
-  updateEntities
-} from "redux-query"
+  updateEntities,
+} from "redux-query";
 
-import B2BPurchaseForm from "../../../components/forms/B2BPurchaseForm"
+import B2BPurchaseForm from "../../../components/forms/B2BPurchaseForm";
 
-import { createCyberSourceForm } from "../../../lib/form"
-import queries from "../../../lib/queries"
+import { createCyberSourceForm } from "../../../lib/form";
+import queries from "../../../lib/queries";
 
 import type {
   B2BCheckoutPayload,
   B2BCouponStatusPayload,
   B2BCouponStatusResponse,
-  Product
-} from "../../../flow/ecommerceTypes"
-import { findProductById } from "../../../lib/ecommerce"
+  Product,
+} from "../../../flow/ecommerceTypes";
+import { findProductById } from "../../../lib/ecommerce";
 
 type Props = {
   checkout: (payload: B2BCheckoutPayload) => Promise<*>,
@@ -36,62 +36,62 @@ type Props = {
   contractNumber: ?string,
   productId: string,
   discountCode: string,
-  isLoading: boolean
-}
+  isLoading: boolean,
+};
 type State = {
-  errors: string | Object | null
-}
+  errors: string | Object | null,
+};
 type Values = {
   // these are form fields so they all start off as strings
   num_seats: string,
   product: Object,
   email: string,
-  contract_number: string
-}
+  contract_number: string,
+};
 export class B2BPurchasePage extends React.Component<Props, State> {
   onSubmit = async (values: Values, { setErrors, setSubmitting }: Object) => {
-    const { products, checkout, couponStatus } = this.props
-    const numSeats = parseInt(values.num_seats)
-    const { productId, programRunId } = values.product
-    const product = findProductById(products, productId)
+    const { products, checkout, couponStatus } = this.props;
+    const numSeats = parseInt(values.num_seats);
+    const { productId, programRunId } = values.product;
+    const product = findProductById(products, productId);
     if (!product) {
       throw new Error(
-        "No product found. This should have been caught in validation."
-      )
+        "No product found. This should have been caught in validation.",
+      );
     }
 
-    const productVersion = product.latest_version
+    const productVersion = product.latest_version;
 
     try {
       const checkoutResponse = await checkout({
-        num_seats:          numSeats,
-        email:              values.email,
+        num_seats: numSeats,
+        email: values.email,
         product_version_id: productVersion.id,
-        discount_code:      couponStatus ? couponStatus.code : null,
-        contract_number:    values.contract_number || null,
-        run_id:             programRunId
-      })
+        discount_code: couponStatus ? couponStatus.code : null,
+        contract_number: values.contract_number || null,
+        run_id: programRunId,
+      });
 
       if (checkoutResponse.status !== 200) {
         if (checkoutResponse.body.errors) {
-          setErrors(checkoutResponse.body.errors)
+          setErrors(checkoutResponse.body.errors);
         }
-        return
+        return;
       }
 
-      const { method, url, payload } = checkoutResponse.body
+      const { method, url, payload } = checkoutResponse.body;
       if (method === "GET") {
-        window.location = url
+        window.location = url;
       } else {
-        const form = createCyberSourceForm(url, payload)
-        const body: HTMLElement = (document.querySelector("body"): any)
-        body.appendChild(form)
-        form.submit()
+        const form = createCyberSourceForm(url, payload);
+        const body: HTMLElement = (document.querySelector("body"): any);
+        body.appendChild(form);
+        form.submit();
       }
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   render() {
     const {
@@ -101,17 +101,17 @@ export class B2BPurchasePage extends React.Component<Props, State> {
       fetchCouponStatus,
       products,
       requestPending,
-      isLoading
-    } = this.props
+      isLoading,
+    } = this.props;
 
-    const params = new URLSearchParams(this.props.location.search)
-    const contractNumber = params.get("contract_number")
-    const discountCode = params.get("code")
-    const seats = params.get("seats")
-    let productId = params.get("product_id")
+    const params = new URLSearchParams(this.props.location.search);
+    const contractNumber = params.get("contract_number");
+    const discountCode = params.get("code");
+    const seats = params.get("seats");
+    let productId = params.get("product_id");
     if (productId && isNaN(productId)) {
       // eslint-disable-next-line no-useless-escape
-      productId = productId.replace(/\ /g, "+")
+      productId = productId.replace(/\ /g, "+");
     }
 
     return (
@@ -130,7 +130,7 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           <B2BPurchaseForm
             onSubmit={this.onSubmit}
             products={products.filter(
-              product => product.is_private === false
+              (product) => product.is_private === false,
             )}
             checkout={checkout}
             couponStatus={couponStatus}
@@ -144,40 +144,37 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           />
         )}
       </React.Fragment>
-    )
+    );
   }
 }
 
-const mapStateToProps = state =>
+const mapStateToProps = (state) =>
   createStructuredSelector({
-    products:       queries.ecommerce.productsSelector,
-    couponStatus:   queries.ecommerce.b2bCouponStatusSelector,
+    products: queries.ecommerce.productsSelector,
+    couponStatus: queries.ecommerce.b2bCouponStatusSelector,
     requestPending: pathOr(false, [
       "queries",
       "b2bCheckoutMutation",
-      "isPending"
+      "isPending",
     ]),
-    isLoading: pathOr(true, ["queries", "products", "isPending"])
-  })
-const mapDispatchToProps = dispatch => ({
+    isLoading: pathOr(true, ["queries", "products", "isPending"]),
+  });
+const mapDispatchToProps = (dispatch) => ({
   checkout: (payload: B2BCheckoutPayload) =>
     dispatch(mutateAsync(queries.ecommerce.b2bCheckoutMutation(payload))),
   clearCouponStatus: () =>
     dispatch(
       updateEntities({
-        b2b_coupon_status: () => null
-      })
+        b2b_coupon_status: () => null,
+      }),
     ),
   fetchCouponStatus: (payload: B2BCouponStatusPayload) =>
-    dispatch(requestAsync(queries.ecommerce.b2bCouponStatus(payload)))
-})
+    dispatch(requestAsync(queries.ecommerce.b2bCouponStatus(payload))),
+});
 
-const mapPropsToConfig = () => [queries.ecommerce.productsQuery()]
+const mapPropsToConfig = () => [queries.ecommerce.productsQuery()];
 
 export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
-  connectRequest(mapPropsToConfig)
-)(B2BPurchasePage)
+  connect(mapStateToProps, mapDispatchToProps),
+  connectRequest(mapPropsToConfig),
+)(B2BPurchasePage);

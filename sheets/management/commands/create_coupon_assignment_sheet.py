@@ -17,12 +17,12 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "-r", "--row", type=int, help="Row number in the request Sheet"
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         if not options["row"]:
             raise CommandError("Need to specify -r/--row")  # noqa: EM101
 
@@ -36,10 +36,8 @@ class Command(BaseCommand):
         ).first()
         if coupon_gen_request is None:
             raise CommandError(
-                "No coupon generation request found for coupon name '{}'. "  # noqa: EM103
-                "This coupon request has probably not been processed yet.".format(
-                    coupon_req_row.coupon_name
-                )
+                f"No coupon generation request found for coupon name '{coupon_req_row.coupon_name}'. "  # noqa: EM102
+                "This coupon request has probably not been processed yet."
             )
 
         spreadsheet_file_name = assignment_sheet_file_name(coupon_req_row)

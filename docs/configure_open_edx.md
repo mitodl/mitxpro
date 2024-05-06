@@ -1,8 +1,6 @@
-Configure Open edX
----
+## Configure Open edX
 
 In order to create user accounts in Open edX and permit authentication from xPro to Open edX, you need to configure xPro as an OAuth2 provider for Open edX.
-
 
 #### Setup Open edX Devstack
 
@@ -22,6 +20,7 @@ $ make dev.clone
 ```
 
 #### Clone and checkout edx-platform (if not already).
+
 ```
 $ cd ..
 $ git clone https://github.com/mitodl/edx-platform
@@ -34,7 +33,7 @@ $ git checkout xpro/maple
 ```
 $ cd devstack
 $ make pull
-$ make dev.provision 
+$ make dev.provision
 ```
 
 #### Start your servers
@@ -82,13 +81,18 @@ There are two options for this:
 In xPro:
 
 - go to `/admin/oauth2_provider/application/` and create a new application with these settings selected:
+
   - `Redirect uris`: `http://<EDX_HOSTNAME>:18000/auth/complete/mitxpro-oauth2/`
+
     - _[OSX users]_ You will need redirect uris for both the local edX host alias and for `host.docker.internal`. This value should be:
+
     ```shell
     http://edx.odl.local:18000/auth/complete/mitxpro-oauth2/
     http://host.docker.internal:18000/auth/complete/mitxpro-oauth2/
     ```
+
     - _[Linux users]_ You will need redirect uris for both the local edX host alias and for the gateway IP of the docker-compose networking setup for xPro as found via `docker network inspect mitxpro_default`
+
     ```shell
     http://edx.odl.local:18000/auth/complete/mitxpro-oauth2/
     http://<GATEWAY_IP>:18000/auth/complete/mitxpro-oauth2/
@@ -101,6 +105,7 @@ In xPro:
   - Other values are arbitrary but be sure to fill them all out. Save the client id and secret for later
 
 In Open edX (derived from instructions [here](https://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/configuration/tpa/tpa_integrate_open/tpa_oauth.html#additional-oauth2-providers-advanced)):
+
 - `make lms-shell` into the LMS container and ensure the following settings:
   - `/edx/etc/lms.yml`:
     ```
@@ -140,37 +145,33 @@ mitxpro-oauth2`
     ```
     - `LOCAL_XPRO_ALIAS` should be your `/etc/hosts` alias for the mitxpro app
     - `EXTERNAL_XPRO_HOST` will depend on your OS, but it needs to be resolvable within the edx container
-        - Linux users: The gateway IP of the docker-compose networking setup for xPro as found via `docker network inspect mitxpro_default`
-        - OSX users: Use `host.docker.internal`
-
-
+      - Linux users: The gateway IP of the docker-compose networking setup for xPro as found via `docker network inspect mitxpro_default`
+      - OSX users: Use `host.docker.internal`
 
 #### Configure Open edX to support OAuth2 authentication from xPro
 
-  - In Open edX:
-    - go to `/admin/oauth2_provider/application/` and verify that an application named 'edx-oauth-app' exists with these settings:
-      - `Redirect uris`: `http://xpro.odl.local:8053/login/_private/complete`
-      - `Client type`: "Confidential"
-      - `Authorization grant type`: "Authorization code"
-      - `Skip authorization`: checked
-      - Other values are arbitrary but be sure to fill them all out. Save the client id and secret for later
-  - In xPro:
-    - Set `OPENEDX_API_CLIENT_ID` to the client id
-    - Set `OPENEDX_API_CLIENT_SECRET` to the client secret
-
+- In Open edX:
+  - go to `/admin/oauth2_provider/application/` and verify that an application named 'edx-oauth-app' exists with these settings:
+    - `Redirect uris`: `http://xpro.odl.local:8053/login/_private/complete`
+    - `Client type`: "Confidential"
+    - `Authorization grant type`: "Authorization code"
+    - `Skip authorization`: checked
+    - Other values are arbitrary but be sure to fill them all out. Save the client id and secret for later
+- In xPro:
+  - Set `OPENEDX_API_CLIENT_ID` to the client id
+  - Set `OPENEDX_API_CLIENT_SECRET` to the client secret
 
 #### Configure Logout
 
-  - In Open edX, configure `settings.IDA_LOGOUT_URI_LIST` to be a list including the full url to `<protocol>://<hostname>[:<port>]/logout` in xPro
-    - For devstack, this means modifying the value in `edx-platform/lms/envs/devstack.py` to include `http://xpro.odl.local:8053/logout`
-    - For production, this setting can go in `lms.env.json` under the key `IDA_LOGOUT_URI_LIST` as a JSON array of with that string in it
+- In Open edX, configure `settings.IDA_LOGOUT_URI_LIST` to be a list including the full url to `<protocol>://<hostname>[:<port>]/logout` in xPro
 
-  - xPro:
-    - Set `LOGOUT_REDIRECT_URL` to the full path to the edx `/logout` view.
-      - For local development this will be `http://<EDX_HOSTNAME>:18000/logout`
+  - For devstack, this means modifying the value in `edx-platform/lms/envs/devstack.py` to include `http://xpro.odl.local:8053/logout`
+  - For production, this setting can go in `lms.env.json` under the key `IDA_LOGOUT_URI_LIST` as a JSON array of with that string in it
 
+- xPro:
+  - Set `LOGOUT_REDIRECT_URL` to the full path to the edx `/logout` view.
+    - For local development this will be `http://<EDX_HOSTNAME>:18000/logout`
 
 #### Configure Open edX user and token for use with xPro management commands
 
 - In Open edX, create a staff user and then under `/admin/oauth2_provider/accesstoken/` add access token. The value of said token needs to match the value set for the `OPENEDX_SERVICE_WORKER_API_TOKEN` key in the xPro app.
-

@@ -2,7 +2,7 @@
 @import "common";
 
 .learning-outcomes-block {
-  background: white url('#{$static-path}/images/dotted-bg.png') repeat-x 0 0;
+  background: white url("#{$static-path}/images/dotted-bg.png") repeat-x 0 0;
 
   .learning-header {
     margin: 0 auto;
@@ -24,7 +24,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    letter-spacing: -.32em;
+    letter-spacing: -0.32em;
     overflow: hidden;
 
     li {
@@ -33,7 +33,7 @@
       font-size: 24px;
       line-height: 28px;
       color: $light-gray;
-      border-top: 1px solid  $light-gray;
+      border-top: 1px solid $light-gray;
       margin: -1px 0 0;
       font-weight: 600;
 
@@ -42,6 +42,7 @@
         display: inline-block;
         vertical-align: top;
       }
+
       @include media-breakpoint-up(lg) {
         width: calc(33.33% - 45px);
       }

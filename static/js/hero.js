@@ -17,24 +17,24 @@ function openVideoLightBox() {
   const fancyBoxArgs = $.extend(
     {},
     {
-      beforeShow: function() {
+      beforeShow: function () {
         backgroundVideo = $(backgroundVideoSel).get(0);
       },
-      beforeLoad: function() {
+      beforeLoad: function () {
         backgroundVideo && backgroundVideo.pause();
       },
-      afterClose: function() {
+      afterClose: function () {
         backgroundVideo && backgroundVideo.play();
-      }
+      },
     },
     youtubeVideoSrc
       ? {
-        src: youtubeVideoSrc
-      }
+          src: youtubeVideoSrc,
+        }
       : {
-        content: hlsAboutVideoEl,
-        type:    "html"
-      }
+          content: hlsAboutVideoEl,
+          type: "html",
+        },
   );
   $.fancybox.open(fancyBoxArgs);
 }
@@ -49,7 +49,7 @@ function configureHlsVideo(selector, autoplay) {
       hls.loadSource(videoUrl);
       hls.attachMedia(video);
       if (autoplay) {
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
           video.play();
         });
       }
@@ -62,7 +62,7 @@ function configureHlsVideo(selector, autoplay) {
     else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = videoUrl;
       if (autoplay) {
-        video.addEventListener("loadedmetadata", function() {
+        video.addEventListener("loadedmetadata", function () {
           video.play();
         });
       }
@@ -80,7 +80,7 @@ export default function hero() {
   // The action button is supposed to play a video element in light box.
   // which exists in another section, which is why we need to check for
   // its existence before we try anything.
-  $("#actionButton").on("click", function(event) {
+  $("#actionButton").on("click", function (event) {
     event.preventDefault();
     openVideoLightBox();
   });

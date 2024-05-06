@@ -1,16 +1,16 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
+import React from "react";
 
-import MixedLink from "./MixedLink"
-import { routes } from "../lib/urls"
+import MixedLink from "./MixedLink";
+import { routes } from "../lib/urls";
 
-import type { User } from "../flow/authTypes"
+import type { User } from "../flow/authTypes";
 
 type Props = {
   /* This is here for future use when we have custom profile avatars */
-  currentUser: User
-}
+  currentUser: User,
+};
 
 const UserMenu = ({ currentUser }: Props) => {
   return (
@@ -65,7 +65,7 @@ const UserMenu = ({ currentUser }: Props) => {
         </a>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UserMenu
+export default UserMenu;

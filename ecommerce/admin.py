@@ -70,10 +70,10 @@ class LineAdmin(admin.ModelAdmin):
 
     readonly_fields = get_field_names(Line)
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     @admin.display(
@@ -93,10 +93,10 @@ class LineRunSelectionAdmin(admin.ModelAdmin):
     list_display = ("id", "line", "get_order", "get_run_courseware_id")
     readonly_fields = get_field_names(LineRunSelection)
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     @admin.display(
@@ -125,10 +125,10 @@ class ProgramRunLineAdmin(admin.ModelAdmin):
 
     readonly_fields = get_field_names(ProgramRunLine)
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     @admin.display(
@@ -152,10 +152,10 @@ class OrderAdmin(AuditableModelAdmin, TimestampedModelAdmin):
 
     readonly_fields = [name for name in get_field_names(Order) if name != "status"]
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     def save_model(self, request, obj, form, change):
@@ -183,10 +183,10 @@ class OrderAuditAdmin(TimestampedModelAdmin):
         """Returns the related Order's user email"""
         return obj.order.purchaser.email
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -208,10 +208,10 @@ class ReceiptAdmin(TimestampedModelAdmin):
         """Returns the related Order's user email"""
         return obj.order.purchaser.email if obj.order is not None else None
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -298,7 +298,7 @@ class CouponPaymentVersionAdmin(admin.ModelAdmin):
     )
     raw_id_fields = ("payment",)
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     @admin.display(
@@ -329,7 +329,7 @@ class CouponVersionAdmin(admin.ModelAdmin):
     list_display = ("id", "get_coupon_code", "get_payment_name")
     raw_id_fields = ("coupon", "payment_version")
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     @admin.display(
@@ -466,7 +466,7 @@ class ProductVersionAdmin(admin.ModelAdmin):
         """Return all active and in_active products"""
         return self.model.objects.get_queryset().select_related("product")
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
     class Media:
@@ -530,7 +530,7 @@ class DataConsentAgreementForm(forms.ModelForm):
         model = DataConsentAgreement
         fields = "__all__"  # noqa: DJ007
 
-    def clean(self):  # noqa: D102
+    def clean(self):
         is_global = self.cleaned_data.get("is_global", False)
         courses = self.cleaned_data.get("courses", Course.objects.none())
         company = self.cleaned_data.get("company", None)

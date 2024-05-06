@@ -1,22 +1,22 @@
 // @flow
 /* global SETTINGS: false */
 
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { RECEIPT_PAGE_TITLE } from "../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { connectRequest } from "redux-query"
-import moment from "moment"
-import { pathOr } from "ramda"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { RECEIPT_PAGE_TITLE } from "../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { connectRequest } from "redux-query";
+import moment from "moment";
+import { pathOr } from "ramda";
 
-import queries from "../../lib/queries"
-import { formatPrettyDate, parseDateString } from "../../lib/util"
-import { formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce"
-import type Moment from "moment"
-import type { Match } from "react-router"
-import type { OrderReceiptResponse } from "../../flow/ecommerceTypes"
-import type { Country, CurrentUser } from "../../flow/authTypes"
+import queries from "../../lib/queries";
+import { formatPrettyDate, parseDateString } from "../../lib/util";
+import { formatNumber, formatDiscount, formatPrice } from "../../lib/ecommerce";
+import type Moment from "moment";
+import type { Match } from "react-router";
+import type { OrderReceiptResponse } from "../../flow/ecommerceTypes";
+import type { Country, CurrentUser } from "../../flow/authTypes";
 
 type Props = {
   isLoading: boolean,
@@ -24,8 +24,8 @@ type Props = {
   countries: Array<Country>,
   match: Match,
   currentUser: CurrentUser,
-  forceRequest: () => Promise<*>
-}
+  forceRequest: () => Promise<*>,
+};
 
 export class ReceiptPage extends React.Component<Props> {
   async componentDidMount() {
@@ -35,42 +35,37 @@ export class ReceiptPage extends React.Component<Props> {
       this.props.orderReceipt.order.id !==
         parseInt(this.props.match.params.orderId)
     ) {
-      await this.props.forceRequest()
+      await this.props.forceRequest();
     }
   }
 
   async componentDidUpdate(prevProps: Props) {
     if (prevProps.match.params.orderId !== this.props.match.params.orderId) {
-      await this.props.forceRequest()
+      await this.props.forceRequest();
     }
   }
 
   render() {
-    const {
-      orderReceipt,
-      isLoading,
-      countries,
-      match,
-      currentUser
-    } = this.props
-    let orderDate = null
-    let stateCode = null
-    let countryName = null
+    const { orderReceipt, isLoading, countries, match, currentUser } =
+      this.props;
+    let orderDate = null;
+    let stateCode = null;
+    let countryName = null;
 
     if (orderReceipt) {
-      orderDate = parseDateString(orderReceipt.order.created_on)
+      orderDate = parseDateString(orderReceipt.order.created_on);
 
       if (countries) {
         const country = countries.find(
-          element => element.code === orderReceipt.purchaser.country
-        )
+          (element) => element.code === orderReceipt.purchaser.country,
+        );
         if (country) {
-          countryName = country.name
+          countryName = country.name;
         }
       }
 
       if (orderReceipt.purchaser.state_or_territory) {
-        stateCode = orderReceipt.purchaser.state_or_territory.split("-").pop()
+        stateCode = orderReceipt.purchaser.state_or_territory.split("-").pop();
       }
     }
 
@@ -111,10 +106,12 @@ export class ReceiptPage extends React.Component<Props> {
                         NE49-2000
                         <br />
                         Cambridge, MA 02139 USA
-                        {SETTINGS.enable_taxes_display ? <div>GSTIN: Pending</div> : null}
+                        {SETTINGS.enable_taxes_display ? (
+                          <div>GSTIN: Pending</div>
+                        ) : null}
                         Support:{" "}
                         <a href={`mailto:${SETTINGS.support_email}`}>
-                          { SETTINGS.support_email }
+                          {SETTINGS.support_email}
                         </a>
                       </p>
                     </div>
@@ -157,7 +154,7 @@ export class ReceiptPage extends React.Component<Props> {
                     <dl>
                       <dt>Address:</dt>
                       <dd>
-                        {orderReceipt.purchaser.street_address.map(line => (
+                        {orderReceipt.purchaser.street_address.map((line) => (
                           <div
                             className="value low-line-height"
                             key={line}
@@ -201,39 +198,39 @@ export class ReceiptPage extends React.Component<Props> {
                     <div className="receipt-col">
                       {orderReceipt.receipt &&
                       orderReceipt.receipt.payment_method === "card" ? (
-                          <div>
-                            <dl>
-                              <dt>Name:</dt>
-                              <dd>{orderReceipt.receipt.name}</dd>
-                            </dl>
-                            <dl>
-                              <dt>Payment Method:</dt>
-                              <dd id="paymentMethod">
-                                {orderReceipt.receipt.card_type
-                                  ? `${orderReceipt.receipt.card_type} | `
-                                  : null}
-                                {orderReceipt.receipt.card_number
-                                  ? orderReceipt.receipt.card_number
-                                  : null}
-                              </dd>
-                            </dl>
-                          </div>
-                        ) : orderReceipt.receipt.payment_method === "paypal" ? (
-                          <div>
-                            <dl>
-                              {orderReceipt.receipt.bill_to_email ? (
-                                <dl>
-                                  <dt>Email:</dt>
-                                  <dd>{orderReceipt.receipt.bill_to_email}</dd>
-                                </dl>
-                              ) : null}
-                            </dl>
-                            <dl>
-                              <dt>Payment Method:</dt>
-                              <dd id="paymentMethod">Paypal</dd>
-                            </dl>
-                          </div>
-                        ) : null}
+                        <div>
+                          <dl>
+                            <dt>Name:</dt>
+                            <dd>{orderReceipt.receipt.name}</dd>
+                          </dl>
+                          <dl>
+                            <dt>Payment Method:</dt>
+                            <dd id="paymentMethod">
+                              {orderReceipt.receipt.card_type
+                                ? `${orderReceipt.receipt.card_type} | `
+                                : null}
+                              {orderReceipt.receipt.card_number
+                                ? orderReceipt.receipt.card_number
+                                : null}
+                            </dd>
+                          </dl>
+                        </div>
+                      ) : orderReceipt.receipt.payment_method === "paypal" ? (
+                        <div>
+                          <dl>
+                            {orderReceipt.receipt.bill_to_email ? (
+                              <dl>
+                                <dt>Email:</dt>
+                                <dd>{orderReceipt.receipt.bill_to_email}</dd>
+                              </dl>
+                            ) : null}
+                          </dl>
+                          <dl>
+                            <dt>Payment Method:</dt>
+                            <dd id="paymentMethod">Paypal</dd>
+                          </dl>
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
                   {orderReceipt.coupon ? (
@@ -254,15 +251,21 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
-                        {SETTINGS.enable_taxes_display ? <th>Total Before Tax</th> : null}
-                        {SETTINGS.enable_taxes_display ? <th>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</th> : null}
+                        {SETTINGS.enable_taxes_display ? (
+                          <th>Total Before Tax</th>
+                        ) : null}
+                        {SETTINGS.enable_taxes_display ? (
+                          <th>
+                            Tax ({formatNumber(orderReceipt.order.tax_rate)}%)
+                          </th>
+                        ) : null}
                         <th>Total Paid</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {orderReceipt.lines.map(line => {
-                        const startDate = parseDateString(line.start_date)
-                        const endDate = parseDateString(line.end_date)
+                      {orderReceipt.lines.map((line) => {
+                        const startDate = parseDateString(line.start_date);
+                        const endDate = parseDateString(line.end_date);
                         return (
                           <tr key={line.readable_id}>
                             <td>
@@ -300,7 +303,10 @@ export class ReceiptPage extends React.Component<Props> {
 
                             {SETTINGS.enable_taxes_display ? (
                               <td>
-                                <p>Tax ({formatNumber(orderReceipt.order.tax_rate)}%)</p>
+                                <p>
+                                  Tax (
+                                  {formatNumber(orderReceipt.order.tax_rate)}%)
+                                </p>
                                 <div>${line.tax_paid}</div>
                               </td>
                             ) : null}
@@ -309,41 +315,48 @@ export class ReceiptPage extends React.Component<Props> {
                               <div>${line.total_paid}</div>
                             </td>
                           </tr>
-                        )
+                        );
                       })}
                     </tbody>
                   </table>
-                  {SETTINGS.enable_taxes_display ? <div className="receipt-hsn">HSN: 9992</div> : null}
+                  {SETTINGS.enable_taxes_display ? (
+                    <div className="receipt-hsn">HSN: 9992</div>
+                  ) : null}
                 </div>
-                { SETTINGS.enable_taxes_display ? <div className="footnote-signature">
-                  <img src="static/images/receipts/signature_only.png" alt=""></img>
-                  <small>Bryan Adkison</small>
-                  <small>MIT Open Learning - A/R Manager</small>
-                </div> : null }
+                {SETTINGS.enable_taxes_display ? (
+                  <div className="footnote-signature">
+                    <img
+                      src="static/images/receipts/signature_only.png"
+                      alt=""
+                    ></img>
+                    <small>Bryan Adkison</small>
+                    <small>MIT Open Learning - A/R Manager</small>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
         </DocumentTitle>
       </React.Fragment>
-    )
+    );
   }
 }
 
-const mapStateToProps = state => ({
-  currentUser:  state.entities.currentUser,
-  countries:    state.entities.countries,
+const mapStateToProps = (state) => ({
+  currentUser: state.entities.currentUser,
+  countries: state.entities.countries,
   orderReceipt: state.entities.orderReceipt,
   isLoading:
     pathOr(true, ["queries", "countries", "isPending"], state) ||
-    pathOr(true, ["queries", "orderReceipt", "isPending"], state)
-})
+    pathOr(true, ["queries", "orderReceipt", "isPending"], state),
+});
 
-const mapPropsToConfigs = props => [
+const mapPropsToConfigs = (props) => [
   queries.users.countriesQuery(),
-  queries.ecommerce.orderReceipt(props.match.params.orderId)
-]
+  queries.ecommerce.orderReceipt(props.match.params.orderId),
+];
 
 export default compose(
   connect(mapStateToProps),
-  connectRequest(mapPropsToConfigs)
-)(ReceiptPage)
+  connectRequest(mapPropsToConfigs),
+)(ReceiptPage);

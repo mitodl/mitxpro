@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     help = "Create program certificate, for a single user or all users in the program."
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         parser.add_argument(
             "--user",
             type=str,

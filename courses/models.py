@@ -49,7 +49,7 @@ class ActiveCertificates(models.Manager):
         return super().get_queryset().filter(is_revoked=False)
 
 
-class ProgramQuerySet(models.QuerySet):  # noqa: D101
+class ProgramQuerySet(models.QuerySet):
     def live(self):
         """Applies a filter for Programs with live=True"""
         return self.filter(live=True)
@@ -59,13 +59,13 @@ class ProgramQuerySet(models.QuerySet):  # noqa: D101
         return self.filter(readable_id=text_id)
 
 
-class CourseQuerySet(models.QuerySet):  # noqa: D101
+class CourseQuerySet(models.QuerySet):
     def live(self):
         """Applies a filter for Courses with live=True"""
         return self.filter(live=True)
 
 
-class CourseRunQuerySet(models.QuerySet):  # noqa: D101
+class CourseRunQuerySet(models.QuerySet):
     def live(self):
         """Applies a filter for Course runs with live=True"""
         return self.filter(live=True)
@@ -201,9 +201,7 @@ class PageProperties(models.Model):
 
 validate_url_path_field = RegexValidator(
     r"^[{}]+$".format(detail_path_char_pattern),  # noqa: UP032
-    "This field is used to produce URL paths. It must contain only characters that match this pattern: [{}]".format(
-        detail_path_char_pattern
-    ),
+    f"This field is used to produce URL paths. It must contain only characters that match this pattern: [{detail_path_char_pattern}]",
 )
 
 
@@ -765,14 +763,14 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
     all_objects = models.Manager()
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         raise NotImplementedError
 
     @classmethod
-    def objects_for_audit(cls):  # noqa: D102
+    def objects_for_audit(cls):
         return cls.all_objects
 
-    def to_dict(self):  # noqa: D102
+    def to_dict(self):
         return {
             **serialize_model_object(self),
             "username": self.user.username,
@@ -814,7 +812,7 @@ class CourseRunEnrollment(EnrollmentModel):
         return self.run.is_past
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         return CourseRunEnrollmentAudit
 
     @classmethod
@@ -834,7 +832,7 @@ class CourseRunEnrollment(EnrollmentModel):
             user=user, run__course__program=program, **added_filters
         )
 
-    def to_dict(self):  # noqa: D102
+    def to_dict(self):
         return {**super().to_dict(), "text_id": self.run.courseware_id}
 
     def __str__(self):
@@ -849,7 +847,7 @@ class CourseRunEnrollmentAudit(AuditModel):
     )
 
     @classmethod
-    def get_related_field_name(cls):  # noqa: D102
+    def get_related_field_name(cls):
         return "enrollment"
 
 
@@ -869,7 +867,7 @@ class ProgramEnrollment(EnrollmentModel):
         return all(enrollment.run.is_past for enrollment in self.get_run_enrollments())
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         return ProgramEnrollmentAudit
 
     def get_run_enrollments(self, order_id=None):
@@ -887,7 +885,7 @@ class ProgramEnrollment(EnrollmentModel):
             user=self.user, program=self.program, **added_filters
         )
 
-    def to_dict(self):  # noqa: D102
+    def to_dict(self):
         return {**super().to_dict(), "text_id": self.program.readable_id}
 
     def __str__(self):
@@ -902,7 +900,7 @@ class ProgramEnrollmentAudit(AuditModel):
     )
 
     @classmethod
-    def get_related_field_name(cls):  # noqa: D102
+    def get_related_field_name(cls):
         return "enrollment"
 
 
@@ -924,10 +922,10 @@ class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
         unique_together = ("user", "course_run")
 
     @classmethod
-    def get_audit_class(cls):  # noqa: D102
+    def get_audit_class(cls):
         return CourseRunGradeAudit
 
-    def to_dict(self):  # noqa: D102
+    def to_dict(self):
         return serialize_model_object(self)
 
     @property
@@ -936,11 +934,7 @@ class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
         return self.grade * 100 if self.grade is not None else None
 
     def __str__(self):
-        return "CourseRunGrade for run '{course_id}', user '{user}' ({grade})".format(
-            course_id=self.course_run.courseware_id,
-            user=self.user.username,
-            grade=self.grade,
-        )
+        return f"CourseRunGrade for run '{self.course_run.courseware_id}', user '{self.user.username}' ({self.grade})"
 
 
 class CourseRunGradeAudit(AuditModel):
@@ -951,7 +945,7 @@ class CourseRunGradeAudit(AuditModel):
     )
 
     @classmethod
-    def get_related_field_name(cls):  # noqa: D102
+    def get_related_field_name(cls):
         return "course_run_grade"
 
 
@@ -1015,14 +1009,14 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     class Meta:
         unique_together = ("user", "course_run")
 
-    def get_certified_object_id(self):  # noqa: D102
+    def get_certified_object_id(self):
         return self.course_run_id
 
     def get_courseware_object_id(self):
         """Gets the course id instead of the course run id"""
         return self.course_run.course_id
 
-    def get_courseware_object_readable_id(self):  # noqa: D102
+    def get_courseware_object_readable_id(self):
         return self.course_run.courseware_id
 
     @property
@@ -1040,15 +1034,9 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         return self.course_run.start_date, self.course_run.end_date
 
     def __str__(self):  # noqa: DJ012
-        return (
-            'CourseRunCertificate for user={user}, run={course_run} ({uuid})"'.format(
-                user=self.user.username,
-                course_run=self.course_run.text_id,
-                uuid=self.uuid,
-            )
-        )
+        return f'CourseRunCertificate for user={self.user.username}, run={self.course_run.text_id} ({self.uuid})"'
 
-    def save(self, *args, **kwargs):  # noqa: D102, DJ012
+    def save(self, *args, **kwargs):  # noqa: DJ012
         if not self.certificate_page_revision:
             certificate_page = (
                 self.course_run.course.page.certificate_page
@@ -1059,7 +1047,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
                 self.certificate_page_revision = certificate_page.get_latest_revision()
         super().save(*args, **kwargs)
 
-    def clean(self):  # noqa: D102
+    def clean(self):
         from cms.models import CertificatePage, CoursePage
 
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
@@ -1101,14 +1089,14 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     class Meta:
         unique_together = ("user", "program")
 
-    def get_certified_object_id(self):  # noqa: D102
+    def get_certified_object_id(self):
         return self.program_id
 
     def get_courseware_object_id(self):
         """Gets the program id"""
         return self.program_id
 
-    def get_courseware_object_readable_id(self):  # noqa: D102
+    def get_courseware_object_readable_id(self):
         return self.program.readable_id
 
     @property
@@ -1136,11 +1124,9 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         return dates["start_date"], dates["end_date"]
 
     def __str__(self):  # noqa: DJ012
-        return 'ProgramCertificate for user={user}, program={program} ({uuid})"'.format(
-            user=self.user.username, program=self.program.text_id, uuid=self.uuid
-        )
+        return f'ProgramCertificate for user={self.user.username}, program={self.program.text_id} ({self.uuid})"'
 
-    def clean(self):  # noqa: D102
+    def clean(self):
         from cms.models import CertificatePage, ProgramPage
 
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
@@ -1161,7 +1147,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
                 }
             )
 
-    def save(self, *args, **kwargs):  # noqa: D102, DJ012
+    def save(self, *args, **kwargs):  # noqa: DJ012
         if not self.certificate_page_revision:
             certificate_page = (
                 self.program.page.certificate_page if self.program.page else None

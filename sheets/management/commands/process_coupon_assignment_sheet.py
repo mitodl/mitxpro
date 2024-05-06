@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
             "-i",
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002, D102
+    def handle(self, *args, **options):  # noqa: ARG002
         if not options["id"] and not options["title"]:
             raise CommandError("Need to provide --id or --title")  # noqa: EM101
 
@@ -95,12 +95,7 @@ class Command(BaseCommand):
         bulk_assignment.save()
         self.stdout.write(
             self.style.SUCCESS(
-                "Successfully processed coupon assignment sheet ({}).\n"
-                "{} individual coupon assignment(s) added, {} deleted (BulkCouponAssignment id: {}).".format(
-                    spreadsheet_repr(spreadsheet),
-                    num_created,
-                    num_removed,
-                    bulk_assignment.id,
-                )
+                f"Successfully processed coupon assignment sheet ({spreadsheet_repr(spreadsheet)}).\n"
+                f"{num_created} individual coupon assignment(s) added, {num_removed} deleted (BulkCouponAssignment id: {bulk_assignment.id})."
             )
         )

@@ -5,9 +5,12 @@
     <h1>DISCOVER THE xPRO CATALOG</h1>
     <div class="row topics-slider">
       {% for topic in topics %}
-        <div class="topic slide" data-url="catalog/?topic={{ topic | urlencode }}">
-          <a href="catalog/?topic={{ topic | urlencode }}">{{ topic }}</a>
-        </div>
+      <div
+        class="topic slide"
+        data-url="catalog/?topic={{ topic | urlencode }}"
+      >
+        <a href="catalog/?topic={{ topic | urlencode }}">{{ topic }}</a>
+      </div>
       {% endfor %}
     </div>
     <div class="view-catalog">

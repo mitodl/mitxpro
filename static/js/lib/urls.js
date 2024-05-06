@@ -1,61 +1,61 @@
 // @flow
-import { include } from "named-urls"
-import qs from "query-string"
+import { include } from "named-urls";
+import qs from "query-string";
 
-export const getNextParam = (search: string) => qs.parse(search).next || "/"
+export const getNextParam = (search: string) => qs.parse(search).next || "/";
 
 export const bulkReceiptCsvUrl = (hash: string) =>
-  `/api/b2b/orders/${hash}/codes/`
+  `/api/b2b/orders/${hash}/codes/`;
 
 export const routes = {
-  root:            "/",
-  catalog:         "/catalog/",
-  webinars:         "/webinars/",
-  enterprise:         "/enterprise/",
-  blog:            "/blog/",
-  dashboard:       "/dashboard/",
+  root: "/",
+  catalog: "/catalog/",
+  webinars: "/webinars/",
+  enterprise: "/enterprise/",
+  blog: "/blog/",
+  dashboard: "/dashboard/",
   accountSettings: "/account-settings/",
-  logout:          "/logout/",
+  logout: "/logout/",
 
   // authentication related routes
   login: include("/signin/", {
-    begin:    "",
+    begin: "",
     password: "password/",
-    forgot:   include("forgot-password/", {
-      begin:   "",
-      confirm: "confirm/:uid/:token/"
-    })
+    forgot: include("forgot-password/", {
+      begin: "",
+      confirm: "confirm/:uid/:token/",
+    }),
   }),
 
   register: include("/create-account/", {
-    begin:       "",
-    confirm:     "confirm/",
+    begin: "",
+    confirm: "confirm/",
     confirmSent: "confirm-sent/",
-    details:     "details/",
-    error:       "error/",
-    extra:       "extra/",
-    denied:      "denied/"
+    details: "details/",
+    error: "error/",
+    extra: "extra/",
+    denied: "denied/",
   }),
 
   profile: include("/profile/", {
-    view:   "",
-    update: "edit/"
+    view: "",
+    update: "edit/",
   }),
 
   checkout: "/checkout/",
 
   ecommerceAdmin: include("/ecommerce/admin/", {
-    index:      "",
-    coupons:    "coupons/"
+    index: "",
+    coupons: "coupons/",
   }),
 
   ecommerceBulk: include("/ecommerce/bulk/", {
     bulkPurchase: "",
-    receipt:      "receipt/"
+    receipt: "receipt/",
   }),
   receipt: "receipt/:orderId/",
 
   account: include("/account/", {
-    confirmEmail: "confirm-email"
-  })
-}
+    confirmEmail: "confirm-email",
+  }),
+};

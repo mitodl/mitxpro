@@ -1,6 +1,6 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
+import React from "react";
 
 import {
   Formik,
@@ -8,36 +8,36 @@ import {
   Form,
   ErrorMessage,
   yupToFormErrors,
-  validateYupSchema
-} from "formik"
+  validateYupSchema,
+} from "formik";
 
-import { PasswordInput, EmailInput } from "./elements/inputs"
-import FormError from "./elements/FormError"
-import { changeEmailFormValidation } from "../../lib/validation"
+import { PasswordInput, EmailInput } from "./elements/inputs";
+import FormError from "./elements/FormError";
+import { changeEmailFormValidation } from "../../lib/validation";
 
-import type { User } from "../../flow/authTypes"
+import type { User } from "../../flow/authTypes";
 
 type Props = {
   onSubmit: Function,
-  user: User
-}
+  user: User,
+};
 
 export type ChangeEmailFormValues = {
   email: string,
-  confirmPassword: string
-}
+  confirmPassword: string,
+};
 
 const ChangeEmailForm = ({ onSubmit, user }: Props) => (
   <Formik
     onSubmit={onSubmit}
     initialValues={{
-      email:           user.email,
-      confirmPassword: ""
+      email: user.email,
+      confirmPassword: "",
     }}
-    validate={values =>
+    validate={(values) =>
       validateYupSchema(values, changeEmailFormValidation, false, {
-        currentEmail: user.email
-      }).catch(err => Promise.reject(yupToFormErrors(err)))
+        currentEmail: user.email,
+      }).catch((err) => Promise.reject(yupToFormErrors(err)))
     }
     render={({ isSubmitting }) => (
       <Form>
@@ -78,6 +78,6 @@ const ChangeEmailForm = ({ onSubmit, user }: Props) => (
       </Form>
     )}
   />
-)
+);
 
-export default ChangeEmailForm
+export default ChangeEmailForm;

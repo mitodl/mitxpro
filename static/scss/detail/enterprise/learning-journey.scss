@@ -2,12 +2,13 @@
 
 .learning-journey-block {
   padding-top: 70px;
-  background: url('#{$static-path}/images/enterprise/enterprise-page-dots-bg.png') repeat-x 0% 100% $alice-blue;
+  background: url("#{$static-path}/images/enterprise/enterprise-page-dots-bg.png")
+    repeat-x 0% 100% $alice-blue;
   position: relative;
 
-  @include media-breakpoint-down (sm) {
+  @include media-breakpoint-down(sm) {
     background: none;
-    padding: 30px 5px 0px 5px;
+    padding: 30px 5px 0;
   }
 
   .learning-journey-heading {
@@ -19,7 +20,7 @@
     line-height: normal;
     margin-bottom: 50px;
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       text-align: initial;
       font-size: 24px;
       font-weight: 400;
@@ -27,7 +28,7 @@
     }
 
     p {
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
   }
 }
@@ -36,7 +37,7 @@
   display: flex;
   justify-content: space-between;
 
-  @include media-breakpoint-down (sm) {
+  @include media-breakpoint-down(sm) {
     display: block;
   }
 
@@ -49,7 +50,7 @@
     flex-direction: column;
     width: 400px;
 
-    @include media-breakpoint-down (md) {
+    @include media-breakpoint-down(md) {
       width: 100%;
     }
 
@@ -62,7 +63,7 @@
     }
 
     ul {
-      padding: 0px;
+      padding: 0;
       margin-bottom: 15px;
     }
 
@@ -71,7 +72,7 @@
       border-radius: 5px;
       background: $white;
       padding: 12px 18px;
-      box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%);
       color: $black;
       font-size: 20px;
       font-weight: 500;
@@ -89,10 +90,10 @@
       font-weight: 500;
       line-height: 27px;
       width: 449px;
-      margin-bottom: 0px;
+      margin-bottom: 0;
       -webkit-line-clamp: 3; // sass-lint:disable-line no-vendor-prefixes
 
-      @include media-breakpoint-down (md) {
+      @include media-breakpoint-down(md) {
         width: 100%;
         font-size: 16px;
         line-height: 25px;
@@ -104,7 +105,7 @@
       }
 
       p {
-        margin-bottom: 0px;
+        margin-bottom: 0;
       }
     }
 
@@ -124,9 +125,9 @@
       align-items: center;
       z-index: 1;
 
-      @include media-breakpoint-down (sm) {
+      @include media-breakpoint-down(sm) {
         width: 100%;
-        margin: 35px 0px 30px;
+        margin: 35px 0 30px;
       }
 
       @include media-breakpoint-only(md) {
@@ -141,7 +142,7 @@
         background: $dark-blue;
         color: $white;
         text-decoration: none;
-        transition: all .2s ease-in;
+        transition: all 0.2s ease-in;
       }
     }
   }
@@ -154,7 +155,7 @@
     max-width: 100%;
     margin-bottom: -1px;
 
-    @include media-breakpoint-down (sm) {
+    @include media-breakpoint-down(sm) {
       height: 386px;
     }
 

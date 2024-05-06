@@ -111,12 +111,11 @@
 }
 
 .certificate-link {
-
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     width: 100%;
   }
 
-  >a {
+  > a {
     color: white;
     font-weight: 600;
     background-color: $denim-blue;
@@ -124,7 +123,7 @@
     padding-right: 1em;
     float: left;
 
-    @media (max-width: 768px) {
+    @media (width <= 768px) {
       width: 100%;
       margin-bottom: 15px;
       text-align: center;
@@ -142,7 +141,7 @@
   padding-bottom: 8px;
   background: $dc-background;
 
-  &:after {
+  &::after {
     position: absolute;
     left: 0;
     top: 0;
@@ -170,7 +169,7 @@
   float: left;
   margin-left: 30px;
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     margin-left: 0;
     width: 100%;
     text-align: center;
@@ -189,7 +188,7 @@
   .digital-credential-store-button {
     display: none;
 
-    @media (max-width: 768px) {
+    @media (width <= 768px) {
       display: flex;
     }
 
@@ -209,8 +208,7 @@
   }
 
   .learn-more-button {
-
-    @media (min-width: 768px) {
+    @media (width >= 768px) {
       float: right;
     }
 
@@ -232,11 +230,10 @@
     }
   }
 
-
   .download-digital-credential-button {
     display: none;
 
-    @media (max-width: 768px) {
+    @media (width <= 768px) {
       display: flex;
     }
 
@@ -298,7 +295,8 @@
       width: 100%;
     }
 
-    .course-enrollment, .enrollment-code {
+    .course-enrollment,
+    .enrollment-code {
       margin-top: 15px;
       margin-bottom: 15px;
     }
@@ -322,7 +320,9 @@
     color: $gray;
     text-decoration: none;
 
-    &:hover, &:active, &:focus {
+    &:hover,
+    &:active,
+    &:focus {
       color: $gray !important;
       background-color: inherit !important;
       outline: none !important;
@@ -346,7 +346,7 @@
 .view-receipt {
   text-decoration: underline;
 
-  @media (max-width: 768px) {
+  @media (width <= 768px) {
     margin-bottom: 15px;
   }
 }

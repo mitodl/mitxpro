@@ -8,8 +8,6 @@ from math import ceil
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
-from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
 from mitol.hubspot_api.exceptions import TooManyRequestsException
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
@@ -24,6 +22,8 @@ from ecommerce.factories import (
     ProductVersionFactory,
 )
 from ecommerce.models import Order, Product
+from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
+from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
 from hubspot_xpro import tasks
 from hubspot_xpro.api import make_contact_sync_message
 from hubspot_xpro.tasks import task_obj_lock

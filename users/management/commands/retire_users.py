@@ -18,8 +18,8 @@ from users.api import fetch_users
 User = get_user_model()
 
 RETIRED_USER_SALTS = ["mitxpro-retired-email"]
-RETIRED_EMAIL_FMT = "retired_email_{}@retired." + "{}".format(
-    urlparse(settings.SITE_BASE_URL).netloc
+RETIRED_EMAIL_FMT = (
+    "retired_email_{}@retired." + f"{urlparse(settings.SITE_BASE_URL).netloc}"
 )
 
 
@@ -77,7 +77,7 @@ class Command(BaseCommand):
         """Convert user email to retired email format."""
         return user_util.get_retired_email(email, RETIRED_USER_SALTS, RETIRED_EMAIL_FMT)
 
-    def handle(self, *args, **kwargs):  # noqa: ARG002, D102
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         users = kwargs.get("users", [])
         block_users = kwargs.get("block_users")
 
@@ -118,9 +118,7 @@ class Command(BaseCommand):
             user.save()
 
             self.stdout.write(
-                "Email changed from {email} to {retired_email} and password is not useable now".format(  # noqa: UP032
-                    email=email, retired_email=user.email
-                )
+                f"Email changed from {email} to {user.email} and password is not useable now"
             )
 
             # reset user social auth

@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def add_arguments(self, parser):  # noqa: D102
+    def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group()
         group.add_argument("--id", type=int, help="The BulkCouponAssignment ID")
         group.add_argument(
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(  # noqa: D102
+    def handle(
         self,
         *args,  # noqa: ARG002
         **options,
@@ -89,11 +89,7 @@ class Command(BaseCommand):
                     for row_update in row_updates
                 ]
             )
-            row_update_results = (
-                "Request sent to the Google API to update {} row(s):\n{}".format(
-                    len(row_updates), row_update_summary
-                )
-            )
+            row_update_results = f"Request sent to the Google API to update {len(row_updates)} row(s):\n{row_update_summary}"
 
         if unsent_assignments and not options["skip_confirm"]:
             user_input = input(

@@ -1,7 +1,7 @@
 // sass-lint:disable mixins-before-declarations
 
 .header-holder {
-  padding: 20px 0px;
+  padding: 20px 0;
 
   @include media-breakpoint-down(md) {
     max-width: 100%;
@@ -38,7 +38,6 @@
 }
 
 .navbar-collapse {
-
   li {
     letter-spacing: normal;
     display: inline-block;
@@ -88,7 +87,7 @@
 .xpro-link {
   z-index: 2;
   position: relative;
-  padding: 10px 0 12px 0;
+  padding: 10px 0 12px;
 }
 
 .navbar-toggler.nav-opener {
@@ -108,7 +107,7 @@
     margin: -2px 5px 0 0;
     vertical-align: top;
 
-    &:after {
+    &::after {
       position: absolute;
       left: 0;
       right: 0;

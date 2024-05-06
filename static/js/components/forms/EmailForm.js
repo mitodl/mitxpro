@@ -1,25 +1,25 @@
 // @flow
-import React from "react"
-import * as yup from "yup"
+import React from "react";
+import * as yup from "yup";
 
-import { Formik, Field, Form, ErrorMessage } from "formik"
+import { Formik, Field, Form, ErrorMessage } from "formik";
 
-import FormError from "./elements/FormError"
-import { EmailInput } from "./elements/inputs"
-import { emailFieldValidation } from "../../lib/validation"
+import FormError from "./elements/FormError";
+import { EmailInput } from "./elements/inputs";
+import { emailFieldValidation } from "../../lib/validation";
 
 const emailValidation = yup.object().shape({
-  email: emailFieldValidation
-})
+  email: emailFieldValidation,
+});
 
 type EmailFormProps = {
   onSubmit: Function,
-  children?: React$Element<*>
-}
+  children?: React$Element<*>,
+};
 
 export type EmailFormValues = {
-  email: string
-}
+  email: string,
+};
 
 const EmailForm = ({ onSubmit, children }: EmailFormProps) => (
   <Formik
@@ -51,6 +51,6 @@ const EmailForm = ({ onSubmit, children }: EmailFormProps) => (
       </Form>
     )}
   />
-)
+);
 
-export default EmailForm
+export default EmailForm;

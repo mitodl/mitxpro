@@ -5,37 +5,37 @@ export default function facultyCarousel() {
   const numFacultySlides = $(".faculty-slider .slide").length;
 
   $(".faculty-slider").slick({
-    rows:           0,
-    slidesToShow:   3,
+    rows: 0,
+    slidesToShow: 3,
     slidesToScroll: 1,
-    dots:           numFacultySlides > 3,
-    infinite:       false,
-    autoplay:       false,
-    responsive:     [
+    dots: numFacultySlides > 3,
+    infinite: false,
+    autoplay: false,
+    responsive: [
       {
         breakpoint: 1024,
-        settings:   {
-          slidesToShow:   3,
+        settings: {
+          slidesToShow: 3,
           slidesToScroll: 3,
-          dots:           numFacultySlides > 3
-        }
+          dots: numFacultySlides > 3,
+        },
       },
       {
         breakpoint: 992,
-        settings:   {
-          slidesToShow:   2,
+        settings: {
+          slidesToShow: 2,
           slidesToScroll: 1,
-          dots:           numFacultySlides > 2
-        }
+          dots: numFacultySlides > 2,
+        },
       },
       {
         breakpoint: 767,
-        settings:   {
-          slidesToShow:   1,
+        settings: {
+          slidesToShow: 1,
           slidesToScroll: 1,
-          dots:           numFacultySlides > 1
-        }
-      }
-    ]
+          dots: numFacultySlides > 1,
+        },
+      },
+    ],
   });
 }

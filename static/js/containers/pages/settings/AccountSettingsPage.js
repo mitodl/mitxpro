@@ -1,121 +1,121 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { ACCOUNT_SETTINGS_PAGE_TITLE } from "../../../constants"
-import { compose } from "redux"
-import { connect } from "react-redux"
-import { mutateAsync } from "redux-query"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { ACCOUNT_SETTINGS_PAGE_TITLE } from "../../../constants";
+import { compose } from "redux";
+import { connect } from "react-redux";
+import { mutateAsync } from "redux-query";
 
-import { addUserNotification } from "../../../actions"
-import auth from "../../../lib/queries/auth"
-import { routes } from "../../../lib/urls"
-import { ALERT_TYPE_TEXT } from "../../../constants"
+import { addUserNotification } from "../../../actions";
+import auth from "../../../lib/queries/auth";
+import { routes } from "../../../lib/urls";
+import { ALERT_TYPE_TEXT } from "../../../constants";
 
-import ChangePasswordForm from "../../../components/forms/ChangePasswordForm"
-import ChangeEmailForm from "../../../components/forms/ChangeEmailForm"
+import ChangePasswordForm from "../../../components/forms/ChangePasswordForm";
+import ChangeEmailForm from "../../../components/forms/ChangeEmailForm";
 
-import type { User } from "../../../flow/authTypes"
+import type { User } from "../../../flow/authTypes";
 
-import { createStructuredSelector } from "reselect"
-import { currentUserSelector } from "../../../lib/queries/users"
+import { createStructuredSelector } from "reselect";
+import { currentUserSelector } from "../../../lib/queries/users";
 
-import type { RouterHistory } from "react-router"
-import type { ChangePasswordFormValues } from "../../../components/forms/ChangePasswordForm"
-import type { ChangeEmailFormValues } from "../../../components/forms/ChangeEmailForm"
-import type { Response } from "redux-query"
+import type { RouterHistory } from "react-router";
+import type { ChangePasswordFormValues } from "../../../components/forms/ChangePasswordForm";
+import type { ChangeEmailFormValues } from "../../../components/forms/ChangeEmailForm";
+import type { Response } from "redux-query";
 
 type Props = {
   history: RouterHistory,
   changePassword: (
     oldPassword: string,
     newPassword: string,
-    confirmPassword: string
+    confirmPassword: string,
   ) => Promise<any>,
   changeEmail: (newEmail: string, password: string) => Promise<any>,
   addUserNotification: Function,
-  currentUser: User
-}
+  currentUser: User,
+};
 
 export class AccountSettingsPage extends React.Component<Props> {
   async onSubmitPasswordForm(
     { oldPassword, newPassword, confirmPassword }: ChangePasswordFormValues,
-    { setSubmitting, resetForm }: any
+    { setSubmitting, resetForm }: any,
   ) {
-    const { addUserNotification, changePassword, history } = this.props
+    const { addUserNotification, changePassword, history } = this.props;
 
     try {
       const response = await changePassword(
         oldPassword,
         newPassword,
-        confirmPassword
-      )
+        confirmPassword,
+      );
 
-      let alertText, color
+      let alertText, color;
       if (response.status === 200 || response.status === 204) {
-        alertText = "Your password has been updated successfully."
-        color = "success"
+        alertText = "Your password has been updated successfully.";
+        color = "success";
       } else {
-        alertText = "Unable to reset your password, please try again later."
-        color = "danger"
+        alertText = "Unable to reset your password, please try again later.";
+        color = "danger";
       }
 
       addUserNotification({
         "password-change": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: color,
           props: {
-            text: alertText
-          }
-        }
-      })
+            text: alertText,
+          },
+        },
+      });
 
-      history.push(routes.accountSettings)
+      history.push(routes.accountSettings);
     } finally {
-      resetForm()
-      setSubmitting(false)
+      resetForm();
+      setSubmitting(false);
     }
   }
 
   async onSubmitEmailForm(
     { email, confirmPassword }: ChangeEmailFormValues,
-    { setSubmitting, resetForm }: any
+    { setSubmitting, resetForm }: any,
   ) {
-    const { addUserNotification, changeEmail, history } = this.props
+    const { addUserNotification, changeEmail, history } = this.props;
 
     try {
-      const response = await changeEmail(email, confirmPassword)
+      const response = await changeEmail(email, confirmPassword);
 
-      let alertText, color
+      let alertText, color;
       if (response.status === 200 || response.status === 201) {
         alertText =
-          "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update."
-        color = "success"
+          "You have been sent a verification email on your updated address. Please click on the link in the email to finish email address update.";
+        color = "success";
       } else {
         alertText =
-          "Unable to update your email address, please try again later."
-        color = "danger"
+          "Unable to update your email address, please try again later.";
+        color = "danger";
       }
 
       addUserNotification({
         "email-change": {
-          type:  ALERT_TYPE_TEXT,
+          type: ALERT_TYPE_TEXT,
           color: color,
           props: {
-            text: alertText
-          }
-        }
-      })
+            text: alertText,
+          },
+        },
+      });
 
-      history.push(routes.accountSettings)
+      history.push(routes.accountSettings);
     } finally {
-      resetForm()
-      setSubmitting(false)
+      resetForm();
+      setSubmitting(false);
     }
   }
 
   render() {
-    const { currentUser } = this.props
+    const { currentUser } = this.props;
 
     return (
       <DocumentTitle
@@ -138,29 +138,26 @@ export class AccountSettingsPage extends React.Component<Props> {
           </div>
         </div>
       </DocumentTitle>
-    )
+    );
   }
 }
 
 const changePassword = (oldPassword: string, newPassword: string) =>
-  mutateAsync(auth.changePasswordMutation(oldPassword, newPassword))
+  mutateAsync(auth.changePasswordMutation(oldPassword, newPassword));
 
 const changeEmail = (newEmail: string, password: string) =>
-  mutateAsync(auth.changeEmailMutation(newEmail, password))
+  mutateAsync(auth.changeEmailMutation(newEmail, password));
 
 const mapStateToProps = createStructuredSelector({
-  currentUser: currentUserSelector
-})
+  currentUser: currentUserSelector,
+});
 
 const mapDispatchToProps = {
   changePassword,
   changeEmail,
-  addUserNotification
-}
+  addUserNotification,
+};
 
-export default compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  )
-)(AccountSettingsPage)
+export default compose(connect(mapStateToProps, mapDispatchToProps))(
+  AccountSettingsPage,
+);

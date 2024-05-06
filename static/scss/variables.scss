@@ -1,10 +1,8 @@
-$static-path: '/static';
-
+$static-path: "/static";
 $primary: #a31f34;
 $gray: #363636;
 $gray-85: #d9d9d9;
 $success: #869ca6;
-
 $light-gray: #8a8b8c;
 $very-light-gray: #f5f5f5;
 $soft-light-gray: #d8d8d8;
@@ -18,7 +16,7 @@ $denim-blue: #16729b;
 $deep-sky-blue: #07a3ff;
 $dark-blue: #03152d;
 $tile-background: #fff;
-$tiles-background: rgba(53, 53, 53, 97);
+$tiles-background: rgb(53 53 53 / 9700%);
 $tab-color: #c2c0bf;
 $gray-bg: #ebebeb;
 $darker-grey-bg: #2c2a29;
@@ -26,14 +24,10 @@ $catalog-text: #909090;
 $detail-grid-border-color: #b4b4b4;
 $featured-banner-background: #a32034;
 $featured-banner-border: #5e0c19;
-
 $events-background: #e3e3e3;
-
 $footer-bg: #262622;
 $footer-border: #686461;
-
 $dc-background: #f2f2f2;
-
 $black: #000;
 $white: #fff;
 $alice-blue: #f4f6f7;

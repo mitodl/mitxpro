@@ -296,8 +296,9 @@ def test_payload_coupons():
     order.purchaser.save()
 
     coupon_version = CouponVersionFactory.create()
-    assert str(coupon_version) == "CouponVersion {} for {}".format(
-        coupon_version.coupon.coupon_code, str(coupon_version.payment_version)
+    assert (
+        str(coupon_version)
+        == f"CouponVersion {coupon_version.coupon.coupon_code} for {coupon_version.payment_version!s}"
     )
     # Coupon only eligible for line2, not line1
     CouponRedemption.objects.create(coupon_version=coupon_version, order=order)

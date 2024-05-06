@@ -1,6 +1,6 @@
 // @flow
-import React from "react"
-import ReactMarkdown from "react-markdown"
+import React from "react";
+import ReactMarkdown from "react-markdown";
 
 // this is our patched version of react-markdown
 // we need to fiddle with it to address this issue:
@@ -8,8 +8,8 @@ import ReactMarkdown from "react-markdown"
 // and also to block images
 
 type MarkdownProps = {
-  source: string
-}
+  source: string,
+};
 
 const Markdown = (props: MarkdownProps) => (
   <ReactMarkdown
@@ -17,14 +17,14 @@ const Markdown = (props: MarkdownProps) => (
     escapeHtml
     className="markdown"
     renderers={{
-      linkReference: reference =>
+      linkReference: (reference) =>
         reference.href ? (
           <a href={reference.$ref}>{reference.children}</a>
         ) : (
           <span>[{reference.children[0]}]</span>
-        )
+        ),
     }}
     {...props}
   />
-)
-export default Markdown
+);
+export default Markdown;

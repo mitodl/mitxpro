@@ -191,7 +191,7 @@ class CouponRequestHandler(SheetHandler):
         self.sheet_metadata = request_sheet_metadata
 
     @cached_property
-    def worksheet(self):  # noqa: D102
+    def worksheet(self):
         return self.spreadsheet.sheet1
 
     def protect_coupon_assignment_ranges(
@@ -340,14 +340,10 @@ class CouponRequestHandler(SheetHandler):
         )
         return bulk_coupon_sheet
 
-    def update_completed_rows(self, success_row_results):  # noqa: D102
+    def update_completed_rows(self, success_row_results):
         for row_result in success_row_results:
             self.worksheet.update_values(
-                crange="{date_processed_col}{row_index}:{error_col}{row_index}".format(
-                    date_processed_col=self.sheet_metadata.PROCESSED_COL_LETTER,
-                    error_col=self.sheet_metadata.ERROR_COL_LETTER,
-                    row_index=row_result.row_index,
-                ),
+                crange=f"{self.sheet_metadata.PROCESSED_COL_LETTER}{row_result.row_index}:{self.sheet_metadata.ERROR_COL_LETTER}{row_result.row_index}",
                 values=[
                     [
                         format_datetime_for_sheet_formula(
@@ -360,13 +356,13 @@ class CouponRequestHandler(SheetHandler):
                 ],
             )
 
-    def post_process_results(self, grouped_row_results):  # noqa: D102
+    def post_process_results(self, grouped_row_results):
         # Create assignment sheets for all newly-processed rows
         processed_row_results = grouped_row_results.get(ResultType.PROCESSED, [])
         for row_result in processed_row_results:
             self.create_assignment_sheet(row_result.row_object)
 
-    def get_or_create_request(self, row_data):  # noqa: D102
+    def get_or_create_request(self, row_data):
         coupon_name = row_data[self.sheet_metadata.COUPON_NAME_COL_INDEX].strip()
         purchase_order_id = row_data[
             self.sheet_metadata.PURCHASE_ORDER_COL_INDEX
@@ -391,7 +387,7 @@ class CouponRequestHandler(SheetHandler):
         return coupon_gen_request, created, raw_data_changed
 
     @staticmethod
-    def validate_sheet(enumerated_rows):  # noqa: D102
+    def validate_sheet(enumerated_rows):
         enumerated_data_rows_1, enumerated_data_rows_2 = itertools.tee(enumerated_rows)
         invalid_rows = []
         observed_coupon_names = set()
@@ -407,8 +403,8 @@ class CouponRequestHandler(SheetHandler):
         # object for each row with a non-unique coupon name (except for the row with the first instance
         # of that name).
         for row_index, coupon_name in invalid_coupon_name_row_dict.items():
-            sheet_error_text = "Coupon name '{}' already exists in the sheet".format(
-                coupon_name
+            sheet_error_text = (
+                f"Coupon name '{coupon_name}' already exists in the sheet"
             )
             invalid_rows.append(
                 RowResult(
@@ -427,7 +423,7 @@ class CouponRequestHandler(SheetHandler):
         )
         return valid_data_rows, invalid_rows
 
-    def filter_ignored_rows(self, enumerated_rows):  # noqa: D102
+    def filter_ignored_rows(self, enumerated_rows):
         return filter(
             # If the "ignore" column is set to TRUE for this row, or it has already been processed,
             # it should be skipped
@@ -435,9 +431,7 @@ class CouponRequestHandler(SheetHandler):
             enumerated_rows,
         )
 
-    def process_row(  # noqa: D102
-        self, row_index, row_data
-    ):
+    def process_row(self, row_index, row_data):
         (
             coupon_gen_request,
             request_created,

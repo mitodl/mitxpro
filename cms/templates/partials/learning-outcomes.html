@@ -4,12 +4,12 @@
     <div class="learning-header">
       <h1>{{ page.heading | safe }}</h1>
       {% if page.sub_heading %}
-        {{ page.sub_heading | richtext }}
+      {{ page.sub_heading | richtext }}
       {% endif %}
     </div>
     <ul class="learning-outcomes-list d-flex flex-wrap justify-content-between">
       {% for outcome in page.outcome_items %}
-        <li>{{ outcome }}</li>
+      <li>{{ outcome }}</li>
       {% endfor %}
     </ul>
   </div>

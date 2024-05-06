@@ -180,10 +180,10 @@ class ProgramEnrollmentAuditAdmin(TimestampedModelAdmin):
         """Returns the related User's email"""
         return obj.enrollment.user.email
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -257,10 +257,10 @@ class CourseRunEnrollmentAuditAdmin(TimestampedModelAdmin):
         """Returns the related User's email"""
         return obj.enrollment.user.email
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -274,7 +274,7 @@ class CourseRunGradeAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     search_fields = ["user__email", "user__username"]
 
-    def get_queryset(self, request):  # noqa: ARG002, D102
+    def get_queryset(self, request):  # noqa: ARG002
         return self.model.objects.get_queryset().select_related("user", "course_run")
 
     @admin.display(
@@ -324,10 +324,10 @@ class CourseRunGradeAuditAdmin(TimestampedModelAdmin):
         """Returns the related CourseRun courseware_id"""
         return obj.course_run_grade.course_run.courseware_id
 
-    def has_add_permission(self, request):  # noqa: ARG002, D102
+    def has_add_permission(self, request):  # noqa: ARG002
         return False
 
-    def has_delete_permission(self, request, obj=None):  # noqa: ARG002, D102
+    def has_delete_permission(self, request, obj=None):  # noqa: ARG002
         return False
 
 
@@ -360,7 +360,7 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
         """Return the revoked state"""
         return obj.is_revoked is not True
 
-    def get_queryset(self, request):  # noqa: ARG002, D102
+    def get_queryset(self, request):  # noqa: ARG002
         return self.model.all_objects.get_queryset().select_related(
             "user", "course_run"
         )
@@ -395,7 +395,7 @@ class ProgramCertificateAdmin(TimestampedModelAdmin):
         """Return the revoked state"""
         return obj.is_revoked is not True
 
-    def get_queryset(self, request):  # noqa: ARG002, D102
+    def get_queryset(self, request):  # noqa: ARG002
         return self.model.all_objects.get_queryset().select_related("user", "program")
 
 

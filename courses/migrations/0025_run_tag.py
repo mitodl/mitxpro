@@ -9,7 +9,7 @@ ENROLLABLE_ITEM_ID_SEPARATOR = "+"
 TEXT_ID_RUN_SUFFIX_PATTERN = r"\+(?P<run_tag>R\d+)$"
 
 
-def backfill_run_tags_from_text_id(course_run_qset):  # noqa: D103
+def backfill_run_tags_from_text_id(course_run_qset):
     run_tag_map = defaultdict(list)
     for run in course_run_qset:
         potential_run_tag = run.courseware_id.split(ENROLLABLE_ITEM_ID_SEPARATOR)[-1]
@@ -26,13 +26,13 @@ def backfill_run_tags_from_text_id(course_run_qset):  # noqa: D103
         run_to_update.save()
 
 
-def backfill_run_tags_from_id(course_run_qset):  # noqa: D103
+def backfill_run_tags_from_id(course_run_qset):
     for run in course_run_qset:
         run.run_tag = str(run.id)
         run.save()
 
 
-def backfill_course_run_run_tags(apps, schema_editor):  # noqa: D103
+def backfill_course_run_run_tags(apps, schema_editor):
     Course = apps.get_model("courses", "Course")
     CourseRun = apps.get_model("courses", "CourseRun")
 

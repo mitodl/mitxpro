@@ -38,6 +38,4 @@ class AffiliateReferralAction(TimestampedModel):
     )
 
     def __str__(self):
-        return "AffiliateReferralAction: code={}, created_user_id={}, created_order_id={}".format(
-            self.affiliate.code, self.created_user_id, self.created_order_id
-        )
+        return f"AffiliateReferralAction: code={self.affiliate.code}, created_user_id={self.created_user_id}, created_order_id={self.created_order_id}"

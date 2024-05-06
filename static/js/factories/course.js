@@ -1,8 +1,8 @@
 // @flow
-import { range } from "ramda"
-import casual from "casual-browserify"
+import { range } from "ramda";
+import casual from "casual-browserify";
 
-import { incrementer } from "./util"
+import { incrementer } from "./util";
 
 import type {
   CourseRun,
@@ -14,121 +14,121 @@ import type {
   ProgramEnrollment,
   UserEnrollments,
   CourseRunCertificate,
-  ProgramCertificate
-} from "../flow/courseTypes"
+  ProgramCertificate,
+} from "../flow/courseTypes";
 
-const genCourseRunId = incrementer()
-const genProductId = incrementer()
-const genCoursewareId = incrementer()
-const genRunTagNumber = incrementer()
-const genReadableId = incrementer()
+const genCourseRunId = incrementer();
+const genProductId = incrementer();
+const genCoursewareId = incrementer();
+const genRunTagNumber = incrementer();
+const genReadableId = incrementer();
 
 export const makeCourseRun = (): CourseRun => ({
-  title:            casual.text,
-  start_date:       casual.moment.add(2, "M").format(),
-  end_date:         casual.moment.add(4, "M").format(),
+  title: casual.text,
+  start_date: casual.moment.add(2, "M").format(),
+  end_date: casual.moment.add(4, "M").format(),
   enrollment_start: casual.moment.add(-1, "M").format(),
-  enrollment_end:   casual.moment.add(3, "M").format(),
-  courseware_url:   casual.url,
-  courseware_id:    casual.word.concat(genCoursewareId.next().value),
-  run_tag:          casual.word.concat(genRunTagNumber.next().value),
+  enrollment_end: casual.moment.add(3, "M").format(),
+  courseware_url: casual.url,
+  courseware_id: casual.word.concat(genCoursewareId.next().value),
+  run_tag: casual.word.concat(genRunTagNumber.next().value),
   // $FlowFixMe
-  id:               genCourseRunId.next().value,
-  product_id:       genProductId.next().value
-})
+  id: genCourseRunId.next().value,
+  product_id: genProductId.next().value,
+});
 
-const genCourseId = incrementer()
+const genCourseId = incrementer();
 const makeBaseCourse = (nextRunId: ?number): BaseCourse => ({
   // $FlowFixMe
-  id:            genCourseId.next().value,
-  title:         casual.text,
-  description:   casual.text,
+  id: genCourseId.next().value,
+  title: casual.text,
+  description: casual.text,
   thumbnail_url: casual.url,
-  readable_id:   casual.word,
-  next_run_id:   nextRunId
-})
+  readable_id: casual.word,
+  next_run_id: nextRunId,
+});
 
 export const makeCourse = (): Course => {
-  const runs = range(0, 3).map(() => makeCourseRun())
-  const baseCourse = makeBaseCourse(runs[1].id)
+  const runs = range(0, 3).map(() => makeCourseRun());
+  const baseCourse = makeBaseCourse(runs[1].id);
 
   return {
     ...baseCourse,
-    courseruns: runs
-  }
-}
+    courseruns: runs,
+  };
+};
 
-const genProgramId = incrementer()
+const genProgramId = incrementer();
 export const makeProgram = (): Program => ({
   // $FlowFixMe
-  id:            genProgramId.next().value,
-  title:         casual.text,
-  description:   casual.text,
+  id: genProgramId.next().value,
+  title: casual.text,
+  description: casual.text,
   thumbnail_url: casual.url,
-  readable_id:   casual.word.concat(genReadableId.next().value)
-})
+  readable_id: casual.word.concat(genReadableId.next().value),
+});
 
 export const makeCourseRunDetail = (): CourseRunDetail => {
-  const run = makeCourseRun()
+  const run = makeCourseRun();
   return {
     ...makeCourseRun(),
-    course: makeBaseCourse(run.id)
-  }
-}
+    course: makeBaseCourse(run.id),
+  };
+};
 
 export const makeCourseRunEnrollment = (): CourseRunEnrollment => ({
-  run:         makeCourseRunDetail(),
+  run: makeCourseRunDetail(),
   certificate: makeCourseCertificate(),
-  receipt:     null
-})
+  receipt: null,
+});
 
-const genProgramEnrollmentId = incrementer()
+const genProgramEnrollmentId = incrementer();
 export const makeProgramEnrollment = (): ProgramEnrollment => ({
   // $FlowFixMe
-  id:                     genProgramEnrollmentId.next().value,
-  program:                makeProgram(),
+  id: genProgramEnrollmentId.next().value,
+  program: makeProgram(),
   course_run_enrollments: [
     makeCourseRunEnrollment(),
-    makeCourseRunEnrollment()
+    makeCourseRunEnrollment(),
   ],
   certificate: makeProgramCertificate(),
-  receipt:     null
-})
+  receipt: null,
+});
 
 export const makeUserEnrollments = (): UserEnrollments => ({
-  program_enrollments:    [makeProgramEnrollment()],
+  program_enrollments: [makeProgramEnrollment()],
   course_run_enrollments: [
     makeCourseRunEnrollment(),
-    makeCourseRunEnrollment()
+    makeCourseRunEnrollment(),
   ],
-  past_program_enrollments:    [makeProgramEnrollment()],
+  past_program_enrollments: [makeProgramEnrollment()],
   past_course_run_enrollments: [
     makeCourseRunEnrollment(),
-    makeCourseRunEnrollment()
-  ]
-})
+    makeCourseRunEnrollment(),
+  ],
+});
 
 export const makeCourseCertificate = (): CourseRunCertificate => ({
   uuid: "some-uuid",
-  link: "some-link"
-})
+  link: "some-link",
+});
 
 export const makeProgramCertificate = (): ProgramCertificate => ({
   uuid: "some-uuid",
-  link: "some-link"
-})
+  link: "some-link",
+});
 
 export const makeCourseTopics = () => [
   {
-    name:         "Business",
-    course_count: 1
+    name: "Business",
+    course_count: 1,
   },
   {
-    name:         "Engineering",
-    course_count: 2
+    name: "Engineering",
+    course_count: 2,
   },
   {
-    name:         "Commerce",
-    course_count: 5
+    name: "Commerce",
+    course_count: 5,
   },
-]
+];

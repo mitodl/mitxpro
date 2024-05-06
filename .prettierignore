@@ -1,0 +1,15 @@
+.venv/
+.yarn/
+flow-typed/npm/
+static/js/flow/
+static/js/components/forms/elements/FormError.js
+static/js/lib/queries/catalog.js
+static/js/containers/pages/profile/ViewProfilePage.js
+static/js/lib/courses.js
+static/js/store/configureStore.js
+static/js/util/integration_test_helper.js
+static/js/lib/queries/digitalCredentials.js
+static/js/Router.js
+static/js/components/forms/ProfileFormFields.js
+voucher/templates/enroll.html
+mail/templates/product_order_receipt/body.html

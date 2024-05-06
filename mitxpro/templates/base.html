@@ -1,82 +1,98 @@
 {% load static hijack render_bundle js_interop %}
 {% load wagtailcore_tags latest_notification startswith %}
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     {% spaceless %}
     {% block seohead %}
     {% endblock %}
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="{% static 'images/favicon.ico' %}" />
     {% include "partials/gtm_head.html" %}
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700|Rajdhani:300,400,500,600,700&display=swap"
-          media="all" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
-          media="none" onload="if(media!='all') media='all'">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700|Rajdhani:300,400,500,600,700&display=swap"
+      media="all"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
+      media="none"
+      onload="if(media!='all') media='all'"
+    />
     {% js_settings %}
     <script type="text/javascript">
-    {% if CSOURCE_PAYLOAD %}
-    var CSOURCE_PAYLOAD = {{ CSOURCE_PAYLOAD|safe }};
-    {% else %}
-    var CSOURCE_PAYLOAD = null;
-    {% endif %}
+      {% if CSOURCE_PAYLOAD %}
+      var CSOURCE_PAYLOAD = {{ CSOURCE_PAYLOAD|safe }};
+      {% else %}
+      var CSOURCE_PAYLOAD = null;
+      {% endif %}
     </script>
     {% render_bundle 'style' %}
     {% render_bundle 'common' %}
     {% render_bundle 'header-root' %}
 
     <title>{% block title %}{% endblock %}</title>
-    <meta name="description" content="{% block description %}{% endblock %}">
-    <meta name="keywords" content="{% block keywords %}{% endblock %}">
+    <meta name="description" content="{% block description %}{% endblock %}" />
+    <meta name="keywords" content="{% block keywords %}{% endblock %}" />
     {% if domain_verification_tag %}
-      <meta name="google-site-verification" content="{{ domain_verification_tag }}" />
+    <meta
+      name="google-site-verification"
+      content="{{ domain_verification_tag }}"
+    />
     {% endif %}
-    <meta name='zd-site-verification' content="o0itxdfh369m1bw4cuz9" />
-    <meta name='zd-site-verification' content="7e22kzikbruclk2jjomono" />
+    <meta name="zd-site-verification" content="o0itxdfh369m1bw4cuz9" />
+    <meta name="zd-site-verification" content="7e22kzikbruclk2jjomono" />
     {% block extrahead %}
     {% endblock %}
     {% endspaceless %}
-      {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-          <script defer id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"> </script>
-      {% endif %}
+    {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
+    <script
+      defer
+      id="ze-snippet"
+      src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"
+    ></script>
+    {% endif %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
-  <div class="main-panel">
-    {% include "partials/gtm_body.html" %}
-    {# Site-wide notifications should not show up on the ecommerce bulk pages #}
-    {% if not request.path|startswith:'/ecommerce/bulk/,/certificate/' %}
+    <div class="main-panel">
+      {% include "partials/gtm_body.html" %}
+      <!-- prettier-ignore -->
+      {# Site-wide notifications should not show up on the ecommerce bulk pages #}
+      {% if not request.path|startswith:'/ecommerce/bulk/,/certificate/' %}
       {% latest_notification %}
-    {% endif %}
-    {% block headercontent %}
-    {% endblock %}
-    {% block content %}
-        {% block banner %}
-        {% endblock %}
-    {% endblock %}
-    {% block contact-us %}
-    {% endblock %}
-  </div>
+      {% endif %}
+      {% block headercontent %}
+      {% endblock %}
+      {% block content %}
+      {% block banner %}
+      {% endblock %}
+      {% endblock %}
+      {% block contact-us %}
+      {% endblock %}
+    </div>
     {% block footer %}
-        {% include "footer.html" %}
+    {% include "footer.html" %}
     {% endblock %}
     {% render_bundle 'django' added_attrs='defer' %}
     {% block scripts %}
-      {# Script to defer youtube video rendering #}
-      <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-          const iframes = Array.from(document.getElementsByTagName('iframe'));
-            iframes.forEach(function (iframe) {
-              const data_src = iframe.getAttribute('data-src')
-                /* Making sure that we only change attributes of those iframes that have youtube embed as a source url.
+    {# Script to defer youtube video rendering #}
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function () {
+        const iframes = Array.from(document.getElementsByTagName('iframe'));
+        iframes.forEach(function (iframe) {
+          const data_src = iframe.getAttribute('data-src');
+          /* Making sure that we only change attributes of those iframes that have youtube embed as a source url.
                 By replacing the src with data-src we let the iframe run the youtube scripts and load the video.*/
-              if (data_src && data_src.indexOf("youtube.com/embed") !== -1) {
-                iframe.setAttribute('src', data_src);
-              }
-          });
+          if (data_src && data_src.indexOf('youtube.com/embed') !== -1) {
+            iframe.setAttribute('src', data_src);
+          }
         });
-        </script>
+      });
+    </script>
     {% endblock %}
   </body>
 </html>

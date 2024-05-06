@@ -1,13 +1,13 @@
 // @flow
-import React from "react"
-import { Switch, Route } from "react-router-dom"
+import React from "react";
+import { Switch, Route } from "react-router-dom";
 
-import { routes } from "../../../lib/urls"
+import { routes } from "../../../lib/urls";
 
-import LoginEmailPage from "./LoginEmailPage"
-import LoginPasswordPage from "./LoginPasswordPage"
-import LoginForgotPasswordPage from "./LoginForgotPasswordPage"
-import LoginForgotPasswordConfirmPage from "./LoginForgotPasswordConfirmPage"
+import LoginEmailPage from "./LoginEmailPage";
+import LoginPasswordPage from "./LoginPasswordPage";
+import LoginForgotPasswordPage from "./LoginForgotPasswordPage";
+import LoginForgotPasswordConfirmPage from "./LoginForgotPasswordConfirmPage";
 
 const ForgotPasswordPages = () => (
   <React.Fragment>
@@ -22,7 +22,7 @@ const ForgotPasswordPages = () => (
       component={LoginForgotPasswordConfirmPage}
     />
   </React.Fragment>
-)
+);
 
 const LoginPages = () => (
   <Switch>
@@ -33,6 +33,6 @@ const LoginPages = () => (
       component={ForgotPasswordPages}
     />
   </Switch>
-)
+);
 
-export default LoginPages
+export default LoginPages;

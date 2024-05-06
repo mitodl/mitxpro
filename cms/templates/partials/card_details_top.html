@@ -3,9 +3,12 @@
 <div class="cover-image">
   <div class="cover-image-frame">
     {% if courseware_page.thumbnail_image %}
-      <img src="{% image_version_url courseware_page.thumbnail_image "fill-275x155" %}" alt="{{ courseware_page.thumbnail_image.title }}" />
+    <img
+      src="{% image_version_url courseware_page.thumbnail_image "fill-275x155" %}"
+      alt="{{ courseware_page.thumbnail_image.title }}"
+    />
     {% else %}
-      <img src="{% static default_image_path %}" alt="Preview image" />
+    <img src="{% static default_image_path %}" alt="Preview image" />
     {% endif %}
   </div>
 </div>
@@ -17,54 +20,53 @@
   </h3>
   <ul>
     {% if courseware_page.is_external_page and courseware_page.price %}
-      <li>
-        <strong>Price:</strong>
-        ${{ courseware_page.price|floatformat:"0"|intcomma }}
-      </li>
+    <li>
+      <strong>Price:</strong>
+      ${{ courseware_page.price|floatformat:"0"|intcomma }}
+    </li>
     {% elif courseware_page.product.current_price %}
-      <li>
-        <strong>Price:</strong>
-        ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
-      </li>
+    <li>
+      <strong>Price:</strong>
+      ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
+    </li>
     {% elif courseware_page.is_course_page and courseware_page.product.first_unexpired_run.current_price %}
-      <li>
-        <strong>Price:</strong>
-        ${{ courseware_page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}
-      </li>
+    <li>
+      <strong>Price:</strong>
+      ${{ courseware_page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}
+    </li>
     {% endif %}
     {% if object_type == "program" %}
-      <li>
-        <strong>Number of Courses:</strong>
-        {{ courseware_page.product.num_courses }}
-      </li>
+    <li>
+      <strong>Number of Courses:</strong>
+      {{ courseware_page.product.num_courses }}
+    </li>
     {% endif %}
     {% if courseware_page.duration %}
-      <li>
-        <strong>Duration:</strong>
-        {{ courseware_page.duration }}
-      </li>
+    <li>
+      <strong>Duration:</strong>
+      {{ courseware_page.duration }}
+    </li>
     {% endif %}
     {% if courseware_page.is_external_page and courseware_page.next_run_date %}
-      <li>
-        <strong>Next Start Date:</strong>
-        {{ courseware_page.next_run_date|date:"F j, Y" }}
-      </li>
+    <li>
+      <strong>Next Start Date:</strong>
+      {{ courseware_page.next_run_date|date:"F j, Y" }}
+    </li>
     {% elif courseware_page.product.next_run_date %}
-      <li>
-        <strong>Next Start Date:</strong>
-        {{ courseware_page.product.next_run_date|date:"F j, Y" }}
-      </li>
+    <li>
+      <strong>Next Start Date:</strong>
+      {{ courseware_page.product.next_run_date|date:"F j, Y" }}
+    </li>
     {% endif %}
   </ul>
 </div>
 <div class="offering-type">
   <label>
     {% if object_type == "course" %}
-      Single
+    Single
     {% else %}
-      Multi
+    Multi
     {% endif %}
     Course Online
   </label>
 </div>
-

@@ -1,6 +1,6 @@
 ## Title for RFC
-ecommerce in mitxpro
 
+ecommerce in mitxpro
 
 #### Abstract
 
@@ -14,7 +14,7 @@ The only supported payment processor for MicroMasters is CyberSource.
 At the time MIT didn't support other payment processors
 like Stripe for example, and I believe that's still true today.
 
-edX has support for multiple payment processors, for example 
+edX has support for multiple payment processors, for example
 the [CyberSource payment processor backend](https://github.com/edx/ecommerce/blob/master/ecommerce/extensions/payment/processors/cybersource.py#L369).
 This adds some complexity since there are significant differences
 between how they interact with the web application's frontend and backend.
@@ -41,20 +41,21 @@ item to the basket.
 ##### Recommendation
 
 Whether or not we want to use django-oscar, we will need models like these (using django-oscar names here):
- - `Order` for an instance of a purchase. This should have a `type` field to distinguish purchase orders
- and end user purchases.
- - `Basket` for a user's shopping cart. This should be connected to `Order` and also `User` for
- the user who is making the purchase.
- - `Line` for an item in an `Basket`
- - `Receipt` to store CyberSource post-back information. Foreign key to `Order`.
- - `Product` to represent a purchasable item. In MicroMasters we skip this and 
- instead set the course key in the `Line` directly but should have this object
- to provide future flexibility and to let us decouple the price and the course information.
- - `Coupon` to describe a coupon and how it can be used. This should have at least a field to store the coupon code
-and the number of allowed redemptions if a coupon code can be used by multiple users or multiple times.
- - `CouponBasket` to connect `Coupon` with `Basket` to describe where a coupon is being redeemed.
- - `PurchaseOrder` to store notes and other information about a purchase order. Foreign key to `Order`.
-A future RFC will define this further.
+
+- `Order` for an instance of a purchase. This should have a `type` field to distinguish purchase orders
+  and end user purchases.
+- `Basket` for a user's shopping cart. This should be connected to `Order` and also `User` for
+  the user who is making the purchase.
+- `Line` for an item in an `Basket`
+- `Receipt` to store CyberSource post-back information. Foreign key to `Order`.
+- `Product` to represent a purchasable item. In MicroMasters we skip this and
+  instead set the course key in the `Line` directly but should have this object
+  to provide future flexibility and to let us decouple the price and the course information.
+- `Coupon` to describe a coupon and how it can be used. This should have at least a field to store the coupon code
+  and the number of allowed redemptions if a coupon code can be used by multiple users or multiple times.
+- `CouponBasket` to connect `Coupon` with `Basket` to describe where a coupon is being redeemed.
+- `PurchaseOrder` to store notes and other information about a purchase order. Foreign key to `Order`.
+  A future RFC will define this further.
 
 These tables will have audit tables to record changes in an append-only JSON format similar to
 how audit tables are implemented in MicroMasters: `Order`, `Coupon`, `PurchaseOrder`, `Product`. The
@@ -95,13 +96,13 @@ A future RFC will define the models and interface for adding purchase orders.
 
 #### Coupons
 
-edX overrides the django-oscar `Voucher` class to support coupons. They have several 
+edX overrides the django-oscar `Voucher` class to support coupons. They have several
 different variations of coupons, for example:
 
- - who can redeem: once by one user, once by many users, many times by many users
- - discount: fixed discount or percent discount
- - target: verified seat or audit in a course (or something else?)
- - time of validity
+- who can redeem: once by one user, once by many users, many times by many users
+- discount: fixed discount or percent discount
+- target: verified seat or audit in a course (or something else?)
+- time of validity
 
 edX only allows one coupon to be used at checkout so they don't need to worry about order of operations
 when two coupons are applied. There is an admin site which allow admins to generate a CSV of coupon codes,
@@ -110,15 +111,15 @@ within edX.)
 
 In MicroMasters we had a custom implementation of coupons, working alongside a custom implementation of financial aid.
 The Django admin is used to create coupons and to record information about coupon invoices for bulk instances of
-coupons. 
+coupons.
 
 There are variations of coupons in MicroMasters:
 
- - standard or discounted_previous_course: The latter handles a special case where people who already paid for
- a previous course on edX get a discounted rate.
- - discount: price discount, percent discount, or just set a new price.
- - target: either program or course
- - time of validity
+- standard or discounted_previous_course: The latter handles a special case where people who already paid for
+  a previous course on edX get a discounted rate.
+- discount: price discount, percent discount, or just set a new price.
+- target: either program or course
+- time of validity
 
 If a coupon is `standard`, the user "attaches" it by clicking on a link in an email. This directs
 them to a page and the code is taken off the URL and sent to the server. This creates a `UserCoupon`
@@ -138,7 +139,7 @@ purchase.
 We also may need to support automatic discounts in the future
 based on arbitrary criteria, to be defined. It would be ideal to support this use case using
 coupons, given to the user and used explicitly like other coupons.
- 
+
 #### Frontend/Backend work
 
 In MicroMasters, when the user clicks the button to submit the order, it creates an unfulfilled order on the backend

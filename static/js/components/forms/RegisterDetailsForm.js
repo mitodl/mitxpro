@@ -1,38 +1,43 @@
 // @flow
-import React from "react"
-import { Formik, Form } from "formik"
+import React from "react";
+import { Formik, Form } from "formik";
 
 import {
   passwordValidation,
   legalAddressValidation,
-  LegalAddressFields
-} from "./ProfileFormFields"
+  LegalAddressFields,
+} from "./ProfileFormFields";
 
-import type { Country } from "../../flow/authTypes"
+import type { Country } from "../../flow/authTypes";
 
 type Props = {
   onSubmit: Function,
   countries: Array<Country>,
   isVatEnabled: boolean,
   enableVatID: Function,
-}
+};
 
 const INITIAL_VALUES = {
-  name:          "",
-  password:      "",
+  name: "",
+  password: "",
   legal_address: {
-    first_name:         "",
-    last_name:          "",
-    street_address:     ["", ""],
-    city:               "",
-    country:            "",
+    first_name: "",
+    last_name: "",
+    street_address: ["", ""],
+    city: "",
+    country: "",
     state_or_territory: "",
-    postal_code:        "",
-    vat_id:             "",
-  }
-}
+    postal_code: "",
+    vat_id: "",
+  },
+};
 
-const RegisterDetailsForm = ({ onSubmit, countries, isVatEnabled, enableVatID }: Props) => (
+const RegisterDetailsForm = ({
+  onSubmit,
+  countries,
+  isVatEnabled,
+  enableVatID,
+}: Props) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(passwordValidation)}
@@ -60,6 +65,6 @@ const RegisterDetailsForm = ({ onSubmit, countries, isVatEnabled, enableVatID }:
       </Form>
     )}
   />
-)
+);
 
-export default RegisterDetailsForm
+export default RegisterDetailsForm;

@@ -1,7 +1,109 @@
+---
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+ci:
+  skip:
+    # Because these are local hooks it seems like they won't easily run in pre-commit CI
+    - prettier
+    - eslint
+    - stylelint
 repos:
-  - repo: git@github.com:Yelp/detect-secrets
-    rev: v0.13.1
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
     hooks:
-    -   id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: .*_test.*|yarn\.lock
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+        exclude: ".hbs$"
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.8.0-1
+    hooks:
+      - id: shfmt
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [--format, parsable, -d, relaxed]
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - --baseline
+          - .secrets.baseline
+          - --exclude-files
+          - .yarn/
+          - --exclude-files
+          - "_test.py$"
+          - --exclude-files
+          - "test_.*.py"
+          - --exclude-files
+          - poetry.lock
+          - --exclude-files
+          - yarn.lock
+          - --exclude-files
+          - compliance/test_data/cybersource/
+          - --exclude-files
+          - "_test.js$"
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.4.0"
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args:
+          - --extend-ignore=D1
+          - --fix
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier
+        language: node
+        entry: yarn
+        args: [run, prettier, --write, --ignore-unknown]
+        types_or:
+          [
+            javascript,
+            jsx,
+            ts,
+            tsx,
+            json,
+            scss,
+            sass,
+            css,
+            yaml,
+            markdown,
+            html,
+          ]
+      - id: eslint
+        name: eslint
+        description: "Lint JS/TS files and apply automatic fixes"
+        entry: yarn
+        language: node
+        types_or: [javascript, jsx, ts, tsx]
+        args: [run, eslint, --fix, --quiet]
+        exclude: "(node_modules/|.yarn/)"
+        require_serial: false
+      - id: stylelint
+        name: stylelint
+        description: "Lint SCSS files"
+        entry: yarn
+        language: node
+        types_or: [scss, css, sass]
+        args: [run, stylelint, --allow-empty-input, --fix]
+        exclude: "(node_modules/|static/css/vendor/)"
+        require_serial: false
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"]
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.6.27
+    hooks:
+      - id: actionlint
+        name: actionlint
+        description: Runs actionlint to lint GitHub Actions workflow files

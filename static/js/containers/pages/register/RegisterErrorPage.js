@@ -1,8 +1,8 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react"
-import DocumentTitle from "react-document-title"
-import { REGISTER_ERROR_PAGE_TITLE } from "../../../constants"
+import React from "react";
+import DocumentTitle from "react-document-title";
+import { REGISTER_ERROR_PAGE_TITLE } from "../../../constants";
 
 const RegisterErrorPage = () => (
   <DocumentTitle title={`${SETTINGS.site_name} | ${REGISTER_ERROR_PAGE_TITLE}`}>
@@ -21,6 +21,6 @@ const RegisterErrorPage = () => (
       </div>
     </div>
   </DocumentTitle>
-)
+);
 
-export default RegisterErrorPage
+export default RegisterErrorPage;

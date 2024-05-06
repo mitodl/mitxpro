@@ -17,12 +17,12 @@ function renderSiteNotification() {
 export default function notifications() {
   renderSiteNotification();
 
-  $(".notifications").on("click", ".close-notification", function(e) {
+  $(".notifications").on("click", ".close-notification", function (e) {
     e.preventDefault();
     const $notification = $(this).closest(".notification");
     localStorage.setItem(
       "dismissedNotification",
-      $notification.data("notification-id")
+      $notification.data("notification-id"),
     );
     $notification.remove();
   });
