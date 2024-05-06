@@ -7,12 +7,12 @@ from types import SimpleNamespace
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
+from hubspot.crm.objects import SimplePublicObject
 from mitol.hubspot_api.factories import HubspotObjectFactory
 
 from b2b_ecommerce import factories as b2b_factories
 from ecommerce import factories
 from ecommerce.models import Order, Product
-from hubspot.crm.objects import SimplePublicObject
 from users.models import User
 
 TIMESTAMPS = [
