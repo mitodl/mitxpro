@@ -435,21 +435,15 @@ def test_get_basket(basket_client, basket_and_coupons, mock_context, mocker):
 
 
 @pytest.mark.parametrize(
-    "receipts_enabled, order_status, expected_status_code",  # noqa: PT006
+    ("order_status", "expected_status_code"),
     [
-        [True, Order.FULFILLED, status.HTTP_200_OK],  # noqa: PT007
-        [True, Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        [True, Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        [False, Order.FULFILLED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        [False, Order.CREATED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        [False, Order.REFUNDED, status.HTTP_404_NOT_FOUND],  # noqa: PT007
+        (Order.FULFILLED, status.HTTP_200_OK),
+        (Order.CREATED, status.HTTP_404_NOT_FOUND),
+        (Order.REFUNDED, status.HTTP_404_NOT_FOUND),
     ],
 )
-def test_get_order_configuration(  # noqa: PLR0913
-    settings, user, user_client, receipts_enabled, order_status, expected_status_code
-):
+def test_get_order_configuration(user, user_client, order_status, expected_status_code):
     """Test the view that handles order receipts functions as expected"""
-    settings.ENABLE_ORDER_RECEIPTS = receipts_enabled
     line = LineFactory.create(order__status=order_status, order__purchaser=user)
     resp = user_client.get(reverse("order_receipt_api", kwargs={"pk": line.order.id}))
     assert resp.status_code == expected_status_code

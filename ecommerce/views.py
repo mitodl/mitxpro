@@ -223,8 +223,7 @@ class CheckoutView(APIView):
 
             # This redirects the user to our order success page
             url = receipt_url
-            if settings.ENABLE_ORDER_RECEIPTS:
-                send_ecommerce_order_receipt(order)
+            send_ecommerce_order_receipt(order)
             method = "GET"
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
@@ -289,8 +288,6 @@ class OrderReceiptView(RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         """Return a 404 for all requests if the feature is not enabled"""
-        if not settings.ENABLE_ORDER_RECEIPTS:
-            raise Http404
         return self.retrieve(request, *args, **kwargs)
 
 
