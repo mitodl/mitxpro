@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.146.2
+---------------
+
+- refactor: remove ENABLE_ORDER_RECEIPTS (#2964)
+- [pre-commit.ci] auto fixes from pre-commit.com hooks
+- Pre commit linting (#2955)
+- fix(deps): update dependency django-storages to v1.14.3
+- fix(deps): update dependency flaky to v3.8.1
+- fix(deps): update dependency celery to v5.4.0
+- fix(deps): update dependency edx-api-client to v1.8.0
+- fix(deps): update dependency wagtail to v5.2.5
+- fix(deps): update dependency boto3 to v1.34.98
+
 Version 0.146.1 (Released May 06, 2024)
 ---------------
 
