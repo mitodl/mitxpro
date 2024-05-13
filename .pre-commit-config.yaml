@@ -29,7 +29,7 @@ repos:
       - id: yamllint
         args: [--format, parsable, -d, relaxed]
   - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
+    rev: v1.5.0
     hooks:
       - id: detect-secrets
         args:
@@ -50,7 +50,7 @@ repos:
           - --exclude-files
           - "_test.js$"
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.4.0"
+    rev: "v0.4.4"
     hooks:
       - id: ruff-format
       - id: ruff
@@ -102,7 +102,7 @@ repos:
       - id: shellcheck
         args: ["--severity=warning"]
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.27
+    rev: v1.7.0
     hooks:
       - id: actionlint
         name: actionlint
