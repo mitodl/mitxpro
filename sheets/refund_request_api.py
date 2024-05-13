@@ -110,7 +110,7 @@ class RefundRequestRow:
                     == GOOGLE_API_TRUE_VAL
                 ),
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise SheetRowParsingException(str(exc)) from exc
 
 

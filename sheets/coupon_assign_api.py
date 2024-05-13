@@ -105,7 +105,7 @@ class CouponAssignmentRow:
                     raw_row_data, assign_sheet_metadata.ENROLLED_EMAIL_COL
                 ),
             )
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise SheetRowParsingException(str(exc)) from exc
 
 
