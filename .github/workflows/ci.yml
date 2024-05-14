@@ -90,7 +90,6 @@ jobs:
           MITXPRO_ADMIN_EMAIL: example@localhost
           OPENEDX_API_CLIENT_ID: fake_client_id
           OPENEDX_API_CLIENT_SECRET: fake_client_secret # pragma: allowlist secret
-          OPENEDX_API_KEY: test-openedx-api-key # pragma: allowlist secret
 
       - name: Tests
         run: |
@@ -120,7 +119,6 @@ jobs:
           OPENEDX_API_BASE_URL: http://localhost:18000
           OPENEDX_API_CLIENT_ID: fake_client_id
           OPENEDX_API_CLIENT_SECRET: fake_client_secret # pragma: allowlist secret
-          OPENEDX_API_KEY: test-openedx-api-key # pragma: allowlist secret
           SECRET_KEY: local_unsafe_key # pragma: allowlist secret
 
       - name: Upload coverage to CodeCov
