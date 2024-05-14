@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.146.2
+Version 0.146.2 (Released May 14, 2024)
 ---------------
 
 - refactor: remove ENABLE_ORDER_RECEIPTS (#2964)
