@@ -739,10 +739,10 @@ def unenroll_edx_course_run(run_enrollment):
         EdxApiEnrollErrorException: Raised if the underlying edX API HTTP request fails
         UnknownEdxApiEnrollException: Raised if an unknown error was encountered during the edX API request
     """
-    edx_client = get_edx_api_client(run_enrollment.user)
+    edx_client = get_edx_api_service_client()
     try:
         deactivated_enrollment = edx_client.enrollments.deactivate_enrollment(
-            run_enrollment.run.courseware_id
+            run_enrollment.run.courseware_id, username=run_enrollment.user.username
         )
     except HTTPError as exc:
         raise EdxApiEnrollErrorException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904, TRY200

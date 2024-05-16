@@ -716,14 +716,19 @@ def test_unenroll_edx_course_run(mocker):
     mock_client = mocker.MagicMock()
     run_enrollment = CourseRunEnrollmentFactory.create(edx_enrolled=True)
     courseware_id = run_enrollment.run.courseware_id
-    enroll_return_value = mocker.Mock(json={"course_id": courseware_id})
+    username = run_enrollment.user.username
+    enroll_return_value = mocker.Mock(
+        json={"course_id": courseware_id, "user": username}
+    )
     mock_client.enrollments.deactivate_enrollment = mocker.Mock(
         return_value=enroll_return_value
     )
-    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    mocker.patch("courseware.api.get_edx_api_service_client", return_value=mock_client)
     deactivated_enrollment = unenroll_edx_course_run(run_enrollment)
 
-    mock_client.enrollments.deactivate_enrollment.assert_called_once_with(courseware_id)
+    mock_client.enrollments.deactivate_enrollment.assert_called_once_with(
+        courseware_id, username=username
+    )
     assert deactivated_enrollment == enroll_return_value
 
 
@@ -744,7 +749,7 @@ def test_unenroll_edx_course_run_failure(
     mock_client.enrollments.deactivate_enrollment = mocker.Mock(
         side_effect=client_exception_raised
     )
-    mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
+    mocker.patch("courseware.api.get_edx_api_service_client", return_value=mock_client)
     with pytest.raises(expected_exception):
         unenroll_edx_course_run(run_enrollment)
 
