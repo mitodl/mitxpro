@@ -1,7 +1,8 @@
 """Tests for Course related tasks"""
 
-import pytest
 from collections import Counter
+
+import pytest
 
 from courses.factories import CourseRunFactory
 from courses.tasks import sync_courseruns_data
