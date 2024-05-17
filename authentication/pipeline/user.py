@@ -147,7 +147,7 @@ def create_user_via_email(
             raise IntegrityError(  # noqa: TRY301
                 "Failed to create User with generated username ({})".format(username)  # noqa: EM103, UP032
             )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise UserCreationFailedException(backend, current_partial) from exc
 
     return {"is_new": True, "user": created_user, "username": created_user.username}

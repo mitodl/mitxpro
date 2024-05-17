@@ -221,7 +221,7 @@ def test_voucher_upload_path(voucher_and_exact_match_with_coupon):
     voucher = voucher_and_exact_match_with_coupon.voucher
     assert (
         re.match(
-            r"vouchers\/\w{8}\-\w{4}\-\w{4}\-\w{4}-\w{12}_%s" % voucher.pdf.name,
+            r"vouchers\/\w{8}\-\w{4}\-\w{4}\-\w{4}-\w{12}_%s" % voucher.pdf.name,  # noqa: UP031
             voucher_upload_path(voucher, voucher.pdf.name),
         )
         is not None

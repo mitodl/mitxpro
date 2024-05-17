@@ -37,7 +37,7 @@ jobs:
           - 9200:9200
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Apt update
         run: sudo apt-get update -y
@@ -131,7 +131,7 @@ jobs:
   javascript-tests:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Setup NodeJS
         uses: actions/setup-node@v2-beta
@@ -142,7 +142,7 @@ jobs:
         id: yarn-cache-dir-path
         run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
         with:
           path: ${{ steps.yarn-cache-dir-path.outputs.dir }}

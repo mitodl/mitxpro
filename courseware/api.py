@@ -671,12 +671,12 @@ def enroll_in_edx_course_runs(user, course_runs, force_enrollment=True):  # noqa
                 raise EdxApiEnrollErrorException(
                     user, course_run, inner_exc
                 ) from inner_exc
-            except Exception as inner_exc:  # noqa: BLE001
+            except Exception as inner_exc:
                 raise UnknownEdxApiEnrollException(
                     user, course_run, inner_exc
                 ) from inner_exc
             results.append(result)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise UnknownEdxApiEnrollException(user, course_run, exc) from exc
     return results
 
