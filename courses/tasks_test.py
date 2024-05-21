@@ -1,5 +1,7 @@
 """Tests for Course related tasks"""
 
+from collections import Counter
+
 import pytest
 
 from courses.factories import CourseRunFactory
@@ -16,4 +18,8 @@ def test_sync_courseruns_data(mocker):
     CourseRunFactory.create_batch(size=3, course__is_external=True)
 
     sync_courseruns_data.delay()
-    sync_course_runs.assert_called_once_with(course_runs)
+    sync_course_runs.assert_called_once()
+
+    called_args, _ = sync_course_runs.call_args
+    actual_course_runs = called_args[0]
+    assert Counter(actual_course_runs) == Counter(course_runs)
