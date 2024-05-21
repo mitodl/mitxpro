@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.147.0
+---------------
+
+- fix: intermittent/flaky test assertion failure in test_sync_courseruns_data (#2983)
+- chore(deps): update postgres docker tag to v12.19
+- fix(deps): update dependency django to v4.2.13
+- fix(deps): update dependency boto3 to v1.34.108
+- [pre-commit.ci] pre-commit autoupdate (#2981)
+- chore(deps): bump get-func-name from 2.0.0 to 2.0.2 (#2770)
+- chore(deps): update akhileshns/heroku-deploy digest to 581dd28 (#2719)
+
 Version 0.146.2 (Released May 14, 2024)
 ---------------
 
