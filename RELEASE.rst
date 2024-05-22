@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.147.0
+Version 0.147.0 (Released May 22, 2024)
 ---------------
 
 - fix: intermittent/flaky test assertion failure in test_sync_courseruns_data (#2983)
