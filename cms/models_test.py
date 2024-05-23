@@ -64,7 +64,12 @@ from cms.models import (
     UserTestimonialsPage,
     WhoShouldEnrollPage,
 )
-from courses.factories import CourseFactory, CourseRunFactory
+from courses.factories import (
+    CourseFactory,
+    CourseRunCertificateFactory,
+    CourseRunFactory,
+    ProgramCertificateFactory,
+)
 
 pytestmark = [pytest.mark.django_db]
 
@@ -1785,3 +1790,25 @@ def test_program_page_price_is_updated(superuser_client):
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
     assert program.current_price == 999
+
+
+def test_course_run_certificate_get(user_client):
+    """Test that course run certificate get is successful for a valid UUID and raises 404 for invalid UUID"""
+    certificate = CourseRunCertificateFactory.create()
+    resp = user_client.get(f"/certificate/{certificate.uuid}/")
+    assert resp.status_code == 200
+
+    invalid_uuid = str(certificate.uuid)[0:-12]
+    resp = user_client.get(f"/certificate/{invalid_uuid}/")
+    assert resp.status_code == 404
+
+
+def test_program_certificate_get(user_client):
+    """Test that program certificate get is successful for a valid UUID and raises 404 for invalid UUID"""
+    certificate = ProgramCertificateFactory.create()
+    resp = user_client.get(f"/certificate/program/{certificate.uuid}/")
+    assert resp.status_code == 200
+
+    invalid_uuid = str(certificate.uuid)[0:-12]
+    resp = user_client.get(f"/certificate/program/{invalid_uuid}/")
+    assert resp.status_code == 404

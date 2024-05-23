@@ -655,6 +655,8 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
             certificate = ProgramCertificate.objects.get(uuid=uuid)
         except ProgramCertificate.DoesNotExist:
             raise Http404  # noqa: B904
+        except ValidationError:
+            raise Http404  # noqa: B904
 
         # Get a CertificatePage to serve this request
         certificate_page = (
@@ -692,6 +694,8 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         try:
             certificate = CourseRunCertificate.objects.get(uuid=uuid)
         except CourseRunCertificate.DoesNotExist:
+            raise Http404  # noqa: B904
+        except ValidationError:
             raise Http404  # noqa: B904
 
         # Get a CertificatePage to serve this request
