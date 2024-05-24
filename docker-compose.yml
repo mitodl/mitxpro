@@ -16,7 +16,6 @@ x-environment: &py-environment
   REDIS_URL: redis://redis:6379/4
   DOCKER_HOST: ${DOCKER_HOST:-missing}
   WEBPACK_DEV_SERVER_HOST: ${WEBPACK_DEV_SERVER_HOST:-localhost}
-  OPENEDX_API_KEY: ${OPENEDX_API_KEY:-PUT_YOUR_API_KEY_HERE}
 
 x-extra-hosts: &default-extra-hosts
   - "edx.odl.local:${OPENEDX_IP:-172.22.0.1}"

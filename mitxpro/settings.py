@@ -1045,12 +1045,6 @@ OPENEDX_API_CLIENT_SECRET = get_string(
     description="The OAuth2 client secret to connect to Open edX with",
     required=True,
 )
-OPENEDX_API_KEY = get_string(
-    name="OPENEDX_API_KEY",
-    default=None,
-    description="edX API key (EDX_API_KEY setting in Open edX)",
-    required=True,
-)
 
 MITXPRO_REGISTRATION_ACCESS_TOKEN = get_string(
     name="MITXPRO_REGISTRATION_ACCESS_TOKEN",
