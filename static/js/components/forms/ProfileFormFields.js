@@ -36,6 +36,7 @@ export const legalAddressValidation = yup.object().shape({
     .label("Full Name")
     .trim()
     .required()
+    .matches(NAME_REGEX, NAME_REGEX_FAIL_MESSAGE)
     .max(255)
     .min(2),
   legal_address: yup.object().shape({

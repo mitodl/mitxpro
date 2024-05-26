@@ -6,14 +6,19 @@ from collections import defaultdict
 
 import pycountry
 from django.db import transaction
+from requests import HTTPError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 from rest_framework import serializers
 from social_django.models import UserSocialAuth
 
+from courseware.api import validate_name_with_edx
+from courseware.exceptions import EdxApiRegistrationValidationException
 from courseware.tasks import change_edx_user_email_async
 from ecommerce.api import fetch_and_serialize_unused_coupons
 from hubspot_xpro.task_helpers import sync_hubspot_user
 from mail import verification_api
 from mitxpro.serializers import WriteableSerializerMethodField
+from users.constants import USER_REGISTRATION_FAILED_MSG
 from users.models import ChangeEmailRequest, LegalAddress, Profile, User
 
 log = logging.getLogger()
@@ -29,6 +34,11 @@ USER_NAME_RE = re.compile(
     """,
     flags=re.I | re.VERBOSE | re.MULTILINE,
 )
+NAME_CONTAINS_HTML_URL_MSG = (
+    "Full name can not contain HTML or URL. Please try a different one."
+)
+
+OPENEDX_NAME_VALIDATION_MSGS_MAP = {"Enter a valid name": NAME_CONTAINS_HTML_URL_MSG}
 
 
 class LegalAddressSerializer(serializers.ModelSerializer):
@@ -266,6 +276,28 @@ class UserSerializer(serializers.ModelSerializer):
         if not instance.is_anonymous:
             return fetch_and_serialize_unused_coupons(instance)
         return []
+
+    def validate(self, data):
+        """Validate an existing user"""
+        name = data.get("name")
+        if name:
+            try:
+                openedx_validation_msg = validate_name_with_edx(name)
+                openedx_validation_msg = OPENEDX_NAME_VALIDATION_MSGS_MAP.get(
+                    openedx_validation_msg, openedx_validation_msg
+                )
+            except (
+                HTTPError,
+                RequestsConnectionError,
+                EdxApiRegistrationValidationException,
+            ) as exc:
+                log.exception("Unable to create user account", exc)  # noqa: PLE1205, TRY401
+                raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)  # noqa: B904
+
+            if openedx_validation_msg:
+                raise serializers.ValidationError({"name": openedx_validation_msg})
+
+        return data
 
     def create(self, validated_data):
         """Create a new user"""
