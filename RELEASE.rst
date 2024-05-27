@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.148.0
+---------------
+
+- fix: invalid certificate uuid should raise 404 (#2990)
+- chore(deps): bump @babel/traverse from 7.16.3 to 7.24.6 (#2995)
+- fix(deps): update dependency boto3 to v1.34.113
+- refactor: remove EdX-Api-Key usage (#2982)
+- fix(deps): update dependency google-api-python-client to v1.12.11 (#2987)
+- fix(deps): update dependency google-auth to v1.35.0
+
 Version 0.147.0 (Released May 22, 2024)
 ---------------
 
