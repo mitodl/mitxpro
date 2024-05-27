@@ -639,7 +639,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
             and not parent.get_children().type(cls).exists()
         )
 
-    @route(r"^program/([A-Fa-f0-9-]+)/?$")
+    @route(r"^program/([A-Fa-f0-9-]{36})/?$")
     def program_certificate(
         self,
         request,
@@ -677,7 +677,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         certificate_page.certificate = certificate
         return certificate_page.serve(request)
 
-    @route(r"^([A-Fa-f0-9-]+)/?$")
+    @route(r"^([A-Fa-f0-9-]{36})/?$")
     def course_certificate(
         self,
         request,
