@@ -639,7 +639,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
             and not parent.get_children().type(cls).exists()
         )
 
-    @route(r"^program/([A-Fa-f0-9-]+)/?$")
+    @route(r"^program/([A-Fa-f0-9-]{36})/?$")
     def program_certificate(
         self,
         request,
@@ -654,8 +654,6 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         try:
             certificate = ProgramCertificate.objects.get(uuid=uuid)
         except ProgramCertificate.DoesNotExist:
-            raise Http404  # noqa: B904
-        except ValidationError:
             raise Http404  # noqa: B904
 
         # Get a CertificatePage to serve this request
@@ -679,7 +677,7 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         certificate_page.certificate = certificate
         return certificate_page.serve(request)
 
-    @route(r"^([A-Fa-f0-9-]+)/?$")
+    @route(r"^([A-Fa-f0-9-]{36})/?$")
     def course_certificate(
         self,
         request,
@@ -694,8 +692,6 @@ class CertificateIndexPage(DisableSitemapURLMixin, RoutablePageMixin, Page):
         try:
             certificate = CourseRunCertificate.objects.get(uuid=uuid)
         except CourseRunCertificate.DoesNotExist:
-            raise Http404  # noqa: B904
-        except ValidationError:
             raise Http404  # noqa: B904
 
         # Get a CertificatePage to serve this request
