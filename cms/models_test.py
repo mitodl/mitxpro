@@ -1792,23 +1792,30 @@ def test_program_page_price_is_updated(superuser_client):
     assert program.current_price == 999
 
 
-def test_course_run_certificate_get(user_client):
-    """Test that course run certificate get is successful for a valid UUID and raises 404 for invalid UUID"""
-    certificate = CourseRunCertificateFactory.create()
-    resp = user_client.get(f"/certificate/{certificate.uuid}/")
+def test_certificate_request_with_valid_uuid(user_client):
+    """Test that certificate request is successful for course and program certificates."""
+    course_run_certificate = CourseRunCertificateFactory.create()
+    resp = user_client.get(f"/certificate/{course_run_certificate.uuid}/")
     assert resp.status_code == 200
 
-    invalid_uuid = str(certificate.uuid)[0:-12]
-    resp = user_client.get(f"/certificate/{invalid_uuid}/")
-    assert resp.status_code == 404
-
-
-def test_program_certificate_get(user_client):
-    """Test that program certificate get is successful for a valid UUID and raises 404 for invalid UUID"""
-    certificate = ProgramCertificateFactory.create()
-    resp = user_client.get(f"/certificate/program/{certificate.uuid}/")
+    program_certificate = ProgramCertificateFactory.create()
+    resp = user_client.get(f"/certificate/program/{program_certificate.uuid}/")
     assert resp.status_code == 200
 
-    invalid_uuid = str(certificate.uuid)[0:-12]
-    resp = user_client.get(f"/certificate/program/{invalid_uuid}/")
-    assert resp.status_code == 404
+
+@pytest.mark.parametrize(
+    "uuid_string",
+    [
+        "",
+        "1bebd843-ebf0-40c0-850e",
+        "1bebd843-ebf0-40c0-850e-fe73baa31b944444",
+        "1bebd843-ebf0-40c0-850e-fe73baa31b94-4ab4",
+    ],
+)
+def test_certificate_request_with_invalid_uuid(user_client, uuid_string):
+    """Test that course run and program certificate request returns a 404 for invalid uuids."""
+    program_certificate_resp = user_client.get(f"/certificate/program/{uuid_string}/")
+    assert program_certificate_resp.status_code == 404
+
+    course_certificate_resp = user_client.get(f"/certificate/{uuid_string}/")
+    assert course_certificate_resp.status_code == 404
