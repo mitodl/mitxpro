@@ -58,8 +58,8 @@ export default class IntegrationTestHelper {
   }
 
   configureHOCRenderer(
-    WrappedComponent: Class<React.Component<*, *>>,
-    InnerComponent: Class<React.Component<*, *>>,
+    WrappedComponent: Class<React.Component<*, *>>, // eslint-disable-line no-undef
+    InnerComponent: Class<React.Component<*, *>>, // eslint-disable-line no-undef
     defaultState: Object,
     defaultProps = {}
   ) {
