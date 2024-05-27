@@ -9968,16 +9968,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mini-css-extract-plugin@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "mini-css-extract-plugin@npm:0.5.0"
+"mini-css-extract-plugin@npm:^0.12.0":
+  version: 0.12.0
+  resolution: "mini-css-extract-plugin@npm:0.12.0"
   dependencies:
     loader-utils: ^1.1.0
+    normalize-url: 1.9.1
     schema-utils: ^1.0.0
     webpack-sources: ^1.1.0
   peerDependencies:
-    webpack: ^4.4.0
-  checksum: deec20ae4000639e4678cd28eda4694ec81ea9697dc0e62d958ee8209f404a0ce94caa234613e0f7c88c0266b72afe838252f78f2b9b35b645276544909d7504
+    webpack: ^4.4.0 || ^5.0.0
+  checksum: 0a7744667c5a85423b7e335418299e6ac5cbd855fe37048fb487a5b1af46c7d41b85bfee0e20d1dd59598396ede8bd87da75a6f1758ae6fd4e8b65d58cc52732
   languageName: node
   linkType: hard
 
@@ -10176,7 +10177,7 @@ __metadata:
     jquery: ^3.5.1
     jsdom: ^16.2.2
     lodash: ^4.17.21
-    mini-css-extract-plugin: ^0.5.0
+    mini-css-extract-plugin: ^0.12.0
     minimist: ^1.2.6
     mocha: ^5.2.0
     named-urls: ^1.4.0
