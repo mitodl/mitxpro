@@ -1067,6 +1067,17 @@ EDX_API_CLIENT_TIMEOUT = get_int(
     default=60,
     description="Timeout (in seconds) for requests made via the edX API client",
 )
+EMERITUS_API_KEY = get_string(
+    name="EMERITUS_API_KEY",
+    default=None,
+    description="The API Key for Emeritus API",
+    required=True,
+)
+EMERITUS_API_BASE_URL = get_string(
+    name="EMERITUS_API_BASE_URL",
+    default="https://mit-xpro.emeritus-analytics.io/",
+    description="Base API URL for Emeritus API",
+)
 
 # django debug toolbar only in debug mode
 if DEBUG:
