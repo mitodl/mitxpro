@@ -103,13 +103,21 @@ def test_serialize_program(  # noqa: PLR0913
     course1 = CourseFactory.create(program=program, position_in_program=1)
     course2 = CourseFactory.create(program=program, position_in_program=2)
 
-    course1_run1 = CourseRunFactory.create(course=course1, start_date = now - timedelta(5))
-    course1_run2 = CourseRunFactory.create(course=course1, start_date = now - timedelta(8))
-    course1_run3 = CourseRunFactory.create(course=course1, start_date = now)
+    course1_run1 = CourseRunFactory.create(
+        course=course1, start_date=now - timedelta(5)
+    )
+    course1_run2 = CourseRunFactory.create(
+        course=course1, start_date=now - timedelta(8)
+    )
+    course1_run3 = CourseRunFactory.create(course=course1, start_date=now)
 
-    course2_run1 = CourseRunFactory.create(course=course2, start_date = now - timedelta(3))
-    course2_run2 = CourseRunFactory.create(course=course2, start_date = now - timedelta(2))
-    course2_run3 = CourseRunFactory.create(course=course2, start_date = now)
+    course2_run1 = CourseRunFactory.create(
+        course=course2, start_date=now - timedelta(3)
+    )
+    course2_run2 = CourseRunFactory.create(
+        course=course2, start_date=now - timedelta(2)
+    )
+    course2_run3 = CourseRunFactory.create(course=course2, start_date=now)
 
     # run1 = CourseRunFactory.create(course__program=program, course__position_in_program=1, start_date=now - timedelta(5))
     # course1 = run1.course
@@ -120,7 +128,14 @@ def test_serialize_program(  # noqa: PLR0913
     #     + [CourseRunFactory.create(course=course1) for _ in range(2)]
     #     + [CourseRunFactory.create(course=course2) for _ in range(2)]
     # )
-    runs = [course1_run1, course1_run2, course1_run3, course2_run1, course2_run2, course2_run3]
+    runs = [
+        course1_run1,
+        course1_run2,
+        course1_run3,
+        course2_run1,
+        course2_run2,
+        course2_run3,
+    ]
 
     faculty_names = ["Teacher 1", "Teacher 2"]
     FacultyMembersPageFactory.create(
