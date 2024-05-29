@@ -307,7 +307,8 @@ class ProgramSerializer(serializers.ModelSerializer):
         Returns:
             datetime: The starting date
         """
-        return instance.first_unexpired_run().start_date
+        first_unexpired_run = instance.first_unexpired_run
+        return getattr(first_unexpired_run, "start_date", None)
 
     def get_end_date(self, instance):
         """
