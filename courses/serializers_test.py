@@ -88,6 +88,8 @@ def test_serialize_program(  # noqa: PLR0913
 ):
     """Test Program serialization"""
 
+    now = datetime.now(tz=timezone.utc)
+
     program = ProgramFactory.create(
         is_external=is_external,
         page__certificate_page__CEUs=ceus,
@@ -98,15 +100,28 @@ def test_serialize_program(  # noqa: PLR0913
         page__external_marketing_url=external_marketing_url,
         page__marketing_hubspot_form_id=marketing_hubspot_form_id,
     )
-    run1 = CourseRunFactory.create(course__program=program)
-    course1 = run1.course
-    run2 = CourseRunFactory.create(course__program=program)
-    course2 = run2.course
-    runs = (
-        [run1, run2]
-        + [CourseRunFactory.create(course=course1) for _ in range(2)]
-        + [CourseRunFactory.create(course=course2) for _ in range(2)]
-    )
+    course1 = CourseFactory.create(program=program, position_in_program=1)
+    course2 = CourseFactory.create(program=program, position_in_program=2)
+
+    course1_run1 = CourseRunFactory.create(course=course1, start_date = now - timedelta(5))
+    course1_run2 = CourseRunFactory.create(course=course1, start_date = now - timedelta(8))
+    course1_run3 = CourseRunFactory.create(course=course1, start_date = now)
+
+    course2_run1 = CourseRunFactory.create(course=course2, start_date = now - timedelta(3))
+    course2_run2 = CourseRunFactory.create(course=course2, start_date = now - timedelta(2))
+    course2_run3 = CourseRunFactory.create(course=course2, start_date = now)
+
+    # run1 = CourseRunFactory.create(course__program=program, course__position_in_program=1, start_date=now - timedelta(5))
+    # course1 = run1.course
+    # run2 = CourseRunFactory.create(course__program=program, course__position_in_program=2)
+    # course2 = run2.course
+    # runs = (
+    #     [run1, run2]
+    #     + [CourseRunFactory.create(course=course1) for _ in range(2)]
+    #     + [CourseRunFactory.create(course=course2) for _ in range(2)]
+    # )
+    runs = [course1_run1, course1_run2, course1_run3, course2_run1, course2_run2, course2_run3]
+
     faculty_names = ["Teacher 1", "Teacher 2"]
     FacultyMembersPageFactory.create(
         parent=program.page,
@@ -139,9 +154,7 @@ def test_serialize_program(  # noqa: PLR0913
             ],
             "thumbnail_url": f"http://localhost:8053{program.page.thumbnail_image.file.url}",
             "current_price": program.current_price,
-            "start_date": sorted(runs, key=lambda run: run.start_date)[
-                0
-            ].start_date.strftime(datetime_format),
+            "start_date": program.first_unexpired_run.start_date,
             "end_date": sorted(runs, key=lambda run: run.end_date)[
                 -1
             ].end_date.strftime(datetime_format),
