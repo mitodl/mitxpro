@@ -307,11 +307,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         Returns:
             datetime: The starting date
         """
-        filtered_start_runs = filter(
-            lambda run: run.start_date is not None, instance.course_runs
-        )
-        sorted_runs = sorted(filtered_start_runs, key=lambda run: run.start_date)
-        return sorted_runs[0].start_date if sorted_runs else None
+        return instance.first_unexpired_run().start_date
 
     def get_end_date(self, instance):
         """
