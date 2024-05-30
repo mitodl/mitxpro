@@ -7,10 +7,10 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
+from mitol.common.utils import dict_without_keys
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthAlreadyAssociated, AuthException
 from social_core.pipeline.partial import partial
-from mitol.common.utils import dict_without_keys
 
 from affiliate.api import get_affiliate_id_from_request
 from authentication.api import create_user_with_generated_username

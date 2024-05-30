@@ -48,9 +48,9 @@ from courseware.constants import (
 from courseware.exceptions import (
     CoursewareUserCreateError,
     EdxApiEnrollErrorException,
+    EdxApiRegistrationValidationException,
     UnknownEdxApiEnrollException,
     UserNameUpdateFailedException,
-    EdxApiRegistrationValidationException,
 )
 from courseware.factories import CoursewareUserFactory, OpenEdxApiAuthFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
@@ -118,14 +118,16 @@ def test_validate_name_with_edx_success(mocker):
     from edX API when the name is valid.
     """
     name = "Test User"
-    mock_response = {"validation_decisions": {"name": "valid name"}}
 
     mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = mock_response
-    mocker.patch('mitxpro.courseware.exceptions.get_edx_api_registration_client', return_value=mock_client)
+    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
+    mocker.patch(
+        "courseware.api.get_edx_api_registration_client",
+        return_value=mock_client
+    )
 
     result = validate_name_with_edx(name)
-    assert result == "valid name"
+    assert result == ""
     mock_client.user_info.validate_user_registration.assert_called_once_with(
         data={"name": name}
     )
@@ -136,10 +138,26 @@ def test_validate_name_with_edx_failure(mocker):
     Test that validate_name_with_edx raises EdxApiRegistrationValidationException
     when the edX API call fails.
     """
-    name = "https://invalid_name"
+    name = "Test User"
+
+    class MockApiException(Exception):
+        """Mock exception for API errors with a response attribute."""
+        def __init__(self, message, response):
+            super().__init__(message)
+            self.response = response
+
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 403
+    mock_response.headers = {"Content-Type": "application/json"}
+
     mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.side_effect = Exception("API error")
-    mocker.patch('mitxpro.courseware.exceptions.get_edx_api_registration_client', return_value=mock_client)
+    mock_client.user_info.validate_user_registration.side_effect = MockApiException(
+        "API error", response=mock_response
+    )
+    mocker.patch(
+        "courseware.api.get_edx_api_registration_client",
+        return_value=mock_client
+    )
 
     with pytest.raises(EdxApiRegistrationValidationException):
         validate_name_with_edx(name)

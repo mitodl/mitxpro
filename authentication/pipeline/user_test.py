@@ -272,6 +272,9 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
         "authentication.pipeline.user.create_user_with_generated_username",
         return_value=fake_user,
     )
+    mock_client = mocker.MagicMock()
+    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
+    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
 
     response = user_actions.create_user_via_email(
         mock_create_user_strategy,
@@ -394,6 +397,10 @@ def test_create_user_via_email_create_fail(
         return_value=create_user_return_val,
         side_effect=create_user_exception,
     )
+    mock_client = mocker.MagicMock()
+    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
+    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
+
     with pytest.raises(UserCreationFailedException):
         user_actions.create_user_via_email(
             mock_create_user_strategy,
@@ -419,6 +426,9 @@ def test_create_user_via_email_affiliate(
         "authentication.pipeline.user.create_user_with_generated_username",
         return_value=UserFactory.build(),
     )
+    mock_client = mocker.MagicMock()
+    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
+    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
     user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
