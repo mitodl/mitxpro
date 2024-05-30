@@ -854,6 +854,6 @@ def validate_name_with_edx(name):
             )
         )
     except Exception as exc:  # noqa: BLE001
-        raise EdxApiRegistrationValidationException(name, exc.response)
+        raise EdxApiRegistrationValidationException(name, exc.response) from exc
 
     return resp["validation_decisions"]["name"]

@@ -140,7 +140,7 @@ def test_validate_name_with_edx_failure(mocker):
     """
     name = "Test User"
 
-    class MockApiException(Exception):
+    class MockApiException(Exception):  # noqa: N818
         """Mock exception for API errors with a response attribute."""
         def __init__(self, message, response):
             super().__init__(message)
