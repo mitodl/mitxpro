@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.148.0
+Version 0.148.0 (Released May 30, 2024)
 ---------------
 
 - fix: invalid certificate uuid should raise 404 (#2990)
