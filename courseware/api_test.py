@@ -36,6 +36,7 @@ from courseware.api import (
     update_edx_user_email,
     update_edx_user_name,
     update_xpro_user_username,
+    validate_name_with_edx,
 )
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
@@ -49,6 +50,7 @@ from courseware.exceptions import (
     EdxApiEnrollErrorException,
     UnknownEdxApiEnrollException,
     UserNameUpdateFailedException,
+    EdxApiRegistrationValidationException,
 )
 from courseware.factories import CoursewareUserFactory, OpenEdxApiAuthFactory
 from courseware.models import CoursewareUser, OpenEdxApiAuth
@@ -108,6 +110,42 @@ def update_token_response_error(settings):
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )
     return SimpleNamespace(refresh_token=refresh_token, access_token=access_token)
+
+
+def test_validate_name_with_edx_success(mocker):
+    """
+    Test that validate_name_with_edx successfully returns the validation message
+    from edX API when the name is valid.
+    """
+    name = "Test User"
+    mock_response = {"validation_decisions": {"name": "valid name"}}
+
+    mock_client = mocker.MagicMock()
+    mock_client.user_info.validate_user_registration.return_value = mock_response
+    mocker.patch('mitxpro.courseware.exceptions.get_edx_api_registration_client', return_value=mock_client)
+
+    result = validate_name_with_edx(name)
+    assert result == "valid name"
+    mock_client.user_info.validate_user_registration.assert_called_once_with(
+        data={"name": name}
+    )
+
+
+def test_validate_name_with_edx_failure(mocker):
+    """
+    Test that validate_name_with_edx raises EdxApiRegistrationValidationException
+    when the edX API call fails.
+    """
+    name = "https://invalid_name"
+    mock_client = mocker.MagicMock()
+    mock_client.user_info.validate_user_registration.side_effect = Exception("API error")
+    mocker.patch('mitxpro.courseware.exceptions.get_edx_api_registration_client', return_value=mock_client)
+
+    with pytest.raises(EdxApiRegistrationValidationException):
+        validate_name_with_edx(name)
+    mock_client.user_info.validate_user_registration.assert_called_once_with(
+        data={"name": name}
+    )
 
 
 @pytest.fixture
