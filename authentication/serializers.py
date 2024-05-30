@@ -169,7 +169,10 @@ class SocialAuthSerializer(serializers.Serializer):
             )
         except RequirePasswordAndPersonalInfoException as exc:
             result = SocialAuthState(
-                SocialAuthState.STATE_REGISTER_DETAILS, partial=exc.partial
+                SocialAuthState.STATE_REGISTER_DETAILS,
+                partial=exc.partial,
+                errors=exc.errors or [],
+                field_errors=exc.field_errors or {},
             )
         except UserTryAgainLaterException:
             result = SocialAuthState(

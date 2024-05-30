@@ -29,7 +29,9 @@ describe("EditProfilePage", () => {
           countries: countries,
         },
       },
-      {},
+      {
+        addUserNotification: helper.sandbox.stub(),
+      },
     );
   });
 
@@ -75,19 +77,22 @@ describe("EditProfilePage", () => {
       // $FlowFixMe
       user.profile.highest_education = hasEmptyFields ? "" : "Doctorate";
 
-      const { inner } = await renderPage();
+      const { inner, wrapper } = await renderPage();
       const setSubmitting = helper.sandbox.stub();
       const setErrors = helper.sandbox.stub();
+      const addUserNotification = wrapper.prop("addUserNotification");
       const values = user;
       const actions = {
         setErrors,
         setSubmitting,
       };
 
+      const errorsResponse = hasError
+        ? { errors: { name: ["Full name cannot contain HTML or URL."] } }
+        : {};
+
       helper.handleRequestStub.returns({
-        body: {
-          errors: hasError ? "some errors" : null,
-        },
+        body: errorsResponse,
       });
 
       await inner.find("EditProfileForm").prop("onSubmit")(values, actions);
@@ -118,8 +123,9 @@ describe("EditProfilePage", () => {
         },
       );
       sinon.assert.calledWith(setSubmitting, false);
-      assert.equal(setErrors.length, 0);
       if (hasError) {
+        sinon.assert.calledWith(setErrors, errorsResponse.errors);
+        sinon.assert.notCalled(addUserNotification);
         assert.isNull(helper.currentLocation);
       } else {
         assert.equal(helper.currentLocation.pathname, "/profile/");
