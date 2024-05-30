@@ -2,7 +2,10 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { ALERT_TYPE_DANGER, REGISTER_DETAILS_PAGE_TITLE } from "../../../constants";
+import {
+  ALERT_TYPE_TEXT,
+  REGISTER_DETAILS_PAGE_TITLE,
+} from "../../../constants";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -18,6 +21,7 @@ import {
   STATE_ERROR,
   STATE_EXISTING_ACCOUNT,
   handleAuthResponse,
+  STATE_REGISTER_DETAILS,
 } from "../../../lib/auth";
 import queries from "../../../lib/queries";
 import { qsPartialTokenSelector } from "../../../lib/selectors";
@@ -32,7 +36,7 @@ import type {
   User,
   Country,
 } from "../../../flow/authTypes";
-import { addUserNotification } from "../../../actions"
+import { addUserNotification } from "../../../actions";
 
 type RegisterProps = {|
   location: Location,
@@ -88,22 +92,30 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
       );
 
       if (body.errors) {
-        body.errors.forEach(error => {
+        body.errors.forEach((error) => {
           addUserNotification({
             "registration-failed-status": {
-              type:  ALERT_TYPE_DANGER,
+              type: ALERT_TYPE_TEXT,
+              color: "danger",
               props: {
-                text: error
-              }
-            }
-          })
-        })
+                text: error,
+              },
+            },
+          });
+        });
       }
 
       handleAuthResponse(history, body, {
-        // eslint-disable-next-line camelcase
+        /* eslint-disable camelcase */
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
+        [STATE_REGISTER_DETAILS]: ({ field_errors }: AuthResponse) => {
+          // Validation failures will result in a 200 API response that still points to this page but contains
+          // field errors.
+          if (field_errors) {
+            setErrors(field_errors);
+          }
+        },
       });
     } finally {
       setSubmitting(false);

@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthAlreadyAssociated, AuthException
 from social_core.pipeline.partial import partial
+from mitol.common.utils import dict_without_keys
 
 from affiliate.api import get_affiliate_id_from_request
 from authentication.api import create_user_with_generated_username
@@ -138,7 +139,10 @@ def create_user_via_email(
 
     if not serializer.is_valid():
         raise RequirePasswordAndPersonalInfoException(
-            backend, current_partial, errors=serializer.errors
+            backend,
+            current_partial,
+            errors=serializer.errors.get("non_field_errors"),
+            field_errors=dict_without_keys(serializer.errors, "non_field_errors"),
         )
 
     try:

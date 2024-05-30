@@ -2,7 +2,7 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { EDIT_PROFILE_PAGE_TITLE } from "../../../constants";
+import { EDIT_PROFILE_PAGE_TITLE, ALERT_TYPE_TEXT } from "../../../constants";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { connectRequest, mutateAsync, requestAsync } from "redux-query";
@@ -16,6 +16,7 @@ import EditProfileForm from "../../../components/forms/EditProfileForm";
 import type { Response } from "redux-query";
 import type { Country, LoggedInUser, User } from "../../../flow/authTypes";
 import type { RouterHistory } from "react-router";
+import { addUserNotification } from "../../../actions";
 
 type StateProps = {|
   countries: ?Array<Country>,
@@ -25,6 +26,7 @@ type StateProps = {|
 type DispatchProps = {|
   editProfile: (userProfileData: User) => Promise<Response<User>>,
   getCurrentUser: () => Promise<Response<User>>,
+  addUserNotification: Function,
 |};
 
 type ProfileProps = {|
@@ -59,7 +61,7 @@ export class EditProfilePage extends React.Component<Props, State> {
   enableVatID = () => this.setState({ isVatEnabled: true });
 
   async onSubmit(profileData: User, { setSubmitting, setErrors }: Object) {
-    const { editProfile, history } = this.props;
+    const { editProfile, history, addUserNotification } = this.props;
 
     const payload = {
       ...profileData,
@@ -82,13 +84,28 @@ export class EditProfilePage extends React.Component<Props, State> {
 
     try {
       const {
+        /* eslint-disable camelcase */
         body: { errors },
       }: { body: Object } = await editProfile(payload);
 
-      if (errors && errors.length > 0) {
-        setErrors({
-          email: errors[0],
+      if (errors) {
+        const nonFieldErrors = errors.non_field_errors || [];
+        const fieldErrors = { ...errors };
+        delete fieldErrors.non_field_errors;
+
+        nonFieldErrors.forEach((error) => {
+          addUserNotification({
+            "profile-update-failed-status": {
+              type: ALERT_TYPE_TEXT,
+              color: "danger",
+              props: {
+                text: error,
+              },
+            },
+          });
         });
+
+        setErrors(fieldErrors);
       } else {
         history.push(routes.profile.view);
       }
@@ -153,6 +170,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = {
   editProfile: editProfile,
   getCurrentUser,
+  addUserNotification,
 };
 
 const mapPropsToConfigs = () => [queries.users.countriesQuery()];
