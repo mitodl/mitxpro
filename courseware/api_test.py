@@ -120,10 +120,11 @@ def test_validate_name_with_edx_success(mocker):
     name = "Test User"
 
     mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
+    mock_client.user_info.validate_user_registration.return_value = {
+        "validation_decisions": {"name": ""}
+    }
     mocker.patch(
-        "courseware.api.get_edx_api_registration_client",
-        return_value=mock_client
+        "courseware.api.get_edx_api_registration_client", return_value=mock_client
     )
 
     result = validate_name_with_edx(name)
@@ -142,6 +143,7 @@ def test_validate_name_with_edx_failure(mocker):
 
     class MockApiException(Exception):  # noqa: N818
         """Mock exception for API errors with a response attribute."""
+
         def __init__(self, message, response):
             super().__init__(message)
             self.response = response
@@ -155,8 +157,7 @@ def test_validate_name_with_edx_failure(mocker):
         "API error", response=mock_response
     )
     mocker.patch(
-        "courseware.api.get_edx_api_registration_client",
-        return_value=mock_client
+        "courseware.api.get_edx_api_registration_client", return_value=mock_client
     )
 
     with pytest.raises(EdxApiRegistrationValidationException):
