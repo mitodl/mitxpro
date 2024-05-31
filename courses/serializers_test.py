@@ -142,9 +142,7 @@ def test_serialize_program(  # noqa: PLR0913
             "end_date": sorted(runs, key=lambda run: run.end_date)[
                 -1
             ].end_date.strftime(datetime_format),
-            "enrollment_start": sorted(runs, key=lambda run: run.enrollment_start)[
-                0
-            ].enrollment_start.strftime(datetime_format),
+            "enrollment_start": program.first_unexpired_run.enrollment_start,
             "url": f"http://localhost{program.page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
             "topics": [{"name": topic.name} for topic in topics],

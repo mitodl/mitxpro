@@ -318,20 +318,18 @@ class ProgramSerializer(serializers.ModelSerializer):
             datetime: The ending date
         """
         filtered_end_runs = filter(
-            lambda run: run.end_date is not None, instance.course_runs
+            lambda run: (run.end_date is not None and run.live), instance.course_runs
         )
         sorted_runs = sorted(filtered_end_runs, key=lambda run: run.end_date)
+
         return sorted_runs[-1].end_date if sorted_runs else None
 
     def get_enrollment_start(self, instance):
         """
         enrollment_start is first date where enrollment starts for any live course run
         """
-        sorted_runs = sorted(
-            (run for run in instance.course_runs if run.enrollment_start),
-            key=lambda run: run.enrollment_start,
-        )
-        return sorted_runs[0].enrollment_start if sorted_runs else None
+        first_unexpired_run = instance.first_unexpired_run
+        return getattr(first_unexpired_run, "enrollment_start", None)
 
     def get_url(self, instance):
         """Get URL"""
