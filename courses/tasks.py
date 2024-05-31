@@ -2,13 +2,17 @@
 Tasks for the courses app
 """
 
+import json
+import time
 import logging
-from datetime import timedelta
+from datetime import datetime, timedelta
+import requests
 
 from django.conf import settings
 from django.db.models import Q
 from requests.exceptions import HTTPError
 
+from courses.constants import EMERITUS_REPORT_NAMES
 from courses.models import CourseRun, CourseRunCertificate
 from courses.utils import (
     ensure_course_run_grade,
@@ -107,3 +111,100 @@ def sync_courseruns_data():
 
     # `sync_course_runs` logs internally so no need to capture/output the returned values
     sync_course_runs(runs)
+
+
+# @app.task
+def task_sync_emeritus_courses():
+    """Task to sync courses for Emeritus"""
+    data = fetch_emeritus_course_data()
+    update_external_courses(data)
+
+def update_external_courses(data):
+    for course_run in data["rows"]:
+        pass
+
+
+def fetch_emeritus_course_data(n_days=1):
+    """Fetch Emeritus course data"""
+    api_base_url = settings.EMERITUS_API_BASE_URL
+    api_key = settings.EMERITUS_API_KEY
+    log.info(f"Starting api extract for {n_days}...")
+    # Both reports have a last-modified timestamp field.
+    # Use this to limit the results to only relevant records.
+    last_date = datetime.now()
+    first_date = last_date - timedelta(n_days)
+
+    # Get a list of available queries
+    queries = requests.get(f"{api_base_url}/api/queries?api_key={api_key}", timeout=60)
+    queries.raise_for_status()
+
+    for report in queries.json()["results"]:
+        # Check if query is in list of desired reports
+        if report["name"] not in EMERITUS_REPORT_NAMES:
+            # If not, continue.
+            log.info(
+                "Report: {} not specified for extract...skipping".format(report["name"])
+            )
+            continue
+
+        log.info("Requesting data for {}...".format(report["name"]))
+
+        # Make a post request for the query found.
+        # This will return either:
+        #   a) A query_result if one is cached for the parameters set, or
+        #   b) A Job object.
+        data = requests.post(
+            f"{api_base_url}/api/queries/{report['id']}/results?api_key={api_key}",
+            data=json.dumps(
+                {
+                    "parameters": {
+                        "date_range": {"start": f"{first_date}", "end": f"{last_date}"}
+                    }
+                }
+            ),
+        )
+
+        data.raise_for_status()
+        data = data.json()
+
+        if "job" in data.keys():
+            # If a job is returned, we will poll until status = 3 (Success)
+            # Status values 1 and 2 correspond to in-progress,
+            # while 4 and 5 correspond to Failed, and Canceled, respectively.
+            job_id = data["job"]["id"]
+            log.info(f"Job id: {job_id} found...waiting for completion...")
+            while True:
+                # Get the status of the job-id returned by the initial request.
+                job_status = requests.get(
+                    f"{api_base_url}/api/jobs/{job_id}?api_key={api_key}"
+                )
+                job_status.raise_for_status()
+                job_status = job_status.json()
+
+                if job_status["job"]["status"] == 3:
+                    # If true, the query_result is ready to be collected.
+                    log.info("Job complete...requesting results...")
+                    query_resp = requests.get(
+                        f"{api_base_url}/api/query_results/{job_status['job']['query_result_id']}?api_key={api_key}"
+                    )
+                    query_resp.raise_for_status()
+                    data = query_resp.json()
+                    break
+                elif job_status["job"]["status"] in [4, 5]:
+                    # Error
+                    log.error("Job failed!")
+                    break
+                else:
+                    # Continue waiting until complete.
+                    log.info("Job not yet complete... sleeping for 2 seconds...")
+                    time.sleep(2)
+
+        if "query_result" in data.keys():
+            # Check that query_reesult is in the data payload.
+            # Write result as json to the specified directory, using
+            # the report title as the filename.
+            results = dict(data["query_result"]["data"])
+            return results
+        else:
+            log.error("Something unexpected happened!")
+
