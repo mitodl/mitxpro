@@ -104,6 +104,12 @@ def test_serialize_program(  # noqa: PLR0913
     course1_runs = CourseRunFactory.create_batch(3, course=course1)
     course2_runs = CourseRunFactory.create_batch(3, course=course2)
 
+    non_live_run = CourseRunFactory.create(
+        course=course1,
+        end_date=datetime.max.astimezone(timezone.utc),
+        expiration_date=None,
+        live=False,
+    )
     runs = course1_runs + course2_runs
 
     faculty_names = ["Teacher 1", "Teacher 2"]
@@ -157,6 +163,7 @@ def test_serialize_program(  # noqa: PLR0913
             "platform": program.platform.name,
         },
     )
+    assert data["end_date"] != non_live_run.end_date.strftime(datetime_format)
 
 
 def test_base_course_serializer():
@@ -285,9 +292,9 @@ def test_serialize_course(  # noqa: PLR0913
             "credits": ceus if course_page else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
-            "marketing_hubspot_form_id": marketing_hubspot_form_id
-            if course_page
-            else None,
+            "marketing_hubspot_form_id": (
+                marketing_hubspot_form_id if course_page else None
+            ),
             "platform": course.platform.name,
         },
     )
@@ -370,9 +377,11 @@ def test_serialize_course_run_enrollments(settings, has_company):
             else None
         ),
         "certificate": None,
-        "receipt": course_run_enrollment.order_id
-        if course_run_enrollment.order.status == Order.FULFILLED
-        else None,
+        "receipt": (
+            course_run_enrollment.order_id
+            if course_run_enrollment.order.status == Order.FULFILLED
+            else None
+        ),
     }
 
 
@@ -413,7 +422,9 @@ def test_serialize_program_enrollments(settings, has_company):
             [course_run_enrollments[1], course_run_enrollments[0]], many=True
         ).data,
         "certificate": None,
-        "receipt": program_enrollment.order_id
-        if program_enrollment.order.status == Order.FULFILLED
-        else None,
+        "receipt": (
+            program_enrollment.order_id
+            if program_enrollment.order.status == Order.FULFILLED
+            else None
+        ),
     }
