@@ -3,11 +3,11 @@ Tasks for the courses app
 """
 
 import json
-import time
 import logging
+import time
 from datetime import datetime, timedelta
-import requests
 
+import requests
 from django.conf import settings
 from django.db.models import Q
 from requests.exceptions import HTTPError
@@ -119,6 +119,7 @@ def task_sync_emeritus_courses():
     data = fetch_emeritus_course_data()
     update_external_courses(data)
 
+
 def update_external_courses(data):
     for course_run in data["rows"]:
         pass
@@ -207,4 +208,3 @@ def fetch_emeritus_course_data(n_days=1):
             return results
         else:
             log.error("Something unexpected happened!")
-
