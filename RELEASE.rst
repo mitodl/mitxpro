@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.149.0
+---------------
+
+- fix: sync start dates for programs & courses between Program/Course pages & APIs (#2999)
+
 Version 0.148.0 (Released May 30, 2024)
 ---------------
 
