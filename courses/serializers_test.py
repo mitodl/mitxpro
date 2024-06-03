@@ -98,15 +98,20 @@ def test_serialize_program(  # noqa: PLR0913
         page__external_marketing_url=external_marketing_url,
         page__marketing_hubspot_form_id=marketing_hubspot_form_id,
     )
-    run1 = CourseRunFactory.create(course__program=program)
-    course1 = run1.course
-    run2 = CourseRunFactory.create(course__program=program)
-    course2 = run2.course
-    runs = (
-        [run1, run2]
-        + [CourseRunFactory.create(course=course1) for _ in range(2)]
-        + [CourseRunFactory.create(course=course2) for _ in range(2)]
+    course1 = CourseFactory.create(program=program, position_in_program=1)
+    course2 = CourseFactory.create(program=program, position_in_program=2)
+
+    course1_runs = CourseRunFactory.create_batch(3, course=course1)
+    course2_runs = CourseRunFactory.create_batch(3, course=course2)
+
+    non_live_run = CourseRunFactory.create(
+        course=course1,
+        end_date=datetime.max.astimezone(timezone.utc),
+        expiration_date=None,
+        live=False,
     )
+    runs = course1_runs + course2_runs
+
     faculty_names = ["Teacher 1", "Teacher 2"]
     FacultyMembersPageFactory.create(
         parent=program.page,
@@ -139,15 +144,11 @@ def test_serialize_program(  # noqa: PLR0913
             ],
             "thumbnail_url": f"http://localhost:8053{program.page.thumbnail_image.file.url}",
             "current_price": program.current_price,
-            "start_date": sorted(runs, key=lambda run: run.start_date)[
-                0
-            ].start_date.strftime(datetime_format),
+            "start_date": program.first_unexpired_run.start_date,
             "end_date": sorted(runs, key=lambda run: run.end_date)[
                 -1
             ].end_date.strftime(datetime_format),
-            "enrollment_start": sorted(runs, key=lambda run: run.enrollment_start)[
-                0
-            ].enrollment_start.strftime(datetime_format),
+            "enrollment_start": program.first_unexpired_run.enrollment_start,
             "url": f"http://localhost{program.page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
             "topics": [{"name": topic.name} for topic in topics],
@@ -162,6 +163,7 @@ def test_serialize_program(  # noqa: PLR0913
             "platform": program.platform.name,
         },
     )
+    assert data["end_date"] != non_live_run.end_date.strftime(datetime_format)
 
 
 def test_base_course_serializer():
@@ -290,9 +292,9 @@ def test_serialize_course(  # noqa: PLR0913
             "credits": ceus if course_page else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
-            "marketing_hubspot_form_id": marketing_hubspot_form_id
-            if course_page
-            else None,
+            "marketing_hubspot_form_id": (
+                marketing_hubspot_form_id if course_page else None
+            ),
             "platform": course.platform.name,
         },
     )
@@ -375,9 +377,11 @@ def test_serialize_course_run_enrollments(settings, has_company):
             else None
         ),
         "certificate": None,
-        "receipt": course_run_enrollment.order_id
-        if course_run_enrollment.order.status == Order.FULFILLED
-        else None,
+        "receipt": (
+            course_run_enrollment.order_id
+            if course_run_enrollment.order.status == Order.FULFILLED
+            else None
+        ),
     }
 
 
@@ -418,7 +422,9 @@ def test_serialize_program_enrollments(settings, has_company):
             [course_run_enrollments[1], course_run_enrollments[0]], many=True
         ).data,
         "certificate": None,
-        "receipt": program_enrollment.order_id
-        if program_enrollment.order.status == Order.FULFILLED
-        else None,
+        "receipt": (
+            program_enrollment.order_id
+            if program_enrollment.order.status == Order.FULFILLED
+            else None
+        ),
     }
