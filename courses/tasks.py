@@ -13,7 +13,7 @@ from django.db.models import Q
 from requests.exceptions import HTTPError
 
 from courses.constants import EMERITUS_REPORT_NAMES
-from courses.models import CourseRun, CourseRunCertificate
+from courses.models import CourseRun, CourseRunCertificate, Course, Platform
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,
@@ -36,7 +36,7 @@ def generate_course_certificates():
         CourseRun.objects.live()
         .filter(
             end_date__lt=now
-            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
+                         - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
         )
         .exclude(
             id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
@@ -121,8 +121,22 @@ def task_sync_emeritus_courses():
 
 
 def update_external_courses(data):
-    for course_run in data["rows"]:
-        pass
+    for external_course_run in data["rows"]:
+        if external_course_run["language"] != "English":
+            continue
+
+        course = Course.objects.update_or_create(
+            title_iexact=external_course_run["program_name"],
+            platform=Platform.objects.get(name__iexact="Emeritus"),
+            is_external=True,
+            defaults={
+                "external_course_code": external_course_run["course_code"],
+                "readable_id": f"course-v1:xPRO+{external_course_run['course_code'].split('-')[0]}"
+            }
+        )
+        if not course:
+            course = Course.objects.create()
+        existing_course_runs = course.courseruns.all()
 
 
 def fetch_emeritus_course_data(n_days=1):
