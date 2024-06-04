@@ -2764,12 +2764,12 @@ files = [
 
 [[package]]
 name = "pycountry"
-version = "19.7.15"
+version = "19.8.18"
 description = "ISO country, subdivision, language, currency and script definitions and their translations"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pycountry-19.7.15.tar.gz", hash = "sha256:68e58bfd3bedeea49ba9d4b38f2bd5e042f9753628eba9a819fb03f551d89096"},
+    {file = "pycountry-19.8.18.tar.gz", hash = "sha256:3c57aa40adcf293d59bebaffbe60d8c39976fba78d846a018dc0c2ec9c6cb3cb"},
 ]
 
 [[package]]
@@ -4089,4 +4089,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.15"
-content-hash = "4a57d452798b30fde028e4700e4d82af61e71b152ebab5273eb2fbc95b29edb6"
+content-hash = "266b823ebac32785801c7b0bf1c734e48753fcf0f04873cc013e4b66f76c9f49"
