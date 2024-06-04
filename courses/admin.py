@@ -54,7 +54,7 @@ class CourseAdmin(admin.ModelAdmin):
     model = Course
     search_fields = ["title", "readable_id", "platform__name"]
     list_display = ("id", "title", "get_program", "position_in_program", "platform")
-    list_filter = ["live", "program", "platform"]
+    list_filter = ["live", "platform", "program"]
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
@@ -83,6 +83,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
         "start_date",
         "end_date",
         "enrollment_start",
+        "course_platform",
     )
     list_filter = ["live", "course__platform", "course"]
 
