@@ -55,7 +55,7 @@
     "flow-typed": "^3.2.1",
     "formik": "^1.5.1",
     "history": "^4.6.3",
-    "hls.js": "^0.13.1",
+    "hls.js": "^0.14.0",
     "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.5.1",
     "jsdom": "^16.2.2",
