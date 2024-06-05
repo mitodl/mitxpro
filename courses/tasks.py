@@ -121,22 +121,76 @@ def task_sync_emeritus_courses():
 
 
 def update_external_courses(data):
-    for external_course_run in data["rows"]:
-        if external_course_run["language"] != "English":
+    platform = Platform.objects.get(name="Emeritus")
+    for external_course_run in data.get("rows", []):
+        course_title = external_course_run.get("program_name")
+        if not course_title:
             continue
 
-        course = Course.objects.update_or_create(
-            title_iexact=external_course_run["program_name"],
-            platform=Platform.objects.get(name__iexact="Emeritus"),
+        course = Course.objects.filter(
+            title_iexact=course_title,
+            platform=platform,
             is_external=True,
-            defaults={
-                "external_course_code": external_course_run["course_code"],
-                "readable_id": f"course-v1:xPRO+{external_course_run['course_code'].split('-')[0]}"
-            }
-        )
+        ).first()
         if not course:
-            course = Course.objects.create()
-        existing_course_runs = course.courseruns.all()
+            # if exact matching failed, we will do partial matching
+            partial_matching_courses = Course.objects.filter(
+                title__icontains=course_title, platform=platform, is_external=True
+            )
+            partial_matching_course_count = len(partial_matching_courses)
+            if partial_matching_course_count == 1:
+                # A course found in partial matching
+                course = partial_matching_courses[0]
+            elif partial_matching_course_count > 1:
+                # More than 1 course found in partial matching
+                log.error(
+                    "Found duplicate courses when doing a partial match for {}. Skipping now".format(course_title)
+                )
+                continue
+            elif partial_matching_course_count == 0:
+                # No courses found in partial matching
+                log.info("No partial matching course found for title: {}. Creating a new one...".format(course_title))
+                external_course_code = external_course_run.get("course_code", "").split("-")[0]
+                if not external_course_code:
+                    log.error("Missing course code for course {}".format(course_title))
+
+                course = Course.objects.create(
+                    title=course_title,
+                    readable_id=f"course-v1:xPRO+{external_course_code}",
+                    platform=platform,
+                    live=True,
+                    is_external=True,
+                )
+        start_date = external_course_run.get("start_date", None)
+        end_date = external_course_run.get("end_date", None)
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").date() if start_date else None
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else None
+
+        matching_course_run = course.courseruns.filter(start_date__date=start_date, end_date__date=end_date).first()
+        if matching_course_run:
+            matching_course_run.title = course_title
+
+
+
+def get_matching_course(course_title, platform):
+    courses = Course.objects.filter(
+        title_iexact=course_title,
+        platform=platform,
+        is_external=True,
+        # defaults={
+        #     "readable_id": f"course-v1:xPRO+{external_course_run['course_code'].split('-')[0]}"
+        # }
+    )
+    if len(courses) == 1:
+        return courses[0]
+    # except Course.DoesNotExist:
+    #     course = Course.objects.create(
+    #         title=course_title,
+    #         readable_id=f"course-v1:xPRO+{external_course_run['course_code'].split('-')[0]}",
+    #         platform=platform,
+    #         live=True,
+    #         is_external=True,
+    #     )
 
 
 def fetch_emeritus_course_data(n_days=1):
