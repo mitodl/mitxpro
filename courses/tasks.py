@@ -4,6 +4,7 @@ Tasks for the courses app
 
 import json
 import logging
+import re
 import time
 from datetime import datetime, timedelta
 
@@ -11,9 +12,11 @@ import requests
 from django.conf import settings
 from django.db.models import Q
 from requests.exceptions import HTTPError
+from wagtail.models import Page
 
+from cms.models import ExternalCoursePage, CourseIndexPage, LearningOutcomesPage, WhoShouldEnrollPage
 from courses.constants import EMERITUS_REPORT_NAMES
-from courses.models import CourseRun, CourseRunCertificate, Course, Platform
+from courses.models import CourseRun, CourseRunCertificate, Course, Platform, CourseTopic
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,
@@ -124,11 +127,12 @@ def update_external_courses(data):
     platform = Platform.objects.get(name="Emeritus")
     for external_course_run in data.get("rows", []):
         course_title = external_course_run.get("program_name")
-        if not course_title:
+        course_code = external_course_run.get("course_code")
+        if not course_title or not course_code:
             continue
 
         course = Course.objects.filter(
-            title_iexact=course_title,
+            title__iexact=course_title,
             platform=platform,
             is_external=True,
         ).first()
@@ -144,53 +148,99 @@ def update_external_courses(data):
             elif partial_matching_course_count > 1:
                 # More than 1 course found in partial matching
                 log.error(
-                    "Found duplicate courses when doing a partial match for {}. Skipping now".format(course_title)
+                    "Found duplicate courses when doing a partial match for {}. Skipping...".format(course_title)
                 )
                 continue
             elif partial_matching_course_count == 0:
                 # No courses found in partial matching
                 log.info("No partial matching course found for title: {}. Creating a new one...".format(course_title))
-                external_course_code = external_course_run.get("course_code", "").split("-")[0]
-                if not external_course_code:
-                    log.error("Missing course code for course {}".format(course_title))
 
                 course = Course.objects.create(
                     title=course_title,
-                    readable_id=f"course-v1:xPRO+{external_course_code}",
+                    readable_id=course_code,
                     platform=platform,
                     live=True,
                     is_external=True,
                 )
-        start_date = external_course_run.get("start_date", None)
-        end_date = external_course_run.get("end_date", None)
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").date() if start_date else None
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").date() if end_date else None
 
-        matching_course_run = course.courseruns.filter(start_date__date=start_date, end_date__date=end_date).first()
-        if matching_course_run:
-            matching_course_run.title = course_title
+        if course.readable_id != course_code:
+            course.readable_id = course_code
+            course.save()
+
+        start_date_str = external_course_run.get("start_date", None)
+        end_date_str = external_course_run.get("end_date", None)
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d") if start_date_str else None
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d") if end_date_str else None
+
+        course_run_code = external_course_run.get("course_run_code")
+        course_run_tag = re.search(r"[0-9]{2}-[0-9]{2}#[0-9]$", course_run_code).group(0)
+
+        matching_course_run = course.courseruns.filter(
+            start_date__date=start_date.date(), end_date__date=end_date.date()
+        ).first()
+        if not matching_course_run:
+            CourseRun.objects.create(
+                course=course,
+                title=course_title,
+                courseware_id=course_run_code,
+                run_tag=course_run_tag,
+                start_date=start_date,
+                end_date=end_date,
+                live=True if not end_date or datetime.now() < end_date else False,
+            )
+        elif matching_course_run.courseware_id != course_run_code or matching_course_run.run_tag != course_run_tag:
+            matching_course_run.courseware_id = course_run_code
+            matching_course_run.run_tag = course_run_tag
+            matching_course_run.save()
+
+        course_page = getattr(course, "externalcoursepage", None)
+        if not course_page:
+            course_page = ExternalCoursePage(
+                title=course_title,
+                external_marketing_url=external_course_run.get("landing_page_url", ""),
+                subhead="Delivered in collaboration with Emeritus.",
+                duration=f"{external_course_run.get('total_weeks')} Weeks",
+                format=external_course_run.get("format"),
+                description=external_course_run.get("description")
+            )
+            course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
+            course_index_page.add_child(instance=course_index_page)
+            course_page.save()
+
+            if external_course_run.get("Category"):
+                topic = CourseTopic.objects.get_or_create(name=external_course_run.get("Category"))
+                course_page.topics.add(topic)
+
+            if external_course_run.get("learning_outcomes"):
+                create_learning_outcomes_page(course_page, external_course_run.get("learning_outcomes"))
+
+            if external_course_run.get("program_for"):
+                create_who_should_enroll_in_page(course_page, external_course_run.get("program_for"))
 
 
-
-def get_matching_course(course_title, platform):
-    courses = Course.objects.filter(
-        title_iexact=course_title,
-        platform=platform,
-        is_external=True,
-        # defaults={
-        #     "readable_id": f"course-v1:xPRO+{external_course_run['course_code'].split('-')[0]}"
-        # }
+def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
+    who_should_enroll_list = who_should_enroll_string.strip().split("\r\n")
+    who_should_enroll_list = [item.replace("●", "").strip() for item in who_should_enroll_list][1:]
+    who_should_enroll_page = WhoShouldEnrollPage(
+        heading="WHO SHOULD ENROLL",
+        content=json.dumps([{"type": "item", "value": who_should_enroll_item} for who_should_enroll_item in who_should_enroll_list])
     )
-    if len(courses) == 1:
-        return courses[0]
-    # except Course.DoesNotExist:
-    #     course = Course.objects.create(
-    #         title=course_title,
-    #         readable_id=f"course-v1:xPRO+{external_course_run['course_code'].split('-')[0]}",
-    #         platform=platform,
-    #         live=True,
-    #         is_external=True,
-    #     )
+    course_page.add_child(who_should_enroll_page)
+    who_should_enroll_page.save()
+
+
+def create_learning_outcomes_page(course_page, outcomes_string):
+    learning_outcomes = outcomes_string.strip().split("\r\n")
+    learning_outcomes = [outcome.replace("●", "").strip() for outcome in learning_outcomes][1:]
+    learning_outcome_page = LearningOutcomesPage(
+        heading="WHAT YOU WILL LEARN",
+        sub_heading="MIT xPRO is collaborating with online education provider Emeritus to deliver "
+                    "this online course. By clicking LEARN MORE, you will be taken to a page where "
+                    "you can download the brochure and apply to the program via Emeritus.",
+        outcome_items=json.dumps([{"type": "outcome", "value": outcome} for outcome in learning_outcomes])
+    )
+    course_page.add_child(instance=learning_outcome_page)
+    learning_outcome_page.save()
 
 
 def fetch_emeritus_course_data(n_days=1):
