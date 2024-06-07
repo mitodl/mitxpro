@@ -79,11 +79,12 @@ class CourseRunAdmin(TimestampedModelAdmin):
         "title",
         "courseware_id",
         "run_tag",
+        "get_course_platform",
         "start_date",
         "end_date",
         "enrollment_start",
     )
-    list_filter = ["live", "course"]
+    list_filter = ["live", "course__platform", "course"]
 
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
@@ -108,6 +109,13 @@ class CourseRunAdmin(TimestampedModelAdmin):
         initial["start_date"] = start_date
         initial["end_date"] = start_date + timedelta(days=1)
         return initial
+
+    @admin.display(description="Platform")
+    def get_course_platform(self, instance):
+        """
+        Returns the course platform.
+        """
+        return instance.course.platform
 
 
 @admin.register(ProgramEnrollment)

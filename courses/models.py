@@ -446,6 +446,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     is_external = models.BooleanField(default=False)
+    external_course_id = models.CharField(max_length=255, default="")
     platform = models.ForeignKey(
         Platform, on_delete=models.PROTECT, null=False, blank=False
     )
@@ -620,6 +621,7 @@ class CourseRun(TimestampedModel):
     )
     live = models.BooleanField(default=False)
     products = GenericRelation(Product, related_query_name="courseruns")
+    external_course_run_id = models.CharField(max_length=255, default="")
 
     class Meta:
         unique_together = ("course", "run_tag")
