@@ -128,7 +128,8 @@ def update_external_courses(data):
     for external_course_run in data.get("rows", []):
         course_title = external_course_run.get("program_name")
         course_code = external_course_run.get("course_code")
-        if not course_title or not course_code:
+        course_run_code = external_course_run.get("course_run_code")
+        if not (course_title and course_code and course_run_code):
             continue
 
         course = Course.objects.filter(
@@ -136,6 +137,7 @@ def update_external_courses(data):
             platform=platform,
             is_external=True,
         ).first()
+        course_readable_id = generate_course_readable_id(course_code)
         if not course:
             # if exact matching failed, we will do partial matching
             partial_matching_courses = Course.objects.filter(
@@ -163,9 +165,9 @@ def update_external_courses(data):
                     is_external=True,
                 )
 
-        if course.readable_id != course_code:
-            course.readable_id = course_code
-            course.save()
+        # if course.readable_id != course_code:
+        #     course.readable_id = course_code
+        #     course.save()
 
         start_date_str = external_course_run.get("start_date", None)
         end_date_str = external_course_run.get("end_date", None)
@@ -173,7 +175,8 @@ def update_external_courses(data):
         end_date = datetime.strptime(end_date_str, "%Y-%m-%d") if end_date_str else None
 
         course_run_code = external_course_run.get("course_run_code")
-        course_run_tag = re.search(r"[0-9]{2}-[0-9]{2}#[0-9]$", course_run_code).group(0)
+        course_run_tag = generate_external_course_run_tag(course_run_code)
+        course_run_courseware_id = generate_external_course_run_courseware_id(course_run_tag, course_readable_id)
 
         matching_course_run = course.courseruns.filter(
             start_date__date=start_date.date(), end_date__date=end_date.date()
@@ -182,16 +185,16 @@ def update_external_courses(data):
             CourseRun.objects.create(
                 course=course,
                 title=course_title,
-                courseware_id=course_run_code,
+                courseware_id=course_run_courseware_id,
                 run_tag=course_run_tag,
                 start_date=start_date,
                 end_date=end_date,
                 live=True if not end_date or datetime.now() < end_date else False,
             )
-        elif matching_course_run.courseware_id != course_run_code or matching_course_run.run_tag != course_run_tag:
-            matching_course_run.courseware_id = course_run_code
-            matching_course_run.run_tag = course_run_tag
-            matching_course_run.save()
+        # elif matching_course_run.courseware_id != course_run_code or matching_course_run.run_tag != course_run_tag:
+        #     matching_course_run.courseware_id = course_run_code
+        #     matching_course_run.run_tag = course_run_tag
+        #     matching_course_run.save()
 
         course_page = getattr(course, "externalcoursepage", None)
         if not course_page:
@@ -216,6 +219,22 @@ def update_external_courses(data):
 
             if external_course_run.get("program_for"):
                 create_who_should_enroll_in_page(course_page, external_course_run.get("program_for"))
+
+
+def generate_course_readable_id(external_course_code):
+    if not external_course_code:
+        return ""
+
+    external_course_tag = external_course_code.split("-")[1]
+    return f"course-v1:xPRO+{external_course_tag}x"
+
+
+def generate_external_course_run_tag(course_run_code):
+    return re.search(r"[0-9]{2}-[0-9]{2}#[0-9]+$", course_run_code).group(0)
+
+
+def generate_external_course_run_courseware_id(course_run_tag, course_readable_id):
+    return f"{course_readable_id}+{course_run_tag}"
 
 
 def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
