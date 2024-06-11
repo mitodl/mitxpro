@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from courses.tasks import task_sync_emeritus_courses
+from courses.tasks import task_sync_emeritus_courseruns
 
 
 class Command(BaseCommand):
@@ -21,4 +21,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
-        task_sync_emeritus_courses()
+        vendor_name = options["vendor_name"]
+        sync_courseruns_task_to_vendor_map = {
+            "emeritus": task_sync_emeritus_courseruns
+        }
+        courseruns_sync_task = sync_courseruns_task_to_vendor_map.get(vendor_name.lower(), None)
+        if courseruns_sync_task:
+            courseruns_sync_task()
