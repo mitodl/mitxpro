@@ -1,5 +1,6 @@
 """Ecommerce mail API"""
 
+import datetime
 import logging
 from urllib.parse import urlencode, urljoin
 
@@ -18,12 +19,14 @@ from mail.constants import (
     EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_COURSE_RUN_UNENROLLMENT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
+    EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
 )
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
 EMAIL_DATE_FORMAT = "%b %-d, %Y"
+EMAIL_TIME_FORMAT = "%I:%M %p %Z"
 
 
 def get_b2b_receipt_data(order):
@@ -189,6 +192,53 @@ def send_course_run_unenrollment_email(enrollment):
         )
     except Exception as exp:
         log.exception("Error sending unenrollment success email: %s", exp)  # noqa: TRY401
+
+
+def send_welcome_course_run_enrollment_email(enrollment):
+    """
+    Welcome the user of successful enrollment for a course run
+
+    Args:
+        enrollment (CourseRunEnrollment): the enrollment for which to send the welcome email
+    """
+
+    run_start_date = run_end_date = ""
+    run_start_time = ""
+    if enrollment.run.start_date:
+        run_start_date = enrollment.run.start_date
+        run_start_time = run_start_date.astimezone(datetime.timezone.utc).strftime(
+            EMAIL_TIME_FORMAT
+        )
+    if enrollment.run.end_date:
+        run_end_date = enrollment.run.end_date
+    if run_start_date and run_end_date:
+        date_range = (
+            f"{run_start_date.strftime(EMAIL_DATE_FORMAT)} - "
+            f"{run_end_date.strftime(EMAIL_DATE_FORMAT)}"
+        )
+    else:
+        date_range = ""
+    try:
+        user = enrollment.user
+        api.send_message(
+            api.message_for_recipient(
+                user.email,
+                api.context_for_user(
+                    user=user,
+                    extra_context={
+                        "enrollment": enrollment,
+                        "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT)
+                        if run_start_date
+                        else run_start_date,
+                        "run_start_time": run_start_time,
+                        "run_date_range": date_range,
+                    },
+                ),
+                EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
+            )
+        )
+    except:  # noqa: E722
+        log.exception("Error sending welcome success email")
 
 
 def send_b2b_receipt_email(order):
