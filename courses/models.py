@@ -446,6 +446,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     )
     live = models.BooleanField(default=False)
     is_external = models.BooleanField(default=False)
+    external_course_id = models.CharField(max_length=255, blank=True, default="")
     platform = models.ForeignKey(
         Platform, on_delete=models.PROTECT, null=False, blank=False
     )
@@ -608,6 +609,7 @@ class CourseRun(TimestampedModel):
         help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
     )
     courseware_url_path = models.CharField(max_length=500, blank=True, null=True)  # noqa: DJ001
+    external_course_run_id = models.CharField(max_length=255, blank=True, default="")
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
     enrollment_start = models.DateTimeField(null=True, blank=True, db_index=True)
