@@ -83,7 +83,6 @@ class CourseRunAdmin(TimestampedModelAdmin):
         "start_date",
         "end_date",
         "enrollment_start",
-        "course_platform",
     )
     list_filter = ["live", "course__platform", "course"]
 
