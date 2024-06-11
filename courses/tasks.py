@@ -10,7 +10,9 @@ from django.db.models import Q
 from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunCertificate
-from courses.sync_external_courses.api import fetch_emeritus_courseruns, update_emeritus_courseruns
+from courses.sync_external_courses.api import (
+    fetch_emeritus_courseruns,
+)
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,
@@ -33,7 +35,7 @@ def generate_course_certificates():
         CourseRun.objects.live()
         .filter(
             end_date__lt=now
-                         - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
+            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
         )
         .exclude(
             id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
@@ -114,4 +116,4 @@ def sync_courseruns_data():
 def task_sync_emeritus_courseruns():
     """Task to sync Emeritus courseruns"""
     emeritus_courseruns = fetch_emeritus_courseruns()
-    update_emeritus_courseruns(emeritus_courseruns)
+    # update_emeritus_courseruns(emeritus_courseruns)

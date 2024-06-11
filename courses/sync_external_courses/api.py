@@ -1,6 +1,6 @@
 import json
-import re
 import logging
+import re
 import time
 from datetime import datetime, timedelta
 
@@ -8,9 +8,14 @@ import requests
 from django.conf import settings
 from wagtail.models import Page
 
-from cms.models import ExternalCoursePage, CourseIndexPage, WhoShouldEnrollPage, LearningOutcomesPage
+from cms.models import (
+    CourseIndexPage,
+    ExternalCoursePage,
+    LearningOutcomesPage,
+    WhoShouldEnrollPage,
+)
 from courses.constants import EMERITUS_REPORT_NAMES
-from courses.models import Platform, Course, CourseRun, CourseTopic
+from courses.models import Course, CourseRun, CourseTopic, Platform
 
 log = logging.getLogger(__name__)
 
@@ -123,9 +128,7 @@ def update_emeritus_courseruns(emeritus_courseruns):
         course_readable_id = generate_course_readable_id(course_code)
         if not course:
             log.info(
-                "No course found for title: {}, external_course_id: {}. Creating a new one...".format(
-                    course_title, course_code
-                )
+                f"No course found for title: {course_title}, external_course_id: {course_code}. Creating a new one..."
             )
 
             course = Course.objects.create(
@@ -139,16 +142,29 @@ def update_emeritus_courseruns(emeritus_courseruns):
 
         start_date_str = emeritus_course_run.get("start_date", None)
         end_date_str = emeritus_course_run.get("end_date", None)
-        start_date = datetime.strptime(start_date_str, EMERITUS_DATE_FORMAT) if start_date_str else None
-        end_date = datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT) if end_date_str else None
+        start_date = (
+            datetime.strptime(start_date_str, EMERITUS_DATE_FORMAT)
+            if start_date_str
+            else None
+        )
+        end_date = (
+            datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT)
+            if end_date_str
+            else None
+        )
 
         course_run_code = emeritus_course_run.get("course_run_code")
-        course_run_tag = generate_external_course_run_tag(course_run_code)
-        course_run_courseware_id = generate_external_course_run_courseware_id(course_run_tag, course_readable_id)
-
-        course_run = course.courseruns.filter(external_course_run_id=course_run_code).first()
+        course_run = course.courseruns.filter(
+            external_course_run_id=course_run_code
+        ).first()
         if not course_run:
-            log.info("Course run not found for external_course_run_id: {}".format(course_run_code))
+            log.info(
+                f"Course run not found for external_course_run_id: {course_run_code}"
+            )
+            course_run_tag = generate_external_course_run_tag(course_run_code)
+            course_run_courseware_id = generate_external_course_run_courseware_id(
+                course_run_tag, course_readable_id
+            )
             CourseRun.objects.create(
                 course=course,
                 title=course_title,
@@ -163,26 +179,35 @@ def update_emeritus_courseruns(emeritus_courseruns):
         course_page = getattr(course, "externalcoursepage", None)
         if not course_page:
             course_page = ExternalCoursePage(
+                course=course,
                 title=course_title,
                 external_marketing_url=emeritus_course_run.get("landing_page_url", ""),
                 subhead="Delivered in collaboration with Emeritus.",
                 duration=f"{emeritus_course_run.get('total_weeks')} Weeks",
                 format=emeritus_course_run.get("format"),
-                description=emeritus_course_run.get("description")
+                description=emeritus_course_run.get("description"),
             )
-            course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
-            course_index_page.add_child(instance=course_index_page)
+            course_index_page = Page.objects.get(
+                id=CourseIndexPage.objects.first().id
+            ).specific
+            course_index_page.add_child(instance=course_page)
             course_page.save()
 
             if emeritus_course_run.get("Category"):
-                topic = CourseTopic.objects.get_or_create(name=emeritus_course_run.get("Category"))
+                topic, _ = CourseTopic.objects.get_or_create(
+                    name=emeritus_course_run.get("Category")
+                )
                 course_page.topics.add(topic)
 
             if emeritus_course_run.get("learning_outcomes"):
-                create_learning_outcomes_page(course_page, emeritus_course_run.get("learning_outcomes"))
+                create_learning_outcomes_page(
+                    course_page, emeritus_course_run.get("learning_outcomes")
+                )
 
             if emeritus_course_run.get("program_for"):
-                create_who_should_enroll_in_page(course_page, emeritus_course_run.get("program_for"))
+                create_who_should_enroll_in_page(
+                    course_page, emeritus_course_run.get("program_for")
+                )
 
 
 def generate_course_readable_id(external_course_code):
@@ -206,10 +231,17 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
 
 def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
     who_should_enroll_list = who_should_enroll_string.strip().split("\r\n")
-    who_should_enroll_list = [item.replace("●", "").strip() for item in who_should_enroll_list][1:]
+    who_should_enroll_list = [
+        item.replace("●", "").strip() for item in who_should_enroll_list
+    ][1:]
     who_should_enroll_page = WhoShouldEnrollPage(
         heading="WHO SHOULD ENROLL",
-        content=json.dumps([{"type": "item", "value": who_should_enroll_item} for who_should_enroll_item in who_should_enroll_list])
+        content=json.dumps(
+            [
+                {"type": "item", "value": who_should_enroll_item}
+                for who_should_enroll_item in who_should_enroll_list
+            ]
+        ),
     )
     course_page.add_child(who_should_enroll_page)
     who_should_enroll_page.save()
@@ -217,14 +249,17 @@ def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
 
 def create_learning_outcomes_page(course_page, outcomes_string):
     learning_outcomes = outcomes_string.strip().split("\r\n")
-    learning_outcomes = [outcome.replace("●", "").strip() for outcome in learning_outcomes][1:]
+    learning_outcomes = [
+        outcome.replace("●", "").strip() for outcome in learning_outcomes
+    ][1:]
     learning_outcome_page = LearningOutcomesPage(
         heading="WHAT YOU WILL LEARN",
         sub_heading="MIT xPRO is collaborating with online education provider Emeritus to deliver "
-                    "this online course. By clicking LEARN MORE, you will be taken to a page where "
-                    "you can download the brochure and apply to the program via Emeritus.",
-        outcome_items=json.dumps([{"type": "outcome", "value": outcome} for outcome in learning_outcomes])
+        "this online course. By clicking LEARN MORE, you will be taken to a page where "
+        "you can download the brochure and apply to the program via Emeritus.",
+        outcome_items=json.dumps(
+            [{"type": "outcome", "value": outcome} for outcome in learning_outcomes]
+        ),
     )
     course_page.add_child(instance=learning_outcome_page)
     learning_outcome_page.save()
-
