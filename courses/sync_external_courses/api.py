@@ -136,49 +136,8 @@ def update_emeritus_course_runs(emeritus_course_runs):
                 is_external=True,
             )
 
-        start_date_str = emeritus_course_run.get("start_date", None)
-        end_date_str = emeritus_course_run.get("end_date", None)
-        start_date = (
-            datetime.strptime(start_date_str, EMERITUS_DATE_FORMAT)
-            if start_date_str
-            else None
-        )
-        end_date = (
-            datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT)
-            if end_date_str
-            else None
-        )
-
-        course_run_code = emeritus_course_run.get("course_run_code")
-        course_run = course.courseruns.filter(
-            external_course_run_id=course_run_code
-        ).first()
-        if not course_run:
-            log.info(
-                f"Course run not found for external_course_run_id: {course_run_code}"
-            )
-            course_run_tag = generate_external_course_run_tag(course_run_code)
-            course_run_courseware_id = generate_external_course_run_courseware_id(
-                course_run_tag, course_readable_id
-            )
-            CourseRun.objects.create(
-                course=course,
-                title=course_title,
-                courseware_id=course_run_courseware_id,
-                run_tag=course_run_tag,
-                external_course_run_id=course_run_code,
-                start_date=start_date,
-                end_date=end_date,
-                live=True,
-            )
-        elif course_run.start_date != start_date or course_run.end_date != end_date:
-            course_run.start_date = start_date
-            course_run.end_date = end_date
-            course_run.save()
-
-        course_page = create_or_update_external_course_page(
-            course, course_title, emeritus_course_run
-        )
+        create_or_update_emeritus_course_run(course, course_title, course_readable_id, emeritus_course_run)
+        course_page = create_or_update_external_course_page(course, course_title, emeritus_course_run)
 
         if emeritus_course_run.get("Category"):
             topic, _ = CourseTopic.objects.get_or_create(
@@ -225,6 +184,9 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
 
 
 def create_or_update_external_course_page(course, course_title, emeritus_course_run):
+    """
+    Creates or updates external course page for Emeritus course page.
+    """
     course_page = getattr(course, "externalcoursepage", None)
     if not course_page:
         course_page = ExternalCoursePage(
@@ -245,6 +207,51 @@ def create_or_update_external_course_page(course, course_title, emeritus_course_
         pass
 
     return course_page
+
+
+def create_or_update_emeritus_course_run(course, course_title, course_readable_id, emeritus_course_run):
+    """
+    Creates or updates the external emeritus course run.
+    """
+    start_date_str = emeritus_course_run.get("start_date", None)
+    end_date_str = emeritus_course_run.get("end_date", None)
+    start_date = (
+        datetime.strptime(start_date_str, EMERITUS_DATE_FORMAT)
+        if start_date_str
+        else None
+    )
+    end_date = (
+        datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT)
+        if end_date_str
+        else None
+    )
+
+    course_run_code = emeritus_course_run.get("course_run_code")
+    course_run = course.courseruns.filter(
+        external_course_run_id=course_run_code
+    ).first()
+    if not course_run:
+        log.info(
+            f"Course run not found for external_course_run_id: {course_run_code}"
+        )
+        course_run_tag = generate_external_course_run_tag(course_run_code)
+        course_run_courseware_id = generate_external_course_run_courseware_id(
+            course_run_tag, course_readable_id
+        )
+        CourseRun.objects.create(
+            course=course,
+            title=course_title,
+            courseware_id=course_run_courseware_id,
+            run_tag=course_run_tag,
+            external_course_run_id=course_run_code,
+            start_date=start_date,
+            end_date=end_date,
+            live=True,
+        )
+    elif course_run.start_date != start_date or course_run.end_date != end_date:
+        course_run.start_date = start_date
+        course_run.end_date = end_date
+        course_run.save()
 
 
 def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
