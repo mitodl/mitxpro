@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.149.1
+---------------
+
+- revert: downgrade django-hijack from 3.5.1 to 3.4.5 (#3018)
+- [pre-commit.ci] pre-commit autoupdate (#3001)
+- feat: add external course id fields and enhance admin models (#3006)
+- refactor: upgrade docker-compose & CI postgres version to 15 (#3004)
+- fix(deps): update dependency redis to v4.6.0
+- fix(deps): update dependency pynacl to v1.5.0
+- fix(deps): update dependency psycopg2 to v2.9.9
+- fix(deps): update dependency django-hijack to v3.5.1
+- chore(deps): update nginx docker tag to v1.27.0
+- fix(deps): update dependency uwsgi to v2.0.26
+- fix(deps): update dependency boto3 to v1.34.122
+- fix(deps): update dependency pycountry to v19.8.18
+- fix(deps): update dependency mini-css-extract-plugin to ^0.12.0 (#2993)
+- fix(deps): update dependency hls.js to ^0.14.0 (#2992)
+- fix(deps): update dependency eslint-config-google to ^0.14.0 (#2975)
+- [pre-commit.ci] pre-commit autoupdate (#2997)
+
 Version 0.149.0 (Released June 10, 2024)
 ---------------
 
