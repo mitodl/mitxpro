@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.149.1
+Version 0.149.1 (Released June 12, 2024)
 ---------------
 
 - revert: downgrade django-hijack from 3.5.1 to 3.4.5 (#3018)
