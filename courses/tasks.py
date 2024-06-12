@@ -11,8 +11,9 @@ from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunCertificate
 from courses.sync_external_courses.api import (
-    fetch_emeritus_courseruns,
+    fetch_emeritus_course_runs,
 )
+from courses.sync_external_courses.api import update_emeritus_course_runs
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,
@@ -113,7 +114,7 @@ def sync_courseruns_data():
 
 
 # @app.task
-def task_sync_emeritus_courseruns():
-    """Task to sync Emeritus courseruns"""
-    emeritus_courseruns = fetch_emeritus_courseruns()
-    # update_emeritus_courseruns(emeritus_courseruns)
+def task_sync_emeritus_course_runs():
+    """Task to sync Emeritus course runs"""
+    emeritus_course_runs = fetch_emeritus_course_runs()
+    update_emeritus_course_runs(emeritus_course_runs)
