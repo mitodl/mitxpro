@@ -10,6 +10,8 @@ from urllib.parse import ParseResult, urlparse, urlunparse
 
 import requests
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.core.serializers import serialize
 from django.db import models
 from django.http import HttpRequest
@@ -603,3 +605,15 @@ def get_js_settings(request: HttpRequest):
         "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
     }
+
+
+def is_valid_url(url):
+    """
+    Validates if a string is a valid url.
+    """
+    validate_url = URLValidator()
+    try:
+        validate_url(url)
+    except ValidationError:
+        return False
+    return True

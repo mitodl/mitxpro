@@ -14,8 +14,11 @@ from cms.models import (
     LearningOutcomesPage,
     WhoShouldEnrollPage,
 )
-from courses.constants import EMERITUS_REPORT_NAMES, EMERITUS_DATE_FORMAT, EMERITUS_PLATFORM_NAME
+from courses.constants import EMERITUS_REPORT_NAMES, EMERITUS_DATE_FORMAT, EMERITUS_PLATFORM_NAME, \
+    EMERITUS_COURSE_PAGE_SUBHEAD, EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING, EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING, \
+    EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD
 from courses.models import Course, CourseRun, CourseTopic, Platform
+from mitxpro.utils import is_valid_url
 
 log = logging.getLogger(__name__)
 
@@ -109,35 +112,31 @@ def update_emeritus_course_runs(emeritus_course_runs):
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
     """
     platform, _ = Platform.objects.get_or_create(name=EMERITUS_PLATFORM_NAME)
+    course_index_page = Page.objects.get(
+        id=CourseIndexPage.objects.first().id
+    ).specific
     for emeritus_course_run in emeritus_course_runs:
         course_title = emeritus_course_run.get("program_name")
         course_code = emeritus_course_run.get("course_code")
         course_run_code = emeritus_course_run.get("course_run_code")
-        if not (course_title and course_code and course_run_code):
+        is_valid_external_url = is_valid_url(emeritus_course_run.get("landing_page_url"))
+        if not (course_title and course_code and course_run_code and not is_valid_external_url):
             continue
 
-        course = Course.objects.filter(
+        course_readable_id = generate_course_readable_id(course_code.split("-")[1])
+        course, _ = Course.objects.get_or_create(
             external_course_id=course_code,
             platform=platform,
             is_external=True,
-        ).first()
-        course_readable_id = generate_course_readable_id(course_code)
-        if not course:
-            log.info(
-                f"No course found for title: {course_title}, external_course_id: {course_code}. Creating a new one..."
-            )
-
-            course = Course.objects.create(
-                title=course_title,
-                readable_id=course_readable_id,
-                external_course_id=course_code,
-                platform=platform,
-                live=True,
-                is_external=True,
-            )
+            defaults={
+                "title": course_title,
+                "readable_id": course_readable_id,
+                "live": True
+            }
+        )
 
         create_or_update_emeritus_course_run(course, course_title, course_readable_id, emeritus_course_run)
-        course_page = create_or_update_external_course_page(course, course_title, emeritus_course_run)
+        course_page = create_or_update_external_course_page(course_index_page, course, course_title, emeritus_course_run)
 
         if emeritus_course_run.get("Category"):
             topic, _ = CourseTopic.objects.get_or_create(
@@ -156,14 +155,10 @@ def update_emeritus_course_runs(emeritus_course_runs):
             )
 
 
-def generate_course_readable_id(external_course_code):
+def generate_course_readable_id(external_course_tag):
     """
     Generates course readable ID using the Emeritus Course code.
     """
-    if not external_course_code:
-        return ""
-
-    external_course_tag = external_course_code.split("-")[1]
     return f"course-v1:xPRO+{external_course_tag}"
 
 
@@ -183,28 +178,33 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
     return f"{course_readable_id}+{course_run_tag}"
 
 
-def create_or_update_external_course_page(course, course_title, emeritus_course_run):
+def create_or_update_external_course_page(course_index_page, course, course_title, emeritus_course_run):
     """
     Creates or updates external course page for Emeritus course page.
     """
     course_page = getattr(course, "externalcoursepage", None)
+    marketing_url = emeritus_course_run.get("landing_page_url") if emeritus_course_run.get("landing_page_url") else ""
+    total_weeks = emeritus_course_run.get('total_weeks')
+    duration = f"{total_weeks} Weeks" if total_weeks and total_weeks != 0 else ""
+    description = emeritus_course_run.get("description") if emeritus_course_run.get("description") else ""
+
     if not course_page:
         course_page = ExternalCoursePage(
             course=course,
             title=course_title,
-            external_marketing_url=emeritus_course_run.get("landing_page_url", ""),
-            subhead="Delivered in collaboration with Emeritus.",
-            duration=f"{emeritus_course_run.get('total_weeks')} Weeks",
+            external_marketing_url=marketing_url,
+            subhead=EMERITUS_COURSE_PAGE_SUBHEAD,
+            duration=duration,
             format=emeritus_course_run.get("format"),
-            description=emeritus_course_run.get("description"),
+            description=description,
         )
-        course_index_page = Page.objects.get(
-            id=CourseIndexPage.objects.first().id
-        ).specific
         course_index_page.add_child(instance=course_page)
         course_page.save()
-    else:
-        pass
+    elif course_page.external_marketing_url != marketing_url or course_page.duration != duration or course_page.description != description:
+        course_page.external_marketing_url = marketing_url
+        course_page.duration = duration
+        course_page.description = description
+        course_page.save()
 
     return course_page
 
@@ -227,28 +227,24 @@ def create_or_update_emeritus_course_run(course, course_title, course_readable_i
     )
 
     course_run_code = emeritus_course_run.get("course_run_code")
-    course_run = course.courseruns.filter(
-        external_course_run_id=course_run_code
-    ).first()
-    if not course_run:
-        log.info(
-            f"Course run not found for external_course_run_id: {course_run_code}"
-        )
-        course_run_tag = generate_external_course_run_tag(course_run_code)
-        course_run_courseware_id = generate_external_course_run_courseware_id(
-            course_run_tag, course_readable_id
-        )
-        CourseRun.objects.create(
-            course=course,
-            title=course_title,
-            courseware_id=course_run_courseware_id,
-            run_tag=course_run_tag,
-            external_course_run_id=course_run_code,
-            start_date=start_date,
-            end_date=end_date,
-            live=True,
-        )
-    elif course_run.start_date != start_date or course_run.end_date != end_date:
+    course_run_tag = generate_external_course_run_tag(course_run_code)
+    course_run_courseware_id = generate_external_course_run_courseware_id(
+        course_run_tag, course_readable_id
+    )
+    course_run, created = CourseRun.objects.get_or_create(
+        external_course_run_id=course_run_code,
+        course=course,
+        defaults={
+            "title": course_title,
+            "courseware_id": course_run_courseware_id,
+            "run_tag": course_run_tag,
+            "start_date": start_date,
+            "end_date": end_date,
+            "live": True
+        }
+    )
+
+    if not created and (course_run.start_date.date() != start_date.date() or course_run.end_date.date() != end_date.date()):
         course_run.start_date = start_date
         course_run.end_date = end_date
         course_run.save()
@@ -262,16 +258,23 @@ def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
     who_should_enroll_list = [
         item.replace("●", "").strip() for item in who_should_enroll_list
     ][1:]
-    who_should_enroll_page = WhoShouldEnrollPage(
-        heading="WHO SHOULD ENROLL",
-        content=json.dumps(
-            [
-                {"type": "item", "value": who_should_enroll_item}
-                for who_should_enroll_item in who_should_enroll_list
-            ]
-        ),
+
+    who_should_enroll_page = course_page.who_should_enroll
+    content = json.dumps(
+        [
+            {
+                "type": "item", "value": who_should_enroll_item
+            }
+            for who_should_enroll_item in who_should_enroll_list
+        ]
     )
-    course_page.add_child(who_should_enroll_page)
+
+    if not who_should_enroll_page:
+        who_should_enroll_page = WhoShouldEnrollPage(
+            heading=EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING,
+            content=content,
+        )
+        course_page.add_child(instance=who_should_enroll_page)
     who_should_enroll_page.save()
 
 
@@ -283,14 +286,15 @@ def create_learning_outcomes_page(course_page, outcomes_string):
     learning_outcomes = [
         outcome.replace("●", "").strip() for outcome in learning_outcomes
     ][1:]
-    learning_outcome_page = LearningOutcomesPage(
-        heading="WHAT YOU WILL LEARN",
-        sub_heading="MIT xPRO is collaborating with online education provider Emeritus to deliver "
-        "this online course. By clicking LEARN MORE, you will be taken to a page where "
-        "you can download the brochure and apply to the program via Emeritus.",
-        outcome_items=json.dumps(
-            [{"type": "outcome", "value": outcome} for outcome in learning_outcomes]
-        ),
+    learning_outcome_page = course_page.outcomes
+    outcome_items = json.dumps(
+        [{"type": "outcome", "value": outcome} for outcome in learning_outcomes]
     )
-    course_page.add_child(instance=learning_outcome_page)
+    if not learning_outcome_page:
+        learning_outcome_page = LearningOutcomesPage(
+            heading=EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING,
+            sub_heading=EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD,
+            outcome_items=outcome_items,
+        )
+        course_page.add_child(instance=learning_outcome_page)
     learning_outcome_page.save()
