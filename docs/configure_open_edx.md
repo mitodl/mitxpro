@@ -61,20 +61,20 @@ There are two options for this:
 - In devstack, run `make lms-shell` and within that shell `pip install social-auth-mitxpro-$VERSION.tar.gz`
   - To update to a new development version without having to actually bump the package version, simply `pip uninstall social-auth-mitxpro`, then install again
 
-#### Install `mitxpro-openedx-extensions` in LMS
+#### Install `openedx-companion-auth` in LMS
 
 There are two options for this:
 
 ##### Install via pip
 
-- `pip install mitxpro-openedx-extensions`
+- `pip install openedx-companion-auth`
 
 ##### Install from local Build
 
-- Checkout the [mitxpro-openedx-extensions](https://github.com/mitodl/mitxpro-openedx-extensions) project and build the package per the project instructions
-- Copy the `mitxpro-openedx-extensions-$VERSION.tar.gz` file into devstack's `edx-platform` directory
-- In devstack, run `make lms-shell` and within that shell `pip install mitxpro-openedx-extensions-$VERSION.tar.gz`
-  - To update to a new development version without having to actually bump the package version, simply `pip uninstall -y mitxpro-openedx-extensions`, then install again
+- Checkout the [open-edx-plugins](https://github.com/mitodl/open-edx-plugins) project and build the package as per the project instructions
+- Copy the `openedx-companion-auth-$VERSION.tar.gz` file from `dist` folder into devstack's `edx-platform` directory
+- In devstack, run `make lms-shell` and within that shell `pip install openedx-companion-auth-$VERSION.tar.gz`
+  - To update to a new development version without having to actually bump the package version, simply `pip uninstall -y openedx-companion-auth`, then install again
 
 #### Configure xPro as a OAuth provider for Open edX
 
