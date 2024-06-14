@@ -2,6 +2,6 @@ from enum import Enum
 
 
 class EmeritusJobStatus(Enum):
-    READY = 2
+    READY = 3
     FAILED = 4
-    ERROR = 5
+    CANCELLED = 5

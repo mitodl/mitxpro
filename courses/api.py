@@ -345,3 +345,10 @@ def defer_enrollment(
     except EdxEnrollmentCreateError:  # noqa: TRY302
         raise
     return from_enrollment, first_or_none(to_enrollments)
+
+
+def generate_course_readable_id(course_tag):
+    """
+    Generates course readable ID using the Emeritus Course code.
+    """
+    return f"course-v1:xPRO+{course_tag}"

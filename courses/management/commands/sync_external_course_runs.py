@@ -30,4 +30,4 @@ class Command(BaseCommand):
             vendor_name.lower(), None
         )
         if course_runs_sync_task:
-            course_runs_sync_task()
+            course_runs_sync_task.delay()

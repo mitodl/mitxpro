@@ -14,6 +14,7 @@ from cms.models import (
     LearningOutcomesPage,
     WhoShouldEnrollPage,
 )
+from courses.api import generate_course_readable_id
 from courses.constants import (
     EMERITUS_COURSE_PAGE_SUBHEAD,
     EMERITUS_DATE_FORMAT,
@@ -49,7 +50,6 @@ def fetch_emeritus_course_runs():
     for report in queries.json()["results"]:  # noqa: RET503
         # Check if query is in list of desired reports
         if report["name"] not in EMERITUS_REPORT_NAMES:
-            # If not, continue.
             log.info(
                 "Report: {} not specified for extract...skipping".format(report["name"])  # noqa: G001
             )
@@ -101,9 +101,8 @@ def fetch_emeritus_course_runs():
                     break
                 elif job_status["job"]["status"] in [
                     EmeritusJobStatus.FAILED,
-                    EmeritusJobStatus.ERROR,
+                    EmeritusJobStatus.CANCELLED,
                 ]:
-                    # Error
                     log.error("Job failed!")
                     break
                 else:
@@ -123,7 +122,7 @@ def update_emeritus_course_runs(emeritus_course_runs):
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
     """
-    platform, _ = Platform.objects.get_or_create(name=EMERITUS_PLATFORM_NAME)
+    platform = Platform.objects.get(name__iexact=EMERITUS_PLATFORM_NAME)
     course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
     for emeritus_course_run in emeritus_course_runs:
         course_title = emeritus_course_run.get("program_name")
@@ -170,25 +169,18 @@ def update_emeritus_course_runs(emeritus_course_runs):
             course_page.topics.add(topic)
             course_page.save()
 
-        if emeritus_course_run.get("learning_outcomes"):
-            create_or_update_learning_outcomes_page(
+        if not course_page.outcomes and emeritus_course_run.get("learning_outcomes"):
+            create_learning_outcomes_page(
                 course_page, emeritus_course_run.get("learning_outcomes")
             )
 
-        if emeritus_course_run.get("program_for"):
-            create_or_update_who_should_enroll_in_page(
+        if not course_page.who_should_enroll and emeritus_course_run.get("program_for"):
+            create_who_should_enroll_in_page(
                 course_page, emeritus_course_run.get("program_for")
             )
 
 
-def generate_course_readable_id(external_course_tag):
-    """
-    Generates course readable ID using the Emeritus Course code.
-    """
-    return f"course-v1:xPRO+{external_course_tag}"
-
-
-def generate_external_course_run_tag(course_run_code):
+def generate_emeritus_course_run_tag(course_run_code):
     """
     Returns the course tag generated using the Emeritus Course run code.
 
@@ -234,15 +226,6 @@ def create_or_update_external_course_page(
         )
         course_index_page.add_child(instance=course_page)
         course_page.save()
-    elif (
-        course_page.external_marketing_url != marketing_url
-        or course_page.duration != duration
-        or course_page.description != description
-    ):
-        course_page.external_marketing_url = marketing_url
-        course_page.duration = duration
-        course_page.description = description
-        course_page.save()
 
     return course_page
 
@@ -268,11 +251,11 @@ def create_or_update_emeritus_course_run(
     end_date = end_date.replace(hour=23, minute=59)
 
     course_run_code = emeritus_course_run.get("course_run_code")
-    course_run_tag = generate_external_course_run_tag(course_run_code)
+    course_run_tag = generate_emeritus_course_run_tag(course_run_code)
     course_run_courseware_id = generate_external_course_run_courseware_id(
         course_run_tag, course_readable_id
     )
-    course_run, created = CourseRun.objects.update_or_create(
+    course_run, created = CourseRun.objects.get_or_create(
         external_course_run_id=course_run_code,
         course=course,
         defaults={
@@ -284,13 +267,23 @@ def create_or_update_emeritus_course_run(
             "live": True,
         },
     )
-    log_msg = "Created Course Run," if created else "Updated Course Run,"
-    log.info(
-        f"{log_msg} title: {course_title}, external_course_run_id: {course_run_code}"  # noqa: G004
-    )
+    if created:
+        log.info(
+            f"Created Course Run, title: {course_title}, external_course_run_id: {course_run_code}"  # noqa: G004
+        )
+    elif (
+        course_run.start_date.date() != start_date.date()
+        or course_run.end_date.date() != end_date.date()
+    ):
+        course_run.start_date = start_date
+        course_run.end_date = end_date
+        course_run.save()
+        log.info(
+            f"Updated Course Run, title: {course_title}, external_course_run_id: {course_run_code}"  # noqa: G004
+        )
 
 
-def create_or_update_who_should_enroll_in_page(course_page, who_should_enroll_string):
+def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
     """
     Creates `WhoShouldEnrollPage` for Emeritus course.
     """
@@ -299,7 +292,6 @@ def create_or_update_who_should_enroll_in_page(course_page, who_should_enroll_st
         item.replace("●", "").strip() for item in who_should_enroll_list
     ][1:]
 
-    who_should_enroll_page = course_page.who_should_enroll
     content = json.dumps(
         [
             {"type": "item", "value": who_should_enroll_item}
@@ -307,16 +299,15 @@ def create_or_update_who_should_enroll_in_page(course_page, who_should_enroll_st
         ]
     )
 
-    if not who_should_enroll_page:
-        who_should_enroll_page = WhoShouldEnrollPage(
-            heading=EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING,
-            content=content,
-        )
-        course_page.add_child(instance=who_should_enroll_page)
+    who_should_enroll_page = WhoShouldEnrollPage(
+        heading=EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING,
+        content=content,
+    )
+    course_page.add_child(instance=who_should_enroll_page)
     who_should_enroll_page.save()
 
 
-def create_or_update_learning_outcomes_page(course_page, outcomes_string):
+def create_learning_outcomes_page(course_page, outcomes_string):
     """
     Creates `LearningOutcomesPage` for Emeritus course.
     """
@@ -324,15 +315,15 @@ def create_or_update_learning_outcomes_page(course_page, outcomes_string):
     learning_outcomes = [
         outcome.replace("●", "").strip() for outcome in learning_outcomes
     ][1:]
-    learning_outcome_page = course_page.outcomes
+
     outcome_items = json.dumps(
         [{"type": "outcome", "value": outcome} for outcome in learning_outcomes]
     )
-    if not learning_outcome_page:
-        learning_outcome_page = LearningOutcomesPage(
-            heading=EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING,
-            sub_heading=EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD,
-            outcome_items=outcome_items,
-        )
-        course_page.add_child(instance=learning_outcome_page)
+
+    learning_outcome_page = LearningOutcomesPage(
+        heading=EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING,
+        sub_heading=EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD,
+        outcome_items=outcome_items,
+    )
+    course_page.add_child(instance=learning_outcome_page)
     learning_outcome_page.save()

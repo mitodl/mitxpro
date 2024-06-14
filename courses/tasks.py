@@ -113,7 +113,7 @@ def sync_courseruns_data():
     sync_course_runs(runs)
 
 
-# @app.task
+@app.task
 def task_sync_emeritus_course_runs():
     """Task to sync Emeritus course runs"""
     emeritus_course_runs = fetch_emeritus_course_runs()
