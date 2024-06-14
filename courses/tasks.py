@@ -12,8 +12,8 @@ from requests.exceptions import HTTPError
 from courses.models import CourseRun, CourseRunCertificate
 from courses.sync_external_courses.api import (
     fetch_emeritus_course_runs,
+    update_emeritus_course_runs,
 )
-from courses.sync_external_courses.api import update_emeritus_course_runs
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,

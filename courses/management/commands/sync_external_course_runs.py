@@ -26,6 +26,8 @@ class Command(BaseCommand):
         sync_course_runs_task_to_vendor_map = {
             EMERITUS_PLATFORM_NAME.lower(): task_sync_emeritus_course_runs
         }
-        course_runs_sync_task = sync_course_runs_task_to_vendor_map.get(vendor_name.lower(), None)
+        course_runs_sync_task = sync_course_runs_task_to_vendor_map.get(
+            vendor_name.lower(), None
+        )
         if course_runs_sync_task:
             course_runs_sync_task()
