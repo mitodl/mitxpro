@@ -6,7 +6,8 @@ from decimal import Decimal
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models as dj_models, transaction
+from django.db import models as dj_models
+from django.db import transaction
 from django.templatetags.static import static
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -32,7 +33,6 @@ from ecommerce.utils import CouponUtils, validate_amount
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
-
 
 log = logging.getLogger(__name__)
 
@@ -493,7 +493,12 @@ class BasketSerializer(serializers.ModelSerializer):
                 models.CouponSelection.objects.update_or_create(
                     basket=basket, defaults={"coupon": coupon_version.coupon}
                 )
-            if updated_run_ids is not None or coupon_version is not None or updated_product is not None or should_update_program_run is True:
+            if (
+                updated_run_ids is not None
+                or coupon_version is not None
+                or updated_product is not None
+                or should_update_program_run is True
+            ):
                 basket.updated_on = datetime.datetime.now()
             if data_consents is not None:
                 models.DataConsentUser.objects.filter(
