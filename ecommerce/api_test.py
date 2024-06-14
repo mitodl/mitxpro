@@ -83,6 +83,7 @@ from ecommerce.factories import (
     TaxRateFactory,
 )
 from ecommerce.models import (
+    Basket,
     BasketItem,
     Coupon,
     CouponPaymentVersion,
@@ -1076,6 +1077,7 @@ def test_complete_order(mocker, user, basket_and_coupons):
     patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
+    assert Basket.obects.filter(user=user).count() == 1
     assert BasketItem.objects.filter(basket__user=user).count() > 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() > 0
     assert CouponSelection.objects.filter(basket__user=user).count() > 0
@@ -1083,6 +1085,7 @@ def test_complete_order(mocker, user, basket_and_coupons):
 
     complete_order(order)
     patched_enroll.assert_called_once_with(order)
+    assert Basket.obects.filter(user=user).count() == 0
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
