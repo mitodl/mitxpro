@@ -16,6 +16,7 @@ from courses.api import (
     deactivate_program_enrollment,
     deactivate_run_enrollment,
     defer_enrollment,
+    generate_course_readable_id,
     get_user_enrollments,
 )
 from courses.constants import (
@@ -537,3 +538,16 @@ def test_defer_enrollment_validation(mocker, user):
         force=True,
     )
     assert patched_create_enrollments.call_count == 2
+
+
+@pytest.mark.parametrize(
+    ("course_tag", "expected_readable_id"),
+    [
+        ("DBIP", "course-v1:xPRO+DBIP"),
+        ("DBIP.ES", "course-v1:xPRO+DBIP.ES"),
+        ("DBIP.SEPO", "course-v1:xPRO+DBIP.SEPO"),
+    ],
+)
+def test_generate_course_readable_id(course_tag, expected_readable_id):
+    """Test that `generate_course_readable_id` returns expected course readable_id for course tags."""
+    assert generate_course_readable_id(course_tag) == expected_readable_id
