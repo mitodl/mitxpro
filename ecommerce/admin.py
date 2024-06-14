@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 
 from courses.models import Course
 from ecommerce.models import (
+    Basket,
+    BasketItem,
     BulkCouponAssignment,
     Company,
     Coupon,
@@ -638,3 +640,6 @@ class TaxRateAdmin(admin.ModelAdmin):
     list_display = ("id", "country_code", "tax_rate", "tax_rate_name", "active")
     search_fields = ("country_code", "tax_rate_name", "tax_rate")
     model = TaxRate
+
+admin.site.register(Basket)
+admin.site.register(BasketItem)
