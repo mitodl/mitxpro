@@ -1,5 +1,9 @@
 {
-  "addons": ["heroku-postgresql:standard-0", "newrelic:wayne", "rediscloud:30"],
+  "addons": [
+    "heroku-postgresql:standard-0",
+    "newrelic:wayne",
+    "rediscloud:30"
+  ],
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-apt"
@@ -40,6 +44,10 @@
     },
     "AWS_STORAGE_BUCKET_NAME": {
       "description": "S3 Bucket name.",
+      "required": false
+    },
+    "BASKET_EXPIRY_DAYS": {
+      "description": "How many days to keep basket before deleting. The threshold value of a basket to live",
       "required": false
     },
     "BLOG_CACHE_TIMEOUT": {
@@ -92,6 +100,9 @@
     },
     "CRON_EMERITUS_COURSERUN_SYNC_HOURS": {
       "description": "'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+    },
+    "CRON_DELETE_BASKET_HOURS": {
+      "description": "'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
       "required": false
     },
     "CSRF_TRUSTED_ORIGINS": {
@@ -662,7 +673,12 @@
       "required": false
     }
   },
-  "keywords": ["Django", "Python", "MIT", "Office of Digital Learning"],
+  "keywords": [
+    "Django",
+    "Python",
+    "MIT",
+    "Office of Digital Learning"
+  ],
   "name": "mitxpro",
   "repository": "https://github.com/mitodl/mitxpro",
   "scripts": {
