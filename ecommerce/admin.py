@@ -641,5 +641,6 @@ class TaxRateAdmin(admin.ModelAdmin):
     search_fields = ("country_code", "tax_rate_name", "tax_rate")
     model = TaxRate
 
+
 admin.site.register(Basket)
 admin.site.register(BasketItem)

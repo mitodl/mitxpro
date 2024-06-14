@@ -777,7 +777,7 @@ CELERY_TASK_SEND_SENT_EVENT = True
 BASKET_EXPIRY_DAYS = get_int(
     name="BASKET_EXPIRY_DAYS",
     default=15,
-    description="How many days to keep basket before deleting. The threshold value of a basket to live"
+    description="How many days to keep basket before deleting. The threshold value of a basket to live",
 )
 RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY = get_int(
     name="RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
@@ -886,8 +886,8 @@ CELERY_BEAT_SCHEDULE = {
             day_of_week="*",
             day_of_month="*",
             month_of_year="*",
-        )
-    }
+        ),
+    },
 }
 if FEATURES.get("COUPON_SHEETS"):
     CELERY_BEAT_SCHEDULE["renew_all_file_watches"] = {
