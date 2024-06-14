@@ -1085,7 +1085,7 @@ def test_complete_order(mocker, user, basket_and_coupons):
 
     complete_order(order)
     patched_enroll.assert_called_once_with(order)
-    assert Basket.obects.filter(user=user).count() == 0
+    assert Basket.objects.filter(user=user).count() == 0
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
