@@ -149,12 +149,10 @@ def update_emeritus_course_runs(emeritus_course_runs):
         log_msg = "Created course," if course_created else "Course already exists,"
         log.info(f"{log_msg} title: {course_title}, readable_id: {course_readable_id}")  # noqa: G004
 
-        create_or_update_emeritus_course_run(
-            course, course_title, course_readable_id, emeritus_course_run
-        )
+        create_or_update_emeritus_course_run(course, emeritus_course_run)
         try:
             course_page = create_or_update_external_course_page(
-                course_index_page, course, course_title, emeritus_course_run
+                course_index_page, course, emeritus_course_run
             )
         except Exception:
             log.exception(
@@ -197,10 +195,10 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
 
 
 def create_or_update_external_course_page(
-    course_index_page, course, course_title, emeritus_course_run
+    course_index_page, course, emeritus_course_run
 ):
     """
-    Creates or updates external course page for Emeritus course page.
+    Creates or updates external course page for Emeritus course run.
     """
     course_page = getattr(course, "externalcoursepage", None)
     marketing_url = clean_url(
@@ -217,7 +215,7 @@ def create_or_update_external_course_page(
     if not course_page:
         course_page = ExternalCoursePage(
             course=course,
-            title=course_title,
+            title=emeritus_course_run["program_name"],
             external_marketing_url=marketing_url,
             subhead=EMERITUS_COURSE_PAGE_SUBHEAD,
             duration=duration,
@@ -226,16 +224,24 @@ def create_or_update_external_course_page(
         )
         course_index_page.add_child(instance=course_page)
         course_page.save()
+    else:
+        # Only update course page fields with API if they are empty.
+        if not course_page.external_marketing_url and marketing_url:
+            course_page.external_marketing_url = marketing_url
+        if not course_page.duration and duration:
+            course_page.duration = duration
+        if not course_page.description and description:
+            course_page.description = description
+        course_page.save()
 
     return course_page
 
 
-def create_or_update_emeritus_course_run(
-    course, course_title, course_readable_id, emeritus_course_run
-):
+def create_or_update_emeritus_course_run(course, emeritus_course_run):
     """
     Creates or updates the external emeritus course run.
     """
+    title = emeritus_course_run["program_name"]
     start_date_str = emeritus_course_run.get("start_date", None)
     end_date_str = emeritus_course_run.get("end_date", None)
     start_date = (
@@ -253,13 +259,13 @@ def create_or_update_emeritus_course_run(
     course_run_code = emeritus_course_run.get("course_run_code")
     course_run_tag = generate_emeritus_course_run_tag(course_run_code)
     course_run_courseware_id = generate_external_course_run_courseware_id(
-        course_run_tag, course_readable_id
+        course_run_tag, course.readable_id
     )
     course_run, created = CourseRun.objects.get_or_create(
         external_course_run_id=course_run_code,
         course=course,
         defaults={
-            "title": course_title,
+            "title": title,
             "courseware_id": course_run_courseware_id,
             "run_tag": course_run_tag,
             "start_date": start_date,
@@ -269,7 +275,7 @@ def create_or_update_emeritus_course_run(
     )
     if created:
         log.info(
-            f"Created Course Run, title: {course_title}, external_course_run_id: {course_run_code}"  # noqa: G004
+            f"Created Course Run, title: {title}, external_course_run_id: {course_run_code}"  # noqa: G004
         )
     elif (
         course_run.start_date.date() != start_date.date()
@@ -279,7 +285,7 @@ def create_or_update_emeritus_course_run(
         course_run.end_date = end_date
         course_run.save()
         log.info(
-            f"Updated Course Run, title: {course_title}, external_course_run_id: {course_run_code}"  # noqa: G004
+            f"Updated Course Run, title: {title}, external_course_run_id: {course_run_code}"  # noqa: G004
         )
 
 
@@ -287,11 +293,7 @@ def create_who_should_enroll_in_page(course_page, who_should_enroll_string):
     """
     Creates `WhoShouldEnrollPage` for Emeritus course.
     """
-    who_should_enroll_list = who_should_enroll_string.strip().split("\r\n")
-    who_should_enroll_list = [
-        item.replace("●", "").strip() for item in who_should_enroll_list
-    ][1:]
-
+    who_should_enroll_list = parse_program_for_and_outcomes(who_should_enroll_string)
     content = json.dumps(
         [
             {"type": "item", "value": who_should_enroll_item}
@@ -311,11 +313,7 @@ def create_learning_outcomes_page(course_page, outcomes_string):
     """
     Creates `LearningOutcomesPage` for Emeritus course.
     """
-    learning_outcomes = outcomes_string.strip().split("\r\n")
-    learning_outcomes = [
-        outcome.replace("●", "").strip() for outcome in learning_outcomes
-    ][1:]
-
+    learning_outcomes = parse_program_for_and_outcomes(outcomes_string)
     outcome_items = json.dumps(
         [{"type": "outcome", "value": outcome} for outcome in learning_outcomes]
     )
@@ -327,3 +325,11 @@ def create_learning_outcomes_page(course_page, outcomes_string):
     )
     course_page.add_child(instance=learning_outcome_page)
     learning_outcome_page.save()
+
+
+def parse_program_for_and_outcomes(items_str):
+    """
+    Parses `WhoShouldEnrollPage` and `LearningOutcomesPage` items for the Emeritus API.
+    """
+    items_list = items_str.strip().split("\r\n")
+    return [item.replace("●", "").strip() for item in items_list][1:]

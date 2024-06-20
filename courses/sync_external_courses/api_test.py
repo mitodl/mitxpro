@@ -2,12 +2,32 @@
 Sync external course API tests
 """
 
+import json
+import random
+from datetime import datetime, timezone
+from pathlib import Path
+
 import pytest
 
+from cms.factories import (
+    CourseIndexPageFactory,
+    ExternalCoursePageFactory,
+    HomePageFactory,
+)
+from courses.constants import EMERITUS_DATE_FORMAT, EMERITUS_PLATFORM_NAME
+from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
+from courses.models import Course
 from courses.sync_external_courses.api import (
+    create_learning_outcomes_page,
+    create_or_update_emeritus_course_run,
+    create_or_update_external_course_page,
+    create_who_should_enroll_in_page,
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
+    parse_program_for_and_outcomes,
+    update_emeritus_course_runs,
 )
+from mitxpro.utils import clean_url
 
 
 @pytest.mark.parametrize(
@@ -52,3 +72,248 @@ def test_generate_external_course_run_courseware_id(
         generate_external_course_run_courseware_id(course_run_tag, course_readable_id)
         == expected_course_run_courseware_id
     )
+
+
+@pytest.mark.parametrize("create_course_page", [True, False])
+@pytest.mark.django_db
+def test_create_or_update_external_course_page(create_course_page):
+    """
+    Test that `create_or_update_external_course_page` creates a new course or updates the existing.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    course = CourseFactory.create()
+
+    emeritus_course_run = {
+        "program_name": "Internet of Things (IoT): Design and Applications",
+        "course_code": "MO-DBIP",
+        "course_run_code": "MO-DBIP.ELE-25-07#1",
+        "start_date": "2025-07-30",
+        "end_date": "2025-09-24",
+        "Category": "Technology",
+        "list_price": 2600,
+        "list_currency": "USD",
+        "total_weeks": 7,
+        "product_family": "Certificate",
+        "product_sub_type": "Short Form",
+        "format": "Online",
+        "suggested_duration": 49,
+        "language": "English",
+        "landing_page_url": "https://executive-ed.xpro.mit.edu/Internet-of-things-iot-design-and-applications"
+        "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
+        "=website&utm_source=MIT-web",
+        "Apply_now_url": "https://executive-ed.xpro.mit.edu/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
+        "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
+        "description": "Test Description",
+        "learning_outcomes": None,
+        "program_for": None,
+    }
+
+    if create_course_page:
+        ExternalCoursePageFactory.create(
+            course=course,
+            title=emeritus_course_run["program_name"],
+            external_marketing_url="",
+            duration="",
+            description="",
+        )
+
+    course_page = create_or_update_external_course_page(
+        course_index_page, course, emeritus_course_run
+    )
+    assert course_page.title == emeritus_course_run["program_name"]
+    assert course_page.external_marketing_url == clean_url(
+        emeritus_course_run["landing_page_url"], remove_query_params=True
+    )
+    assert course_page.course == course
+    assert course_page.duration == f"{emeritus_course_run['total_weeks']} Weeks"
+    assert course_page.description == emeritus_course_run["description"]
+
+
+@pytest.mark.django_db
+def test_create_who_should_enroll_in_page():
+    """
+    Tests that `create_who_should_enroll_in_page` creates the `WhoShouldEnrollPage`.
+    """
+    course_page = ExternalCoursePageFactory.create()
+    who_should_enroll_str = (
+        "The program is ideal for:\r\n●       Early-career IT professionals, network engineers, "
+        "and system administrators wanting to gain a comprehensive overview of cybersecurity and "
+        "fast-track their career progression\r\n●       IT project managers and engineers keen on "
+        "gaining the ability to think critically about the threat landscape, including "
+        "vulnerabilities in cybersecurity, and upgrading their resume for career "
+        "advancement\r\n●       Mid- or later-career professionals seeking a career change and "
+        "looking to add critical cybersecurity knowledge and foundational lessons to their resume"
+    )
+    create_who_should_enroll_in_page(course_page, who_should_enroll_str)
+    assert parse_program_for_and_outcomes(who_should_enroll_str) == [
+        item.value.source for item in course_page.who_should_enroll.content
+    ]
+    assert course_page.who_should_enroll is not None
+
+
+@pytest.mark.django_db
+def test_create_learning_outcomes_page():
+    """
+    Tests that `create_learning_outcomes_page` creates the `LearningOutcomesPage`.
+    """
+    course_page = ExternalCoursePageFactory.create()
+    learning_outcomes_str = (
+        "This program will enable you to:\r\n●       Gain an overview of cybersecurity risk "
+        "management, including its foundational concepts and relevant regulations\r\n●       "
+        "Explore the domains covering various aspects of cloud technology\r\n●       "
+        "Learn adversary tactics and techniques that are utilized as the foundational development "
+        "of specific threat models and methodologies\r\n●       Understand the guidelines for "
+        "organizations to prepare themselves against cybersecurity attacks"
+    )
+    create_learning_outcomes_page(course_page, learning_outcomes_str)
+    assert parse_program_for_and_outcomes(learning_outcomes_str) == [
+        item.value for item in course_page.outcomes.outcome_items
+    ]
+    assert course_page.outcomes is not None
+
+
+def test_parse_program_for_and_outcomes():
+    """
+    Tests that `parse_program_for_and_outcomes` parses who should enroll and learning outcomes strings as expected.
+    """
+    data_str = (
+        "This program will enable you to:\r\n●       Gain an overview of cybersecurity risk "
+        "management, including its foundational concepts and relevant regulations\r\n●       "
+        "Explore the domains covering various aspects of cloud technology\r\n●       "
+        "Learn adversary tactics and techniques that are utilized as the foundational development "
+        "of specific threat models and methodologies\r\n●       Understand the guidelines for "
+        "organizations to prepare themselves against cybersecurity attacks"
+    )
+    assert parse_program_for_and_outcomes(data_str) == [
+        "Gain an overview of cybersecurity risk management, including "
+        "its foundational concepts and relevant regulations",
+        "Explore the domains covering various aspects of cloud technology",
+        "Learn adversary tactics and techniques that are utilized as the foundational development "
+        "of specific threat models and methodologies",
+        "Understand the guidelines for organizations to prepare themselves against cybersecurity attacks",
+    ]
+
+
+@pytest.mark.parametrize("create_existing_course_run", [True, False])
+@pytest.mark.django_db
+def test_create_or_update_emeritus_course_run(create_existing_course_run):
+    """
+    Tests that `create_or_update_emeritus_course_run` creates or updates a course run
+    """
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        emeritus_course_run = json.load(test_data_file)["rows"][0]
+
+    course = CourseFactory.create()
+    course_run_code = emeritus_course_run["course_run_code"]
+    if create_existing_course_run:
+        CourseRunFactory.create(
+            course=course,
+            external_course_run_id=course_run_code,
+            enrollment_start=None,
+            enrollment_end=None,
+            expiration_date=None,
+        )
+
+    create_or_update_emeritus_course_run(course, emeritus_course_run)
+    course_runs = course.courseruns.all()
+
+    course_run_tag = generate_emeritus_course_run_tag(course_run_code)
+    course_run_courseware_id = generate_external_course_run_courseware_id(
+        course_run_tag, course.readable_id
+    )
+    start_date = datetime.strptime(
+        emeritus_course_run["start_date"], EMERITUS_DATE_FORMAT
+    ).astimezone(timezone.utc)
+    end_date = datetime.strptime(
+        emeritus_course_run["end_date"], EMERITUS_DATE_FORMAT
+    ).astimezone(timezone.utc)
+    end_date = end_date.replace(hour=23, minute=59)
+
+    assert len(course_runs) == 1
+    if create_existing_course_run:
+        expected_data = {
+            "external_course_run_id": course_run_code,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+    else:
+        expected_data = {
+            "title": emeritus_course_run["program_name"],
+            "external_course_run_id": course_run_code,
+            "courseware_id": course_run_courseware_id,
+            "run_tag": course_run_tag,
+            "start_date": start_date,
+            "end_date": end_date,
+            "live": True,
+        }
+    for attr_name, expected_value in expected_data.items():
+        assert getattr(course_runs[0], attr_name) == expected_value
+
+
+@pytest.mark.parametrize("create_existing_course_runs", [True, False])
+@pytest.mark.django_db
+def test_update_emeritus_course_runs(create_existing_course_runs):
+    """
+    Tests that `update_emeritus_course_runs` creates new courses and updates existing.
+    """
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        emeritus_course_runs = json.load(test_data_file)["rows"]
+
+    platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
+
+    if create_existing_course_runs:
+        for run in random.sample(emeritus_course_runs, len(emeritus_course_runs) // 2):
+            course = CourseFactory.create(
+                title=run["program_name"],
+                platform=platform,
+                external_course_id=run["course_code"],
+                is_external=True,
+            )
+            CourseRunFactory.create(
+                course=course,
+                external_course_run_id=run["course_run_code"],
+                enrollment_start=None,
+                enrollment_end=None,
+                expiration_date=None,
+            )
+
+            home_page = HomePageFactory.create(
+                title="Home Page", subhead="<p>subhead</p>"
+            )
+            CourseIndexPageFactory.create(parent=home_page, title="Courses")
+            ExternalCoursePageFactory.create(
+                course=course,
+                title=run["program_name"],
+                external_marketing_url="",
+                duration="",
+                description="",
+            )
+
+    update_emeritus_course_runs(emeritus_course_runs)
+    courses = Course.objects.filter(platform=platform)
+    assert len(courses) == len(emeritus_course_runs)
+    for emeritus_course_run in emeritus_course_runs:
+        course = Course.objects.filter(
+            platform=platform,
+            external_course_id=emeritus_course_run["course_code"],
+            is_external=True,
+        ).first()
+        assert course is not None
+        assert (
+            course.courseruns.filter(
+                external_course_run_id=emeritus_course_run["course_run_code"]
+            ).count()
+            == 1
+        )
+        assert hasattr(course, "externalcoursepage")
+
+        course_page = course.externalcoursepage
+        if emeritus_course_run["program_for"]:
+            assert course_page.who_should_enroll is not None
+        if emeritus_course_run["learning_outcomes"]:
+            assert course_page.outcomes is not None
