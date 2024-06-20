@@ -222,6 +222,10 @@
       "description": "The API Key for Emeritus API",
       "required": true
     },
+    "EMERITUS_API_TIMEOUT": {
+      "description": "API request timeout for Emeritus APIs",
+      "required": false
+    },
     "ENROLLMENT_CHANGE_SHEET_ID": {
       "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
       "required": false

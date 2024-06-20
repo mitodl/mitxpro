@@ -41,7 +41,7 @@ COURSE_BG_IMG_MOBILE_W_H = (1024, 350)
 COURSE_BG_IMG_MOBILE_WAGTAIL_FILL = "fill-{}x{}".format(*COURSE_BG_IMG_MOBILE_W_H)
 
 
-# Emeritus Course Runs Sync constants
+# Emeritus Course Sync constants
 EMERITUS_REPORT_NAMES = ["Batch"]
 EMERITUS_PLATFORM_NAME = "Emeritus"
 EMERITUS_DATE_FORMAT = "%Y-%m-%d"

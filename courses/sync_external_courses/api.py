@@ -44,7 +44,10 @@ def fetch_emeritus_course_runs():
     start_date = end_date - timedelta(days=1)
 
     # Get a list of available queries
-    queries = requests.get(f"{api_base_url}/api/queries?api_key={api_key}", timeout=60)
+    queries = requests.get(
+        f"{api_base_url}/api/queries?api_key={api_key}",
+        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+    )
     queries.raise_for_status()
 
     for report in queries.json()["results"]:  # noqa: RET503
@@ -70,7 +73,7 @@ def fetch_emeritus_course_runs():
                     }
                 }
             ),
-            timeout=60,
+            timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
         )
 
         data.raise_for_status()
@@ -84,7 +87,8 @@ def fetch_emeritus_course_runs():
             while True:
                 # Get the status of the job-id returned by the initial request.
                 job_status = requests.get(
-                    f"{api_base_url}/api/jobs/{job_id}?api_key={api_key}", timeout=60
+                    f"{api_base_url}/api/jobs/{job_id}?api_key={api_key}",
+                    timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
                 )
                 job_status.raise_for_status()
                 job_status = job_status.json()
@@ -94,7 +98,7 @@ def fetch_emeritus_course_runs():
                     log.info("Job complete... requesting results...")
                     query_resp = requests.get(
                         f"{api_base_url}/api/query_results/{job_status['job']['query_result_id']}?api_key={api_key}",
-                        timeout=60,
+                        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
                     )
                     query_resp.raise_for_status()
                     data = query_resp.json()
@@ -151,7 +155,7 @@ def update_emeritus_course_runs(emeritus_course_runs):
 
         create_or_update_emeritus_course_run(course, emeritus_course_run)
         try:
-            course_page = create_or_update_external_course_page(
+            course_page = create_or_update_emeritus_course_page(
                 course_index_page, course, emeritus_course_run
             )
         except Exception:
@@ -194,7 +198,7 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
     return f"{course_readable_id}+{course_run_tag}"
 
 
-def create_or_update_external_course_page(
+def create_or_update_emeritus_course_page(
     course_index_page, course, emeritus_course_run
 ):
     """
@@ -250,11 +254,12 @@ def create_or_update_emeritus_course_run(course, emeritus_course_run):
         else None
     )
     end_date = (
-        datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT).astimezone(timezone.utc)
+        datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT)
+        .astimezone(timezone.utc)
+        .replace(hour=23, minute=59)
         if end_date_str
         else None
     )
-    end_date = end_date.replace(hour=23, minute=59)
 
     course_run_code = emeritus_course_run.get("course_run_code")
     course_run_tag = generate_emeritus_course_run_tag(course_run_code)

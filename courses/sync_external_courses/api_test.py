@@ -19,8 +19,8 @@ from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.api import (
     create_learning_outcomes_page,
+    create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
-    create_or_update_external_course_page,
     create_who_should_enroll_in_page,
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
@@ -76,9 +76,9 @@ def test_generate_external_course_run_courseware_id(
 
 @pytest.mark.parametrize("create_course_page", [True, False])
 @pytest.mark.django_db
-def test_create_or_update_external_course_page(create_course_page):
+def test_create_or_update_emeritus_course_page(create_course_page):
     """
-    Test that `create_or_update_external_course_page` creates a new course or updates the existing.
+    Test that `create_or_update_emeritus_course_page` creates a new course or updates the existing.
     """
     home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
@@ -118,7 +118,7 @@ def test_create_or_update_external_course_page(create_course_page):
             description="",
         )
 
-    course_page = create_or_update_external_course_page(
+    course_page = create_or_update_emeritus_course_page(
         course_index_page, course, emeritus_course_run
     )
     assert course_page.title == emeritus_course_run["program_name"]
