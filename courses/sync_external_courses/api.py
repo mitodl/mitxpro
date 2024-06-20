@@ -93,7 +93,7 @@ def fetch_emeritus_course_runs():
                 job_status.raise_for_status()
                 job_status = job_status.json()
 
-                if job_status["job"]["status"] == EmeritusJobStatus.READY:
+                if job_status["job"]["status"] == EmeritusJobStatus.READY.value:
                     # If true, the query_result is ready to be collected.
                     log.info("Job complete... requesting results...")
                     query_resp = requests.get(
@@ -104,8 +104,8 @@ def fetch_emeritus_course_runs():
                     data = query_resp.json()
                     break
                 elif job_status["job"]["status"] in [
-                    EmeritusJobStatus.FAILED,
-                    EmeritusJobStatus.CANCELLED,
+                    EmeritusJobStatus.FAILED.value,
+                    EmeritusJobStatus.CANCELLED.value,
                 ]:
                     log.error("Job failed!")
                     break

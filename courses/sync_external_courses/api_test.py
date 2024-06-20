@@ -3,6 +3,7 @@ Sync external course API tests
 """
 
 import json
+import logging
 import random
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,11 +23,13 @@ from courses.sync_external_courses.api import (
     create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
     create_who_should_enroll_in_page,
+    fetch_emeritus_course_runs,
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
     parse_program_for_and_outcomes,
     update_emeritus_course_runs,
 )
+from mitxpro.test_utils import MockResponse
 from mitxpro.utils import clean_url
 
 
@@ -317,3 +320,79 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
             assert course_page.who_should_enroll is not None
         if emeritus_course_run["learning_outcomes"]:
             assert course_page.outcomes is not None
+
+
+def test_fetch_emeritus_course_runs_success(settings, mocker):
+    """
+    Tests that `fetch_emeritus_course_runs` makes the required calls to the `Emeritus` API. Tests the success scenario.
+
+    Here is the expected flow:
+        1. Make a get request to get a list of reports.
+        2. Make a post request for the `Batch` report.
+        3. If the results are not ready, wait for the job to complete and make a get request to check the status.
+        4. If the results are ready after the post request, return the results.
+        5. If job status is 1 or 2, it is in progress. Wait for 2 seconds and make a get request for Job status.
+        6. If job status is 3, the results are ready, make a get request to collect the results and return the data.
+    """
+    settings.EMERITUS_API_BASE_URL = "https://test_emeritus_api.com"
+    settings.EMERITUS_API_KEY = "test_emeritus_api_key"
+    mock_get = mocker.patch("courses.sync_external_courses.api.requests.get")
+    mock_post = mocker.patch("courses.sync_external_courses.api.requests.post")
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        emeritus_course_runs = json.load(test_data_file)
+
+    batch_query = {
+        "id": 77,
+        "name": "Batch",
+    }
+    mock_get.side_effect = [
+        MockResponse({"results": [batch_query]}),
+        MockResponse({"job": {"status": 1}}),
+        MockResponse({"job": {"status": 2}}),
+        MockResponse({"job": {"status": 3, "query_result_id": 1}}),
+        MockResponse({"query_result": {"data": emeritus_course_runs}}),
+    ]
+    mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
+    actual_course_runs = fetch_emeritus_course_runs()
+    mock_get.assert_any_call(
+        f"{settings.EMERITUS_API_BASE_URL}/api/queries?api_key={settings.EMERITUS_API_KEY}",
+        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+    )
+    mock_post.assert_called_once()
+    mock_get.assert_any_call(
+        f"{settings.EMERITUS_API_BASE_URL}/api/jobs/1?api_key={settings.EMERITUS_API_KEY}",
+        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+    )
+    mock_get.assert_any_call(
+        f"{settings.EMERITUS_API_BASE_URL}/api/query_results/1?api_key={settings.EMERITUS_API_KEY}",
+        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+    )
+    assert actual_course_runs == emeritus_course_runs["rows"]
+
+
+def test_fetch_emeritus_course_runs_error(settings, mocker, caplog):
+    """
+    Tests that `fetch_emeritus_course_runs` specific calls to the Emeritus API and Fails for Job status 3 and 4.
+    """
+    settings.EMERITUS_API_BASE_URL = "https://test_emeritus_api.com"
+    settings.EMERITUS_API_KEY = "test_emeritus_api_key"
+    mock_get = mocker.patch("courses.sync_external_courses.api.requests.get")
+    mock_post = mocker.patch("courses.sync_external_courses.api.requests.post")
+
+    batch_query = {
+        "id": 77,
+        "name": "Batch",
+    }
+    mock_get.side_effect = [
+        MockResponse({"results": [batch_query]}),
+        MockResponse({"job": {"status": 1}}),
+        MockResponse({"job": {"status": 2}}),
+        MockResponse({"job": {"status": 4}}),
+    ]
+    mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
+    with caplog.at_level(logging.ERROR):
+        fetch_emeritus_course_runs()
+    assert "Job failed!" in caplog.text
+    assert "Something unexpected happened!" in caplog.text
