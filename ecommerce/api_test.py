@@ -1077,7 +1077,7 @@ def test_complete_order(mocker, user, basket_and_coupons):
     patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
-    assert Basket.obects.filter(user=user).count() == 1
+    assert Basket.objects.filter(user=user).count() == 1
     assert BasketItem.objects.filter(basket__user=user).count() > 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() > 0
     assert CouponSelection.objects.filter(basket__user=user).count() > 0
