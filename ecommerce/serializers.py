@@ -434,7 +434,7 @@ class BasketSerializer(serializers.ModelSerializer):
         return coupon_version
 
     @classmethod
-    def _update_basket_data(  # noqa: PLR0913
+    def _update_basket_data(  # noqa: PLR0913, C901
         cls,
         basket,
         updated_product=None,
