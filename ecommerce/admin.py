@@ -7,8 +7,6 @@ from django.core.exceptions import ValidationError
 
 from courses.models import Course
 from ecommerce.models import (
-    Basket,
-    BasketItem,
     BulkCouponAssignment,
     Company,
     Coupon,
