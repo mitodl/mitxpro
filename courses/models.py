@@ -603,7 +603,9 @@ class CourseRun(TimestampedModel):
     )
     product = GenericRelation(Product, related_query_name="course_run")
     title = models.CharField(max_length=255)
-    courseware_id = models.CharField(max_length=255, unique=True)
+    courseware_id = models.CharField(
+        max_length=255, unique=True, validators=[validate_url_path_field]
+    )
     run_tag = models.CharField(
         max_length=10,
         help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
