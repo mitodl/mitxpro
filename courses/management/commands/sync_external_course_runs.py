@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 
 from courses.constants import EMERITUS_PLATFORM_NAME
 from courses.tasks import task_sync_emeritus_course_runs
+from mitxpro import settings
 
 
 class Command(BaseCommand):
@@ -22,6 +23,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
+        if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
+            self.stdout.write(
+                self.style.ERROR(
+                    "External Course Sync is disabled. You can enable by turning the feature flag "
+                    "`ENABLE_EXTERNAL_COURSE_SYNC`"
+                )
+            )
+            return
         vendor_name = options["vendor_name"]
         sync_course_runs_task_to_vendor_map = {
             EMERITUS_PLATFORM_NAME.lower(): task_sync_emeritus_course_runs
