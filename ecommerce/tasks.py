@@ -1,19 +1,21 @@
 import datetime
 import logging
 
+from django.conf import settings
 from django.db import transaction
 
 from ecommerce.api import clear_baskets
 from ecommerce.models import Basket
 from mitxpro.celery import app
+from mitxpro.utils import now_in_utc
 
 log = logging.getLogger(__name__)
 
 
 @app.task(acks_late=True)
 def delete_expired_baskets():
-    cutoff_date = datetime.datetime.now() - datetime.timedelta(days=0)
-    log.info("Starting the deletion of expired baskets at %s", datetime.datetime.now())
+    cutoff_date = now_in_utc() - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    log.info("Starting the deletion of expired baskets at %s", now_in_utc())
 
     with transaction.atomic():
         expired_baskets = Basket.objects.filter(

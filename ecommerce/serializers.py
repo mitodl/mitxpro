@@ -1,6 +1,5 @@
 """ecommerce serializers"""
 
-import datetime
 import logging
 from decimal import Decimal
 
@@ -499,7 +498,7 @@ class BasketSerializer(serializers.ModelSerializer):
                 or updated_product is not None
                 or should_update_program_run is True
             ):
-                basket.updated_on = datetime.datetime.now()
+                basket.updated_on = now_in_utc()
             if data_consents is not None:
                 models.DataConsentUser.objects.filter(
                     id__in=data_consents, user=basket.user
