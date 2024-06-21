@@ -3,6 +3,7 @@ import logging
 import re
 import time
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 
 import requests
 from django.conf import settings
@@ -15,57 +16,67 @@ from cms.models import (
     WhoShouldEnrollPage,
 )
 from courses.api import generate_course_readable_id
-from courses.constants import (
-    EMERITUS_COURSE_PAGE_SUBHEAD,
-    EMERITUS_DATE_FORMAT,
-    EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING,
-    EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD,
-    EMERITUS_PLATFORM_NAME,
-    EMERITUS_REPORT_NAMES,
-    EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING,
-)
 from courses.models import Course, CourseRun, CourseTopic, Platform
-from courses.sync_external_courses.utils import EmeritusJobStatus
 from mitxpro.utils import clean_url, now_in_utc
 
 log = logging.getLogger(__name__)
 
 
-def fetch_emeritus_course_runs():
+EMERITUS_REPORT_NAMES = ["Batch"]
+EMERITUS_PLATFORM_NAME = "Emeritus"
+EMERITUS_DATE_FORMAT = "%Y-%m-%d"
+EMERITUS_COURSE_PAGE_SUBHEAD = "Delivered in collaboration with Emeritus."
+EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
+EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
+EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD = (
+    "MIT xPRO is collaborating with online education provider Emeritus to "
+    "deliver this online course. By clicking LEARN MORE, you will be taken to "
+    "a page where you can download the brochure and apply to the program via Emeritus."
+)
+
+
+class EmeritusJobStatus(Enum):
     """
-    Fetches Emeritus course runs.
+    Status of an Emeritus Job.
+    """
+
+    READY = 3
+    FAILED = 4
+    CANCELLED = 5
+
+
+def fetch_emeritus_courses():
+    """
+    Fetches Emeritus courses data.
 
     Makes a request to get the list of available queries and then queries the required reports.
     """
-    api_base_url = settings.EMERITUS_API_BASE_URL
-    api_key = settings.EMERITUS_API_KEY
-
     end_date = now_in_utc()
     start_date = end_date - timedelta(days=1)
 
     # Get a list of available queries
     queries = requests.get(
-        f"{api_base_url}/api/queries?api_key={api_key}",
+        f"{settings.EMERITUS_API_BASE_URL}/api/queries?api_key={settings.EMERITUS_API_KEY}",
         timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
     )
     queries.raise_for_status()
 
-    for report in queries.json()["results"]:  # noqa: RET503
+    for query in queries.json()["results"]:  # noqa: RET503
         # Check if query is in list of desired reports
-        if report["name"] not in EMERITUS_REPORT_NAMES:
+        if query["name"] not in EMERITUS_REPORT_NAMES:
             log.info(
-                "Report: {} not specified for extract...skipping".format(report["name"])  # noqa: G001
+                "Report: {} not specified for extract...skipping".format(query["name"])  # noqa: G001
             )
             continue
 
-        log.info("Requesting data for {}...".format(report["name"]))  # noqa: G001
+        log.info("Requesting data for {}...".format(query["name"]))  # noqa: G001
 
         # Make a post request for the query found.
         # This will return either:
         #   a) A query_result if one is cached for the parameters set, or
         #   b) A Job object.
-        data = requests.post(
-            f"{api_base_url}/api/queries/{report['id']}/results?api_key={api_key}",
+        query_response = requests.post(
+            f"{settings.EMERITUS_API_BASE_URL}/api/queries/{query['id']}/results?api_key={settings.EMERITUS_API_KEY}",
             data=json.dumps(
                 {
                     "parameters": {
@@ -76,18 +87,20 @@ def fetch_emeritus_course_runs():
             timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
         )
 
-        data.raise_for_status()
-        data = data.json()
-        if "job" in data:
+        query_response.raise_for_status()
+        query_response = query_response.json()
+        if "job" in query_response:
             # If a job is returned, we will poll until status = 3 (Success)
             # Status values 1 and 2 correspond to in-progress,
             # while 4 and 5 correspond to Failed, and Canceled, respectively.
-            job_id = data["job"]["id"]
-            log.info(f"Job id: {job_id} found... waiting for completion...")  # noqa: G004
+            job_id = query_response["job"]["id"]
+            log.info(
+                f"Job id: {job_id} found... waiting for completion..."  # noqa: G004
+            )  # fmt: off
             while True:
                 # Get the status of the job-id returned by the initial request.
                 job_status = requests.get(
-                    f"{api_base_url}/api/jobs/{job_id}?api_key={api_key}",
+                    f"{settings.EMERITUS_API_BASE_URL}/api/jobs/{job_id}?api_key={settings.EMERITUS_API_KEY}",
                     timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
                 )
                 job_status.raise_for_status()
@@ -97,11 +110,11 @@ def fetch_emeritus_course_runs():
                     # If true, the query_result is ready to be collected.
                     log.info("Job complete... requesting results...")
                     query_resp = requests.get(
-                        f"{api_base_url}/api/query_results/{job_status['job']['query_result_id']}?api_key={api_key}",
+                        f"{settings.EMERITUS_API_BASE_URL}/api/query_results/{job_status['job']['query_result_id']}?api_key={settings.EMERITUS_API_KEY}",
                         timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
                     )
                     query_resp.raise_for_status()
-                    data = query_resp.json()
+                    query_response = query_resp.json()
                     break
                 elif job_status["job"]["status"] in [
                     EmeritusJobStatus.FAILED.value,
@@ -114,10 +127,10 @@ def fetch_emeritus_course_runs():
                     log.info("Job not yet complete... sleeping for 2 seconds...")
                     time.sleep(2)
 
-        if "query_result" in data:
+        if "query_result" in query_response:
             # Check that query_result is in the data payload.
             # Return result as json
-            return dict(data["query_result"]["data"]).get("rows", [])
+            return dict(query_response["query_result"]["data"]).get("rows", [])
         log.error("Something unexpected happened!")
 
 
@@ -126,7 +139,7 @@ def update_emeritus_course_runs(emeritus_course_runs):
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
     """
-    platform = Platform.objects.get(name__iexact=EMERITUS_PLATFORM_NAME)
+    platform, _ = Platform.objects.get_or_create(name__iexact=EMERITUS_PLATFORM_NAME)
     course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
     for emeritus_course_run in emeritus_course_runs:
         course_title = emeritus_course_run.get("program_name")

@@ -15,15 +15,16 @@ from cms.factories import (
     ExternalCoursePageFactory,
     HomePageFactory,
 )
-from courses.constants import EMERITUS_DATE_FORMAT, EMERITUS_PLATFORM_NAME
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
-from courses.sync_external_courses.api import (
+from courses.sync_external_courses.emeritus_api import (
+    EMERITUS_DATE_FORMAT,
+    EMERITUS_PLATFORM_NAME,
     create_learning_outcomes_page,
     create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
     create_who_should_enroll_in_page,
-    fetch_emeritus_course_runs,
+    fetch_emeritus_courses,
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
     parse_program_for_and_outcomes,
@@ -322,9 +323,9 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
             assert course_page.outcomes is not None
 
 
-def test_fetch_emeritus_course_runs_success(settings, mocker):
+def test_fetch_emeritus_courses_success(settings, mocker):
     """
-    Tests that `fetch_emeritus_course_runs` makes the required calls to the `Emeritus` API. Tests the success scenario.
+    Tests that `fetch_emeritus_courses` makes the required calls to the `Emeritus` API. Tests the success scenario.
 
     Here is the expected flow:
         1. Make a get request to get a list of reports.
@@ -355,7 +356,7 @@ def test_fetch_emeritus_course_runs_success(settings, mocker):
         MockResponse({"query_result": {"data": emeritus_course_runs}}),
     ]
     mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
-    actual_course_runs = fetch_emeritus_course_runs()
+    actual_course_runs = fetch_emeritus_courses()
     mock_get.assert_any_call(
         f"{settings.EMERITUS_API_BASE_URL}/api/queries?api_key={settings.EMERITUS_API_KEY}",
         timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
@@ -372,9 +373,9 @@ def test_fetch_emeritus_course_runs_success(settings, mocker):
     assert actual_course_runs == emeritus_course_runs["rows"]
 
 
-def test_fetch_emeritus_course_runs_error(settings, mocker, caplog):
+def test_fetch_emeritus_courses_error(settings, mocker, caplog):
     """
-    Tests that `fetch_emeritus_course_runs` specific calls to the Emeritus API and Fails for Job status 3 and 4.
+    Tests that `fetch_emeritus_courses` specific calls to the Emeritus API and Fails for Job status 3 and 4.
     """
     settings.EMERITUS_API_BASE_URL = "https://test_emeritus_api.com"
     settings.EMERITUS_API_KEY = "test_emeritus_api_key"
@@ -393,6 +394,6 @@ def test_fetch_emeritus_course_runs_error(settings, mocker, caplog):
     ]
     mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
     with caplog.at_level(logging.ERROR):
-        fetch_emeritus_course_runs()
+        fetch_emeritus_courses()
     assert "Job failed!" in caplog.text
     assert "Something unexpected happened!" in caplog.text

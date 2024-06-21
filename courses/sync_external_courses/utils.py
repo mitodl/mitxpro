@@ -1,9 +1,0 @@
-"""Utilities for courses/sync_external_courses"""
-
-from enum import Enum
-
-
-class EmeritusJobStatus(Enum):
-    READY = 3
-    FAILED = 4
-    CANCELLED = 5

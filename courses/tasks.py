@@ -10,8 +10,8 @@ from django.db.models import Q
 from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunCertificate
-from courses.sync_external_courses.api import (
-    fetch_emeritus_course_runs,
+from courses.sync_external_courses.emeritus_api import (
+    fetch_emeritus_courses,
     update_emeritus_course_runs,
 )
 from courses.utils import (
@@ -119,5 +119,5 @@ def task_sync_emeritus_course_runs():
     if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
         log.info("External Course sync is disabled.")
         return
-    emeritus_course_runs = fetch_emeritus_course_runs()
+    emeritus_course_runs = fetch_emeritus_courses()
     update_emeritus_course_runs(emeritus_course_runs)

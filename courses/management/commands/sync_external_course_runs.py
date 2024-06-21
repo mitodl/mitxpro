@@ -2,7 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
-from courses.constants import EMERITUS_PLATFORM_NAME
+from courses.sync_external_courses.emeritus_api import EMERITUS_PLATFORM_NAME
 from courses.tasks import task_sync_emeritus_course_runs
 from mitxpro import settings
 
@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--vendor_name",
+            "--vendor-name",
             type=str,
             help="The name of the vendor i.e. `Emeritus`",
             required=True,
@@ -32,16 +32,21 @@ class Command(BaseCommand):
             )
             return
         vendor_name = options["vendor_name"]
-        sync_course_runs_task_to_vendor_map = {
+        sync_course_to_vendor_task_map = {
             EMERITUS_PLATFORM_NAME.lower(): task_sync_emeritus_course_runs
         }
-        course_runs_sync_task = sync_course_runs_task_to_vendor_map.get(
+        courses_sync_task = sync_course_to_vendor_task_map.get(
             vendor_name.lower(), None
         )
-        if course_runs_sync_task:
-            course_runs_sync_task.delay()
+        if courses_sync_task:
+            self.stdout.write(f"Starting Course Sync for {vendor_name}.")
+            courses_sync_task()
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Sync task is triggered successfully for {vendor_name}."
+                    f"External Course Sync successful for {vendor_name}."
                 )
+            )
+        else:
+            self.stdout.write(
+                self.style.ERROR(f"There is no task to sync courses for {vendor_name}.")
             )
