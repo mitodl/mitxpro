@@ -1082,7 +1082,7 @@ EMERITUS_API_BASE_URL = get_string(
 EMERITUS_API_REQUEST_TIMEOUT = get_int(
     name="EMERITUS_API_TIMEOUT",
     default=60,
-    description="API request timeout for Emeritus APIs",
+    description="API request timeout for Emeritus APIs in seconds",
 )
 
 # django debug toolbar only in debug mode

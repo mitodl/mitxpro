@@ -605,15 +605,12 @@ def get_js_settings(request: HttpRequest):
     }
 
 
-def clean_url(url, *, trim_spaces=True, remove_query_params=False):
+def clean_url(url, *, remove_query_params=False):
     """
     Cleans a URL by removing the extra spaces and Optionally removes the query params to return the base URL.
     """
     if not url:
         return ""
-
-    if trim_spaces:
-        url = url.strip()
 
     if remove_query_params:
         url = url[: url.find("?")]
