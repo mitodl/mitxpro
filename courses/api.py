@@ -349,7 +349,7 @@ def defer_enrollment(
 
 def generate_course_readable_id(course_tag):
     """
-    Generates course readable ID using the Emeritus Course code.
+    Generates course readable ID using the course tag.
 
     Args:
         course_tag (str): Course tag
@@ -357,4 +357,9 @@ def generate_course_readable_id(course_tag):
     Returns:
         str: Course readable id
     """
+    if not course_tag:
+        raise ValidationError(
+            "course_tag is required to generate a valid readable ID for a course."  # noqa: EM101
+        )
+
     return f"course-v1:xPRO+{course_tag}"

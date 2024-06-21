@@ -541,13 +541,21 @@ def test_defer_enrollment_validation(mocker, user):
 
 
 @pytest.mark.parametrize(
-    ("course_tag", "expected_readable_id"),
+    ("course_tag", "expected_readable_id", "raises_validation_error"),
     [
-        ("DBIP", "course-v1:xPRO+DBIP"),
-        ("DBIP.ES", "course-v1:xPRO+DBIP.ES"),
-        ("DBIP.SEPO", "course-v1:xPRO+DBIP.SEPO"),
+        ("DBIP", "course-v1:xPRO+DBIP", False),
+        ("DBIP.ES", "course-v1:xPRO+DBIP.ES", False),
+        ("DBIP.SEPO", "course-v1:xPRO+DBIP.SEPO", False),
+        ("", "", True),
+        (None, None, True),
     ],
 )
-def test_generate_course_readable_id(course_tag, expected_readable_id):
+def test_generate_course_readable_id(
+    course_tag, expected_readable_id, raises_validation_error
+):
     """Test that `generate_course_readable_id` returns expected course readable_id for course tags."""
-    assert generate_course_readable_id(course_tag) == expected_readable_id
+    if raises_validation_error:
+        with pytest.raises(ValidationError):
+            generate_course_readable_id(course_tag)
+    else:
+        assert generate_course_readable_id(course_tag) == expected_readable_id
