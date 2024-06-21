@@ -2,8 +2,8 @@ import datetime
 
 from django.conf import settings
 
-from ecommerce.models import Basket, BasketItem, CourseRunSelection, CouponSelection
 from ecommerce import tasks
+from ecommerce.models import Basket, BasketItem, CouponSelection, CourseRunSelection
 
 
 def test_delete_expired_baskets(mocker, user, basket_and_coupons):
