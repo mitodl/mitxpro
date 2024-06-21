@@ -694,7 +694,6 @@ def test_course_run_courseware_id_invalid(courseware_id_value):
     course_run = CourseRunFactory.build(
         course=CourseFactory.create(), courseware_id=courseware_id_value
     )
-    breakpoint()
     with pytest.raises(ValidationError):
         course_run.save()
 
