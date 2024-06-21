@@ -2,7 +2,7 @@ import json
 import logging
 import re
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from enum import Enum
 
 import requests
@@ -17,7 +17,8 @@ from cms.models import (
 )
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseRun, CourseTopic, Platform
-from mitxpro.utils import clean_url, now_in_utc
+from courses.sync_external_courses.emeritus_api_client import EmeritusAPIClient
+from mitxpro.utils import clean_url
 
 log = logging.getLogger(__name__)
 
@@ -51,17 +52,9 @@ def fetch_emeritus_courses():
 
     Makes a request to get the list of available queries and then queries the required reports.
     """
-    end_date = now_in_utc()
-    start_date = end_date - timedelta(days=1)
-
-    # Get a list of available queries
-    queries = requests.get(
-        f"{settings.EMERITUS_API_BASE_URL}/api/queries?api_key={settings.EMERITUS_API_KEY}",
-        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
-    )
-    queries.raise_for_status()
-
-    for query in queries.json()["results"]:  # noqa: RET503
+    emeritus_api_client = EmeritusAPIClient()
+    queries = emeritus_api_client.get_queries_list()
+    for query in queries:  # noqa: RET503
         # Check if query is in list of desired reports
         if query["name"] not in EMERITUS_REPORT_NAMES:
             log.info(
@@ -70,25 +63,7 @@ def fetch_emeritus_courses():
             continue
 
         log.info("Requesting data for {}...".format(query["name"]))  # noqa: G001
-
-        # Make a post request for the query found.
-        # This will return either:
-        #   a) A query_result if one is cached for the parameters set, or
-        #   b) A Job object.
-        query_response = requests.post(
-            f"{settings.EMERITUS_API_BASE_URL}/api/queries/{query['id']}/results?api_key={settings.EMERITUS_API_KEY}",
-            data=json.dumps(
-                {
-                    "parameters": {
-                        "date_range": {"start": f"{start_date}", "end": f"{end_date}"}
-                    }
-                }
-            ),
-            timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
-        )
-
-        query_response.raise_for_status()
-        query_response = query_response.json()
+        query_response = emeritus_api_client.get_query_response(query["id"])
         if "job" in query_response:
             # If a job is returned, we will poll until status = 3 (Success)
             # Status values 1 and 2 correspond to in-progress,
