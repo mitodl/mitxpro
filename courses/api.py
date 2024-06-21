@@ -352,7 +352,7 @@ def generate_course_readable_id(course_tag):
     Generates course readable ID using the course tag.
 
     Args:
-        course_tag (str): Course tag
+        course_tag (str): Course tag of course
 
     Returns:
         str: Course readable id
