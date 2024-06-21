@@ -492,13 +492,6 @@ class BasketSerializer(serializers.ModelSerializer):
                 models.CouponSelection.objects.update_or_create(
                     basket=basket, defaults={"coupon": coupon_version.coupon}
                 )
-            if (
-                updated_run_ids is not None
-                or coupon_version is not None
-                or updated_product is not None
-                or should_update_program_run is True
-            ):
-                basket.updated_on = now_in_utc()
             if data_consents is not None:
                 models.DataConsentUser.objects.filter(
                     id__in=data_consents, user=basket.user
