@@ -9,7 +9,7 @@ from ecommerce.models import Basket, BasketItem, CouponSelection, CourseRunSelec
 def test_delete_expired_baskets(mocker, user, basket_and_coupons):
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
-    
+
     now_in_utc = mocker.patch("ecommerce.tasks.now_in_utc")
     now_in_utc.return_value = datetime.datetime.now(
         tz=datetime.timezone.utc
