@@ -594,7 +594,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
 
 
-class CourseRun(TimestampedModel):
+class CourseRun(TimestampedModel, ValidateOnSaveMixin):
     """Model for a single run/instance of a course"""
 
     objects = CourseRunQuerySet.as_manager()
