@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.150.0
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3022)
+- Add -E flag to worker subcommand for sending task events
+- Revert "Add flag for Celery to send task state change events"
+- docs: replaced mitxpro-openedx-extensions with openedx-companion-auth in readme (#3020)
+- Add flag for Celery to send task state change events
+
 Version 0.149.1 (Released June 12, 2024)
 ---------------
 
