@@ -1,3 +1,5 @@
+"""Utilities for courses/sync_external_courses"""
+
 from enum import Enum
 
 

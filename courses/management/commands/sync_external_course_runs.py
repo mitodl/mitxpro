@@ -31,3 +31,8 @@ class Command(BaseCommand):
         )
         if course_runs_sync_task:
             course_runs_sync_task.delay()
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"External Course Sync task is triggered successfully for {vendor_name}."
+                )
+            )
