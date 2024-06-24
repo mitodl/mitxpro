@@ -27,7 +27,7 @@ class EmeritusAPIClient:
             timeout=self.request_timeout,
         )
         queries.raise_for_status()
-        return queries.json()["result"]
+        return queries.json()["results"]
 
     def get_query_response(self, query_id, start_date, end_date):
         """

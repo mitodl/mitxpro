@@ -55,8 +55,11 @@ class EmeritusCourse:
     def __init__(self, emeritus_course_json):
         self.course_title = emeritus_course_json.get("program_name", None)
         self.course_code = emeritus_course_json.get("course_code")
+
+        # Emeritus course code format is `MO-<COURSE_TAG>`, where course tag can contain `.`,
+        # we will replace `.` with `_` to follow the internal readable id format.
         self.course_readable_id = generate_course_readable_id(
-            self.course_code.split("-")[1]
+            self.course_code.split("-")[1].replace(".", "_")
         )
 
         self.course_run_code = emeritus_course_json.get("course_run_code")
@@ -75,8 +78,10 @@ class EmeritusCourse:
         self.marketing_url = clean_url(
             emeritus_course_json.get("landing_page_url"), remove_query_params=True
         )
-        total_weeks = emeritus_course_json.get("total_weeks")
+        total_weeks = int(emeritus_course_json.get("total_weeks"))
         self.duration = f"{total_weeks} Weeks" if total_weeks != 0 else ""
+
+        # Description can be null in Emeritus API data, we cannot store `None` as description is Non-Nullable
         self.description = (
             emeritus_course_json.get("description")
             if emeritus_course_json.get("description")
@@ -84,11 +89,17 @@ class EmeritusCourse:
         )
         self.format = emeritus_course_json.get("format")
         self.category = emeritus_course_json.get("Category", None)
-        self.learning_outcomes_list = parse_program_for_and_outcomes(
-            emeritus_course_json.get("learning_outcomes")
+        self.learning_outcomes_list = (
+            parse_program_for_and_outcomes(
+                emeritus_course_json.get("learning_outcomes")
+            )
+            if emeritus_course_json.get("learning_outcomes")
+            else []
         )
-        self.who_should_enroll_list = parse_program_for_and_outcomes(
-            emeritus_course_json.get("program_for")
+        self.who_should_enroll_list = (
+            parse_program_for_and_outcomes(emeritus_course_json.get("program_for"))
+            if emeritus_course_json.get("program_for")
+            else []
         )
 
 
@@ -156,7 +167,9 @@ def update_emeritus_course_runs(emeritus_courses):
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
     """
-    platform, _ = Platform.objects.get_or_create(name__iexact=EMERITUS_PLATFORM_NAME)
+    platform, _ = Platform.objects.get_or_create(
+        name__iexact=EMERITUS_PLATFORM_NAME, defaults={"name": EMERITUS_PLATFORM_NAME}
+    )
     course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
     for emeritus_course_json in emeritus_courses:
         emeritus_course = EmeritusCourse(emeritus_course_json)
@@ -290,18 +303,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
     )
     course_run = (
         CourseRun.objects.select_for_update()
-        .filter(
-            external_course_run_id=emeritus_course.course_run_code,
-            course=course,
-            defaults={
-                "title": emeritus_course.course_title,
-                "courseware_id": course_run_courseware_id,
-                "run_tag": emeritus_course.course_run_tag,
-                "start_date": emeritus_course.start_date,
-                "end_date": emeritus_course.end_date,
-                "live": True,
-            },
-        )
+        .filter(external_course_run_id=emeritus_course.course_run_code, course=course)
         .first()
     )
 
