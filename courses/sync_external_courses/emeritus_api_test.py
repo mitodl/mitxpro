@@ -102,10 +102,10 @@ def test_create_or_update_emeritus_course_page(create_course_page):
         "format": "Online",
         "suggested_duration": 49,
         "language": "English",
-        "landing_page_url": "https://emeritus-api.io/Internet-of-things-iot-design-and-applications"
+        "landing_page_url": "https://test-emeritus-api/Internet-of-things-iot-design-and-applications"
         "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
         "=website&utm_source=MIT-web",
-        "Apply_now_url": "https://emeritus-api.io/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
+        "Apply_now_url": "https://test-emeritus-api/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
         "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
         "description": "Test Description",
         "learning_outcomes": None,
