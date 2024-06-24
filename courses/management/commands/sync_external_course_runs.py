@@ -2,8 +2,11 @@
 
 from django.core.management.base import BaseCommand
 
-from courses.sync_external_courses.emeritus_api import EMERITUS_PLATFORM_NAME
-from courses.tasks import task_sync_emeritus_course_runs
+from courses.sync_external_courses.emeritus_api import (
+    EMERITUS_PLATFORM_NAME,
+    fetch_emeritus_courses,
+    update_emeritus_course_runs,
+)
 from mitxpro import settings
 
 
@@ -32,15 +35,10 @@ class Command(BaseCommand):
             )
             return
         vendor_name = options["vendor_name"]
-        sync_course_to_vendor_task_map = {
-            EMERITUS_PLATFORM_NAME.lower(): task_sync_emeritus_course_runs
-        }
-        courses_sync_task = sync_course_to_vendor_task_map.get(
-            vendor_name.lower(), None
-        )
-        if courses_sync_task:
+        if vendor_name.lower() == EMERITUS_PLATFORM_NAME.lower():
             self.stdout.write(f"Starting Course Sync for {vendor_name}.")
-            courses_sync_task()
+            emeritus_course_runs = fetch_emeritus_courses()
+            update_emeritus_course_runs(emeritus_course_runs)
             self.stdout.write(
                 self.style.SUCCESS(
                     f"External Course Sync successful for {vendor_name}."

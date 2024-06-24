@@ -615,3 +615,14 @@ def clean_url(url, *, remove_query_params=False):
     if remove_query_params:
         url = url[: url.find("?")]
     return url.strip()
+
+
+def strip_datetime(date_str, date_format, date_timezone=None):
+    """
+    Strip datetime from string using the format and timezone.
+    """
+    if not date_str or not date_format:
+        return None
+
+    date_timezone = date_timezone if date_timezone else datetime.timezone.utc
+    return datetime.datetime.strptime(date_str, date_format).astimezone(date_timezone)

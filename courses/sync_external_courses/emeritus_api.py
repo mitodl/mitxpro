@@ -2,11 +2,9 @@ import json
 import logging
 import re
 import time
-from datetime import datetime, timezone
+from datetime import timedelta, timezone
 from enum import Enum
 
-import requests
-from django.conf import settings
 from wagtail.models import Page
 
 from cms.models import (
@@ -18,7 +16,7 @@ from cms.models import (
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.emeritus_api_client import EmeritusAPIClient
-from mitxpro.utils import clean_url
+from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 
 log = logging.getLogger(__name__)
 
@@ -52,8 +50,12 @@ def fetch_emeritus_courses():
 
     Makes a request to get the list of available queries and then queries the required reports.
     """
+    end_date = now_in_utc()
+    start_date = end_date - timedelta(days=1)
+
     emeritus_api_client = EmeritusAPIClient()
     queries = emeritus_api_client.get_queries_list()
+
     for query in queries:  # noqa: RET503
         # Check if query is in list of desired reports
         if query["name"] not in EMERITUS_REPORT_NAMES:
@@ -63,7 +65,9 @@ def fetch_emeritus_courses():
             continue
 
         log.info("Requesting data for {}...".format(query["name"]))  # noqa: G001
-        query_response = emeritus_api_client.get_query_response(query["id"])
+        query_response = emeritus_api_client.get_query_response(
+            query["id"], start_date, end_date
+        )
         if "job" in query_response:
             # If a job is returned, we will poll until status = 3 (Success)
             # Status values 1 and 2 correspond to in-progress,
@@ -71,25 +75,15 @@ def fetch_emeritus_courses():
             job_id = query_response["job"]["id"]
             log.info(
                 f"Job id: {job_id} found... waiting for completion..."  # noqa: G004
-            )  # fmt: off
+            )
             while True:
-                # Get the status of the job-id returned by the initial request.
-                job_status = requests.get(
-                    f"{settings.EMERITUS_API_BASE_URL}/api/jobs/{job_id}?api_key={settings.EMERITUS_API_KEY}",
-                    timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
-                )
-                job_status.raise_for_status()
-                job_status = job_status.json()
-
+                job_status = emeritus_api_client.get_job_status(job_id)
                 if job_status["job"]["status"] == EmeritusJobStatus.READY.value:
                     # If true, the query_result is ready to be collected.
                     log.info("Job complete... requesting results...")
-                    query_result = requests.get(
-                        f"{settings.EMERITUS_API_BASE_URL}/api/query_results/{job_status['job']['query_result_id']}?api_key={settings.EMERITUS_API_KEY}",
-                        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+                    query_response = emeritus_api_client.get_query_result(
+                        job_status["job"]["query_result_id"]
                     )
-                    query_result.raise_for_status()
-                    query_response = query_result.json()
                     break
                 elif job_status["job"]["status"] in [
                     EmeritusJobStatus.FAILED.value,
@@ -121,6 +115,13 @@ def update_emeritus_course_runs(emeritus_course_runs):
         course_code = emeritus_course_run.get("course_code")
         course_run_code = emeritus_course_run.get("course_run_code")
 
+        log.info(
+            "Creating or updating course metadata for title: {}, course_code: {}, course_run_code: {}".format(  # noqa: G001, UP032
+                course_title, course_code, course_run_code
+            )
+        )
+
+        # If course_title, course_code, or course_run_code is missing, skip.
         if not (course_title and course_code and course_run_code):
             log.info(
                 f"Missing required course data. Skipping... Course data: {json.dumps(emeritus_course_run)}"  # noqa: G004
@@ -128,6 +129,9 @@ def update_emeritus_course_runs(emeritus_course_runs):
             continue
 
         course_readable_id = generate_course_readable_id(course_code.split("-")[1])
+        log.info(
+            "Generated course readable_id {} for course_code: {}".format(course_readable_id, course_code)  # noqa: G001, UP032
+        )
         course, course_created = Course.objects.get_or_create(
             external_course_id=course_code,
             platform=platform,
@@ -235,18 +239,10 @@ def create_or_update_emeritus_course_run(course, emeritus_course_run):
     title = emeritus_course_run["program_name"]
     start_date_str = emeritus_course_run.get("start_date", None)
     end_date_str = emeritus_course_run.get("end_date", None)
-    start_date = (
-        datetime.strptime(start_date_str, EMERITUS_DATE_FORMAT).astimezone(timezone.utc)
-        if start_date_str
-        else None
-    )
-    end_date = (
-        datetime.strptime(end_date_str, EMERITUS_DATE_FORMAT)
-        .astimezone(timezone.utc)
-        .replace(hour=23, minute=59)
-        if end_date_str
-        else None
-    )
+
+    start_date = strip_datetime(start_date_str, EMERITUS_DATE_FORMAT, timezone.utc)
+    end_date = strip_datetime(end_date_str, EMERITUS_DATE_FORMAT, timezone.utc)
+    end_date = end_date.replace(hour=23, minute=59) if end_date else None
 
     course_run_code = emeritus_course_run.get("course_run_code")
     course_run_tag = generate_emeritus_course_run_tag(course_run_code)

@@ -1,10 +1,11 @@
+"""
+API client for Emeritus
+"""
+
 import json
-from datetime import timedelta
 
 import requests
 from django.conf import settings
-
-from mitxpro.utils import now_in_utc
 
 
 class EmeritusAPIClient:
@@ -28,16 +29,14 @@ class EmeritusAPIClient:
         queries.raise_for_status()
         return queries.json()["result"]
 
-    def get_query_response(self, query_id):
+    def get_query_response(self, query_id, start_date, end_date):
         """
-        Make a post request for the query found.
+        Make a post request for the query.
+
         This will return either:
           a) A query_result if one is cached for the parameters set, or
           b) A Job object.
         """
-        end_date = now_in_utc()
-        start_date = end_date - timedelta(days=1)
-
         query_response = requests.post(
             f"{self.base_url}/api/queries/{query_id}/results?api_key={self.api_key}",
             data=json.dumps(
@@ -51,3 +50,25 @@ class EmeritusAPIClient:
         )
         query_response.raise_for_status()
         return query_response.json()
+
+    def get_job_status(self, job_id):
+        """
+        Get the status of the job
+        """
+        job_status = requests.get(
+            f"{self.base_url}/api/jobs/{job_id}?api_key={self.api_key}",
+            timeout=self.request_timeout,
+        )
+        job_status.raise_for_status()
+        return job_status.json()
+
+    def get_query_result(self, query_result_id):
+        """
+        Get the query result
+        """
+        query_result = requests.get(
+            f"{self.base_url}/api/query_results/{query_result_id}?api_key={self.api_key}",
+            timeout=self.request_timeout,
+        )
+        query_result.raise_for_status()
+        return query_result.json()
