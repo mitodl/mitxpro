@@ -619,7 +619,7 @@ def clean_url(url, *, remove_query_params=False):
 
 def strip_datetime(date_str, date_format, date_timezone=None):
     """
-    Strip datetime from string using the format and timezone.
+    Strip datetime from string using the format and set timezone.
     """
     if not date_str or not date_format:
         return None

@@ -200,6 +200,7 @@ def update_emeritus_course_runs(emeritus_courses):
                 defaults={
                     "title": emeritus_course.course_title,
                     "readable_id": emeritus_course.course_readable_id,
+                    # All new courses are by default, we will change the status manually
                     "live": True,
                 },
             )

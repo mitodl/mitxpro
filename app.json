@@ -223,7 +223,7 @@
       "required": true
     },
     "EMERITUS_API_TIMEOUT": {
-      "description": "API request timeout for Emeritus APIs",
+      "description": "API request timeout for Emeritus APIs in seconds",
       "required": false
     },
     "ENROLLMENT_CHANGE_SHEET_ID": {

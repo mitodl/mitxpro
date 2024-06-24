@@ -34,6 +34,7 @@ class Command(BaseCommand):
                 )
             )
             return
+
         vendor_name = options["vendor_name"]
         if vendor_name.lower() == EMERITUS_PLATFORM_NAME.lower():
             self.stdout.write(f"Starting Course Sync for {vendor_name}.")
