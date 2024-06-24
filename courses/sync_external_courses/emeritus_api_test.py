@@ -5,7 +5,6 @@ Sync external course API tests
 import json
 import logging
 import random
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -18,8 +17,8 @@ from cms.factories import (
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.emeritus_api import (
-    EMERITUS_DATE_FORMAT,
     EMERITUS_PLATFORM_NAME,
+    EmeritusCourse,
     create_learning_outcomes_page,
     create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
@@ -123,7 +122,7 @@ def test_create_or_update_emeritus_course_page(create_course_page):
         )
 
     course_page = create_or_update_emeritus_course_page(
-        course_index_page, course, emeritus_course_run
+        course_index_page, course, EmeritusCourse(emeritus_course_run)
     )
     assert course_page.title == emeritus_course_run["program_name"]
     assert course_page.external_marketing_url == clean_url(
@@ -149,7 +148,9 @@ def test_create_who_should_enroll_in_page():
         "advancement\r\n●       Mid- or later-career professionals seeking a career change and "
         "looking to add critical cybersecurity knowledge and foundational lessons to their resume"
     )
-    create_who_should_enroll_in_page(course_page, who_should_enroll_str)
+    create_who_should_enroll_in_page(
+        course_page, parse_program_for_and_outcomes(who_should_enroll_str)
+    )
     assert parse_program_for_and_outcomes(who_should_enroll_str) == [
         item.value.source for item in course_page.who_should_enroll.content
     ]
@@ -170,7 +171,9 @@ def test_create_learning_outcomes_page():
         "of specific threat models and methodologies\r\n●       Understand the guidelines for "
         "organizations to prepare themselves against cybersecurity attacks"
     )
-    create_learning_outcomes_page(course_page, learning_outcomes_str)
+    create_learning_outcomes_page(
+        course_page, parse_program_for_and_outcomes(learning_outcomes_str)
+    )
     assert parse_program_for_and_outcomes(learning_outcomes_str) == [
         item.value for item in course_page.outcomes.outcome_items
     ]
@@ -208,49 +211,39 @@ def test_create_or_update_emeritus_course_run(create_existing_course_run):
     with Path(
         "courses/sync_external_courses/test_data/batch_test.json"
     ).open() as test_data_file:
-        emeritus_course_run = json.load(test_data_file)["rows"][0]
+        emeritus_course = EmeritusCourse(json.load(test_data_file)["rows"][0])
 
     course = CourseFactory.create()
-    course_run_code = emeritus_course_run["course_run_code"]
     if create_existing_course_run:
         CourseRunFactory.create(
             course=course,
-            external_course_run_id=course_run_code,
+            external_course_run_id=emeritus_course.course_run_code,
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
         )
 
-    create_or_update_emeritus_course_run(course, emeritus_course_run)
+    create_or_update_emeritus_course_run(course, emeritus_course)
     course_runs = course.courseruns.all()
-
-    course_run_tag = generate_emeritus_course_run_tag(course_run_code)
     course_run_courseware_id = generate_external_course_run_courseware_id(
-        course_run_tag, course.readable_id
+        emeritus_course.course_run_tag, course.readable_id
     )
-    start_date = datetime.strptime(
-        emeritus_course_run["start_date"], EMERITUS_DATE_FORMAT
-    ).astimezone(timezone.utc)
-    end_date = datetime.strptime(
-        emeritus_course_run["end_date"], EMERITUS_DATE_FORMAT
-    ).astimezone(timezone.utc)
-    end_date = end_date.replace(hour=23, minute=59)
 
     assert len(course_runs) == 1
     if create_existing_course_run:
         expected_data = {
-            "external_course_run_id": course_run_code,
-            "start_date": start_date,
-            "end_date": end_date,
+            "external_course_run_id": emeritus_course.course_run_code,
+            "start_date": emeritus_course.start_date,
+            "end_date": emeritus_course.end_date,
         }
     else:
         expected_data = {
-            "title": emeritus_course_run["program_name"],
-            "external_course_run_id": course_run_code,
+            "title": emeritus_course.course_title,
+            "external_course_run_id": emeritus_course.course_run_code,
             "courseware_id": course_run_courseware_id,
-            "run_tag": course_run_tag,
-            "start_date": start_date,
-            "end_date": end_date,
+            "run_tag": emeritus_course.course_run_tag,
+            "start_date": emeritus_course.start_date,
+            "end_date": emeritus_course.end_date,
             "live": True,
         }
     for attr_name, expected_value in expected_data.items():
