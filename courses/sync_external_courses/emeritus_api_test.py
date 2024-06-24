@@ -328,14 +328,17 @@ def test_fetch_emeritus_courses_success(settings, mocker):
         5. If job status is 1 or 2, it is in progress. Wait for 2 seconds and make a get request for Job status.
         6. If job status is 3, the results are ready, make a get request to collect the results and return the data.
     """
-    settings.EMERITUS_API_BASE_URL = "https://test_emeritus_api.com"
+    settings.EMERITUS_API_BASE_URL = "https://test_emeritus_api.io"
     settings.EMERITUS_API_KEY = "test_emeritus_api_key"
+    settings.EMERITUS_API_REQUEST_TIMEOUT = 60
+
     mock_get = mocker.patch(
         "courses.sync_external_courses.emeritus_api_client.requests.get"
     )
     mock_post = mocker.patch(
         "courses.sync_external_courses.emeritus_api_client.requests.post"
     )
+
     with Path(
         "courses/sync_external_courses/test_data/batch_test.json"
     ).open() as test_data_file:
@@ -353,19 +356,21 @@ def test_fetch_emeritus_courses_success(settings, mocker):
         MockResponse({"query_result": {"data": emeritus_course_runs}}),
     ]
     mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
+
     actual_course_runs = fetch_emeritus_courses()
+
     mock_get.assert_any_call(
-        f"{settings.EMERITUS_API_BASE_URL}/api/queries?api_key={settings.EMERITUS_API_KEY}",
-        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+        "https://test_emeritus_api.io/api/queries?api_key=test_emeritus_api_key",
+        timeout=60,
     )
     mock_post.assert_called_once()
     mock_get.assert_any_call(
-        f"{settings.EMERITUS_API_BASE_URL}/api/jobs/1?api_key={settings.EMERITUS_API_KEY}",
-        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+        "https://test_emeritus_api.io/api/jobs/1?api_key=test_emeritus_api_key",
+        timeout=60,
     )
     mock_get.assert_any_call(
-        f"{settings.EMERITUS_API_BASE_URL}/api/query_results/1?api_key={settings.EMERITUS_API_KEY}",
-        timeout=settings.EMERITUS_API_REQUEST_TIMEOUT,
+        "https://test_emeritus_api.io/api/query_results/1?api_key=test_emeritus_api_key",
+        timeout=60,
     )
     assert actual_course_runs == emeritus_course_runs["rows"]
 
