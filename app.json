@@ -86,6 +86,14 @@
       "description": "'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
       "required": false
     },
+    "CRON_EMERITUS_COURSERUN_SYNC_DAYS": {
+      "description": "'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
+      "required": false
+    },
+    "CRON_EMERITUS_COURSERUN_SYNC_HOURS": {
+      "description": "'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+      "required": false
+    },
     "CSRF_TRUSTED_ORIGINS": {
       "description": "Comma separated string of trusted domains that should be CSRF exempt",
       "required": false

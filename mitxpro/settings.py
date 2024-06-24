@@ -751,6 +751,17 @@ CRON_COURSERUN_SYNC_DAYS = get_string(
     description="'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
 )
 
+CRON_EMERITUS_COURSERUN_SYNC_HOURS = get_string(
+    name="CRON_EMERITUS_COURSERUN_SYNC_HOURS",
+    default="0",
+    description="'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+)
+CRON_EMERITUS_COURSERUN_SYNC_DAYS = get_string(
+    name="CRON_EMERITUS_COURSERUN_SYNC_DAYS",
+    default=None,
+    description="'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
+)
+
 
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -843,6 +854,16 @@ CELERY_BEAT_SCHEDULE = {
             minute=0,
             hour=CRON_COURSERUN_SYNC_HOURS,
             day_of_week=CRON_COURSERUN_SYNC_DAYS or "*",
+            day_of_month="*",
+            month_of_year="*",
+        ),
+    },
+    "sync-emeritus-course-runs": {
+        "task": "courses.tasks.task_sync_emeritus_course_runs",
+        "schedule": crontab(
+            minute="0",
+            hour=CRON_EMERITUS_COURSERUN_SYNC_HOURS,
+            day_of_week=CRON_EMERITUS_COURSERUN_SYNC_DAYS or "*",
             day_of_month="*",
             month_of_year="*",
         ),
