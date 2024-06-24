@@ -17,8 +17,8 @@ from cms.factories import (
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.emeritus_api import (
-    EMERITUS_PLATFORM_NAME,
     EmeritusCourse,
+    EmeritusKeyMap,
     create_learning_outcomes_page,
     create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
@@ -26,7 +26,7 @@ from courses.sync_external_courses.emeritus_api import (
     fetch_emeritus_courses,
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
-    parse_program_for_and_outcomes,
+    parse_emeritus_data_str,
     update_emeritus_course_runs,
 )
 from mitxpro.test_utils import MockResponse
@@ -102,10 +102,10 @@ def test_create_or_update_emeritus_course_page(create_course_page):
         "format": "Online",
         "suggested_duration": 49,
         "language": "English",
-        "landing_page_url": "https://executive-ed.xpro.mit.edu/Internet-of-things-iot-design-and-applications"
+        "landing_page_url": "https://emeritus-api.io/Internet-of-things-iot-design-and-applications"
         "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
         "=website&utm_source=MIT-web",
-        "Apply_now_url": "https://executive-ed.xpro.mit.edu/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
+        "Apply_now_url": "https://emeritus-api.io/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
         "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
         "description": "Test Description",
         "learning_outcomes": None,
@@ -149,9 +149,9 @@ def test_create_who_should_enroll_in_page():
         "looking to add critical cybersecurity knowledge and foundational lessons to their resume"
     )
     create_who_should_enroll_in_page(
-        course_page, parse_program_for_and_outcomes(who_should_enroll_str)
+        course_page, parse_emeritus_data_str(who_should_enroll_str)
     )
-    assert parse_program_for_and_outcomes(who_should_enroll_str) == [
+    assert parse_emeritus_data_str(who_should_enroll_str) == [
         item.value.source for item in course_page.who_should_enroll.content
     ]
     assert course_page.who_should_enroll is not None
@@ -172,17 +172,17 @@ def test_create_learning_outcomes_page():
         "organizations to prepare themselves against cybersecurity attacks"
     )
     create_learning_outcomes_page(
-        course_page, parse_program_for_and_outcomes(learning_outcomes_str)
+        course_page, parse_emeritus_data_str(learning_outcomes_str)
     )
-    assert parse_program_for_and_outcomes(learning_outcomes_str) == [
+    assert parse_emeritus_data_str(learning_outcomes_str) == [
         item.value for item in course_page.outcomes.outcome_items
     ]
     assert course_page.outcomes is not None
 
 
-def test_parse_program_for_and_outcomes():
+def test_parse_emeritus_data_str():
     """
-    Tests that `parse_program_for_and_outcomes` parses who should enroll and learning outcomes strings as expected.
+    Tests that `parse_emeritus_data_str` parses who should enroll and learning outcomes strings as expected.
     """
     data_str = (
         "This program will enable you to:\r\n●       Gain an overview of cybersecurity risk "
@@ -192,7 +192,7 @@ def test_parse_program_for_and_outcomes():
         "of specific threat models and methodologies\r\n●       Understand the guidelines for "
         "organizations to prepare themselves against cybersecurity attacks"
     )
-    assert parse_program_for_and_outcomes(data_str) == [
+    assert parse_emeritus_data_str(data_str) == [
         "Gain an overview of cybersecurity risk management, including "
         "its foundational concepts and relevant regulations",
         "Explore the domains covering various aspects of cloud technology",
@@ -261,7 +261,7 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
     ).open() as test_data_file:
         emeritus_course_runs = json.load(test_data_file)["rows"]
 
-    platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
+    platform = PlatformFactory.create(name=EmeritusKeyMap.PLATFORM_NAME.value)
 
     if create_existing_course_runs:
         for run in random.sample(emeritus_course_runs, len(emeritus_course_runs) // 2):

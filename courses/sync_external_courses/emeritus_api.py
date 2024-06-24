@@ -22,17 +22,22 @@ from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 log = logging.getLogger(__name__)
 
 
-EMERITUS_REPORT_NAMES = ["Batch"]
-EMERITUS_PLATFORM_NAME = "Emeritus"
-EMERITUS_DATE_FORMAT = "%Y-%m-%d"
-EMERITUS_COURSE_PAGE_SUBHEAD = "Delivered in collaboration with Emeritus."
-EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
-EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
-EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD = (
-    "MIT xPRO is collaborating with online education provider Emeritus to "
-    "deliver this online course. By clicking LEARN MORE, you will be taken to "
-    "a page where you can download the brochure and apply to the program via Emeritus."
-)
+class EmeritusKeyMap(Enum):
+    """
+    Emeritus course sync keys.
+    """
+
+    REPORT_NAMES = ["Batch"]
+    PLATFORM_NAME = "Emeritus"
+    DATE_FORMAT = "%Y-%m-%d"
+    COURSE_PAGE_SUBHEAD = "Delivered in collaboration with Emeritus."
+    WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
+    LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
+    LEARNING_OUTCOMES_PAGE_SUBHEAD = (
+        "MIT xPRO is collaborating with online education provider Emeritus to "
+        "deliver this online course. By clicking LEARN MORE, you will be taken to "
+        "a page where you can download the brochure and apply to the program via Emeritus."
+    )
 
 
 class EmeritusJobStatus(Enum):
@@ -49,7 +54,7 @@ class EmeritusCourse:
     """
     Emeritus course object.
 
-    Parses an Emeritus course json obj to Python object.
+    Parses an Emeritus course JSON to Python object.
     """
 
     def __init__(self, emeritus_course_json):
@@ -66,10 +71,10 @@ class EmeritusCourse:
         self.course_run_tag = generate_emeritus_course_run_tag(self.course_run_code)
 
         self.start_date = strip_datetime(
-            emeritus_course_json.get("start_date"), EMERITUS_DATE_FORMAT
+            emeritus_course_json.get("start_date"), EmeritusKeyMap.DATE_FORMAT.value
         )
         end_datetime = strip_datetime(
-            emeritus_course_json.get("end_date"), EMERITUS_DATE_FORMAT
+            emeritus_course_json.get("end_date"), EmeritusKeyMap.DATE_FORMAT.value
         )
         self.end_date = (
             end_datetime.replace(hour=23, minute=59) if end_datetime else None
@@ -90,14 +95,12 @@ class EmeritusCourse:
         self.format = emeritus_course_json.get("format")
         self.category = emeritus_course_json.get("Category", None)
         self.learning_outcomes_list = (
-            parse_program_for_and_outcomes(
-                emeritus_course_json.get("learning_outcomes")
-            )
+            parse_emeritus_data_str(emeritus_course_json.get("learning_outcomes"))
             if emeritus_course_json.get("learning_outcomes")
             else []
         )
         self.who_should_enroll_list = (
-            parse_program_for_and_outcomes(emeritus_course_json.get("program_for"))
+            parse_emeritus_data_str(emeritus_course_json.get("program_for"))
             if emeritus_course_json.get("program_for")
             else []
         )
@@ -117,7 +120,7 @@ def fetch_emeritus_courses():
 
     for query in queries:  # noqa: RET503
         # Check if query is in list of desired reports
-        if query["name"] not in EMERITUS_REPORT_NAMES:
+        if query["name"] not in EmeritusKeyMap.REPORT_NAMES.value:
             log.info(
                 "Report: {} not specified for extract...skipping".format(query["name"])  # noqa: G001
             )
@@ -168,7 +171,8 @@ def update_emeritus_course_runs(emeritus_courses):
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
     """
     platform, _ = Platform.objects.get_or_create(
-        name__iexact=EMERITUS_PLATFORM_NAME, defaults={"name": EMERITUS_PLATFORM_NAME}
+        name__iexact=EmeritusKeyMap.PLATFORM_NAME.value,
+        defaults={"name": EmeritusKeyMap.PLATFORM_NAME.value},
     )
     course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
     for emeritus_course_json in emeritus_courses:
@@ -192,6 +196,12 @@ def update_emeritus_course_runs(emeritus_courses):
             )
             continue
 
+        if now_in_utc() > emeritus_course.end_date:
+            log.info(
+                f"Course run is expired, Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
+            )
+            continue
+
         with transaction.atomic():
             course, course_created = Course.objects.get_or_create(
                 external_course_id=emeritus_course.course_code,
@@ -200,7 +210,7 @@ def update_emeritus_course_runs(emeritus_courses):
                 defaults={
                     "title": emeritus_course.course_title,
                     "readable_id": emeritus_course.course_readable_id,
-                    # All new courses are by default, we will change the status manually
+                    # All new courses are live by default, we will change the status manually
                     "live": True,
                 },
             )
@@ -209,7 +219,14 @@ def update_emeritus_course_runs(emeritus_courses):
                 f"{log_msg} title: {emeritus_course.course_title}, readable_id: {emeritus_course.course_readable_id}"  # noqa: G004
             )
 
+            log.info(
+                f"Creating or Updating course run, title: {emeritus_course.course_title}, course_run_code: {emeritus_course.course_run_code}"  # noqa: G004
+            )
             create_or_update_emeritus_course_run(course, emeritus_course)
+
+            log.info(
+                f"Creating or Updating course page, title: {emeritus_course.course_title}, course_code: {emeritus_course.course_run_code}"  # noqa: G004
+            )
             course_page = create_or_update_emeritus_course_page(
                 course_index_page, course, emeritus_course
             )
@@ -253,7 +270,7 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
 
 def create_or_update_emeritus_course_page(course_index_page, course, emeritus_course):
     """
-    Creates or updates external course page for Emeritus course run.
+    Creates or updates external course page for Emeritus course.
     """
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
@@ -263,7 +280,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             course=course,
             title=emeritus_course.course_title,
             external_marketing_url=emeritus_course.marketing_url,
-            subhead=EMERITUS_COURSE_PAGE_SUBHEAD,
+            subhead=EmeritusKeyMap.COURSE_PAGE_SUBHEAD.value,
             duration=emeritus_course.duration,
             format=emeritus_course.format,
             description=emeritus_course.description,
@@ -351,7 +368,7 @@ def create_who_should_enroll_in_page(course_page, who_should_enroll_list):
     )
 
     who_should_enroll_page = WhoShouldEnrollPage(
-        heading=EMERITUS_WHO_SHOULD_ENROLL_PAGE_HEADING,
+        heading=EmeritusKeyMap.WHO_SHOULD_ENROLL_PAGE_HEADING.value,
         content=content,
     )
     course_page.add_child(instance=who_should_enroll_page)
@@ -367,15 +384,15 @@ def create_learning_outcomes_page(course_page, outcomes_list):
     )
 
     learning_outcome_page = LearningOutcomesPage(
-        heading=EMERITUS_LEARNING_OUTCOMES_PAGE_HEADING,
-        sub_heading=EMERITUS_LEARNING_OUTCOMES_PAGE_SUBHEAD,
+        heading=EmeritusKeyMap.LEARNING_OUTCOMES_PAGE_HEADING.value,
+        sub_heading=EmeritusKeyMap.LEARNING_OUTCOMES_PAGE_SUBHEAD.value,
         outcome_items=outcome_items,
     )
     course_page.add_child(instance=learning_outcome_page)
     learning_outcome_page.save()
 
 
-def parse_program_for_and_outcomes(items_str):
+def parse_emeritus_data_str(items_str):
     """
     Parses `WhoShouldEnrollPage` and `LearningOutcomesPage` items for the Emeritus API.
     """

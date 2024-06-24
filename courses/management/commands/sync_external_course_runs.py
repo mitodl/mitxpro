@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 
 from courses.sync_external_courses.emeritus_api import (
-    EMERITUS_PLATFORM_NAME,
+    EmeritusKeyMap,
     fetch_emeritus_courses,
     update_emeritus_course_runs,
 )
@@ -29,23 +29,21 @@ class Command(BaseCommand):
         if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
             self.stdout.write(
                 self.style.ERROR(
-                    "External Course Sync is disabled. You can enable by turning the feature flag "
+                    "External Course Sync is disabled. You can enable it by turning on the feature flag "
                     "`ENABLE_EXTERNAL_COURSE_SYNC`"
                 )
             )
             return
 
         vendor_name = options["vendor_name"]
-        if vendor_name.lower() == EMERITUS_PLATFORM_NAME.lower():
-            self.stdout.write(f"Starting Course Sync for {vendor_name}.")
+        if vendor_name.lower() == EmeritusKeyMap.PLATFORM_NAME.value.lower():
+            self.stdout.write(f"Starting course sync for {vendor_name}.")
             emeritus_course_runs = fetch_emeritus_courses()
             update_emeritus_course_runs(emeritus_course_runs)
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Sync successful for {vendor_name}."
+                    f"External course sync successful for {vendor_name}."
                 )
             )
         else:
-            self.stdout.write(
-                self.style.ERROR(f"There is no task to sync courses for {vendor_name}.")
-            )
+            self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
