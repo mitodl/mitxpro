@@ -603,3 +603,26 @@ def get_js_settings(request: HttpRequest):
         "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
     }
+
+
+def clean_url(url, *, remove_query_params=False):
+    """
+    Cleans a URL by removing the extra spaces and Optionally removes the query params to return the base URL.
+    """
+    if not url:
+        return ""
+
+    if remove_query_params:
+        url = url[: url.find("?")]
+    return url.strip()
+
+
+def strip_datetime(date_str, date_format, date_timezone=None):
+    """
+    Strip datetime from string using the format and set timezone.
+    """
+    if not date_str or not date_format:
+        return None
+
+    date_timezone = date_timezone if date_timezone else datetime.timezone.utc
+    return datetime.datetime.strptime(date_str, date_format).astimezone(date_timezone)

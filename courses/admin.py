@@ -52,9 +52,9 @@ class CourseAdmin(admin.ModelAdmin):
     """Admin for Course"""
 
     model = Course
-    search_fields = ["title", "readable_id", "platform__name"]
+    search_fields = ["title", "readable_id", "platform__name", "external_course_id"]
     list_display = ("id", "title", "get_program", "position_in_program", "platform")
-    list_filter = ["live", "program", "platform"]
+    list_filter = ["live", "platform", "program"]
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
@@ -73,7 +73,12 @@ class CourseRunAdmin(TimestampedModelAdmin):
     """Admin for CourseRun"""
 
     model = CourseRun
-    search_fields = ["title", "courseware_id"]
+    search_fields = [
+        "title",
+        "courseware_id",
+        "external_course_run_id",
+        "course__external_course_id",
+    ]
     list_display = (
         "id",
         "title",

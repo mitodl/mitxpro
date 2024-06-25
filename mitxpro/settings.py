@@ -751,6 +751,17 @@ CRON_COURSERUN_SYNC_DAYS = get_string(
     description="'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
 )
 
+CRON_EXTERNAL_COURSERUN_SYNC_HOURS = get_string(
+    name="CRON_EMERITUS_COURSERUN_SYNC_HOURS",
+    default="0",
+    description="'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+)
+CRON_EXTERNAL_COURSERUN_SYNC_DAYS = get_string(
+    name="CRON_EMERITUS_COURSERUN_SYNC_DAYS",
+    default=None,
+    description="'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
+)
+
 
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -843,6 +854,16 @@ CELERY_BEAT_SCHEDULE = {
             minute=0,
             hour=CRON_COURSERUN_SYNC_HOURS,
             day_of_week=CRON_COURSERUN_SYNC_DAYS or "*",
+            day_of_month="*",
+            month_of_year="*",
+        ),
+    },
+    "sync-emeritus-course-runs": {
+        "task": "courses.tasks.task_sync_emeritus_course_runs",
+        "schedule": crontab(
+            minute="0",
+            hour=CRON_EXTERNAL_COURSERUN_SYNC_HOURS,
+            day_of_week=CRON_EXTERNAL_COURSERUN_SYNC_DAYS or "*",
             day_of_month="*",
             month_of_year="*",
         ),
@@ -1066,6 +1087,23 @@ EDX_API_CLIENT_TIMEOUT = get_int(
     name="EDX_API_CLIENT_TIMEOUT",
     default=60,
     description="Timeout (in seconds) for requests made via the edX API client",
+)
+
+EMERITUS_API_KEY = get_string(
+    name="EMERITUS_API_KEY",
+    default=None,
+    description="The API Key for Emeritus API",
+    required=True,
+)
+EMERITUS_API_BASE_URL = get_string(
+    name="EMERITUS_API_BASE_URL",
+    default="https://mit-xpro.emeritus-analytics.io/",
+    description="Base API URL for Emeritus API",
+)
+EMERITUS_API_REQUEST_TIMEOUT = get_int(
+    name="EMERITUS_API_TIMEOUT",
+    default=60,
+    description="API request timeout for Emeritus APIs in seconds",
 )
 
 # django debug toolbar only in debug mode
