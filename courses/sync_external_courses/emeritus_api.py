@@ -175,6 +175,10 @@ def update_emeritus_course_runs(emeritus_courses):
         defaults={"name": EmeritusKeyMap.PLATFORM_NAME.value},
     )
     course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
+    num_of_expired_courses = 0
+    num_of_updated_or_created_courses = 0
+    num_of_skipped_courses = 0
+
     for emeritus_course_json in emeritus_courses:
         emeritus_course = EmeritusCourse(emeritus_course_json)
 
@@ -194,12 +198,14 @@ def update_emeritus_course_runs(emeritus_courses):
             log.info(
                 f"Missing required course data. Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
+            num_of_skipped_courses += 1
             continue
 
         if now_in_utc() > emeritus_course.end_date:
             log.info(
                 f"Course run is expired, Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
+            num_of_expired_courses += 1
             continue
 
         with transaction.atomic():
@@ -232,11 +238,12 @@ def update_emeritus_course_runs(emeritus_courses):
             )
 
             if emeritus_course.category:
-                topic, _ = CourseTopic.objects.get_or_create(
-                    name=emeritus_course.category
-                )
-                course_page.topics.add(topic)
-                course_page.save()
+                topic = CourseTopic.objects.filter(
+                    name__iexact=emeritus_course.category
+                ).first()
+                if topic:
+                    course_page.topics.add(topic)
+                    course_page.save()
 
             if not course_page.outcomes and emeritus_course.learning_outcomes_list:
                 create_learning_outcomes_page(
@@ -250,6 +257,14 @@ def update_emeritus_course_runs(emeritus_courses):
                 create_who_should_enroll_in_page(
                     course_page, emeritus_course.who_should_enroll_list
                 )
+
+        num_of_updated_or_created_courses += 1
+
+    log.info(f"Number of expired courses: {num_of_expired_courses}")  # noqa: G004
+    log.info(
+        f"Number of updated/created courses: {num_of_updated_or_created_courses}"  # noqa: G004
+    )
+    log.info(f"Number of skipped courses: {num_of_skipped_courses}")  # noqa: G004
 
 
 def generate_emeritus_course_run_tag(course_run_code):
