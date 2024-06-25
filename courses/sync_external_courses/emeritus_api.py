@@ -165,7 +165,7 @@ def fetch_emeritus_courses():
         log.error("Something unexpected happened!")
 
 
-def update_emeritus_course_runs(emeritus_courses):
+def update_emeritus_course_runs(emeritus_courses):  # noqa: C901
     """
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
@@ -175,9 +175,16 @@ def update_emeritus_course_runs(emeritus_courses):
         defaults={"name": EmeritusKeyMap.PLATFORM_NAME.value},
     )
     course_index_page = Page.objects.get(id=CourseIndexPage.objects.first().id).specific
-    num_of_expired_courses = 0
-    num_of_updated_or_created_courses = 0
-    num_of_skipped_courses = 0
+    stats = {
+        "courses_created": set(),
+        "existing_courses": set(),
+        "course_runs_created": set(),
+        "course_runs_updated": set(),
+        "course_pages_created": set(),
+        "course_pages_updated": set(),
+        "course_runs_skipped": set(),
+        "course_runs_expired": set(),
+    }
 
     for emeritus_course_json in emeritus_courses:
         emeritus_course = EmeritusCourse(emeritus_course_json)
@@ -198,14 +205,14 @@ def update_emeritus_course_runs(emeritus_courses):
             log.info(
                 f"Missing required course data. Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
-            num_of_skipped_courses += 1
+            stats["course_runs_skipped"].add(emeritus_course.course_run_code)
             continue
 
         if now_in_utc() > emeritus_course.end_date:
             log.info(
                 f"Course run is expired, Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
-            num_of_expired_courses += 1
+            stats["course_runs_expired"].add(emeritus_course.course_run_code)
             continue
 
         with transaction.atomic():
@@ -225,17 +232,34 @@ def update_emeritus_course_runs(emeritus_courses):
                 f"{log_msg} title: {emeritus_course.course_title}, readable_id: {emeritus_course.course_readable_id}"  # noqa: G004
             )
 
+            if course_created:
+                stats["courses_created"].add(emeritus_course.course_code)
+            else:
+                stats["existing_courses"].add(emeritus_course.course_code)
+
             log.info(
                 f"Creating or Updating course run, title: {emeritus_course.course_title}, course_run_code: {emeritus_course.course_run_code}"  # noqa: G004
             )
-            create_or_update_emeritus_course_run(course, emeritus_course)
+            course_run, course_run_created = create_or_update_emeritus_course_run(
+                course, emeritus_course
+            )
+
+            if course_run_created:
+                stats["course_runs_created"].add(course_run.external_course_run_id)
+            else:
+                stats["course_runs_updated"].add(course_run.external_course_run_id)
 
             log.info(
                 f"Creating or Updating course page, title: {emeritus_course.course_title}, course_code: {emeritus_course.course_run_code}"  # noqa: G004
             )
-            course_page = create_or_update_emeritus_course_page(
+            course_page, course_page_created = create_or_update_emeritus_course_page(
                 course_index_page, course, emeritus_course
             )
+
+            if course_page_created:
+                stats["course_pages_created"].add(emeritus_course.course_code)
+            else:
+                stats["course_pages_updated"].add(emeritus_course.course_code)
 
             if emeritus_course.category:
                 topic = CourseTopic.objects.filter(
@@ -257,14 +281,7 @@ def update_emeritus_course_runs(emeritus_courses):
                 create_who_should_enroll_in_page(
                     course_page, emeritus_course.who_should_enroll_list
                 )
-
-        num_of_updated_or_created_courses += 1
-
-    log.info(f"Number of expired courses: {num_of_expired_courses}")  # noqa: G004
-    log.info(
-        f"Number of updated/created courses: {num_of_updated_or_created_courses}"  # noqa: G004
-    )
-    log.info(f"Number of skipped courses: {num_of_skipped_courses}")  # noqa: G004
+    return stats
 
 
 def generate_emeritus_course_run_tag(course_run_code):
@@ -290,6 +307,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
     )
+    created = False
     if not course_page:
         course_page = ExternalCoursePage(
             course=course,
@@ -305,6 +323,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
         log.info(
             f"Created external course page for course title: {emeritus_course.course_title}"  # noqa: G004
         )
+        created = True
     else:
         # Only update course page fields with API if they are empty.
         course_page_attrs_changed = False
@@ -324,12 +343,19 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
                 f"Updated external course page for course title: {emeritus_course.course_title}"  # noqa: G004
             )
 
-    return course_page
+    return course_page, created
 
 
 def create_or_update_emeritus_course_run(course, emeritus_course):
     """
     Creates or updates the external emeritus course run.
+
+    Args:
+        course (courses.Course): Course object
+        emeritus_course (EmeritusCourse): EmeritusCourse object
+
+    Returns:
+        tuple: A tuple containing of course run and is course run created.
     """
     course_run_courseware_id = generate_external_course_run_courseware_id(
         emeritus_course.course_run_tag, course.readable_id
@@ -341,7 +367,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
     )
 
     if not course_run:
-        CourseRun.objects.create(
+        course_run = CourseRun.objects.create(
             external_course_run_id=emeritus_course.course_run_code,
             course=course,
             title=emeritus_course.course_title,
@@ -354,6 +380,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         log.info(
             f"Created Course Run, title: {emeritus_course.course_title}, external_course_run_id: {emeritus_course.course_run_code}"  # noqa: G004
         )
+        return course_run, True
     elif (
         course_run.start_date
         and emeritus_course.start_date
@@ -369,6 +396,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         log.info(
             f"Updated Course Run, title: {emeritus_course.course_title}, external_course_run_id: {emeritus_course.course_run_code}"  # noqa: G004
         )
+    return course_run, False
 
 
 def create_who_should_enroll_in_page(course_page, who_should_enroll_list):
