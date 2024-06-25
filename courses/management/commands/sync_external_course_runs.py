@@ -47,7 +47,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Codes: {stats['courses_created']}.\n"
+                    f"External Course Codes: {stats['courses_created'] if stats['courses_created'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -57,7 +57,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Codes: {stats['existing_courses']}.\n"
+                    f"External Course Codes: {stats['existing_courses'] if stats['existing_courses'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -67,7 +67,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Run Codes: {stats['course_runs_created']}.\n"
+                    f"External Course Run Codes: {stats['course_runs_created'] if stats['course_runs_created'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -77,7 +77,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Run Codes: {stats['course_runs_updated']}.\n"
+                    f"External Course Run Codes: {stats['course_runs_updated'] if stats['course_runs_updated'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -87,7 +87,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_pages_created']}.\n"
+                    f"External Course Codes: {stats['course_pages_created'] if stats['course_pages_created'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -97,7 +97,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_pages_updated']}.\n"
+                    f"External Course Codes: {stats['course_pages_updated'] if stats['course_pages_updated'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -107,7 +107,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_runs_skipped']}.\n"
+                    f"External Course Codes: {stats['course_runs_skipped'] if stats['course_runs_skipped'] else None}.\n"
                 )
             )
             self.stdout.write(
@@ -117,7 +117,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_runs_expired']}.\n"
+                    f"External Course Codes: {stats['course_runs_expired'] if stats['course_runs_expired'] else None}.\n"
                 )
             )
             self.stdout.write(

@@ -281,6 +281,15 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901
                 create_who_should_enroll_in_page(
                     course_page, emeritus_course.who_should_enroll_list
                 )
+
+    # As we get the API data for course runs, we can have duplicate course codes in course created and updated,
+    # so, we are removing the courses created from the updated courses list.
+    stats["existing_courses"] = stats["existing_courses"].difference(
+        stats["courses_created"]
+    )
+    stats["course_pages_updated"] = stats["course_pages_updated"].difference(
+        stats["course_pages_created"]
+    )
     return stats
 
 
