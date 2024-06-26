@@ -14,10 +14,8 @@ def remove_text_id_space(apps, schema_editor):
 
     bad_product_versions = ProductVersion.objects.filter(text_id__icontains=" ")
     for product_version in bad_product_versions:
-        product_version.text_id = product_version.text_id.strip().replace(" ", "")
-        product_version.description = product_version.description.strip().replace(
-            " ", ""
-        )
+        product_version.text_id = product_version.text_id.replace(" ", "")
+        product_version.description = product_version.description.replace(" ", "")
 
     ProductVersion.objects.bulk_update(bad_product_versions, ["text_id", "description"])
 
