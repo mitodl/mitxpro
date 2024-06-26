@@ -391,13 +391,18 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         )
         return course_run, True
     elif (
-        course_run.start_date
-        and emeritus_course.start_date
-        and course_run.start_date.date() != emeritus_course.start_date.date()
-    ) or (
-        course_run.end_date
-        and emeritus_course.end_date
-        and course_run.end_date.date() != emeritus_course.end_date.date()
+        (not course_run.start_date and emeritus_course.start_date)
+        or (
+            course_run.start_date
+            and emeritus_course.start_date
+            and course_run.start_date.date() != emeritus_course.start_date.date()
+        )
+        or (not course_run.end_date and emeritus_course.end_date)
+        or (
+            course_run.end_date
+            and emeritus_course.end_date
+            and course_run.end_date.date() != emeritus_course.end_date.date()
+        )
     ):
         course_run.start_date = emeritus_course.start_date
         course_run.end_date = emeritus_course.end_date
