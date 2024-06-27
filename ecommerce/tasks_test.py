@@ -1,3 +1,5 @@
+"""Ecommerce Tasks Tests"""
+
 import datetime
 
 from django.conf import settings
@@ -7,6 +9,7 @@ from ecommerce.models import Basket, BasketItem, CouponSelection, CourseRunSelec
 
 
 def test_delete_expired_baskets(mocker, user, basket_and_coupons):
+    """Test that the expired baskets are deleted on task run"""
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
 
