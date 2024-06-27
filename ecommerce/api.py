@@ -734,6 +734,7 @@ def clear_and_delete_baskets(basket_ids):
     log.info("Deleted %d CouponSelection objects", items_deleted)
     Basket.objects.filter(id__in=basket_ids).delete()
 
+
 def complete_order(order):
     """
     Enrolls a user in all items associated with their Order and gets rid of checkout-related objects
@@ -752,9 +753,11 @@ def complete_order(order):
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
     with transaction.atomic():
-        basket_ids = Basket.objects.select_for_update(skip_locked=True).filter(
-            user=order.purchaser
-        ).values_list("id", flat=True)
+        basket_ids = (
+            Basket.objects.select_for_update(skip_locked=True)
+            .filter(user=order.purchaser)
+            .values_list("id", flat=True)
+        )
         log.info("Found %d baskets to delete", len(basket_ids))
 
         # clear the basket
