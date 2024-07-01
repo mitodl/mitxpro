@@ -614,7 +614,7 @@ def clean_url(url, *, remove_query_params=False):
 
     if remove_query_params:
         url = url[: url.find("?")]
-    return url.strip()
+    return url.replace(" ", "")
 
 
 def strip_datetime(date_str, date_format, date_timezone=None):
