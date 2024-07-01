@@ -1,7 +1,7 @@
 """Ecommerce Tasks"""
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
 
 from django.conf import settings
 from django.db import transaction
