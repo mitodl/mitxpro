@@ -1,6 +1,6 @@
 """Ecommerce Tasks"""
 
-import datetime
+from datetime import timedelta
 import logging
 
 from django.conf import settings
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 @app.task(acks_late=True)
 def delete_expired_baskets():
     """Deletes the expired baskets"""
-    cutoff_date = now_in_utc() - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    cutoff_date = now_in_utc() - timedelta(days=settings.BASKET_EXPIRY_DAYS)
     log.info("Starting the deletion of expired baskets at %s", now_in_utc())
 
     with transaction.atomic():

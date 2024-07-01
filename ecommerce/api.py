@@ -719,20 +719,21 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
 
 def clear_and_delete_baskets(basket_ids):
     """
-    Delete baskets and all the items associated with them
+    Delete baskets and all the associated items.
 
     Args:
         basket_ids (iterable of int): A list of basket ids whose associated items to be deleted
     """
     items_deleted, _ = BasketItem.objects.filter(basket_id__in=basket_ids).delete()
-    log.info("Deleted %d BasketItem objects", items_deleted)
+    log.info("Deleted %d BasketItem object(s)", items_deleted)
     items_deleted, _ = CourseRunSelection.objects.filter(
         basket_id__in=basket_ids
     ).delete()
-    log.info("Deleted %d CourseRunSelection objects", items_deleted)
+    log.info("Deleted %d CourseRunSelection object(s)", items_deleted)
     items_deleted, _ = CouponSelection.objects.filter(basket_id__in=basket_ids).delete()
-    log.info("Deleted %d CouponSelection objects", items_deleted)
-    Basket.objects.filter(id__in=basket_ids).delete()
+    log.info("Deleted %d CouponSelection object(s)", items_deleted)
+    items_deleted, _ = Basket.objects.filter(id__in=basket_ids).delete()
+    log.info("Deleted %d Basket object(s)", items_deleted)
 
 
 def complete_order(order):
