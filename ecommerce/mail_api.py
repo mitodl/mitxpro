@@ -201,23 +201,18 @@ def send_welcome_course_run_enrollment_email(enrollment):
     Args:
         enrollment (CourseRunEnrollment): the enrollment for which to send the welcome email
     """
-
     run_start_date = run_end_date = ""
     run_start_time = ""
     if enrollment.run.start_date:
-        run_start_date = enrollment.run.start_date
-        run_start_time = run_start_date.astimezone(datetime.timezone.utc).strftime(
-            EMAIL_TIME_FORMAT
-        )
+        run_start_date = enrollment.run.start_date.strftime(EMAIL_DATE_FORMAT)
+        run_start_time = enrollment.run.start_date.astimezone(
+            datetime.timezone.utc
+        ).strftime(EMAIL_TIME_FORMAT)
     if enrollment.run.end_date:
-        run_end_date = enrollment.run.end_date
-    if run_start_date and run_end_date:
-        date_range = (
-            f"{run_start_date.strftime(EMAIL_DATE_FORMAT)} - "
-            f"{run_end_date.strftime(EMAIL_DATE_FORMAT)}"
-        )
-    else:
-        date_range = ""
+        run_end_date = enrollment.run.end_date.strftime(EMAIL_DATE_FORMAT)
+    date_range = (
+        f"{run_start_date} - {run_end_date}" if run_start_date and run_end_date else ""
+    )
     try:
         user = enrollment.user
         api.send_message(
@@ -227,9 +222,7 @@ def send_welcome_course_run_enrollment_email(enrollment):
                     user=user,
                     extra_context={
                         "enrollment": enrollment,
-                        "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT)
-                        if run_start_date
-                        else run_start_date,
+                        "run_start_date": run_start_date,
                         "run_start_time": run_start_time,
                         "run_date_range": date_range,
                     },
