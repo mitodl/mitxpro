@@ -14,6 +14,7 @@ from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
     all_equal,
     all_unique,
+    clean_url,
     dict_without_keys,
     ensure_trailing_slash,
     filter_dict_by_key_set,
@@ -41,6 +42,7 @@ from mitxpro.utils import (
     public_path,
     remove_password_from_url,
     request_get_with_timeout_retry,
+    strip_datetime,
     unique,
     unique_ignore_case,
     webpack_dev_server_host,
@@ -495,3 +497,77 @@ def test_get_js_settings(settings, rf):
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
     }
+
+
+@pytest.mark.parametrize(
+    ("url", "remove_query_params", "expected_url"),
+    [
+        ("https://test_url.com/?query_param=True", True, "https://test_url.com/"),
+        (
+            "https://test_url.com/?query_param=True",
+            False,
+            "https://test_url.com/?query_param=True",
+        ),
+        (" https://test_url.com/ ?query_param=True ", True, "https://test_url.com/"),
+        (
+            " https://test_url.com/ ?query_param=True ",
+            False,
+            "https://test_url.com/?query_param=True",
+        ),
+        ("   ?query_param=True", True, ""),
+        ("   ?query_param=True", False, "?query_param=True"),
+    ],
+)
+def test_clean_url(url, remove_query_params, expected_url):
+    """
+    Tests that `clean_url` returns the cleaned URL.
+    """
+    assert clean_url(url, remove_query_params=remove_query_params) == expected_url
+
+
+@pytest.mark.parametrize(
+    ("date_str", "date_format", "date_timezone", "expected_date"),
+    [
+        (
+            "2025-06-26",
+            "%Y-%m-%d",
+            datetime.timezone.utc,
+            datetime.datetime(2025, 6, 26, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "2025-06-26",
+            "%Y-%m-%d",
+            None,
+            datetime.datetime(2025, 6, 26, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "21 June, 2018",
+            "%d %B, %Y",
+            datetime.timezone.utc,
+            datetime.datetime(2018, 6, 21, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "21 June, 2018",
+            "%d %B, %Y",
+            None,
+            datetime.datetime(2018, 6, 21, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "12/11/2018 09:15:32",
+            "%d/%m/%Y %H:%M:%S",
+            datetime.timezone.utc,
+            datetime.datetime(2018, 11, 12, 9, 15, 32, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "12/11/2018 09:15:32",
+            "%d/%m/%Y %H:%M:%S",
+            None,
+            datetime.datetime(2018, 11, 12, 9, 15, 32, tzinfo=datetime.timezone.utc),
+        ),
+    ],
+)
+def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
+    """
+    Tests that `strip_datetime` strips the datetime and sets the timezone.
+    """
+    assert strip_datetime(date_str, date_format, date_timezone) == expected_date
