@@ -121,7 +121,7 @@ def test_create_or_update_emeritus_course_page(create_course_page):
             description="",
         )
 
-    course_page, _ = create_or_update_emeritus_course_page(
+    course_page, course_page_created = create_or_update_emeritus_course_page(
         course_index_page, course, EmeritusCourse(emeritus_course_run)
     )
     assert course_page.title == emeritus_course_run["program_name"]
@@ -131,6 +131,7 @@ def test_create_or_update_emeritus_course_page(create_course_page):
     assert course_page.course == course
     assert course_page.duration == f"{emeritus_course_run['total_weeks']} Weeks"
     assert course_page.description == emeritus_course_run["description"]
+    assert course_page_created == (not create_course_page)
 
 
 @pytest.mark.django_db
@@ -202,9 +203,16 @@ def test_parse_emeritus_data_str():
     ]
 
 
-@pytest.mark.parametrize("create_existing_course_run", [True, False])
+@pytest.mark.parametrize(
+    ("create_existing_course_run", "empty_dates"),
+    [
+        (True, True),
+        (True, False),
+        (False, False),
+    ],
+)
 @pytest.mark.django_db
-def test_create_or_update_emeritus_course_run(create_existing_course_run):
+def test_create_or_update_emeritus_course_run(create_existing_course_run, empty_dates):
     """
     Tests that `create_or_update_emeritus_course_run` creates or updates a course run
     """
@@ -215,21 +223,27 @@ def test_create_or_update_emeritus_course_run(create_existing_course_run):
 
     course = CourseFactory.create()
     if create_existing_course_run:
-        CourseRunFactory.create(
+        run = CourseRunFactory.create(
             course=course,
             external_course_run_id=emeritus_course.course_run_code,
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
         )
+        if empty_dates:
+            run.start_date = None
+            run.end_date = None
+            run.save()
 
-    create_or_update_emeritus_course_run(course, emeritus_course)
+    run, run_created = create_or_update_emeritus_course_run(course, emeritus_course)
     course_runs = course.courseruns.all()
     course_run_courseware_id = generate_external_course_run_courseware_id(
         emeritus_course.course_run_tag, course.readable_id
     )
 
     assert len(course_runs) == 1
+    assert run.course == course
+    assert run_created == (not create_existing_course_run)
     if create_existing_course_run:
         expected_data = {
             "external_course_run_id": emeritus_course.course_run_code,
@@ -291,9 +305,18 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
                 description="",
             )
 
-    update_emeritus_course_runs(emeritus_course_runs)
+    stats = update_emeritus_course_runs(emeritus_course_runs)
     courses = Course.objects.filter(platform=platform)
-    assert len(courses) == len(emeritus_course_runs)
+    assert len(courses) == 4
+    assert len(stats["course_runs_skipped"]) == 1
+    assert len(stats["course_runs_expired"]) == 0
+    assert len(stats["courses_created"]) == 2
+    assert len(stats["existing_courses"]) == 2
+    assert len(stats["course_runs_created"]) == 2
+    assert len(stats["course_runs_updated"]) == 2
+    assert len(stats["course_pages_created"]) == 2
+    assert len(stats["course_pages_updated"]) == 2
+
     for emeritus_course_run in emeritus_course_runs:
         course = Course.objects.filter(
             platform=platform,
