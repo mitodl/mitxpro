@@ -55,7 +55,7 @@ services:
       sleep 3 &&
       python3 manage.py collectstatic --noinput &&
       python3 manage.py migrate --noinput &&
-      uwsgi uwsgi.ini --honour-stdin'
+      uwsgi uwsgi.ini --honour-stdin --enable-threads --py-call-uwsgi-fork-hooks'
     stdin_open: true
     tty: true
     ports:
