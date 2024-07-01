@@ -762,6 +762,11 @@ CRON_EXTERNAL_COURSERUN_SYNC_DAYS = get_string(
     description="'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
 )
 
+CRON_DELETE_BASKET_HOURS = get_string(
+    name="CRON_DELETE_BASKET_HOURS",
+    default=0,
+    description="'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
+)
 
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
@@ -769,6 +774,11 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_SEND_SENT_EVENT = True
+BASKET_EXPIRY_DAYS = get_int(
+    name="BASKET_EXPIRY_DAYS",
+    default=15,
+    description="How many days to keep basket before deleting. The threshold value of a basket to live",
+)
 RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY = get_int(
     name="RETRY_FAILED_EDX_ENROLLMENT_FREQUENCY",
     default=60 * 30,
@@ -864,6 +874,16 @@ CELERY_BEAT_SCHEDULE = {
             minute="0",
             hour=CRON_EXTERNAL_COURSERUN_SYNC_HOURS,
             day_of_week=CRON_EXTERNAL_COURSERUN_SYNC_DAYS or "*",
+            day_of_month="*",
+            month_of_year="*",
+        ),
+    },
+    "delete-expired-baskets": {
+        "task": "ecommerce.tasks.delete_expired_baskets",
+        "schedule": crontab(
+            minute=0,
+            hour=CRON_DELETE_BASKET_HOURS,
+            day_of_week="*",
             day_of_month="*",
             month_of_year="*",
         ),

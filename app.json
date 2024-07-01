@@ -42,6 +42,10 @@
       "description": "S3 Bucket name.",
       "required": false
     },
+    "BASKET_EXPIRY_DAYS": {
+      "description": "How many days to keep basket before deleting. The threshold value of a basket to live",
+      "required": false
+    },
     "BLOG_CACHE_TIMEOUT": {
       "description": "How long the blog should be cached",
       "required": false
@@ -84,6 +88,10 @@
     },
     "CRON_COURSE_CERTIFICATES_HOURS": {
       "description": "'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
+      "required": false
+    },
+    "CRON_DELETE_BASKET_HOURS": {
+      "description": "'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
       "required": false
     },
     "CRON_EMERITUS_COURSERUN_SYNC_DAYS": {

@@ -717,6 +717,25 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
         sheets.tasks.set_assignment_rows_to_enrolled.delay(sheet_update_map)
 
 
+def clear_and_delete_baskets(basket_ids):
+    """
+    Delete baskets and all the associated items.
+
+    Args:
+        basket_ids (iterable of int): A list of basket ids whose associated items to be deleted
+    """
+    items_deleted, _ = BasketItem.objects.filter(basket_id__in=basket_ids).delete()
+    log.info("Deleted %d BasketItem object(s)", items_deleted)
+    items_deleted, _ = CourseRunSelection.objects.filter(
+        basket_id__in=basket_ids
+    ).delete()
+    log.info("Deleted %d CourseRunSelection object(s)", items_deleted)
+    items_deleted, _ = CouponSelection.objects.filter(basket_id__in=basket_ids).delete()
+    log.info("Deleted %d CouponSelection object(s)", items_deleted)
+    items_deleted, _ = Basket.objects.filter(id__in=basket_ids).delete()
+    log.info("Deleted %d Basket object(s)", items_deleted)
+
+
 def complete_order(order):
     """
     Enrolls a user in all items associated with their Order and gets rid of checkout-related objects
@@ -734,11 +753,16 @@ def complete_order(order):
     if order_coupon_ids:
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
-    # clear the basket
     with transaction.atomic():
-        BasketItem.objects.filter(basket__user=order.purchaser).delete()
-        CourseRunSelection.objects.filter(basket__user=order.purchaser).delete()
-        CouponSelection.objects.filter(basket__user=order.purchaser).delete()
+        basket_ids = (
+            Basket.objects.select_for_update(skip_locked=True)
+            .filter(user=order.purchaser)
+            .values_list("id", flat=True)
+        )
+        log.info("Found %d baskets to delete", len(basket_ids))
+
+        # clear the basket
+        clear_and_delete_baskets(basket_ids)
 
 
 def enroll_user_in_order_items(order):
