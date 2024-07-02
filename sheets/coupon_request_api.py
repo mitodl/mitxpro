@@ -102,7 +102,6 @@ class CouponRequestRow:
         self.errors = errors
         self.skip_row = skip_row
         self.requester = requester
-        #
         product, _, program_run = ecommerce.api.get_product_from_text_id(
             self.product_text_id
         )
