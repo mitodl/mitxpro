@@ -32,9 +32,9 @@ from ecommerce.mail_api import (
     send_b2b_receipt_email,
     send_bulk_enroll_emails,
     send_course_run_enrollment_email,
+    send_course_run_enrollment_welcome_email,
     send_ecommerce_order_receipt,
     send_enrollment_failure_message,
-    send_welcome_course_run_enrollment_email,
 )
 from ecommerce.models import Order
 from mail.api import EmailMetadata, UserMessageProps
@@ -150,8 +150,8 @@ def test_send_course_run_enrollment_email_error(mocker):
     )
 
 
-def test_send_welcome_course_run_enrollment_email(mocker):
-    """send_welcome_course_run_enrollment_email should send a welcome email for the given enrollment"""
+def test_send_course_run_enrollment_welcome_email(mocker):
+    """send_course_run_enrollment_welcome_email should send a welcome email for the given enrollment"""
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     enrollment = CourseRunEnrollmentFactory.create()
 
@@ -165,7 +165,7 @@ def test_send_welcome_course_run_enrollment_email(mocker):
         f"{run_end_date.strftime(EMAIL_DATE_FORMAT)}"
     )
 
-    send_welcome_course_run_enrollment_email(enrollment)
+    send_course_run_enrollment_welcome_email(enrollment)
 
     patched_mail_api.context_for_user.assert_called_once_with(
         user=enrollment.user,

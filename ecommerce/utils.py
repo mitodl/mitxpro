@@ -1,5 +1,6 @@
 """Utility functions for ecommerce"""
 
+import datetime
 import logging
 from urllib.parse import urlencode, urljoin
 
@@ -12,6 +13,7 @@ from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
 
 log = logging.getLogger(__name__)
+EMAIL_TIME_FORMAT = "%I:%M %p %Z"
 
 
 def create_delete_rule(table_name):
@@ -154,3 +156,23 @@ class CouponUtils:
             Coupon.objects.filter(coupon_code=value).exists()
             or B2BCoupon.objects.filter(coupon_code=value).exists()
         )
+
+
+def format_run_date(run_date):
+    """
+    Format run date to return both date and time strings.
+
+    Args:
+        run_date (datetime): The datetime to format.
+
+    Returns:
+        tuple: A tuple containing the formatted date and time strings.
+    """
+    if run_date:
+        from ecommerce.mail_api import EMAIL_DATE_FORMAT
+
+        formatted_date_time = run_date.astimezone(datetime.timezone.utc).strftime(
+            f"{EMAIL_DATE_FORMAT}-{EMAIL_TIME_FORMAT}"
+        )
+        return tuple(formatted_date_time.split("-", 1))
+    return "", ""
