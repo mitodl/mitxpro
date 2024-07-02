@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.151.0
+Version 0.151.0 (Released July 02, 2024)
 ---------------
 
 - fix(external course sync): sync course run dates if they are missing (#3027)
