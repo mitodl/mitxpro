@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
         sys.exit(
             check_call(
-                [os.path.join(base_dir, "manage.py"), "shell", *sys.argv[1:]],  # noqa: PTH118, S603
+                [os.path.join(base_dir, "manage.py"), "shell", *sys.argv[1:]],  # noqa: PTH118
                 env={**os.environ, "PYTHONSTARTUP": os.path.join(base_dir, "repl.py")},  # noqa: PTH118
             )
         )
