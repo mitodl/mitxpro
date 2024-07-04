@@ -17,7 +17,6 @@ class Migration(migrations.Migration):
             field=modelcluster.fields.ParentalManyToManyField(
                 blank=True,
                 help_text="The topics for this course page.",
-                null=True,
                 to="courses.CourseTopic",
             ),
         ),
@@ -27,7 +26,6 @@ class Migration(migrations.Migration):
             field=modelcluster.fields.ParentalManyToManyField(
                 blank=True,
                 help_text="The topics for this course page.",
-                null=True,
                 to="courses.CourseTopic",
             ),
         ),

@@ -39,7 +39,7 @@ class Command(BaseCommand):
             "--force",
             action="store_true",
             help=(
-                "Process coupon assignment sheet even if the file is unchanged since the last time it was processed.",
+                "Process coupon assignment sheet even if the file is unchanged since the last time it was processed."
             ),
         )
         super().add_arguments(parser)
