@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.152.0
+---------------
+
+- feat: replace # with - in Emeritus courserun.courseware_id (#3035)
+- fix: remove spaces from the product version text_id fields (#3023)
+- chore: add fake EMERITUS_API_KEY to .env.example (#3030)
+- [pre-commit.ci] pre-commit autoupdate (#3025)
+- fix(deps): update dependency djangorestframework to v3.15.2 [security]
+
 Version 0.151.0 (Released July 02, 2024)
 ---------------
 
