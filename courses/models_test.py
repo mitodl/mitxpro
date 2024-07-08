@@ -634,6 +634,22 @@ def test_readable_id_valid(readable_id_value):
 
 
 @pytest.mark.parametrize(
+    "courseware_id_value",
+    ["somevalue", "some-value", "some_value", "some+value", "some:value"],
+)
+def test_course_run_courseware_id_valid(courseware_id_value):
+    """
+    Test that the Course Run courseware_id field accepts valid values, and that
+    validation is performed when a save is attempted.
+    """
+    course_run = CourseRunFactory.build(
+        course=CourseFactory.create(), courseware_id=courseware_id_value
+    )
+    course_run.save()
+    assert course_run.id is not None
+
+
+@pytest.mark.parametrize(
     "readable_id_value",
     [
         "",
@@ -656,6 +672,30 @@ def test_readable_id_invalid(readable_id_value):
     course = CourseFactory.build(program=None, readable_id=readable_id_value)
     with pytest.raises(ValidationError):
         course.save()
+
+
+@pytest.mark.parametrize(
+    "courseware_id_value",
+    [
+        "",
+        "some value",
+        "some/value",
+        " somevalue",
+        "somevalue ",
+        "/somevalue",
+        "somevalue/",
+    ],
+)
+def test_course_run_courseware_id_invalid(courseware_id_value):
+    """
+    Test that the Course Run courseware_id field rejects invalid values, and that
+    validation is performed when a save is attempted.
+    """
+    course_run = CourseRunFactory.build(
+        course=CourseFactory.create(), courseware_id=courseware_id_value
+    )
+    with pytest.raises(ValidationError):
+        course_run.save()
 
 
 def test_get_program_run_enrollments(user):
