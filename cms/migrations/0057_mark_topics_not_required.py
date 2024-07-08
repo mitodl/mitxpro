@@ -15,9 +15,9 @@ class Migration(migrations.Migration):
             model_name="coursepage",
             name="topics",
             field=modelcluster.fields.ParentalManyToManyField(
-                null=True,
                 blank=True,
                 help_text="The topics for this course page.",
+                null=True,
                 to="courses.CourseTopic",
             ),
         ),
@@ -25,9 +25,9 @@ class Migration(migrations.Migration):
             model_name="externalcoursepage",
             name="topics",
             field=modelcluster.fields.ParentalManyToManyField(
-                null=True,
                 blank=True,
                 help_text="The topics for this course page.",
+                null=True,
                 to="courses.CourseTopic",
             ),
         ),
