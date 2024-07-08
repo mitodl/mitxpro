@@ -36,11 +36,11 @@ from mitxpro.utils import clean_url
 @pytest.mark.parametrize(
     ("emeritus_course_run_code", "expected_course_run_tag"),
     [
-        ("MO-EOB-18-01#1", "18-01#1"),
-        ("MO-EOB-08-01#1", "08-01#1"),
-        ("MO-EOB-08-12#1", "08-12#1"),
-        ("MO-EOB-18-01#12", "18-01#12"),
-        ("MO-EOB-18-01#212", "18-01#212"),
+        ("MO-EOB-18-01#1", "18-01-1"),
+        ("MO-EOB-08-01#1", "08-01-1"),
+        ("MO-EOB-08-12#1", "08-12-1"),
+        ("MO-EOB-18-01#12", "18-01-12"),
+        ("MO-EOB-18-01#212", "18-01-212"),
     ],
 )
 def test_generate_emeritus_course_run_tag(

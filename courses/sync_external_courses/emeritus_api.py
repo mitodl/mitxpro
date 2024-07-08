@@ -299,7 +299,8 @@ def generate_emeritus_course_run_tag(course_run_code):
 
     Emeritus course run codes follow a pattern `MO-<COURSE_CODE>-<RUN_TAG>`. This method returns the run tag.
     """
-    return re.search(r"[0-9]{2}-[0-9]{2}#[0-9]+$", course_run_code).group(0)
+    run_tag = re.search(r"[0-9]{2}-[0-9]{2}#[0-9]+$", course_run_code).group(0)
+    return run_tag.replace("#", "-")
 
 
 def generate_external_course_run_courseware_id(course_run_tag, course_readable_id):
