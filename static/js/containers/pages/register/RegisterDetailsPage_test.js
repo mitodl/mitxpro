@@ -13,7 +13,6 @@ import {
   STATE_ERROR_TEMPORARY,
   FLOW_REGISTER,
   STATE_EXISTING_ACCOUNT,
-  STATE_REGISTER_DETAILS,
 } from "../../../lib/auth";
 import { routes } from "../../../lib/urls";
 import { makeRegisterAuthResponse } from "../../../factories/auth";
@@ -169,32 +168,5 @@ describe("RegisterDetailsPage", () => {
       confirmationMessage.text().replace("<Link />", ""),
       "You already have an xPRO account. Please .",
     );
-  });
-
-  it("shows field errors from the auth response if they exist", async () => {
-    const { inner } = await renderPage();
-
-    helper.handleRequestStub.returns({
-      body: makeRegisterAuthResponse({
-        state: STATE_REGISTER_DETAILS,
-        field_errors: { name: "Invalid" },
-        partial_token: "new_partial_token",
-      }),
-    });
-    const onSubmit = inner.find("RegisterDetailsForm").prop("onSubmit");
-
-    await onSubmit(detailsData, {
-      setSubmitting: setSubmittingStub,
-      setErrors: setErrorsStub,
-    });
-
-    sinon.assert.calledWith(
-      helper.handleRequestStub,
-      "/api/register/details/",
-      "POST",
-      { body, headers: undefined, credentials: undefined },
-    );
-    sinon.assert.calledOnce(setErrorsStub);
-    sinon.assert.calledWith(setErrorsStub, { name: "Invalid" });
   });
 });

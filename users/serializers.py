@@ -34,11 +34,6 @@ USER_NAME_RE = re.compile(
     """,
     flags=re.I | re.VERBOSE | re.MULTILINE,
 )
-NAME_CONTAINS_HTML_URL_MSG = (
-    "Full name can not contain HTML or URL. Please try a different one."
-)
-
-OPENEDX_NAME_VALIDATION_MSGS_MAP = {"Enter a valid name": NAME_CONTAINS_HTML_URL_MSG}
 
 
 class LegalAddressSerializer(serializers.ModelSerializer):
@@ -278,14 +273,11 @@ class UserSerializer(serializers.ModelSerializer):
         return []
 
     def validate(self, data):
-        """Validate an existing user"""
+        """Validate user data"""
         name = data.get("name")
         if name:
             try:
                 openedx_validation_msg = validate_name_with_edx(name)
-                openedx_validation_msg = OPENEDX_NAME_VALIDATION_MSGS_MAP.get(
-                    openedx_validation_msg, openedx_validation_msg
-                )
             except (
                 HTTPError,
                 RequestsConnectionError,
@@ -295,7 +287,7 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)  # noqa: B904
 
             if openedx_validation_msg:
-                raise serializers.ValidationError({"name": openedx_validation_msg})
+                raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)
 
         return data
 

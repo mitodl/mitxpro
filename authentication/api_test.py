@@ -17,15 +17,12 @@ def test_create_user_session(user):
     assert session.session_key is not None
 
 
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_create_user_with_generated_username(mocker, valid_address_dict):
     """
     Integration test to assert that create_user_with_generated_username tries to find an available
     username and try again to save a User if there was a username collision
     """
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
-
     username = "testuser"
     # Create a user with the desired username before calling the function so we get a collision
     UserFactory.create(username=username)

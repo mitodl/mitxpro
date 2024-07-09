@@ -27,6 +27,7 @@ from authentication.exceptions import (
     UserTryAgainLaterException,
 )
 from authentication.utils import SocialAuthState
+from users.constants import USER_REGISTRATION_FAILED_MSG
 
 PARTIAL_PIPELINE_TOKEN_KEY = "partial_pipeline_token"  # noqa: S105
 
@@ -177,7 +178,7 @@ class SocialAuthSerializer(serializers.Serializer):
         except UserTryAgainLaterException:
             result = SocialAuthState(
                 SocialAuthState.STATE_ERROR_TEMPORARY,
-                errors=["Unable to register at this time, please try again later"],
+                errors=[USER_REGISTRATION_FAILED_MSG],
             )
         except AuthException as exc:
             log.exception("Received unexpected AuthException")

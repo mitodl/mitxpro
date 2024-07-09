@@ -214,13 +214,11 @@ def test_update_email_change_request_invalid_token(user_drf_client):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_update_user_name_change(mocker, user_client, user, valid_address_dict):
     """Test that updating user's name is properly reflected in xPRO"""
     new_name = fuzzy.FuzzyText(prefix="Test-").fuzz()
     mocker.patch("courseware.api.update_edx_user_name")
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
     payload = {
         "name": new_name,
         "email": user.email,
@@ -238,13 +236,11 @@ def test_update_user_name_change(mocker, user_client, user, valid_address_dict):
     assert User.objects.get(pk=user.pk).name == new_name
 
 
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_update_user_name_change_edx(mocker, user_client, user, valid_address_dict):
     """Test that PATCH on user/me also calls update user's name api in edX if there is a name change in xPRO"""
     new_name = fuzzy.FuzzyText(prefix="Test-").fuzz()
     update_edx_mock = mocker.patch("courseware.api.update_edx_user_name")
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
     payload = {
         "name": new_name,
         "email": user.email,
@@ -259,12 +255,10 @@ def test_update_user_name_change_edx(mocker, user_client, user, valid_address_di
     update_edx_mock.assert_called_once_with(user)
 
 
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_update_user_no_name_change_edx(mocker, user_client, user, valid_address_dict):
     """Test that PATCH on user/me without name change doesn't call update user's name in edX"""
     update_edx_mock = mocker.patch("courseware.api.update_edx_user_name")
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
     resp = user_client.patch(
         reverse("users_api-me"),
         content_type="application/json",
