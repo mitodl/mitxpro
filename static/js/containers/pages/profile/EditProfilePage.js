@@ -87,11 +87,8 @@ export class EditProfilePage extends React.Component<Props, State> {
         /* eslint-disable camelcase */
         body: { errors },
       }: { body: Object } = await editProfile(payload);
-
-      if (errors) {
-        const nonFieldErrors = errors.non_field_errors || [];
-        const fieldErrors = { ...errors };
-        delete fieldErrors.non_field_errors;
+      if (errors && errors.non_field_errors) {
+        const nonFieldErrors = errors.non_field_errors;
 
         nonFieldErrors.forEach((error) => {
           addUserNotification({
@@ -104,8 +101,10 @@ export class EditProfilePage extends React.Component<Props, State> {
             },
           });
         });
-
-        setErrors(fieldErrors);
+      } else if (errors && errors.length > 0) {
+        setErrors({
+          email: errors[0],
+        });
       } else {
         history.push(routes.profile.view);
       }

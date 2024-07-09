@@ -542,11 +542,14 @@ def get_edx_api_registration_client():
     Returns:
          EdxApi: edx api registration client instance
     """
-    if settings.MITXPRO_REGISTRATION_ACCESS_TOKEN is None:
-        raise ImproperlyConfigured("MITXPRO_REGISTRATION_ACCESS_TOKEN is not set")  # noqa: EM101
+    registration_access_token = (
+        settings.MITXPRO_REGISTRATION_ACCESS_TOKEN
+        if settings.MITXPRO_REGISTRATION_ACCESS_TOKEN
+        else ""
+    )
 
     return EdxApi(
-        {"access_token": settings.MITXPRO_REGISTRATION_ACCESS_TOKEN},
+        {"access_token": registration_access_token},
         settings.OPENEDX_API_BASE_URL,
         timeout=settings.EDX_API_CLIENT_TIMEOUT,
     )
@@ -844,16 +847,14 @@ def validate_name_with_edx(name):
         name (str): The full name
 
     Raises:
-        EdxApiRegistrationValidationException: Raised if response status is not OK.
+        EdxApiRegistrationValidationException: Raised if response status is not 200.
     """
     edx_client = get_edx_api_registration_client()
     try:
-        resp = edx_client.user_info.validate_user_registration(
-            data=dict(  # noqa: C408
+        return edx_client.user_validation.validate_user_registration(
+            registration_information=dict(  # noqa: C408
                 name=name,
             )
-        )
-    except Exception as exc:  # noqa: BLE001
+        ).name
+    except Exception as exc:
         raise EdxApiRegistrationValidationException(name, exc.response) from exc
-
-    return resp["validation_decisions"]["name"]

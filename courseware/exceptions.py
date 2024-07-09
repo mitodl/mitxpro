@@ -68,7 +68,7 @@ class UserNameUpdateFailedException(Exception):  # noqa: N818
 class EdxApiRegistrationValidationException(Exception):  # noqa: N818
     """An edX Registration Validation API call resulted in an error response"""
 
-    def __init__(self, name, response, msg=None):
+    def __init__(self, name, error_response, msg=None):
         """
         Sets exception properties and adds a default message
 
@@ -77,7 +77,7 @@ class EdxApiRegistrationValidationException(Exception):  # noqa: N818
             response (requests.Response): edX response for name validation
         """
         self.name = name
-        self.response = response
+        self.response = error_response
         if msg is None:
             # Set some default useful error message
             msg = f"EdX API error validating registration name {self.name}.\n{get_error_response_summary(self.response)}"

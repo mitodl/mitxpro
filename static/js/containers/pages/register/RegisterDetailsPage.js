@@ -21,7 +21,6 @@ import {
   STATE_ERROR,
   STATE_EXISTING_ACCOUNT,
   handleAuthResponse,
-  STATE_REGISTER_DETAILS,
 } from "../../../lib/auth";
 import queries from "../../../lib/queries";
 import { qsPartialTokenSelector } from "../../../lib/selectors";
@@ -109,13 +108,6 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
         /* eslint-disable camelcase */
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
-        [STATE_REGISTER_DETAILS]: ({ field_errors }: AuthResponse) => {
-          // Validation failures will result in a 200 API response that still points to this page but contains
-          // field errors.
-          if (field_errors) {
-            setErrors(field_errors);
-          }
-        },
       });
     } finally {
       setSubmitting(false);

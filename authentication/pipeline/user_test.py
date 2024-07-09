@@ -257,6 +257,7 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_strategy):
     """
     Tests that create_user_via_email creates a user via social_core.pipeline.user.create_user_via_email,
@@ -272,9 +273,6 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
         "authentication.pipeline.user.create_user_with_generated_username",
         return_value=fake_user,
     )
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
 
     response = user_actions.create_user_via_email(
         mock_create_user_strategy,
@@ -384,6 +382,7 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
     "create_user_return_val,create_user_exception",  # noqa: PT006
     [[None, None], [UserFactory.build(), ValueError("bad value")]],  # noqa: PT007
 )
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_create_user_via_email_create_fail(
     mocker,
     mock_email_backend,
@@ -397,10 +396,6 @@ def test_create_user_via_email_create_fail(
         return_value=create_user_return_val,
         side_effect=create_user_exception,
     )
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
-
     with pytest.raises(UserCreationFailedException):
         user_actions.create_user_via_email(
             mock_create_user_strategy,
@@ -413,6 +408,7 @@ def test_create_user_via_email_create_fail(
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_create_user_via_email_affiliate(
     mocker, mock_create_user_strategy, mock_email_backend
 ):
@@ -426,9 +422,6 @@ def test_create_user_via_email_affiliate(
         "authentication.pipeline.user.create_user_with_generated_username",
         return_value=UserFactory.build(),
     )
-    mock_client = mocker.MagicMock()
-    mock_client.user_info.validate_user_registration.return_value = {"validation_decisions": {"name": ""}}
-    mocker.patch("courseware.api.get_edx_api_registration_client", return_value=mock_client)
     user_actions.create_user_via_email(
         mock_create_user_strategy,
         mock_email_backend,
