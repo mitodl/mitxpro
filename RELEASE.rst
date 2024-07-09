@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.152.0
+Version 0.152.0 (Released July 09, 2024)
 ---------------
 
 - feat: replace # with - in Emeritus courserun.courseware_id (#3035)
