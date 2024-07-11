@@ -41,10 +41,11 @@
 <div class="light-box-video-holder hidden">
   {% embed page.video_url as youtube_video %}
   {% if youtube_video %}
+  <!-- prettier-ignore -->
   <div
     class="tv-video youtube-video"
     id="tv-light-box-yt-video"
-    data-href="{{ youtube_video }}"
+    data-href='{{ youtube_video }}'
   ></div>
   {% else %}
   <video
