@@ -42,6 +42,7 @@ class Command(BaseCommand):
             User._meta.app_label,  # noqa: SLF001
             create=self.create,
         )
+        self.stdout.write(f"Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
@@ -60,6 +61,7 @@ class Command(BaseCommand):
             Product._meta.app_label,  # noqa: SLF001
             create=self.create,
         )
+        self.stdout.write(f"Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
@@ -75,6 +77,7 @@ class Command(BaseCommand):
         """
         sys.stdout.write("  Syncing b2b orders with hubspot deals...\n")
         task = batch_upsert_hubspot_b2b_deals.delay(self.create)
+        self.stdout.write(f"Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
@@ -94,6 +97,7 @@ class Command(BaseCommand):
             self.create,
             object_ids=self.object_ids,
         )
+        self.stdout.write(f"Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
@@ -113,6 +117,7 @@ class Command(BaseCommand):
             self.create,
             object_ids=self.object_ids,
         )
+        self.stdout.write(f"Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
@@ -126,6 +131,7 @@ class Command(BaseCommand):
         """
         sys.stdout.write("  Syncing deal associations with hubspot...\n")
         task = batch_upsert_associations.delay(order_ids=self.object_ids)
+        self.stdout.write(f"Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
