@@ -234,6 +234,8 @@ class ProductVersion(TimestampedModel):
                 "The content object for this ProductVersion (%s) does not have a `text_id` property",
                 str(self.id),
             )
+        if not self.description:
+            raise ValidationError("Description is a required field.")  # noqa: EM101
         super().save(*args, **kwargs)
 
     def __str__(self):

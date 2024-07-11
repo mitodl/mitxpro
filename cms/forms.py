@@ -67,7 +67,9 @@ class CoursewareForm(WagtailAdminPageForm):
                 content_type=ContentType.objects.get_for_model(CourseRun),
                 object_id=course_run.id,
             )
-            ProductVersion.objects.create(product=product, price=price)
+            ProductVersion.objects.create(
+                product=product, price=price, description=course_run.text_id
+            )
 
         elif (
             page.is_internal_or_external_program_page
@@ -77,7 +79,9 @@ class CoursewareForm(WagtailAdminPageForm):
                 content_type=ContentType.objects.get_for_model(Program),
                 object_id=page.program.id,
             )
-            ProductVersion.objects.create(product=product, price=price)
+            ProductVersion.objects.create(
+                product=product, price=price, description=page.program.text_id
+            )
 
         if commit:
             page.save()
