@@ -120,7 +120,6 @@ class ProductVersionViewSet(ModelViewSet):
         "product",
         "price",
         "description",
-        "text_id",
         "requires_enrollment_code",
     )
     list_display = (
