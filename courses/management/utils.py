@@ -216,6 +216,7 @@ class EnrollmentChangeCommand(BaseCommand):
             run_enrollment.edx_enrolled = True
             run_enrollment.save_and_log(None)
             mail_api.send_course_run_enrollment_email(run_enrollment)
+            mail_api.send_course_run_enrollment_welcome_email(run_enrollment)
         elif not keep_failed_enrollments:
             if created:
                 run_enrollment.delete()
