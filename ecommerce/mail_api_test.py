@@ -150,11 +150,8 @@ def test_send_course_run_enrollment_email_error(mocker):
     )
 
 
-@pytest.mark.parametrize("enabled", [True, False])
-def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
+def test_send_course_run_enrollment_welcome_email(mocker):
     """send_course_run_enrollment_welcome_email should send a welcome email for the given enrollment"""
-    settings.FEATURES["ENROLLMENT_WELCOME_EMAIL"] = enabled
-    mock_log = mocker.patch("ecommerce.mail_api.log")
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     enrollment = CourseRunEnrollmentFactory.create()
 
@@ -170,28 +167,23 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
 
     send_course_run_enrollment_welcome_email(enrollment)
 
-    if not enabled:
-        mock_log.info.assert_called_once_with(
-            "Feature ENROLLMENT_WELCOME_EMAIL is disabled."
-        )
-    else:
-        patched_mail_api.context_for_user.assert_called_once_with(
-            user=enrollment.user,
-            extra_context={
-                "enrollment": enrollment,
-                "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT),
-                "run_start_time": run_start_time,
-                "run_date_range": date_range,
-            },
-        )
-        patched_mail_api.message_for_recipient.assert_called_once_with(
-            enrollment.user.email,
-            patched_mail_api.context_for_user.return_value,
-            EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
-        )
-        patched_mail_api.send_message.assert_called_once_with(
-            patched_mail_api.message_for_recipient.return_value
-        )
+    patched_mail_api.context_for_user.assert_called_once_with(
+        user=enrollment.user,
+        extra_context={
+            "enrollment": enrollment,
+            "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT),
+            "run_start_time": run_start_time,
+            "run_date_range": date_range,
+        },
+    )
+    patched_mail_api.message_for_recipient.assert_called_once_with(
+        enrollment.user.email,
+        patched_mail_api.context_for_user.return_value,
+        EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
+    )
+    patched_mail_api.send_message.assert_called_once_with(
+        patched_mail_api.message_for_recipient.return_value
+    )
 
 
 @pytest.mark.parametrize("has_discount", [True, False])
