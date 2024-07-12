@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.153.0
+---------------
+
+- feat: welcome emails for xPRO Learners  (#3017)
+- fix(deps): update dependency wagtail to v5.2.6 [security]
+- fix: homepage watch now video (#3039)
+- fix(deps): update dependency django to v4.2.14 [security]
+
 Version 0.152.0 (Released July 09, 2024)
 ---------------
 
