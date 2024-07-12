@@ -5,7 +5,6 @@ import logging
 from collections import namedtuple
 from traceback import format_exc
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import HTTPError
@@ -114,7 +113,6 @@ def create_run_enrollments(
             for all of the given course runs
     """
     successful_enrollments = []
-    send_welcome_email = settings.FEATURES.get("ENROLLMENT_WELCOME_EMAIL", False)
     try:
         enroll_in_edx_course_runs(user, runs)
     except (
@@ -157,10 +155,7 @@ def create_run_enrollments(
             successful_enrollments.append(enrollment)
             if enrollment.edx_enrolled:
                 mail_api.send_course_run_enrollment_email(enrollment)
-                if send_welcome_email:
-                    mail_api.send_course_run_enrollment_welcome_email(enrollment)
-                else:
-                    log.info("Feature ENROLLMENT_WELCOME_EMAIL is disabled.")
+                mail_api.send_course_run_enrollment_welcome_email(enrollment)
     return successful_enrollments, edx_request_success
 
 

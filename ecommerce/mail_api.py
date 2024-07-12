@@ -200,6 +200,9 @@ def send_course_run_enrollment_welcome_email(enrollment):
     Args:
         enrollment (CourseRunEnrollment): the enrollment for which to send the welcome email
     """
+    if not settings.FEATURES.get("ENROLLMENT_WELCOME_EMAIL", False):
+        log.info("Feature ENROLLMENT_WELCOME_EMAIL is disabled.")
+        return
     run_start_date, run_start_time = format_run_date(enrollment.run.start_date)
     run_end_date, _ = format_run_date(enrollment.run.end_date)
     run_duration = (

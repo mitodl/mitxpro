@@ -1,8 +1,5 @@
 """Utility functions/classes for course management commands"""
 
-import logging
-
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun, CourseRunEnrollment, Program, ProgramEnrollment
@@ -14,8 +11,6 @@ from courseware.exceptions import (
 )
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
-
-log = logging.getLogger(__name__)
 
 
 def enrollment_summary(enrollment):
@@ -221,10 +216,7 @@ class EnrollmentChangeCommand(BaseCommand):
             run_enrollment.edx_enrolled = True
             run_enrollment.save_and_log(None)
             mail_api.send_course_run_enrollment_email(run_enrollment)
-            if settings.FEATURES.get("ENROLLMENT_WELCOME_EMAIL", False):
-                mail_api.send_course_run_enrollment_welcome_email(run_enrollment)
-            else:
-                log.info("Feature ENROLLMENT_WELCOME_EMAIL is disabled.")
+            mail_api.send_course_run_enrollment_welcome_email(run_enrollment)
         elif not keep_failed_enrollments:
             if created:
                 run_enrollment.delete()
