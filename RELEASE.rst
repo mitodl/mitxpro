@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.153.1
+---------------
+
+- feat: add products and product versions for emeritus products (#3045)
+- Revert "fix(deps): update dependency ramda to ^0.30.0 (#3013)" (#3044)
+- fix(deps): update dependency ramda to ^0.30.0 (#3013)
+
 Version 0.153.0 (Released July 15, 2024)
 ---------------
 
