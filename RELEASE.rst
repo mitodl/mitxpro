@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.153.0
+Version 0.153.0 (Released July 15, 2024)
 ---------------
 
 - feat: welcome emails for xPRO Learners  (#3017)
