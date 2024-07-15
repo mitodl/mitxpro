@@ -116,7 +116,7 @@ export class ViewProfilePage extends React.Component<Props> {
                         <div className="col">
                           {
                             find(
-                              propEq("code", currentUser.legal_address.country),
+                              propEq(currentUser.legal_address.country,"code" ),
                               countries
                             ).name
                           }
@@ -131,13 +131,13 @@ export class ViewProfilePage extends React.Component<Props> {
                             {
                               find(
                                 propEq(
-                                  "code",
-                                  currentUser.legal_address.state_or_territory
+                                  currentUser.legal_address.state_or_territory,
+                                  "code"
                                 ),
                                 find(
                                   propEq(
-                                    "code",
-                                    currentUser.legal_address.country
+                                    currentUser.legal_address.country,
+                                    "code"
                                   ),
                                   countries
                                 ).states
