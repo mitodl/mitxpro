@@ -27,11 +27,11 @@ export function csrfSafeMethod(method: string): boolean {
   return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
 }
 
-const headers = R.mergeRight({ headers: {} });
+const headers = R.merge({ headers: {} });
 
-const method = R.mergeRight({ method: "GET" });
+const method = R.merge({ method: "GET" });
 
-const credentials = R.mergeRight({ credentials: "same-origin" });
+const credentials = R.merge({ credentials: "same-origin" });
 
 const setWith = R.curry((path, valFunc, obj) => R.set(path, valFunc(), obj));
 
@@ -40,7 +40,7 @@ const csrfToken = R.unless(
   setWith(R.lensPath(["headers", "X-CSRFToken"]), () => getCookie("csrftoken")),
 );
 
-const jsonHeaders = R.mergeRight({
+const jsonHeaders = R.merge({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
