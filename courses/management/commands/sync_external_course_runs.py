@@ -102,6 +102,11 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
+                    f"Course Runs without prices: {stats['course_runs_without_prices'] if stats['course_runs_without_prices'] else None}.\n"
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
                     f"Number of Courses Pages Created {len(stats['course_pages_created'])}."
                 )
             )
