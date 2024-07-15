@@ -82,6 +82,31 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
+                    f"Number of Products Created {len(stats['products_created'])}."
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Course Run courseware_ids: {stats['products_created'] if stats['products_created'] else None}.\n"
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Number of Product Versions Created {len(stats['product_versions_created'])}."
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Course Run courseware_ids: {stats['product_versions_created'] if stats['product_versions_created'] else None}.\n"
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Course Runs without prices: {stats['course_runs_without_prices'] if stats['course_runs_without_prices'] else None}.\n"
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
                     f"Number of Courses Pages Created {len(stats['course_pages_created'])}."
                 )
             )
