@@ -301,7 +301,7 @@ export const LegalAddressFields = ({
         >
           <option value="">-----</option>
           {find(
-            propEq(values.legal_address.country,"code"),
+            propEq("code", values.legal_address.country),
             countries
           ).states.map((state, i) => (
             <option key={i} value={state.code}>
