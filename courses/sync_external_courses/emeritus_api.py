@@ -5,6 +5,7 @@ import time
 from datetime import timedelta
 from enum import Enum
 
+from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from wagtail.models import Page
 
@@ -17,6 +18,7 @@ from cms.models import (
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.emeritus_api_client import EmeritusAPIClient
+from ecommerce.models import Product, ProductVersion
 from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 
 log = logging.getLogger(__name__)
@@ -69,6 +71,7 @@ class EmeritusCourse:
 
         self.course_run_code = emeritus_course_json.get("course_run_code")
         self.course_run_tag = generate_emeritus_course_run_tag(self.course_run_code)
+        self.price = float(emeritus_course_json.get("list_price"))
 
         self.start_date = strip_datetime(
             emeritus_course_json.get("start_date"), EmeritusKeyMap.DATE_FORMAT.value
@@ -165,7 +168,7 @@ def fetch_emeritus_courses():
         log.error("Something unexpected happened!")
 
 
-def update_emeritus_course_runs(emeritus_courses):  # noqa: C901
+def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
     """
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
@@ -184,6 +187,8 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901
         "course_pages_updated": set(),
         "course_runs_skipped": set(),
         "course_runs_expired": set(),
+        "products_created": set(),
+        "product_versions_created": set(),
     }
 
     for emeritus_course_json in emeritus_courses:
@@ -250,6 +255,25 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901
                 stats["course_runs_updated"].add(course_run.external_course_run_id)
 
             log.info(
+                f"Creating or Updating Product and Product Version, course run courseware_id: {course_run.external_course_run_id}, Price: {emeritus_course.price}"  # noqa: G004
+            )
+
+            product_created, product_version_created = (
+                create_or_update_product_and_product_version(
+                    emeritus_course, course_run
+                )
+            )
+            if product_created:
+                stats["products_created"].add(course_run.external_course_run_id)
+                log.info(f"Created Product for course run: {course_run.courseware_id}")  # noqa: G004
+
+            if product_version_created:
+                stats["product_versions_created"].add(course_run.external_course_run_id)
+                log.info(
+                    f"Created Product Version for course run: {course_run.courseware_id}, Price: {emeritus_course.price}"  # noqa: G004
+                )
+
+            log.info(
                 f"Creating or Updating course page, title: {emeritus_course.course_title}, course_code: {emeritus_course.course_run_code}"  # noqa: G004
             )
             course_page, course_page_created = create_or_update_emeritus_course_page(
@@ -291,6 +315,32 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901
         stats["course_pages_created"]
     )
     return stats
+
+
+def create_or_update_product_and_product_version(emeritus_course, course_run):
+    """
+    Creates or Updates Product and Product Version for the course run.
+
+    Args:
+        emeritus_course(EmeritusCourse): EmeritusCourse object
+        course_run(CourseRun): CourseRun object
+
+    Returns:
+        tuple: (product is created, product version is created)
+    """
+    current_price = course_run.current_price
+    if not current_price or current_price != emeritus_course.price:
+        product, product_created = Product.objects.get_or_create(
+            content_type=ContentType.objects.get_for_model(CourseRun),
+            object_id=course_run.id,
+        )
+        ProductVersion.objects.create(
+            product=product,
+            price=emeritus_course.price,
+            description=course_run.courseware_id,
+        )
+        return product_created, True
+    return False, False
 
 
 def generate_emeritus_course_run_tag(course_run_code):
@@ -388,7 +438,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
             live=True,
         )
         log.info(
-            f"Created Course Run, title: {emeritus_course.course_title}, external_course_run_id: {emeritus_course.course_run_code}"  # noqa: G004
+            f"Created Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
         )
         return course_run, True
     elif (
@@ -409,7 +459,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         course_run.end_date = emeritus_course.end_date
         course_run.save()
         log.info(
-            f"Updated Course Run, title: {emeritus_course.course_title}, external_course_run_id: {emeritus_course.course_run_code}"  # noqa: G004
+            f"Updated Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
         )
     return course_run, False
 
