@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.153.1
+Version 0.153.1 (Released July 15, 2024)
 ---------------
 
 - feat: add products and product versions for emeritus products (#3045)
