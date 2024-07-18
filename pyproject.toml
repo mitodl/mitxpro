@@ -199,3 +199,4 @@ fixture-parentheses = false
 "*_test.py" = ["ARG001", "E501", "S101", "PLR2004"]
 "test_*.py" = ["ARG001", "E501", "S101", "PLR2004"]
 "**/migrations/**" = ["ARG001", "D101", "D100"]
+"repl.py" = ["S603"]
