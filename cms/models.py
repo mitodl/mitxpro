@@ -1312,7 +1312,6 @@ class CourseProductPage(ProductPage):
     )
     topics = ParentalManyToManyField(
         "courses.CourseTopic",
-        null=True,
         blank=True,
         help_text="The topics for this course page.",
     )
