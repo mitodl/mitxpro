@@ -2150,12 +2150,15 @@ class CertificatePage(CourseProgramChildPage):
             [
                 (
                     "signatory",
-                    PageChooserBlock(required=True, target_model=["cms.SignatoryPage"]),
+                    PageChooserBlock(
+                        required=False, target_model=["cms.SignatoryPage"]
+                    ),
                 )
             ],
-            min_num=1,
+            min_num=0,
             max_num=5,
         ),
+        blank=True,
         help_text="You can choose upto 5 signatories.",
         use_json_field=True,
     )

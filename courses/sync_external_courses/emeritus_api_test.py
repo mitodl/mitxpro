@@ -11,10 +11,12 @@ from pathlib import Path
 import pytest
 
 from cms.factories import (
+    CertificatePageFactory,
     CourseIndexPageFactory,
     ExternalCoursePageFactory,
     HomePageFactory,
 )
+from cms.models import CertificatePage
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.emeritus_api import (
@@ -309,12 +311,15 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
                 title="Home Page", subhead="<p>subhead</p>"
             )
             CourseIndexPageFactory.create(parent=home_page, title="Courses")
-            ExternalCoursePageFactory.create(
+            course_page = ExternalCoursePageFactory.create(
                 course=course,
                 title=run["program_name"],
                 external_marketing_url="",
                 duration="",
                 description="",
+            )
+            CertificatePageFactory.create(
+                parent=course_page, CEUs="1.0", partner_logo=None
             )
 
     update_emeritus_course_runs(emeritus_course_runs)
@@ -340,6 +345,12 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
             assert course_page.who_should_enroll is not None
         if emeritus_course_run["learning_outcomes"]:
             assert course_page.outcomes is not None
+        if emeritus_course_run.get("ceu", ""):
+            certificate_page = course_page.get_child_page_of_type_including_draft(
+                CertificatePage
+            )
+            assert certificate_page
+            assert certificate_page.CEUs == emeritus_course_run["ceu"]
 
 
 def test_fetch_emeritus_courses_success(settings, mocker):

@@ -18,6 +18,21 @@ class CertificatePageForm(WagtailAdminPageForm):
                 "readable_id"
             ].parent_readable_id = parent_page.specific.course.readable_id
 
+    def clean(self):
+        """
+        Validates that certificate page signatories are added for internal courseware.
+        """
+        from cms.models import CoursePage, ProgramPage
+
+        cleaned_data = super().clean()
+        parent_page = self.parent_page.specific
+        if (isinstance(parent_page, (CoursePage, ProgramPage))) and not cleaned_data[
+            "signatories"
+        ]:
+            self.add_error("signatories", "Signatories is a required field.")
+
+        return cleaned_data
+
 
 class CoursewareForm(WagtailAdminPageForm):
     """

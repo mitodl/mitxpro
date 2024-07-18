@@ -1968,3 +1968,121 @@ def test_get_child_page_of_type_including_draft():
         == learning_outcomes_page
     )
     assert not LearningOutcomesPage.can_create_at(external_course_page)
+
+
+@pytest.mark.parametrize("page_factory", [CoursePageFactory, ProgramPageFactory])
+def test_certificatepage_without_signatories_for_internal_courseware(
+    superuser_client, page_factory
+):
+    """
+    Tests that an error is raised when signatories are empty for internal courseware certificates.
+    """
+    home = HomePageFactory.create()
+    home.save_revision().publish()
+
+    page = page_factory.create(parent=home, certificate_page=None)
+    page.save_revision().publish()
+
+    certificate_page = CertificatePageFactory.create(
+        parent=page,
+        product_name="product_name",
+        CEUs="2.8",
+        partner_logo=None,
+    )
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": certificate_page.id})
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["overrides-count"] = 0
+    data_to_post["signatories-count"] = 0
+
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 200
+    assert resp.context["form"].errors["signatories"] == [
+        "Signatories is a required field."
+    ]
+
+
+@pytest.mark.parametrize("page_factory", [CoursePageFactory, ProgramPageFactory])
+def test_certificatepage_with_signatories_for_internal_courseware(
+    superuser_client, page_factory
+):
+    """
+    Tests that certificate page is published when signatories are added for internal courseware.
+    """
+    home = HomePageFactory.create()
+    home.save_revision().publish()
+
+    page = page_factory.create(parent=home, certificate_page=None)
+    page.save_revision().publish()
+
+    signatory = SignatoryPageFactory(
+        name="Name",
+        title_1="Title_1",
+        title_2="Title_2",
+        organization="Organization",
+        signature_image__image__title="Image",
+    )
+    certificate_page = CertificatePageFactory.create(
+        parent=page,
+        product_name="product_name",
+        CEUs="2.8",
+        partner_logo=None,
+        signatories__0__signatory__page=signatory,
+    )
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": certificate_page.id})
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["action-publish"] = "action-publish"
+    data_to_post["overrides-count"] = 0
+    data_to_post["signatories-count"] = 1
+    data_to_post["signatories-0-deleted"] = ""
+    data_to_post["signatories-0-order"] = 0
+    data_to_post["signatories-0-type"] = "signatory"
+
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert certificate_page.signatories is not None
+
+
+@pytest.mark.parametrize(
+    "page_factory", [ExternalCoursePageFactory, ExternalProgramPageFactory]
+)
+def test_certificatepage_is_saved_without_signatories_for_external_courseware(
+    superuser_client, page_factory
+):
+    """
+    Tests that certificate page is saved without signatories for external courseware.
+    """
+    home = HomePageFactory.create()
+    home.save_revision().publish()
+
+    page = page_factory.create(parent=home)
+    page.save_revision().publish()
+
+    certificate_page = CertificatePageFactory.create(
+        parent=page,
+        product_name="product_name",
+        CEUs="2.8",
+        partner_logo=None,
+    )
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": certificate_page.id})
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["overrides-count"] = 0
+    data_to_post["action-publish"] = "action-publish"
+    data_to_post["signatories-count"] = 0
+
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302

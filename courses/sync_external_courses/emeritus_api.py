@@ -7,9 +7,11 @@ from enum import Enum
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from wagtail.images.models import Image
 from wagtail.models import Page
 
 from cms.models import (
+    CertificatePage,
     CourseIndexPage,
     ExternalCoursePage,
     LearningOutcomesPage,
@@ -105,6 +107,8 @@ class EmeritusCourse:
         )
         self.format = emeritus_course_json.get("format")
         self.category = emeritus_course_json.get("Category", None)
+        self.image_name = emeritus_course_json.get("image_name", None)
+        self.CEUs = str(emeritus_course_json.get("ceu", ""))
         self.learning_outcomes_list = (
             parse_emeritus_data_str(emeritus_course_json.get("learning_outcomes"))
             if emeritus_course_json.get("learning_outcomes")
@@ -198,6 +202,8 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
         "products_created": set(),
         "product_versions_created": set(),
         "course_runs_without_prices": set(),
+        "certificates_created": set(),
+        "certificates_updated": set(),
     }
 
     for emeritus_course_json in emeritus_courses:
@@ -328,6 +334,21 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                     course_page, emeritus_course.who_should_enroll_list
                 )
 
+            if emeritus_course.CEUs:
+                log.info(
+                    f"Creating or Updating Certificate Page for title: {emeritus_course.course_title}, course_code: {course.readable_id}, CEUs: {emeritus_course.CEUs}"  # noqa: G004
+                )
+                _, is_certificatepage_created, is_certificatepage_updated = (
+                    create_or_update_certificate_page(course_page, emeritus_course)
+                )
+
+                if is_certificatepage_created:
+                    log.info("Certificate Page Created")
+                    stats["certificates_created"].add(course.readable_id)
+                elif is_certificatepage_updated:
+                    stats["certificates_updated"].add(course.readable_id)
+                    log.info("Certificate Page Updated")
+
     # As we get the API data for course runs, we can have duplicate course codes in course created and updated,
     # so, we are removing the courses created from the updated courses list.
     stats["existing_courses"] = stats["existing_courses"].difference(
@@ -389,6 +410,11 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
     )
+    image = (
+        Image.objects.filter(title=emeritus_course.image_name)
+        .order_by("-created_at")
+        .first()
+    )
     created = False
     if not course_page:
         course_page = ExternalCoursePage(
@@ -399,6 +425,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             duration=emeritus_course.duration,
             format=emeritus_course.format,
             description=emeritus_course.description,
+            background_image=image,
         )
         course_index_page.add_child(instance=course_page)
         course_page.save()
@@ -416,6 +443,8 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             latest_revision.duration = emeritus_course.duration
         if not latest_revision.description and emeritus_course.description:
             latest_revision.description = emeritus_course.description
+        if not latest_revision.background_image and image:
+            latest_revision.background_image = image
 
         is_draft = course_page.has_unpublished_changes
         revision = latest_revision.save_revision()
@@ -529,6 +558,46 @@ def create_learning_outcomes_page(course_page, outcomes_list):
     )
     course_page.add_child(instance=learning_outcome_page)
     learning_outcome_page.save()
+
+
+def create_or_update_certificate_page(course_page, emeritus_course):
+    """
+    Creates or Updates certificate page for a course page.
+
+    Args:
+        course_page(ExternalCoursePage): ExternalCoursePage object
+        emeritus_course(EmeritusCourse): EmeritusCourse object
+
+    Returns:
+        tuple: (CertificatePage, Is Page Created, Is Page Updated)
+    """
+    certificate_page = course_page.get_child_page_of_type_including_draft(
+        CertificatePage
+    )
+    if certificate_page and certificate_page.CEUs == emeritus_course.CEUs:
+        return certificate_page, False, False
+
+    if not certificate_page:
+        certificate_page = CertificatePage(
+            product_name=f"Certificate for {emeritus_course.course_title}",
+            CEUs=emeritus_course.CEUs,
+            live=False,
+        )
+        course_page.add_child(instance=certificate_page)
+        course_page.save()
+        return certificate_page, True, False
+    else:
+        latest_revision = certificate_page.get_latest_revision_as_object()
+        is_updated = False
+        if latest_revision.CEUs != emeritus_course.CEUs:
+            latest_revision.CEUs = emeritus_course.CEUs
+            is_updated = True
+
+        revision = latest_revision.save_revision()
+        if certificate_page.live and certificate_page.has_unpublished_changes:
+            revision.publish()
+
+        return certificate_page, False, is_updated
 
 
 def parse_emeritus_data_str(items_str):
