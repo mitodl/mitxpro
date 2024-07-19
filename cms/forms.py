@@ -63,13 +63,14 @@ class CoursewareForm(WagtailAdminPageForm):
         price = self.cleaned_data["price"]
         if page.is_internal_or_external_course_page and course_run_id and price:
             course_run = CourseRun.objects.get(id=course_run_id)
-            product, _ = Product.objects.get_or_create(
-                content_type=ContentType.objects.get_for_model(CourseRun),
-                object_id=course_run.id,
-            )
-            ProductVersion.objects.create(
-                product=product, price=price, description=course_run.text_id
-            )
+            if course_run.current_price != price:
+                product, _ = Product.objects.get_or_create(
+                    content_type=ContentType.objects.get_for_model(CourseRun),
+                    object_id=course_run.id,
+                )
+                ProductVersion.objects.create(
+                    product=product, price=price, description=course_run.text_id
+                )
 
         elif (
             page.is_internal_or_external_program_page
