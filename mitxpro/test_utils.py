@@ -68,7 +68,7 @@ class MockResponse:
     Mock requests.Response
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         content,
         status_code=200,
