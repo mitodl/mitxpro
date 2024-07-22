@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.153.2
+---------------
+
+- fix(deps): update dependency ramda to ^0.30.0 (#3013) (#3047)
+- chore(deps): update dependency ruff to ^0.5.0
+- [pre-commit.ci] pre-commit autoupdate (#3033)
+- fix: process_coupon_assignment_sheet warnings and errors (#3034)
+
 Version 0.153.1 (Released July 15, 2024)
 ---------------
 
