@@ -5,6 +5,7 @@ Sync external course API tests
 import json
 import logging
 import random
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -31,6 +32,39 @@ from courses.sync_external_courses.emeritus_api import (
 )
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import clean_url
+
+
+@pytest.fixture
+def emeritus_course_json():
+    """
+    Emeritus Course JSON with Future dates.
+    """
+    start_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")  # noqa: DTZ005
+    end_date = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")  # noqa: DTZ005
+    return {
+        "program_name": "Internet of Things (IoT): Design and Applications",
+        "course_code": "MO-DBIP",
+        "course_run_code": "MO-DBIP.ELE-25-07#1",
+        "start_date": start_date,
+        "end_date": end_date,
+        "Category": "Technology",
+        "list_price": 2600,
+        "list_currency": "USD",
+        "total_weeks": 7,
+        "product_family": "Certificate",
+        "product_sub_type": "Short Form",
+        "format": "Online",
+        "suggested_duration": 49,
+        "language": "English",
+        "landing_page_url": "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
+        "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
+        "=website&utm_source=MIT-web",
+        "Apply_now_url": "https://test-emeritus-api.io/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
+        "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
+        "description": "Test Description",
+        "learning_outcomes": None,
+        "program_for": None,
+    }
 
 
 @pytest.mark.parametrize(
@@ -77,60 +111,46 @@ def test_generate_external_course_run_courseware_id(
     )
 
 
-@pytest.mark.parametrize("create_course_page", [True, False])
+@pytest.mark.parametrize(
+    ("create_course_page", "is_draft"),
+    [
+        (True, True),
+        (True, False),
+        (False, False),
+    ],
+)
 @pytest.mark.django_db
-def test_create_or_update_emeritus_course_page(create_course_page):
+def test_create_or_update_emeritus_course_page(
+    create_course_page, is_draft, emeritus_course_json
+):
     """
     Test that `create_or_update_emeritus_course_page` creates a new course or updates the existing.
     """
     home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
-    course = CourseFactory.create()
-
-    emeritus_course_run = {
-        "program_name": "Internet of Things (IoT): Design and Applications",
-        "course_code": "MO-DBIP",
-        "course_run_code": "MO-DBIP.ELE-25-07#1",
-        "start_date": "2025-07-30",
-        "end_date": "2025-09-24",
-        "Category": "Technology",
-        "list_price": 2600,
-        "list_currency": "USD",
-        "total_weeks": 7,
-        "product_family": "Certificate",
-        "product_sub_type": "Short Form",
-        "format": "Online",
-        "suggested_duration": 49,
-        "language": "English",
-        "landing_page_url": "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
-        "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
-        "=website&utm_source=MIT-web",
-        "Apply_now_url": "https://test-emeritus-api.io/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
-        "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
-        "description": "Test Description",
-        "learning_outcomes": None,
-        "program_for": None,
-    }
+    course = CourseFactory.create(is_external=True)
 
     if create_course_page:
-        ExternalCoursePageFactory.create(
+        external_course_page = ExternalCoursePageFactory.create(
             course=course,
-            title=emeritus_course_run["program_name"],
+            title=emeritus_course_json["program_name"],
             external_marketing_url="",
             duration="",
             description="",
         )
+        if is_draft:
+            external_course_page.unpublish()
 
     course_page, _ = create_or_update_emeritus_course_page(
-        course_index_page, course, EmeritusCourse(emeritus_course_run)
+        course_index_page, course, EmeritusCourse(emeritus_course_json)
     )
-    assert course_page.title == emeritus_course_run["program_name"]
+    assert course_page.title == emeritus_course_json["program_name"]
     assert course_page.external_marketing_url == clean_url(
-        emeritus_course_run["landing_page_url"], remove_query_params=True
+        emeritus_course_json["landing_page_url"], remove_query_params=True
     )
     assert course_page.course == course
-    assert course_page.duration == f"{emeritus_course_run['total_weeks']} Weeks"
-    assert course_page.description == emeritus_course_run["description"]
+    assert course_page.duration == f"{emeritus_course_json['total_weeks']} Weeks"
+    assert course_page.description == emeritus_course_json["description"]
 
 
 @pytest.mark.django_db
@@ -204,15 +224,13 @@ def test_parse_emeritus_data_str():
 
 @pytest.mark.parametrize("create_existing_course_run", [True, False])
 @pytest.mark.django_db
-def test_create_or_update_emeritus_course_run(create_existing_course_run):
+def test_create_or_update_emeritus_course_run(
+    create_existing_course_run, emeritus_course_json
+):
     """
     Tests that `create_or_update_emeritus_course_run` creates or updates a course run
     """
-    with Path(
-        "courses/sync_external_courses/test_data/batch_test.json"
-    ).open() as test_data_file:
-        emeritus_course = EmeritusCourse(json.load(test_data_file)["rows"][0])
-
+    emeritus_course = EmeritusCourse(emeritus_course_json)
     course = CourseFactory.create()
     if create_existing_course_run:
         CourseRunFactory.create(
