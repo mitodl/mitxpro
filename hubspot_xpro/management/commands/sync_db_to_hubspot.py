@@ -35,7 +35,7 @@ class Command(BaseCommand):
         """
         Sync all users with contacts in hubspot
         """
-        sys.stdout.write("  Syncing users with hubspot contacts...\n")
+        sys.stdout.write("Syncing users with hubspot contacts...\n")
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.CONTACTS.value,
             ContentType.objects.get_for_model(User).model,
@@ -47,14 +47,14 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            f"Syncing of users to hubspot contacts finished, took {total_seconds} seconds\n"
+            f"  Syncing of users to hubspot contacts finished, took {total_seconds} seconds\n"
         )
 
     def sync_products(self):
         """
         Sync all products with products in hubspot
         """
-        sys.stdout.write("  Syncing products with hubspot products...\n")
+        sys.stdout.write("Syncing products with hubspot products...\n")
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.PRODUCTS.value,
             ContentType.objects.get_for_model(Product).model,
@@ -66,7 +66,7 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            "Syncing of products to hubspot finished, took {} seconds\n".format(  # noqa: UP032
+            "  Syncing of products to hubspot finished, took {} seconds\n".format(  # noqa: UP032
                 total_seconds
             )
         )
@@ -75,21 +75,21 @@ class Command(BaseCommand):
         """
         Sync all b2b orders with deals in hubspot
         """
-        sys.stdout.write("  Syncing b2b orders with hubspot deals...\n")
+        sys.stdout.write("Syncing b2b orders with hubspot deals...\n")
         task = batch_upsert_hubspot_b2b_deals.delay(self.create)
         self.stdout.write(f"  Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            f"Syncing of b2b orders/lines to hubspot finished, took {total_seconds} seconds\n"
+            f"  Syncing of b2b orders/lines to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_deals(self):
         """
         Sync all orders with deals in hubspot
         """
-        sys.stdout.write("  Syncing orders with hubspot deals...\n")
+        sys.stdout.write("Syncing orders with hubspot deals...\n")
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.DEALS.value,
             ContentType.objects.get_for_model(Order).model,
@@ -102,14 +102,14 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            f"Syncing of orders/lines to hubspot finished, took {total_seconds} seconds\n"
+            f"  Syncing of orders/lines to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_lines(self):
         """
         Sync all orders with line_items in hubspot
         """
-        sys.stdout.write("  Syncing order lines with hubspot line_items...\n")
+        sys.stdout.write("Syncing order lines with hubspot line_items...\n")
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.LINES.value,
             ContentType.objects.get_for_model(Line).model,
@@ -122,21 +122,21 @@ class Command(BaseCommand):
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            f"Syncing of order lines to hubspot finished, took {total_seconds} seconds\n"
+            f"  Syncing of order lines to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_associations(self):
         """
         Sync all deal associations in hubspot
         """
-        sys.stdout.write("  Syncing deal associations with hubspot...\n")
+        sys.stdout.write("Syncing deal associations with hubspot...\n")
         task = batch_upsert_associations.delay(order_ids=self.object_ids)
         self.stdout.write(f"  Task id is {task.id}")
         start = now_in_utc()
         task.get()
         total_seconds = (now_in_utc() - start).total_seconds()
         self.stdout.write(
-            f"Syncing of deal associations to hubspot finished, took {total_seconds} seconds\n"
+            f"  Syncing of deal associations to hubspot finished, took {total_seconds} seconds\n"
         )
 
     def sync_all(self):
