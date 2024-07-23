@@ -1821,7 +1821,7 @@ def test_certificate_request_with_invalid_uuid(user_client, uuid_string):
     assert course_certificate_resp.status_code == 404
 
 
-def test_get_child_page_of_type_with_draft():
+def test_get_child_page_of_type_including_draft():
     """
     Test that `_get_child_page_of_type` returns a draft page if `including_draft=True`
     and a New child page of type cannot be created.
