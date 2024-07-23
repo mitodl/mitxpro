@@ -33,7 +33,7 @@ def configure_admin_api_default_order(router):
 
 
 @hooks.register("after_publish_page")
-def create_product_and_product_versions(request, page):
+def create_product_and_versions_for_courseware_pages(request, page):
     """
     Creates Product and Product Version for the courseware pages on page publish.
     """
