@@ -144,7 +144,7 @@ class AssignmentStatusMap:
             else:
                 self._unassigned_code_map[bulk_assignment.id] += 1
 
-    def add_potential_event_date(  # noqa: PLR0913
+    def add_potential_event_date(
         self, bulk_assignment_id, code, recipient_email, event_type, event_date
     ):
         """
