@@ -1823,8 +1823,8 @@ def test_certificate_request_with_invalid_uuid(user_client, uuid_string):
 
 def test_get_child_page_of_type_including_draft():
     """
-    Test that `_get_child_page_of_type` returns a draft page if `including_draft=True`
-    and a New child page of type cannot be created.
+    Test that `get_child_page_of_type_including_draft` returns a draft
+    child page and a New child page of type cannot be created.
     """
     external_course_page = ExternalCoursePageFactory.create()
 
