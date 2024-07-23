@@ -1852,8 +1852,8 @@ def test_get_child_page_of_type_with_draft():
 
     assert external_course_page.outcomes is None
     assert (
-        external_course_page._get_child_page_of_type(  # noqa: SLF001
-            LearningOutcomesPage, including_draft=True
+        external_course_page.get_child_page_of_type_including_draft(
+            LearningOutcomesPage
         )
         == learning_outcomes_page
     )
