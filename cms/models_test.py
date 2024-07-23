@@ -8,6 +8,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
 from django.urls import resolve, reverse
+from wagtail import hooks
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
@@ -64,6 +65,7 @@ from cms.models import (
     UserTestimonialsPage,
     WhoShouldEnrollPage,
 )
+from cms.wagtail_hooks import create_product_and_versions_for_courseware_pages
 from courses.factories import (
     CourseFactory,
     CourseRunCertificateFactory,
@@ -1730,6 +1732,9 @@ def test_course_page_price_change_fields_are_visible(superuser_client):
     ].choices
 
 
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
 def test_course_page_price_is_updated(superuser_client):
     """
     Test that the course price can be set in the CoursePage.
@@ -1746,7 +1751,7 @@ def test_course_page_price_is_updated(superuser_client):
     data_to_post = querydict_from_html(
         response.content.decode(), form_id="page-edit-form"
     )
-    data_to_post["action-publish"] = ""
+    data_to_post["action-publish"] = "action-publish"
     data_to_post["content-count"] = 0
     data_to_post["price"] = 1234
     data_to_post["course_run"] = course_run.id
@@ -1770,6 +1775,9 @@ def test_program_page_price_change_field_is_visible(superuser_client):
     assert "price" in resp.context_data["form"].fields
 
 
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
 def test_program_page_price_is_updated(superuser_client):
     """
     Test that the course price can be changed in the ProgramPage.
@@ -1784,7 +1792,7 @@ def test_program_page_price_is_updated(superuser_client):
     data_to_post = querydict_from_html(
         response.content.decode(), form_id="page-edit-form"
     )
-    data_to_post["action-publish"] = ""
+    data_to_post["action-publish"] = "action-publish"
     data_to_post["content-count"] = 0
     data_to_post["price"] = 999
     resp = superuser_client.post(path, data_to_post)
