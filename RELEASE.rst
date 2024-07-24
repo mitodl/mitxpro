@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.154.0
+---------------
+
+- fix(deps): update dependency sass to v1.77.6 (#3015)
+- fix(deps): update dependency sentry-sdk to v2 (#3055)
+- [pre-commit.ci] pre-commit autoupdate (#3053)
+- feat: added task id logs for sync_db_to_hubspot command (#3040)
+
 Version 0.153.2 (Released July 22, 2024)
 ---------------
 
