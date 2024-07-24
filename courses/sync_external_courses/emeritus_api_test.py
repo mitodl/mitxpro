@@ -35,9 +35,9 @@ from mitxpro.utils import clean_url
 
 
 @pytest.fixture
-def emeritus_course_json():
+def emeritus_course_data():
     """
-    Emeritus Course JSON with Future dates.
+    Emeritus Course data with Future dates.
     """
     start_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")  # noqa: DTZ005
     end_date = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")  # noqa: DTZ005
@@ -121,7 +121,7 @@ def test_generate_external_course_run_courseware_id(
 )
 @pytest.mark.django_db
 def test_create_or_update_emeritus_course_page(
-    create_course_page, is_draft, emeritus_course_json
+    create_course_page, is_draft, emeritus_course_data
 ):
     """
     Test that `create_or_update_emeritus_course_page` creates a new course or updates the existing.
@@ -133,7 +133,7 @@ def test_create_or_update_emeritus_course_page(
     if create_course_page:
         external_course_page = ExternalCoursePageFactory.create(
             course=course,
-            title=emeritus_course_json["program_name"],
+            title=emeritus_course_data["program_name"],
             external_marketing_url="",
             duration="",
             description="",
@@ -142,15 +142,15 @@ def test_create_or_update_emeritus_course_page(
             external_course_page.unpublish()
 
     course_page, _ = create_or_update_emeritus_course_page(
-        course_index_page, course, EmeritusCourse(emeritus_course_json)
+        course_index_page, course, EmeritusCourse(emeritus_course_data)
     )
-    assert course_page.title == emeritus_course_json["program_name"]
+    assert course_page.title == emeritus_course_data["program_name"]
     assert course_page.external_marketing_url == clean_url(
-        emeritus_course_json["landing_page_url"], remove_query_params=True
+        emeritus_course_data["landing_page_url"], remove_query_params=True
     )
     assert course_page.course == course
-    assert course_page.duration == f"{emeritus_course_json['total_weeks']} Weeks"
-    assert course_page.description == emeritus_course_json["description"]
+    assert course_page.duration == f"{emeritus_course_data['total_weeks']} Weeks"
+    assert course_page.description == emeritus_course_data["description"]
 
 
 @pytest.mark.django_db
@@ -225,12 +225,12 @@ def test_parse_emeritus_data_str():
 @pytest.mark.parametrize("create_existing_course_run", [True, False])
 @pytest.mark.django_db
 def test_create_or_update_emeritus_course_run(
-    create_existing_course_run, emeritus_course_json
+    create_existing_course_run, emeritus_course_data
 ):
     """
     Tests that `create_or_update_emeritus_course_run` creates or updates a course run
     """
-    emeritus_course = EmeritusCourse(emeritus_course_json)
+    emeritus_course = EmeritusCourse(emeritus_course_data)
     course = CourseFactory.create()
     if create_existing_course_run:
         CourseRunFactory.create(
