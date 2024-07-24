@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.154.0
+Version 0.154.0 (Released July 24, 2024)
 ---------------
 
 - fix(deps): update dependency sass to v1.77.6 (#3015)
