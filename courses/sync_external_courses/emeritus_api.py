@@ -308,15 +308,18 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                     course_page.topics.add(topic)
                     course_page.save()
 
-            if not course_page.outcomes and emeritus_course.learning_outcomes_list:
+            outcomes_page = course_page.get_child_page_of_type_including_draft(
+                LearningOutcomesPage
+            )
+            if not outcomes_page and emeritus_course.learning_outcomes_list:
                 create_learning_outcomes_page(
                     course_page, emeritus_course.learning_outcomes_list
                 )
 
-            if (
-                not course_page.who_should_enroll
-                and emeritus_course.who_should_enroll_list
-            ):
+            who_should_enroll_page = course_page.get_child_page_of_type_including_draft(
+                WhoShouldEnrollPage
+            )
+            if not who_should_enroll_page and emeritus_course.who_should_enroll_list:
                 create_who_should_enroll_in_page(
                     course_page, emeritus_course.who_should_enroll_list
                 )
@@ -400,23 +403,20 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
         )
         created = True
     else:
-        # Only update course page fields with API if they are empty.
-        course_page_attrs_changed = False
-        if not course_page.external_marketing_url and emeritus_course.marketing_url:
-            course_page.external_marketing_url = emeritus_course.marketing_url
-            course_page_attrs_changed = True
-        if not course_page.duration and emeritus_course.duration:
-            course_page.duration = emeritus_course.duration
-            course_page_attrs_changed = True
-        if not course_page.description and emeritus_course.description:
-            course_page.description = emeritus_course.description
-            course_page_attrs_changed = True
+        latest_revision = course_page.get_latest_revision_as_object()
 
-        if course_page_attrs_changed:
-            course_page.save()
-            log.info(
-                f"Updated external course page for course title: {emeritus_course.course_title}"  # noqa: G004
-            )
+        # Only update course page fields with API if they are empty in the latest revision.
+        if not latest_revision.external_marketing_url and emeritus_course.marketing_url:
+            latest_revision.external_marketing_url = emeritus_course.marketing_url
+        if not latest_revision.duration and emeritus_course.duration:
+            latest_revision.duration = emeritus_course.duration
+        if not latest_revision.description and emeritus_course.description:
+            latest_revision.description = emeritus_course.description
+
+        latest_revision.save_revision()
+        log.info(
+            f"Updated external course page for course title: {emeritus_course.course_title}"  # noqa: G004
+        )
 
     return course_page, created
 

@@ -107,7 +107,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Number of Courses Pages Created {len(stats['course_pages_created'])}."
+                    f"Number of Course Pages Created {len(stats['course_pages_created'])}."
                 )
             )
             self.stdout.write(
@@ -117,7 +117,7 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Number of Courses Pages Updated {len(stats['course_pages_updated'])}."
+                    f"Number of Course Pages Updated {len(stats['course_pages_updated'])}."
                 )
             )
             self.stdout.write(

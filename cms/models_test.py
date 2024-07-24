@@ -1819,3 +1819,42 @@ def test_certificate_request_with_invalid_uuid(user_client, uuid_string):
 
     course_certificate_resp = user_client.get(f"/certificate/{uuid_string}/")
     assert course_certificate_resp.status_code == 404
+
+
+def test_get_child_page_of_type_including_draft():
+    """
+    Test that `get_child_page_of_type_including_draft` returns a draft
+    child page and a New child page of type cannot be created.
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+
+    assert external_course_page.outcomes is None
+    assert (
+        external_course_page.get_child_page_of_type_including_draft(
+            LearningOutcomesPage
+        )
+        is None
+    )
+    assert LearningOutcomesPage.can_create_at(external_course_page)
+
+    learning_outcomes_page = LearningOutcomesPageFactory(
+        parent=external_course_page,
+        heading="heading",
+        sub_heading="<p>subheading</p>",
+        outcome_items=json.dumps([{"type": "outcome", "value": "benefit"}]),
+    )
+    learning_outcomes_page.unpublish()
+    assert learning_outcomes_page.get_parent() == external_course_page
+
+    # invalidate cached properties
+    del external_course_page.child_pages
+    del external_course_page.child_pages_including_draft
+
+    assert external_course_page.outcomes is None
+    assert (
+        external_course_page.get_child_page_of_type_including_draft(
+            LearningOutcomesPage
+        )
+        == learning_outcomes_page
+    )
+    assert not LearningOutcomesPage.can_create_at(external_course_page)

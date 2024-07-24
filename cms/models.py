@@ -726,21 +726,35 @@ class WagtailCachedPageMixin:
 
     @cached_property
     def child_pages(self):
-        """Gets child pages for the wagtail page"""
+        """Gets only live/published child pages for a Wagtail page"""
         return self.get_children().select_related("content_type").live()
 
-    def _get_child_page_of_type(self, cls):
+    @cached_property
+    def child_pages_including_draft(self):
+        """Gets all child pages for a Wagtail page including draft pages"""
+        return self.get_children().select_related("content_type")
+
+    def _get_child_page_of_type(self, cls, *, including_draft=False):
         """Gets the first child page of the given type if it exists"""
 
+        child_pages = (
+            self.child_pages
+            if not including_draft
+            else self.child_pages_including_draft
+        )
         child = next(
             (
                 page
-                for page in self.child_pages
+                for page in child_pages
                 if page.content_type.model == cls.__name__.lower()
             ),
             None,
         )
         return child.specific if child else None
+
+    def get_child_page_of_type_including_draft(self, cls):
+        """Gets the first child page of the given type if it exists including draft"""
+        return self._get_child_page_of_type(cls, including_draft=True)
 
 
 class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Page):
