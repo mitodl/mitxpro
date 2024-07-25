@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from wagtail import hooks
 from wagtail.admin.api.views import PagesAdminAPIViewSet
 
+from cms.models import CoursePage, ExternalCoursePage, ExternalProgramPage, ProgramPage
 from courses.models import CourseRun, Program
 from ecommerce.models import Product, ProductVersion
 
@@ -37,9 +38,14 @@ def create_product_and_versions_for_courseware_pages(request, page):
     """
     Creates Product and Product Version for the courseware pages on page publish.
     """
-    if not (
-        page.is_internal_or_external_course_page
-        or page.is_internal_or_external_program_page
+    courseware_classes = [
+        CoursePage,
+        ExternalCoursePage,
+        ExternalProgramPage,
+        ProgramPage,
+    ]
+    if not any(
+        isinstance(page, courseware_cls) for courseware_cls in courseware_classes
     ):
         return
 
