@@ -141,16 +141,22 @@ def test_create_or_update_emeritus_course_page(
         if is_draft:
             external_course_page.unpublish()
 
-    course_page, _ = create_or_update_emeritus_course_page(
+    external_course_page, _ = create_or_update_emeritus_course_page(
         course_index_page, course, EmeritusCourse(emeritus_course_data)
     )
-    assert course_page.title == emeritus_course_data["program_name"]
-    assert course_page.external_marketing_url == clean_url(
+    assert external_course_page.title == emeritus_course_data["program_name"]
+    assert external_course_page.external_marketing_url == clean_url(
         emeritus_course_data["landing_page_url"], remove_query_params=True
     )
-    assert course_page.course == course
-    assert course_page.duration == f"{emeritus_course_data['total_weeks']} Weeks"
-    assert course_page.description == emeritus_course_data["description"]
+    assert external_course_page.course == course
+    assert (
+        external_course_page.duration == f"{emeritus_course_data['total_weeks']} Weeks"
+    )
+    assert external_course_page.description == emeritus_course_data["description"]
+
+    if is_draft:
+        assert external_course_page.has_unpublished_changes
+        assert not external_course_page.live
 
 
 @pytest.mark.django_db
