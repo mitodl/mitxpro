@@ -1800,6 +1800,48 @@ def test_program_page_price_is_updated(superuser_client):
     assert program.current_price == 999
 
 
+@pytest.mark.parametrize(
+    "page_factory",
+    [WebinarPageFactory, TextVideoSectionFactory],
+)
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
+def test_price_update_hook_passes_for_non_courseware_pages(
+    superuser_client, page_factory
+):
+    """
+    Test that `create_product_and_versions_for_courseware_pages` does not raise any error for non-courseware pages.
+    """
+    if page_factory == WebinarPageFactory:
+        page = page_factory.create(banner_image=None)
+    elif page_factory == TextVideoSectionFactory:
+        home_page = HomePageFactory.create()
+        assert not home_page.about_mit_xpro
+
+        del home_page.child_pages
+
+        page = TextVideoSectionFactory.create(
+            parent=home_page,
+            content="<p>content</p>",
+            switch_layout=True,
+            dark_theme=True,
+            action_title="Action Title",
+            video_url="http://test.com/abcd",
+        )
+
+    page.save_revision().publish()
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": page.id})
+    response = superuser_client.get(path)
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["action-publish"] = "action-publish"
+    data_to_post["content-count"] = 0
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+
+
 def test_certificate_request_with_valid_uuid(user_client):
     """Test that certificate request is successful for course and program certificates."""
     course_run_certificate = CourseRunCertificateFactory.create()
