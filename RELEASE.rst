@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.155.0
+---------------
+
+- fix(external course sync): publish revision if course is live and has unpublished changes (#3065)
+- fix: add productversion description for CMS products and raise error if empty (#3041)
+- chore(deps): update yarn to v3.8.3 (#2860)
+- fix(deps): update dependency pillow to v10.4.0
+- fix(deps): update dependency django-storages to v1.14.4
+- fix(deps): update dependency boto3 to v1.34.149
+- fix: draft page issues in API ingestion (#3048)
+- chore: switch migrations to the release phase (#3054)
+
 Version 0.154.0 (Released July 24, 2024)
 ---------------
 
