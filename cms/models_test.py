@@ -72,6 +72,7 @@ from courses.factories import (
     CourseRunFactory,
     ProgramCertificateFactory,
 )
+from ecommerce.factories import ProductFactory, ProductVersionFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -1760,6 +1761,37 @@ def test_course_page_price_is_updated(superuser_client):
     assert course_run.current_price == 1234
 
 
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
+def test_course_page_price_is_not_updated_when_saved_as_draft(superuser_client):
+    """
+    Test that the course price is not updated when CoursePage is saved as draft.
+    """
+    course_run = CourseRunFactory.create(
+        course__page__thumbnail_image=None, course__page__background_image=None
+    )
+    existing_product = ProductFactory.create(content_object=course_run)
+    ProductVersionFactory.create(product=existing_product, price=111)
+
+    path = reverse(
+        "wagtailadmin_pages:edit", kwargs={"page_id": course_run.course.page.id}
+    )
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    # `action-publish` empty in data means that we just want to save it as draft.
+    data_to_post["action-publish"] = ""
+    data_to_post["content-count"] = 0
+    data_to_post["price"] = 1234
+    data_to_post["course_run"] = course_run.id
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert course_run.current_price == 111
+
+
 def test_program_page_price_change_field_is_visible(superuser_client):
     """
     Test that the custom form fields are visible for a ProgramPage.
@@ -1780,7 +1812,7 @@ def test_program_page_price_change_field_is_visible(superuser_client):
 )
 def test_program_page_price_is_updated(superuser_client):
     """
-    Test that the course price can be changed in the ProgramPage.
+    Test that the program price can be changed in the ProgramPage.
     """
     program = ProgramFactory.create(
         page__thumbnail_image=None, page__background_image=None
@@ -1798,6 +1830,34 @@ def test_program_page_price_is_updated(superuser_client):
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
     assert program.current_price == 999
+
+
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
+def test_program_page_price_is_not_updated_when_saved_as_draft(superuser_client):
+    """
+    Test that the program price is not updated when page is saved a draft.
+    """
+    program = ProgramFactory.create(
+        page__thumbnail_image=None, page__background_image=None
+    )
+    existing_product = ProductFactory.create(content_object=program)
+    ProductVersionFactory.create(product=existing_product, price=111)
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": program.page.id})
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    # `action-publish` empty in data means that we just want to save it as draft.
+    data_to_post["action-publish"] = ""
+    data_to_post["content-count"] = 0
+    data_to_post["price"] = 999
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert program.current_price == 111
 
 
 @pytest.mark.parametrize(
