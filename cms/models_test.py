@@ -1766,7 +1766,7 @@ def test_course_page_price_is_updated(superuser_client):
 )
 def test_course_page_price_is_not_updated_when_saved_as_draft(superuser_client):
     """
-    Test that the course price is not updated when CoursePage is saved as draft.
+    Test that a new `ProductVersion` is not created when a CoursePage is saved as draft.
     """
     course_run = CourseRunFactory.create(
         course__page__thumbnail_image=None, course__page__background_image=None
@@ -1837,7 +1837,7 @@ def test_program_page_price_is_updated(superuser_client):
 )
 def test_program_page_price_is_not_updated_when_saved_as_draft(superuser_client):
     """
-    Test that the program price is not updated when page is saved a draft.
+    Test that a new `ProductVersion` is not created when program page is saved a draft.
     """
     program = ProgramFactory.create(
         page__thumbnail_image=None, page__background_image=None
