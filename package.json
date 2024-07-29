@@ -148,5 +148,5 @@
     "merge": "^2.1.1",
     "normalize-url": "^6.0.1"
   },
-  "packageManager": "yarn@3.6.4"
+  "packageManager": "yarn@3.8.3"
 }

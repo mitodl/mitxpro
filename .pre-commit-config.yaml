@@ -16,6 +16,7 @@ repos:
         exclude: ".hbs$"
       - id: check-yaml
       - id: check-added-large-files
+        exclude: "yarn.lock|.yarn/releases/.*"
       - id: check-merge-conflict
       - id: check-toml
       - id: debug-statements
