@@ -6446,13 +6446,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^4.0.3":
-  version: 4.0.7
-  resolution: "eventemitter3@npm:4.0.7"
-  checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
-  languageName: node
-  linkType: hard
-
 "events@npm:^3.0.0":
   version: 3.3.0
   resolution: "events@npm:3.3.0"
@@ -7891,13 +7884,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hls.js@npm:^0.14.0":
-  version: 0.14.17
-  resolution: "hls.js@npm:0.14.17"
-  dependencies:
-    eventemitter3: ^4.0.3
-    url-toolkit: ^2.1.6
-  checksum: 0b9a9650092c92462b452d72a6ce9544359364a35692578b0c36ba2585e0d133de11f081f3dba21866447be60d7834eb182c370df53d3c0849f17b3b111461e3
+"hls.js@npm:^1.0.0":
+  version: 1.5.13
+  resolution: "hls.js@npm:1.5.13"
+  checksum: 534b48b18638fefe7788fd31d92b0b4e3820271b470fbd18c29cd46d51e6381b6f011d732f6196d4cda3148c81d8cb7740e1d1d0f2da0031e808b468198142f3
   languageName: node
   linkType: hard
 
@@ -10179,7 +10169,7 @@ __metadata:
     flow-typed: ^3.2.1
     formik: ^1.5.1
     history: ^4.6.3
-    hls.js: ^0.14.0
+    hls.js: ^1.0.0
     isomorphic-fetch: ^2.2.1
     jquery: ^3.5.1
     jsdom: ^16.2.2
@@ -15059,13 +15049,6 @@ __metadata:
     querystringify: ^2.1.1
     requires-port: ^1.0.0
   checksum: fbdba6b1d83336aca2216bbdc38ba658d9cfb8fc7f665eb8b17852de638ff7d1a162c198a8e4ed66001ddbf6c9888d41e4798912c62b4fd777a31657989f7bdf
-  languageName: node
-  linkType: hard
-
-"url-toolkit@npm:^2.1.6":
-  version: 2.2.3
-  resolution: "url-toolkit@npm:2.2.3"
-  checksum: b6f88faaa0e1ceae7f62ab6d714727245b0e989b40053da6abb2bf3762f59151d192cedaef6302a81de63d27f292bdad6b2f815555f65dd8d8eb894bc04aee24
   languageName: node
   linkType: hard
 
