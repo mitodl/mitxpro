@@ -387,7 +387,11 @@ class SeedDataLoader:
             self.seed_result.add_created(product)
         latest_version = product.latest_version
         if not latest_version or not has_equal_properties(latest_version, product_data):
-            new_version = ProductVersion.objects.create(product=product, **product_data)
+            new_version = ProductVersion.objects.create(
+                product=product,
+                description=product.content_object.text_id,
+                **product_data,
+            )
             self.seed_result.add_created(new_version)
             return new_version
         else:

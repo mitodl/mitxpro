@@ -8,6 +8,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
 from django.urls import resolve, reverse
+from wagtail import hooks
 from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
@@ -64,12 +65,14 @@ from cms.models import (
     UserTestimonialsPage,
     WhoShouldEnrollPage,
 )
+from cms.wagtail_hooks import create_product_and_versions_for_courseware_pages
 from courses.factories import (
     CourseFactory,
     CourseRunCertificateFactory,
     CourseRunFactory,
     ProgramCertificateFactory,
 )
+from ecommerce.factories import ProductFactory, ProductVersionFactory
 
 pytestmark = [pytest.mark.django_db]
 
@@ -1730,6 +1733,9 @@ def test_course_page_price_change_fields_are_visible(superuser_client):
     ].choices
 
 
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
 def test_course_page_price_is_updated(superuser_client):
     """
     Test that the course price can be set in the CoursePage.
@@ -1746,13 +1752,44 @@ def test_course_page_price_is_updated(superuser_client):
     data_to_post = querydict_from_html(
         response.content.decode(), form_id="page-edit-form"
     )
-    data_to_post["action-publish"] = ""
+    data_to_post["action-publish"] = "action-publish"
     data_to_post["content-count"] = 0
     data_to_post["price"] = 1234
     data_to_post["course_run"] = course_run.id
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
     assert course_run.current_price == 1234
+
+
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
+def test_course_page_price_is_not_updated_when_saved_as_draft(superuser_client):
+    """
+    Test that a new `ProductVersion` is not created when a CoursePage is saved as draft.
+    """
+    course_run = CourseRunFactory.create(
+        course__page__thumbnail_image=None, course__page__background_image=None
+    )
+    existing_product = ProductFactory.create(content_object=course_run)
+    ProductVersionFactory.create(product=existing_product, price=111)
+
+    path = reverse(
+        "wagtailadmin_pages:edit", kwargs={"page_id": course_run.course.page.id}
+    )
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    # `action-publish` empty in data means that we just want to save it as draft.
+    data_to_post["action-publish"] = ""
+    data_to_post["content-count"] = 0
+    data_to_post["price"] = 1234
+    data_to_post["course_run"] = course_run.id
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert course_run.current_price == 111
 
 
 def test_program_page_price_change_field_is_visible(superuser_client):
@@ -1770,9 +1807,12 @@ def test_program_page_price_change_field_is_visible(superuser_client):
     assert "price" in resp.context_data["form"].fields
 
 
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
 def test_program_page_price_is_updated(superuser_client):
     """
-    Test that the course price can be changed in the ProgramPage.
+    Test that the program price can be changed in the ProgramPage.
     """
     program = ProgramFactory.create(
         page__thumbnail_image=None, page__background_image=None
@@ -1784,12 +1824,82 @@ def test_program_page_price_is_updated(superuser_client):
     data_to_post = querydict_from_html(
         response.content.decode(), form_id="page-edit-form"
     )
-    data_to_post["action-publish"] = ""
+    data_to_post["action-publish"] = "action-publish"
     data_to_post["content-count"] = 0
     data_to_post["price"] = 999
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
     assert program.current_price == 999
+
+
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
+def test_program_page_price_is_not_updated_when_saved_as_draft(superuser_client):
+    """
+    Test that a new `ProductVersion` is not created when program page is saved a draft.
+    """
+    program = ProgramFactory.create(
+        page__thumbnail_image=None, page__background_image=None
+    )
+    existing_product = ProductFactory.create(content_object=program)
+    ProductVersionFactory.create(product=existing_product, price=111)
+
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": program.page.id})
+    response = superuser_client.get(path)
+
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    # `action-publish` empty in data means that we just want to save it as draft.
+    data_to_post["action-publish"] = ""
+    data_to_post["content-count"] = 0
+    data_to_post["price"] = 999
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
+    assert program.current_price == 111
+
+
+@pytest.mark.parametrize(
+    "page_factory",
+    [WebinarPageFactory, TextVideoSectionFactory],
+)
+@hooks.register_temporarily(
+    "after_publish_page", create_product_and_versions_for_courseware_pages
+)
+def test_price_update_hook_passes_for_non_courseware_pages(
+    superuser_client, page_factory
+):
+    """
+    Test that `create_product_and_versions_for_courseware_pages` does not raise any error for non-courseware pages.
+    """
+    if page_factory == WebinarPageFactory:
+        page = page_factory.create(banner_image=None)
+    elif page_factory == TextVideoSectionFactory:
+        home_page = HomePageFactory.create()
+        assert not home_page.about_mit_xpro
+
+        del home_page.child_pages
+
+        page = TextVideoSectionFactory.create(
+            parent=home_page,
+            content="<p>content</p>",
+            switch_layout=True,
+            dark_theme=True,
+            action_title="Action Title",
+            video_url="http://test.com/abcd",
+        )
+
+    page.save_revision().publish()
+    path = reverse("wagtailadmin_pages:edit", kwargs={"page_id": page.id})
+    response = superuser_client.get(path)
+    data_to_post = querydict_from_html(
+        response.content.decode(), form_id="page-edit-form"
+    )
+    data_to_post["action-publish"] = "action-publish"
+    data_to_post["content-count"] = 0
+    resp = superuser_client.post(path, data_to_post)
+    assert resp.status_code == 302
 
 
 def test_certificate_request_with_valid_uuid(user_client):

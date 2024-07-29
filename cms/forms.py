@@ -3,11 +3,7 @@ Custom forms for the cms
 """
 
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 from wagtail.admin.forms import WagtailAdminPageForm
-
-from courses.models import CourseRun, Program
-from ecommerce.models import Product, ProductVersion
 
 
 class CertificatePageForm(WagtailAdminPageForm):
@@ -52,33 +48,3 @@ class CoursewareForm(WagtailAdminPageForm):
 
             elif instance.is_internal_or_external_program_page and instance.program:
                 self.fields["price"].initial = instance.program.current_price
-
-    def save(self, commit=True):  # noqa: FBT002
-        """
-        Handles pricing update and creates product(if required) and product version for a course run.
-        """
-        page = super().save(commit=False)
-
-        course_run_id = self.cleaned_data["course_run"]
-        price = self.cleaned_data["price"]
-        if page.is_internal_or_external_course_page and course_run_id and price:
-            course_run = CourseRun.objects.get(id=course_run_id)
-            product, _ = Product.objects.get_or_create(
-                content_type=ContentType.objects.get_for_model(CourseRun),
-                object_id=course_run.id,
-            )
-            ProductVersion.objects.create(product=product, price=price)
-
-        elif (
-            page.is_internal_or_external_program_page
-            and price != page.program.current_price
-        ):
-            product, _ = Product.objects.get_or_create(
-                content_type=ContentType.objects.get_for_model(Program),
-                object_id=page.program.id,
-            )
-            ProductVersion.objects.create(product=product, price=price)
-
-        if commit:
-            page.save()
-        return page

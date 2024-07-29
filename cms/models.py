@@ -1198,9 +1198,17 @@ class ProgramProductPage(ProductPage):
     objects = ProgramProductPageManager()
     parent_page_types = ["ProgramIndexPage"]
 
-    content_panels = (
-        [FieldPanel("program")] + ProductPage.content_panels + [FieldPanel("price")]  # noqa: RUF005
-    )
+    content_panels = [
+        FieldPanel("program"),
+        *ProductPage.content_panels,
+        MultiFieldPanel(
+            [
+                FieldPanel("price"),
+            ],
+            heading="Set Price",
+            help_text="Price is not changed when a page is saved as draft.",
+        ),
+    ]
     base_form_class = CoursewareForm
 
     program = models.OneToOneField(
@@ -1332,22 +1340,19 @@ class CourseProductPage(ProductPage):
 
     parent_page_types = ["CourseIndexPage"]
 
-    content_panels = (
-        [  # noqa: RUF005
-            FieldPanel("course"),
-            FieldPanel("topics"),
-        ]
-        + ProductPage.content_panels
-        + [
-            MultiFieldPanel(
-                [
-                    FieldPanel("course_run", widget=forms.Select),
-                    FieldPanel("price"),
-                ],
-                heading="Set Price",
-            ),
-        ]
-    )
+    content_panels = [
+        FieldPanel("course"),
+        FieldPanel("topics"),
+        *ProductPage.content_panels,
+        MultiFieldPanel(
+            [
+                FieldPanel("course_run", widget=forms.Select),
+                FieldPanel("price"),
+            ],
+            heading="Set Price",
+            help_text="Price is not changed when a page is saved as draft.",
+        ),
+    ]
     base_form_class = CoursewareForm
 
     @cached_property

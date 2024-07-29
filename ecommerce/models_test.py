@@ -261,6 +261,17 @@ def test_product_version_save_text_id_badproduct(mocker):
     )
 
 
+def test_product_version_save_empty_description(mocker):
+    """ProductVersion should raise ValidationError if ProductVersion.description is empty"""
+    product_version = ProductVersionFactory.create(
+        product=ProductFactory.create(content_object=LineFactory())
+    )
+    product_version.description = ""
+    with pytest.raises(ValidationError) as exc:
+        product_version.save()
+    assert exc.value.message == "Description is a required field."
+
+
 @pytest.mark.parametrize(
     "factory",
     [ProductVersionFactory, CouponVersionFactory, CouponPaymentVersionFactory],
