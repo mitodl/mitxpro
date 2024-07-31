@@ -532,7 +532,9 @@ class CatalogPage(Page):
             .order_by("id")
             .select_related("course")
         )
-        external_course_qset = ExternalCoursePage.objects.live().order_by("title")
+        external_course_qset = (
+            ExternalCoursePage.objects.live().select_related("course").order_by("title")
+        )
 
         if topic_filter != ALL_TOPICS:
             program_page_qset = program_page_qset.related_pages(topic_filter)
@@ -557,9 +559,11 @@ class CatalogPage(Page):
             "thumbnail_image",
         )
 
-        programs = [page.program for page in program_page_qset]
+        programs = [
+            page.program for page in [*program_page_qset, *external_program_qset]
+        ]
         courses = [
-            *[page.course for page in course_page_qset],
+            *[page.course for page in [*course_page_qset, *external_course_qset]],
             *[course for program in programs for course in program.courses.all()],
         ]
 
