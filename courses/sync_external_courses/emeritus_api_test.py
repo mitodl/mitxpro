@@ -23,6 +23,7 @@ from courses.sync_external_courses.emeritus_api import (
     EmeritusCourse,
     EmeritusKeyMap,
     create_learning_outcomes_page,
+    create_or_update_certificate_page,
     create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
     create_who_should_enroll_in_page,
@@ -58,6 +59,8 @@ def emeritus_course_data():
         "format": "Online",
         "suggested_duration": 49,
         "language": "English",
+        "image_name": "test_emeritus_image.jpg",
+        "ceu": "2.8",
         "landing_page_url": "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
         "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
         "=website&utm_source=MIT-web",
@@ -159,6 +162,50 @@ def test_create_or_update_emeritus_course_page(
     if is_draft:
         assert external_course_page.has_unpublished_changes
         assert not external_course_page.live
+
+
+@pytest.mark.parametrize(
+    ("existing_cert_page", "publish_certificate"),
+    [
+        (True, False),
+        (True, True),
+        (False, False),
+    ],
+)
+@pytest.mark.django_db
+def test_create_or_update_certificate_page(
+    emeritus_course_data, existing_cert_page, publish_certificate
+):
+    """
+    Tests that `create_or_update_certificate_page` updates the CEUs and does not change the draft or live state.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    course = CourseFactory.create(is_external=True)
+    external_course_page = ExternalCoursePageFactory.create(
+        parent=course_index_page,
+        course=course,
+        title=emeritus_course_data["program_name"],
+        external_marketing_url="",
+        duration="",
+        description="",
+    )
+    if existing_cert_page:
+        certificate_page = CertificatePageFactory.create(
+            parent=external_course_page, CEUs=""
+        )
+        if publish_certificate:
+            certificate_page.save_revision().publish()
+        else:
+            certificate_page.unpublish()
+
+    certificate_page, is_created, is_updated = create_or_update_certificate_page(
+        external_course_page, EmeritusCourse(emeritus_course_data)
+    )
+    assert certificate_page.CEUs == emeritus_course_data["ceu"]
+    assert is_created == (not existing_cert_page)
+    assert is_updated == existing_cert_page
+    assert certificate_page.live == publish_certificate
 
 
 @pytest.mark.django_db
