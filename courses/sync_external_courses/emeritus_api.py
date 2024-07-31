@@ -589,6 +589,7 @@ def create_or_update_certificate_page(course_page, emeritus_course):
     else:
         latest_revision = certificate_page.get_latest_revision_as_object()
         is_updated = False
+
         if latest_revision.CEUs != emeritus_course.CEUs:
             latest_revision.CEUs = emeritus_course.CEUs
             is_updated = True
@@ -596,8 +597,9 @@ def create_or_update_certificate_page(course_page, emeritus_course):
         if not is_updated:
             return certificate_page, False, is_updated
 
+        is_draft = certificate_page.has_unpublished_changes
         revision = latest_revision.save_revision()
-        if certificate_page.live and certificate_page.has_unpublished_changes:
+        if not is_draft:
             revision.publish()
 
         return certificate_page, False, is_updated
