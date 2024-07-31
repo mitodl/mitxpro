@@ -577,9 +577,6 @@ def create_or_update_certificate_page(course_page, emeritus_course):
     certificate_page = course_page.get_child_page_of_type_including_draft(
         CertificatePage
     )
-    if certificate_page and certificate_page.CEUs == emeritus_course.CEUs:
-        return certificate_page, False, False
-
     if not certificate_page:
         certificate_page = CertificatePage(
             product_name=f"Certificate for {emeritus_course.course_title}",
@@ -595,6 +592,9 @@ def create_or_update_certificate_page(course_page, emeritus_course):
         if latest_revision.CEUs != emeritus_course.CEUs:
             latest_revision.CEUs = emeritus_course.CEUs
             is_updated = True
+
+        if not is_updated:
+            return certificate_page, False, is_updated
 
         revision = latest_revision.save_revision()
         if certificate_page.live and certificate_page.has_unpublished_changes:
