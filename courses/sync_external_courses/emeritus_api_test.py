@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
+from wagtail.test.utils.wagtail_factories import ImageFactory
 
 from cms.factories import (
     CertificatePageFactory,
@@ -117,16 +118,16 @@ def test_generate_external_course_run_courseware_id(
 
 
 @pytest.mark.parametrize(
-    ("create_course_page", "is_draft"),
+    ("create_course_page", "is_draft", "create_image"),
     [
-        (True, True),
-        (True, False),
-        (False, False),
+        (True, True, True),
+        (True, False, True),
+        (False, False, False),
     ],
 )
 @pytest.mark.django_db
 def test_create_or_update_emeritus_course_page(
-    create_course_page, is_draft, emeritus_course_data
+    create_course_page, is_draft, create_image, emeritus_course_data
 ):
     """
     Test that `create_or_update_emeritus_course_page` creates a new course or updates the existing.
@@ -135,6 +136,9 @@ def test_create_or_update_emeritus_course_page(
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
     course = CourseFactory.create(is_external=True)
 
+    if create_image:
+        ImageFactory.create(title=emeritus_course_data["image_name"])
+
     if create_course_page:
         external_course_page = ExternalCoursePageFactory.create(
             course=course,
@@ -142,6 +146,8 @@ def test_create_or_update_emeritus_course_page(
             external_marketing_url="",
             duration="",
             description="",
+            background_image=None,
+            thumbnail_image=None,
         )
         if is_draft:
             external_course_page.unpublish()
@@ -162,6 +168,16 @@ def test_create_or_update_emeritus_course_page(
     if is_draft:
         assert external_course_page.has_unpublished_changes
         assert not external_course_page.live
+
+    if create_image:
+        assert (
+            external_course_page.background_image.title
+            == emeritus_course_data["image_name"]
+        )
+        assert (
+            external_course_page.thumbnail_image.title
+            == emeritus_course_data["image_name"]
+        )
 
 
 @pytest.mark.parametrize(

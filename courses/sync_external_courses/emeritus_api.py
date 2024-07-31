@@ -426,6 +426,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             format=emeritus_course.format,
             description=emeritus_course.description,
             background_image=image,
+            thumbnail_image=image,
         )
         course_index_page.add_child(instance=course_page)
         course_page.save()
@@ -445,6 +446,8 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             latest_revision.description = emeritus_course.description
         if not latest_revision.background_image and image:
             latest_revision.background_image = image
+        if not latest_revision.thumbnail_image and image:
+            latest_revision.thumbnail_image = image
 
         is_draft = course_page.has_unpublished_changes
         revision = latest_revision.save_revision()
