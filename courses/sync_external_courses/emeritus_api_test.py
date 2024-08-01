@@ -259,6 +259,7 @@ def test_create_or_update_emeritus_course_run(
             "external_course_run_id": emeritus_course.course_run_code,
             "start_date": emeritus_course.start_date,
             "end_date": emeritus_course.end_date,
+            "enrollment_end": emeritus_course.enrollment_end,
         }
     else:
         expected_data = {
@@ -268,6 +269,7 @@ def test_create_or_update_emeritus_course_run(
             "run_tag": emeritus_course.course_run_tag,
             "start_date": emeritus_course.start_date,
             "end_date": emeritus_course.end_date,
+            "enrollment_end": emeritus_course.enrollment_end,
             "live": True,
         }
     for attr_name, expected_value in expected_data.items():
