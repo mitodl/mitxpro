@@ -549,6 +549,13 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             else []
         )
 
+    @property
+    def current_price(self):
+        """Gets the current price for the first unexpired run"""
+        return (
+            self.first_unexpired_run.current_price if self.first_unexpired_run else None
+        )
+
     def available_runs(self, user):
         """
         Get all enrollable runs for a Course that a user has not already enrolled in.

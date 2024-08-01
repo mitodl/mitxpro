@@ -24,11 +24,6 @@
       <strong>Price:</strong>
       ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
     </li>
-    {% elif courseware_page.is_internal_or_external_course_page and courseware_page.product.first_unexpired_run.current_price %}
-    <li>
-      <strong>Price:</strong>
-      ${{ courseware_page.product.first_unexpired_run.current_price|floatformat:"0"|intcomma }}
-    </li>
     {% endif %}
     {% if object_type == "program" %}
     <li>
