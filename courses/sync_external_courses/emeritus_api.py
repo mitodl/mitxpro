@@ -413,8 +413,9 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
         if not latest_revision.description and emeritus_course.description:
             latest_revision.description = emeritus_course.description
 
+        is_draft = course_page.has_unpublished_changes
         revision = latest_revision.save_revision()
-        if course_page.live and course_page.has_unpublished_changes:
+        if not is_draft:
             revision.publish()
         log.info(
             f"Updated external course page for course title: {emeritus_course.course_title}"  # noqa: G004
