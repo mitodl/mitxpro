@@ -91,6 +91,12 @@
         <span class="title">FORMAT</span>
         <span class="text">{{ page.format }}</span>
       </li>
+      {% if certificate %}
+      <li>
+        <span class="title">CEUs</span>
+        <span class="text">{{ certificate.CEUs }}</span>
+      </li>
+      {% endif %}
       {% if page.product.current_price %}
       <li>
         <span class="title">PRICE</span>

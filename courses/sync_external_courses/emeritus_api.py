@@ -108,7 +108,7 @@ class EmeritusCourse:
         self.format = emeritus_course_json.get("format")
         self.category = emeritus_course_json.get("Category", None)
         self.image_name = emeritus_course_json.get("image_name", None)
-        self.CEUs = str(emeritus_course_json.get("ceu", ""))
+        self.CEUs = str(emeritus_course_json.get("ceu") or "")
         self.learning_outcomes_list = (
             parse_emeritus_data_str(emeritus_course_json.get("learning_outcomes"))
             if emeritus_course_json.get("learning_outcomes")
@@ -584,7 +584,7 @@ def create_or_update_certificate_page(course_page, emeritus_course):
             live=False,
         )
         course_page.add_child(instance=certificate_page)
-        course_page.save()
+        certificate_page.save_revision().publish()
         return certificate_page, True, False
     else:
         latest_revision = certificate_page.get_latest_revision_as_object()
