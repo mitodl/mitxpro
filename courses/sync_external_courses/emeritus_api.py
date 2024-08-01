@@ -86,6 +86,9 @@ class EmeritusCourse:
         self.end_date = (
             end_datetime.replace(hour=23, minute=59) if end_datetime else None
         )
+        # Emeritus does not allow enrollments after start date.
+        # We set the course run enrollment_end to the start date to
+        # hide the course run from the course details page.
         self.enrollment_end = self.start_date
 
         self.marketing_url = clean_url(
