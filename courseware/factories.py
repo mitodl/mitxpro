@@ -28,7 +28,7 @@ class OpenEdxApiAuthFactory(DjangoModelFactory):
     refresh_token = Faker("pystr", max_chars=30)
     access_token = Faker("pystr", max_chars=30)
     access_token_expires_on = Faker(
-        "future_datetime", end_date="+1h", tzinfo=timezone.utc
+        "date_time_between", start_date="+1y", end_date="+2y", tzinfo=timezone.utc
     )
 
     class Meta:
