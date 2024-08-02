@@ -86,6 +86,10 @@ class EmeritusCourse:
         self.end_date = (
             end_datetime.replace(hour=23, minute=59) if end_datetime else None
         )
+        # Emeritus does not allow enrollments after start date.
+        # We set the course run enrollment_end to the start date to
+        # hide the course run from the course details page.
+        self.enrollment_end = self.start_date
 
         self.marketing_url = clean_url(
             emeritus_course_json.get("landing_page_url"), remove_query_params=True
@@ -453,6 +457,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
             run_tag=emeritus_course.course_run_tag,
             start_date=emeritus_course.start_date,
             end_date=emeritus_course.end_date,
+            enrollment_end=emeritus_course.enrollment_end,
             live=True,
         )
         log.info(
@@ -472,9 +477,17 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
             and emeritus_course.end_date
             and course_run.end_date.date() != emeritus_course.end_date.date()
         )
+        or (not course_run.enrollment_end and emeritus_course.enrollment_end)
+        or (
+            course_run.enrollment_end
+            and emeritus_course.enrollment_end
+            and course_run.enrollment_end.date()
+            != emeritus_course.enrollment_end.date()
+        )
     ):
         course_run.start_date = emeritus_course.start_date
         course_run.end_date = emeritus_course.end_date
+        course_run.enrollment_end = emeritus_course.enrollment_end
         course_run.save()
         log.info(
             f"Updated Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
