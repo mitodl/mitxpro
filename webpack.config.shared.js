@@ -4,27 +4,25 @@ const webpack = require("webpack");
 module.exports = {
   config: {
     entry: {
-      root: ["@babel/polyfill", "./static/js/entry/root"],
-      header: ["@babel/polyfill", "./static/js/entry/header"],
+      root: "./static/js/entry/root",
+      header: "./static/js/entry/header",
       style: "./static/js/entry/style",
-      django: ["@babel/polyfill", "./static/js/entry/django"],
+      django: "./static/js/entry/django",
     },
     module: {
       rules: [
         {
           test: /\.(svg|ttf|woff|woff2|eot|gif)$/,
-          use: "url-loader",
+          use: "asset/inline",
         },
         {
           test: require.resolve("jquery"),
           use: [
             {
               loader: "expose-loader",
-              options: "jQuery",
-            },
-            {
-              loader: "expose-loader",
-              options: "$",
+              options: {
+                exposes: ["jQuery", "$"],
+              },
             },
           ],
         },
@@ -33,7 +31,9 @@ module.exports = {
           use: [
             {
               loader: "expose-loader",
-              options: "Hls",
+              options: {
+                exposes: "Hls",
+              },
             },
           ],
         },
@@ -55,7 +55,7 @@ module.exports = {
       path.resolve(__dirname, "node_modules/strict-uri-encode"),
     ],
     loader: "babel-loader",
-    query: {
+    options: {
       presets: [
         ["@babel/preset-env", { modules: false }],
         "@babel/preset-react",

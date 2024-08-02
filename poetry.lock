@@ -1123,13 +1123,13 @@ user-agents = "*"
 
 [[package]]
 name = "django-webpack-loader"
-version = "0.7.0"
+version = "1.8.1"
 description = "Transparently use webpack with django"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-webpack-loader-0.7.0.tar.gz", hash = "sha256:7a3c88201aa54481f9399465615cbe7b9aece8081496a6d0287b7cb8e232f447"},
-    {file = "django_webpack_loader-0.7.0-py2.py3-none-any.whl", hash = "sha256:d28a276ed3d89e97a313b74967e373693f8b86afe629f4c91eea91c5b4f2ec20"},
+    {file = "django-webpack-loader-1.8.1.tar.gz", hash = "sha256:073beda18e2929fa5cd83bafbcaaf975e5945e84a17bfa81927cb6c9f5a17b94"},
+    {file = "django_webpack_loader-1.8.1-py2.py3-none-any.whl", hash = "sha256:2d50a902256cf94bdd87eac3e7687989c9aa757a63af21db68773115216cedee"},
 ]
 
 [[package]]
@@ -4118,4 +4118,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.15"
-content-hash = "65bf638d389973848905ddbf470e7ce4c59cfca117697937e07e2c1923b24602"
+content-hash = "f4f6b264b0c4abeeff93fbd7dcfef0c3e9b62cfd1a09dff15aa67f263a4287d4"
