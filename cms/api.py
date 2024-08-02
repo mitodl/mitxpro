@@ -32,16 +32,15 @@ def filter_and_sort_catalog_pages(
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
             ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the next course/program run date and title
     """
+    all_program_pages = program_pages + external_program_pages
+    all_course_pages = course_pages + external_course_pages
+
     valid_program_pages = [
-        page for page in program_pages if page.product.is_catalog_visible
+        page for page in all_program_pages if page.product.is_catalog_visible
     ]
     valid_course_pages = [
-        page for page in course_pages if page.product.is_catalog_visible
+        page for page in all_course_pages if page.product.is_catalog_visible
     ]
-
-    valid_external_course_pages = list(external_course_pages)
-
-    valid_external_program_pages = list(external_program_pages)
 
     page_run_dates = {
         page: page.product.next_run_date
@@ -49,16 +48,11 @@ def filter_and_sort_catalog_pages(
         for page in itertools.chain(
             valid_program_pages,
             valid_course_pages,
-            valid_external_course_pages,
-            valid_external_program_pages,
         )
     }
     return (
         sorted(
-            valid_program_pages
-            + valid_external_program_pages
-            + valid_course_pages
-            + valid_external_course_pages,
+            valid_program_pages + valid_course_pages,
             # ProgramPages with the same next run date as a CoursePage should be sorted first
             key=lambda page: (
                 page_run_dates[page],
@@ -67,11 +61,11 @@ def filter_and_sort_catalog_pages(
             ),
         ),
         sorted(
-            valid_program_pages + valid_external_program_pages,
+            valid_program_pages,
             key=lambda page: (page_run_dates[page], page.title),
         ),
         sorted(
-            valid_course_pages + valid_external_course_pages,
+            valid_course_pages,
             key=lambda page: (page_run_dates[page], page.title),
         ),
     )
