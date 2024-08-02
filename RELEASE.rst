@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.155.0
+Version 0.155.0 (Released August 02, 2024)
 ---------------
 
 - feat: set enrollment end for emeritus courses (#3073)
