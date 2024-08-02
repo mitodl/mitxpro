@@ -646,7 +646,7 @@ def test_product_page_context_has_certificate(
         page = page_factory.create()
 
     page.save_revision().publish()
-    certificate_page = CertificatePageFactory.create(parent=page)
+    certificate_page = CertificatePageFactory.create(parent=page, CEUs="12.0")
     revision = certificate_page.save_revision()
     if published_certificate:
         revision.publish()
@@ -659,5 +659,6 @@ def test_product_page_context_has_certificate(
 
     if published_certificate:
         assert resp.context["certificate"] is not None
+        assert resp.context["certificate"].CEUs == "12.0"
     else:
         assert resp.context["certificate"] is None

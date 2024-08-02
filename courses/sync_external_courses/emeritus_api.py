@@ -411,9 +411,13 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
     )
     image = (
-        Image.objects.filter(title=emeritus_course.image_name)
-        .order_by("-created_at")
-        .first()
+        (
+            Image.objects.filter(title=emeritus_course.image_name)
+            .order_by("-created_at")
+            .first()
+        )
+        if emeritus_course.image_name
+        else None
     )
     created = False
     if not course_page:
