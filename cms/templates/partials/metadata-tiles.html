@@ -101,7 +101,7 @@
       <li>
         <span class="title">PRICE</span>
         <span class="text"
-          >${{ page.product.current_price|floatformat:"2"|intcomma }}</span
+          >${{ page.product.current_price|floatformat:"0"|intcomma }}</span
         >
       </li>
       {% elif page.is_internal_or_external_course_page and page.product.first_unexpired_run.current_price %}
