@@ -76,11 +76,11 @@ def emeritus_course_data():
 
 
 @pytest.fixture
-def emeritus_expired_course_json(emeritus_course_json):
+def emeritus_expired_course_data(emeritus_course_data):
     """
     Emeritus course JSON with expired dates.
     """
-    expired_emeritus_course_json = emeritus_course_json.copy()
+    expired_emeritus_course_json = emeritus_course_data.copy()
     expired_emeritus_course_json["start_date"] = (
         datetime.now() - timedelta(days=2)  # noqa: DTZ005
     ).strftime("%Y-%m-%d")
@@ -91,21 +91,21 @@ def emeritus_expired_course_json(emeritus_course_json):
 
 
 @pytest.fixture
-def emeritus_course_json_with_bad_data(emeritus_course_json):
+def emeritus_course_with_bad_data(emeritus_course_data):
     """
     Emeritus course JSON with bad data, i.e. program_name, course_code, course_run_code is null.
     """
-    bad_data_emeritus_course_json = emeritus_course_json.copy()
+    bad_data_emeritus_course_json = emeritus_course_data.copy()
     bad_data_emeritus_course_json["program_name"] = None
     return bad_data_emeritus_course_json
 
 
 @pytest.fixture
-def emeritus_course_json_with_null_price(emeritus_course_json):
+def emeritus_course_data_with_null_price(emeritus_course_data):
     """
     Emeritus course JSON with null price.
     """
-    emeritus_course_json = emeritus_course_json.copy()
+    emeritus_course_json = emeritus_course_data.copy()
     emeritus_course_json["list_price"] = None
     return emeritus_course_json
 
@@ -189,8 +189,10 @@ def test_create_or_update_emeritus_course_page(
         if is_draft:
             external_course_page.unpublish()
 
-    external_course_page, course_page_created = create_or_update_emeritus_course_page(
-        course_index_page, course, EmeritusCourse(emeritus_course_data)
+    external_course_page, course_page_created, course_page_updated = (
+        create_or_update_emeritus_course_page(
+            course_index_page, course, EmeritusCourse(emeritus_course_data)
+        )
     )
     assert external_course_page.title == emeritus_course_data["program_name"]
     assert external_course_page.external_marketing_url == clean_url(
@@ -202,6 +204,7 @@ def test_create_or_update_emeritus_course_page(
     )
     assert external_course_page.description == emeritus_course_data["description"]
     assert course_page_created == (not create_course_page)
+    assert course_page_updated == create_course_page
 
     if is_draft:
         assert external_course_page.has_unpublished_changes
@@ -361,7 +364,9 @@ def test_create_or_update_emeritus_course_run(
             run.end_date = None
             run.save()
 
-    run, run_created = create_or_update_emeritus_course_run(course, emeritus_course)
+    run, run_created, run_updated = create_or_update_emeritus_course_run(
+        course, emeritus_course
+    )
     course_runs = course.courseruns.all()
     course_run_courseware_id = generate_external_course_run_courseware_id(
         emeritus_course.course_run_tag, course.readable_id
@@ -370,6 +375,7 @@ def test_create_or_update_emeritus_course_run(
     assert len(course_runs) == 1
     assert run.course == course
     assert run_created == (not create_existing_course_run)
+    assert run_updated == create_existing_course_run
     if create_existing_course_run:
         expected_data = {
             "external_course_run_id": emeritus_course.course_run_code,
@@ -396,9 +402,9 @@ def test_create_or_update_emeritus_course_run(
 @pytest.mark.django_db
 def test_update_emeritus_course_runs(  # noqa: PLR0915
     create_existing_data,
-    emeritus_expired_course_json,
-    emeritus_course_json_with_bad_data,
-    emeritus_course_json_with_null_price,
+    emeritus_expired_course_data,
+    emeritus_course_with_bad_data,
+    emeritus_course_data_with_null_price,
 ):
     """
     Tests that `update_emeritus_course_runs` creates new courses and updates existing.
@@ -443,9 +449,9 @@ def test_update_emeritus_course_runs(  # noqa: PLR0915
             product = ProductFactory.create(content_object=course_run)
             ProductVersionFactory.create(product=product, price=run["list_price"])
 
-    emeritus_course_runs.append(emeritus_expired_course_json)
-    emeritus_course_runs.append(emeritus_course_json_with_bad_data)
-    emeritus_course_runs.append(emeritus_course_json_with_null_price)
+    emeritus_course_runs.append(emeritus_expired_course_data)
+    emeritus_course_runs.append(emeritus_course_with_bad_data)
+    emeritus_course_runs.append(emeritus_course_data_with_null_price)
     stats = update_emeritus_course_runs(emeritus_course_runs)
     courses = Course.objects.filter(platform=platform)
 
@@ -619,7 +625,7 @@ def test_fetch_emeritus_courses_error(settings, mocker, caplog):
 )
 @pytest.mark.django_db
 def test_create_or_update_product_and_product_version(  # noqa: PLR0913
-    emeritus_course_json,
+    emeritus_course_data,
     create_existing_product,
     existing_price,
     new_price,
@@ -630,8 +636,8 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     """
     Tests that `create_or_update_product_and_product_version` creates or updates products and versions as required.
     """
-    emeritus_course_json["list_price"] = new_price
-    emeritus_course = EmeritusCourse(emeritus_course_json)
+    emeritus_course_data["list_price"] = new_price
+    emeritus_course = EmeritusCourse(emeritus_course_data)
     platform = PlatformFactory.create(name=EmeritusKeyMap.PLATFORM_NAME)
     course = CourseFactory.create(
         external_course_id=emeritus_course.course_code,
@@ -641,7 +647,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
         readable_id=emeritus_course.course_readable_id,
         live=True,
     )
-    course_run, _ = create_or_update_emeritus_course_run(course, emeritus_course)
+    course_run, _, _ = create_or_update_emeritus_course_run(course, emeritus_course)
 
     if create_existing_product:
         product = ProductFactory.create(content_object=course_run)
