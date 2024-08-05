@@ -45,34 +45,15 @@ def emeritus_course_data():
     """
     Emeritus Course data with Future dates.
     """
-    start_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")  # noqa: DTZ005
-    end_date = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")  # noqa: DTZ005
-    return {
-        "program_name": "Internet of Things (IoT): Design and Applications",
-        "course_code": "MO-DBIP",
-        "course_run_code": "MO-DBIP.ELE-25-07#1",
-        "start_date": start_date,
-        "end_date": end_date,
-        "Category": "Technology",
-        "list_price": 2600,
-        "list_currency": "USD",
-        "total_weeks": 7,
-        "product_family": "Certificate",
-        "product_sub_type": "Short Form",
-        "format": "Online",
-        "suggested_duration": 49,
-        "language": "English",
-        "image_name": "test_emeritus_image.jpg",
-        "ceu": "2.8",
-        "landing_page_url": "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
-        "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
-        "=website&utm_source=MIT-web",
-        "Apply_now_url": "https://test-emeritus-api.io/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
-        "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
-        "description": "Test Description",
-        "learning_outcomes": None,
-        "program_for": None,
-    }
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        emeritus_course_data = json.load(test_data_file)["rows"][0]
+
+    emeritus_course_data["start_date"] = "2099-09-30"
+    emeritus_course_data["end_date"] = "2099-11-30"
+    emeritus_course_data["course_run_code"] = "MO-DBIP.ELE-99-09#1"
+    return emeritus_course_data
 
 
 @pytest.fixture
@@ -155,16 +136,25 @@ def test_generate_external_course_run_courseware_id(
 
 
 @pytest.mark.parametrize(
-    ("create_course_page", "is_draft", "create_image"),
+    (
+        "create_course_page",
+        "is_draft",
+        "create_image",
+        "test_image_name_without_extension",
+    ),
     [
-        (True, True, True),
-        (True, False, True),
-        (False, False, False),
+        (True, True, True, True),
+        (True, False, True, False),
+        (False, False, False, False),
     ],
 )
 @pytest.mark.django_db
 def test_create_or_update_emeritus_course_page(
-    create_course_page, is_draft, create_image, emeritus_course_data
+    create_course_page,
+    is_draft,
+    create_image,
+    test_image_name_without_extension,
+    emeritus_course_data,
 ):
     """
     Test that `create_or_update_emeritus_course_page` creates a new course or updates the existing.
@@ -172,6 +162,11 @@ def test_create_or_update_emeritus_course_page(
     home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
     course = CourseFactory.create(is_external=True)
+
+    if test_image_name_without_extension:
+        emeritus_course_data["image_name"] = emeritus_course_data["image_name"].split(
+            "."
+        )[0]
 
     if create_image:
         ImageFactory.create(title=emeritus_course_data["image_name"])
