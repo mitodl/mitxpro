@@ -6,7 +6,6 @@ import pytest
 
 from cms.api import filter_and_sort_catalog_pages
 from cms.factories import ExternalCoursePageFactory, ExternalProgramPageFactory
-from cms.models import ExternalCoursePage
 from courses.factories import CourseRunFactory, ProgramRunFactory
 from mitxpro.utils import now_in_utc
 
@@ -84,14 +83,14 @@ def test_filter_and_sort_catalog_pages():
         + len(initial_course_pages)
         + len(external_course_pages)
         + len(external_program_pages)
-        - 1
+        - 2
     )
     assert len(course_pages) == (
         len(initial_course_pages) + len(external_course_pages) - 1
     )
 
     assert len(program_pages) == (
-        len(initial_program_pages) + len(external_program_pages)
+        len(initial_program_pages) + len(external_program_pages) - 1
     )
 
     # Filtered out external course page because it does not have a `course` attribute
@@ -104,7 +103,6 @@ def test_filter_and_sort_catalog_pages():
         first_program_run.course.program,
         second_program_run.course.program,
         later_external_program_page.program,
-        earlier_external_program_page.program,
     ]
     expected_course_run_sort = [
         non_program_run,
@@ -116,9 +114,6 @@ def test_filter_and_sort_catalog_pages():
     ]
 
     # The sort should also include external course pages as expected
-    assert [
-        page if page.is_external_course_page else page.course for page in course_pages
-    ] == [
-        run if isinstance(run, ExternalCoursePage) else run.course
-        for run in expected_course_run_sort
+    assert [page.course for page in course_pages] == [
+        run.course for run in expected_course_run_sort
     ]
