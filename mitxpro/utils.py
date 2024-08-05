@@ -608,6 +608,13 @@ def get_js_settings(request: HttpRequest):
 def clean_url(url, *, remove_query_params=False):
     """
     Cleans a URL by removing the extra spaces and Optionally removes the query params to return the base URL.
+
+    Args:
+        url(str): A string containing a URL.
+        remove_query_params(bool): A boolean to conditionally remove query params.
+
+    Returns:
+        str: Cleaned URL
     """
     if not url:
         return ""
@@ -620,6 +627,14 @@ def clean_url(url, *, remove_query_params=False):
 def strip_datetime(date_str, date_format, date_timezone=None):
     """
     Strip datetime from string using the format and set timezone.
+
+    Args:
+        date_str(str): A string of date.
+        date_format(str): Format of the date.
+        date_timezone(timezone): Timezone of the date.
+
+    Returns:
+        datetime.datetime: A datetime object.
     """
     if not date_str or not date_format:
         return None

@@ -40,131 +40,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Starting course sync for {vendor_name}.")
             emeritus_course_runs = fetch_emeritus_courses()
             stats = update_emeritus_course_runs(emeritus_course_runs)
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Courses Created {len(stats['courses_created'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Codes: {stats['courses_created'] if stats['courses_created'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of existing Courses {len(stats['existing_courses'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Codes: {stats['existing_courses'] if stats['existing_courses'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Course Runs Created {len(stats['course_runs_created'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Run Codes: {stats['course_runs_created'] if stats['course_runs_created'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Course Runs Updated {len(stats['course_runs_updated'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Run Codes: {stats['course_runs_updated'] if stats['course_runs_updated'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Products Created {len(stats['products_created'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Course Run courseware_ids: {stats['products_created'] if stats['products_created'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Product Versions Created {len(stats['product_versions_created'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Course Run courseware_ids: {stats['product_versions_created'] if stats['product_versions_created'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Course Runs without prices: {stats['course_runs_without_prices'] if stats['course_runs_without_prices'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Course Pages Created {len(stats['course_pages_created'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_pages_created'] if stats['course_pages_created'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Course Pages Updated {len(stats['course_pages_updated'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_pages_updated'] if stats['course_pages_updated'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Certificate Pages Created {len(stats['certificates_created'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Course Readable IDs: {stats['certificates_created'] if stats['certificates_created'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Certificate Pages Updated {len(stats['certificates_updated'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Course Readable IDs: {stats['certificates_updated'] if stats['certificates_updated'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Course Runs Skipped due to bad data {len(stats['course_runs_skipped'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_runs_skipped'] if stats['course_runs_skipped'] else None}.\n"
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Number of Expired Course Runs {len(stats['course_runs_expired'])}."
-                )
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External Course Codes: {stats['course_runs_expired'] if stats['course_runs_expired'] else None}.\n"
-                )
-            )
+            self.log_stats(stats)
             self.stdout.write(
                 self.style.SUCCESS(
                     f"External course sync successful for {vendor_name}."
@@ -172,3 +48,89 @@ class Command(BaseCommand):
             )
         else:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
+
+    def log_stats(self, stats):
+        """
+        Logs the stats for the external course sync.
+        """
+        self.log_style_success(
+            f"Number of Courses Created {len(stats['courses_created'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats['courses_created'] if stats['courses_created'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of existing Courses {len(stats['existing_courses'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats['existing_courses'] if stats['existing_courses'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Course Runs Created {len(stats['course_runs_created'])}."
+        )
+        self.log_style_success(
+            f"External Course Run Codes: {stats['course_runs_created'] if stats['course_runs_created'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Course Runs Updated {len(stats['course_runs_updated'])}."
+        )
+        self.log_style_success(
+            f"External Course Run Codes: {stats['course_runs_updated'] if stats['course_runs_updated'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Products Created {len(stats['products_created'])}."
+        )
+        self.log_style_success(
+            f"Course Run courseware_ids: {stats['products_created'] if stats['products_created'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Product Versions Created {len(stats['product_versions_created'])}."
+        )
+        self.log_style_success(
+            f"Course Run courseware_ids: {stats['product_versions_created'] if stats['product_versions_created'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Course Runs without prices: {stats['course_runs_without_prices'] if stats['course_runs_without_prices'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Course Pages Created {len(stats['course_pages_created'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats['course_pages_created'] if stats['course_pages_created'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Course Pages Updated {len(stats['course_pages_updated'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats['course_pages_updated'] if stats['course_pages_updated'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Certificate Pages Created {len(stats['certificates_created'])}."
+        )
+        self.log_style_success(
+            f"Course Readable IDs: {stats['certificates_created'] if stats['certificates_created'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Certificate Pages Updated {len(stats['certificates_updated'])}."
+        )
+        self.log_style_success(
+            f"Course Readable IDs: {stats['certificates_updated'] if stats['certificates_updated'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Course Runs Skipped due to bad data {len(stats['course_runs_skipped'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats['course_runs_skipped'] if stats['course_runs_skipped'] else None}.\n"
+        )
+        self.log_style_success(
+            f"Number of Expired Course Runs {len(stats['course_runs_expired'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats['course_runs_expired'] if stats['course_runs_expired'] else None}.\n"
+        )
+
+    def log_style_success(self, log_msg):
+        """
+        Logs success styled message.
+        """
+        self.stdout.write(self.style.SUCCESS(log_msg))
