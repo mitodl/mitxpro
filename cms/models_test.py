@@ -1971,7 +1971,7 @@ def test_get_child_page_of_type_including_draft():
 
 
 @pytest.mark.parametrize("page_factory", [CoursePageFactory, ProgramPageFactory])
-def test_certificatepage_without_signatories_for_internal_courseware(
+def test_certificatepage_no_signatories_internal_courseware(
     superuser_client, page_factory
 ):
     """
@@ -2007,7 +2007,7 @@ def test_certificatepage_without_signatories_for_internal_courseware(
 
 
 @pytest.mark.parametrize("page_factory", [CoursePageFactory, ProgramPageFactory])
-def test_certificatepage_with_signatories_for_internal_courseware(
+def test_certificatepage_with_signatories_internal_courseware(
     superuser_client, page_factory
 ):
     """
@@ -2055,7 +2055,7 @@ def test_certificatepage_with_signatories_for_internal_courseware(
 @pytest.mark.parametrize(
     "page_factory", [ExternalCoursePageFactory, ExternalProgramPageFactory]
 )
-def test_certificatepage_is_saved_without_signatories_for_external_courseware(
+def test_certificatepage_saved_no_signatories_external_courseware(
     superuser_client, page_factory
 ):
     """

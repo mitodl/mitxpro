@@ -655,10 +655,10 @@ def test_product_page_context_has_certificate(
 
     resp = client.get(page.get_url())
     assert resp.status_code == 200
-    assert "certificate" in resp.context
+    assert "ceus" in resp.context
 
     if published_certificate:
-        assert resp.context["certificate"] is not None
-        assert resp.context["certificate"].CEUs == "12.0"
+        assert resp.context["ceus"] is not None
+        assert resp.context["ceus"] == "12.0"
     else:
-        assert resp.context["certificate"] is None
+        assert resp.context["ceus"] is None

@@ -1049,7 +1049,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "techniques": self.techniques,
             "propel_career": self.propel_career,
             "news_and_events": self.news_and_events,
-            "certificate": self.certificate_page,
+            "ceus": self.certificate_page.CEUs if self.certificate_page else None,
         }
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
