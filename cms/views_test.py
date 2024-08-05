@@ -22,9 +22,12 @@ from cms.constants import (
 from cms.factories import (
     BlogIndexPageFactory,
     CatalogPageFactory,
+    CertificatePageFactory,
     CourseIndexPageFactory,
     CoursePageFactory,
     EnterprisePageFactory,
+    ExternalCoursePageFactory,
+    ExternalProgramPageFactory,
     HomePageFactory,
     ProgramIndexPageFactory,
     ProgramPageFactory,
@@ -616,3 +619,46 @@ def test_enterprise_page_context(client, wagtail_basics):
     assert context["hubspot_enterprise_page_form_id"] == settings.HUBSPOT_CONFIG.get(
         "HUBSPOT_ENTERPRISE_PAGE_FORM_ID"
     )
+
+
+@pytest.mark.parametrize(
+    ("page_factory", "published_certificate"),
+    [
+        (CoursePageFactory, True),
+        (CoursePageFactory, False),
+        (ExternalCoursePageFactory, True),
+        (ExternalCoursePageFactory, False),
+        (ProgramPageFactory, True),
+        (ProgramPageFactory, False),
+        (ExternalProgramPageFactory, True),
+        (ExternalProgramPageFactory, False),
+    ],
+)
+def test_product_page_context_has_certificate(
+    page_factory, published_certificate, client
+):
+    """
+    Tests that product page context has certificate.
+    """
+    if page_factory in (CoursePageFactory, ProgramPageFactory):
+        page = page_factory.create(certificate_page=None)
+    else:
+        page = page_factory.create()
+
+    page.save_revision().publish()
+    certificate_page = CertificatePageFactory.create(parent=page, CEUs="12.0")
+    revision = certificate_page.save_revision()
+    if published_certificate:
+        revision.publish()
+    else:
+        certificate_page.unpublish()
+
+    resp = client.get(page.get_url())
+    assert resp.status_code == 200
+    assert "ceus" in resp.context
+
+    if published_certificate:
+        assert resp.context["ceus"] is not None
+        assert resp.context["ceus"] == "12.0"
+    else:
+        assert resp.context["ceus"] is None

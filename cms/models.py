@@ -1049,6 +1049,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "techniques": self.techniques,
             "propel_career": self.propel_career,
             "news_and_events": self.news_and_events,
+            "ceus": self.certificate_page.CEUs if self.certificate_page else None,
         }
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
@@ -2150,12 +2151,15 @@ class CertificatePage(CourseProgramChildPage):
             [
                 (
                     "signatory",
-                    PageChooserBlock(required=True, target_model=["cms.SignatoryPage"]),
+                    PageChooserBlock(
+                        required=False, target_model=["cms.SignatoryPage"]
+                    ),
                 )
             ],
-            min_num=1,
+            min_num=0,
             max_num=5,
         ),
+        blank=True,
         help_text="You can choose upto 5 signatories.",
         use_json_field=True,
     )

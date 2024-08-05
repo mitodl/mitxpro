@@ -127,6 +127,26 @@ class Command(BaseCommand):
             )
             self.stdout.write(
                 self.style.SUCCESS(
+                    f"Number of Certificate Pages Created {len(stats['certificates_created'])}."
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Course Readable IDs: {stats['certificates_created'] if stats['certificates_created'] else None}.\n"
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Number of Certificate Pages Updated {len(stats['certificates_updated'])}."
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Course Readable IDs: {stats['certificates_updated'] if stats['certificates_updated'] else None}.\n"
+                )
+            )
+            self.stdout.write(
+                self.style.SUCCESS(
                     f"Number of Course Runs Skipped due to bad data {len(stats['course_runs_skipped'])}."
                 )
             )
