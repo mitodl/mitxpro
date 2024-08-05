@@ -394,7 +394,7 @@ def test_create_or_update_emeritus_course_run(
 
 @pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
-def test_update_emeritus_course_runs(
+def test_update_emeritus_course_runs(  # noqa: PLR0915
     create_existing_data,
     emeritus_expired_course_json,
     emeritus_course_json_with_bad_data,
