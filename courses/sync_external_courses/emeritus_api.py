@@ -640,6 +640,8 @@ def create_or_update_certificate_page(course_page, emeritus_course):
     certificate_page = course_page.get_child_page_of_type_including_draft(
         CertificatePage
     )
+    is_created = is_updated = False
+
     if not certificate_page:
         certificate_page = CertificatePage(
             product_name=f"Certificate for {emeritus_course.course_title}",
@@ -648,24 +650,21 @@ def create_or_update_certificate_page(course_page, emeritus_course):
         )
         course_page.add_child(instance=certificate_page)
         certificate_page.save_revision().publish()
-        return certificate_page, True, False
+        is_created = True
     else:
         latest_revision = certificate_page.get_latest_revision_as_object()
-        is_updated = False
 
         if latest_revision.CEUs != emeritus_course.CEUs:
-            latest_revision.CEUs = emeritus_course.CEUs
+            certificate_page.CEUs = emeritus_course.CEUs
             is_updated = True
 
-        if not is_updated:
-            return certificate_page, False, is_updated
+        if is_updated:
+            is_draft = certificate_page.has_unpublished_changes
+            revision = certificate_page.save_revision()
+            if not is_draft:
+                revision.publish()
 
-        is_draft = certificate_page.has_unpublished_changes
-        revision = latest_revision.save_revision()
-        if not is_draft:
-            revision.publish()
-
-        return certificate_page, False, is_updated
+    return certificate_page, is_created, is_updated
 
 
 def parse_emeritus_data_str(items_str):

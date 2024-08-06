@@ -217,16 +217,17 @@ def test_create_or_update_emeritus_course_page(
 
 
 @pytest.mark.parametrize(
-    ("existing_cert_page", "publish_certificate"),
+    ("existing_cert_page", "publish_certificate", "is_live_and_draft"),
     [
-        (True, False),
-        (True, True),
-        (False, False),
+        (True, False, False),
+        (True, True, True),
+        (True, True, False),
+        (False, False, False),
     ],
 )
 @pytest.mark.django_db
 def test_create_or_update_certificate_page(
-    emeritus_course_data, existing_cert_page, publish_certificate
+    emeritus_course_data, existing_cert_page, publish_certificate, is_live_and_draft
 ):
     """
     Tests that `create_or_update_certificate_page` updates the CEUs and does not change the draft or live state.
@@ -248,6 +249,9 @@ def test_create_or_update_certificate_page(
         )
         if publish_certificate:
             certificate_page.save_revision().publish()
+            if is_live_and_draft:
+                certificate_page.CEUs = "1.2"
+                certificate_page.save_revision()
         else:
             certificate_page.unpublish()
 
@@ -258,6 +262,9 @@ def test_create_or_update_certificate_page(
     assert is_created == (not existing_cert_page)
     assert is_updated == existing_cert_page
     assert certificate_page.live == publish_certificate
+
+    if publish_certificate and is_live_and_draft:
+        assert certificate_page.has_unpublished_changes
 
 
 @pytest.mark.django_db
