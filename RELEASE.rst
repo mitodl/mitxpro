@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.156.0
+Version 0.156.0 (Released August 06, 2024)
 ---------------
 
 - feat(emeritus course sync): add image and certificates for external courses (#3064)
