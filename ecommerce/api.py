@@ -2,6 +2,8 @@
 Functions for ecommerce
 """
 
+from __future__ import annotations
+
 import decimal
 import hashlib
 import hmac

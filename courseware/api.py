@@ -510,7 +510,7 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
         auth = get_valid_edx_api_auth(user, ttl_in_seconds=ttl_in_seconds)
     except OpenEdxApiAuth.DoesNotExist:
         raise NoEdxApiAuthError(  # noqa: B904, TRY200
-            f"{user!s} does not have an associated OpenEdxApiAuth"
+            f"{user!s} does not have an associated OpenEdxApiAuth"  # noqa: EM102
         )
     return EdxApi(
         {"access_token": auth.access_token},

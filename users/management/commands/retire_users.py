@@ -125,12 +125,8 @@ class Command(BaseCommand):
             auth_deleted_count = UserSocialAuth.objects.filter(user=user).delete()
 
             if auth_deleted_count:
-                self.stdout.write(
-                    f"For  user: '{user}' SocialAuth rows deleted"
-                )
+                self.stdout.write(f"For  user: '{user}' SocialAuth rows deleted")
 
             self.stdout.write(
-                self.style.SUCCESS(
-                    f"User: '{user}' is retired from MIT xPRO"
-                )
+                self.style.SUCCESS(f"User: '{user}' is retired from MIT xPRO")
             )

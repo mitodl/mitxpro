@@ -134,9 +134,7 @@ class Command(BaseCommand):
                     if renewal_attempt is None
                     else f"\n[{renewal_attempt.result_status_code}] {renewal_attempt.result}"
                 )
-                self.style.ERROR(
-                    f"Failed to create/update file watch.{error_msg}"
-                )
+                self.style.ERROR(f"Failed to create/update file watch.{error_msg}")
                 continue
             if file_watch_result.created:
                 desc = "created"
@@ -192,9 +190,7 @@ class Command(BaseCommand):
                         )
                     )
                 else:
-                    self.stdout.write(
-                        self.style.ERROR(f"Request failed: {exc}")
-                    )
+                    self.stdout.write(self.style.ERROR(f"Request failed: {exc}"))
                     sys.exit(1)
             else:
                 self.stdout.write(

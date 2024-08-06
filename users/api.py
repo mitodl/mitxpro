@@ -131,9 +131,7 @@ def fetch_users(filter_values, ignore_case=True):  # noqa: FBT002
         )
         user_qset = User.objects.filter(query)
     else:
-        user_qset = User.objects.filter(
-            **{f"{filter_field}__in": filter_values}
-        )
+        user_qset = User.objects.filter(**{f"{filter_field}__in": filter_values})
     if user_qset.count() != len(filter_values):
         valid_values = user_qset.values_list(filter_field, flat=True)
         invalid_values = set(filter_values) - set(valid_values)
