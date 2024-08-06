@@ -723,22 +723,26 @@ def clear_and_delete_baskets(baskets):
     Args:
         baskets (iterable of Baskets): A list of baskets whose associated items to be deleted
     """
-    log.info("Basket deletion requested for baskets: %s", [basket.id for basket in baskets])
+    log.info(
+        "Basket deletion requested for baskets: %s", [basket.id for basket in baskets]
+    )
     for basket in baskets:
         log.info("Clearing basket: %s", basket.id)
 
         basket_items = basket.basketitems.all()
-        basket_item_ids = list(basket_items.values_list('id', flat=True))
+        basket_item_ids = list(basket_items.values_list("id", flat=True))
         log.info("Deleting basket items: %s", basket_item_ids)
         basket_items.delete()
 
         course_run_selections = basket.courserunselection_set.all()
-        course_run_selections_ids = list(course_run_selections.values_list('id', flat=True))
+        course_run_selections_ids = list(
+            course_run_selections.values_list("id", flat=True)
+        )
         log.info("Deleting course run selections: %s", course_run_selections_ids)
         course_run_selections.delete()
-        
+
         coupon_selections = basket.couponselection_set.all()
-        coupon_selections_ids = list(coupon_selections.values_list('id', flat=True))
+        coupon_selections_ids = list(coupon_selections.values_list("id", flat=True))
         log.info("Deleting coupon selections: %s", coupon_selections_ids)
         coupon_selections.delete()
 
@@ -764,9 +768,8 @@ def complete_order(order):
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
     with transaction.atomic():
-        baskets = (
-            Basket.objects.select_for_update(skip_locked=True)
-            .filter(user=order.purchaser)
+        baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+            user=order.purchaser
         )
         log.info("Found %d baskets to delete", len(baskets))
 
