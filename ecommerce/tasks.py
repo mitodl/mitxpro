@@ -23,9 +23,8 @@ def delete_expired_baskets(self):
     log.info("Starting the deletion of expired baskets at %s", now_in_utc())
 
     with transaction.atomic():
-        expired_baskets = (
-            Basket.objects.select_for_update(skip_locked=True)
-            .filter(updated_on__lte=cutoff_date)
+        expired_baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+            updated_on__lte=cutoff_date
         )
         log.info("Found %d expired baskets to delete", len(expired_baskets))
         if expired_baskets:

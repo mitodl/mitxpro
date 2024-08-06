@@ -29,6 +29,7 @@ def test_delete_expired_baskets(mocker, user, basket_and_coupons):
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
+
 def test_active_baskets_are_not_deleted(mocker, user, basket_and_coupons):
     """Test that the active baskets are not deleted on task run"""
     basket_and_coupons.basket.user = user
