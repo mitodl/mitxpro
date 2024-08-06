@@ -69,7 +69,7 @@ class CatalogPageFactory(wagtail_factories.PageFactory):
 class ProgramPageFactory(wagtail_factories.PageFactory):
     """ProgramPage factory class"""
 
-    title = factory.Sequence("Test page - Program {0}".format)
+    title = factory.Sequence("Test page - Program {}".format)
     program = factory.SubFactory(ProgramFactory, page=None)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
@@ -99,7 +99,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
 class CoursePageFactory(wagtail_factories.PageFactory):
     """CoursePage factory class"""
 
-    title = factory.Sequence("Test page - Course {0}".format)
+    title = factory.Sequence("Test page - Course {}".format)
     course = factory.SubFactory(CourseFactory, page=None)
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
@@ -131,7 +131,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
 
     course = factory.SubFactory(CourseFactory, page=None)
 
-    title = factory.Sequence("Test page - External Course {0}".format)
+    title = factory.Sequence("Test page - External Course {}".format)
     external_marketing_url = factory.Faker("uri")
     marketing_hubspot_form_id = factory.Faker("bothify", text="??????????")
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
@@ -160,7 +160,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
 
     program = factory.SubFactory(ProgramFactory, page=None)
 
-    title = factory.Sequence("Test page - External Program {0}".format)
+    title = factory.Sequence("Test page - External Program {}".format)
     external_marketing_url = factory.Faker("uri")
     marketing_hubspot_form_id = factory.Faker("bothify", text="??????????")
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")

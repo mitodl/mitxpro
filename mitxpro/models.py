@@ -3,7 +3,7 @@ Common model classes
 """
 
 import copy
-from typing import Iterable  # noqa: UP035
+from collections.abc import Iterable  # noqa: UP035
 
 from django.conf import settings
 from django.core.exceptions import ValidationError

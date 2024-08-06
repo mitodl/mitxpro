@@ -65,7 +65,7 @@ class ProgramRunFactory(DjangoModelFactory):
     """Factory for ProgramRuns"""
 
     program = factory.SubFactory(ProgramFactory)
-    run_tag = factory.Sequence("R{0}".format)
+    run_tag = factory.Sequence("R{}".format)
 
     class Meta:
         model = ProgramRun
@@ -77,7 +77,7 @@ class CourseFactory(DjangoModelFactory):
     program = factory.SubFactory(ProgramFactory)
     position_in_program = None  # will get populated in save()
     title = fuzzy.FuzzyText(prefix="Course ")
-    readable_id = factory.Sequence("course-{0}".format)
+    readable_id = factory.Sequence("course-{}".format)
     platform = factory.SubFactory(PlatformFactory)
     live = True
 
@@ -96,7 +96,7 @@ class CourseRunFactory(DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     title = factory.LazyAttribute(lambda x: "CourseRun " + FAKE.sentence())  # noqa: ARG005
     courseware_id = factory.Sequence(lambda number: f"course:v{number}+{FAKE.slug()}")
-    run_tag = factory.Sequence("R{0}".format)
+    run_tag = factory.Sequence("R{}".format)
     courseware_url_path = factory.Faker("uri")
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=timezone.utc

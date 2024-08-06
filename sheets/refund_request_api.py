@@ -226,7 +226,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=refund_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Parsing failure: {}".format(str(exc)),  # noqa: UP032
+                message=f"Parsing failure: {str(exc)}",  # noqa: UP032
             )
         is_unchanged_error_row = (
             refund_req_row.errors and not request_created and not request_updated

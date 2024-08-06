@@ -30,10 +30,10 @@ class GoogleFileWatchFactory(DjangoModelFactory):
     file_id = Faker("pystr", max_chars=15)
     channel_id = fuzzy.FuzzyText(prefix="Channel ")
     activation_date = Faker(
-        "past_datetime", start_date="-30d", tzinfo=datetime.timezone.utc
+        "past_datetime", start_date="-30d", tzinfo=datetime.UTC
     )
     expiration_date = Faker(
-        "future_datetime", end_date="+30d", tzinfo=datetime.timezone.utc
+        "future_datetime", end_date="+30d", tzinfo=datetime.UTC
     )
 
     class Meta:

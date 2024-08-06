@@ -112,7 +112,7 @@ class EnrollmentChangeCommand(BaseCommand):
             enrollment = CourseRunEnrollment.all_objects.filter(**query_params).first()
 
         if not enrollment:
-            raise CommandError("Enrollment not found for: {}".format(enrolled_obj))  # noqa: EM103, UP032
+            raise CommandError(f"Enrollment not found for: {enrolled_obj}")  # noqa: EM103, UP032
         if not enrollment.active and not force:
             raise CommandError(
                 "The given enrollment is not active ({}).\n"  # noqa: EM103, UP032, RUF100

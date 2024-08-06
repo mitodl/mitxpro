@@ -508,7 +508,7 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
         auth = get_valid_edx_api_auth(user, ttl_in_seconds=ttl_in_seconds)
     except OpenEdxApiAuth.DoesNotExist:
         raise NoEdxApiAuthError(  # noqa: B904, TRY200
-            "{} does not have an associated OpenEdxApiAuth".format(str(user))  # noqa: EM103, UP032
+            f"{str(user)} does not have an associated OpenEdxApiAuth"  # noqa: EM103, UP032
         )
     return EdxApi(
         {"access_token": auth.access_token},
@@ -799,7 +799,7 @@ def create_oauth_application():
         defaults=dict(  # noqa: C408
             redirect_uris=urljoin(
                 settings.OPENEDX_BASE_REDIRECT_URL,
-                "/auth/complete/{}/".format(settings.MITXPRO_OAUTH_PROVIDER),  # noqa: UP032
+                f"/auth/complete/{settings.MITXPRO_OAUTH_PROVIDER}/",  # noqa: UP032
             ),
             client_type="confidential",
             authorization_grant_type="authorization-code",

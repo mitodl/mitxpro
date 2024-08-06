@@ -214,7 +214,7 @@ class SheetHandler:
                     row_db_record=None,
                     row_object=None,
                     result_type=ResultType.FAILED,
-                    message="Error: {}".format(str(exc)),  # noqa: UP032
+                    message=f"Error: {str(exc)}",  # noqa: UP032
                 )
             finally:
                 if row_result:

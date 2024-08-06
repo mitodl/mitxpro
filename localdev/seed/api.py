@@ -186,7 +186,7 @@ def parse_datetime_from_string(dt_string):
         datetime.datetime: The parsed datetime
     """
     return datetime.datetime.strptime(dt_string, "%Y-%m-%dT%H:%M:%S").astimezone(
-        datetime.timezone.utc
+        datetime.UTC
     )
 
 
@@ -207,7 +207,7 @@ def check_settings():
             missing.append(variable)
     if missing:
         raise ImproperlyConfigured(
-            "Missing required voucher settings: {}".format(missing)  # noqa: EM103, UP032
+            f"Missing required voucher settings: {missing}"  # noqa: EM103, UP032
         )
 
 

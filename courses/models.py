@@ -200,7 +200,7 @@ class PageProperties(models.Model):
 
 
 validate_url_path_field = RegexValidator(
-    r"^[{}]+$".format(detail_path_char_pattern),  # noqa: UP032
+    fr"^[{detail_path_char_pattern}]+$",  # noqa: UP032
     f"This field is used to produce URL paths. It must contain only characters that match this pattern: [{detail_path_char_pattern}]",
 )
 

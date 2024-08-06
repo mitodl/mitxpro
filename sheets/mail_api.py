@@ -69,8 +69,8 @@ def get_bulk_assignment_messages(event=None, begin=None, end=None):
             raw_next_url = resp_data["paging"]["next"]
             # The "next" url in the paging section does not contain necessary auth. Fill it in here.
             url = raw_next_url.replace(
-                "/{}/".format(MAILGUN_API_DOMAIN),  # noqa: UP032
-                "/api:{}@{}/".format(settings.MAILGUN_KEY, MAILGUN_API_DOMAIN),  # noqa: UP032
+                f"/{MAILGUN_API_DOMAIN}/",  # noqa: UP032
+                f"/api:{settings.MAILGUN_KEY}@{MAILGUN_API_DOMAIN}/",  # noqa: UP032
             )
             resp = request_get_with_timeout_retry(
                 url, retries=MAILGUN_API_TIMEOUT_RETRIES

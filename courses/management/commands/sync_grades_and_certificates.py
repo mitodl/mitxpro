@@ -130,10 +130,10 @@ class Command(BaseCommand):
             else:
                 grade_status = "already exists"
 
-            grade_summary = ["passed: {}".format(course_run_grade.passed)]  # noqa: UP032
+            grade_summary = [f"passed: {course_run_grade.passed}"]  # noqa: UP032
             if override_grade is not None:
                 grade_summary.append(
-                    "value override: {}".format(course_run_grade.grade)  # noqa: UP032
+                    f"value override: {course_run_grade.grade}"  # noqa: UP032
                 )
 
             if created_cert:
