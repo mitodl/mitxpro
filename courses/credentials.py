@@ -1,7 +1,5 @@
 """Digital courseware credentials"""
 
-from __future__ import annotations
-
 import logging
 from urllib.parse import urljoin
 
@@ -82,7 +80,7 @@ def build_course_run_credential(certificate: CourseRunCertificate) -> dict:
 
 
 def build_digital_credential(
-    certificate: ProgramCertificate | CourseRunCertificate,
+    certificate: ProgramCertificate | CourseRunCertificate,  # noqa: FA102
     learner_did: LearnerDID,
 ) -> dict:
     """Function for building certificate digital credentials"""
