@@ -1662,14 +1662,13 @@ dev = ["black", "pytest"]
 
 [[package]]
 name = "hypothesis"
-version = "4.23.4"
+version = "4.24.6"
 description = "A library for property based testing"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 files = [
-    {file = "hypothesis-4.23.4-py2-none-any.whl", hash = "sha256:c761288bb04b1c2c32fbc06981e22ba5b020bcc272aa39e749c77156301b5b13"},
-    {file = "hypothesis-4.23.4-py3-none-any.whl", hash = "sha256:782520620cd42ed4f0a76ea95e05d0c4726387b5e0b0e787b5c16ca86d66f9c5"},
-    {file = "hypothesis-4.23.4.tar.gz", hash = "sha256:a9708beea61b45ee11de99aa61e06fe6d559aeccabe5017f9080522449727f18"},
+    {file = "hypothesis-4.24.6-py3-none-any.whl", hash = "sha256:223b7eb23f06ed00ad5227e7e5add7fecf6a8f35f36636463a9c7ad422829f3f"},
+    {file = "hypothesis-4.24.6.tar.gz", hash = "sha256:15e9d9064e826d6f693a3633a3fae116832159aba0951b8eb65a47082feda4c9"},
 ]
 
 [package.dependencies]
@@ -4101,4 +4100,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.4"
-content-hash = "3a1f6390dd1dc39cd7e63f03a329aad2821ca408f64d9d4625f2b20c28496fa6"
+content-hash = "a4d0ec9641e942806f7cac7193f6905a1800571de2b2ffa775b58c22094c3372"
