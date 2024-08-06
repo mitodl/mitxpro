@@ -29,6 +29,6 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             self.style.SUCCESS(
-                f"Deferral sheet successfully processed.\n{results}"  # noqa: UP032
+                f"Deferral sheet successfully processed.\n{results}"
             )
         )

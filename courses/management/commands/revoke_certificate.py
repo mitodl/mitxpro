@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
         if updated:
             msg = "Certificate for {} has been {}".format(
-                f"run: {run}" if run else f"program: {program}",  # noqa: UP032
+                f"run: {run}" if run else f"program: {program}",
                 "revoked" if revoke else "un-revoked",
             )
             self.stdout.write(self.style.SUCCESS(msg))

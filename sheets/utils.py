@@ -460,7 +460,7 @@ def _parse_sheet_date_str(date_str, date_format):
     )
     return (
         dt
-        if settings.SHEETS_DATE_TIMEZONE == datetime.UTC  # noqa: SIM300
+        if settings.SHEETS_DATE_TIMEZONE == datetime.UTC
         else dt.astimezone(datetime.UTC)
     )
 

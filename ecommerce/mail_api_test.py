@@ -159,9 +159,7 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
     enrollment = CourseRunEnrollmentFactory.create()
 
     run_start_date = enrollment.run.start_date
-    run_start_time = run_start_date.astimezone(datetime.UTC).strftime(
-        EMAIL_TIME_FORMAT
-    )
+    run_start_time = run_start_date.astimezone(datetime.UTC).strftime(EMAIL_TIME_FORMAT)
     run_end_date = enrollment.run.end_date
     date_range = (
         f"{run_start_date.strftime(EMAIL_DATE_FORMAT)} - "

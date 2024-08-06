@@ -1,7 +1,6 @@
 """Digital courseware credentials"""
 
 import logging
-from typing import Union
 from urllib.parse import urljoin
 
 from django.conf import settings
@@ -81,7 +80,7 @@ def build_course_run_credential(certificate: CourseRunCertificate) -> dict:
 
 
 def build_digital_credential(
-    certificate: ProgramCertificate | CourseRunCertificate,  # noqa: FA100
+    certificate: ProgramCertificate | CourseRunCertificate,
     learner_did: LearnerDID,
 ) -> dict:
     """Function for building certificate digital credentials"""
