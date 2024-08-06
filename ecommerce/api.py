@@ -10,9 +10,9 @@ import re
 import uuid
 from base64 import b64encode
 from collections import defaultdict
-from datetime import timedelta
-from typing import NamedTuple, Optional  # noqa: UP035
 from collections.abc import Iterable
+from datetime import timedelta
+from typing import NamedTuple
 from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
@@ -837,10 +837,9 @@ def enroll_user_in_order_items(order):
     ):
         voucher_target = voucher.product.content_object
     voucher_enrollment = first_or_none(
-          # noqa: UP034
-            enrollment
-            for enrollment in successful_run_enrollments
-            if enrollment.run == voucher_target
+        enrollment
+        for enrollment in successful_run_enrollments
+        if enrollment.run == voucher_target
     )
     if voucher_enrollment is not None:
         voucher.enrollment = voucher_enrollment
@@ -999,9 +998,9 @@ class ValidatedBasket(NamedTuple):
     basket: Basket
     basket_item: BasketItem
     product_version: ProductVersion
-    coupon_version: CouponVersion | None  # noqa: FA100
-    run_selection_ids: Iterable[int] | None  # noqa: FA100
-    data_consent_users: Iterable[DataConsentUser] | None  # noqa: FA100
+    coupon_version: CouponVersion | None
+    run_selection_ids: Iterable[int] | None
+    data_consent_users: Iterable[DataConsentUser] | None
 
 
 def _validate_basket_contents(basket):

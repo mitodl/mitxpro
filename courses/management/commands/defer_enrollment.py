@@ -63,12 +63,12 @@ class Command(EnrollmentChangeCommand):
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):
                 message = f"'from' course run enrollment does not exist ({from_courseware_id})"
             elif isinstance(exc, CourseRun.DoesNotExist):
-                message = f"'to' course does not exist ({to_courseware_id})"  # noqa: UP032
+                message = f"'to' course does not exist ({to_courseware_id})"
             else:
                 message = str(exc)
             raise CommandError(message)  # noqa: B904
         except ValidationError as exc:
-            raise CommandError(f"Invalid enrollment deferral - {exc}")  # noqa: B904, EM103, TRY200, UP032
+            raise CommandError(f"Invalid enrollment deferral - {exc}")  # noqa: B904, TRY200
         else:
             if not to_enrollment:
                 raise CommandError(

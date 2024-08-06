@@ -273,7 +273,7 @@ class CouponRequestHandler(SheetHandler):
         worksheet = bulk_coupon_sheet.sheet1
         # Add headers
         worksheet.update_values(
-            crange=f"A1:{assign_sheet_metadata.LAST_COL_LETTER}1",  # noqa: UP032
+            crange=f"A1:{assign_sheet_metadata.LAST_COL_LETTER}1",
             values=[assign_sheet_metadata.column_headers],
         )
         # Write enrollment codes to the appropriate column of the worksheet
@@ -311,7 +311,7 @@ class CouponRequestHandler(SheetHandler):
         # Format header cells with bold text
         header_range = worksheet.get_values(
             start="A1",
-            end=f"{assign_sheet_metadata.LAST_COL_LETTER}1",  # noqa: UP032
+            end=f"{assign_sheet_metadata.LAST_COL_LETTER}1",
             returnas="range",
         )
         first_cell = header_range.cells[0][0]
@@ -444,7 +444,7 @@ class CouponRequestHandler(SheetHandler):
                 row_db_record=coupon_gen_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message=f"Parsing failure: {str(exc)}",  # noqa: UP032
+                message=f"Parsing failure: {exc!s}",
             )
         is_unchanged_error_row = (
             coupon_req_row.errors and not request_created and not request_updated

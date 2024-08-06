@@ -207,7 +207,7 @@ def check_settings():
             missing.append(variable)
     if missing:
         raise ImproperlyConfigured(
-            f"Missing required voucher settings: {missing}"  # noqa: EM103, UP032
+            f"Missing required voucher settings: {missing}"
         )
 
 

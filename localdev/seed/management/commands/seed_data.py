@@ -24,4 +24,4 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS("RESULTS"))
             for k, v in results.report.items():
-                self.stdout.write(f"{k}: {v}")  # noqa: UP032
+                self.stdout.write(f"{k}: {v}")

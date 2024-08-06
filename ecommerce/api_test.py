@@ -708,9 +708,9 @@ def test_get_by_reference_number(
     same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
     if hubspot_api_key:
-        mock_hubspot_syncs.order.assert_called_with(order.id)  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_called_with(order.id)
     else:
-        mock_hubspot_syncs.order.assert_not_called()  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_not_called()
 
 
 def test_get_by_reference_number_missing(validated_basket):
@@ -774,9 +774,9 @@ def test_create_unfulfilled_order(  # noqa: PLR0913
         assert CouponRedemption.objects.count() == 0
 
     if hubspot_api_key:
-        mock_hubspot_syncs.order.assert_called_with(order.id)  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_called_with(order.id)
     else:
-        mock_hubspot_syncs.order.assert_not_called()  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_not_called()
 
 
 @pytest.mark.parametrize("has_program_run", [True, False])

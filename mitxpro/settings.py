@@ -272,7 +272,7 @@ WSGI_APPLICATION = "mitxpro.wsgi.application"
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_string(
         name="DATABASE_URL",
-        default="sqlite:///{}".format(os.path.join(BASE_DIR, "db.sqlite3")),  # noqa: PTH118, UP030
+        default="sqlite:///{}".format(os.path.join(BASE_DIR, "db.sqlite3")),  # noqa: PTH118
         description="The connection url to the Postgres database",
         required=True,
         write_app_json=False,
@@ -426,7 +426,7 @@ CLOUDFRONT_DIST = get_string(
 )
 if CLOUDFRONT_DIST:
     STATIC_URL = urljoin(
-        f"https://{CLOUDFRONT_DIST}.cloudfront.net",  # noqa: UP032
+        f"https://{CLOUDFRONT_DIST}.cloudfront.net",
         STATIC_URL,
     )
 
@@ -682,7 +682,7 @@ if MITXPRO_USE_S3 and (
     )
 if MITXPRO_USE_S3:
     if CLOUDFRONT_DIST:
-        AWS_S3_CUSTOM_DOMAIN = f"{CLOUDFRONT_DIST}.cloudfront.net"  # noqa: UP032
+        AWS_S3_CUSTOM_DOMAIN = f"{CLOUDFRONT_DIST}.cloudfront.net"
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
 FEATURES = get_features()

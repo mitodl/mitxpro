@@ -26,7 +26,7 @@ def test_get_credentials_service_account(mocker, settings):
         get_credentials()
 
     settings.SHEETS_ADMIN_EMAILS.append(
-        f"service-account@mitxpro.{GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN}"  # noqa: UP032
+        f"service-account@mitxpro.{GOOGLE_SERVICE_ACCOUNT_EMAIL_DOMAIN}"
     )
     creds = get_credentials()
 

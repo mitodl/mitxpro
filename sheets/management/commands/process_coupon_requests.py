@@ -28,5 +28,5 @@ class Command(BaseCommand):
             limit_row_index=options.get("row", None)
         )
         self.stdout.write(
-            self.style.SUCCESS(f"Coupon generation succeeded.\n{results}")  # noqa: UP032
+            self.style.SUCCESS(f"Coupon generation succeeded.\n{results}")
         )
