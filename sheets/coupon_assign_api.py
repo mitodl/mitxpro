@@ -823,7 +823,7 @@ class CouponAssignmentHandler:
                 "codes listed in the Sheet. There may be an invalid coupon code in the Sheet."
             )
         product_coupon_dict = dict(product_coupon_tuples)
-        return set((row.email, product_coupon_dict[row.code]) for row in valid_rows)  # noqa: C401
+        return {(row.email, product_coupon_dict[row.code]) for row in valid_rows}  # noqa: C401
 
     @staticmethod
     def get_assignments_to_create_and_remove(
@@ -872,10 +872,10 @@ class CouponAssignmentHandler:
                 )
                 # If any of the assignments we want to create have the same product coupon as one
                 # of these already-redeemed assignments, filter them out and log an info message.
-                product_coupon_ids = set(  # noqa: C401
+                product_coupon_ids = {  # noqa: C401
                     assignment.product_coupon_id
                     for assignment in already_redeemed_assignments
-                )
+                }
                 adjusted_create_iter, cannot_create_iter = partition(
                     tuple_set_to_create,
                     lambda assignment_tuple: assignment_tuple[1] in product_coupon_ids,
@@ -988,7 +988,7 @@ class CouponAssignmentHandler:
         # Validate emails before assignment so we can filter out and report on any bad emails
         try:
             validate_email_addresses(
-                (assignment_tuple[0] for assignment_tuple in assignments_to_create)  # noqa: UP034
+                assignment_tuple[0] for assignment_tuple in assignments_to_create  # noqa: UP034
             )
         except MultiEmailValidationError as exc:
             invalid_emails = exc.invalid_emails

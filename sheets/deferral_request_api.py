@@ -134,7 +134,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=deferral_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Parsing failure: {}".format(str(exc)),  # noqa: UP032
+                message=f"Parsing failure: {str(exc)}",  # noqa: UP032
             )
         is_unchanged_error_row = (
             deferral_req_row.errors and not request_created and not request_updated
@@ -202,7 +202,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=deferral_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Invalid deferral: {}".format(exc),  # noqa: UP032
+                message=f"Invalid deferral: {exc}",  # noqa: UP032
             )
         except EdxEnrollmentCreateError as exc:
             return RowResult(
@@ -210,7 +210,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
                 row_db_record=deferral_request,
                 row_object=None,
                 result_type=ResultType.FAILED,
-                message="Unable to defer enrollment: {}".format(exc),  # noqa: UP032
+                message=f"Unable to defer enrollment: {exc}",  # noqa: UP032
             )
 
         deferral_request.date_completed = now_in_utc()

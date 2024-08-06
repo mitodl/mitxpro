@@ -283,11 +283,11 @@ def test_course_view(  # noqa: PLR0913
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")  # noqa: UP012
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode()  # noqa: UP012
         in resp.content
     ) is has_button
     assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")  # noqa: UP012
+        b"Please Sign In to MITx PRO to enroll in a course"  # noqa: UP012
         in resp.content
     ) is (is_anonymous and has_product and has_unexpired_run)
 
@@ -349,11 +349,11 @@ def test_program_view(  # noqa: PLR0913
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")  # noqa: UP012
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode()  # noqa: UP012
         in resp.content
     ) is has_button
     assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")  # noqa: UP012
+        b"Please Sign In to MITx PRO to enroll in a course"  # noqa: UP012
         in resp.content
     ) is (is_anonymous and has_product and has_unexpired_run)
 

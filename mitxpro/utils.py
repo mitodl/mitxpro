@@ -72,7 +72,7 @@ def is_near_now(time):
         bool:
             True if near now, false otherwise
     """
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    now = datetime.datetime.now(tz=datetime.UTC)
     five_seconds = datetime.timedelta(0, 5)
     return now - five_seconds < time < now + five_seconds
 
@@ -83,7 +83,7 @@ def now_in_utc():
     Returns:
         datetime.datetime: A datetime object for the current time
     """
-    return datetime.datetime.now(tz=datetime.timezone.utc)
+    return datetime.datetime.now(tz=datetime.UTC)
 
 
 def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):  # noqa: FBT002
@@ -639,5 +639,5 @@ def strip_datetime(date_str, date_format, date_timezone=None):
     if not date_str or not date_format:
         return None
 
-    date_timezone = date_timezone if date_timezone else datetime.timezone.utc
+    date_timezone = date_timezone if date_timezone else datetime.UTC
     return datetime.datetime.strptime(date_str, date_format).astimezone(date_timezone)

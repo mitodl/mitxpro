@@ -214,7 +214,7 @@ class WebinarIndexPage(Page, CanCreatePageMixin):
             .exclude(Q(category=UPCOMING_WEBINAR) & Q(date__lt=now_in_utc().date()))
             .order_by("-category", "date")
         )
-        webinars_dict = defaultdict(lambda: [])  # noqa: PIE807
+        webinars_dict = defaultdict(list)  # noqa: PIE807
         for webinar in webinars:
             webinar.detail_page_url = webinar.detail_page_url(request)
             webinars_dict[webinar.category].append(webinar)
@@ -1028,7 +1028,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             # of the Course/Program instead (e.g.: "/courses/course-v1:edX+DemoX+Demo_Course")
             re.sub(
                 self.slugged_page_path_pattern,
-                r"\1{}\3".format(self.product.readable_id),  # noqa: UP032
+                fr"\1{self.product.readable_id}\3",  # noqa: UP032
                 url_parts[2],
             ),
         )
@@ -1508,7 +1508,7 @@ class CourseProgramChildPage(DisableSitemapURLMixin, Page):
     def can_create_at(cls, parent):
         # You can only create one of these page under course / program.
         return (
-            super(CourseProgramChildPage, cls).can_create_at(parent)  # noqa: UP008
+            super().can_create_at(parent)  # noqa: UP008
             and parent.get_children().type(cls).count() == 0
         )
 

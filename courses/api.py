@@ -57,7 +57,7 @@ def get_user_enrollments(user):
             for program_enrollment in program_enrollments
         )
     )
-    program_course_ids = set(course.id for course in program_courses)  # noqa: C401
+    program_course_ids = {course.id for course in program_courses}  # noqa: C401
     course_run_enrollments = (
         CourseRunEnrollment.objects.select_related("run__course__coursepage", "company")
         .filter(user=user)
@@ -316,7 +316,7 @@ def defer_enrollment(
     to_run = CourseRun.objects.get(courseware_id=to_courseware_id)
     if from_enrollment.run == to_run:
         raise ValidationError(
-            "Cannot defer to the same course run (run: {})".format(to_run.courseware_id)  # noqa: EM103, UP032
+            f"Cannot defer to the same course run (run: {to_run.courseware_id})"  # noqa: EM103, UP032
         )
     if not force and not to_run.is_not_beyond_enrollment:
         raise ValidationError(

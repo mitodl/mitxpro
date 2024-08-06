@@ -149,7 +149,7 @@ def create_user_via_email(
         created_user = create_user_with_generated_username(serializer, username)
         if created_user is None:
             raise IntegrityError(  # noqa: TRY301
-                "Failed to create User with generated username ({})".format(username)  # noqa: EM103, UP032
+                f"Failed to create User with generated username ({username})"  # noqa: EM103, UP032
             )
     except Exception as exc:
         raise UserCreationFailedException(backend, current_partial) from exc
