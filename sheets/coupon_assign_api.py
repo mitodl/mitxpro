@@ -988,8 +988,7 @@ class CouponAssignmentHandler:
         # Validate emails before assignment so we can filter out and report on any bad emails
         try:
             validate_email_addresses(
-                assignment_tuple[0]
-                for assignment_tuple in assignments_to_create
+                assignment_tuple[0] for assignment_tuple in assignments_to_create
             )
         except MultiEmailValidationError as exc:
             invalid_emails = exc.invalid_emails

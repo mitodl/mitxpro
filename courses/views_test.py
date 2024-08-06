@@ -283,13 +283,11 @@ def test_course_view(  # noqa: PLR0913
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode()
-        in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
-    assert (
-        b"Please Sign In to MITx PRO to enroll in a course"
-        in resp.content
-    ) is (is_anonymous and has_product and has_unexpired_run)
+    assert (b"Please Sign In to MITx PRO to enroll in a course" in resp.content) is (
+        is_anonymous and has_product and has_unexpired_run
+    )
 
 
 @pytest.mark.parametrize("is_enrolled", [True, False])
@@ -349,13 +347,11 @@ def test_program_view(  # noqa: PLR0913
             class_name = "enrolled"
 
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode()
-        in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
-    assert (
-        b"Please Sign In to MITx PRO to enroll in a course"
-        in resp.content
-    ) is (is_anonymous and has_product and has_unexpired_run)
+    assert (b"Please Sign In to MITx PRO to enroll in a course" in resp.content) is (
+        is_anonymous and has_product and has_unexpired_run
+    )
 
 
 def test_user_enrollments_view(mocker, client, user):

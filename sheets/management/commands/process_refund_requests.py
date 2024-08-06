@@ -28,7 +28,5 @@ class Command(BaseCommand):
             limit_row_index=options.get("row", None)
         )
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Refund sheet successfully processed.\n{results}"
-            )
+            self.style.SUCCESS(f"Refund sheet successfully processed.\n{results}")
         )

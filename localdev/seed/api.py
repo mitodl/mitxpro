@@ -206,9 +206,7 @@ def check_settings():
         except AttributeError:  # noqa: PERF203
             missing.append(variable)
     if missing:
-        raise ImproperlyConfigured(
-            f"Missing required voucher settings: {missing}"
-        )
+        raise ImproperlyConfigured(f"Missing required voucher settings: {missing}")  # noqa: EM102
 
 
 SeedDataSpec = namedtuple("SeedDataSpec", ["model_cls", "data", "parent"])  # noqa: PYI024

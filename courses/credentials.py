@@ -1,5 +1,7 @@
 """Digital courseware credentials"""
 
+from __future__ import annotations
+
 import logging
 from urllib.parse import urljoin
 

@@ -316,7 +316,7 @@ def defer_enrollment(
     to_run = CourseRun.objects.get(courseware_id=to_courseware_id)
     if from_enrollment.run == to_run:
         raise ValidationError(
-            f"Cannot defer to the same course run (run: {to_run.courseware_id})"
+            f"Cannot defer to the same course run (run: {to_run.courseware_id})"  # noqa: EM102
         )
     if not force and not to_run.is_not_beyond_enrollment:
         raise ValidationError(

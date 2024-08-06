@@ -132,9 +132,7 @@ class Command(BaseCommand):
 
             grade_summary = [f"passed: {course_run_grade.passed}"]
             if override_grade is not None:
-                grade_summary.append(
-                    f"value override: {course_run_grade.grade}"
-                )
+                grade_summary.append(f"value override: {course_run_grade.grade}")
 
             if created_cert:
                 cert_status = "created"
