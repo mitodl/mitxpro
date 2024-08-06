@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.156.0 (Released August 06, 2024)
+---------------
+
+- feat(emeritus course sync): add image and certificates for external courses (#3064)
+- fix: catalog external courses page visibility conditions (#3082)
+- chore(deps): lock file maintenance
+- temp: remove package manager from package.json (#3084)
+
 Version 0.155.0 (Released August 02, 2024)
 ---------------
 
