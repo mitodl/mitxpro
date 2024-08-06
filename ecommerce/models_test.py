@@ -253,11 +253,12 @@ def test_product_version_save_text_id_badproduct(mocker):
     """ProductVersion.text_id should None if ProductVersion.product is invalid"""
     mock_log = mocker.patch("ecommerce.models.log")
     product_version = ProductVersionFactory.create(
-        product=ProductFactory.create(content_object=LineFactory())
+        product=ProductFactory.create(content_object=LineFactory()), id=1
     )
     assert product_version.text_id is None
-    assert mock_log.called_once_with(  # noqa: PGH005
-        f"The content object for this ProductVersion ({product_version.id}) does not have a `text_id` property"
+    mock_log.error.assert_called_once_with(
+        "The content object for this ProductVersion (%s) does not have a `text_id` property",
+        str(product_version.id),
     )
 
 

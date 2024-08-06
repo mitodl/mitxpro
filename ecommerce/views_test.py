@@ -225,9 +225,9 @@ def test_zero_price_checkout(  # noqa: PLR0913
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_not_called()  # noqa: PGH005
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
@@ -287,9 +287,9 @@ def test_order_fulfilled(  # noqa: PLR0913
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
     if hubspot_api_key:
-        assert mock_hubspot_syncs.order.called_with(order.id)  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_called_with(order.id)  # noqa: PGH005
     else:
-        assert mock_hubspot_syncs.order.not_called()  # noqa: PGH005
+        mock_hubspot_syncs.order.assert_not_called()  # noqa: PGH005
 
 
 def test_order_affiliate(basket_client, mocker, basket_and_coupons):
