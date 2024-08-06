@@ -138,20 +138,23 @@ def test_generate_external_course_run_courseware_id(
 @pytest.mark.parametrize(
     (
         "create_course_page",
-        "is_draft",
+        "publish_page",
+        "is_live_and_draft",
         "create_image",
         "test_image_name_without_extension",
     ),
     [
-        (True, True, True, True),
-        (True, False, True, False),
-        (False, False, False, False),
+        (True, False, False, True, True),
+        (True, True, True, True, False),
+        (True, True, False, True, False),
+        (False, False, False, False, False),
     ],
 )
 @pytest.mark.django_db
-def test_create_or_update_emeritus_course_page(
+def test_create_or_update_emeritus_course_page(  # noqa: PLR0913
     create_course_page,
-    is_draft,
+    publish_page,
+    is_live_and_draft,
     create_image,
     test_image_name_without_extension,
     emeritus_course_data,
@@ -181,7 +184,12 @@ def test_create_or_update_emeritus_course_page(
             background_image=None,
             thumbnail_image=None,
         )
-        if is_draft:
+        if publish_page:
+            external_course_page.save_revision().publish()
+            if is_live_and_draft:
+                external_course_page.title = external_course_page.title + "Draft"
+                external_course_page.save_revision()
+        else:
             external_course_page.unpublish()
 
     external_course_page, course_page_created, course_page_updated = (
@@ -201,9 +209,13 @@ def test_create_or_update_emeritus_course_page(
     assert course_page_created == (not create_course_page)
     assert course_page_updated == create_course_page
 
-    if is_draft:
+    if create_course_page and not publish_page:
         assert external_course_page.has_unpublished_changes
         assert not external_course_page.live
+
+    if is_live_and_draft:
+        assert external_course_page.has_unpublished_changes
+        assert external_course_page.live
 
     if create_image:
         assert (

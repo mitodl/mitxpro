@@ -494,24 +494,28 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
 
         # Only update course page fields with API if they are empty in the latest revision.
         if not latest_revision.external_marketing_url and emeritus_course.marketing_url:
-            latest_revision.external_marketing_url = emeritus_course.marketing_url
+            course_page.external_marketing_url = emeritus_course.marketing_url
             is_updated = True
+
         if not latest_revision.duration and emeritus_course.duration:
-            latest_revision.duration = emeritus_course.duration
+            course_page.duration = emeritus_course.duration
             is_updated = True
+
         if not latest_revision.description and emeritus_course.description:
-            latest_revision.description = emeritus_course.description
+            course_page.description = emeritus_course.description
             is_updated = True
+
         if not latest_revision.background_image and image:
-            latest_revision.background_image = image
+            course_page.background_image = image
             is_updated = True
+
         if not latest_revision.thumbnail_image and image:
-            latest_revision.thumbnail_image = image
+            course_page.thumbnail_image = image
             is_updated = True
 
         if is_updated:
             is_draft = course_page.has_unpublished_changes
-            revision = latest_revision.save_revision()
+            revision = course_page.save_revision()
             if not is_draft:
                 revision.publish()
 
