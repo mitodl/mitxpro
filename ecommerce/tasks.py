@@ -14,18 +14,19 @@ from mitxpro.utils import now_in_utc
 log = logging.getLogger(__name__)
 
 
-@app.task(acks_late=True)
-def delete_expired_baskets():
+@app.task(bind=True, acks_late=True)
+def delete_expired_baskets(self):
     """Deletes the expired baskets"""
+    log.info("Task ID: %s", self.request.id)
+
     cutoff_date = now_in_utc() - timedelta(days=settings.BASKET_EXPIRY_DAYS)
     log.info("Starting the deletion of expired baskets at %s", now_in_utc())
 
     with transaction.atomic():
-        expired_basket_ids = (
+        expired_baskets = (
             Basket.objects.select_for_update(skip_locked=True)
             .filter(updated_on__lte=cutoff_date)
-            .values_list("id", flat=True)
         )
-        log.info("Found %d expired baskets to delete", len(expired_basket_ids))
-        if expired_basket_ids:
-            clear_and_delete_baskets(expired_basket_ids)
+        log.info("Found %d expired baskets to delete", len(expired_baskets))
+        if expired_baskets:
+            clear_and_delete_baskets(expired_baskets)

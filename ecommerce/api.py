@@ -53,7 +53,6 @@ from ecommerce.models import (
     CouponRedemption,
     CouponSelection,
     CouponVersion,
-    CourseRunSelection,
     DataConsentAgreement,
     DataConsentUser,
     Line,
@@ -717,23 +716,34 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
         sheets.tasks.set_assignment_rows_to_enrolled.delay(sheet_update_map)
 
 
-def clear_and_delete_baskets(basket_ids):
+def clear_and_delete_baskets(baskets):
     """
     Delete baskets and all the associated items.
 
     Args:
-        basket_ids (iterable of int): A list of basket ids whose associated items to be deleted
+        baskets (iterable of Baskets): A list of baskets whose associated items to be deleted
     """
-    items_deleted, _ = BasketItem.objects.filter(basket_id__in=basket_ids).delete()
-    log.info("Deleted %d BasketItem object(s)", items_deleted)
-    items_deleted, _ = CourseRunSelection.objects.filter(
-        basket_id__in=basket_ids
-    ).delete()
-    log.info("Deleted %d CourseRunSelection object(s)", items_deleted)
-    items_deleted, _ = CouponSelection.objects.filter(basket_id__in=basket_ids).delete()
-    log.info("Deleted %d CouponSelection object(s)", items_deleted)
-    items_deleted, _ = Basket.objects.filter(id__in=basket_ids).delete()
-    log.info("Deleted %d Basket object(s)", items_deleted)
+    log.info("Basket deletion requested for baskets: %s", [basket.id for basket in baskets])
+    for basket in baskets:
+        log.info("Clearing basket: %s", basket.id)
+
+        basket_items = basket.basketitems.all()
+        basket_item_ids = list(basket_items.values_list('id', flat=True))
+        log.info("Deleting basket items: %s", basket_item_ids)
+        basket_items.delete()
+
+        course_run_selections = basket.courserunselection_set.all()
+        course_run_selections_ids = list(course_run_selections.values_list('id', flat=True))
+        log.info("Deleting course run selections: %s", course_run_selections_ids)
+        course_run_selections.delete()
+        
+        coupon_selections = basket.couponselection_set.all()
+        coupon_selections_ids = list(coupon_selections.values_list('id', flat=True))
+        log.info("Deleting coupon selections: %s", coupon_selections_ids)
+        coupon_selections.delete()
+
+        log.info("Deleting basket: %s", basket.id)
+        basket.delete()
 
 
 def complete_order(order):
@@ -754,15 +764,14 @@ def complete_order(order):
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
     with transaction.atomic():
-        basket_ids = (
+        baskets = (
             Basket.objects.select_for_update(skip_locked=True)
             .filter(user=order.purchaser)
-            .values_list("id", flat=True)
         )
-        log.info("Found %d baskets to delete", len(basket_ids))
+        log.info("Found %d baskets to delete", len(baskets))
 
         # clear the basket
-        clear_and_delete_baskets(basket_ids)
+        clear_and_delete_baskets(baskets)
 
 
 def enroll_user_in_order_items(order):
