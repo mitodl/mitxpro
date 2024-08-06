@@ -187,7 +187,7 @@ def test_create_or_update_emeritus_course_page(  # noqa: PLR0913
         if publish_page:
             external_course_page.save_revision().publish()
             if is_live_and_draft:
-                external_course_page.title = external_course_page.title + "Draft"
+                external_course_page.title = external_course_page.title + " Draft"
                 external_course_page.save_revision()
         else:
             external_course_page.unpublish()
@@ -197,7 +197,8 @@ def test_create_or_update_emeritus_course_page(  # noqa: PLR0913
             course_index_page, course, EmeritusCourse(emeritus_course_data)
         )
     )
-    assert external_course_page.title == emeritus_course_data["program_name"]
+    external_course_page = external_course_page.revisions.last().as_object()
+
     assert external_course_page.external_marketing_url == clean_url(
         emeritus_course_data["landing_page_url"], remove_query_params=True
     )
@@ -216,6 +217,12 @@ def test_create_or_update_emeritus_course_page(  # noqa: PLR0913
     if is_live_and_draft:
         assert external_course_page.has_unpublished_changes
         assert external_course_page.live
+        assert (
+            external_course_page.title
+            == emeritus_course_data["program_name"] + " Draft"
+        )
+    else:
+        assert external_course_page.title == emeritus_course_data["program_name"]
 
     if create_image:
         assert (
