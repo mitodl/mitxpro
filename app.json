@@ -43,7 +43,7 @@
       "required": false
     },
     "BASKET_EXPIRY_DAYS": {
-      "description": "How many days to keep basket before deleting. The threshold value of a basket to live",
+      "description": "Expiry life span of a basket in days",
       "required": false
     },
     "BLOG_CACHE_TIMEOUT": {
@@ -74,6 +74,14 @@
       "description": "ID of the Google Sheet that contains requests for coupons",
       "required": false
     },
+    "CRON_BASKET_DELETE_DAYS": {
+      "description": "'days' value for the 'delete-expired-baskets' scheduled task (defaults to everyday)",
+      "required": false
+    },
+    "CRON_BASKET_DELETE_HOURS": {
+      "description": "'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
+      "required": false
+    },
     "CRON_COURSERUN_SYNC_DAYS": {
       "description": "'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
       "required": false
@@ -88,10 +96,6 @@
     },
     "CRON_COURSE_CERTIFICATES_HOURS": {
       "description": "'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
-      "required": false
-    },
-    "CRON_DELETE_BASKET_HOURS": {
-      "description": "'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
       "required": false
     },
     "CRON_EMERITUS_COURSERUN_SYNC_DAYS": {
