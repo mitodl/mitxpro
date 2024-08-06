@@ -277,13 +277,16 @@ def test_create_or_update_certificate_page(
     certificate_page, is_created, is_updated = create_or_update_certificate_page(
         external_course_page, EmeritusCourse(emeritus_course_data)
     )
+    certificate_page = certificate_page.revisions.last().as_object()
     assert certificate_page.CEUs == emeritus_course_data["ceu"]
     assert is_created == (not existing_cert_page)
     assert is_updated == existing_cert_page
-    assert certificate_page.live == publish_certificate
 
     if publish_certificate and is_live_and_draft:
         assert certificate_page.has_unpublished_changes
+
+    if publish_certificate or is_live_and_draft:
+        assert certificate_page.live
 
 
 @pytest.mark.django_db
