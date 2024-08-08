@@ -122,7 +122,7 @@
     "yup": "^0.31.0"
   },
   "engines": {
-    "node": "15.14.0"
+    "node": "20.16.0"
   },
   "scripts": {
     "postinstall": "./webpack_if_prod.sh",
