@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.156.2
+---------------
+
+- feat: add course and program availability in APIs (#3098)
+
 Version 0.156.1 (Released August 08, 2024)
 ---------------
 
