@@ -4,6 +4,7 @@ import re
 import time
 from datetime import timedelta
 from enum import Enum
+from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -443,7 +444,7 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
     return f"{course_readable_id}+{course_run_tag}"
 
 
-def create_or_update_emeritus_course_page(course_index_page, course, emeritus_course):  # noqa: C901
+def create_or_update_emeritus_course_page(course_index_page, course, emeritus_course):
     """
     Creates or updates external course page for Emeritus course.
 
@@ -468,7 +469,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
         )
 
         if not image:
-            image_title = emeritus_course.image_name.split(".")[0]
+            image_title = Path(emeritus_course.image_name).stem
             image = (
                 Image.objects.filter(title=image_title).order_by("-created_at").first()
             )
@@ -514,10 +515,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             is_updated = True
 
         if is_updated:
-            is_draft = course_page.has_unpublished_changes
-            revision = latest_revision.save_revision()
-            if not is_draft:
-                revision.publish()
+            save_page_revision(course_page, latest_revision)
 
     return course_page, is_created, is_updated
 
@@ -663,10 +661,7 @@ def create_or_update_certificate_page(course_page, emeritus_course):
             is_updated = True
 
         if is_updated:
-            is_draft = certificate_page.has_unpublished_changes
-            revision = latest_revision.save_revision()
-            if not is_draft:
-                revision.publish()
+            save_page_revision(certificate_page, latest_revision)
 
     return certificate_page, is_created, is_updated
 
@@ -683,3 +678,17 @@ def parse_emeritus_data_str(items_str):
     """
     items_list = items_str.strip().split("\r\n")
     return [item.replace("●", "").strip() for item in items_list][1:]
+
+
+def save_page_revision(page, updated_revision):
+    """
+    Saves the page revision and publishes it if page has no draft changes.
+
+    Args:
+        page(Page): A page object.
+        updated_revision(Page): Updated Page object using the `latest_revision_as_object`
+    """
+    is_draft = page.has_unpublished_changes
+    revision = updated_revision.save_revision(user=None, log_action=True)
+    if not is_draft:
+        revision.publish()

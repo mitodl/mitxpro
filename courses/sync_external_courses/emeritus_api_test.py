@@ -33,6 +33,7 @@ from courses.sync_external_courses.emeritus_api import (
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
     parse_emeritus_data_str,
+    save_page_revision,
     update_emeritus_course_runs,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
@@ -687,3 +688,40 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     assert version_created == expected_product_version_created
     assert course_run.products.first().latest_version.description
     assert course_run.products.first().latest_version.text_id
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("is_draft_page", "has_unpublished_changes"),
+    [
+        (True, True),
+        (True, False),
+        (False, True),
+        (False, False),
+    ],
+)
+def test_save_page_revision(is_draft_page, has_unpublished_changes):
+    """
+    Tests that `save_page_revision` saves a revision and publishes the page if needed.
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+    revision = external_course_page.save_revision()
+    if is_draft_page:
+        external_course_page.unpublish()
+    else:
+        revision.publish()
+
+    if has_unpublished_changes:
+        external_course_page.external_marketing_url = ""
+        external_course_page.save_revision()
+
+    latest_revision = external_course_page.get_latest_revision_as_object()
+    latest_revision.external_marketing_url = (
+        "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
+    )
+    save_page_revision(external_course_page, latest_revision)
+
+    assert external_course_page.live == (not is_draft_page)
+
+    if has_unpublished_changes:
+        assert external_course_page.has_unpublished_changes
