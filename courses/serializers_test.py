@@ -161,7 +161,6 @@ def test_serialize_program(  # noqa: PLR0913
             "external_marketing_url": external_marketing_url,
             "marketing_hubspot_form_id": marketing_hubspot_form_id,
             "platform": program.platform.name,
-            "availability": "dated",
         },
     )
     assert data["end_date"] != non_live_run.end_date.strftime(datetime_format)
@@ -297,7 +296,6 @@ def test_serialize_course(  # noqa: PLR0913
                 marketing_hubspot_form_id if course_page else None
             ),
             "platform": course.platform.name,
-            "availability": "dated",
         },
     )
 
