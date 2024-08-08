@@ -5,7 +5,7 @@ from collections import Counter
 import pytest
 
 from courses.factories import CourseRunFactory
-from courses.tasks import sync_courseruns_data
+from courses.tasks import sync_courseruns_data, task_sync_emeritus_course_runs
 
 pytestmark = [pytest.mark.django_db]
 
@@ -23,3 +23,15 @@ def test_sync_courseruns_data(mocker):
     called_args, _ = sync_course_runs.call_args
     actual_course_runs = called_args[0]
     assert Counter(actual_course_runs) == Counter(course_runs)
+
+
+def test_task_sync_emeritus_course_runs(mocker, settings):
+    """Test task_sync_emeritus_course_runs calls the right api functionality"""
+    settings.FEATURES["ENABLE_EXTERNAL_COURSE_SYNC"] = True
+    mock_fetch_emeritus_courses = mocker.patch("courses.tasks.fetch_emeritus_courses")
+    mock_update_emeritus_course_runs = mocker.patch(
+        "courses.tasks.update_emeritus_course_runs"
+    )
+    task_sync_emeritus_course_runs.delay()
+    mock_fetch_emeritus_courses.assert_called_once()
+    mock_update_emeritus_course_runs.assert_called_once()

@@ -27,13 +27,16 @@ from courses.sync_external_courses.emeritus_api import (
     create_or_update_certificate_page,
     create_or_update_emeritus_course_page,
     create_or_update_emeritus_course_run,
+    create_or_update_product_and_product_version,
     create_who_should_enroll_in_page,
     fetch_emeritus_courses,
     generate_emeritus_course_run_tag,
     generate_external_course_run_courseware_id,
     parse_emeritus_data_str,
+    save_page_revision,
     update_emeritus_course_runs,
 )
+from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import clean_url
 
@@ -43,34 +46,50 @@ def emeritus_course_data():
     """
     Emeritus Course data with Future dates.
     """
-    start_date = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")  # noqa: DTZ005
-    end_date = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")  # noqa: DTZ005
-    return {
-        "program_name": "Internet of Things (IoT): Design and Applications",
-        "course_code": "MO-DBIP",
-        "course_run_code": "MO-DBIP.ELE-25-07#1",
-        "start_date": start_date,
-        "end_date": end_date,
-        "Category": "Technology",
-        "list_price": 2600,
-        "list_currency": "USD",
-        "total_weeks": 7,
-        "product_family": "Certificate",
-        "product_sub_type": "Short Form",
-        "format": "Online",
-        "suggested_duration": 49,
-        "language": "English",
-        "image_name": "test_emeritus_image.jpg",
-        "ceu": "2.8",
-        "landing_page_url": "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
-        "?utm_medium=EmWebsite&utm_campaign=direct_EmWebsite?utm_campaign=school_website&utm_medium"
-        "=website&utm_source=MIT-web",
-        "Apply_now_url": "https://test-emeritus-api.io/?locale=en&program_sfid=01t2s000000OHA2AAO&source"
-        "=applynowlp&utm_campaign=school&utm_medium=MITWebsite&utm_source=MIT-web",
-        "description": "Test Description",
-        "learning_outcomes": None,
-        "program_for": None,
-    }
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        emeritus_course_data = json.load(test_data_file)["rows"][0]
+
+    emeritus_course_data["start_date"] = "2099-09-30"
+    emeritus_course_data["end_date"] = "2099-11-30"
+    emeritus_course_data["course_run_code"] = "MO-DBIP.ELE-99-09#1"
+    return emeritus_course_data
+
+
+@pytest.fixture
+def emeritus_expired_course_data(emeritus_course_data):
+    """
+    Emeritus course JSON with expired dates.
+    """
+    expired_emeritus_course_json = emeritus_course_data.copy()
+    expired_emeritus_course_json["start_date"] = (
+        datetime.now() - timedelta(days=2)  # noqa: DTZ005
+    ).strftime("%Y-%m-%d")
+    expired_emeritus_course_json["end_date"] = (
+        datetime.now() - timedelta(days=1)  # noqa: DTZ005
+    ).strftime("%Y-%m-%d")
+    return expired_emeritus_course_json
+
+
+@pytest.fixture
+def emeritus_course_with_bad_data(emeritus_course_data):
+    """
+    Emeritus course JSON with bad data, i.e. program_name, course_code, course_run_code is null.
+    """
+    bad_data_emeritus_course_json = emeritus_course_data.copy()
+    bad_data_emeritus_course_json["program_name"] = None
+    return bad_data_emeritus_course_json
+
+
+@pytest.fixture
+def emeritus_course_data_with_null_price(emeritus_course_data):
+    """
+    Emeritus course JSON with null price.
+    """
+    emeritus_course_json = emeritus_course_data.copy()
+    emeritus_course_json["list_price"] = None
+    return emeritus_course_json
 
 
 @pytest.mark.parametrize(
@@ -118,16 +137,28 @@ def test_generate_external_course_run_courseware_id(
 
 
 @pytest.mark.parametrize(
-    ("create_course_page", "is_draft", "create_image"),
+    (
+        "create_course_page",
+        "publish_page",
+        "is_live_and_draft",
+        "create_image",
+        "test_image_name_without_extension",
+    ),
     [
-        (True, True, True),
-        (True, False, True),
-        (False, False, False),
+        (True, False, False, True, True),
+        (True, True, True, True, False),
+        (True, True, False, True, False),
+        (False, False, False, False, False),
     ],
 )
 @pytest.mark.django_db
-def test_create_or_update_emeritus_course_page(
-    create_course_page, is_draft, create_image, emeritus_course_data
+def test_create_or_update_emeritus_course_page(  # noqa: PLR0913
+    create_course_page,
+    publish_page,
+    is_live_and_draft,
+    create_image,
+    test_image_name_without_extension,
+    emeritus_course_data,
 ):
     """
     Test that `create_or_update_emeritus_course_page` creates a new course or updates the existing.
@@ -135,6 +166,11 @@ def test_create_or_update_emeritus_course_page(
     home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
     course = CourseFactory.create(is_external=True)
+
+    if test_image_name_without_extension:
+        emeritus_course_data["image_name"] = emeritus_course_data["image_name"].split(
+            "."
+        )[0]
 
     if create_image:
         ImageFactory.create(title=emeritus_course_data["image_name"])
@@ -149,13 +185,21 @@ def test_create_or_update_emeritus_course_page(
             background_image=None,
             thumbnail_image=None,
         )
-        if is_draft:
+        if publish_page:
+            external_course_page.save_revision().publish()
+            if is_live_and_draft:
+                external_course_page.title = external_course_page.title + " Draft"
+                external_course_page.save_revision()
+        else:
             external_course_page.unpublish()
 
-    external_course_page, _ = create_or_update_emeritus_course_page(
-        course_index_page, course, EmeritusCourse(emeritus_course_data)
+    external_course_page, course_page_created, course_page_updated = (
+        create_or_update_emeritus_course_page(
+            course_index_page, course, EmeritusCourse(emeritus_course_data)
+        )
     )
-    assert external_course_page.title == emeritus_course_data["program_name"]
+    external_course_page = external_course_page.revisions.last().as_object()
+
     assert external_course_page.external_marketing_url == clean_url(
         emeritus_course_data["landing_page_url"], remove_query_params=True
     )
@@ -164,10 +208,22 @@ def test_create_or_update_emeritus_course_page(
         external_course_page.duration == f"{emeritus_course_data['total_weeks']} Weeks"
     )
     assert external_course_page.description == emeritus_course_data["description"]
+    assert course_page_created == (not create_course_page)
+    assert course_page_updated == create_course_page
 
-    if is_draft:
+    if create_course_page and not publish_page:
         assert external_course_page.has_unpublished_changes
         assert not external_course_page.live
+
+    if is_live_and_draft:
+        assert external_course_page.has_unpublished_changes
+        assert external_course_page.live
+        assert (
+            external_course_page.title
+            == emeritus_course_data["program_name"] + " Draft"
+        )
+    else:
+        assert external_course_page.title == emeritus_course_data["program_name"]
 
     if create_image:
         assert (
@@ -181,16 +237,17 @@ def test_create_or_update_emeritus_course_page(
 
 
 @pytest.mark.parametrize(
-    ("existing_cert_page", "publish_certificate"),
+    ("existing_cert_page", "publish_certificate", "is_live_and_draft"),
     [
-        (True, False),
-        (True, True),
-        (False, False),
+        (True, False, False),
+        (True, True, True),
+        (True, True, False),
+        (False, False, False),
     ],
 )
 @pytest.mark.django_db
 def test_create_or_update_certificate_page(
-    emeritus_course_data, existing_cert_page, publish_certificate
+    emeritus_course_data, existing_cert_page, publish_certificate, is_live_and_draft
 ):
     """
     Tests that `create_or_update_certificate_page` updates the CEUs and does not change the draft or live state.
@@ -212,16 +269,25 @@ def test_create_or_update_certificate_page(
         )
         if publish_certificate:
             certificate_page.save_revision().publish()
+            if is_live_and_draft:
+                certificate_page.CEUs = "1.2"
+                certificate_page.save_revision()
         else:
             certificate_page.unpublish()
 
     certificate_page, is_created, is_updated = create_or_update_certificate_page(
         external_course_page, EmeritusCourse(emeritus_course_data)
     )
+    certificate_page = certificate_page.revisions.last().as_object()
     assert certificate_page.CEUs == emeritus_course_data["ceu"]
     assert is_created == (not existing_cert_page)
     assert is_updated == existing_cert_page
-    assert certificate_page.live == publish_certificate
+
+    if publish_certificate and is_live_and_draft:
+        assert certificate_page.has_unpublished_changes
+
+    if publish_certificate or is_live_and_draft:
+        assert certificate_page.live
 
 
 @pytest.mark.django_db
@@ -293,10 +359,17 @@ def test_parse_emeritus_data_str():
     ]
 
 
-@pytest.mark.parametrize("create_existing_course_run", [True, False])
+@pytest.mark.parametrize(
+    ("create_existing_course_run", "empty_dates"),
+    [
+        (True, True),
+        (True, False),
+        (False, False),
+    ],
+)
 @pytest.mark.django_db
 def test_create_or_update_emeritus_course_run(
-    create_existing_course_run, emeritus_course_data
+    create_existing_course_run, empty_dates, emeritus_course_data
 ):
     """
     Tests that `create_or_update_emeritus_course_run` creates or updates a course run
@@ -304,21 +377,30 @@ def test_create_or_update_emeritus_course_run(
     emeritus_course = EmeritusCourse(emeritus_course_data)
     course = CourseFactory.create()
     if create_existing_course_run:
-        CourseRunFactory.create(
+        run = CourseRunFactory.create(
             course=course,
             external_course_run_id=emeritus_course.course_run_code,
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
         )
+        if empty_dates:
+            run.start_date = None
+            run.end_date = None
+            run.save()
 
-    create_or_update_emeritus_course_run(course, emeritus_course)
+    run, run_created, run_updated = create_or_update_emeritus_course_run(
+        course, emeritus_course
+    )
     course_runs = course.courseruns.all()
     course_run_courseware_id = generate_external_course_run_courseware_id(
         emeritus_course.course_run_tag, course.readable_id
     )
 
     assert len(course_runs) == 1
+    assert run.course == course
+    assert run_created == (not create_existing_course_run)
+    assert run_updated == create_existing_course_run
     if create_existing_course_run:
         expected_data = {
             "external_course_run_id": emeritus_course.course_run_code,
@@ -341,9 +423,14 @@ def test_create_or_update_emeritus_course_run(
         assert getattr(course_runs[0], attr_name) == expected_value
 
 
-@pytest.mark.parametrize("create_existing_course_runs", [True, False])
+@pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
-def test_update_emeritus_course_runs(create_existing_course_runs):
+def test_update_emeritus_course_runs(  # noqa: PLR0915
+    create_existing_data,
+    emeritus_expired_course_data,
+    emeritus_course_with_bad_data,
+    emeritus_course_data_with_null_price,
+):
     """
     Tests that `update_emeritus_course_runs` creates new courses and updates existing.
     """
@@ -354,7 +441,7 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
 
     platform = PlatformFactory.create(name=EmeritusKeyMap.PLATFORM_NAME.value)
 
-    if create_existing_course_runs:
+    if create_existing_data:
         for run in random.sample(emeritus_course_runs, len(emeritus_course_runs) // 2):
             course = CourseFactory.create(
                 title=run["program_name"],
@@ -362,7 +449,7 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
                 external_course_id=run["course_code"],
                 is_external=True,
             )
-            CourseRunFactory.create(
+            course_run = CourseRunFactory.create(
                 course=course,
                 external_course_run_id=run["course_run_code"],
                 enrollment_start=None,
@@ -384,11 +471,43 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
             CertificatePageFactory.create(
                 parent=course_page, CEUs="1.0", partner_logo=None
             )
+            product = ProductFactory.create(content_object=course_run)
+            ProductVersionFactory.create(product=product, price=run["list_price"])
 
-    update_emeritus_course_runs(emeritus_course_runs)
+    emeritus_course_runs.append(emeritus_expired_course_data)
+    emeritus_course_runs.append(emeritus_course_with_bad_data)
+    emeritus_course_runs.append(emeritus_course_data_with_null_price)
+    stats = update_emeritus_course_runs(emeritus_course_runs)
     courses = Course.objects.filter(platform=platform)
-    assert len(courses) == len(emeritus_course_runs)
+
+    num_courses_created = 2 if create_existing_data else 4
+    num_existing_courses = 2 if create_existing_data else 0
+    num_course_runs_created = 3 if create_existing_data else 5
+    num_course_runs_updated = 2 if create_existing_data else 0
+    num_course_pages_created = 2 if create_existing_data else 4
+    num_course_pages_updated = 2 if create_existing_data else 0
+    num_products_created = 2 if create_existing_data else 4
+    num_product_versions_created = 2 if create_existing_data else 4
+    assert len(courses) == 4
+    assert len(stats["course_runs_skipped"]) == 1
+    assert len(stats["course_runs_expired"]) == 1
+    assert len(stats["courses_created"]) == num_courses_created
+    assert len(stats["existing_courses"]) == num_existing_courses
+    assert len(stats["course_runs_created"]) == num_course_runs_created
+    assert len(stats["course_runs_updated"]) == num_course_runs_updated
+    assert len(stats["course_pages_created"]) == num_course_pages_created
+    assert len(stats["course_pages_updated"]) == num_course_pages_updated
+    assert len(stats["products_created"]) == num_products_created
+    assert len(stats["product_versions_created"]) == num_product_versions_created
+    assert len(stats["course_runs_without_prices"]) == 1
+
     for emeritus_course_run in emeritus_course_runs:
+        if (
+            emeritus_course_run["course_run_code"] in stats["course_runs_skipped"]
+            or emeritus_course_run["course_run_code"] in stats["course_runs_expired"]
+        ):
+            continue
+
         course = Course.objects.filter(
             platform=platform,
             external_course_id=emeritus_course_run["course_code"],
@@ -402,6 +521,14 @@ def test_update_emeritus_course_runs(create_existing_course_runs):
             == 1
         )
         assert hasattr(course, "externalcoursepage")
+        assert (
+            course.courseruns.filter(
+                external_course_run_id=emeritus_course_run["course_run_code"]
+            )
+            .first()
+            .current_price
+            == emeritus_course_run["list_price"]
+        )
 
         course_page = course.externalcoursepage
         if emeritus_course_run["program_for"]:
@@ -503,3 +630,98 @@ def test_fetch_emeritus_courses_error(settings, mocker, caplog):
         fetch_emeritus_courses()
     assert "Job failed!" in caplog.text
     assert "Something unexpected happened!" in caplog.text
+
+
+@pytest.mark.parametrize(
+    (
+        "create_existing_product",
+        "existing_price",
+        "new_price",
+        "expected_price",
+        "expected_product_created",
+        "expected_product_version_created",
+    ),
+    [
+        (True, None, float(100), float(100), False, True),
+        (False, None, float(100), float(100), True, True),
+        (True, float(100), float(100), float(100), False, False),
+        (True, float(100), float(111), float(111), False, True),
+    ],
+)
+@pytest.mark.django_db
+def test_create_or_update_product_and_product_version(  # noqa: PLR0913
+    emeritus_course_data,
+    create_existing_product,
+    existing_price,
+    new_price,
+    expected_price,
+    expected_product_created,
+    expected_product_version_created,
+):
+    """
+    Tests that `create_or_update_product_and_product_version` creates or updates products and versions as required.
+    """
+    emeritus_course_data["list_price"] = new_price
+    emeritus_course = EmeritusCourse(emeritus_course_data)
+    platform = PlatformFactory.create(name=EmeritusKeyMap.PLATFORM_NAME)
+    course = CourseFactory.create(
+        external_course_id=emeritus_course.course_code,
+        platform=platform,
+        is_external=True,
+        title=emeritus_course.course_title,
+        readable_id=emeritus_course.course_readable_id,
+        live=True,
+    )
+    course_run, _, _ = create_or_update_emeritus_course_run(course, emeritus_course)
+
+    if create_existing_product:
+        product = ProductFactory.create(content_object=course_run)
+
+        if existing_price:
+            ProductVersionFactory.create(product=product, price=existing_price)
+
+    product_created, version_created = create_or_update_product_and_product_version(
+        emeritus_course, course_run
+    )
+    assert course_run.current_price == expected_price
+    assert product_created == expected_product_created
+    assert version_created == expected_product_version_created
+    assert course_run.products.first().latest_version.description
+    assert course_run.products.first().latest_version.text_id
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("is_draft_page", "has_unpublished_changes"),
+    [
+        (True, True),
+        (True, False),
+        (False, True),
+        (False, False),
+    ],
+)
+def test_save_page_revision(is_draft_page, has_unpublished_changes):
+    """
+    Tests that `save_page_revision` saves a revision and publishes the page if needed.
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+    revision = external_course_page.save_revision()
+    if is_draft_page:
+        external_course_page.unpublish()
+    else:
+        revision.publish()
+
+    if has_unpublished_changes:
+        external_course_page.external_marketing_url = ""
+        external_course_page.save_revision()
+
+    latest_revision = external_course_page.get_latest_revision_as_object()
+    latest_revision.external_marketing_url = (
+        "https://test-emeritus-api.io/Internet-of-things-iot-design-and-applications"
+    )
+    save_page_revision(external_course_page, latest_revision)
+
+    assert external_course_page.live == (not is_draft_page)
+
+    if has_unpublished_changes:
+        assert external_course_page.has_unpublished_changes

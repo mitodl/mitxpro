@@ -4,6 +4,7 @@ import re
 import time
 from datetime import timedelta
 from enum import Enum
+from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
@@ -184,6 +185,12 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
     """
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
+
+    Args:
+        emeritus_courses(list[dict]): A list of Emeritus Courses as a dict.
+
+    Returns:
+        dict: Stats of all the objects created/updated.
     """
     platform, _ = Platform.objects.get_or_create(
         name__iexact=EmeritusKeyMap.PLATFORM_NAME.value,
@@ -247,27 +254,35 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                     "live": True,
                 },
             )
-            log_msg = "Created course," if course_created else "Course already exists,"
-            log.info(
-                f"{log_msg} title: {emeritus_course.course_title}, readable_id: {emeritus_course.course_readable_id}"  # noqa: G004
-            )
 
             if course_created:
                 stats["courses_created"].add(emeritus_course.course_code)
+                log.info(
+                    f"Created course, title: {emeritus_course.course_title}, readable_id: {emeritus_course.course_readable_id}"  # noqa: G004
+                )
             else:
                 stats["existing_courses"].add(emeritus_course.course_code)
+                log.info(
+                    f"Course already exists, title: {emeritus_course.course_title}, readable_id: {emeritus_course.course_readable_id}"  # noqa: G004
+                )
 
             log.info(
                 f"Creating or Updating course run, title: {emeritus_course.course_title}, course_run_code: {emeritus_course.course_run_code}"  # noqa: G004
             )
-            course_run, course_run_created = create_or_update_emeritus_course_run(
-                course, emeritus_course
+            course_run, course_run_created, course_run_updated = (
+                create_or_update_emeritus_course_run(course, emeritus_course)
             )
 
             if course_run_created:
                 stats["course_runs_created"].add(course_run.external_course_run_id)
-            else:
+                log.info(
+                    f"Created Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
+                )
+            elif course_run_updated:
                 stats["course_runs_updated"].add(course_run.external_course_run_id)
+                log.info(
+                    f"Updated Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
+                )
 
             log.info(
                 f"Creating or Updating Product and Product Version, course run courseware_id: {course_run.external_course_run_id}, Price: {emeritus_course.price}"  # noqa: G004
@@ -301,14 +316,22 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
             log.info(
                 f"Creating or Updating course page, title: {emeritus_course.course_title}, course_code: {emeritus_course.course_run_code}"  # noqa: G004
             )
-            course_page, course_page_created = create_or_update_emeritus_course_page(
-                course_index_page, course, emeritus_course
+            course_page, course_page_created, course_page_updated = (
+                create_or_update_emeritus_course_page(
+                    course_index_page, course, emeritus_course
+                )
             )
 
             if course_page_created:
                 stats["course_pages_created"].add(emeritus_course.course_code)
-            else:
+                log.info(
+                    f"Created external course page for course title: {emeritus_course.course_title}"  # noqa: G004
+                )
+            elif course_page_updated:
                 stats["course_pages_updated"].add(emeritus_course.course_code)
+                log.info(
+                    f"Updated external course page for course title: {emeritus_course.course_title}"  # noqa: G004
+                )
 
             if emeritus_course.category:
                 topic = CourseTopic.objects.filter(
@@ -317,6 +340,9 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 if topic:
                     course_page.topics.add(topic)
                     course_page.save()
+                    log.info(
+                        f"Added topic {topic.name} for {emeritus_course.course_title}"  # noqa: G004
+                    )
 
             outcomes_page = course_page.get_child_page_of_type_including_draft(
                 LearningOutcomesPage
@@ -325,6 +351,7 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 create_learning_outcomes_page(
                     course_page, emeritus_course.learning_outcomes_list
                 )
+                log.info("Created LearningOutcomesPage.")
 
             who_should_enroll_page = course_page.get_child_page_of_type_including_draft(
                 WhoShouldEnrollPage
@@ -333,6 +360,7 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 create_who_should_enroll_in_page(
                     course_page, emeritus_course.who_should_enroll_list
                 )
+                log.info("Created WhoShouldEnrollPage.")
 
             if emeritus_course.CEUs:
                 log.info(
@@ -391,6 +419,12 @@ def generate_emeritus_course_run_tag(course_run_code):
     Returns the course run tag generated using the Emeritus Course run code.
 
     Emeritus course run codes follow a pattern `MO-<COURSE_CODE>-<RUN_TAG>`. This method returns the run tag.
+
+    Args:
+        course_run_code(str): Emeritus course code
+
+    Returns:
+        str: Course tag generated from the Emeritus Course Code
     """
     run_tag = re.search(r"[0-9]{2}-[0-9]{2}#[0-9]+$", course_run_code).group(0)
     return run_tag.replace("#", "-")
@@ -399,6 +433,13 @@ def generate_emeritus_course_run_tag(course_run_code):
 def generate_external_course_run_courseware_id(course_run_tag, course_readable_id):
     """
     Returns course run courseware id using the course readable id and course run tag.
+
+    Args:
+        course_run_tag(str): CourseRun tag for the course.
+        course_readable_id(str): Course readable_id
+
+    Returns:
+        str: Course run courseware_id
     """
     return f"{course_readable_id}+{course_run_tag}"
 
@@ -406,6 +447,14 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
 def create_or_update_emeritus_course_page(course_index_page, course, emeritus_course):
     """
     Creates or updates external course page for Emeritus course.
+
+    Args:
+        course_index_page(CourseIndexPage): A course index page object.
+        course(Course): A course object.
+        emeritus_course(EmeritusCourse): A EmeritusCourse object.
+
+    Returns:
+        tuple(ExternalCoursePage, is_created, is_updated): ExternalCoursePage object, is_created, is_updated
     """
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
@@ -420,11 +469,12 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
         )
 
         if not image:
-            image_title = emeritus_course.image_name.split(".")[0]
+            image_title = Path(emeritus_course.image_name).stem
             image = (
                 Image.objects.filter(title=image_title).order_by("-created_at").first()
             )
-    created = False
+
+    is_created = is_updated = False
     if not course_page:
         course_page = ExternalCoursePage(
             course=course,
@@ -438,35 +488,36 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             thumbnail_image=image,
         )
         course_index_page.add_child(instance=course_page)
-        course_page.save()
-        log.info(
-            f"Created external course page for course title: {emeritus_course.course_title}"  # noqa: G004
-        )
-        created = True
+        course_page.save_revision().publish()
+        is_created = True
     else:
         latest_revision = course_page.get_latest_revision_as_object()
 
         # Only update course page fields with API if they are empty in the latest revision.
         if not latest_revision.external_marketing_url and emeritus_course.marketing_url:
             latest_revision.external_marketing_url = emeritus_course.marketing_url
+            is_updated = True
+
         if not latest_revision.duration and emeritus_course.duration:
             latest_revision.duration = emeritus_course.duration
+            is_updated = True
+
         if not latest_revision.description and emeritus_course.description:
             latest_revision.description = emeritus_course.description
+            is_updated = True
+
         if not latest_revision.background_image and image:
             latest_revision.background_image = image
+            is_updated = True
+
         if not latest_revision.thumbnail_image and image:
             latest_revision.thumbnail_image = image
+            is_updated = True
 
-        is_draft = course_page.has_unpublished_changes
-        revision = latest_revision.save_revision()
-        if not is_draft:
-            revision.publish()
-        log.info(
-            f"Updated external course page for course title: {emeritus_course.course_title}"  # noqa: G004
-        )
+        if is_updated:
+            save_page_revision(course_page, latest_revision)
 
-    return course_page, created
+    return course_page, is_created, is_updated
 
 
 def create_or_update_emeritus_course_run(course, emeritus_course):
@@ -478,7 +529,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         emeritus_course (EmeritusCourse): EmeritusCourse object
 
     Returns:
-        tuple: A tuple containing of course run and is course run created.
+        tuple(CourseRun, is_created, is_updated): A tuple containing course run, is course run created, is course run updated
     """
     course_run_courseware_id = generate_external_course_run_courseware_id(
         emeritus_course.course_run_tag, course.readable_id
@@ -488,6 +539,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         .filter(external_course_run_id=emeritus_course.course_run_code, course=course)
         .first()
     )
+    is_created = is_updated = False
 
     if not course_run:
         course_run = CourseRun.objects.create(
@@ -501,10 +553,7 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
             enrollment_end=emeritus_course.enrollment_end,
             live=True,
         )
-        log.info(
-            f"Created Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
-        )
-        return course_run, True
+        is_created = True
     elif (
         (not course_run.start_date and emeritus_course.start_date)
         or (
@@ -530,15 +579,18 @@ def create_or_update_emeritus_course_run(course, emeritus_course):
         course_run.end_date = emeritus_course.end_date
         course_run.enrollment_end = emeritus_course.enrollment_end
         course_run.save()
-        log.info(
-            f"Updated Course Run, title: {emeritus_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
-        )
-    return course_run, False
+        is_updated = True
+
+    return course_run, is_created, is_updated
 
 
 def create_who_should_enroll_in_page(course_page, who_should_enroll_list):
     """
     Creates `WhoShouldEnrollPage` for Emeritus course.
+
+    Args:
+        course_page(ExternalCoursePage): ExternalCoursePage object.
+        who_should_enroll_list(list): List of who should enroll items.
     """
     content = json.dumps(
         [
@@ -558,6 +610,10 @@ def create_who_should_enroll_in_page(course_page, who_should_enroll_list):
 def create_learning_outcomes_page(course_page, outcomes_list):
     """
     Creates `LearningOutcomesPage` for Emeritus course.
+
+    Args:
+        course_page(ExternalCoursePage): ExternalCoursePage object.
+        outcomes_list(list): List of outcomes.
     """
     outcome_items = json.dumps(
         [{"type": "outcome", "value": outcome} for outcome in outcomes_list]
@@ -586,6 +642,8 @@ def create_or_update_certificate_page(course_page, emeritus_course):
     certificate_page = course_page.get_child_page_of_type_including_draft(
         CertificatePage
     )
+    is_created = is_updated = False
+
     if not certificate_page:
         certificate_page = CertificatePage(
             product_name=f"Certificate for {emeritus_course.course_title}",
@@ -594,29 +652,43 @@ def create_or_update_certificate_page(course_page, emeritus_course):
         )
         course_page.add_child(instance=certificate_page)
         certificate_page.save_revision().publish()
-        return certificate_page, True, False
+        is_created = True
     else:
         latest_revision = certificate_page.get_latest_revision_as_object()
-        is_updated = False
 
         if latest_revision.CEUs != emeritus_course.CEUs:
             latest_revision.CEUs = emeritus_course.CEUs
             is_updated = True
 
-        if not is_updated:
-            return certificate_page, False, is_updated
+        if is_updated:
+            save_page_revision(certificate_page, latest_revision)
 
-        is_draft = certificate_page.has_unpublished_changes
-        revision = latest_revision.save_revision()
-        if not is_draft:
-            revision.publish()
-
-        return certificate_page, False, is_updated
+    return certificate_page, is_created, is_updated
 
 
 def parse_emeritus_data_str(items_str):
     """
     Parses `WhoShouldEnrollPage` and `LearningOutcomesPage` items for the Emeritus API.
+
+    Args:
+        items_str(str): String containing a list of items separated by `\r\n`.
+
+    Returns:
+        list: List of items.
     """
     items_list = items_str.strip().split("\r\n")
     return [item.replace("●", "").strip() for item in items_list][1:]
+
+
+def save_page_revision(page, updated_revision):
+    """
+    Saves the page revision and publishes it if page has no draft changes.
+
+    Args:
+        page(Page): A page object.
+        updated_revision(Page): Updated Page object using the `latest_revision_as_object`
+    """
+    is_draft = page.has_unpublished_changes
+    revision = updated_revision.save_revision(user=None, log_action=True)
+    if not is_draft:
+        revision.publish()
