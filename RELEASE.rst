@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.156.1
+---------------
+
+- Revert "feat: add course and program availability in APIs (#3094)" (#3096)
+- feat: add course and program availability in APIs (#3094)
+- test(emeritus_api): add more tests for emeritus API ingestion (#3032)
+- chore: upgrade node to v20 (#3090)
+- fix(deps): update dependency django to v4.2.15 [security]
+- [pre-commit.ci] pre-commit autoupdate (#3088)
+
 Version 0.156.0 (Released August 06, 2024)
 ---------------
 
