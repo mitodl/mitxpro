@@ -159,9 +159,7 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
     enrollment = CourseRunEnrollmentFactory.create()
 
     run_start_date = enrollment.run.start_date
-    run_start_time = run_start_date.astimezone(datetime.timezone.utc).strftime(
-        EMAIL_TIME_FORMAT
-    )
+    run_start_time = run_start_date.astimezone(datetime.UTC).strftime(EMAIL_TIME_FORMAT)
     run_end_date = enrollment.run.end_date
     date_range = (
         f"{run_start_date.strftime(EMAIL_DATE_FORMAT)} - "
@@ -265,7 +263,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
     """send_ecommerce_order_receipt should send a receipt email"""
     settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
-    date = datetime.datetime(2010, 1, 1, 0, tzinfo=datetime.timezone.utc)
+    date = datetime.datetime(2010, 1, 1, 0, tzinfo=datetime.UTC)
     user = UserFactory.create(
         name="test",
         email="test@example.com",

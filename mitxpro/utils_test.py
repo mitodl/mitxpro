@@ -88,14 +88,14 @@ def test_now_in_utc():
     """now_in_utc() should return the current time set to the UTC time zone"""
     now = now_in_utc()
     assert is_near_now(now)
-    assert now.tzinfo == datetime.timezone.utc
+    assert now.tzinfo == datetime.UTC
 
 
 def test_is_near_now():
     """
     Test is_near_now for now
     """
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    now = datetime.datetime.now(tz=datetime.UTC)
     assert is_near_now(now) is True
     later = now + datetime.timedelta(0, 6)
     assert is_near_now(later) is False

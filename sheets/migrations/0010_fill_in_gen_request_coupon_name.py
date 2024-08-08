@@ -29,7 +29,7 @@ def fill_in_coupon_name(apps, schema_editor):
                     "raw_data is either not a list, or does not include a valid coupon name"  # noqa: EM101
                 )
         except Exception:  # noqa: BLE001
-            coupon_name = "COUPON NAME NEEDED ({})".format(coupon_gen_request.id)  # noqa: UP032
+            coupon_name = f"COUPON NAME NEEDED ({coupon_gen_request.id})"
         else:
             coupon_name = raw_data[1]
         coupon_gen_request.coupon_name = coupon_name

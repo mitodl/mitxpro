@@ -92,7 +92,7 @@ class Command(BaseCommand):
         users = fetch_users(kwargs["users"])
 
         for user in users:
-            self.stdout.write("Retiring user: {user}".format(user=user))  # noqa: UP032
+            self.stdout.write(f"Retiring user: {user}")
             if not user.is_active:
                 self.stdout.write(
                     self.style.ERROR(
@@ -125,12 +125,8 @@ class Command(BaseCommand):
             auth_deleted_count = UserSocialAuth.objects.filter(user=user).delete()
 
             if auth_deleted_count:
-                self.stdout.write(
-                    "For  user: '{user}' SocialAuth rows deleted".format(user=user)  # noqa: UP032
-                )
+                self.stdout.write(f"For  user: '{user}' SocialAuth rows deleted")
 
             self.stdout.write(
-                self.style.SUCCESS(
-                    "User: '{user}' is retired from MIT xPRO".format(user=user)  # noqa: UP032
-                )
+                self.style.SUCCESS(f"User: '{user}' is retired from MIT xPRO")
             )

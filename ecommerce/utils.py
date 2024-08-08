@@ -171,7 +171,7 @@ def format_run_date(run_date):
     if run_date:
         from ecommerce.mail_api import EMAIL_DATE_FORMAT
 
-        formatted_date_time = run_date.astimezone(datetime.timezone.utc).strftime(
+        formatted_date_time = run_date.astimezone(datetime.UTC).strftime(
             f"{EMAIL_DATE_FORMAT}-{EMAIL_TIME_FORMAT}"
         )
         return tuple(formatted_date_time.split("-", 1))

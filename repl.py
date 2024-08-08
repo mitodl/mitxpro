@@ -23,7 +23,7 @@ if __name__ == "__main__":
     for app in settings.INSTALLED_APPS:
         try:  # noqa: SIM105
             exec(  # noqa: S102
-                "from {app}.models import *".format(app=app)  # noqa: UP032
+                f"from {app}.models import *"
             )
         except ModuleNotFoundError:  # noqa: PERF203
             pass

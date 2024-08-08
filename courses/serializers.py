@@ -371,12 +371,12 @@ class ProgramSerializer(serializers.ModelSerializer):
 
     def get_topics(self, instance):
         """List all topics in all courses in the program"""
-        topics = set(  # noqa: C401
+        topics = {
             topic.name
             for course in instance.courses.all()
             if course.page
             for topic in course.page.topics.all()
-        )
+        }
         return [{"name": topic} for topic in sorted(topics)]
 
     def get_time_commitment(self, instance):

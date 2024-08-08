@@ -460,8 +460,8 @@ def _parse_sheet_date_str(date_str, date_format):
     )
     return (
         dt
-        if settings.SHEETS_DATE_TIMEZONE == datetime.timezone.utc  # noqa: SIM300
-        else dt.astimezone(datetime.timezone.utc)
+        if settings.SHEETS_DATE_TIMEZONE == datetime.UTC
+        else dt.astimezone(datetime.UTC)
     )
 
 
@@ -503,7 +503,7 @@ def google_timestamp_to_datetime(google_timestamp):
     """
     # Google timestamps are expressed in milliseconds, hence the '/ 1000'
     timestamp_in_seconds = int(google_timestamp) / 1000
-    return datetime.datetime.fromtimestamp(timestamp_in_seconds, datetime.timezone.utc)
+    return datetime.datetime.fromtimestamp(timestamp_in_seconds, datetime.UTC)
 
 
 def google_date_string_to_datetime(google_date_str):
@@ -518,7 +518,7 @@ def google_date_string_to_datetime(google_date_str):
     """
     return datetime.datetime.strptime(
         google_date_str, "%Y-%m-%dT%H:%M:%S.%fZ"
-    ).astimezone(datetime.timezone.utc)
+    ).astimezone(datetime.UTC)
 
 
 def mailgun_timestamp_to_datetime(timestamp):
@@ -531,7 +531,7 @@ def mailgun_timestamp_to_datetime(timestamp):
     Returns:
         datetime.datetime: The parsed timestamp
     """
-    return datetime.datetime.fromtimestamp(timestamp, datetime.timezone.utc)
+    return datetime.datetime.fromtimestamp(timestamp, datetime.UTC)
 
 
 def build_multi_cell_update_request_body(

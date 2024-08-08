@@ -1,6 +1,6 @@
 const { babelSharedLoader } = require("../../webpack.config.shared");
 
-babelSharedLoader.query.presets = ["@babel/env", "@babel/preset-react"];
+babelSharedLoader.options.presets = ["@babel/env", "@babel/preset-react"];
 
 require("@babel/polyfill");
 
@@ -47,4 +47,4 @@ Object.defineProperty(window, "location", {
   },
 });
 
-require("@babel/register")(babelSharedLoader.query);
+require("@babel/register")(babelSharedLoader.options);
