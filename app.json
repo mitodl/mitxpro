@@ -42,6 +42,10 @@
       "description": "S3 Bucket name.",
       "required": false
     },
+    "BASKET_EXPIRY_DAYS": {
+      "description": "Expiry life span of a basket in days",
+      "required": false
+    },
     "BLOG_CACHE_TIMEOUT": {
       "description": "How long the blog should be cached",
       "required": false
@@ -68,6 +72,14 @@
     },
     "COUPON_REQUEST_SHEET_ID": {
       "description": "ID of the Google Sheet that contains requests for coupons",
+      "required": false
+    },
+    "CRON_BASKET_DELETE_DAYS": {
+      "description": "'days' value for the 'delete-expired-baskets' scheduled task (defaults to everyday)",
+      "required": false
+    },
+    "CRON_BASKET_DELETE_HOURS": {
+      "description": "'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
       "required": false
     },
     "CRON_COURSERUN_SYNC_DAYS": {
