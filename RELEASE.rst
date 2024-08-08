@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.156.1
+Version 0.156.1 (Released August 08, 2024)
 ---------------
 
 - Revert "feat: add course and program availability in APIs (#3094)" (#3096)
