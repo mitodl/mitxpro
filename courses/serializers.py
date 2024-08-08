@@ -113,6 +113,16 @@ class CourseSerializer(serializers.ModelSerializer):
     credits = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
     marketing_hubspot_form_id = serializers.SerializerMethodField()
+    availability = serializers.SerializerMethodField()
+
+    def get_availability(self, instance):  # noqa: ARG002
+        """Get course availability"""
+
+        # This is a hard coded value because the consumers of the API need this field.
+        # In an ideal situation the availability could be "dated" or "anytime".
+        # Since all the courses in xPRO are dated so we will not check for "self paced"
+        # courses to determine if the course could be "anytime"
+        return "dated"
 
     def get_url(self, instance):
         """Get CMS Page URL for the course"""
@@ -217,6 +227,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "credits",
             "is_external",
             "platform",
+            "availability",
         ]
 
 
@@ -280,6 +291,16 @@ class ProgramSerializer(serializers.ModelSerializer):
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
+    availability = serializers.SerializerMethodField()
+
+    def get_availability(self, instance):  # noqa: ARG002
+        """Get program availability"""
+
+        # This is a hard coded value because the consumers of the API need this field.
+        # In an ideal situation the availability could be "dated" or "anytime".
+        # Since all the courses in xPRO are dated so we will not check for "self paced"
+        # courses to determine if the course could be "anytime"
+        return "dated"
 
     def get_courses(self, instance):
         """Serializer for courses"""
@@ -411,6 +432,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "credits",
             "is_external",
             "platform",
+            "availability",
         ]
 
 
