@@ -298,7 +298,7 @@ class ProgramSerializer(serializers.ModelSerializer):
 
         # This is a hard coded value because the consumers of the API need this field.
         # In an ideal situation the availability could be "dated" or "anytime".
-        # Since all the courses in xPRO are dated so we will not check for "self paced"
+        # Since all the programs in xPRO are dated so we will not check for "self paced"
         # courses to determine if the course could be "anytime"
         return "dated"
 
