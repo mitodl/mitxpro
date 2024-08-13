@@ -9,7 +9,9 @@ from ecommerce import tasks
 
 def test_delete_expired_baskets(mocker, user, basket_and_coupons):
     """Test that the expired baskets are deleted on task run"""
-    patched_clear_and_delete_baskets = mocker.patch("ecommerce.tasks.clear_and_delete_baskets")
+    patched_clear_and_delete_baskets = mocker.patch(
+        "ecommerce.tasks.clear_and_delete_baskets"
+    )
 
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
@@ -22,12 +24,16 @@ def test_delete_expired_baskets(mocker, user, basket_and_coupons):
     tasks.delete_expired_baskets.delay()
 
     patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
-    assert patched_clear_and_delete_baskets.call_args[0][0][0]==basket_and_coupons.basket
+    assert (
+        patched_clear_and_delete_baskets.call_args[0][0][0] == basket_and_coupons.basket
+    )
 
 
 def test_active_baskets_are_not_deleted(mocker, user, basket_and_coupons):
     """Test that the active baskets are not deleted on task run"""
-    patched_clear_and_delete_baskets = mocker.patch("ecommerce.tasks.clear_and_delete_baskets")
+    patched_clear_and_delete_baskets = mocker.patch(
+        "ecommerce.tasks.clear_and_delete_baskets"
+    )
 
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()

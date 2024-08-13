@@ -1070,6 +1070,7 @@ def test_company_multiple_global_consent_error(mocker, basket_and_agreement):
         basket_and_agreement.agreement.company,
     )
 
+
 def test_clear_and_delete_baskets(user, basket_and_coupons):
     """
     Test to verify that the basket is cleared and deleted upon calling clear_and_delete_basket fn
@@ -1093,7 +1094,9 @@ def test_complete_order(mocker, user, basket_and_coupons):
     Test that complete_order enrolls a user in the items in their order and clears out checkout-related objects
     """
     patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
-    patched_clear_and_delete_baskets = mocker.patch("ecommerce.api.clear_and_delete_baskets")
+    patched_clear_and_delete_baskets = mocker.patch(
+        "ecommerce.api.clear_and_delete_baskets"
+    )
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
     order = OrderFactory.create(purchaser=user, status=Order.CREATED)
@@ -1102,7 +1105,9 @@ def test_complete_order(mocker, user, basket_and_coupons):
 
     patched_enroll.assert_called_once_with(order)
     patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
-    assert patched_clear_and_delete_baskets.call_args[0][0][0]==basket_and_coupons.basket
+    assert (
+        patched_clear_and_delete_baskets.call_args[0][0][0] == basket_and_coupons.basket
+    )
 
 
 def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):

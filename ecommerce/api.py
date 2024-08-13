@@ -724,14 +724,18 @@ def clear_and_delete_baskets(baskets):
         baskets (iterable of Baskets): A list of baskets whose associated items to be deleted
     """
     log.info(
-        "Basket deletion requested for baskets Ids: %s", [basket.id for basket in baskets]
+        "Basket deletion requested for baskets Ids: %s",
+        [basket.id for basket in baskets],
     )
     for basket in baskets:
         log.info("Clearing and deleting basket with Id: %s", basket.id)
 
         with transaction.atomic():
             basket_items = basket.basketitems.all()
-            log.info("Deleting basket items: %s", list(basket_items.values_list("id", flat=True)))
+            log.info(
+                "Deleting basket items: %s",
+                list(basket_items.values_list("id", flat=True)),
+            )
             basket_items.delete()
 
             course_run_selections = basket.courserunselection_set.all()
