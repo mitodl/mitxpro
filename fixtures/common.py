@@ -114,14 +114,17 @@ def nplusone_fail(settings):  # noqa: PT004
 
 @pytest.fixture
 def mock_validate_user_registration(mocker):
-    """Fixture to mock validate_user_registration method."""
+    """Fixture to mock validate_user_registration_info method."""
     mock_response = mocker.MagicMock()
     mock_response.name = ""
 
     mock_client = mocker.MagicMock()
-    mock_client.user_validation.validate_user_registration.return_value = mock_response
+    mock_client.user_validation.validate_user_registration_info.return_value = (
+        mock_response
+    )
     mocker.patch(
-        "courseware.api.get_edx_api_registration_client", return_value=mock_client
+        "courseware.api.get_edx_api_registration_validation_client",
+        return_value=mock_client,
     )
 
     return mock_client

@@ -535,21 +535,15 @@ def get_edx_api_service_client():
     )
 
 
-def get_edx_api_registration_client():
+def get_edx_api_registration_validation_client():
     """
-    Gets an edx api client instance for the user registration
+    Gets an Open edX api client instance for the user registration
 
     Returns:
-         EdxApi: edx api registration client instance
+         EdxApi: Open edX api registration client instance
     """
-    registration_access_token = (
-        settings.MITXPRO_REGISTRATION_ACCESS_TOKEN
-        if settings.MITXPRO_REGISTRATION_ACCESS_TOKEN
-        else ""
-    )
-
     return EdxApi(
-        {"access_token": registration_access_token},
+        {"access_token": ""},
         settings.OPENEDX_API_BASE_URL,
         timeout=settings.EDX_API_CLIENT_TIMEOUT,
     )
@@ -841,7 +835,7 @@ def delete_oauth_application():
 
 def validate_name_with_edx(name):
     """
-    Returns validation message after validating it with edX.
+    Returns validation message after validating it with Open edX.
 
     Args:
         name (str): The full name
@@ -849,12 +843,12 @@ def validate_name_with_edx(name):
     Raises:
         EdxApiRegistrationValidationException: Raised if response status is not 200.
     """
-    edx_client = get_edx_api_registration_client()
+    edx_client = get_edx_api_registration_validation_client()
     try:
-        return edx_client.user_validation.validate_user_registration(
-            registration_information=dict(  # noqa: C408
-                name=name,
-            )
-        ).name
+        response = edx_client.user_validation.validate_user_registration_info(
+            registration_information={"name": name},
+        )
     except Exception as exc:
         raise EdxApiRegistrationValidationException(name, exc.response) from exc
+    else:
+        return response.name

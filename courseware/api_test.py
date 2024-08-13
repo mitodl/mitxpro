@@ -115,13 +115,13 @@ def update_token_response_error(settings):
 def test_validate_name_with_edx_success(mock_validate_user_registration):
     """
     Test that validate_name_with_edx successfully returns the validation message
-    from edX API when the name is valid.
+    from Open edX API when the name is valid.
     """
     name = "Test User"
 
     result = validate_name_with_edx(name)
     assert result == ""
-    mock_validate_user_registration.user_validation.validate_user_registration.assert_called_once_with(
+    mock_validate_user_registration.user_validation.validate_user_registration_info.assert_called_once_with(
         registration_information={"name": name}
     )
 
@@ -129,7 +129,7 @@ def test_validate_name_with_edx_success(mock_validate_user_registration):
 def test_validate_name_with_edx_failure(mocker):
     """
     Test that validate_name_with_edx raises EdxApiRegistrationValidationException
-    when the edX API call fails.
+    when the Open edX API call fails.
     """
     name = "Test User"
 
@@ -146,16 +146,17 @@ def test_validate_name_with_edx_failure(mocker):
     mock_response.text = "Some error details"
 
     mock_client = mocker.MagicMock()
-    mock_client.user_validation.validate_user_registration.side_effect = (
+    mock_client.user_validation.validate_user_registration_info.side_effect = (
         MockApiException("API error", response=mock_response)
     )
     mocker.patch(
-        "courseware.api.get_edx_api_registration_client", return_value=mock_client
+        "courseware.api.get_edx_api_registration_validation_client",
+        return_value=mock_client,
     )
 
     with pytest.raises(EdxApiRegistrationValidationException) as exc_info:
         validate_name_with_edx(name)
-    mock_client.user_validation.validate_user_registration.assert_called_once_with(
+    mock_client.user_validation.validate_user_registration_info.assert_called_once_with(
         registration_information={"name": name}
     )
     assert (

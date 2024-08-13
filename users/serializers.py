@@ -6,8 +6,6 @@ from collections import defaultdict
 
 import pycountry
 from django.db import transaction
-from requests import HTTPError
-from requests.exceptions import ConnectionError as RequestsConnectionError
 from rest_framework import serializers
 from social_django.models import UserSocialAuth
 
@@ -278,11 +276,7 @@ class UserSerializer(serializers.ModelSerializer):
         if name:
             try:
                 openedx_validation_msg = validate_name_with_edx(name)
-            except (
-                HTTPError,
-                RequestsConnectionError,
-                EdxApiRegistrationValidationException,
-            ) as exc:
+            except EdxApiRegistrationValidationException as exc:
                 log.exception("Unable to create user account: %s", exc)  # noqa: TRY401
                 raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)  # noqa: B904
 
