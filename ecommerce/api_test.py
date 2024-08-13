@@ -34,6 +34,7 @@ from ecommerce.api import (
     best_coupon_for_product,
     bulk_assign_product_coupons,
     calculate_tax,
+    clear_and_delete_baskets,
     complete_order,
     create_coupons,
     create_unfulfilled_order,
@@ -1069,26 +1070,39 @@ def test_company_multiple_global_consent_error(mocker, basket_and_agreement):
         basket_and_agreement.agreement.company,
     )
 
-
-def test_complete_order(mocker, user, basket_and_coupons):
+def test_clear_and_delete_baskets(user, basket_and_coupons):
     """
-    Test that complete_order enrolls a user in the items in their order and clears out checkout-related objects
+    Test to verify that the basket is cleared and deleted upon calling clear_and_delete_basket fn
     """
-    patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
     assert Basket.objects.filter(user=user).count() == 1
     assert BasketItem.objects.filter(basket__user=user).count() > 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() > 0
     assert CouponSelection.objects.filter(basket__user=user).count() > 0
-    order = OrderFactory.create(purchaser=user, status=Order.CREATED)
 
-    complete_order(order)
-    patched_enroll.assert_called_once_with(order)
+    clear_and_delete_baskets([basket_and_coupons.basket])
     assert Basket.objects.filter(user=user).count() == 0
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
+
+
+def test_complete_order(mocker, user, basket_and_coupons):
+    """
+    Test that complete_order enrolls a user in the items in their order and clears out checkout-related objects
+    """
+    patched_enroll = mocker.patch("ecommerce.api.enroll_user_in_order_items")
+    patched_clear_and_delete_baskets = mocker.patch("ecommerce.api.clear_and_delete_baskets")
+    basket_and_coupons.basket.user = user
+    basket_and_coupons.basket.save()
+    order = OrderFactory.create(purchaser=user, status=Order.CREATED)
+
+    complete_order(order)
+
+    patched_enroll.assert_called_once_with(order)
+    patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
+    assert patched_clear_and_delete_baskets.call_args[0][0][0]==basket_and_coupons.basket
 
 
 def test_complete_order_coupon_assignments(mocker, user, basket_and_coupons):
