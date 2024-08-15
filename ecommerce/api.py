@@ -771,12 +771,13 @@ def complete_order(order):
     if order_coupon_ids:
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
-    baskets = Basket.objects.select_for_update(skip_locked=True).filter(
-        user=order.purchaser
-    )
+    with transaction.atomic():
+        baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+            user=order.purchaser
+        )
 
-    # clear the basket
-    clear_and_delete_baskets(baskets)
+        # clear the basket
+        clear_and_delete_baskets(baskets)
 
 
 def enroll_user_in_order_items(order):
