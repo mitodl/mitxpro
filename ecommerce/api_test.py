@@ -1143,7 +1143,7 @@ def test_complete_order(mocker, user, basket_and_coupons):
     patched_enroll.assert_called_once_with(order)
     patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
     assert (
-        patched_clear_and_delete_baskets.call_args[0][0][0] == basket_and_coupons.basket.user
+        patched_clear_and_delete_baskets.call_args[0][0] == basket_and_coupons.basket.user
     )
 
 

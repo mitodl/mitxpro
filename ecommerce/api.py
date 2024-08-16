@@ -781,8 +781,8 @@ def complete_order(order):
     if order_coupon_ids:
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
-        # clear the basket
-        clear_and_delete_baskets(order.purchaser)
+    # clear and delete the basket
+    clear_and_delete_baskets(order.purchaser)
 
 
 def enroll_user_in_order_items(order):
