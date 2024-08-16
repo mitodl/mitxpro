@@ -5,7 +5,6 @@ import logging
 from ecommerce.api import clear_and_delete_baskets
 from mitxpro.celery import app
 
-
 log = logging.getLogger(__name__)
 
 

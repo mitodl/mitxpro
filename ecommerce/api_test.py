@@ -2,11 +2,11 @@
 Test for ecommerce functions
 """
 
+import datetime
 import hashlib
 import hmac
 import ipaddress
 import uuid
-import datetime
 from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
@@ -1098,7 +1098,7 @@ def test_delete_baskets_with_user_args(baskets_with_different_users):
     user2 = baskets_with_different_users.baskets[1].user
 
     assert Basket.objects.filter(user=user1).count() == 1
-    
+
     clear_and_delete_baskets(user1)
 
     assert Basket.objects.filter(user=user1).count() == 0
@@ -1132,7 +1132,7 @@ def test_active_baskets_are_not_deleted(mocker, user, basket_and_coupons):
     clear_and_delete_baskets()
     assert Basket.objects.filter(user=user).count() == 1
 
-    
+
 def test_complete_order(mocker, user, basket_and_coupons):
     """
     Test that complete_order enrolls a user in the items in their order and clears out checkout-related objects

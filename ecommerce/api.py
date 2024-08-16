@@ -70,7 +70,6 @@ from hubspot_xpro.task_helpers import sync_hubspot_deal
 from maxmind.api import ip_to_country_code
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
-
 log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"

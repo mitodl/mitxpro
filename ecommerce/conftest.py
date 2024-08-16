@@ -25,7 +25,6 @@ from ecommerce.factories import (
 from ecommerce.models import CourseRunSelection
 from users.factories import UserFactory
 
-
 CouponGroup = namedtuple(  # noqa: PYI024
     "CouponGroup", ["coupon", "coupon_version", "payment", "payment_version"]
 )
@@ -41,7 +40,7 @@ def baskets_with_different_users():
 
     user2 = UserFactory.create()
     basket2 = BasketFactory.create(user=user2)
-    
+
 
     return SimpleNamespace(baskets=[basket1, basket2])
 
