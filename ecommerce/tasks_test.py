@@ -10,4 +10,4 @@ def test_delete_expired_baskets(mocker):
     )
 
     tasks.delete_expired_baskets.delay()
-    patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
+    patched_clear_and_delete_baskets.assert_called_once_with()
