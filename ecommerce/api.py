@@ -723,16 +723,11 @@ def clear_and_delete_baskets(user=None):
     Args:
        user (User, optional): The user whose baskets should be deleted. If not provided, expired baskets will be deleted.
     """
+    cutoff_date = now_in_utc() - timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    basket_filter = {"user": user} if user else {"updated_on__lte": cutoff_date}
+
     with transaction.atomic():
-        if user:
-            baskets = Basket.objects.select_for_update(skip_locked=True).filter(
-                user=user
-            )
-        else:
-            cutoff_date = now_in_utc() - timedelta(days=settings.BASKET_EXPIRY_DAYS)
-            baskets = Basket.objects.select_for_update(skip_locked=True).filter(
-                updated_on__lte=cutoff_date
-            )
+        baskets = Basket.objects.select_for_update(skip_locked=True).filter(**basket_filter)
         log.info(
             "Basket deletion requested for baskets Ids: %s",
             [basket.id for basket in baskets],
@@ -752,11 +747,15 @@ def clear_and_delete_baskets(user=None):
                 course_run_selections_ids = list(
                     course_run_selections.values_list("id", flat=True)
                 )
-                log.info("Deleting course run selections: %s", course_run_selections_ids)
+                log.info(
+                    "Deleting course run selections: %s", course_run_selections_ids
+                )
                 course_run_selections.delete()
 
                 coupon_selections = basket.couponselection_set.all()
-                coupon_selections_ids = list(coupon_selections.values_list("id", flat=True))
+                coupon_selections_ids = list(
+                    coupon_selections.values_list("id", flat=True)
+                )
                 log.info("Deleting coupon selections: %s", coupon_selections_ids)
                 coupon_selections.delete()
 

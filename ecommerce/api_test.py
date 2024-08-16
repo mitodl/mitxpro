@@ -11,7 +11,7 @@ from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, patch
 
 import factory
 import faker
@@ -1090,40 +1090,34 @@ def test_clear_baskets(user, basket_and_coupons):
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
 
 
-def test_delete_baskets_with_user_args(baskets_with_different_users):
+def test_delete_baskets_with_user_args():
     """
     Test to verify that the basket of the user passed in the clear_and_delete_baskets fn is deleted only
     """
-    user1 = baskets_with_different_users.baskets[0].user
-    user2 = baskets_with_different_users.baskets[1].user
+    baskets = BasketFactory.create_batch(2)
+    
+    assert Basket.objects.filter(user=baskets[0].user).count() == 1
+    clear_and_delete_baskets(baskets[0].user)
+    assert Basket.objects.filter(user=baskets[0].user).count() == 0
+    assert (
+        Basket.objects.filter(user=baskets[1].user).count() == 1
+    )  # Not deleting basket of other users
 
-    assert Basket.objects.filter(user=user1).count() == 1
 
-    clear_and_delete_baskets(user1)
-
-    assert Basket.objects.filter(user=user1).count() == 0
-    assert Basket.objects.filter(user=user2).count() == 1  # Not deleting basket of other users
-
-
-@pytest.mark.parametrize("is_expired", [True, False])
-def test_delete_expired_basket(mocker, user, basket_and_coupons, is_expired):
+@patch("django.utils.timezone.now")
+def test_delete_expired_basket(patch_now):
     """
     Test to verify that the expired baskets are deleted on calling clear_and_delete_baskets fn without user argument
     """
-    basket_and_coupons.basket.user = user
-    basket_and_coupons.basket.save()
-
-    if is_expired:
-            now_in_utc = mocker.patch("ecommerce.api.now_in_utc")
-            now_in_utc.return_value = datetime.datetime.now(
-                tz=datetime.timezone.utc
-            ) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
-    else:
-        mocker.patch("django.conf.settings.BASKET_EXPIRY_DAYS", 15)
-
-    assert Basket.objects.filter(user=user).count() == 1
+    patch_now.return_value = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    BasketFactory.create_batch(3)
+    patch_now.return_value = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS + 1)
+    unexpired_baskets = BasketFactory.create_batch(3)
+    patch_now.stop()
+    # Calling the clear baskets without user argument so it should delete the expired baskets
     clear_and_delete_baskets()
-    assert bool(Basket.objects.filter(user=user).count()) != is_expired
+    assert Basket.objects.all().count() == 3
+    assert list(Basket.objects.all().values_list("id", flat=True)) == [basket.id for basket in unexpired_baskets]
 
 
 def test_complete_order(mocker, user, basket_and_coupons):

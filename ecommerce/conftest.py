@@ -31,21 +31,6 @@ CouponGroup = namedtuple(  # noqa: PYI024
 
 
 @pytest.fixture
-def baskets_with_different_users():
-    """
-    Multiple baskets for different users
-    """
-    user1 = UserFactory.create()
-    basket1 = BasketFactory.create(user=user1)
-
-    user2 = UserFactory.create()
-    basket2 = BasketFactory.create(user=user2)
-
-
-    return SimpleNamespace(baskets=[basket1, basket2])
-
-
-@pytest.fixture
 def basket_and_coupons():
     """
     Sample basket and coupon
