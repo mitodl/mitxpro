@@ -70,6 +70,7 @@ from hubspot_xpro.task_helpers import sync_hubspot_deal
 from maxmind.api import ip_to_country_code
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
+
 log = logging.getLogger(__name__)
 
 ISO_8601_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
@@ -716,42 +717,52 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
         sheets.tasks.set_assignment_rows_to_enrolled.delay(sheet_update_map)
 
 
-def clear_and_delete_baskets(baskets):
+def clear_and_delete_baskets(user=None):
     """
     Delete baskets and all the associated items.
 
     Args:
-        baskets (iterable of Baskets): A list of baskets whose associated items to be deleted
+       user (User, optional): The user whose baskets should be deleted. If not provided, expired baskets will be deleted.
     """
-    log.info(
-        "Basket deletion requested for baskets Ids: %s",
-        [basket.id for basket in baskets],
-    )
-    for basket in baskets:
-        log.info("Clearing and deleting basket with Id: %s", basket.id)
-
-        with transaction.atomic():
-            basket_items = basket.basketitems.all()
-            log.info(
-                "Deleting basket items: %s",
-                list(basket_items.values_list("id", flat=True)),
+    with transaction.atomic():
+        if user:
+            baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+                user=user
             )
-            basket_items.delete()
-
-            course_run_selections = basket.courserunselection_set.all()
-            course_run_selections_ids = list(
-                course_run_selections.values_list("id", flat=True)
+        else:
+            cutoff_date = now_in_utc() - timedelta(days=settings.BASKET_EXPIRY_DAYS)
+            baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+                updated_on__lte=cutoff_date
             )
-            log.info("Deleting course run selections: %s", course_run_selections_ids)
-            course_run_selections.delete()
+        log.info(
+            "Basket deletion requested for baskets Ids: %s",
+            [basket.id for basket in baskets],
+        )
+        for basket in baskets:
+            log.info("Clearing and deleting basket with Id: %s", basket.id)
 
-            coupon_selections = basket.couponselection_set.all()
-            coupon_selections_ids = list(coupon_selections.values_list("id", flat=True))
-            log.info("Deleting coupon selections: %s", coupon_selections_ids)
-            coupon_selections.delete()
+            with transaction.atomic():
+                basket_items = basket.basketitems.all()
+                log.info(
+                    "Deleting basket items: %s",
+                    list(basket_items.values_list("id", flat=True)),
+                )
+                basket_items.delete()
 
-            log.info("Deleting basket: %s", basket.id)
-            basket.delete()
+                course_run_selections = basket.courserunselection_set.all()
+                course_run_selections_ids = list(
+                    course_run_selections.values_list("id", flat=True)
+                )
+                log.info("Deleting course run selections: %s", course_run_selections_ids)
+                course_run_selections.delete()
+
+                coupon_selections = basket.couponselection_set.all()
+                coupon_selections_ids = list(coupon_selections.values_list("id", flat=True))
+                log.info("Deleting coupon selections: %s", coupon_selections_ids)
+                coupon_selections.delete()
+
+                log.info("Deleting basket: %s", basket.id)
+                basket.delete()
 
 
 def complete_order(order):
@@ -771,13 +782,8 @@ def complete_order(order):
     if order_coupon_ids:
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
-    with transaction.atomic():
-        baskets = Basket.objects.select_for_update(skip_locked=True).filter(
-            user=order.purchaser
-        )
-
         # clear the basket
-        clear_and_delete_baskets(baskets)
+        clear_and_delete_baskets(order.purchaser)
 
 
 def enroll_user_in_order_items(order):
