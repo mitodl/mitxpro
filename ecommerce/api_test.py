@@ -1105,32 +1105,25 @@ def test_delete_baskets_with_user_args(baskets_with_different_users):
     assert Basket.objects.filter(user=user2).count() == 1  # Not deleting basket of other users
 
 
-def test_delete_expired_basket(mocker, user, basket_and_coupons):
+@pytest.mark.parametrize("is_expired", [True, False])
+def test_delete_expired_basket(mocker, user, basket_and_coupons, is_expired):
     """
     Test to verify that the expired baskets are deleted on calling clear_and_delete_baskets fn without user argument
     """
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
 
-    now_in_utc = mocker.patch("ecommerce.api.now_in_utc")
-    now_in_utc.return_value = datetime.datetime.now(
-        tz=datetime.timezone.utc
-    ) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    if is_expired:
+            now_in_utc = mocker.patch("ecommerce.api.now_in_utc")
+            now_in_utc.return_value = datetime.datetime.now(
+                tz=datetime.timezone.utc
+            ) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    else:
+        mocker.patch("django.conf.settings.BASKET_EXPIRY_DAYS", 15)
 
     assert Basket.objects.filter(user=user).count() == 1
     clear_and_delete_baskets()
-    assert Basket.objects.filter(user=user).count() == 0
-
-
-def test_active_baskets_are_not_deleted(mocker, user, basket_and_coupons):
-    """Test that the active baskets are not deleted on calling clear_and_delete_baskets fn without user argument"""
-    basket_and_coupons.basket.user = user
-    basket_and_coupons.basket.save()
-
-    mocker.patch("django.conf.settings.BASKET_EXPIRY_DAYS", 15)
-    assert Basket.objects.filter(user=user).count() == 1
-    clear_and_delete_baskets()
-    assert Basket.objects.filter(user=user).count() == 1
+    assert bool(Basket.objects.filter(user=user).count()) != is_expired
 
 
 def test_complete_order(mocker, user, basket_and_coupons):
