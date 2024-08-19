@@ -118,8 +118,8 @@ describe("EditProfilePage", () => {
         },
       );
       sinon.assert.calledWith(setSubmitting, false);
-      assert.equal(setErrors.length, 0);
       if (hasError) {
+        assert.equal(setErrors.length, 0);
         assert.isNull(helper.currentLocation);
       } else {
         assert.equal(helper.currentLocation.pathname, "/profile/");

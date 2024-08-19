@@ -9,11 +9,14 @@ from django.db import transaction
 from rest_framework import serializers
 from social_django.models import UserSocialAuth
 
+from courseware.api import validate_name_with_edx
+from courseware.exceptions import EdxApiRegistrationValidationException
 from courseware.tasks import change_edx_user_email_async
 from ecommerce.api import fetch_and_serialize_unused_coupons
 from hubspot_xpro.task_helpers import sync_hubspot_user
 from mail import verification_api
 from mitxpro.serializers import WriteableSerializerMethodField
+from users.constants import USER_REGISTRATION_FAILED_MSG
 from users.models import ChangeEmailRequest, LegalAddress, Profile, User
 
 log = logging.getLogger()
@@ -266,6 +269,21 @@ class UserSerializer(serializers.ModelSerializer):
         if not instance.is_anonymous:
             return fetch_and_serialize_unused_coupons(instance)
         return []
+
+    def validate(self, data):
+        """Validate user data"""
+        name = data.get("name")
+        if name:
+            try:
+                openedx_validation_msg = validate_name_with_edx(name)
+            except EdxApiRegistrationValidationException as exc:
+                log.exception("Unable to create user account: %s", exc)  # noqa: TRY401
+                raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)  # noqa: B904
+
+            if openedx_validation_msg:
+                raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)
+
+        return data
 
     def create(self, validated_data):
         """Create a new user"""

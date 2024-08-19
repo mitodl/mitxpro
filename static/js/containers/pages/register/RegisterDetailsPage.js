@@ -2,7 +2,10 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { REGISTER_DETAILS_PAGE_TITLE } from "../../../constants";
+import {
+  ALERT_TYPE_TEXT,
+  REGISTER_DETAILS_PAGE_TITLE,
+} from "../../../constants";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -32,6 +35,7 @@ import type {
   User,
   Country,
 } from "../../../flow/authTypes";
+import { addUserNotification } from "../../../actions";
 
 type RegisterProps = {|
   location: Location,
@@ -52,6 +56,7 @@ type DispatchProps = {|
     partialToken: string,
   ) => Promise<Response<AuthResponse>>,
   getCurrentUser: () => Promise<Response<User>>,
+  addUserNotification: Function,
 |};
 
 type Props = {|
@@ -74,6 +79,7 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
       history,
       registerDetails,
       params: { partialToken },
+      addUserNotification,
     } = this.props;
 
     try {
@@ -84,8 +90,22 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
         partialToken,
       );
 
+      if (body.errors) {
+        body.errors.forEach((error) => {
+          addUserNotification({
+            "registration-failed-status": {
+              type: ALERT_TYPE_TEXT,
+              color: "danger",
+              props: {
+                text: error,
+              },
+            },
+          });
+        });
+      }
+
       handleAuthResponse(history, body, {
-        // eslint-disable-next-line camelcase
+        /* eslint-disable camelcase */
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
       });
@@ -175,6 +195,7 @@ const getCurrentUser = () =>
 const mapDispatchToProps = {
   registerDetails,
   getCurrentUser,
+  addUserNotification,
 };
 
 export default compose(

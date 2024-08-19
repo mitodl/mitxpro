@@ -63,3 +63,22 @@ class UnknownEdxApiEnrollException(Exception):  # noqa: N818
 
 class UserNameUpdateFailedException(Exception):  # noqa: N818
     """Raised if a user's profile name(Full Name) update call is failed"""
+
+
+class EdxApiRegistrationValidationException(Exception):  # noqa: N818
+    """An Open edX Registration Validation API call resulted in an error response"""
+
+    def __init__(self, name, error_response, msg=None):
+        """
+        Sets exception properties and adds a default message
+
+        Args:
+            name (str): The name being validated
+            response (requests.Response): Open edX response for name validation
+        """
+        self.name = name
+        self.response = error_response
+        if msg is None:
+            # Set some default useful error message
+            msg = f"EdX API error validating registration name {self.name}.\n{get_error_response_summary(self.response)}"
+        super().__init__(msg)

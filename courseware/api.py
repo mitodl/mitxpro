@@ -29,6 +29,7 @@ from courseware.constants import (
 from courseware.exceptions import (
     CoursewareUserCreateError,
     EdxApiEnrollErrorException,
+    EdxApiRegistrationValidationException,
     NoEdxApiAuthError,
     OpenEdXOAuth2Error,
     UnknownEdxApiEnrollException,
@@ -534,6 +535,20 @@ def get_edx_api_service_client():
     )
 
 
+def get_edx_api_registration_validation_client():
+    """
+    Gets an Open edX api client instance for the user registration
+
+    Returns:
+         EdxApi: Open edX api registration client instance
+    """
+    return EdxApi(
+        {"access_token": ""},
+        settings.OPENEDX_API_BASE_URL,
+        timeout=settings.EDX_API_CLIENT_TIMEOUT,
+    )
+
+
 def get_edx_api_course_detail_client():
     """
     Gets an edx api client instance for use with the grades api
@@ -816,3 +831,24 @@ def delete_oauth_application():
         name=settings.OPENEDX_OAUTH_APP_NAME
     ).delete()
     return _, deleted_applications_count
+
+
+def validate_name_with_edx(name):
+    """
+    Returns validation message after validating it with Open edX.
+
+    Args:
+        name (str): The full name
+
+    Raises:
+        EdxApiRegistrationValidationException: Raised if response status is not 200.
+    """
+    edx_client = get_edx_api_registration_validation_client()
+    try:
+        response = edx_client.user_validation.validate_user_registration_info(
+            registration_information={"name": name},
+        )
+    except Exception as exc:
+        raise EdxApiRegistrationValidationException(name, exc.response) from exc
+    else:
+        return response.name

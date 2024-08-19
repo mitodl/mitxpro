@@ -110,3 +110,21 @@ def valid_address_dict():
 def nplusone_fail(settings):  # noqa: PT004
     """Configures the nplusone app to raise errors"""
     settings.NPLUSONE_RAISE = True
+
+
+@pytest.fixture
+def mock_validate_user_registration(mocker):
+    """Fixture to mock validate_user_registration_info method."""
+    mock_response = mocker.MagicMock()
+    mock_response.name = ""
+
+    mock_client = mocker.MagicMock()
+    mock_client.user_validation.validate_user_registration_info.return_value = (
+        mock_response
+    )
+    mocker.patch(
+        "courseware.api.get_edx_api_registration_validation_client",
+        return_value=mock_client,
+    )
+
+    return mock_client

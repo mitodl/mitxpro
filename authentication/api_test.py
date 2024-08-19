@@ -17,6 +17,7 @@ def test_create_user_session(user):
     assert session.session_key is not None
 
 
+@pytest.mark.usefixtures("mock_validate_user_registration")
 def test_create_user_with_generated_username(mocker, valid_address_dict):
     """
     Integration test to assert that create_user_with_generated_username tries to find an available

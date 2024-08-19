@@ -36,6 +36,7 @@ from courseware.api import (
     update_edx_user_email,
     update_edx_user_name,
     update_xpro_user_username,
+    validate_name_with_edx,
 )
 from courseware.constants import (
     COURSEWARE_REPAIR_GRACE_PERIOD_MINS,
@@ -47,6 +48,7 @@ from courseware.constants import (
 from courseware.exceptions import (
     CoursewareUserCreateError,
     EdxApiEnrollErrorException,
+    EdxApiRegistrationValidationException,
     UnknownEdxApiEnrollException,
     UserNameUpdateFailedException,
 )
@@ -108,6 +110,60 @@ def update_token_response_error(settings):
         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )
     return SimpleNamespace(refresh_token=refresh_token, access_token=access_token)
+
+
+def test_validate_name_with_edx_success(mock_validate_user_registration):
+    """
+    Test that validate_name_with_edx successfully returns the validation message
+    from Open edX API when the name is valid.
+    """
+    name = "Test User"
+
+    result = validate_name_with_edx(name)
+    assert result == ""
+    mock_validate_user_registration.user_validation.validate_user_registration_info.assert_called_once_with(
+        registration_information={"name": name}
+    )
+
+
+def test_validate_name_with_edx_failure(mocker):
+    """
+    Test that validate_name_with_edx raises EdxApiRegistrationValidationException
+    when the Open edX API call fails.
+    """
+    name = "Test User"
+
+    class MockApiException(Exception):  # noqa: N818
+        """Mock exception for API errors with a response attribute."""
+
+        def __init__(self, message, response):
+            super().__init__(message)
+            self.response = response
+
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 403
+    mock_response.headers = {"Content-Type": "application/json"}
+    mock_response.text = "Some error details"
+
+    mock_client = mocker.MagicMock()
+    mock_client.user_validation.validate_user_registration_info.side_effect = (
+        MockApiException("API error", response=mock_response)
+    )
+    mocker.patch(
+        "courseware.api.get_edx_api_registration_validation_client",
+        return_value=mock_client,
+    )
+
+    with pytest.raises(EdxApiRegistrationValidationException) as exc_info:
+        validate_name_with_edx(name)
+    mock_client.user_validation.validate_user_registration_info.assert_called_once_with(
+        registration_information={"name": name}
+    )
+    assert (
+        str(exc_info.value)
+        == f"EdX API error validating registration name {name}.\nResponse - code: {mock_response.status_code}, "
+        f"content: {mock_response.text}"
+    )
 
 
 @pytest.fixture
