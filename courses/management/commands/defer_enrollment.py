@@ -66,9 +66,9 @@ class Command(EnrollmentChangeCommand):
                 message = "'to' course does not exist ({})".format(to_courseware_id)  # noqa: UP032
             else:
                 message = str(exc)
-            raise CommandError(message)  # noqa: B904, TRY200
+            raise CommandError(message)  # noqa: B904
         except ValidationError as exc:
-            raise CommandError("Invalid enrollment deferral - {}".format(exc))  # noqa: B904, EM103, TRY200, UP032
+            raise CommandError("Invalid enrollment deferral - {}".format(exc))  # noqa: B904, EM103, UP032
         else:
             if not to_enrollment:
                 raise CommandError(

@@ -61,7 +61,7 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
     try:
         order_id = int(reference_number[len(prefix_with_dash) :])
     except ValueError:
-        raise ParseException("Unable to parse order number")  # noqa: B904, EM101, TRY200
+        raise ParseException("Unable to parse order number")  # noqa: B904, EM101
 
     return order_id
 

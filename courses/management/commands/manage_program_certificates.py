@@ -51,7 +51,7 @@ class Command(BaseCommand):
         try:
             program = Program.objects.get(readable_id=program)
         except Program.DoesNotExist:
-            raise CommandError(  # noqa: B904, TRY200
+            raise CommandError(  # noqa: B904
                 f"Could not find any program with provided readable_id={program}"  # noqa: EM102
             )
 

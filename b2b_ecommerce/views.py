@@ -60,17 +60,17 @@ class B2BCheckoutView(APIView):
             contract_number = request.data.get("contract_number")
             run_id = request.data.get("run_id")
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102, TRY200
+            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102
 
         try:
             validate_email(email)
         except DjangoValidationError:
-            raise ValidationError({"email": "Invalid email"})  # noqa: B904, TRY200
+            raise ValidationError({"email": "Invalid email"})  # noqa: B904
 
         try:
             num_seats = int(num_seats)
         except ValueError:
-            raise ValidationError({"num_seats": "num_seats must be a number"})  # noqa: B904, TRY200
+            raise ValidationError({"num_seats": "num_seats must be a number"})  # noqa: B904
 
         if (
             contract_number
@@ -245,7 +245,7 @@ class B2BCouponView(APIView):
             coupon_code = request.GET["code"]
             product_id = request.GET["product_id"]
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102, TRY200
+            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102
 
         try:
             # product_id can be an integer e.g. 1234 or

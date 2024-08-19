@@ -112,7 +112,7 @@ class Command(BaseCommand):
                 if not successful_enrollments:
                     raise EdxEnrollmentCreateError  # noqa: TRY301
             except EdxEnrollmentCreateError:
-                raise CommandError("Failed to create the enrollment record")  # noqa: B904, EM101, TRY200
+                raise CommandError("Failed to create the enrollment record")  # noqa: B904, EM101
 
         ProductCouponAssignment.objects.filter(
             email__iexact=user.email, redeemed=False, product_coupon__coupon=coupon

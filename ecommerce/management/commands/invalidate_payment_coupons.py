@@ -54,7 +54,7 @@ class Command(BaseCommand):
             try:
                 payment = CouponPayment.objects.filter(name=kwargs["payment"]).get()
             except Exception:  # noqa: BLE001
-                raise CommandError(  # noqa: B904, TRY200
+                raise CommandError(  # noqa: B904
                     f"Payment name {kwargs['payment']} not found or ambiguous."  # noqa: EM102
                 )
 
@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 with open(kwargs["codefile"], "r") as file:  # noqa: PTH123, UP015
                     procCodes = [line.strip() for line in file]
             except Exception as e:  # noqa: BLE001
-                raise CommandError(  # noqa: B904, TRY200
+                raise CommandError(  # noqa: B904
                     f"Specified file {kwargs['codefile']} could not be opened: {e}"  # noqa: EM102
                 )
 
