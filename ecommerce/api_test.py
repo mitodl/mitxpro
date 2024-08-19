@@ -2,6 +2,7 @@
 Test for ecommerce functions
 """
 
+import datetime
 import hashlib
 import hmac
 import ipaddress
@@ -10,7 +11,7 @@ from base64 import b64encode
 from collections import defaultdict
 from datetime import timedelta
 from decimal import Decimal
-from unittest.mock import PropertyMock
+from unittest.mock import PropertyMock, patch
 
 import factory
 import faker
@@ -1071,9 +1072,9 @@ def test_company_multiple_global_consent_error(mocker, basket_and_agreement):
     )
 
 
-def test_clear_and_delete_baskets(user, basket_and_coupons):
+def test_clear_baskets(user, basket_and_coupons):
     """
-    Test to verify that the basket is cleared and deleted upon calling clear_and_delete_basket fn
+    Test to verify that the basket is cleared upon calling clear_and_delete_basket fn
     """
     basket_and_coupons.basket.user = user
     basket_and_coupons.basket.save()
@@ -1082,11 +1083,47 @@ def test_clear_and_delete_baskets(user, basket_and_coupons):
     assert CourseRunSelection.objects.filter(basket__user=user).count() > 0
     assert CouponSelection.objects.filter(basket__user=user).count() > 0
 
-    clear_and_delete_baskets([basket_and_coupons.basket])
+    clear_and_delete_baskets(basket_and_coupons.basket.user)
     assert Basket.objects.filter(user=user).count() == 0
     assert BasketItem.objects.filter(basket__user=user).count() == 0
     assert CourseRunSelection.objects.filter(basket__user=user).count() == 0
     assert CouponSelection.objects.filter(basket__user=user).count() == 0
+
+
+def test_delete_baskets_with_user_args():
+    """
+    Test to verify that the basket of the user passed in the clear_and_delete_baskets fn is deleted only
+    """
+    baskets = BasketFactory.create_batch(2)
+
+    assert Basket.objects.filter(user=baskets[0].user).count() == 1
+    clear_and_delete_baskets(baskets[0].user)
+    assert Basket.objects.filter(user=baskets[0].user).count() == 0
+    assert (
+        Basket.objects.filter(user=baskets[1].user).count() == 1
+    )  # Not deleting basket of other users
+
+
+@patch("django.utils.timezone.now")
+def test_delete_expired_basket(patch_now):
+    """
+    Test to verify that the expired baskets are deleted on calling clear_and_delete_baskets fn without user argument
+    """
+    patch_now.return_value = datetime.datetime.now(
+        tz=datetime.timezone.utc
+    ) - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    BasketFactory.create_batch(3)
+    patch_now.return_value = datetime.datetime.now(
+        tz=datetime.timezone.utc
+    ) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS + 1)
+    unexpired_baskets = BasketFactory.create_batch(3)
+    patch_now.stop()
+    # Calling the clear baskets without user argument so it should delete the expired baskets
+    clear_and_delete_baskets()
+    assert Basket.objects.all().count() == 3
+    assert list(Basket.objects.all().values_list("id", flat=True)) == [
+        basket.id for basket in unexpired_baskets
+    ]
 
 
 def test_complete_order(mocker, user, basket_and_coupons):
@@ -1106,7 +1143,8 @@ def test_complete_order(mocker, user, basket_and_coupons):
     patched_enroll.assert_called_once_with(order)
     patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
     assert (
-        patched_clear_and_delete_baskets.call_args[0][0][0] == basket_and_coupons.basket
+        patched_clear_and_delete_baskets.call_args[0][0]
+        == basket_and_coupons.basket.user
     )
 
 

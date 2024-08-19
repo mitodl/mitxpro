@@ -716,42 +716,53 @@ def set_coupons_to_redeemed(redeemed_email, coupon_ids):
         sheets.tasks.set_assignment_rows_to_enrolled.delay(sheet_update_map)
 
 
-def clear_and_delete_baskets(baskets):
+def clear_and_delete_baskets(user=None):
     """
     Delete baskets and all the associated items.
 
     Args:
-        baskets (iterable of Baskets): A list of baskets whose associated items to be deleted
+       user (User, optional): The user whose baskets should be deleted. If not provided, expired baskets will be deleted.
     """
-    log.info(
-        "Basket deletion requested for baskets Ids: %s",
-        [basket.id for basket in baskets],
-    )
-    for basket in baskets:
-        log.info("Clearing and deleting basket with Id: %s", basket.id)
+    cutoff_date = now_in_utc() - timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    basket_filter = {"user": user} if user else {"updated_on__lte": cutoff_date}
 
-        with transaction.atomic():
-            basket_items = basket.basketitems.all()
-            log.info(
-                "Deleting basket items: %s",
-                list(basket_items.values_list("id", flat=True)),
-            )
-            basket_items.delete()
+    with transaction.atomic():
+        baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+            **basket_filter
+        )
+        log.info(
+            "Basket deletion requested for baskets Ids: %s",
+            [basket.id for basket in baskets],
+        )
+        for basket in baskets:
+            log.info("Clearing and deleting basket with Id: %s", basket.id)
 
-            course_run_selections = basket.courserunselection_set.all()
-            course_run_selections_ids = list(
-                course_run_selections.values_list("id", flat=True)
-            )
-            log.info("Deleting course run selections: %s", course_run_selections_ids)
-            course_run_selections.delete()
+            with transaction.atomic():
+                basket_items = basket.basketitems.all()
+                log.info(
+                    "Deleting basket items: %s",
+                    list(basket_items.values_list("id", flat=True)),
+                )
+                basket_items.delete()
 
-            coupon_selections = basket.couponselection_set.all()
-            coupon_selections_ids = list(coupon_selections.values_list("id", flat=True))
-            log.info("Deleting coupon selections: %s", coupon_selections_ids)
-            coupon_selections.delete()
+                course_run_selections = basket.courserunselection_set.all()
+                course_run_selections_ids = list(
+                    course_run_selections.values_list("id", flat=True)
+                )
+                log.info(
+                    "Deleting course run selections: %s", course_run_selections_ids
+                )
+                course_run_selections.delete()
 
-            log.info("Deleting basket: %s", basket.id)
-            basket.delete()
+                coupon_selections = basket.couponselection_set.all()
+                coupon_selections_ids = list(
+                    coupon_selections.values_list("id", flat=True)
+                )
+                log.info("Deleting coupon selections: %s", coupon_selections_ids)
+                coupon_selections.delete()
+
+                log.info("Deleting basket: %s", basket.id)
+                basket.delete()
 
 
 def complete_order(order):
@@ -771,12 +782,8 @@ def complete_order(order):
     if order_coupon_ids:
         set_coupons_to_redeemed(order.purchaser.email, order_coupon_ids)
 
-    baskets = Basket.objects.select_for_update(skip_locked=True).filter(
-        user=order.purchaser
-    )
-
-    # clear the basket
-    clear_and_delete_baskets(baskets)
+    # clear and delete the basket
+    clear_and_delete_baskets(order.purchaser)
 
 
 def enroll_user_in_order_items(order):
