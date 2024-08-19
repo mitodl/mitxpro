@@ -282,6 +282,7 @@ def test_course_view(  # noqa: PLR0913
             url = reverse("user-dashboard")
             class_name = "enrolled"
 
+    # Note: UTF-8 is the default encoding in Python 3.
     assert (
         f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
@@ -346,6 +347,7 @@ def test_program_view(  # noqa: PLR0913
             url = reverse("user-dashboard")
             class_name = "enrolled"
 
+    # Note: UTF-8 is the default encoding in Python 3.
     assert (
         f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button

@@ -33,6 +33,7 @@ def mock_cybersource_wsdl(mocked_responses, settings, service_version=SERVICE_VE
     Mocks the responses to achieve a functional WSDL
     """
     # in order for zeep to load the wsdl, it will load the wsdl and the accompanying xsd definitions
+    # Note: open() defaults to read mode ("r")
     with open(f"{DATA_DIR}/CyberSourceTransaction_{service_version}.wsdl") as wsdl:  # noqa: PTH123
         mocked_responses.add(
             mocked_responses.GET,

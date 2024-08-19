@@ -170,6 +170,7 @@ def create_tempfile_csv(rows_iter):
         writer = csv.writer(f, delimiter=",")
         for row in rows_iter:
             writer.writerow(row)
+    # Note: open() defaults to read mode ("r")
     with open(f.name) as user_csv:  # noqa: PTH123
         return SimpleUploadedFile(
             f.name, user_csv.read().encode("utf8"), content_type="application/csv"

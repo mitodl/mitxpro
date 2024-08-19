@@ -61,6 +61,7 @@ class Command(BaseCommand):
             codes = Coupon.objects.filter(enabled=True, payment=payment).all()
         else:
             try:
+                # Note: open() defaults to read mode ("r")
                 with open(kwargs["codefile"]) as file:  # noqa: PTH123
                     procCodes = [line.strip() for line in file]
             except Exception as e:  # noqa: BLE001

@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 
 import factory
 import pytest
-import pytz
 from django.contrib.auth.models import AnonymousUser
 
 from cms.constants import FORMAT_HYBRID, FORMAT_ONLINE, FORMAT_OTHER
@@ -107,7 +106,7 @@ def test_serialize_program(  # noqa: PLR0913
 
     non_live_run = CourseRunFactory.create(
         course=course1,
-        end_date=datetime.max.replace(tzinfo=pytz.utc),
+        end_date=datetime.max.replace(tzinfo=timezone.utc),
         expiration_date=None,
         live=False,
     )

@@ -68,7 +68,7 @@ class Command(EnrollmentChangeCommand):
                 message = str(exc)
             raise CommandError(message)  # noqa: B904
         except ValidationError as exc:
-            raise CommandError(f"Invalid enrollment deferral - {exc}")  # noqa: B904, TRY200, EM102
+            raise CommandError(f"Invalid enrollment deferral - {exc}")  # noqa: B904, EM102
         else:
             if not to_enrollment:
                 raise CommandError(
