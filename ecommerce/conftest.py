@@ -9,7 +9,6 @@ import pytest
 from ecommerce.api import ValidatedBasket
 from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
-    BasketFactory,
     BasketItemFactory,
     CompanyFactory,
     CouponEligibilityFactory,
@@ -23,7 +22,6 @@ from ecommerce.factories import (
     ProductVersionFactory,
 )
 from ecommerce.models import CourseRunSelection
-from users.factories import UserFactory
 
 CouponGroup = namedtuple(  # noqa: PYI024
     "CouponGroup", ["coupon", "coupon_version", "payment", "payment_version"]

@@ -1095,7 +1095,7 @@ def test_delete_baskets_with_user_args():
     Test to verify that the basket of the user passed in the clear_and_delete_baskets fn is deleted only
     """
     baskets = BasketFactory.create_batch(2)
-    
+
     assert Basket.objects.filter(user=baskets[0].user).count() == 1
     clear_and_delete_baskets(baskets[0].user)
     assert Basket.objects.filter(user=baskets[0].user).count() == 0
@@ -1109,15 +1109,21 @@ def test_delete_expired_basket(patch_now):
     """
     Test to verify that the expired baskets are deleted on calling clear_and_delete_baskets fn without user argument
     """
-    patch_now.return_value = datetime.datetime.now(tz=datetime.timezone.utc) - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
+    patch_now.return_value = datetime.datetime.now(
+        tz=datetime.timezone.utc
+    ) - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
     BasketFactory.create_batch(3)
-    patch_now.return_value = datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS + 1)
+    patch_now.return_value = datetime.datetime.now(
+        tz=datetime.timezone.utc
+    ) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS + 1)
     unexpired_baskets = BasketFactory.create_batch(3)
     patch_now.stop()
     # Calling the clear baskets without user argument so it should delete the expired baskets
     clear_and_delete_baskets()
     assert Basket.objects.all().count() == 3
-    assert list(Basket.objects.all().values_list("id", flat=True)) == [basket.id for basket in unexpired_baskets]
+    assert list(Basket.objects.all().values_list("id", flat=True)) == [
+        basket.id for basket in unexpired_baskets
+    ]
 
 
 def test_complete_order(mocker, user, basket_and_coupons):
@@ -1137,7 +1143,8 @@ def test_complete_order(mocker, user, basket_and_coupons):
     patched_enroll.assert_called_once_with(order)
     patched_clear_and_delete_baskets.assert_called_once_with(mocker.ANY)
     assert (
-        patched_clear_and_delete_baskets.call_args[0][0] == basket_and_coupons.basket.user
+        patched_clear_and_delete_baskets.call_args[0][0]
+        == basket_and_coupons.basket.user
     )
 
 

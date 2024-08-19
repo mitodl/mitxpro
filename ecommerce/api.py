@@ -727,7 +727,9 @@ def clear_and_delete_baskets(user=None):
     basket_filter = {"user": user} if user else {"updated_on__lte": cutoff_date}
 
     with transaction.atomic():
-        baskets = Basket.objects.select_for_update(skip_locked=True).filter(**basket_filter)
+        baskets = Basket.objects.select_for_update(skip_locked=True).filter(
+            **basket_filter
+        )
         log.info(
             "Basket deletion requested for baskets Ids: %s",
             [basket.id for basket in baskets],
