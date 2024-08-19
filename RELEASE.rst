@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.157.0
+---------------
+
+- fix: fixed basket deletion issue (#3102)
+- [pre-commit.ci] pre-commit autoupdate (#3100)
+- feat: added a celery task to delete expired basket (#3021)
+
 Version 0.156.2 (Released August 13, 2024)
 ---------------
 
