@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.157.0
+Version 0.157.0 (Released August 19, 2024)
 ---------------
 
 - fix: fixed basket deletion issue (#3102)
