@@ -33,7 +33,7 @@ class Command(BaseCommand):
             try:
                 runs = [CourseRun.objects.get(courseware_id=options["run"])]
             except CourseRun.DoesNotExist:
-                raise CommandError(  # noqa: B904, TRY200
+                raise CommandError(  # noqa: B904
                     "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
                 )
         else:

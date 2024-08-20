@@ -127,7 +127,7 @@ def create_run_enrollments(
 
         edx_request_success = False
         if not keep_failed_enrollments:
-            raise EdxEnrollmentCreateError(str(error_message))  # noqa: B904, TRY200
+            raise EdxEnrollmentCreateError(str(error_message))  # noqa: B904
         log.exception(str(error_message))
     else:
         edx_request_success = True

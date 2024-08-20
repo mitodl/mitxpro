@@ -508,7 +508,7 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
     try:
         auth = get_valid_edx_api_auth(user, ttl_in_seconds=ttl_in_seconds)
     except OpenEdxApiAuth.DoesNotExist:
-        raise NoEdxApiAuthError(  # noqa: B904, TRY200
+        raise NoEdxApiAuthError(  # noqa: B904
             "{} does not have an associated OpenEdxApiAuth".format(str(user))  # noqa: EM103, UP032
         )
     return EdxApi(
@@ -760,9 +760,9 @@ def unenroll_edx_course_run(run_enrollment):
             run_enrollment.run.courseware_id, username=run_enrollment.user.username
         )
     except HTTPError as exc:
-        raise EdxApiEnrollErrorException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904, TRY200
+        raise EdxApiEnrollErrorException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904
     except Exception as exc:  # noqa: BLE001
-        raise UnknownEdxApiEnrollException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904, TRY200
+        raise UnknownEdxApiEnrollException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904
     else:
         return deactivated_enrollment
 
@@ -785,7 +785,7 @@ def update_edx_user_name(user):
     try:
         return edx_client.user_info.update_user_name(user.username, user.name)
     except Exception as exc:  # noqa: BLE001
-        raise UserNameUpdateFailedException(  # noqa: B904, TRY200
+        raise UserNameUpdateFailedException(  # noqa: B904
             "Error updating user's full name in edX.",  # noqa: EM101
             exc,
         )
