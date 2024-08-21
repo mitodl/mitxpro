@@ -40,7 +40,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     courses_prefetch = Prefetch(
         "courses",
         Course.objects.select_related(
-            "coursepage", "externalcoursepage"
+            "coursepage", "externalcoursepage", "platform"
         ).prefetch_related(
             course_runs_prefetch, "coursepage__topics", "externalcoursepage__topics"
         ),
@@ -51,7 +51,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         Program.objects.filter(live=True)
         .exclude(products=None)
-        .select_related("programpage", "externalprogrampage")
+        .select_related("programpage", "externalprogrampage", "platform")
         .prefetch_related(courses_prefetch, products_prefetch)
         .filter(Q(programpage__live=True) | Q(externalprogrampage__live=True))
     )
@@ -71,7 +71,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = (
             Course.objects.filter(live=True)
-            .select_related("coursepage", "externalcoursepage")
+            .select_related("coursepage", "externalcoursepage", "platform")
             .prefetch_related(
                 "coursepage__topics",
                 "externalcoursepage__topics",
@@ -100,7 +100,7 @@ class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = CourseRunSerializer
     queryset = CourseRun.objects.select_related(
-        "course", "course__coursepage"
+        "course", "course__coursepage", "course__externalcoursepage"
     ).prefetch_related(products_prefetch)
 
 

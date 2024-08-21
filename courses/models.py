@@ -525,10 +525,8 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 sorted(
                     [
                         course_run
-                        for course_run in self.courseruns.filter(
-                            start_date__isnull=False
-                        )
-                        if course_run.live
+                        for course_run in self.courseruns.all()
+                        if course_run.live and course_run.start_date is not None
                     ],
                     key=lambda course_run: course_run.start_date,
                 ),
