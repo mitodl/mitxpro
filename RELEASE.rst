@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.157.1
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3104)
+- fix: prevent HTML/URLs in the Full Name field (#2994)
+
 Version 0.157.0 (Released August 19, 2024)
 ---------------
 
