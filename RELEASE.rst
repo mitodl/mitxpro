@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.157.1
+Version 0.157.1 (Released August 22, 2024)
 ---------------
 
 - [pre-commit.ci] pre-commit autoupdate (#3104)
