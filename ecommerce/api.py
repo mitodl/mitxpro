@@ -156,6 +156,21 @@ def calculate_tax(
     return (0, "", item_price)
 
 
+def display_taxes(user):
+    """
+    Calculates the taxes display for a specific user.
+
+    Args:
+        user(users.User): User object
+    """
+    return (
+        settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False)
+        and user.is_authenticated
+        and user.legal_address.country
+        in TaxRate.objects.filter(active=True).values_list("country_code", flat=True)
+    )
+
+
 def generate_cybersource_sa_signature(payload):
     """
     Generate an HMAC SHA256 signature for the CyberSource Secure Acceptance payload
