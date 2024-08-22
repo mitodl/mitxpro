@@ -455,7 +455,7 @@ def test_request_get_with_timeout_retry(mocker):
     assert result == mock_response
 
 
-def test_get_js_settings(settings, rf):
+def test_get_js_settings(settings, rf, user):
     """Test get_js_settings"""
     settings.GA_TRACKING_ID = "fake"
     settings.GTM_TRACKING_ID = "fake"
@@ -477,6 +477,7 @@ def test_get_js_settings(settings, rf):
     settings.FEATURES["ENABLE_ENTERPRISE"] = False
 
     request = rf.get("/")
+    request.user = user
 
     assert get_js_settings(request) == {
         "gaTrackingID": "fake",
