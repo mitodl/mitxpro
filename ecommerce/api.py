@@ -158,10 +158,13 @@ def calculate_tax(
 
 def display_taxes(user):
     """
-    Calculates the taxes display for a specific user.
+    Returns a boolean to manage the taxes display.
 
     Args:
         user(users.User): User object
+
+    Returns:
+        Boolean: True if flag and taxes are enabled for the specific country.
     """
     return (
         settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False)

@@ -39,6 +39,7 @@ from ecommerce.api import (
     complete_order,
     create_coupons,
     create_unfulfilled_order,
+    display_taxes,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
     generate_cybersource_sa_payload,
@@ -103,6 +104,7 @@ from ecommerce.test_utils import unprotect_version_tables
 from maxmind.factories import GeonameFactory, NetBlockIPv4Factory
 from mitxpro.test_utils import update_namespace
 from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
@@ -1864,3 +1866,35 @@ def test_tax_country_and_no_ip_tax(user):
         location_tax_rate.country_code,
         1000 + (1000 * Decimal(location_tax_rate.tax_rate / 100)),
     )
+
+
+@pytest.mark.parametrize(
+    (
+        "is_flag_enabled",
+        "tax_rate_created",
+        "tax_rate_enabled",
+        "expected_taxes_display",
+    ),
+    [
+        (True, True, True, True),
+        (True, True, False, False),
+        (True, False, False, False),
+        (False, True, True, False),
+        (False, True, False, False),
+    ],
+)
+def test_display_taxes(
+    is_flag_enabled, tax_rate_created, tax_rate_enabled, expected_taxes_display
+):
+    """
+    Tests that `display_taxes` returns the expected display status.
+    """
+    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = is_flag_enabled
+    user = UserFactory.create(legal_address__country="US")
+
+    if tax_rate_created:
+        TaxRateFactory.create(
+            country_code=user.legal_address.country, active=tax_rate_enabled
+        )
+
+    assert display_taxes(user) == expected_taxes_display
