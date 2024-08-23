@@ -14,6 +14,7 @@ from django.shortcuts import reverse
 from edx_api.client import EdxApi
 from oauth2_provider.models import AccessToken, Application
 from oauthlib.common import generate_token
+from requests.exceptions import ConnectionError as RequestConnectionError
 from requests.exceptions import HTTPError
 from rest_framework import status
 
@@ -848,6 +849,9 @@ def validate_name_with_edx(name):
         response = edx_client.user_validation.validate_user_registration_info(
             registration_information={"name": name},
         )
+    except RequestConnectionError:
+        # Silently fail if connection cannot be established with the open edx instance.
+        return ""
     except Exception as exc:
         raise EdxApiRegistrationValidationException(name, exc.response) from exc
     else:

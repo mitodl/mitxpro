@@ -78,7 +78,10 @@ class EdxApiRegistrationValidationException(Exception):  # noqa: N818
         """
         self.name = name
         self.response = error_response
+        error_summary = (
+            get_error_response_summary(self.response) if self.response else ""
+        )
         if msg is None:
             # Set some default useful error message
-            msg = f"EdX API error validating registration name {self.name}.\n{get_error_response_summary(self.response)}"
+            msg = f"EdX API error validating registration name {self.name}.\n{error_summary}"
         super().__init__(msg)
