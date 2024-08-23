@@ -169,8 +169,9 @@ def display_taxes(user):
     return (
         settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False)
         and user.is_authenticated
-        and user.legal_address.country
-        in TaxRate.objects.filter(active=True).values_list("country_code", flat=True)
+        and TaxRate.objects.filter(
+            active=True, country_code=user.legal_address.country
+        ).exists()
     )
 
 
