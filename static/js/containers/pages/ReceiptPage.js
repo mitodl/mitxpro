@@ -108,7 +108,9 @@ export class ReceiptPage extends React.Component<Props> {
                         Cambridge, MA 02139 USA
                         {SETTINGS.enable_taxes_display ? (
                           <div>GSTIN: 9923USA29055OSB</div>
-                        ) : null}
+                        ) : (
+                          <br />
+                        )}
                         Support:{" "}
                         <a href={`mailto:${SETTINGS.support_email}`}>
                           {SETTINGS.support_email}
