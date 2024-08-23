@@ -58,9 +58,9 @@ module.exports = Object.assign(prodConfig, {
   ],
   optimization: {
     minimize: true,
-    chunkIds: "named",
+    moduleIds: "named",
     splitChunks: {
-      chunks: "all",
+      name: "common",
       minChunks: 2,
       automaticNameDelimiter: "-",
       cacheGroups: {
