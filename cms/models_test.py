@@ -13,6 +13,7 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
+    FORMAT_HYBRID,
     FORMAT_ONLINE,
     FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
@@ -881,11 +882,11 @@ def test_course_page_format_field_default_value():
     assert course_page.format == FORMAT_ONLINE
 
 
-@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_OTHER])
+@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 def test_course_page_format_field_choices(course_format, staff_user):
     """
-    Verifies that if the "format" field in a course page contains the values FORMAT_ONLINE and FORMAT_OTHER,
-    and they are in the same context.
+    Verifies that if the "format" field in a course page contains the values
+    FORMAT_ONLINE, FORMAT_HYBRID, and FORMAT_OTHER, and they are in the same context.
     """
     course_page = CoursePageFactory.create(format=course_format)
 
@@ -961,11 +962,11 @@ def test_program_page_format_field_default_value():
     assert program_page.format == FORMAT_ONLINE
 
 
-@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
+@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 def test_program_page_format_field_choices(program_format, staff_user):
     """
-    Verifies that if the "format" field in a program page contains the values FORMAT_ONLINE and FORMAT_OTHER,
-    and they are in the same context.
+    Verifies that if the "format" field in a program page contains the values
+    FORMAT_ONLINE, FORMAT_HYBRID, and FORMAT_OTHER, and they are in the same context.
     """
     program_page = ProgramPageFactory.create(format=program_format)
 

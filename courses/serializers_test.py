@@ -8,7 +8,7 @@ import factory
 import pytest
 from django.contrib.auth.models import AnonymousUser
 
-from cms.constants import FORMAT_ONLINE, FORMAT_OTHER
+from cms.constants import FORMAT_HYBRID, FORMAT_ONLINE, FORMAT_OTHER
 from cms.factories import FacultyMembersPageFactory
 from courses.factories import (
     CourseFactory,
@@ -52,7 +52,7 @@ def test_base_program_serializer():
 
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
-@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_OTHER])
+@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
     "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
@@ -184,7 +184,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("all_runs", [True, False])
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("course_page", [True, False])
-@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_OTHER])
+@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
     "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
