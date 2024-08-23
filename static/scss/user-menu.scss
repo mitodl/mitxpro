@@ -59,6 +59,15 @@
 
     &:hover {
       cursor: pointer;
+      color: black;
+    }
+  }
+
+  .dropdown-menu {
+    left: unset;
+
+    .dropdown-item:hover {
+      background-color: #e9ecef;
     }
   }
 }

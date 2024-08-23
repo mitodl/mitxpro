@@ -11,17 +11,20 @@ type Props = {
 const CatalogMenu = ({ courseTopics }: Props) => {
   return (
     <div className="catalog-menu dropdown">
-      <div
+      <a
         className="col-2 dropdown-toggle"
         id="dropdownMenuButton"
         data-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
         aria-label="courses"
+        href="#"
+        role="button"
+        data-bs-toggle="dropdown"
       >
         Courses
-      </div>
-      <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      </a>
+      <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <a
           className="dropdown-item bold"
           href="/catalog/"
@@ -49,7 +52,7 @@ const CatalogMenu = ({ courseTopics }: Props) => {
         >
           Programs
         </a>
-      </div>
+      </ul>
     </div>
   );
 };

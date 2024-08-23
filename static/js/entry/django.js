@@ -2,6 +2,7 @@
 import "jquery";
 import "bootstrap";
 import "popper.js";
+import "@popperjs/core";
 import "slick-carousel";
 import "hls.js";
 import "@fancyapps/fancybox";

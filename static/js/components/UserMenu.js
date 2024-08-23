@@ -15,12 +15,15 @@ type Props = {
 const UserMenu = ({ currentUser }: Props) => {
   return (
     <div className="user-menu dropdown">
-      <div
+      <a
         className="col-2 dropdown-toggle"
         id="dropdownMenuButton"
         data-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
+        href="#"
+        role="button"
+        data-bs-toggle="dropdown"
       >
         <img
           /* Use default profile avatar for now */
@@ -30,8 +33,8 @@ const UserMenu = ({ currentUser }: Props) => {
           width={34}
           height={34}
         />
-      </div>
-      <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      </a>
+      <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <MixedLink
           className="dropdown-item"
           dest={routes.profile.view}
@@ -63,7 +66,7 @@ const UserMenu = ({ currentUser }: Props) => {
           <div className="dropdown-icon icon-logout" />
           Sign Out
         </a>
-      </div>
+      </ul>
     </div>
   );
 };
