@@ -9,7 +9,7 @@ const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 
 const prodBabelConfig = Object.assign({}, babelSharedLoader);
 
-prodBabelConfig.query.plugins.push(
+prodBabelConfig.options.plugins.push(
   "@babel/plugin-transform-react-constant-elements",
   "@babel/plugin-transform-react-inline-elements",
 );
@@ -58,9 +58,9 @@ module.exports = Object.assign(prodConfig, {
   ],
   optimization: {
     minimize: true,
-    chunkIds: "named",
+    moduleIds: "named",
     splitChunks: {
-      chunks: "all",
+      name: "common",
       minChunks: 2,
       automaticNameDelimiter: "-",
       cacheGroups: {

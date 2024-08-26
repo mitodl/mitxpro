@@ -28,10 +28,9 @@ const devConfig = Object.assign({}, config, {
     new BundleTracker({ filename: "./webpack-stats.json" }),
   ],
   optimization: {
-    chunkIds: "named",
     moduleIds: "named",
     splitChunks: {
-      chunks: "all",
+      name: "common",
       minChunks: 2,
       automaticNameDelimiter: "-",
       cacheGroups: {
