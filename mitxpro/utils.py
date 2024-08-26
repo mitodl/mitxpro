@@ -602,7 +602,7 @@ def get_js_settings(request: HttpRequest):
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
-        "enable_taxes_display": display_taxes(request.user),
+        "enable_taxes_display": display_taxes(request),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
     }
 

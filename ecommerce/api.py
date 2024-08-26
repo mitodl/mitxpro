@@ -156,22 +156,20 @@ def calculate_tax(
     return (0, "", item_price)
 
 
-def display_taxes(user):
+def display_taxes(request):
     """
     Returns a boolean to manage the taxes display.
 
     Args:
-        user(users.User): User object
+        request(HttpRequest): Request object
 
     Returns:
         Boolean: True if flag and taxes are enabled for the specific country.
     """
+    visitor_country = determine_visitor_country(request)
     return (
         settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False)
-        and user.is_authenticated
-        and TaxRate.objects.filter(
-            active=True, country_code=user.legal_address.country
-        ).exists()
+        and TaxRate.objects.filter(active=True, country_code=visitor_country).exists()
     )
 
 

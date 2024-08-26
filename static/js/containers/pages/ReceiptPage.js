@@ -106,7 +106,7 @@ export class ReceiptPage extends React.Component<Props> {
                         NE49-2000
                         <br />
                         Cambridge, MA 02139 USA
-                        {SETTINGS.enable_taxes_display ? (
+                        {orderReceipt.order.tax_rate ? (
                           <div>GSTIN: 9923USA29055OSB</div>
                         ) : (
                           <br />
@@ -253,10 +253,10 @@ export class ReceiptPage extends React.Component<Props> {
                         <th>Quantity</th>
                         <th>Unit Price</th>
                         <th>Discount</th>
-                        {SETTINGS.enable_taxes_display ? (
+                        {orderReceipt.order.tax_rate ? (
                           <th>Total Before Tax</th>
                         ) : null}
-                        {SETTINGS.enable_taxes_display ? (
+                        {orderReceipt.order.tax_rate ? (
                           <th>
                             Tax ({formatNumber(orderReceipt.order.tax_rate)}%)
                           </th>
@@ -296,14 +296,14 @@ export class ReceiptPage extends React.Component<Props> {
                               <p>Discount</p>
                               <div>{formatDiscount(line.discount)}</div>
                             </td>
-                            {SETTINGS.enable_taxes_display ? (
+                            {orderReceipt.order.tax_rate ? (
                               <td>
                                 <p>Total Before Tax</p>
                                 <div>{formatPrice(line.total_before_tax)}</div>
                               </td>
                             ) : null}
 
-                            {SETTINGS.enable_taxes_display ? (
+                            {orderReceipt.order.tax_rate ? (
                               <td>
                                 <p>
                                   Tax (
@@ -321,11 +321,11 @@ export class ReceiptPage extends React.Component<Props> {
                       })}
                     </tbody>
                   </table>
-                  {SETTINGS.enable_taxes_display ? (
+                  {orderReceipt.order.tax_rate ? (
                     <div className="receipt-hsn">HSN: 9992</div>
                   ) : null}
                 </div>
-                {SETTINGS.enable_taxes_display ? (
+                {orderReceipt.order.tax_rate ? (
                   <div className="footnote-signature">
                     <img
                       src="static/images/receipts/signature_only.png"

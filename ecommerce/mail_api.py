@@ -21,7 +21,6 @@ from mail.constants import (
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
 )
 from mitxpro.utils import format_price
-from users.models import User
 
 log = logging.getLogger()
 ENROLL_ERROR_EMAIL_SUBJECT = "MIT xPRO enrollment error"
@@ -298,7 +297,6 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
         cyber_source_provided_email: Include the email address if user provide though CyberSource payment process.
         order: An order.
     """
-    from ecommerce.api import display_taxes
     from ecommerce.serializers import OrderReceiptSerializer
 
     data = OrderReceiptSerializer(instance=order).data
@@ -308,7 +306,6 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
     order = data.get("order")
     receipt = data.get("receipt")
     country = pycountry.countries.get(alpha_2=purchaser.get("country"))
-    user = User.objects.get(email=purchaser.get("email"))
     recipients = [purchaser.get("email")]
     if cyber_source_provided_email and cyber_source_provided_email not in recipients:
         recipients.append(cyber_source_provided_email)
@@ -359,7 +356,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "company": purchaser.get("company"),
                                     "vat_id": purchaser.get("vat_id"),
                                 },
-                                "enable_taxes_display": display_taxes(user),
+                                "enable_taxes_display": bool(order["tax_rate"]),
                             },
                         ),
                     )
