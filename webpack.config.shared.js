@@ -13,7 +13,7 @@ module.exports = {
       rules: [
         {
           test: /\.(svg|ttf|woff|woff2|eot|gif)$/,
-          use: "asset/inline",
+          type: "asset/inline",
         },
         {
           test: require.resolve("jquery"),
