@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.158.0
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3110)
+- Upgrade Webpack from v4 to v5 (#3091)
+- perf: improve API performance (#3106)
+- feat: add hybrid format option for courseware page (#3105)
+- fix: silently fail name validation on connection error (#3107)
+
 Version 0.157.1 (Released August 22, 2024)
 ---------------
 
