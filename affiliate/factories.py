@@ -12,7 +12,7 @@ from users.factories import UserFactory
 class AffiliateFactory(DjangoModelFactory):
     """Factory for Affiliate"""
 
-    code = factory.Sequence("affiliate-code-{0}".format)
+    code = factory.Sequence("affiliate-code-{}".format)
     name = fuzzy.FuzzyText(prefix="Affiliate ", length=30)
 
     class Meta:

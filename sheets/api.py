@@ -185,7 +185,7 @@ class ExpandedSheetsClient:
             )
         return self.pygsheets_client.drive.list(
             **extra_list_params,
-            fields="files({})".format(file_fields),  # noqa: UP032
+            fields=f"files({file_fields})",
             q=query,
         )
 

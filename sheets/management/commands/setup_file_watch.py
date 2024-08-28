@@ -134,9 +134,7 @@ class Command(BaseCommand):
                     if renewal_attempt is None
                     else f"\n[{renewal_attempt.result_status_code}] {renewal_attempt.result}"
                 )
-                self.style.ERROR(
-                    "Failed to create/update file watch.{}".format(error_msg)  # noqa: UP032
-                )
+                self.style.ERROR(f"Failed to create/update file watch.{error_msg}")
                 continue
             if file_watch_result.created:
                 desc = "created"
@@ -146,7 +144,7 @@ class Command(BaseCommand):
                 desc = "found (unexpired)"
             file_id_desc = ""
             if file_watch_result.metadata.sheet_type == SHEET_TYPE_COUPON_ASSIGN:
-                file_id_desc = " (file id: {})".format(file_watch.file_id)  # noqa: UP032
+                file_id_desc = f" (file id: {file_watch.file_id})"
 
             self.stdout.write(
                 self.style.SUCCESS(
@@ -192,9 +190,7 @@ class Command(BaseCommand):
                         )
                     )
                 else:
-                    self.stdout.write(
-                        self.style.ERROR("Request failed: {}".format(exc))  # noqa: UP032
-                    )
+                    self.stdout.write(self.style.ERROR(f"Request failed: {exc}"))
                     sys.exit(1)
             else:
                 self.stdout.write(

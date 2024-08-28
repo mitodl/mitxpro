@@ -106,7 +106,7 @@ def test_serialize_program(  # noqa: PLR0913
 
     non_live_run = CourseRunFactory.create(
         course=course1,
-        end_date=datetime.max.astimezone(timezone.utc),
+        end_date=datetime.max.replace(tzinfo=timezone.utc),
         expiration_date=None,
         live=False,
     )

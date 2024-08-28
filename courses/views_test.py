@@ -282,14 +282,13 @@ def test_course_view(  # noqa: PLR0913
             url = reverse("user-dashboard")
             class_name = "enrolled"
 
+    # Note: UTF-8 is the default encoding in Python 3.
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")  # noqa: UP012
-        in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
-    assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")  # noqa: UP012
-        in resp.content
-    ) is (is_anonymous and has_product and has_unexpired_run)
+    assert (b"Please Sign In to MITx PRO to enroll in a course" in resp.content) is (
+        is_anonymous and has_product and has_unexpired_run
+    )
 
 
 @pytest.mark.parametrize("is_enrolled", [True, False])
@@ -348,14 +347,13 @@ def test_program_view(  # noqa: PLR0913
             url = reverse("user-dashboard")
             class_name = "enrolled"
 
+    # Note: UTF-8 is the default encoding in Python 3.
     assert (
-        f'<a class="enroll-button {class_name}" href="{url}">'.encode("utf-8")  # noqa: UP012
-        in resp.content
+        f'<a class="enroll-button {class_name}" href="{url}">'.encode() in resp.content
     ) is has_button
-    assert (
-        "Please Sign In to MITx PRO to enroll in a course".encode("utf-8")  # noqa: UP012
-        in resp.content
-    ) is (is_anonymous and has_product and has_unexpired_run)
+    assert (b"Please Sign In to MITx PRO to enroll in a course" in resp.content) is (
+        is_anonymous and has_product and has_unexpired_run
+    )
 
 
 def test_user_enrollments_view(mocker, client, user):

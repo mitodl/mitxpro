@@ -11,7 +11,7 @@ def now_in_utc():
     Returns:
         datetime.datetime: A datetime object for the current time
     """
-    return datetime.datetime.now(tz=datetime.timezone.utc)
+    return datetime.datetime.now(tz=datetime.UTC)
 
 
 def set_date_completed_to_none(apps, schema_editor):

@@ -72,7 +72,7 @@ class LegalAddressFactory(DjangoModelFactory):
         if self.country not in {"US", "CA"}:
             return ""
         subdivisions = pycountry.subdivisions.get(country_code=self.country)
-        subdivision = random.randgen.sample(subdivisions, 1)[0]
+        subdivision = random.randgen.sample(list(subdivisions), 1)[0]
         # Example: "US-MA"  # noqa: ERA001
         return subdivision.code
 
