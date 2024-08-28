@@ -356,9 +356,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "company": purchaser.get("company"),
                                     "vat_id": purchaser.get("vat_id"),
                                 },
-                                "enable_taxes_display": settings.FEATURES.get(
-                                    "ENABLE_TAXES_DISPLAY", False
-                                ),
+                                "enable_taxes_display": bool(order["tax_rate"]),
                             },
                         ),
                     )

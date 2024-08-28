@@ -39,6 +39,7 @@ from ecommerce.api import (
     complete_order,
     create_coupons,
     create_unfulfilled_order,
+    display_taxes,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
     generate_cybersource_sa_payload,
@@ -103,6 +104,7 @@ from ecommerce.test_utils import unprotect_version_tables
 from maxmind.factories import GeonameFactory, NetBlockIPv4Factory
 from mitxpro.test_utils import update_namespace
 from mitxpro.utils import now_in_utc
+from users.factories import UserFactory
 from voucher.factories import VoucherFactory
 from voucher.models import Voucher
 
@@ -1864,3 +1866,54 @@ def test_tax_country_and_no_ip_tax(user):
         location_tax_rate.country_code,
         1000 + (1000 * Decimal(location_tax_rate.tax_rate / 100)),
     )
+
+
+@pytest.mark.parametrize(
+    (
+        "is_taxes_display_flag_enabled",
+        "is_force_profile_country_flag_enabled",
+        "user_profile_country",
+        "user_determined_country",
+        "tax_rate_country",
+        "tax_rate_created",
+        "tax_rate_enabled",
+        "expected_taxes_display",
+    ),
+    [
+        (True, True, "US", "US", "US", True, True, True),
+        (True, True, "US", "US", "PK", True, True, False),
+        (True, False, "US", "US", "US", True, True, True),
+        (True, False, "PK", "US", "US", True, True, True),
+        (True, False, "PK", "US", "PK", True, True, False),
+        (True, False, "US", "US", "US", True, False, False),
+        (True, False, "PK", "US", "US", True, False, False),
+        (True, False, "US", "US", "US", False, False, False),
+    ],
+)
+def test_display_taxes(  # noqa: PLR0913
+    is_taxes_display_flag_enabled,
+    is_force_profile_country_flag_enabled,
+    user_profile_country,
+    user_determined_country,
+    tax_rate_country,
+    tax_rate_created,
+    tax_rate_enabled,
+    expected_taxes_display,
+    mocker,
+):
+    """
+    Tests that `display_taxes` returns the expected display status.
+    """
+    mocker.patch(
+        "ecommerce.api.determine_visitor_country", return_value=user_determined_country
+    )
+    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = is_taxes_display_flag_enabled
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = is_force_profile_country_flag_enabled
+    user = UserFactory.create(legal_address__country=user_profile_country)
+    request = FakeRequest()
+    request.user = user
+
+    if tax_rate_created:
+        TaxRateFactory.create(country_code=tax_rate_country, active=tax_rate_enabled)
+
+    assert display_taxes(request) == expected_taxes_display

@@ -257,7 +257,13 @@ $label-color: #8a8b8c;
   .print-btn,
   .print-row,
   .footer,
-  .header-holder {
+  .header-holder,
+  .notifications {
+    display: none !important;
+  }
+
+  iframe[title="Message from company"],
+  iframe[title="Close message"] {
     display: none !important;
   }
 
@@ -267,5 +273,9 @@ $label-color: #8a8b8c;
       500 16px/21px Rajdhani,
       "Times New Roman",
       serif;
+
+    .footnote-signature {
+      padding-top: 300px;
+    }
   }
 }

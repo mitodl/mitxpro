@@ -157,6 +157,23 @@ def calculate_tax(
     return (0, "", item_price)
 
 
+def display_taxes(request):
+    """
+    Returns a boolean to manage the taxes display.
+
+    Args:
+        request(HttpRequest): Request object
+
+    Returns:
+        Boolean: True if flag and taxes are enabled for the specific country.
+    """
+    visitor_country = determine_visitor_country(request)
+    return (
+        settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False)
+        and TaxRate.objects.filter(active=True, country_code=visitor_country).exists()
+    )
+
+
 def generate_cybersource_sa_signature(payload):
     """
     Generate an HMAC SHA256 signature for the CyberSource Secure Acceptance payload
