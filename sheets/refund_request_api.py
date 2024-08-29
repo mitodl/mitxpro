@@ -263,7 +263,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
                 )
             elif isinstance(exc, Order.DoesNotExist):
                 message = f"Order with id {refund_req_row.order_id} and purchaser '{refund_req_row.learner_email}' not found"
-            elif isinstance(
+            elif isinstance(  # noqa: UP038
                 exc, (ProgramEnrollment.DoesNotExist, CourseRunEnrollment.DoesNotExist)
             ):
                 message = f"Program/Course run enrollment does not exist for product '{refund_req_row.product_id}' and order {refund_req_row.order_id}"

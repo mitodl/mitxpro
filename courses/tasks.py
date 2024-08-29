@@ -88,7 +88,7 @@ def exception_logging_generator(generator):
     while True:
         try:
             yield next(generator)
-        except StopIteration:  # noqa: PERF203
+        except StopIteration:
             return
         except HTTPError as exc:
             log.exception("EdX API error for fetching user grades %s:", exc)  # noqa: TRY401

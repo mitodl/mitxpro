@@ -2,7 +2,7 @@
 Fixtures for hubspot_xpro tests
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -16,14 +16,14 @@ from ecommerce.models import Order, Product
 from users.models import User
 
 TIMESTAMPS = [
-    datetime(2017, 1, 1, tzinfo=timezone.utc),
-    datetime(2017, 1, 2, tzinfo=timezone.utc),
-    datetime(2017, 1, 3, tzinfo=timezone.utc),
-    datetime(2017, 1, 4, tzinfo=timezone.utc),
-    datetime(2017, 1, 5, tzinfo=timezone.utc),
-    datetime(2017, 1, 6, tzinfo=timezone.utc),
-    datetime(2017, 1, 7, tzinfo=timezone.utc),
-    datetime(2017, 1, 8, tzinfo=timezone.utc),
+    datetime(2017, 1, 1, tzinfo=UTC),
+    datetime(2017, 1, 2, tzinfo=UTC),
+    datetime(2017, 1, 3, tzinfo=UTC),
+    datetime(2017, 1, 4, tzinfo=UTC),
+    datetime(2017, 1, 5, tzinfo=UTC),
+    datetime(2017, 1, 6, tzinfo=UTC),
+    datetime(2017, 1, 7, tzinfo=UTC),
+    datetime(2017, 1, 8, tzinfo=UTC),
 ]
 
 FAKE_OBJECT_ID = 1234

@@ -2,7 +2,7 @@
 
 import itertools
 import logging
-from datetime import MAXYEAR, datetime, timezone
+from datetime import MAXYEAR, UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
@@ -44,7 +44,7 @@ def filter_and_sort_catalog_pages(
 
     page_run_dates = {
         page: page.product.next_run_date
-        or datetime(year=MAXYEAR, month=1, day=1, tzinfo=timezone.utc)
+        or datetime(year=MAXYEAR, month=1, day=1, tzinfo=UTC)
         for page in itertools.chain(
             valid_program_pages,
             valid_course_pages,

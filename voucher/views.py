@@ -3,7 +3,7 @@ Voucher views
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -59,7 +59,7 @@ class UploadVoucherFormView(LoginRequiredMixin, FormView):
                 )
                 return redirect("voucher:resubmit")
             voucher = old_voucher
-            voucher.uploaded = datetime.now(tz=timezone.utc)
+            voucher.uploaded = datetime.now(tz=UTC)
             voucher.save()
         else:
             Voucher.objects.create(**values, user=user)

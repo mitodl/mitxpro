@@ -8,7 +8,7 @@ readme = "README.md"
 packages = []
 
 [tool.poetry.dependencies]
-python = "3.12.4"
+python = "3.12.5"
 
 Pillow = "10.4.0"
 PyNaCl = "1.5.0"
@@ -89,7 +89,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]

@@ -1015,9 +1015,9 @@ class ValidatedBasket(NamedTuple):
     basket: Basket
     basket_item: BasketItem
     product_version: ProductVersion
-    coupon_version: CouponVersion | None  # noqa: FA102
-    run_selection_ids: Iterable[int] | None  # noqa: FA102
-    data_consent_users: Iterable[DataConsentUser] | None  # noqa: FA102
+    coupon_version: CouponVersion | None
+    run_selection_ids: Iterable[int] | None
+    data_consent_users: Iterable[DataConsentUser] | None
 
 
 def _validate_basket_contents(basket):

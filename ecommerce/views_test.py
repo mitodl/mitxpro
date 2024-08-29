@@ -1,7 +1,7 @@
 """ecommerce tests for views"""
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from urllib.parse import quote_plus, urljoin
 
 import factory
@@ -975,7 +975,7 @@ def test_patch_basket_data_consents(basket_and_agreement, as_owner):
     )
     if as_owner:
         assert resp.json()["data_consents"][0]["consent_date"] >= datetime.now(
-            tz=timezone.utc
+            tz=UTC
         ).strftime("%Y-%m-%dT00:00:00Z")
     else:
         assert resp.json()["data_consents"] == []

@@ -1123,7 +1123,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     @property
     def is_internal_or_external_course_page(self):
         """Gets the product page type, this is used for sorting product pages."""
-        return isinstance(self, (CoursePage, ExternalCoursePage))
+        return isinstance(self, (CoursePage, ExternalCoursePage))  # noqa: UP038
 
     @property
     def external_courseware_url(self):
@@ -1148,7 +1148,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     @property
     def is_internal_or_external_program_page(self):
         """Check whether the page is an internal or external program page."""
-        return isinstance(self, (ProgramPage, ExternalProgramPage))
+        return isinstance(self, (ProgramPage, ExternalProgramPage))  # noqa: UP038
 
     @property
     def is_external_page(self):

@@ -80,7 +80,7 @@ def build_course_run_credential(certificate: CourseRunCertificate) -> dict:
 
 
 def build_digital_credential(
-    certificate: ProgramCertificate | CourseRunCertificate,  # noqa: FA102
+    certificate: ProgramCertificate | CourseRunCertificate,
     learner_did: LearnerDID,
 ) -> dict:
     """Function for building certificate digital credentials"""

@@ -143,7 +143,7 @@ def create_run_enrollments(
             if not created and not enrollment.active:
                 enrollment.edx_enrolled = edx_request_success
                 enrollment.reactivate_and_save()
-        except:  # noqa: E722, PERF203
+        except:  # noqa: E722
             mail_api.send_enrollment_failure_message(order, run, details=format_exc())
             log.exception(
                 "Failed to create/update enrollment record (user: %s, run: %s, order: %s)",
@@ -184,7 +184,7 @@ def create_program_enrollments(user, programs, order=None, company=None):
             )
             if not created and not enrollment.active:
                 enrollment.reactivate_and_save()
-        except:  # noqa: E722, PERF203
+        except:  # noqa: E722
             mail_api.send_enrollment_failure_message(
                 order, program, details=format_exc()
             )

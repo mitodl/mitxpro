@@ -1,6 +1,6 @@
 """Courseware factories"""
 
-from datetime import timedelta, timezone
+from datetime import UTC, timedelta
 
 from factory import Faker, LazyAttribute, SubFactory, Trait
 from factory.django import DjangoModelFactory
@@ -28,7 +28,7 @@ class OpenEdxApiAuthFactory(DjangoModelFactory):
     refresh_token = Faker("pystr", max_chars=30)
     access_token = Faker("pystr", max_chars=30)
     access_token_expires_on = Faker(
-        "date_time_between", start_date="+1d", end_date="+2d", tzinfo=timezone.utc
+        "date_time_between", start_date="+1d", end_date="+2d", tzinfo=UTC
     )
 
     class Meta:

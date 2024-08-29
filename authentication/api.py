@@ -57,7 +57,7 @@ def create_user_with_generated_username(serializer, initial_username):
     while created_user is None and attempts < USERNAME_COLLISION_ATTEMPTS:
         try:
             created_user = serializer.save(username=username)
-        except IntegrityError as exc:  # noqa: PERF203
+        except IntegrityError as exc:
             if not is_duplicate_username_error(exc):
                 raise
             username = find_available_username(initial_username)

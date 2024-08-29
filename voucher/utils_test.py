@@ -2,7 +2,7 @@
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -130,7 +130,7 @@ def test_get_current_voucher(user):
     assert get_current_voucher(user) == voucher1
     voucher2 = VoucherFactory(user=user)
     assert get_current_voucher(user) == voucher2
-    voucher1.uploaded = datetime.now(tz=timezone.utc)
+    voucher1.uploaded = datetime.now(tz=UTC)
     voucher1.save()
     assert get_current_voucher(user) == voucher1
 

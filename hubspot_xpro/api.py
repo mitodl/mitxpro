@@ -388,14 +388,14 @@ def get_hubspot_id_for_object(
         return hubspot_obj.hubspot_id
     if isinstance(obj, User):
         hubspot_obj = find_contact(obj.email)
-    elif isinstance(obj, (B2BOrder, Order)):
+    elif isinstance(obj, (B2BOrder, Order)):  # noqa: UP038
         serialized_deal = get_hubspot_serializer(obj).data
         hubspot_obj = find_deal(
             name=serialized_deal["dealname"],
             amount=serialized_deal["amount"],
             raise_count_error=raise_error,
         )
-    elif isinstance(obj, (Line, B2BLine)):
+    elif isinstance(obj, (Line, B2BLine)):  # noqa: UP038
         serialized_line = get_hubspot_serializer(obj).data
         order_id = get_hubspot_id_for_object(obj.order)
         if order_id:

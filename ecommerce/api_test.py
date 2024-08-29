@@ -1112,11 +1112,11 @@ def test_delete_expired_basket(patch_now):
     Test to verify that the expired baskets are deleted on calling clear_and_delete_baskets fn without user argument
     """
     patch_now.return_value = datetime.datetime.now(
-        tz=datetime.timezone.utc
+        tz=datetime.UTC
     ) - datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS)
     BasketFactory.create_batch(3)
     patch_now.return_value = datetime.datetime.now(
-        tz=datetime.timezone.utc
+        tz=datetime.UTC
     ) + datetime.timedelta(days=settings.BASKET_EXPIRY_DAYS + 1)
     unexpired_baskets = BasketFactory.create_batch(3)
     patch_now.stop()
