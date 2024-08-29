@@ -26,7 +26,7 @@ class CertificatePageForm(WagtailAdminPageForm):
 
         cleaned_data = super().clean()
         parent_page = self.parent_page.specific
-        if (isinstance(parent_page, (CoursePage, ProgramPage))) and not cleaned_data[
+        if (isinstance(parent_page, (CoursePage, ProgramPage))) and not cleaned_data[  # noqa: UP038
             "signatories"
         ]:
             self.add_error("signatories", "Signatories is a required field.")

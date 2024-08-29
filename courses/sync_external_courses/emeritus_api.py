@@ -1,3 +1,5 @@
+"""API for Emeritus course sync"""
+
 import json
 import logging
 import re

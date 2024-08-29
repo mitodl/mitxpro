@@ -76,7 +76,7 @@ class MockResponse:
         url=None,
         reason="",
     ):
-        if isinstance(content, (dict, list)):
+        if isinstance(content, (dict, list)):  # noqa: UP038
             self.content = json.dumps(content)
         else:
             self.content = str(content)
