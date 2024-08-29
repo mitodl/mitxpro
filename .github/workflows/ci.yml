@@ -49,7 +49,7 @@ jobs:
         id: setup-python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12.4"
+          python-version: "3.12.5"
 
       - name: Install poetry
         uses: snok/install-poetry@v1
