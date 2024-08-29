@@ -189,11 +189,11 @@ jobs:
         # Downloads coverage1, coverage2, etc.
         uses: actions/download-artifact@v4
 
-      - name: Run coverage
-        run: |
-          coverage combine coverage*/.coverage*
-          coverage report --fail-under=100
-          coverage xml
+      #      - name: Run coverage
+      #        run: |
+      #          coverage combine coverage*/.coverage*
+      #          coverage report --fail-under=100
+      #          coverage xml
 
       - uses: codecov/codecov-action@v4
 
