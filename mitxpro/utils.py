@@ -212,7 +212,7 @@ def find_object_with_matching_attr(iterable, attr_name, value):
         try:
             if getattr(item, attr_name) == value:
                 return item
-        except AttributeError:  # noqa: PERF203
+        except AttributeError:
             pass
     return None
 
@@ -226,7 +226,7 @@ def has_equal_properties(obj, property_dict):
         try:
             if getattr(obj, field) != value:
                 return False
-        except AttributeError:  # noqa: PERF203
+        except AttributeError:
             return False
     return True
 

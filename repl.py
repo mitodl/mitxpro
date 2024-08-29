@@ -25,5 +25,5 @@ if __name__ == "__main__":
             exec(  # noqa: S102
                 f"from {app}.models import *"
             )
-        except ModuleNotFoundError:  # noqa: PERF203
+        except ModuleNotFoundError:
             pass

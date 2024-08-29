@@ -2,7 +2,7 @@
 Tests for course serializers
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import factory
 import pytest
@@ -106,7 +106,7 @@ def test_serialize_program(  # noqa: PLR0913
 
     non_live_run = CourseRunFactory.create(
         course=course1,
-        end_date=datetime.max.replace(tzinfo=timezone.utc),
+        end_date=datetime.max.replace(tzinfo=UTC),
         expiration_date=None,
         live=False,
     )
@@ -221,7 +221,7 @@ def test_serialize_course(  # noqa: PLR0913
     marketing_hubspot_form_id,
 ):
     """Test Course serialization"""
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     if is_anonymous:
         mock_context["request"].user = AnonymousUser()
     if all_runs:

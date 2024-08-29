@@ -203,7 +203,7 @@ def check_settings():
             # check in settings
             if not getattr(settings, variable):
                 missing.append(variable)
-        except AttributeError:  # noqa: PERF203
+        except AttributeError:
             missing.append(variable)
     if missing:
         raise ImproperlyConfigured(f"Missing required voucher settings: {missing}")  # noqa: EM102

@@ -97,7 +97,7 @@ def sync_failed_contacts(chunk: list[int]) -> list[int]:
         try:
             api.sync_contact_with_hubspot(user_id)
             time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
-        except ApiException:  # noqa: PERF203
+        except ApiException:
             failed_ids.append(user_id)
     return failed_ids
 

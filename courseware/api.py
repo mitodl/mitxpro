@@ -413,7 +413,7 @@ def repair_faulty_courseware_users():
             # edX is our only courseware for the time being. If a different courseware is added, this
             # function will need to be updated.
             created_user, created_auth_token = repair_faulty_edx_user(user)
-        except HTTPError as exc:  # noqa: PERF203
+        except HTTPError as exc:
             log.exception(
                 "Failed to repair faulty user %s (%s). %s",
                 user.username,
@@ -597,7 +597,7 @@ def get_edx_grades_with_users(course_run, user=None):
         for edx_grade in all_grades:
             try:
                 user = User.objects.get(username=edx_grade.username)
-            except User.DoesNotExist:  # noqa: PERF203
+            except User.DoesNotExist:
                 log.warning("User with username %s not found", edx_grade.username)
             else:
                 yield edx_grade, user
@@ -651,7 +651,7 @@ def enroll_in_edx_course_runs(user, course_runs, force_enrollment=True):  # noqa
                 force_enrollment=force_enrollment,
             )
             results.append(result)
-        except HTTPError as exc:  # noqa: PERF203
+        except HTTPError as exc:
             # If there is an error message and it indicates that the preferred enrollment mode was the cause of the
             # error, log an error and try to enroll the user in 'audit' mode as a failover.
             if not is_json_response(exc.response):

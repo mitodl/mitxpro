@@ -286,7 +286,7 @@ def send_messages(messages):
     for msg in messages:
         try:
             msg.send()
-        except:  # noqa: E722, PERF203
+        except:  # noqa: E722
             log.exception("Error sending email '%s' to %s", msg.subject, msg.to)
 
 
@@ -315,7 +315,7 @@ def validate_email_addresses(email_addresses):
     for email in email_addresses:
         try:
             validate_email(email)
-        except ValidationError:  # noqa: PERF203
+        except ValidationError:
             invalid_emails.add(email)
     if invalid_emails:
         raise MultiEmailValidationError(invalid_emails)

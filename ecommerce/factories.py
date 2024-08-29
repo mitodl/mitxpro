@@ -2,7 +2,7 @@
 Factories for ecommerce models
 """
 
-from datetime import timezone
+from datetime import UTC
 
 import faker
 from factory import Faker, LazyAttribute, SubFactory, Trait, fuzzy, post_generation
@@ -128,10 +128,10 @@ class CouponPaymentVersionFactory(DjangoModelFactory):
     amount = fuzzy.FuzzyDecimal(0, 1, precision=5)
     company = SubFactory(CompanyFactory)
     activation_date = Faker(
-        "date_time_this_year", before_now=True, after_now=False, tzinfo=timezone.utc
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=UTC
     )
     expiration_date = Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
+        "date_time_this_year", before_now=False, after_now=True, tzinfo=UTC
     )
 
     class Meta:

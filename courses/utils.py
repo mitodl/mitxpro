@@ -271,7 +271,7 @@ def sync_course_runs(runs):
                 course_id=run.courseware_id,
                 username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
             )
-        except HTTPError as e:  # noqa: PERF203
+        except HTTPError as e:
             failure_count += 1
             if e.response.status_code == HTTP_404_NOT_FOUND:
                 log.error(  # noqa: TRY400

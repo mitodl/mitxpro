@@ -2,7 +2,7 @@
 Fixtures for voucher tests
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import factory
@@ -124,7 +124,7 @@ def voucher_and_partial_matches(voucher_and_user_client):
     company = CompanyFactory()
     course_run_1 = CourseRunFactory(
         start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=timezone.utc
+            voucher.course_start_date_input, datetime.min.time(), tzinfo=UTC
         ),
         live=True,
     )
@@ -159,7 +159,7 @@ def voucher_and_exact_match(voucher_and_user_client):
     voucher = voucher_and_user_client.voucher
     exact_match = CourseRunFactory(
         start_date=datetime.combine(
-            voucher.course_start_date_input, datetime.min.time(), tzinfo=timezone.utc
+            voucher.course_start_date_input, datetime.min.time(), tzinfo=UTC
         ),
         course__readable_id=voucher.course_id_input,
         course__title=voucher.course_title_input,

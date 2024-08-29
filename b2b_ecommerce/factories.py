@@ -1,6 +1,6 @@
 """Factories for b2b_ecommerce"""
 
-from datetime import timezone
+from datetime import UTC
 
 import factory
 from factory import fuzzy
@@ -46,10 +46,10 @@ class B2BCouponFactory(DjangoModelFactory):
     name = fuzzy.FuzzyText()
     coupon_code = fuzzy.FuzzyText()
     activation_date = factory.Faker(
-        "date_time_this_year", before_now=True, after_now=False, tzinfo=timezone.utc
+        "date_time_this_year", before_now=True, after_now=False, tzinfo=UTC
     )
     expiration_date = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=timezone.utc
+        "date_time_this_year", before_now=False, after_now=True, tzinfo=UTC
     )
     enabled = True
     reusable = False
