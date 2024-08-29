@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        group: [1, 2, 3, 4, 5, 6, 7, 8]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
     services:
       db:
@@ -111,7 +111,7 @@ jobs:
           source .venv/bin/activate
           export MEDIA_ROOT="$(mktemp -d)"
           poetry run ./scripts/test/python_tests.sh
-          pytest --cov --splits 8 --group ${{ matrix.group }}
+          pytest --cov --splits 12 --group ${{ matrix.group }}
         env:
           DEBUG: False
           NODE_ENV: "production"
