@@ -70,7 +70,7 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: Install dependencies
+      - name: Install project
         run: poetry install --no-interaction
 
       # Configurations required for elasticsearch.
