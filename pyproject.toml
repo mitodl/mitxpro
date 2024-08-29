@@ -60,6 +60,7 @@ wagtail = "5.2.6"
 wagtail-metadata = "5.0.0"
 xmltodict = "^0.14.0"
 zeep = "4.2.1"
+pytest-split = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 bpython = "*"
