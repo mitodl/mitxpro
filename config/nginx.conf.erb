@@ -72,6 +72,10 @@ http {
             add_header Cache-Control private;
         }
 
+        location = /static/bundles/report.html {
+            return 404;
+        }
+
         location ~* /static/(.*$) {
             expires max;
             add_header Access-Control-Allow-Origin *;
