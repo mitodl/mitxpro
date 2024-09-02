@@ -77,6 +77,7 @@ services:
     ports:
       - "8052:8052"
     environment:
+      PUBLIC_PATH: http://${MIT_XPRO_HOSTNAME:-xpro.odl.local}:8053/
       NODE_ENV: "production"
       DOCKER_HOST: ${DOCKER_HOST:-missing}
       CONTAINER_NAME: "watch"
