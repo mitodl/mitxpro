@@ -2349,7 +2349,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/json-schema@npm:*, @types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
+"@types/json-schema@npm:^7.0.8, @types/json-schema@npm:^7.0.9":
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 97ed0cb44d4070aecea772b7b2e2ed971e10c81ec87dd4ecc160322ffa55ff330dace1793489540e3e318d90942064bb697cc0f8989391797792d919737b3b98
@@ -9824,17 +9824,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-selector-parser@npm:^6.0.0, postcss-selector-parser@npm:^6.0.13, postcss-selector-parser@npm:^6.0.2":
-  version: 6.1.2
-  resolution: "postcss-selector-parser@npm:6.1.2"
-  dependencies:
-    cssesc: ^3.0.0
-    util-deprecate: ^1.0.2
-  checksum: ce9440fc42a5419d103f4c7c1847cb75488f3ac9cbe81093b408ee9701193a509f664b4d10a2b4d82c694ee7495e022f8f482d254f92b7ffd9ed9dea696c6f84
-  languageName: node
-  linkType: hard
-
-"postcss-selector-parser@npm:^6.0.4":
+"postcss-selector-parser@npm:^6.0.13, postcss-selector-parser@npm:^6.0.2, postcss-selector-parser@npm:^6.0.4":
   version: 6.1.2
   resolution: "postcss-selector-parser@npm:6.1.2"
   dependencies:
@@ -9868,18 +9858,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.28":
-  version: 8.4.41
-  resolution: "postcss@npm:8.4.41"
-  dependencies:
-    nanoid: ^3.3.7
-    picocolors: ^1.0.1
-    source-map-js: ^1.2.0
-  checksum: f865894929eb0f7fc2263811cc853c13b1c75103028b3f4f26df777e27b201f1abe21cb4aa4c2e901c80a04f6fb325ee22979688fe55a70e2ea82b0a517d3b6f
-  languageName: node
-  linkType: hard
-
-"postcss@npm:^8.4.33":
+"postcss@npm:^8.4.28, postcss@npm:^8.4.33":
   version: 8.4.41
   resolution: "postcss@npm:8.4.41"
   dependencies:
