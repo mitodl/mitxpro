@@ -22,7 +22,7 @@ app.use(function (req, res, next) {
 
 app.use(
   devMiddleware(compiler, {
-    publicPath: "/",
+    publicPath: process.env.PUBLIC_PATH,
   }),
 );
 
