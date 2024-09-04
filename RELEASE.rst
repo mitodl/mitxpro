@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.159.0
+---------------
+
+- fix(deps): update dependency css-loader to v7 (#3086)
+- fix(deps): update dependency google-auth to v2.34.0
+- fix(deps): update dependency google-api-python-client to v2.143.0
+- fix(deps): update dependency django-robots to v6.1
+- fix(deps): update dependency django-hijack to v3.6.0
+- fix(deps): update dependency boto3 to v1.35.8
+- chore(deps): update postgres docker tag to v15.8 (#3117)
+- chore(deps): update node.js to v20.17.0 (#3116)
+- chore(deps): update nginx docker tag to v1.27.1 (#3114)
+- fix(deps): update python to v3.12.5 (#3003)
+- chore(deps): lock file maintenance (#3113)
+- feat: display tax details for countries where taxes are enabled (#3109)
+- fix(deps): update dependency zeep to v4 (#3062)
+- fix(deps): update dependency pygsheets to v2.0.6 (#2736)
+- fix(deps): update dependency webpack to v5.94.0 [security]
+- Python upgrade from 3.9.x to 3.12.x (#3089)
+
 Version 0.158.0 (Released August 29, 2024)
 ---------------
 
