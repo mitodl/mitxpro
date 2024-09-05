@@ -75,7 +75,7 @@ export const legalAddressValidation = yup.object().shape({
       .label("State/Territory")
       .when("country", {
         is:   includes(__, COUNTRIES_REQUIRING_STATE),
-        then: yup.string().required()
+        then: ()=>yup.string().required("State/Territory is a required field")
       }),
     country: yup
       .string()
@@ -86,16 +86,18 @@ export const legalAddressValidation = yup.object().shape({
       .string()
       .label("Zip/Postal Code")
       .trim()
-      .when("country", (country, schema) => {
-        if (country === US_ALPHA_2) {
-          return schema.required().matches(US_POSTAL_CODE_REGEX, {
-            message:
-              "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
-          })
-        } else if (country === CA_ALPHA_2) {
-          return schema.required().matches(CA_POSTAL_CODE_REGEX, {
-            message: "Postal Code must be formatted as 'ANA NAN'"
-          })
+      .when("country", {
+        is:   includes(__, COUNTRIES_REQUIRING_STATE),
+        then: (country, schema)=>{
+          if (country === US_ALPHA_2) {
+            return schema.required().matches(US_POSTAL_CODE_REGEX, 
+                "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
+            )
+          } else if (country === CA_ALPHA_2) {
+            return schema.required().matches(CA_POSTAL_CODE_REGEX, 
+              "Postal Code must be formatted as 'ANA NAN'"
+            )
+          }
         }
       })
   })
