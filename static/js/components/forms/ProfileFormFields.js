@@ -89,12 +89,12 @@ export const legalAddressValidation = yup.object().shape({
       .when("country", {
         is: US_ALPHA_2,
         then: (schema)=>
-            schema.required().matches(US_POSTAL_CODE_REGEX, 
+            schema.required().matches(US_POSTAL_CODE_REGEX,
                 "Postal Code must be formatted as either 'NNNNN' or 'NNNNN-NNNN'"
             )
       }).when("country",{
         is: CA_ALPHA_2,
-        then: (schema)=>schema.required().matches(CA_POSTAL_CODE_REGEX, 
+        then: (schema)=>schema.required().matches(CA_POSTAL_CODE_REGEX,
               "Postal Code must be formatted as 'ANA NAN'"
             )
       })
