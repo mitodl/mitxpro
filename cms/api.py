@@ -16,7 +16,11 @@ DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)  # noqa: C408
 
 
 def filter_and_sort_catalog_pages(
-    program_pages, course_pages, external_course_pages, external_program_pages
+    program_pages,
+    course_pages,
+    external_course_pages,
+    external_program_pages,
+    sort_by=None,
 ):
     """
     Filters program and course pages to only include those that should be visible in the catalog, then returns a tuple
@@ -27,6 +31,7 @@ def filter_and_sort_catalog_pages(
         course_pages (iterable of CoursePage): CoursePages to filter and sort
         external_course_pages (iterable of ExternalCoursePage): ExternalCoursePages to filter and sort
         external_program_pages (iterable of ExternalProgramPage): ExternalProgramPages to filter and sort
+        sort_by (str): Sort catalog option.
 
     Returns:
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
@@ -50,6 +55,21 @@ def filter_and_sort_catalog_pages(
             valid_course_pages,
         )
     }
+    sorting_key_map = {
+        "price_asc": {
+            "sort_key": None,
+            "reverse": False,
+        },
+        "price_desc": {
+            "sort_key": None,
+            "reverse": True,
+        },
+        "start_date_asc": {
+            "sort_key": None,
+            "reverse": False,
+        },
+    }
+    sorting = sorting_key_map[sort_by]  # noqa: F841
     return (
         sorted(
             valid_program_pages + valid_course_pages,

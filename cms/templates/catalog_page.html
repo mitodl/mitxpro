@@ -122,6 +122,17 @@
                 >
                 {% endif %}
               </li>
+              <li class="nav-item">
+                <div class="catalog-sort-by">
+                  <label for="pageSelect">Sort By:</label>
+                  <select id="pageSelect" onchange="redirectToPage(this)">
+                    <option value="">Best Match</option>
+                    <option value="start_date_asc">Start Date</option>
+                    <option value="price_asc">Price: High-Low</option>
+                    <option value="price_desc">Price: Low-High</option>
+                  </select>
+                </div>
+              </li>
             </ul>
             <div class="tab-content">
               {% if featured_product.program %}
@@ -212,3 +223,20 @@
     </div>
   </div>
 </div>
+
+{% block scripts %}
+<script type="text/javascript">
+  function redirectToPage(selectObj) {
+    const selectedValue = selectObj.value;
+    if (selectedValue) {
+      if (window.location.href.includes('?topic')) {
+        window.location.href =
+          window.location.href + '&' + 'sort-by=' + selectedValue;
+      } else {
+        window.location.href =
+          window.location.href + '?' + 'sort-by=' + selectedValue;
+      }
+    }
+  }
+</script>
+{% endblock %}

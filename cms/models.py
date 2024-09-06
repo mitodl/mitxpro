@@ -511,6 +511,7 @@ class CatalogPage(Page):
         Populate the context with live programs, courses and programs + courses
         """
         topic_filter = request.GET.get("topic", ALL_TOPICS)
+        sort_by = request.GET.get("sort-by", None)
         program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
@@ -600,6 +601,7 @@ class CatalogPage(Page):
             course_page_qset,
             external_course_qset,
             external_program_qset,
+            sort_by=sort_by,
         )
         return dict(
             **super().get_context(request),
