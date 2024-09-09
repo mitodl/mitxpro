@@ -346,6 +346,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
                 "vat_id": "AT12349876",
             },
             "enable_taxes_display": False,
+            "email_support": settings.EMAIL_SUPPORT,
         },
     )
     patched_mail_api.messages_for_recipients.assert_called_once_with(
