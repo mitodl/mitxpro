@@ -8134,6 +8134,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.frompairs@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "lodash.frompairs@npm:4.0.1"
+  checksum: 8ff2d857f0764325dba5825ef8776cfc6992a504d75d668889bdd617c62fc3f179f1590042e127c98ed14d3fb14b71e66697b0fe8b10f73879c3a46e2d1c23d3
+  languageName: node
+  linkType: hard
+
 "lodash.get@npm:^4.4.2":
   version: 4.4.2
   resolution: "lodash.get@npm:4.4.2"
@@ -8201,6 +8208,13 @@ __metadata:
   version: 4.6.0
   resolution: "lodash.pickby@npm:4.6.0"
   checksum: a554d898c15bcd3218e4005b95b5146210bd862010c7d242d17106ee36aed9b9209a858ce974136ab1faadd86a82297761c206fda7f1886278bac827145c5536
+  languageName: node
+  linkType: hard
+
+"lodash.topairs@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "lodash.topairs@npm:4.3.0"
+  checksum: 8efd69e706e5adb7f8c4521cd094be17ed4776dab30d9ae0a72e130f14e7bb696dd858cbc18c912aa20e97ccc76486f3cf2d0acb3ff30cb9af3fd525a7f9c9bd
   languageName: node
   linkType: hard
 
@@ -8856,7 +8870,7 @@ __metadata:
     waait: ^1.0.4
     webpack: ^5.76.0
     webpack-bundle-analyzer: ^4.6.1
-    webpack-bundle-tracker: 1.4.0
+    webpack-bundle-tracker: 1.8.1
     webpack-cli: ^4.8.0
     webpack-dev-middleware: ^5.0.0
     webpack-hot-middleware: ^2.25.0
@@ -13019,16 +13033,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-bundle-tracker@npm:1.4.0":
-  version: 1.4.0
-  resolution: "webpack-bundle-tracker@npm:1.4.0"
+"webpack-bundle-tracker@npm:1.8.1":
+  version: 1.8.1
+  resolution: "webpack-bundle-tracker@npm:1.8.1"
   dependencies:
     lodash.assign: ^4.2.0
     lodash.defaults: ^4.2.0
     lodash.foreach: ^4.5.0
+    lodash.frompairs: ^4.0.1
     lodash.get: ^4.4.2
+    lodash.topairs: ^4.3.0
     strip-ansi: ^6.0.0
-  checksum: f70501a14578fa9f76d03f69905a97a9a3989526e5e04652be3b6b9e1bec85f2612fa9fc9231d7f0b864474d6de26ad50ba0b43fe1688045d34d44d8e2d5233f
+  checksum: c2f83d42a825c071d058e24b2da3a5938899c21aa10e4a65211cbc5c92a6906917de94c957dcc9cc63158d0c1c8af6da95863284446a09c31271caf327d55c54
   languageName: node
   linkType: hard
 
