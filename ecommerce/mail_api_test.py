@@ -48,7 +48,6 @@ from mail.constants import (
 from mitxpro.utils import format_price
 from users.factories import UserFactory
 
-
 pytestmark = pytest.mark.django_db
 
 
