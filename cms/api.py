@@ -69,7 +69,7 @@ def filter_and_sort_catalog_pages(
             "reverse": False,
         },
     }
-    sorting = sorting_key_map[sort_by]  # noqa: F841
+    sorting = sorting_key_map[sort_by] if sort_by else None  # noqa: F841
     return (
         sorted(
             valid_program_pages + valid_course_pages,

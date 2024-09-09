@@ -36,104 +36,106 @@
       <div class="courseware">
         <div class="tab-block">
           <div class="container">
-            <ul class="nav nav-tabs" role="tablist">
-              <li class="nav-item">
-                {% if active_tab == "all-tab" %}
-                <a
-                  id="all-tab"
-                  class="nav-link active"
-                  data-toggle="tab"
-                  href="#all"
-                  role="tab"
-                  aria-controls="all"
-                  aria-selected="true"
-                  >All</a
-                >
-                {% else %}
-                <a
-                  id="all-tab"
-                  class="nav-link"
-                  data-toggle="tab"
-                  href="#all"
-                  role="tab"
-                  aria-controls="all"
-                  aria-selected="true"
-                  >All</a
-                >
-                {% endif %}
-              </li>
-              <li
-                class="nav-item"
-                data-toggle="tooltip"
-                title="Multi-course offerings"
-                data-placement="bottom"
-              >
-                {% if active_tab == "programs-tab" %}
-                <a
-                  id="programs-tab"
-                  class="nav-link active"
-                  data-toggle="tab"
-                  href="#programs"
-                  role="tab"
-                  aria-controls="programs"
-                  aria-selected="false"
-                  >programs</a
-                >
-                {% else %}
-                <a
-                  id="programs-tab"
-                  class="nav-link"
-                  data-toggle="tab"
-                  href="#programs"
-                  role="tab"
-                  aria-controls="programs"
-                  aria-selected="false"
-                  >programs</a
-                >
-                {% endif %}
-              </li>
-              <li
-                class="nav-item"
-                data-toggle="tooltip"
-                title="Single course offerings"
-                data-placement="bottom"
-              >
-                {% if active_tab == "courses-tab" %}
-                <a
-                  id="courses-tab"
-                  class="nav-link active"
-                  data-toggle="tab"
-                  href="#courses"
-                  role="tab"
-                  aria-controls="courses"
-                  aria-selected="false"
-                  >Courses</a
-                >
-                {% else %}
-                <a
-                  id="courses-tab"
-                  class="nav-link"
-                  data-toggle="tab"
-                  href="#courses"
-                  role="tab"
-                  aria-controls="courses"
-                  aria-selected="false"
-                  >Courses</a
-                >
-                {% endif %}
-              </li>
-              <li class="nav-item">
-                <div class="catalog-sort-by">
-                  <label for="pageSelect">Sort By:</label>
-                  <select id="pageSelect" onchange="redirectToPage(this)">
-                    <option value="">Best Match</option>
-                    <option value="start_date_asc">Start Date</option>
-                    <option value="price_asc">Price: High-Low</option>
-                    <option value="price_desc">Price: Low-High</option>
-                  </select>
-                </div>
-              </li>
-            </ul>
+            <div class="catalog-nav-head">
+              <div class="nav-tabs-container">
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="nav-item">
+                    {% if active_tab == "all-tab" %}
+                    <a
+                      id="all-tab"
+                      class="nav-link active"
+                      data-toggle="tab"
+                      href="#all"
+                      role="tab"
+                      aria-controls="all"
+                      aria-selected="true"
+                      >All</a
+                    >
+                    {% else %}
+                    <a
+                      id="all-tab"
+                      class="nav-link"
+                      data-toggle="tab"
+                      href="#all"
+                      role="tab"
+                      aria-controls="all"
+                      aria-selected="true"
+                      >All</a
+                    >
+                    {% endif %}
+                  </li>
+                  <li
+                    class="nav-item"
+                    data-toggle="tooltip"
+                    title="Multi-course offerings"
+                    data-placement="bottom"
+                  >
+                    {% if active_tab == "programs-tab" %}
+                    <a
+                      id="programs-tab"
+                      class="nav-link active"
+                      data-toggle="tab"
+                      href="#programs"
+                      role="tab"
+                      aria-controls="programs"
+                      aria-selected="false"
+                      >programs</a
+                    >
+                    {% else %}
+                    <a
+                      id="programs-tab"
+                      class="nav-link"
+                      data-toggle="tab"
+                      href="#programs"
+                      role="tab"
+                      aria-controls="programs"
+                      aria-selected="false"
+                      >programs</a
+                    >
+                    {% endif %}
+                  </li>
+                  <li
+                    class="nav-item"
+                    data-toggle="tooltip"
+                    title="Single course offerings"
+                    data-placement="bottom"
+                  >
+                    {% if active_tab == "courses-tab" %}
+                    <a
+                      id="courses-tab"
+                      class="nav-link active"
+                      data-toggle="tab"
+                      href="#courses"
+                      role="tab"
+                      aria-controls="courses"
+                      aria-selected="false"
+                      >Courses</a
+                    >
+                    {% else %}
+                    <a
+                      id="courses-tab"
+                      class="nav-link"
+                      data-toggle="tab"
+                      href="#courses"
+                      role="tab"
+                      aria-controls="courses"
+                      aria-selected="false"
+                      >Courses</a
+                    >
+                    {% endif %}
+                  </li>
+                </ul>
+              </div>
+              <div class="catalog-sort-by">
+                <label for="sorting-select">Sort By:</label>
+                <select id="sorting-select" onchange="applySorting(this)">
+                  <option value="">Best Match</option>
+                  <option value="start_date_asc">Start Date</option>
+                  <option value="price_asc">Price: High-Low</option>
+                  <option value="price_desc">Price: Low-High</option>
+                </select>
+              </div>
+            </div>
             <div class="tab-content">
               {% if featured_product.program %}
               {% include "partials/featured_card.html" with courseware_page=featured_product object_type="program" %}
@@ -226,7 +228,7 @@
 
 {% block scripts %}
 <script type="text/javascript">
-  function redirectToPage(selectObj) {
+  function applySorting(selectObj) {
     const selectedValue = selectObj.value;
     if (selectedValue) {
       if (window.location.href.includes('?topic')) {
