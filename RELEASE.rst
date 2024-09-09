@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.159.0
+Version 0.159.0 (Released September 09, 2024)
 ---------------
 
 - fix(deps): update dependency css-loader to v7 (#3086)
