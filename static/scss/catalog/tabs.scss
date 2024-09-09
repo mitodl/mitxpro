@@ -104,12 +104,44 @@
   }
 }
 
-.nav-tabs-container,
-.catalog-sort-by {
+.nav-tabs-container {
   display: inline-block;
 }
 
-#sorting-select {
-  border: none;
-  appearance: none;
+.catalog-sort-by-dropdown {
+  display: inline-flex;
+  padding: 10px;
+  border: 2px solid transparent;
+
+  &:hover {
+    border: 2px solid #b8c2cc;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .dropdown-toggle {
+    color: #626a73;
+  }
+
+  .dropdown-menu {
+    background-color: $white;
+    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 50%);
+    border-color: $white-smoke;
+    border-radius: 5px;
+    right: 0;
+    left: unset;
+    width: fit-content;
+
+    .dropdown-item {
+      color: #626a73;
+      font-size: 18px;
+      font-weight: 400;
+
+      &:hover {
+        background-color: $white;
+        color: $primary;
+        text-decoration: underline;
+      }
+    }
+  }
 }
