@@ -56,37 +56,64 @@ def filter_and_sort_catalog_pages(
         )
     }
     sorting_key_map = {
+        "best_match": {
+            "sorting_key": {
+                "all": lambda page: (
+                    page_run_dates[page],
+                    page.is_course_page or page.is_external_course_page,
+                    page.title,
+                ),
+                "programs": lambda page: (page_run_dates[page], page.title),
+                "courses": lambda page: (page_run_dates[page], page.title),
+            },
+            "reverse": False,
+        },
+        "start_date_asc": {
+            "sorting_key": {
+                "all": lambda page: (
+                    page_run_dates[page],
+                    page.is_course_page or page.is_external_course_page,
+                    page.title,
+                ),
+                "programs": lambda page: (page_run_dates[page], page.title),
+                "courses": lambda page: (page_run_dates[page], page.title),
+            },
+            "reverse": False,
+        },
         "price_asc": {
-            "sort_key": None,
+            "sorting_key": {
+                "all": lambda page: (page.product.current_price, page.title),
+                "programs": lambda page: (page.product.current_price, page.title),
+                "courses": lambda page: (page.product.current_price, page.title),
+            },
             "reverse": False,
         },
         "price_desc": {
-            "sort_key": None,
+            "sorting_key": {
+                "all": lambda page: (page.product.current_price, page.title),
+                "programs": lambda page: (page.product.current_price, page.title),
+                "courses": lambda page: (page.product.current_price, page.title),
+            },
             "reverse": True,
         },
-        "start_date_asc": {
-            "sort_key": None,
-            "reverse": False,
-        },
     }
-    sorting = sorting_key_map[sort_by] if sort_by else None  # noqa: F841
+    sorting = sorting_key_map[sort_by] if sort_by else sorting_key_map["best_match"]
     return (
         sorted(
             valid_program_pages + valid_course_pages,
             # ProgramPages with the same next run date as a CoursePage should be sorted first
-            key=lambda page: (
-                page_run_dates[page],
-                page.is_course_page or page.is_external_course_page,
-                page.title,
-            ),
+            key=sorting["sorting_key"]["all"],
+            reverse=sorting["reverse"],
         ),
         sorted(
             valid_program_pages,
-            key=lambda page: (page_run_dates[page], page.title),
+            key=sorting["sorting_key"]["programs"],
+            reverse=sorting["reverse"],
         ),
         sorted(
             valid_course_pages,
-            key=lambda page: (page_run_dates[page], page.title),
+            key=sorting["sorting_key"]["courses"],
+            reverse=sorting["reverse"],
         ),
     )
 

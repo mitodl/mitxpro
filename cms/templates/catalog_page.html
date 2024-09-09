@@ -126,14 +126,44 @@
                   </li>
                 </ul>
               </div>
-              <div class="catalog-sort-by">
-                <label for="sorting-select">Sort By:</label>
-                <select id="sorting-select" onchange="applySorting(this)">
-                  <option value="">Best Match</option>
-                  <option value="start_date_asc">Start Date</option>
-                  <option value="price_asc">Price: High-Low</option>
-                  <option value="price_desc">Price: Low-High</option>
-                </select>
+              <div class="catalog-sort-by dropdown">
+                <span>Sort By:</span>
+                <div
+                  class="col-2 dropdown-toggle"
+                  id="dropdownMenuButton"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-label="sorting-options"
+                >
+                  Best Match
+                </div>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <div
+                    class="dropdown-item"
+                    onclick="applySorting('best_match')"
+                  >
+                    Best Match
+                  </div>
+                  <div
+                    class="dropdown-item"
+                    onclick="applySorting('start_date_asc')"
+                  >
+                    Start Date
+                  </div>
+                  <div
+                    class="dropdown-item"
+                    onclick="applySorting('price_desc')"
+                  >
+                    Price: High-Low
+                  </div>
+                  <div
+                    class="dropdown-item"
+                    onclick="applySorting('price_asc')"
+                  >
+                    Price: Low-High
+                  </div>
+                </div>
               </div>
             </div>
             <div class="tab-content">
@@ -228,17 +258,14 @@
 
 {% block scripts %}
 <script type="text/javascript">
-  function applySorting(selectObj) {
-    const selectedValue = selectObj.value;
-    if (selectedValue) {
-      if (window.location.href.includes('?topic')) {
-        window.location.href =
-          window.location.href + '&' + 'sort-by=' + selectedValue;
-      } else {
-        window.location.href =
-          window.location.href + '?' + 'sort-by=' + selectedValue;
-      }
-    }
+  function applySorting(sortOption) {
+    var url = new URL(window.location.href);
+    var search_params = url.searchParams;
+    search_params.set('sort-by', sortOption);
+    url.search = search_params.toString();
+    var newURL = url.toString();
+    console.log(newURL);
+    window.location.href = newURL;
   }
 </script>
 {% endblock %}
