@@ -9,8 +9,7 @@ from mitxpro.test_utils import set_request_session
 from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
 from sheets.models import GoogleApiAuth
 from sheets.views import complete_google_auth
-
-lazy = pytest.lazy_fixture
+from pytest_lazy_fixtures import lf as lazy
 
 
 @pytest.fixture

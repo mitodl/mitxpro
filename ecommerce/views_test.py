@@ -63,6 +63,7 @@ from ecommerce.test_utils import unprotect_version_tables
 from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import dict_without_keys, now_in_utc
 from users.factories import UserFactory
+from pytest_lazy_fixtures import lf as lazy
 
 CYBERSOURCE_SECURE_ACCEPTANCE_URL = "http://fake"
 CYBERSOURCE_ACCESS_KEY = "access"
@@ -70,7 +71,6 @@ CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
 FAKE = faker.Factory.create()
 
-lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
 

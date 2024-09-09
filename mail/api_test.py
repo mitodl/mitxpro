@@ -18,9 +18,9 @@ from mail.api import (
 )
 from mitxpro.test_utils import any_instance_of
 from users.factories import UserFactory
+from pytest_lazy_fixtures import lf as lazy
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("email_settings")]
-lazy = pytest.lazy_fixture
 
 
 @pytest.fixture
