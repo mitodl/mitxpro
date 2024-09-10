@@ -31,6 +31,8 @@ prodConfig.module.rules = [
   },
 ];
 
+const analyzeBundles = process.env.WEBPACK_ANALYZE === 'True';
+
 module.exports = Object.assign(prodConfig, {
   context: __dirname,
   mode: "production",
@@ -53,9 +55,14 @@ module.exports = Object.assign(prodConfig, {
     new MiniCssExtractPlugin({
       filename: "[name]-[contenthash].css",
     }),
-    new BundleAnalyzerPlugin({
-      analyzerMode: "static",
-    }),
+    ...(analyzeBundles
+      ? [
+          new BundleAnalyzerPlugin({
+            analyzerMode: "static",
+          }),
+        ]
+      : []
+    ),
   ],
   optimization: {
     minimize: true,
