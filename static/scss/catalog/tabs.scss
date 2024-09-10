@@ -73,7 +73,22 @@
 
       @include media-breakpoint-up(md) {
         font-size: 26px;
-        padding: 0 121px 0 0;
+      }
+
+      @media screen and (width >= 1550px) {
+        padding: 0 120px 0 0;
+      }
+
+      @media screen and (width <= 1550px) {
+        padding: 0 85px 0 0;
+      }
+
+      @media screen and (width <= 1200px) {
+        padding: 0 50px 0 0;
+      }
+
+      @media screen and (width <= 500px) {
+        padding: 0 55px 0 0;
       }
 
       @include media-breakpoint-down(md) {
@@ -117,6 +132,16 @@
     border: 2px solid #b8c2cc;
     border-radius: 4px;
     cursor: pointer;
+  }
+
+  @include media-breakpoint-down(md) {
+    margin-left: 20px;
+    padding-left: 0;
+  }
+
+  @include media-breakpoint-down(sm) {
+    margin-left: 35px;
+    padding-left: 0;
   }
 
   .dropdown-toggle {
