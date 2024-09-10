@@ -76,19 +76,19 @@
       }
 
       @media screen and (width >= 1550px) {
-        padding: 0 120px 0 0;
+        padding: 0 110px 0 0;
       }
 
       @media screen and (width <= 1550px) {
-        padding: 0 85px 0 0;
+        padding: 0 75px 0 0;
       }
 
       @media screen and (width <= 1200px) {
-        padding: 0 50px 0 0;
+        padding: 0 40px 0 0;
       }
 
       @media screen and (width <= 500px) {
-        padding: 0 55px 0 0;
+        padding: 0 45px 0 0;
       }
 
       @include media-breakpoint-down(md) {
@@ -181,6 +181,12 @@
         color: $primary;
         text-decoration: underline;
       }
+    }
+
+    .selected {
+      background-color: $white;
+      color: $primary;
+      text-decoration: underline;
     }
   }
 }

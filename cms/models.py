@@ -75,6 +75,7 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
+    CatalogSorting,
 )
 from cms.forms import CertificatePageForm, CoursewareForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
@@ -511,7 +512,7 @@ class CatalogPage(Page):
         Populate the context with live programs, courses and programs + courses
         """
         topic_filter = request.GET.get("topic", ALL_TOPICS)
-        sort_by = request.GET.get("sort-by", None)
+        sort_by = request.GET.get("sort-by", CatalogSorting.BEST_MATCH.sorting_value)
         program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
@@ -621,6 +622,37 @@ class CatalogPage(Page):
             ],
             selected_topic=topic_filter,
             active_tab=request.GET.get("active-tab", ALL_TAB),
+            active_sorting_title=CatalogSorting[sort_by.upper()].sorting_title,
+            sort_by_options=[
+                {
+                    "value": CatalogSorting.BEST_MATCH.sorting_value,
+                    "title": CatalogSorting.BEST_MATCH.sorting_title,
+                    "selected_cls": "selected"
+                    if sort_by == CatalogSorting.BEST_MATCH.sorting_value
+                    else "",
+                },
+                {
+                    "value": CatalogSorting.START_DATE_ASC.sorting_value,
+                    "title": CatalogSorting.START_DATE_ASC.sorting_title,
+                    "selected_cls": "selected"
+                    if sort_by == CatalogSorting.START_DATE_ASC.sorting_value
+                    else "",
+                },
+                {
+                    "value": CatalogSorting.PRICE_DESC.sorting_value,
+                    "title": CatalogSorting.PRICE_DESC.sorting_title,
+                    "selected_cls": "selected"
+                    if sort_by == CatalogSorting.PRICE_DESC.sorting_value
+                    else "",
+                },
+                {
+                    "value": CatalogSorting.PRICE_ASC.sorting_value,
+                    "title": CatalogSorting.PRICE_ASC.sorting_title,
+                    "selected_cls": "selected"
+                    if sort_by == CatalogSorting.PRICE_ASC.sorting_value
+                    else "",
+                },
+            ],
         )
 
 

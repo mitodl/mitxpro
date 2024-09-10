@@ -1,5 +1,7 @@
 """Constants for the CMS app"""
 
+import enum
+
 COURSE_INDEX_SLUG = "courses"
 PROGRAM_INDEX_SLUG = "programs"
 SIGNATORY_INDEX_SLUG = "signatories"
@@ -29,3 +31,14 @@ ON_DEMAND_WEBINAR_BUTTON_TITLE = "VIEW RECORDING"
 FORMAT_ONLINE = "Online"
 FORMAT_HYBRID = "Hybrid"
 FORMAT_OTHER = "Other"
+
+
+class CatalogSorting(enum.Enum):
+    BEST_MATCH = ("best_match", "Best Match")
+    START_DATE_ASC = ("start_date_asc", "Start Date")
+    PRICE_DESC = ("price_desc", "Price: High-Low")
+    PRICE_ASC = ("price_asc", "Price: Low-High")
+
+    def __init__(self, sorting_value, sorting_title):
+        self.sorting_value = sorting_value
+        self.sorting_title = sorting_title

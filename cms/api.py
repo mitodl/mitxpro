@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 
 from cms import models as cms_models
-from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG
+from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
@@ -55,49 +55,60 @@ def filter_and_sort_catalog_pages(
             valid_course_pages,
         )
     }
+
+    price_sorting_key = lambda page: (  # noqa: E731
+        page.product.current_price is None,
+        page.product.current_price,
+        page.title,
+    )
+    best_match_all_tab_sorting_key = lambda page: (  # noqa: E731
+        page_run_dates[page],
+        page.is_course_page or page.is_external_course_page,
+        page.title,
+    )
+    best_match_program_tab_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
+    best_match_course_tab_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
+
     sorting_key_map = {
-        "best_match": {
+        CatalogSorting.BEST_MATCH.sorting_value: {
             "sorting_key": {
-                "all": lambda page: (
-                    page_run_dates[page],
-                    page.is_course_page or page.is_external_course_page,
-                    page.title,
-                ),
-                "programs": lambda page: (page_run_dates[page], page.title),
-                "courses": lambda page: (page_run_dates[page], page.title),
+                "all": best_match_all_tab_sorting_key,
+                "programs": best_match_program_tab_sorting_key,
+                "courses": best_match_course_tab_sorting_key,
             },
             "reverse": False,
         },
-        "start_date_asc": {
+        CatalogSorting.START_DATE_ASC.sorting_value: {
             "sorting_key": {
-                "all": lambda page: (
-                    page_run_dates[page],
-                    page.is_course_page or page.is_external_course_page,
-                    page.title,
-                ),
-                "programs": lambda page: (page_run_dates[page], page.title),
-                "courses": lambda page: (page_run_dates[page], page.title),
+                "all": best_match_all_tab_sorting_key,
+                "programs": best_match_program_tab_sorting_key,
+                "courses": best_match_course_tab_sorting_key,
             },
             "reverse": False,
         },
-        "price_asc": {
+        CatalogSorting.PRICE_ASC.sorting_value: {
             "sorting_key": {
-                "all": lambda page: (page.product.current_price, page.title),
-                "programs": lambda page: (page.product.current_price, page.title),
-                "courses": lambda page: (page.product.current_price, page.title),
+                "all": price_sorting_key,
+                "programs": price_sorting_key,
+                "courses": price_sorting_key,
             },
             "reverse": False,
         },
-        "price_desc": {
+        CatalogSorting.PRICE_DESC.sorting_value: {
             "sorting_key": {
-                "all": lambda page: (page.product.current_price, page.title),
-                "programs": lambda page: (page.product.current_price, page.title),
-                "courses": lambda page: (page.product.current_price, page.title),
+                "all": price_sorting_key,
+                "programs": price_sorting_key,
+                "courses": price_sorting_key,
             },
             "reverse": True,
         },
     }
-    sorting = sorting_key_map[sort_by] if sort_by else sorting_key_map["best_match"]
+    sort_by = (
+        sort_by
+        if sort_by in sorting_key_map
+        else CatalogSorting.BEST_MATCH.sorting_value
+    )
+    sorting = sorting_key_map[sort_by]
     return (
         sorted(
             valid_program_pages + valid_course_pages,

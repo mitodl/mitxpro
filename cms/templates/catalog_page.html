@@ -136,33 +136,17 @@
                   aria-expanded="false"
                   aria-label="sorting-options"
                 >
-                  Best Match
+                  {{ active_sorting_title }}
                 </div>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  {% for sorting in sort_by_options %}
                   <div
-                    class="dropdown-item"
-                    onclick="applySorting('best_match')"
+                    class="dropdown-item {{ sorting.selected_cls }}"
+                    onclick="applySorting('{{ sorting.value }}')"
                   >
-                    Best Match
+                    {{ sorting.title }}
                   </div>
-                  <div
-                    class="dropdown-item"
-                    onclick="applySorting('start_date_asc')"
-                  >
-                    Start Date
-                  </div>
-                  <div
-                    class="dropdown-item"
-                    onclick="applySorting('price_desc')"
-                  >
-                    Price: High-Low
-                  </div>
-                  <div
-                    class="dropdown-item"
-                    onclick="applySorting('price_asc')"
-                  >
-                    Price: Low-High
-                  </div>
+                  {% endfor %}
                 </div>
               </div>
             </div>
