@@ -121,6 +121,20 @@
 
   .dropdown-toggle {
     color: #626a73;
+
+    &::after {
+      content: "chevron_right";
+      font-family: "Material Icons";
+      transform: rotate(90deg);
+      line-height: 18px;
+      display: inline-block;
+      margin-left: unset;
+      vertical-align: -3px;
+      border-top: unset;
+      border-right: unset;
+      border-bottom: unset;
+      border-left: unset;
+    }
   }
 
   .dropdown-menu {
