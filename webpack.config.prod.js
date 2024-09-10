@@ -31,7 +31,7 @@ prodConfig.module.rules = [
   },
 ];
 
-const analyzeBundles = process.env.WEBPACK_ANALYZE === "True";
+const analyzeBundles = process.env.WEBPACK_ANALYZE?.toLowerCase() === "true";
 
 module.exports = Object.assign(prodConfig, {
   context: __dirname,
