@@ -35,7 +35,7 @@ const couponValidations = yup.object().shape({
   coupon_type: yup.string().required("Coupon type is required"),
   products: yup.array().when("is_global", {
     is: false,
-    then: yup.array().min(1, "${min} or more products must be selected"),
+    then: (schema) => schema.min(1, "${min} or more products must be selected"),
   }),
   is_global: yup.boolean(),
   activation_date: yup.date().required("Valid activation date required"),
@@ -52,9 +52,8 @@ const couponValidations = yup.object().shape({
     .min(1, "Must be at least ${min}")
     .when("discount_type", {
       is: DISCOUNT_TYPE_PERCENT_OFF,
-      then: yup
-        .number()
-        .max(
+      then: (schema) =>
+        schema.max(
           100,
           "The amount should be between (0 - 1) when discount type is percent-off.",
         ),
@@ -62,40 +61,36 @@ const couponValidations = yup.object().shape({
   discount_type: yup.string().required("Discount type is required"),
   max_redemptions: yup.number().when("coupon_type", {
     is: COUPON_TYPE_PROMO,
-    then: yup
-      .number()
-      .min(1, "Must be at least ${min}")
-      .required("Number required"),
+    then: (schema) =>
+      schema.min(1, "Must be at least ${min}").required("Number required"),
   }),
   coupon_code: yup.string().when("coupon_type", {
     is: COUPON_TYPE_PROMO,
-    then: yup
-      .string()
-      .required("Coupon code is required")
-      .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
+    then: (schema) =>
+      schema
+        .required("Coupon code is required")
+        .matches(/^\w+$/, "Only letters, numbers, and underscores allowed"),
   }),
   num_coupon_codes: yup.number().when("coupon_type", {
     is: COUPON_TYPE_SINGLE_USE,
-    then: yup
-      .number()
-      .min(1, "Must be at least ${min}")
-      .required("Number required"),
+    then: (schema) =>
+      schema.min(1, "Must be at least ${min}").required("Number required"),
   }),
   max_redemptions_per_user: yup.number().when("coupon_type", {
     is: COUPON_TYPE_PROMO,
-    then: yup
-      .number()
-      .required("Number required")
-      .min(1, "Must be at least ${min}")
-      .max(100, "Must be at most ${max}"),
+    then: (schema) =>
+      schema
+        .required("Number required")
+        .min(1, "Must be at least ${min}")
+        .max(100, "Must be at most ${max}"),
   }),
   payment_transaction: yup.string().when("coupon_type", {
     is: COUPON_TYPE_SINGLE_USE,
-    then: yup.string().required("Payment transaction is required"),
+    then: (schema) => schema.required("Payment transaction is required"),
   }),
   payment_type: yup.string().when("coupon_type", {
     is: COUPON_TYPE_SINGLE_USE,
-    then: yup.string().required("Payment type is required"),
+    then: (schema) => schema.required("Payment type is required"),
   }),
 });
 
