@@ -53,4 +53,7 @@ def test_ipv4_lookup(v4, in_block):
 
     result = ip_to_country_code(str(test_address))
 
-    return result is None and not in_block
+    if in_block:
+        assert result is not None
+    else:
+        assert result is None
