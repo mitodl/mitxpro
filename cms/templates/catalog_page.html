@@ -141,8 +141,8 @@
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   {% for sorting in sort_by_options %}
                   <div
-                    class="dropdown-item {{ sorting.selected_cls }}"
-                    onclick="applySorting('{{ sorting.value }}')"
+                    class="dropdown-item catalog-sort-option {{ sorting.selected_cls }}"
+                    data-sort-value="{{ sorting.value }}"
                   >
                     {{ sorting.title }}
                   </div>
@@ -239,17 +239,3 @@
     </div>
   </div>
 </div>
-
-{% block scripts %}
-<script type="text/javascript">
-  function applySorting(sortOption) {
-    var url = new URL(window.location.href);
-    var search_params = url.searchParams;
-    search_params.set('sort-by', sortOption);
-    url.search = search_params.toString();
-    var newURL = url.toString();
-    console.log(newURL);
-    window.location.href = newURL;
-  }
-</script>
-{% endblock %}
