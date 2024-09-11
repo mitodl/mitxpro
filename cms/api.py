@@ -20,7 +20,7 @@ def filter_and_sort_catalog_pages(
     course_pages,
     external_course_pages,
     external_program_pages,
-    sort_by=None,
+    sort_by,
 ):
     """
     Filters program and course pages to only include those that should be visible in the catalog, then returns a tuple
