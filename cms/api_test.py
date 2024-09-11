@@ -5,6 +5,7 @@ from datetime import timedelta
 import pytest
 
 from cms.api import filter_and_sort_catalog_pages
+from cms.constants import CatalogSorting
 from cms.factories import ExternalCoursePageFactory, ExternalProgramPageFactory
 from courses.factories import CourseRunFactory, ProgramRunFactory
 from mitxpro.utils import now_in_utc
@@ -12,7 +13,14 @@ from mitxpro.utils import now_in_utc
 pytestmark = pytest.mark.django_db
 
 
-def test_filter_and_sort_catalog_pages():
+@pytest.mark.parametrize(
+    "sort_by",
+    [
+        CatalogSorting.BEST_MATCH.sorting_value,
+        CatalogSorting.START_DATE_ASC.sorting_value,
+    ],
+)
+def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
     """
     Test that filter_and_sort_catalog_pages removes program/course/external course pages that do not have a future start date
     or enrollment end date, and returns appropriately sorted lists of pages
@@ -75,6 +83,7 @@ def test_filter_and_sort_catalog_pages():
         initial_course_pages,
         external_course_pages,
         external_program_pages,
+        sort_by,
     )
 
     # Combined pages and course pages should not include the past course run
