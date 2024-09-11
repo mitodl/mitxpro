@@ -126,7 +126,10 @@
                   </li>
                 </ul>
               </div>
-              <div class="catalog-sort-by-dropdown dropdown">
+              <div
+                class="catalog-sort-by-dropdown dropdown"
+                id="catalogSortDropdown"
+              >
                 <span>Sort By:</span>
                 <div
                   class="col-2 dropdown-toggle"
@@ -135,10 +138,14 @@
                   aria-haspopup="true"
                   aria-expanded="false"
                   aria-label="sorting-options"
+                  data-display="static"
                 >
                   {{ active_sorting_title }}
                 </div>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <div
+                  class="dropdown-menu dropdown-menu-left"
+                  aria-labelledby="dropdownMenuButton"
+                >
                   {% for sorting in sort_by_options %}
                   <div
                     class="dropdown-item catalog-sort-option {{ sorting.selected_cls }}"
