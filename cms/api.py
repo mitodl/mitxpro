@@ -56,7 +56,13 @@ def filter_and_sort_catalog_pages(
         )
     }
 
-    price_sorting_key = lambda page: (  # noqa: E731
+    price_desc_sorting_key = lambda page: (  # noqa: E731
+        page.product.current_price
+        if page.product.current_price is not None
+        else float("-inf"),
+        page.title,
+    )
+    price_asc_sorting_key = lambda page: (  # noqa: E731
         page.product.current_price is None,
         page.product.current_price,
         page.title,
@@ -88,17 +94,17 @@ def filter_and_sort_catalog_pages(
         },
         CatalogSorting.PRICE_ASC.sorting_value: {
             "sorting_key": {
-                "all": price_sorting_key,
-                "programs": price_sorting_key,
-                "courses": price_sorting_key,
+                "all": price_asc_sorting_key,
+                "programs": price_asc_sorting_key,
+                "courses": price_asc_sorting_key,
             },
             "reverse": False,
         },
         CatalogSorting.PRICE_DESC.sorting_value: {
             "sorting_key": {
-                "all": price_sorting_key,
-                "programs": price_sorting_key,
-                "courses": price_sorting_key,
+                "all": price_desc_sorting_key,
+                "programs": price_desc_sorting_key,
+                "courses": price_desc_sorting_key,
             },
             "reverse": True,
         },
