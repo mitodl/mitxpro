@@ -31,11 +31,11 @@ def filter_and_sort_catalog_pages(
         course_pages (iterable of CoursePage): CoursePages to filter and sort
         external_course_pages (iterable of ExternalCoursePage): ExternalCoursePages to filter and sort
         external_program_pages (iterable of ExternalProgramPage): ExternalProgramPages to filter and sort
-        sort_by (str): Sort catalog option.
+        sort_by (str): Sorting applicable.
 
     Returns:
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
-            ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the next course/program run date and title
+            ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the sort_by option.
     """
     all_program_pages = program_pages + external_program_pages
     all_course_pages = course_pages + external_course_pages

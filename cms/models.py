@@ -625,33 +625,13 @@ class CatalogPage(Page):
             active_sorting_title=CatalogSorting[sort_by.upper()].sorting_title,
             sort_by_options=[
                 {
-                    "value": CatalogSorting.BEST_MATCH.sorting_value,
-                    "title": CatalogSorting.BEST_MATCH.sorting_title,
+                    "value": sorting_option.sorting_value,
+                    "title": sorting_option.sorting_title,
                     "selected_cls": "selected"
-                    if sort_by == CatalogSorting.BEST_MATCH.sorting_value
+                    if sort_by == sorting_option.sorting_value
                     else "",
-                },
-                {
-                    "value": CatalogSorting.START_DATE_ASC.sorting_value,
-                    "title": CatalogSorting.START_DATE_ASC.sorting_title,
-                    "selected_cls": "selected"
-                    if sort_by == CatalogSorting.START_DATE_ASC.sorting_value
-                    else "",
-                },
-                {
-                    "value": CatalogSorting.PRICE_DESC.sorting_value,
-                    "title": CatalogSorting.PRICE_DESC.sorting_title,
-                    "selected_cls": "selected"
-                    if sort_by == CatalogSorting.PRICE_DESC.sorting_value
-                    else "",
-                },
-                {
-                    "value": CatalogSorting.PRICE_ASC.sorting_value,
-                    "title": CatalogSorting.PRICE_ASC.sorting_title,
-                    "selected_cls": "selected"
-                    if sort_by == CatalogSorting.PRICE_ASC.sorting_value
-                    else "",
-                },
+                }
+                for sorting_option in CatalogSorting
             ],
         )
 

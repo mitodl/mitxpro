@@ -34,11 +34,16 @@ FORMAT_OTHER = "Other"
 
 
 class CatalogSorting(enum.Enum):
+    """Catalog sorting option"""
+
     BEST_MATCH = ("best_match", "Best Match")
     START_DATE_ASC = ("start_date_asc", "Start Date")
     PRICE_DESC = ("price_desc", "Price: High-Low")
     PRICE_ASC = ("price_asc", "Price: Low-High")
 
     def __init__(self, sorting_value, sorting_title):
+        """
+        A sorting option can have a value and a title.
+        """
         self.sorting_value = sorting_value
         self.sorting_title = sorting_title
