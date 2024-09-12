@@ -10,7 +10,12 @@ from cms.factories import (
     ExternalCoursePageFactory,
     ExternalProgramPageFactory,
 )
-from courses.factories import CourseRunFactory, ProgramRunFactory
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+    ProgramFactory,
+    ProgramRunFactory,
+)
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.utils import now_in_utc
 
@@ -133,28 +138,46 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
 
 
 @pytest.mark.parametrize(
-    ("sort_by", "prices", "expected_prices_order"),
+    (
+        "sort_by",
+        "course_prices",
+        "program_prices",
+        "expected_all_tab_prices",
+        "expected_course_tab_prices",
+        "expected_program_tab_prices",
+    ),
     [
         (
             CatalogSorting.PRICE_ASC.sorting_value,
-            [1200, 100, None, 1800, 5000, None, 21000],
-            [100, 1200, 1800, 5000, 21000, None, None],
+            [120, 10, None, 500, None, 1000],
+            [220, 50, None, 5000, None, 21000],
+            [10, 50, 120, 220, 500, 1000, 5000, 21000, None, None, None, None],
+            [10, 120, 500, 1000, None, None],
+            [50, 220, 5000, 21000, None, None],
         ),
         (
             CatalogSorting.PRICE_DESC.sorting_value,
-            [1200, 100, None, 1800, 5000, None, 21000],
-            [21000, 5000, 1800, 1200, 100, None, None],
+            [120, 10, None, 500, None, 1000],
+            [220, 50, None, 5000, None, 21000],
+            [21000, 5000, 1000, 500, 220, 120, 50, 10, None, None, None, None],
+            [1000, 500, 120, 10, None, None],
+            [21000, 5000, 220, 50, None, None],
         ),
     ],
 )
-def test_filter_and_sort_catalog_pages_with_price_sorting(
-    sort_by, prices, expected_prices_order
+def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
+    sort_by,
+    course_prices,
+    program_prices,
+    expected_all_tab_prices,
+    expected_course_tab_prices,
+    expected_program_tab_prices,
 ):
     """Tests that `filter_and_sort_catalog_pages` returns appropriately sorted lists of courseware pages"""
     now = now_in_utc()
 
     course_page_list = []
-    for price in prices:
+    for price in course_prices:
         if price is None:
             run = CourseRunFactory.create(
                 past_start=True,
@@ -175,20 +198,48 @@ def test_filter_and_sort_catalog_pages_with_price_sorting(
 
         course_page_list.append(run.course.coursepage)
 
+    program_page_list = []
+    for price in program_prices:
+        if price is None:
+            program = ProgramFactory.create()
+            course = CourseFactory.create(program=program)
+            CourseRunFactory.create(
+                course=course,
+                past_start=True,
+                enrollment_end=(now + timedelta(days=1)),
+                course__no_program=True,
+            )
+        else:
+            program = ProgramFactory.create()
+            course = CourseFactory.create(program=program)
+            CourseRunFactory.create(
+                course=course,
+                past_start=True,
+                enrollment_end=(now + timedelta(days=1)),
+                course__no_program=True,
+            )
+            ProductVersionFactory.create(
+                product=ProductFactory.create(content_object=program), price=price
+            )
+
+        program_page_list.append(program.programpage)
+
     all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
-        [],
+        program_page_list,
         course_page_list,
         [],
         [],
         sort_by,
     )
 
-    assert len(all_pages) == len(course_page_list)
+    assert len(all_pages) == len(course_page_list) + len(program_page_list)
     assert len(course_pages) == len(course_page_list)
-    assert len(program_pages) == 0
+    assert len(program_pages) == len(program_page_list)
 
-    assert [page.product.current_price for page in all_pages] == expected_prices_order
+    assert [page.product.current_price for page in all_pages] == expected_all_tab_prices
     assert [
         page.product.current_price for page in course_pages
-    ] == expected_prices_order
-    assert [page.product.current_price for page in program_pages] == []
+    ] == expected_course_tab_prices
+    assert [
+        page.product.current_price for page in program_pages
+    ] == expected_program_tab_prices
