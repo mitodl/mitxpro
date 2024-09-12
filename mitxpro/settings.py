@@ -13,6 +13,7 @@ import dj_database_url
 from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from mitol.common.envs import (
+    env,
     get_bool,
     get_delimited_list,
     get_features,
@@ -20,14 +21,21 @@ from mitol.common.envs import (
     get_string,
     import_settings_modules,
 )
-from mitol.common.settings.webpack import *  # noqa: F403
-from mitol.digitalcredentials.settings import *  # noqa: F403
 from redbeat import RedBeatScheduler
 
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
 VERSION = "0.159.0"
+
+env.reset()
+
+# import_settings_module, imports the default settings defined in ol-django-authentication app
+import_settings_modules(
+    "mitol.authentication.settings.djoser_settings",
+    "mitol.common.settings.webpack",
+    "mitol.digitalcredentials.settings",
+)
 
 ENVIRONMENT = get_string(
     name="MITXPRO_ENVIRONMENT",
@@ -201,7 +209,7 @@ if ENVIRONMENT not in ("production", "prod"):
     INSTALLED_APPS += ("localdev.seed",)
 
 
-if not WEBPACK_DISABLE_LOADER_STATS:  # noqa: F405
+if not WEBPACK_DISABLE_LOADER_STATS:  # noqa: F821
     INSTALLED_APPS += ("webpack_loader",)
 
 MIDDLEWARE = (
@@ -1053,8 +1061,6 @@ MITOL_DIGITAL_CREDENTIALS_BUILD_CREDENTIAL_FUNC = (
 )
 
 # mitol-django-authenticaton
-# import_settings_module, imports the default settings defined in ol-django-authentication app
-import_settings_modules("mitol.authentication.settings.djoser_settings")
 MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
 
