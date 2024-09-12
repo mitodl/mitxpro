@@ -3,14 +3,13 @@
 import pytest
 from django.test.client import Client, RequestFactory
 from django.urls import reverse
+from pytest_lazy_fixtures import lf as lazy
 from rest_framework import status
 
 from mitxpro.test_utils import set_request_session
 from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
 from sheets.models import GoogleApiAuth
 from sheets.views import complete_google_auth
-
-lazy = pytest.lazy_fixture
 
 
 @pytest.fixture

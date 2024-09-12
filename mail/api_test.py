@@ -3,6 +3,7 @@
 from email.utils import formataddr
 
 import pytest
+from pytest_lazy_fixtures import lf as lazy
 
 from mail.api import (
     EmailMetadata,
@@ -20,7 +21,6 @@ from mitxpro.test_utils import any_instance_of
 from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("email_settings")]
-lazy = pytest.lazy_fixture
 
 
 @pytest.fixture

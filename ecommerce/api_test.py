@@ -110,7 +110,6 @@ from voucher.models import Voucher
 
 FAKE = faker.Factory.create()
 pytestmark = pytest.mark.django_db
-lazy = pytest.lazy_fixture
 
 CYBERSOURCE_ACCESS_KEY = "access"
 CYBERSOURCE_PROFILE_ID = "profile"

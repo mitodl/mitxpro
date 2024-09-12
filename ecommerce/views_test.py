@@ -9,6 +9,7 @@ import faker
 import pytest
 from django.db.models import Count, Q
 from django.urls import reverse
+from pytest_lazy_fixtures import lf as lazy
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.test import APIClient
@@ -70,7 +71,6 @@ CYBERSOURCE_PROFILE_ID = "profile"
 CYBERSOURCE_SECURITY_KEY = "security"
 FAKE = faker.Factory.create()
 
-lazy = pytest.lazy_fixture
 
 pytestmark = pytest.mark.django_db
 
