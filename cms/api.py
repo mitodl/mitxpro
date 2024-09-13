@@ -6,11 +6,12 @@ from collections import defaultdict
 from datetime import MAXYEAR, UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from wagtail.models import Page, Site
 
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
+from mitxpro.utils import now_in_utc
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
@@ -33,7 +34,7 @@ def get_catalog_sorting_keys(sorting, *, reverse):
 
 def filter_program_pages(is_external=False):  # noqa: FBT002
     """Filter the internal and external program objects"""
-
+    now = now_in_utc()
     program_page_cls = cms_models.ProgramPage
     prefetch_type = "coursepage"
     if is_external:
@@ -42,7 +43,19 @@ def filter_program_pages(is_external=False):  # noqa: FBT002
 
     return (
         program_page_cls.objects.live()
-        .filter(program__live=True)
+        .filter(
+            (
+                Q(
+                    program__courses__courseruns__start_date__isnull=False,
+                    program__courses__courseruns__start_date__gte=now,
+                )
+                | Q(
+                    program__courses__courseruns__enrollment_end__isnull=False,
+                    program__courses__courseruns__enrollment_end__gte=now,
+                )
+            ),
+            program__live=True,
+        )
         .order_by("id")
         .select_related("program")
         .prefetch_related(
@@ -58,16 +71,29 @@ def filter_program_pages(is_external=False):  # noqa: FBT002
 
 def filter_course_pages(is_external=False):  # noqa: FBT002
     """Filter the internal and external course pages"""
-
+    now = now_in_utc()
     course_page_cls = (
         cms_models.CoursePage if is_external else cms_models.ExternalCoursePage
     )
 
     return (
         course_page_cls.objects.live()
-        .filter(course__live=True)
+        .filter(
+            (
+                Q(
+                    course__courseruns__start_date__isnull=False,
+                    course__courseruns__start_date__gte=now,
+                )
+                | Q(
+                    course__courseruns__enrollment_end__isnull=False,
+                    course__courseruns__enrollment_end__gte=now,
+                )
+            ),
+            course__live=True,
+        )
         .order_by("id")
         .select_related("course")
+        .distinct()
     )
 
 
@@ -87,19 +113,13 @@ def filter_and_sort_catalog_pages(program_pages, course_pages, sort_by):
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
             ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the sort_by option.
     """
-    valid_program_pages = [
-        page for page in program_pages if page.product.is_catalog_visible
-    ]
-    valid_course_pages = [
-        page for page in course_pages if page.product.is_catalog_visible
-    ]
 
     page_run_dates = {
         page: page.product.next_run_date
         or datetime(year=MAXYEAR, month=1, day=1, tzinfo=UTC)
         for page in itertools.chain(
-            valid_program_pages,
-            valid_course_pages,
+            program_pages,
+            course_pages,
         )
     }
 
@@ -130,17 +150,17 @@ def filter_and_sort_catalog_pages(program_pages, course_pages, sort_by):
 
     return (
         sorted(
-            valid_program_pages + valid_course_pages,
+            program_pages + course_pages,
             key=sorting["sorting_key"]["all"],
             reverse=sorting["reverse"],
         ),
         sorted(
-            valid_program_pages,
+            program_pages,
             key=sorting["sorting_key"]["programs"],
             reverse=sorting["reverse"],
         ),
         sorted(
-            valid_course_pages,
+            course_pages,
             key=sorting["sorting_key"]["courses"],
             reverse=sorting["reverse"],
         ),

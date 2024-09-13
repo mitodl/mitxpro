@@ -28,11 +28,13 @@ from courses.serializers import (
     ProgramSerializer,
 )
 from ecommerce.models import Product
+from mitxpro.utils import now_in_utc
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
+    now = now_in_utc()
     products_prefetch = Prefetch("products", Product.objects.with_ordered_versions())
     course_runs_prefetch = Prefetch(
         "courseruns", CourseRun.objects.prefetch_related(products_prefetch)
@@ -49,7 +51,19 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
     serializer_class = ProgramSerializer
     queryset = (
-        Program.objects.filter(live=True)
+        Program.objects.filter(
+            (
+                Q(
+                    courses__courseruns__start_date__isnull=False,
+                    courses__courseruns__start_date__gte=now,
+                )
+                | Q(
+                    courses__courseruns__enrollment_end__isnull=False,
+                    courses__courseruns__enrollment_end__gte=now,
+                )
+            ),
+            live=True,
+        )
         .exclude(products=None)
         .select_related("programpage", "externalprogrampage", "platform")
         .prefetch_related(courses_prefetch, products_prefetch)
@@ -69,8 +83,21 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CourseSerializer
 
     def get_queryset(self):
+        now = now_in_utc()
         queryset = (
-            Course.objects.filter(live=True)
+            Course.objects.filter(
+                (
+                    Q(
+                        courseruns__start_date__isnull=False,
+                        courseruns__start_date__gte=now,
+                    )
+                    | Q(
+                        courseruns__enrollment_end__isnull=False,
+                        courseruns__enrollment_end__gte=now,
+                    )
+                ),
+                live=True,
+            )
             .select_related("coursepage", "externalcoursepage", "platform")
             .prefetch_related(
                 "coursepage__topics",
