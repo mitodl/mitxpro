@@ -65,7 +65,7 @@ zeep = "4.2.1"
 [tool.poetry.group.dev.dependencies]
 bpython = "*"
 django-debug-toolbar = "*"
-factory-boy = "3.3.0"
+factory-boy = "3.3.1"
 faker = "13.16.0"
 freezegun = "0.3.15"
 hypothesis = "4.24.6"
