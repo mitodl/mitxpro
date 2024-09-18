@@ -627,9 +627,6 @@ class CatalogPage(Page):
                 {
                     "value": sorting_option.sorting_value,
                     "title": sorting_option.sorting_title,
-                    "selected_cls": "selected"
-                    if sort_by == sorting_option.sorting_value
-                    else "",
                 }
                 for sorting_option in CatalogSorting
             ],

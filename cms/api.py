@@ -2,6 +2,7 @@
 
 import itertools
 import logging
+from collections import defaultdict
 from datetime import MAXYEAR, UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
@@ -67,53 +68,41 @@ def filter_and_sort_catalog_pages(
         page.product.current_price,
         page.title,
     )
-    best_match_all_tab_sorting_key = lambda page: (  # noqa: E731
+    default_all_tab_sorting_key = lambda page: (  # noqa: E731
         page_run_dates[page],
         page.is_course_page or page.is_external_course_page,
         page.title,
     )
-    best_match_program_tab_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
-    best_match_course_tab_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
+    default_courseware_tab_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
 
-    sorting_key_map = {
-        CatalogSorting.BEST_MATCH.sorting_value: {
+    # Best Match and Start Date sorting has same logic
+    sorting_key_map = defaultdict(
+        lambda: {
             "sorting_key": {
-                "all": best_match_all_tab_sorting_key,
-                "programs": best_match_program_tab_sorting_key,
-                "courses": best_match_course_tab_sorting_key,
+                "all": default_all_tab_sorting_key,
+                "programs": default_courseware_tab_sorting_key,
+                "courses": default_courseware_tab_sorting_key,
             },
             "reverse": False,
-        },
-        CatalogSorting.START_DATE_ASC.sorting_value: {
-            "sorting_key": {
-                "all": best_match_all_tab_sorting_key,
-                "programs": best_match_program_tab_sorting_key,
-                "courses": best_match_course_tab_sorting_key,
-            },
-            "reverse": False,
-        },
-        CatalogSorting.PRICE_ASC.sorting_value: {
-            "sorting_key": {
-                "all": price_asc_sorting_key,
-                "programs": price_asc_sorting_key,
-                "courses": price_asc_sorting_key,
-            },
-            "reverse": False,
-        },
-        CatalogSorting.PRICE_DESC.sorting_value: {
-            "sorting_key": {
-                "all": price_desc_sorting_key,
-                "programs": price_desc_sorting_key,
-                "courses": price_desc_sorting_key,
-            },
-            "reverse": True,
-        },
-    }
-    sort_by = (
-        sort_by
-        if sort_by in sorting_key_map
-        else CatalogSorting.BEST_MATCH.sorting_value
+        }
     )
+
+    sorting_key_map[CatalogSorting.PRICE_ASC.sorting_value] = {
+        "sorting_key": {
+            "all": price_asc_sorting_key,
+            "programs": price_asc_sorting_key,
+            "courses": price_asc_sorting_key,
+        },
+        "reverse": False,
+    }
+    sorting_key_map[CatalogSorting.PRICE_DESC.sorting_value] = {
+        "sorting_key": {
+            "all": price_desc_sorting_key,
+            "programs": price_desc_sorting_key,
+            "courses": price_desc_sorting_key,
+        },
+        "reverse": True,
+    }
     sorting = sorting_key_map[sort_by]
     return (
         sorted(
