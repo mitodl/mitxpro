@@ -1,6 +1,32 @@
 Release Notes
 =============
 
+Version 0.159.1
+---------------
+
+- fix(deps): update dependency boto3 to v1.35.21
+- [pre-commit.ci] pre-commit autoupdate (#3152)
+- fix(deps): update dependency boto3 to v1.35.19
+- chore(deps): update dependency factory-boy to v3.3.1
+- Don't fail app init if settings.py is reloaded
+- fix: don't generate report.html file for RC and Production (#3125)
+- fix(deps): update dependency express to v4.20.0 [security] (#3147)
+- chore(deps): update dependency pytest to v8 (#3141)
+- fix(deps): update dependency yup to v1 (#3061)
+- fix(deps): update dependency mocha to v10 (#3144)
+- chore(deps): update postgres docker tag to v16 (#3138)
+- Revert "fix(deps): update dependency sass to ~1.78.0" (#3145)
+- [pre-commit.ci] pre-commit autoupdate (#3142)
+- fix(deps): update dependency pycountry to v24 (#3139)
+- fix(deps): update dependency webpack-bundle-tracker to v1.8.1 (#3136)
+- fix(deps): update dependency google-api-python-client to v2.144.0
+- fix(deps): update dependency django to v4.2.16
+- fix(deps): update dependency boto3 to v1.35.14
+- fix: use support email address from configurations(settings) (#3127)
+- fix(deps): update dependency sass to ~1.78.0
+- [pre-commit.ci] pre-commit autoupdate (#3126)
+- chore(deps): update dependency ruff to ^0.6.0 (#3115)
+
 Version 0.159.0 (Released September 09, 2024)
 ---------------
 
