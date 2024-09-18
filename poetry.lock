@@ -3943,17 +3943,17 @@ ua-parser = ">=0.8.0"
 
 [[package]]
 name = "user-util"
-version = "0.1.5"
+version = "0.3.1"
 description = "User utilities for the Open edX platform"
 optional = false
 python-versions = "*"
 files = [
-    {file = "user_util-0.1.5-py2.py3-none-any.whl", hash = "sha256:9a75a3fae1d0a44d240b4c5e33a071270c6f9f81e18962a6118b4de4af2c1d16"},
-    {file = "user_util-0.1.5.tar.gz", hash = "sha256:473f09023afd0a6e5321ef1da862a4bc8de9abc2bbab73a1483b9f9a646aa13c"},
+    {file = "user_util-0.3.1-py2.py3-none-any.whl", hash = "sha256:20af28318a2f6f1919cb2238250db9002ba1a0ebfeedc5b2d677a94db8d15e23"},
+    {file = "user_util-0.3.1.tar.gz", hash = "sha256:11e54d67bb98adf763f758fa4698aec1b7637bfb007075f0859d07e236c9142f"},
 ]
 
 [package.dependencies]
-Click = ">=6.0"
+Click = "*"
 
 [[package]]
 name = "uwsgi"
@@ -4144,4 +4144,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.5"
-content-hash = "9809e2678a779ad998cc39cd1bd4789b37a59aaedc9e779f0d5e21403158941e"
+content-hash = "0e6811b691d60c8fe2db07f8dacb301cd6ad55499d6777654a75d6c1839be974"
