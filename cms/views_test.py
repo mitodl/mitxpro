@@ -488,9 +488,6 @@ def test_catalog_page_sorting(client, wagtail_basics, sort_by, sort_by_title):
         {
             "value": sorting_option.sorting_value,
             "title": sorting_option.sorting_title,
-            "selected_cls": "selected"
-            if sort_by == sorting_option.sorting_value
-            else "",
         }
         for sorting_option in CatalogSorting
     ]

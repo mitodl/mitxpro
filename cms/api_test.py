@@ -11,7 +11,6 @@ from cms.factories import (
     ExternalProgramPageFactory,
 )
 from courses.factories import (
-    CourseFactory,
     CourseRunFactory,
     ProgramFactory,
     ProgramRunFactory,
@@ -178,20 +177,13 @@ def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
 
     course_page_list = []
     for price in course_prices:
-        if price is None:
-            run = CourseRunFactory.create(
-                past_start=True,
-                enrollment_end=(now + timedelta(days=1)),
-                course__no_program=True,
-            )
+        run = CourseRunFactory.create(
+            past_start=True,
+            enrollment_end=(now + timedelta(days=1)),
+            course__no_program=True,
+        )
 
-        else:
-            run = CourseRunFactory.create(
-                past_start=True,
-                enrollment_end=(now + timedelta(days=1)),
-                course__no_program=True,
-            )
-
+        if price is not None:
             ProductVersionFactory.create(
                 product=ProductFactory.create(content_object=run), price=price
             )
@@ -200,24 +192,15 @@ def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
 
     program_page_list = []
     for price in program_prices:
-        if price is None:
-            program = ProgramFactory.create()
-            course = CourseFactory.create(program=program)
-            CourseRunFactory.create(
-                course=course,
-                past_start=True,
-                enrollment_end=(now + timedelta(days=1)),
-                course__no_program=True,
-            )
-        else:
-            program = ProgramFactory.create()
-            course = CourseFactory.create(program=program)
-            CourseRunFactory.create(
-                course=course,
-                past_start=True,
-                enrollment_end=(now + timedelta(days=1)),
-                course__no_program=True,
-            )
+        program = ProgramFactory.create()
+        CourseRunFactory.create(
+            course__program=program,
+            past_start=True,
+            enrollment_end=(now + timedelta(days=1)),
+            course__no_program=True,
+        )
+
+        if price is not None:
             ProductVersionFactory.create(
                 product=ProductFactory.create(content_object=program), price=price
             )
