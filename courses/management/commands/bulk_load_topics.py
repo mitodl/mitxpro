@@ -21,9 +21,10 @@ from courses.models import CourseTopic
 
 def create_topic(name=None, parent=None):
     """Helper method to create topics based on topic/subtopic relationship"""
+    name = name.strip()
     if not parent:
         return CourseTopic.objects.get_or_create(name=name)
-
+    parent = parent.strip()
     parent_topic = CourseTopic.objects.get(name=parent, parent__isnull=True)
     return CourseTopic.objects.get_or_create(name=name, parent=parent_topic)
 
@@ -74,12 +75,13 @@ class Command(BaseCommand):
             # Each row after the header contains the subtopics respectively according to their parent in each column
             for row in data_dict:
                 for topic in topics:
-                    if row[topic]:
-                        subtopic, created = create_topic(row[topic], topic)
+                    subtopic = row.get(topic, "")
+                    if subtopic:
+                        subtopic_obj, created = create_topic(subtopic, topic)
                         stats["new_subtopics"].append(
-                            subtopic.name
+                            subtopic_obj.name
                         ) if created else stats["skipped_subtopics"].append(
-                            subtopic.name
+                            subtopic_obj.name
                         )
 
             self.stdout.write(
