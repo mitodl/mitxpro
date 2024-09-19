@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta
 
 import factory
 import pytest
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
 from django.urls import resolve, reverse
@@ -156,6 +157,7 @@ def test_webinar_context(staff_user):
         "courseware_url": program_page.get_url(),
         "default_banner_image": WEBINAR_HEADER_BANNER,
         "detail_page_url": webinar_page.get_url(request=request),
+        "support_email": settings.EMAIL_SUPPORT,
     }
 
 
