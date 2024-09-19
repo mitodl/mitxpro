@@ -1,4 +1,4 @@
-"""Management command to load bulk load topics from a CSV into system
+"""Management command to bulk load topics from a CSV into the system
 
 Arguments:
 * --file <filename> - Path to the CSV file containing the topics
@@ -13,6 +13,7 @@ subtopic    | subtopic      | subtopic
 """
 
 import csv
+from pathlib import Path
 
 from django.core.management import BaseCommand, CommandError
 
@@ -47,11 +48,12 @@ class Command(BaseCommand):
         """Handle command execution"""
 
         file_path = options["topics_file"].strip()
-        if not file_path:
-            raise CommandError("Invalid file path")  # noqa: EM101
 
-        if not file_path.endswith(".csv"):
+        if not file_path or not file_path.endswith(".csv"):
             raise CommandError("The command can handle only CSV files")  # noqa: EM101
+
+        if not file_path or not Path(file_path).exists():
+            raise CommandError("Invalid file path")  # noqa: EM101
 
         with open(file_path) as import_raw:  # noqa: PTH123
             data_dict = csv.DictReader(import_raw)
@@ -74,8 +76,7 @@ class Command(BaseCommand):
 
             # Each row after the header contains the subtopics respectively according to their parent in each column
             for row in data_dict:
-                for topic in topics:
-                    subtopic = row.get(topic, "")
+                for topic, subtopic in row.items():
                     if subtopic:
                         subtopic_obj, created = create_topic(subtopic, topic)
                         stats["new_subtopics"].append(
@@ -83,7 +84,6 @@ class Command(BaseCommand):
                         ) if created else stats["skipped_subtopics"].append(
                             subtopic_obj.name
                         )
-
             self.stdout.write(
                 self.style.SUCCESS(f"Topics created: {stats['new_topics']}\n")
             )

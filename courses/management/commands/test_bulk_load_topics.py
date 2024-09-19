@@ -6,18 +6,20 @@ from django.core.management import CommandError, call_command
 from courses.models import CourseTopic
 
 
-def test_command_no_args():
-    """Test that bulk load command throws and error when no file path is provided"""
+@pytest.mark.parametrize(
+    "file_path, error_message",  # noqa: PT006
+    [
+        ("", "The command can handle only CSV files"),
+        ("test", "The command can handle only CSV files"),
+        ("test.txt", "The command can handle only CSV files"),
+        ("test.csv", "Invalid file path"),
+    ],
+)
+def test_command_args(file_path, error_message):
+    """Test that bulk load command throws an error when no file path is provided"""
     with pytest.raises(CommandError) as command_error:
-        call_command("bulk_load_topics", "--file=")
-    assert "Invalid file path" in str(command_error.value)
-
-
-def test_command_no_csv_path_args():
-    """Test that bulk load command throws and error when no CSV path is provided"""
-    with pytest.raises(CommandError) as command_error:
-        call_command("bulk_load_topics", "--file=test")
-    assert "The command can handle only CSV files" in str(command_error.value)
+        call_command("bulk_load_topics", f"--file={file_path}")
+    assert error_message in str(command_error.value)
 
 
 @pytest.mark.django_db
