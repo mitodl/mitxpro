@@ -220,6 +220,7 @@ def send_course_run_enrollment_welcome_email(enrollment):
                         "run_start_date": run_start_date,
                         "run_start_time": run_start_time,
                         "run_date_range": run_duration,
+                        "support_email": settings.EMAIL_SUPPORT,
                     },
                 ),
                 EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
@@ -357,7 +358,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "vat_id": purchaser.get("vat_id"),
                                 },
                                 "enable_taxes_display": bool(order["tax_rate"]),
-                                "email_support": settings.EMAIL_SUPPORT,
+                                "support_email": settings.EMAIL_SUPPORT,
                             },
                         ),
                     )

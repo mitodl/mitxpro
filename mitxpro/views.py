@@ -27,6 +27,7 @@ def get_base_context(request):  # noqa: ARG001
         context["domain_verification_tag"] = (
             settings.GOOGLE_DOMAIN_VERIFICATION_TAG_VALUE
         )
+    context["support_email"] = settings.EMAIL_SUPPORT
     return context
 
 
