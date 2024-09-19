@@ -52,7 +52,7 @@ class Command(BaseCommand):
         if not file_path or not file_path.endswith(".csv"):
             raise CommandError("The command can handle only CSV files")  # noqa: EM101
 
-        if not file_path or not Path(file_path).exists():
+        if not Path(file_path).exists():
             raise CommandError("Invalid file path")  # noqa: EM101
 
         with open(file_path) as import_raw:  # noqa: PTH123
