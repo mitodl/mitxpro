@@ -39,6 +39,7 @@ from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.models import (
     Basket,
     BulkCouponAssignment,
+    Coupon,
     Company,
     CouponPaymentVersion,
     Order,
@@ -337,6 +338,19 @@ class CouponListView(APIView):
             },
         )
 
+    def delete(self, request):
+        """Deactivate Coupons"""
+        coupon_codes= request.data.get("coupons","").strip().split("\n")
+        codes = Coupon.objects.filter(coupon_code__in=coupon_codes, enabled=True).all()
+
+        for code in codes:
+            code.enabled = False
+
+        Coupon.objects.bulk_update(codes, ["enabled"])
+
+        return Response(
+            status=status.HTTP_200_OK
+        )
 
 def coupon_code_csv_view(request, version_id):
     """View for returning a csv file of coupon codes"""
