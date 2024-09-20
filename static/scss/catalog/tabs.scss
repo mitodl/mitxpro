@@ -34,8 +34,12 @@
   position: relative;
 
   .container {
-    max-width: 880px;
+    min-width: 880px;
     padding-left: 0;
+
+    @media (width <= 1024px) {
+      min-width: unset;
+    }
   }
 
   h1 {
@@ -49,11 +53,13 @@
   }
 
   .nav-tabs {
-    border: none;
-    display: block;
-    letter-spacing: -0.32em;
-    position: relative;
-    margin-top: 35px;
+    display: flex;
+    justify-content: space-between;
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    margin: 35px 0 0;
+    border-bottom: unset;
 
     @include media-breakpoint-down(sm) {
       margin-left: 15px;
@@ -66,14 +72,15 @@
       font-size: 24px;
       line-height: 30px;
       font-weight: 600;
-      position: relative;
       text-transform: uppercase;
       float: none;
       padding: 0 15px 0 0;
+      flex-grow: 1;
+      text-align: left;
+      margin: 0 5px;
 
       @include media-breakpoint-up(md) {
         font-size: 26px;
-        padding: 0 121px 0 0;
       }
 
       @include media-breakpoint-down(md) {
@@ -100,6 +107,97 @@
 
     @include media-breakpoint-down(md) {
       padding-left: 20px;
+    }
+  }
+}
+
+.nav-tabs-container {
+  display: inline-block;
+  flex-grow: 1;
+}
+
+.catalog-nav-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 35px;
+
+  @include media-breakpoint-down(sm) {
+    display: block;
+  }
+}
+
+.catalog-sort-by-dropdown {
+  margin-left: 20px;
+  display: inline-flex;
+  padding: 10px;
+  white-space: nowrap;
+  margin-top: 25px;
+  border: 2px solid transparent;
+
+  &.show,
+  &:hover {
+    border: 2px solid #b8c2cc;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  @include media-breakpoint-down(md) {
+    margin-left: 20px;
+  }
+
+  @include media-breakpoint-down(sm) {
+    margin-left: 23px;
+  }
+
+  .dropdown-toggle {
+    color: #626a73;
+
+    &::after {
+      content: "chevron_right";
+      font-family: "Material Icons";
+      transform: rotate(90deg);
+      line-height: 18px;
+      display: inline-block;
+      margin-left: unset;
+      vertical-align: -3px;
+      border-top: unset;
+      border-right: unset;
+      border-bottom: unset;
+      border-left: unset;
+    }
+  }
+
+  .dropdown-menu {
+    background-color: $white;
+    box-shadow: 0 2px 4px 0 rgb(37 38 43 / 20%);
+    border-radius: 8px;
+    right: 0;
+    left: unset;
+    width: 100%;
+
+    &.show {
+      padding: 12px 0;
+    }
+
+    .dropdown-item {
+      color: #626a73;
+      font-size: 18px;
+      font-weight: 400;
+      padding: 8px 16px;
+
+      &:hover {
+        background-color: $white;
+        color: $primary;
+        text-decoration: underline;
+      }
+    }
+
+    .selected {
+      background-color: $white;
+      color: $primary;
+      text-decoration: underline;
     }
   }
 }

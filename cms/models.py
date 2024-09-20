@@ -75,6 +75,7 @@ from cms.constants import (
     WEBINAR_DEFAULT_IMAGES,
     WEBINAR_HEADER_BANNER,
     WEBINAR_INDEX_SLUG,
+    CatalogSorting,
 )
 from cms.forms import CertificatePageForm, CoursewareForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
@@ -511,6 +512,7 @@ class CatalogPage(Page):
         Populate the context with live programs, courses and programs + courses
         """
         topic_filter = request.GET.get("topic", ALL_TOPICS)
+        sort_by = request.GET.get("sort-by", CatalogSorting.BEST_MATCH.sorting_value)
         program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
@@ -600,6 +602,7 @@ class CatalogPage(Page):
             course_page_qset,
             external_course_qset,
             external_program_qset,
+            sort_by=sort_by,
         )
         return dict(
             **super().get_context(request),
@@ -619,6 +622,14 @@ class CatalogPage(Page):
             ],
             selected_topic=topic_filter,
             active_tab=request.GET.get("active-tab", ALL_TAB),
+            active_sorting_title=CatalogSorting[sort_by.upper()].sorting_title,
+            sort_by_options=[
+                {
+                    "value": sorting_option.sorting_value,
+                    "title": sorting_option.sorting_title,
+                }
+                for sorting_option in CatalogSorting
+            ],
         )
 
 

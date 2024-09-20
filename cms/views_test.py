@@ -18,6 +18,7 @@ from cms.constants import (
     ON_DEMAND_WEBINAR,
     UPCOMING_WEBINAR,
     WEBINAR_DEFAULT_IMAGES,
+    CatalogSorting,
 )
 from cms.factories import (
     BlogIndexPageFactory,
@@ -464,6 +465,32 @@ def test_catalog_page_topics_ordering(client, wagtail_basics):
     assert resp.context_data["topics"] == sorted(
         [ALL_TOPICS, *topic_name_with_courses_list]
     )
+
+
+@pytest.mark.parametrize(
+    ("sort_by", "sort_by_title"),
+    [
+        (sort_option.sorting_value, sort_option.sorting_title)
+        for sort_option in CatalogSorting
+    ],
+)
+def test_catalog_page_sorting_context(client, wagtail_basics, sort_by, sort_by_title):
+    """
+    Tests that active_sorting_title is correct based on the queryparam and context has sort_by_options.
+    """
+    homepage = wagtail_basics.root
+    catalog_page = CatalogPageFactory.create(parent=homepage)
+    catalog_page.save_revision().publish()
+
+    resp = client.get(f"{catalog_page.get_url()}?sort-by={sort_by}")
+    assert resp.context_data["active_sorting_title"] == sort_by_title
+    assert resp.context_data["sort_by_options"] == [
+        {
+            "value": sorting_option.sorting_value,
+            "title": sorting_option.sorting_title,
+        }
+        for sorting_option in CatalogSorting
+    ]
 
 
 def test_program_page_checkout_url_product(client, wagtail_basics):

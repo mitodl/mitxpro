@@ -2,21 +2,40 @@
 
 import itertools
 import logging
+from collections import defaultdict
 from datetime import MAXYEAR, UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 
 from cms import models as cms_models
-from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG
+from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
 DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)  # noqa: C408
 
 
+def get_catalog_sorting_keys(sorting, *, reverse):
+    """
+    Returns a dict of catalog tab sorting key and is reverse sorting.
+    """
+    return {
+        "sorting_key": {
+            "all": sorting,
+            "programs": sorting,
+            "courses": sorting,
+        },
+        "reverse": reverse,
+    }
+
+
 def filter_and_sort_catalog_pages(
-    program_pages, course_pages, external_course_pages, external_program_pages
+    program_pages,
+    course_pages,
+    external_course_pages,
+    external_program_pages,
+    sort_by,
 ):
     """
     Filters program and course pages to only include those that should be visible in the catalog, then returns a tuple
@@ -27,10 +46,11 @@ def filter_and_sort_catalog_pages(
         course_pages (iterable of CoursePage): CoursePages to filter and sort
         external_course_pages (iterable of ExternalCoursePage): ExternalCoursePages to filter and sort
         external_program_pages (iterable of ExternalProgramPage): ExternalProgramPages to filter and sort
+        sort_by (str): Sorting applicable.
 
     Returns:
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
-            ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the next course/program run date and title
+            ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the sort_by option.
     """
     all_program_pages = program_pages + external_program_pages
     all_course_pages = course_pages + external_course_pages
@@ -50,23 +70,47 @@ def filter_and_sort_catalog_pages(
             valid_course_pages,
         )
     }
+
+    price_desc_sorting_key = lambda page: (  # noqa: E731
+        page.product.current_price
+        if page.product.current_price is not None
+        else float("-inf"),
+        page.title,
+    )
+    price_asc_sorting_key = lambda page: (  # noqa: E731
+        page.product.current_price is None,
+        page.product.current_price,
+        page.title,
+    )
+    default_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
+
+    # Best Match and Start Date sorting has same logic
+    sorting_key_map = defaultdict(
+        lambda: get_catalog_sorting_keys(default_sorting_key, reverse=False)
+    )
+    sorting_key_map[CatalogSorting.PRICE_ASC.sorting_value] = get_catalog_sorting_keys(
+        price_asc_sorting_key, reverse=False
+    )
+    sorting_key_map[CatalogSorting.PRICE_DESC.sorting_value] = get_catalog_sorting_keys(
+        price_desc_sorting_key, reverse=True
+    )
+    sorting = sorting_key_map[sort_by]
+
     return (
         sorted(
             valid_program_pages + valid_course_pages,
-            # ProgramPages with the same next run date as a CoursePage should be sorted first
-            key=lambda page: (
-                page_run_dates[page],
-                page.is_course_page or page.is_external_course_page,
-                page.title,
-            ),
+            key=sorting["sorting_key"]["all"],
+            reverse=sorting["reverse"],
         ),
         sorted(
             valid_program_pages,
-            key=lambda page: (page_run_dates[page], page.title),
+            key=sorting["sorting_key"]["programs"],
+            reverse=sorting["reverse"],
         ),
         sorted(
             valid_course_pages,
-            key=lambda page: (page_run_dates[page], page.title),
+            key=sorting["sorting_key"]["courses"],
+            reverse=sorting["reverse"],
         ),
     )
 
