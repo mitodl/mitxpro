@@ -178,6 +178,7 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
                 "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT),
                 "run_start_time": run_start_time,
                 "run_date_range": date_range,
+                "support_email": settings.EMAIL_SUPPORT,
             },
         )
         patched_mail_api.message_for_recipient.assert_called_once_with(
@@ -344,7 +345,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
                 "vat_id": "AT12349876",
             },
             "enable_taxes_display": False,
-            "email_support": settings.EMAIL_SUPPORT,
+            "support_email": settings.EMAIL_SUPPORT,
         },
     )
     patched_mail_api.messages_for_recipients.assert_called_once_with(
