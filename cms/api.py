@@ -16,6 +16,20 @@ DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page"
 DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)  # noqa: C408
 
 
+def get_catalog_sorting_keys(sorting, *, reverse):
+    """
+    Returns a dict of catalog tab sorting key and is reverse sorting.
+    """
+    return {
+        "sorting_key": {
+            "all": sorting,
+            "programs": sorting,
+            "courses": sorting,
+        },
+        "reverse": reverse,
+    }
+
+
 def filter_and_sort_catalog_pages(
     program_pages,
     course_pages,
@@ -68,46 +82,23 @@ def filter_and_sort_catalog_pages(
         page.product.current_price,
         page.title,
     )
-    default_all_tab_sorting_key = lambda page: (  # noqa: E731
-        page_run_dates[page],
-        page.is_course_page or page.is_external_course_page,
-        page.title,
-    )
-    default_courseware_tab_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
+    default_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
 
     # Best Match and Start Date sorting has same logic
     sorting_key_map = defaultdict(
-        lambda: {
-            "sorting_key": {
-                "all": default_all_tab_sorting_key,
-                "programs": default_courseware_tab_sorting_key,
-                "courses": default_courseware_tab_sorting_key,
-            },
-            "reverse": False,
-        }
+        lambda: get_catalog_sorting_keys(default_sorting_key, reverse=False)
     )
-
-    sorting_key_map[CatalogSorting.PRICE_ASC.sorting_value] = {
-        "sorting_key": {
-            "all": price_asc_sorting_key,
-            "programs": price_asc_sorting_key,
-            "courses": price_asc_sorting_key,
-        },
-        "reverse": False,
-    }
-    sorting_key_map[CatalogSorting.PRICE_DESC.sorting_value] = {
-        "sorting_key": {
-            "all": price_desc_sorting_key,
-            "programs": price_desc_sorting_key,
-            "courses": price_desc_sorting_key,
-        },
-        "reverse": True,
-    }
+    sorting_key_map[CatalogSorting.PRICE_ASC.sorting_value] = get_catalog_sorting_keys(
+        price_asc_sorting_key, reverse=False
+    )
+    sorting_key_map[CatalogSorting.PRICE_DESC.sorting_value] = get_catalog_sorting_keys(
+        price_desc_sorting_key, reverse=True
+    )
     sorting = sorting_key_map[sort_by]
+
     return (
         sorted(
             valid_program_pages + valid_course_pages,
-            # ProgramPages with the same next run date as a CoursePage should be sorted first
             key=sorting["sorting_key"]["all"],
             reverse=sorting["reverse"],
         ),

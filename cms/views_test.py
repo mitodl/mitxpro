@@ -474,7 +474,7 @@ def test_catalog_page_topics_ordering(client, wagtail_basics):
         for sort_option in CatalogSorting
     ],
 )
-def test_catalog_page_sorting(client, wagtail_basics, sort_by, sort_by_title):
+def test_catalog_page_sorting_context(client, wagtail_basics, sort_by, sort_by_title):
     """
     Tests that active_sorting_title is correct based on the queryparam and context has sort_by_options.
     """
