@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.160.0
+---------------
+
+- feat: load topics in bulk from CSV (#3156)
+- fix(deps): update dependency user-util to v0.3.1
+
 Version 0.159.1 (Released September 19, 2024)
 ---------------
 
