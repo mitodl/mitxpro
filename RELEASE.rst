@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.160.1
+---------------
+
+- revert: revert the pygsheet uprgade https://github.com/mitodl/mitxpro/pull/2736 (#3161)
+- fix(deps): update python to v3.12.6 (#3151)
+
 Version 0.160.0 (Released September 23, 2024)
 ---------------
 
