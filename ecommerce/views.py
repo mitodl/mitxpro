@@ -39,8 +39,8 @@ from ecommerce.mail_api import send_ecommerce_order_receipt
 from ecommerce.models import (
     Basket,
     BulkCouponAssignment,
-    Coupon,
     Company,
+    Coupon,
     CouponPaymentVersion,
     Order,
     Product,
