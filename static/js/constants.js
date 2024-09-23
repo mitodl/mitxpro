@@ -115,7 +115,7 @@ export const ALTER_TYPE_B2B_ORDER_STATUS = "b2b-order-status";
 export const CHECKOUT_PAGE_TITLE = "Checkout";
 export const DASHBOARD_PAGE_TITLE = "Dashboard";
 export const CREATE_COUPON_PAGE_TITLE = "Create Coupon";
-export const DELETE_COUPONS_PAGE_TITLE = "Delete Coupons";
+export const DEACTIVATE_COUPONS_PAGE_TITLE = "Deactivate Coupons";
 
 export const LOGIN_EMAIL_PAGE_TITLE = "Sign In";
 export const LOGIN_PASSWORD_PAGE_TITLE = LOGIN_EMAIL_PAGE_TITLE;
