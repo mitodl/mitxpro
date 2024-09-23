@@ -248,13 +248,13 @@ watch = ["watchdog"]
 
 [[package]]
 name = "cachetools"
-version = "5.5.0"
+version = "4.2.4"
 description = "Extensible memoizing collections and decorators"
 optional = false
-python-versions = ">=3.7"
+python-versions = "~=3.5"
 files = [
-    {file = "cachetools-5.5.0-py3-none-any.whl", hash = "sha256:02134e8439cdc2ffb62023ce1debca2944c3f289d66bb17ead3ab3dede74b292"},
-    {file = "cachetools-5.5.0.tar.gz", hash = "sha256:2cc24fb4cbe39633fb7badd9db9ca6295d766d9c2995f245725a46715d050f2a"},
+    {file = "cachetools-4.2.4-py3-none-any.whl", hash = "sha256:92971d3cb7d2a97efff7c7bb1657f21a8f5fb309a37530537c71b1774189f2d1"},
+    {file = "cachetools-4.2.4.tar.gz", hash = "sha256:89ea6f1b638d5a73a4f9226be57ac5e4f399d22770b92355f92dcb0f7f001693"},
 ]
 
 [[package]]
@@ -1253,6 +1253,18 @@ requests = ">=2.20.0"
 dev = ["flake8"]
 
 [[package]]
+name = "enum34"
+version = "1.1.10"
+description = "Python 3.4 Enum backported to 3.3, 3.2, 3.1, 2.7, 2.6, 2.5, and 2.4"
+optional = false
+python-versions = "*"
+files = [
+    {file = "enum34-1.1.10-py2-none-any.whl", hash = "sha256:a98a201d6de3f2ab3db284e70a33b0f896fbf35f8086594e8c9e74b909058d53"},
+    {file = "enum34-1.1.10-py3-none-any.whl", hash = "sha256:c3858660960c984d6ab0ebad691265180da2b43f07e061c0f8dca9ef3cffd328"},
+    {file = "enum34-1.1.10.tar.gz", hash = "sha256:cce6a7477ed816bd2542d03d53db9f0db935dd013b70f336a95c73979289f248"},
+]
+
+[[package]]
 name = "et-xmlfile"
 version = "1.1.0"
 description = "An implementation of lxml.xmlfile for the standard library"
@@ -1379,67 +1391,67 @@ six = "*"
 
 [[package]]
 name = "google-api-core"
-version = "2.19.2"
+version = "2.10.2"
 description = "Google API client core library"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_api_core-2.19.2-py3-none-any.whl", hash = "sha256:53ec0258f2837dd53bbd3d3df50f5359281b3cc13f800c941dd15a9b5a415af4"},
-    {file = "google_api_core-2.19.2.tar.gz", hash = "sha256:ca07de7e8aa1c98a8bfca9321890ad2340ef7f2eb136e558cee68f24b94b0a8f"},
+    {file = "google-api-core-2.10.2.tar.gz", hash = "sha256:10c06f7739fe57781f87523375e8e1a3a4674bf6392cd6131a3222182b971320"},
+    {file = "google_api_core-2.10.2-py3-none-any.whl", hash = "sha256:34f24bd1d5f72a8c4519773d99ca6bf080a6c4e041b4e9f024fe230191dda62e"},
 ]
 
 [package.dependencies]
-google-auth = ">=2.14.1,<3.0.dev0"
-googleapis-common-protos = ">=1.56.2,<2.0.dev0"
-proto-plus = ">=1.22.3,<2.0.0dev"
-protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<6.0.0.dev0"
-requests = ">=2.18.0,<3.0.0.dev0"
+google-auth = ">=1.25.0,<3.0dev"
+googleapis-common-protos = ">=1.56.2,<2.0dev"
+protobuf = ">=3.19.5,<3.20.0 || >3.20.0,<3.20.1 || >3.20.1,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4.21.3 || >4.21.3,<4.21.4 || >4.21.4,<4.21.5 || >4.21.5,<5.0.0dev"
+requests = ">=2.18.0,<3.0.0dev"
 
 [package.extras]
-grpc = ["grpcio (>=1.33.2,<2.0dev)", "grpcio (>=1.49.1,<2.0dev)", "grpcio-status (>=1.33.2,<2.0.dev0)", "grpcio-status (>=1.49.1,<2.0.dev0)"]
-grpcgcp = ["grpcio-gcp (>=0.2.2,<1.0.dev0)"]
-grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0.dev0)"]
+grpc = ["grpcio (>=1.33.2,<2.0dev)", "grpcio-status (>=1.33.2,<2.0dev)"]
+grpcgcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
+grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.144.0"
+version = "1.12.11"
 description = "Google API Client Library for Python"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 files = [
-    {file = "google_api_python_client-2.144.0-py2.py3-none-any.whl", hash = "sha256:f9c333ac4454a012adca90c297f9a22611a8953f3aae5481f90b3a56b9bdd413"},
-    {file = "google_api_python_client-2.144.0.tar.gz", hash = "sha256:fe00851b257157bca600e1692ed8a54762c4a5c7d9eb7f6d4822059424b0d0a9"},
+    {file = "google-api-python-client-1.12.11.tar.gz", hash = "sha256:1b4bd42a46321e13c0542a9e4d96fa05d73626f07b39f83a73a947d70ca706a9"},
+    {file = "google_api_python_client-1.12.11-py2.py3-none-any.whl", hash = "sha256:7e0a1a265c8d3088ee1987778c72683fcb376e32bada8d7767162bd9c503fd9b"},
 ]
 
 [package.dependencies]
-google-api-core = ">=1.31.5,<2.0.dev0 || >2.3.0,<3.0.0.dev0"
-google-auth = ">=1.32.0,<2.24.0 || >2.24.0,<2.25.0 || >2.25.0,<3.0.0.dev0"
-google-auth-httplib2 = ">=0.2.0,<1.0.0"
-httplib2 = ">=0.19.0,<1.dev0"
-uritemplate = ">=3.0.1,<5"
+google-api-core = {version = ">=1.21.0,<3dev", markers = "python_version >= \"3\""}
+google-auth = {version = ">=1.16.0,<3dev", markers = "python_version >= \"3\""}
+google-auth-httplib2 = ">=0.0.3"
+httplib2 = ">=0.15.0,<1dev"
+six = ">=1.13.0,<2dev"
+uritemplate = ">=3.0.0,<4dev"
 
 [[package]]
 name = "google-auth"
-version = "2.34.0"
+version = "1.35.0"
 description = "Google Authentication Library"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
 files = [
-    {file = "google_auth-2.34.0-py2.py3-none-any.whl", hash = "sha256:72fd4733b80b6d777dcde515628a9eb4a577339437012874ea286bca7261ee65"},
-    {file = "google_auth-2.34.0.tar.gz", hash = "sha256:8eb87396435c19b20d32abd2f984e31c191a15284af72eb922f10e5bde9c04cc"},
+    {file = "google-auth-1.35.0.tar.gz", hash = "sha256:b7033be9028c188ee30200b204ea00ed82ea1162e8ac1df4aa6ded19a191d88e"},
+    {file = "google_auth-1.35.0-py2.py3-none-any.whl", hash = "sha256:997516b42ecb5b63e8d80f5632c1a61dddf41d2a4c2748057837e06e00014258"},
 ]
 
 [package.dependencies]
-cachetools = ">=2.0.0,<6.0"
+cachetools = ">=2.0.0,<5.0"
 pyasn1-modules = ">=0.2.1"
-rsa = ">=3.1.4,<5"
+rsa = {version = ">=3.1.4,<5", markers = "python_version >= \"3.6\""}
+setuptools = ">=40.3.0"
+six = ">=1.9.0"
 
 [package.extras]
-aiohttp = ["aiohttp (>=3.6.2,<4.0.0.dev0)", "requests (>=2.20.0,<3.0.0.dev0)"]
-enterprise-cert = ["cryptography", "pyopenssl"]
-pyopenssl = ["cryptography (>=38.0.3)", "pyopenssl (>=20.0.0)"]
+aiohttp = ["aiohttp (>=3.6.2,<4.0.0dev)", "requests (>=2.20.0,<3.0.0dev)"]
+pyopenssl = ["pyopenssl (>=20.0.0)"]
 reauth = ["pyu2f (>=0.1.5)"]
-requests = ["requests (>=2.20.0,<3.0.0.dev0)"]
 
 [[package]]
 name = "google-auth-httplib2"
@@ -1458,17 +1470,17 @@ httplib2 = ">=0.19.0"
 
 [[package]]
 name = "google-auth-oauthlib"
-version = "1.2.1"
+version = "0.5.3"
 description = "Google Authentication Library"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "google_auth_oauthlib-1.2.1-py2.py3-none-any.whl", hash = "sha256:2d58a27262d55aa1b87678c3ba7142a080098cbc2024f903c62355deb235d91f"},
-    {file = "google_auth_oauthlib-1.2.1.tar.gz", hash = "sha256:afd0cad092a2eaa53cd8e8298557d6de1034c6cb4a740500b5357b648af97263"},
+    {file = "google-auth-oauthlib-0.5.3.tar.gz", hash = "sha256:307d21918d61a0741882ad1fd001c67e68ad81206451d05fc4d26f79de56fc90"},
+    {file = "google_auth_oauthlib-0.5.3-py2.py3-none-any.whl", hash = "sha256:9e8ff4ed2b21c174a2d6cc2172c698dbf0b1f686509774c663a83c495091fe09"},
 ]
 
 [package.dependencies]
-google-auth = ">=2.15.0"
+google-auth = ">=1.0.0"
 requests-oauthlib = ">=0.7.0"
 
 [package.extras]
@@ -2663,40 +2675,23 @@ files = [
 wcwidth = "*"
 
 [[package]]
-name = "proto-plus"
-version = "1.24.0"
-description = "Beautiful, Pythonic protocol buffers."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "proto-plus-1.24.0.tar.gz", hash = "sha256:30b72a5ecafe4406b0d339db35b56c4059064e69227b8c3bda7462397f966445"},
-    {file = "proto_plus-1.24.0-py3-none-any.whl", hash = "sha256:402576830425e5f6ce4c2a6702400ac79897dab0b4343821aa5188b0fab81a12"},
-]
-
-[package.dependencies]
-protobuf = ">=3.19.0,<6.0.0dev"
-
-[package.extras]
-testing = ["google-api-core (>=1.31.5)"]
-
-[[package]]
 name = "protobuf"
-version = "5.27.4"
+version = "4.25.5"
 description = ""
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "protobuf-5.27.4-cp310-abi3-win32.whl", hash = "sha256:10319748764b917a9a7cddef1582a0a9cd0f8f6d04e545c6236f7ccaf9b624d9"},
-    {file = "protobuf-5.27.4-cp310-abi3-win_amd64.whl", hash = "sha256:f0c24374aaaf103f33662e4de7666a4a4280abebdb8a9f3f0f9b1d71b61174ec"},
-    {file = "protobuf-5.27.4-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:e85fed07013e5a0121efbaf1b14355fdc66f6e545f12fc5985b2882370410006"},
-    {file = "protobuf-5.27.4-cp38-abi3-manylinux2014_aarch64.whl", hash = "sha256:d5a0e229061600842e57af4ff6a8522ede5280bcfa4fe7f3a1c20589377859a6"},
-    {file = "protobuf-5.27.4-cp38-abi3-manylinux2014_x86_64.whl", hash = "sha256:25ba1f0633f73c3939f3b84e1636f3eb3bab7196952ebb83906d56945edd6aa8"},
-    {file = "protobuf-5.27.4-cp38-cp38-win32.whl", hash = "sha256:565b051249a2f8270af04206dd4f3b73a02343e7d9e072aed57441b369b3467d"},
-    {file = "protobuf-5.27.4-cp38-cp38-win_amd64.whl", hash = "sha256:e673f173cbac4e59c7817ed358e471e4c77aa9166986edf3e731156379a556c7"},
-    {file = "protobuf-5.27.4-cp39-cp39-win32.whl", hash = "sha256:25169c7624d5a9e669fa6faff5a6e818f854346d51ee347b2284676beb9e85dd"},
-    {file = "protobuf-5.27.4-cp39-cp39-win_amd64.whl", hash = "sha256:1fe7735902e84ce35c4152cf07981c176713935a8efad78cea547aae5f4f75cb"},
-    {file = "protobuf-5.27.4-py3-none-any.whl", hash = "sha256:b97259641e8d38738eef34a173e51d2d53a453baab01a32477a64752d9ce59a3"},
-    {file = "protobuf-5.27.4.tar.gz", hash = "sha256:eaa1016e353d8fc5bf08c8087e96eed15f5297aa52bb7ee1f533278bb3f3aad7"},
+    {file = "protobuf-4.25.5-cp310-abi3-win32.whl", hash = "sha256:5e61fd921603f58d2f5acb2806a929b4675f8874ff5f330b7d6f7e2e784bbcd8"},
+    {file = "protobuf-4.25.5-cp310-abi3-win_amd64.whl", hash = "sha256:4be0571adcbe712b282a330c6e89eae24281344429ae95c6d85e79e84780f5ea"},
+    {file = "protobuf-4.25.5-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:b2fde3d805354df675ea4c7c6338c1aecd254dfc9925e88c6d31a2bcb97eb173"},
+    {file = "protobuf-4.25.5-cp37-abi3-manylinux2014_aarch64.whl", hash = "sha256:919ad92d9b0310070f8356c24b855c98df2b8bd207ebc1c0c6fcc9ab1e007f3d"},
+    {file = "protobuf-4.25.5-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:fe14e16c22be926d3abfcb500e60cab068baf10b542b8c858fa27e098123e331"},
+    {file = "protobuf-4.25.5-cp38-cp38-win32.whl", hash = "sha256:98d8d8aa50de6a2747efd9cceba361c9034050ecce3e09136f90de37ddba66e1"},
+    {file = "protobuf-4.25.5-cp38-cp38-win_amd64.whl", hash = "sha256:b0234dd5a03049e4ddd94b93400b67803c823cfc405689688f59b34e0742381a"},
+    {file = "protobuf-4.25.5-cp39-cp39-win32.whl", hash = "sha256:abe32aad8561aa7cc94fc7ba4fdef646e576983edb94a73381b03c53728a626f"},
+    {file = "protobuf-4.25.5-cp39-cp39-win_amd64.whl", hash = "sha256:7a183f592dc80aa7c8da7ad9e55091c4ffc9497b3054452d629bb85fa27c2a45"},
+    {file = "protobuf-4.25.5-py3-none-any.whl", hash = "sha256:0aebecb809cae990f8129ada5ca273d9d670b76d9bfc9b1809f0a9c02b7dbf41"},
+    {file = "protobuf-4.25.5.tar.gz", hash = "sha256:7f8249476b4a9473645db7f8ab42b02fe1488cbe5fb72fddd445e0665afd8584"},
 ]
 
 [[package]]
@@ -2969,18 +2964,20 @@ windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
 name = "pygsheets"
-version = "2.0.6"
+version = "2.0.2"
 description = "Google Spreadsheets Python API v4"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = "*"
 files = [
-    {file = "pygsheets-2.0.6-py3-none-any.whl", hash = "sha256:3338c2eb8990fdee9f463b42a370ec0870c118d607d775471a6dfb8b08f6cd87"},
-    {file = "pygsheets-2.0.6.tar.gz", hash = "sha256:bff46c812e99f9b8b81a09b456581365281c797620ec08530b0d0e48fa9299e2"},
+    {file = "pygsheets-2.0.2-py2-none-any.whl", hash = "sha256:5f57c3bbdbf3f6c0442c1daf6aab0447f787a5078c1a68584109a43067637e02"},
+    {file = "pygsheets-2.0.2-py3-none-any.whl", hash = "sha256:c2ddd56ff9dcccad6fa4da5fabb747c0b71ca53643e200e5f51a844fc815fc5c"},
+    {file = "pygsheets-2.0.2.tar.gz", hash = "sha256:8f3e3c614a39d9d69e8e2184033dcad996653a62773ce41795b407400e692668"},
 ]
 
 [package.dependencies]
-google-api-python-client = ">=2.50.0"
-google-auth-oauthlib = ">=0.7.1"
+enum34 = "*"
+google-api-python-client = ">=1.5.5"
+google-auth-oauthlib = "*"
 
 [package.extras]
 pandas = ["pandas (>=0.14.0)"]
@@ -3901,13 +3898,13 @@ files = [
 
 [[package]]
 name = "uritemplate"
-version = "4.1.1"
-description = "Implementation of RFC 6570 URI Templates"
+version = "3.0.1"
+description = "URI templates"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "uritemplate-4.1.1-py2.py3-none-any.whl", hash = "sha256:830c08b8d99bdd312ea4ead05994a38e8936266f84b9a7878232db50b044e02e"},
-    {file = "uritemplate-4.1.1.tar.gz", hash = "sha256:4346edfc5c3b79f694bccd6d6099a322bbeb628dbf2cd86eea55a456ce5124f0"},
+    {file = "uritemplate-3.0.1-py2.py3-none-any.whl", hash = "sha256:07620c3f3f8eed1f12600845892b0e036a2420acf513c53f7de0abd911a5894f"},
+    {file = "uritemplate-3.0.1.tar.gz", hash = "sha256:5af8ad10cec94f215e3f48112de2022e1d5a37ed427fbd88652fa908f2ab7cae"},
 ]
 
 [[package]]
@@ -4144,4 +4141,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "ec0344ba3997b65095e976039e48f1ba9459b7b25a4961e0037808445f9b5c87"
+content-hash = "a94a1f0ec2e5feead1a9acb80688c8caf69218590317e3174cb755f94b089062"
