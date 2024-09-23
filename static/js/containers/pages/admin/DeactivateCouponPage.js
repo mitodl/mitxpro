@@ -2,12 +2,9 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import {
-  DISCOUNT_TYPE_PERCENT_OFF,
-  CREATE_COUPON_PAGE_TITLE,
-} from "../../../constants";
+import { DELETE_COUPONS_PAGE_TITLE } from "../../../constants";
 import { mergeAll } from "ramda";
-import { connectRequest, mutateAsync } from "redux-query";
+import { mutateAsync } from "redux-query";
 import { compose } from "redux";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -17,28 +14,17 @@ import queries from "../../../lib/queries";
 import { routes } from "../../../lib/urls";
 
 import type { Response } from "redux-query";
-import type {
-  Company,
-  CouponPaymentVersion,
-  Product,
-} from "../../../flow/ecommerceTypes";
 import { createStructuredSelector } from "reselect";
-import { COUPON_TYPE_SINGLE_USE } from "../../../constants";
 
 type State = {
-  deleted: ?Boolean,
+  deactivated: ?boolean,
 };
 
-type StateProps = {|
-  coupons: Map<string, CouponPaymentVersion>,
-|};
-
 type DispatchProps = {|
-  deleteCoupon: (coupon: Object) => Promise<Response<CouponPaymentVersion>>,
+  deactivateCoupon: (coupon: Object) => Promise<Response<any>>,
 |};
 
 type Props = {|
-  ...StateProps,
   ...DispatchProps,
 |};
 
@@ -46,7 +32,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      deleted: false,
+      deactivated: false,
     };
   }
 
@@ -54,28 +40,27 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     couponData: Object,
     { setSubmitting, setErrors }: Object,
   ) => {
-    const { coupons, deleteCoupon } = this.props;
-    console.log(coupons)
+    const { deactivateCoupon } = this.props;
     try {
-      const result = await deleteCoupon(couponData);
+      const result = await deactivateCoupon(couponData);
       if (result.body && result.body.errors) {
         setErrors(mergeAll(result.body.errors));
       }
-      await this.setState({deleted: true})
+      await this.setState({ deactivated: true });
     } finally {
       setSubmitting(false);
     }
   };
 
   clearSuccess = async () => {
-    await this.setState({ deleted: false });
+    await this.setState({ deactivated: false });
   };
 
   render() {
-    const { deleted } = this.state;
+    const { deactivated } = this.state;
     return (
       <DocumentTitle
-        title={`${SETTINGS.site_name} | ${CREATE_COUPON_PAGE_TITLE}`}
+        title={`${SETTINGS.site_name} | ${DELETE_COUPONS_PAGE_TITLE}`}
       >
         <div className="ecommerce-admin-body">
           <p>
@@ -84,23 +69,19 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
             </Link>
           </p>
           <h3>Deactivate Coupons</h3>
-          {deleted ? (
+          {deactivated ? (
             <div className="coupon-success-div">
-              {
-                <span>{`Coupons successfully deleted.`}</span>
-              }
+              {<span>{`Coupon(s) successfully deactivated.`}</span>}
               <div>
                 <input
                   type="button"
-                  value="Delete more coupons"
+                  value="Deactivate more coupons"
                   onClick={this.clearSuccess}
                 />
               </div>
             </div>
           ) : (
-            <CouponDeactivateForm
-              onSubmit={this.onSubmit}
-            />
+            <CouponDeactivateForm onSubmit={this.onSubmit} />
           )}
         </div>
       </DocumentTitle>
@@ -108,15 +89,13 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
   }
 }
 
-const deleteCoupon = (coupon: Object) =>
-  mutateAsync(queries.ecommerce.couponsDeletion(coupon));
+const deactivateCoupon = (coupon: Object) =>
+  mutateAsync(queries.ecommerce.couponsDeactivation(coupon));
 
-const mapStateToProps = createStructuredSelector({
-  coupons: queries.ecommerce.couponsSelector,
-});
+const mapStateToProps = createStructuredSelector({});
 
 const mapDispatchToProps = {
-  deleteCoupon: deleteCoupon,
+  deactivateCoupon: deactivateCoupon,
 };
 
 export default compose(
@@ -124,5 +103,4 @@ export default compose(
     mapStateToProps,
     mapDispatchToProps,
   ),
-  // connectRequest(mapPropsToConfig),
 )(DeactivateCouponPage);

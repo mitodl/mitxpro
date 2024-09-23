@@ -108,12 +108,12 @@ export default {
       ...DEFAULT_POST_OPTIONS,
     },
   }),
-  couponsDeletion: (coupon: Object) => ({
-    queryKey: "couponsDeletion",
+  couponsDeactivation: (coupon: Object) => ({
+    queryKey: "couponsDeactivation",
     url: "/api/coupons/",
     body: coupon,
     options: {
-      method : "DELETE",
+      method: "PUT",
       ...DEFAULT_POST_OPTIONS,
     },
   }),
