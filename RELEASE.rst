@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.160.1
+Version 0.160.1 (Released September 23, 2024)
 ---------------
 
 - revert: revert the pygsheet uprgade https://github.com/mitodl/mitxpro/pull/2736 (#3161)
