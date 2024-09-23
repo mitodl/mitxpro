@@ -36,9 +36,9 @@ export const CouponDeactivateForm = ({
       <Form className="coupon-form">
         <div>
           <div className="block text-area-div">
-          <label htmlFor="coupons">
-            Coupon Names (each coupon at separate line)*
-            <Field name="coupons" component="textarea" rows="4" cols="70" />   
+            <label htmlFor="coupons">
+              Coupon Names (each coupon at separate line)*
+              <Field name="coupons" component="textarea" rows="4" cols="70" />
             </label>
             <ErrorMessage name="coupons" component={FormError} />
           </div>

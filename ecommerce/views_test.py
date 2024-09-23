@@ -1212,6 +1212,20 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
+def test_deactivate_coupon(admin_drf_client):
+    """Test that the API successfully disables enabled coupons"""
+    coupons = CouponFactory.create_batch(10)
+    coupon_codes = [coupon.coupon_code for coupon in coupons]
+    assert all(coupon.enabled for coupon in coupons)
+
+    data = {"coupons": "\n".join(coupon_codes)}
+    response = admin_drf_client.put(reverse("coupon_api"), type="json", data=data)
+
+    assert response.status_code == status.HTTP_200_OK
+    refreshed_coupons = Coupon.objects.filter(coupon_code__in=coupon_codes)
+    assert all(not coupon.enabled for coupon in refreshed_coupons)
+
+
 @pytest.mark.parametrize(
     "discount_type",
     (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007

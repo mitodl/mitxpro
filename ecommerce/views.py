@@ -338,8 +338,8 @@ class CouponListView(APIView):
             },
         )
 
-    def delete(self, request):
-        """Deactivate Coupons"""
+    def put(self, request):
+        """Deactivate coupon(s)"""
         coupon_codes= request.data.get("coupons","").strip().split("\n")
         codes = Coupon.objects.filter(coupon_code__in=coupon_codes, enabled=True).all()
 
@@ -349,7 +349,10 @@ class CouponListView(APIView):
         Coupon.objects.bulk_update(codes, ["enabled"])
 
         return Response(
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
+            data={
+                "status" : "Deactivated coupon(s) sucessfully!"
+            }
         )
 
 def coupon_code_csv_view(request, version_id):
