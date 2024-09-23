@@ -2,7 +2,7 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { DELETE_COUPONS_PAGE_TITLE } from "../../../constants";
+import { DEACTIVATE_COUPONS_PAGE_TITLE } from "../../../constants";
 import { mergeAll } from "ramda";
 import { mutateAsync } from "redux-query";
 import { compose } from "redux";
@@ -60,7 +60,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     const { deactivated } = this.state;
     return (
       <DocumentTitle
-        title={`${SETTINGS.site_name} | ${DELETE_COUPONS_PAGE_TITLE}`}
+        title={`${SETTINGS.site_name} | ${DEACTIVATE_COUPONS_PAGE_TITLE}`}
       >
         <div className="ecommerce-admin-body">
           <p>
