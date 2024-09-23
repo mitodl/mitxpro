@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.160.0
+Version 0.160.0 (Released September 23, 2024)
 ---------------
 
 - feat: add sorting option (#3129)
