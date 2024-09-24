@@ -47,7 +47,8 @@ const EditProfileForm = ({
     onSubmit={onSubmit}
     validationSchema={legalAddressValidation.concat(profileValidation)}
     initialValues={getInitialValues(user)}
-    render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
+  >
+    {({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form>
         <LegalAddressFields
           countries={countries}
@@ -72,7 +73,7 @@ const EditProfileForm = ({
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default EditProfileForm;

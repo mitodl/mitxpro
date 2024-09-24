@@ -48,9 +48,11 @@ describe("CouponForm", () => {
 
   it("renders the form", () => {
     const wrapper = renderForm();
+    // console.log(wrapper.html())
     const form = wrapper.find("Formik");
     assert.ok(wrapper.find(".picky").exists());
-    assert.ok(wrapper.find("DayPickerInput").at(1).exists);
+    assert.ok(wrapper.find("DayPickerInput").at(1).exists());
+    // console.log(form.html())
     assert.ok(findFormikFieldByName(form, "product_type").exists());
     assert.ok(findFormikFieldByName(form, "coupon_type").exists());
     assert.ok(findFormikFieldByName(form, "is_global").exists());
