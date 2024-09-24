@@ -25,7 +25,8 @@ const ResetPasswordForm = ({ onSubmit }: Props) => (
       newPassword: "",
       reNewPassword: "",
     }}
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form>
         <div className="form-group">
           <label htmlFor="newPassword">New Password</label>
@@ -56,7 +57,7 @@ const ResetPasswordForm = ({ onSubmit }: Props) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default ResetPasswordForm;

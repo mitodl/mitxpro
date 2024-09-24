@@ -271,9 +271,10 @@ class B2BPurchaseForm extends React.Component<Props> {
         }}
         validationSchema={emailValidation}
         validate={validate}
-        render={this.renderForm}
         ref={this.formikRef}
-      />
+      >
+        {this.renderForm}
+      </Formik>
     );
   }
 }
