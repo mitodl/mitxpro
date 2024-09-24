@@ -512,7 +512,14 @@ class CatalogPage(Page):
         Populate the context with live programs, courses and programs + courses
         """
         topic_filter = request.GET.get("topic", ALL_TOPICS)
+
+        # Best Match is the default sorting.
         sort_by = request.GET.get("sort-by", CatalogSorting.BEST_MATCH.sorting_value)
+        try:
+            CatalogSorting[sort_by.upper()]
+        except KeyError:
+            sort_by = CatalogSorting.BEST_MATCH.sorting_value
+
         program_page_qset = (
             ProgramPage.objects.live()
             .filter(program__live=True)
