@@ -468,13 +468,21 @@ def test_catalog_page_topics_ordering(client, wagtail_basics):
 
 
 @pytest.mark.parametrize(
-    ("sort_by", "sort_by_title"),
+    ("sort_by", "expected_sort_by_title"),
     [
-        (sort_option.sorting_value, sort_option.sorting_title)
-        for sort_option in CatalogSorting
+        ("undefined", "Best Match"),
+        ("None", "Best Match"),
+        ("", "Best Match"),
+        (None, "Best Match"),
+        *[
+            (sort_option.sorting_value, sort_option.sorting_title)
+            for sort_option in CatalogSorting
+        ],
     ],
 )
-def test_catalog_page_sorting_context(client, wagtail_basics, sort_by, sort_by_title):
+def test_catalog_page_sorting_context(
+    client, wagtail_basics, sort_by, expected_sort_by_title
+):
     """
     Tests that active_sorting_title is correct based on the queryparam and context has sort_by_options.
     """
@@ -483,7 +491,7 @@ def test_catalog_page_sorting_context(client, wagtail_basics, sort_by, sort_by_t
     catalog_page.save_revision().publish()
 
     resp = client.get(f"{catalog_page.get_url()}?sort-by={sort_by}")
-    assert resp.context_data["active_sorting_title"] == sort_by_title
+    assert resp.context_data["active_sorting_title"] == expected_sort_by_title
     assert resp.context_data["sort_by_options"] == [
         {
             "value": sorting_option.sorting_value,
