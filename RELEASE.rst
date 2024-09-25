@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.160.2
+Version 0.160.2 (Released September 25, 2024)
 ---------------
 
 - fix: handle tampered queryparam (#3164)
