@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.160.2
+---------------
+
+- fix: handle tampered queryparam (#3164)
+- [pre-commit.ci] pre-commit autoupdate (#3163)
+
 Version 0.160.1 (Released September 23, 2024)
 ---------------
 
