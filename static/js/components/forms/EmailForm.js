@@ -26,7 +26,8 @@ const EmailForm = ({ onSubmit, children }: EmailFormProps) => (
     onSubmit={onSubmit}
     validationSchema={emailValidation}
     initialValues={{ email: "" }}
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form>
         <div className="form-group">
           <label htmlFor="email">Email</label>
@@ -50,7 +51,7 @@ const EmailForm = ({ onSubmit, children }: EmailFormProps) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default EmailForm;
