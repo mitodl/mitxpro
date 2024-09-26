@@ -1144,7 +1144,11 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
             "At least one product must be selected or coupon should be global.",
         ],
         ["name", "AlreadyExists", "This field must be unique."],  # noqa: PT007
-        ["coupon_code", "AlreadyExists", "Coupon code already exists in the platform."],  # noqa: PT007
+        [
+            "coupon_code",
+            "AlreadyExists",
+            "Coupon code already exists in the platform.",
+        ],  # noqa: PT007
     ],
 )
 @pytest.mark.parametrize(
@@ -1215,14 +1219,19 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
 def test_deactivate_coupon(admin_drf_client):
     """Test that the API successfully disables enabled coupons"""
     coupons = CouponFactory.create_batch(10)
-    coupon_codes = [coupon.coupon_code for coupon in coupons]
+    coupon_codes = [coupon.coupon_code for coupon in coupons[:5]]
+    payment_names = [coupon.payment.name for coupon in coupons[5:]]
+
     assert all(coupon.enabled for coupon in coupons)
 
-    data = {"coupons": "\n".join(coupon_codes)}
+    mixed_coupons = coupon_codes + payment_names
+    data = {"coupons": "\n".join(mixed_coupons)}
     response = admin_drf_client.put(reverse("coupon_api"), type="json", data=data)
 
     assert response.status_code == status.HTTP_200_OK
-    refreshed_coupons = Coupon.objects.filter(coupon_code__in=coupon_codes)
+    refreshed_coupons = Coupon.objects.filter(
+        Q(coupon_code__in=mixed_coupons) | Q(payment__name__in=mixed_coupons)
+    )
     assert all(not coupon.enabled for coupon in refreshed_coupons)
 
 
@@ -1282,8 +1291,18 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
 @pytest.mark.parametrize(
     "url_name,url_kwarg_name,test_client,expected_status_code",  # noqa: PT006
     [
-        ["coupons_csv", "version_id", lazy("admin_client"), status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        ["coupons_csv", "version_id", lazy("user_client"), status.HTTP_403_FORBIDDEN],  # noqa: PT007
+        [
+            "coupons_csv",
+            "version_id",
+            lazy("admin_client"),
+            status.HTTP_404_NOT_FOUND,
+        ],  # noqa: PT007
+        [
+            "coupons_csv",
+            "version_id",
+            lazy("user_client"),
+            status.HTTP_403_FORBIDDEN,
+        ],  # noqa: PT007
         [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
