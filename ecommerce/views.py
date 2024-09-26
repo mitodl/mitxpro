@@ -51,6 +51,7 @@ from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
     CouponPaymentVersionDetailSerializer,
+    CouponSerializer,
     OrderReceiptSerializer,
     ProductSerializer,
     ProgramRunSerializer,
@@ -340,20 +341,43 @@ class CouponListView(APIView):
 
     def put(self, request):
         """Deactivate coupon(s)"""
-        coupon_codes= request.data.get("coupons","").strip().split("\n")
-        codes = Coupon.objects.filter(coupon_code__in=coupon_codes, enabled=True).all()
+        coupons_list = request.data.get("coupons", "").strip().split("\n")
+        coupons = (
+            Coupon.objects.filter(
+                Q(coupon_code__in=coupons_list) | Q(payment__name__in=coupons_list),
+                enabled=True,
+            )
+            .select_related("payment")
+            .all()
+        )
+        matched_codes = set([coupon.coupon_code for coupon in coupons])
+        matched_payment_names = set([coupon.payment.name for coupon in coupons])
 
-        for code in codes:
-            code.enabled = False
+        all_matched = matched_codes.union(matched_payment_names)
 
-        Coupon.objects.bulk_update(codes, ["enabled"])
+        skipped_codes = set(coupons_list) - all_matched
+
+        for code in coupons:
+            serializer = CouponSerializer(
+                instance=code, data={"coupon_code": code.coupon_code, "enabled": False}
+            )
+            if serializer.is_valid():
+                serializer.save()
+
+        log.info(
+            "User %s has deactivated the following coupon codes: %s",
+            request.user,
+            [code.coupon_code for code in coupons],
+        )
 
         return Response(
             status=status.HTTP_200_OK,
             data={
-                "status" : "Deactivated coupon(s) sucessfully!"
-            }
+                "status": "Deactivated coupon(s) sucessfully!",
+                "skipped_codes": list(skipped_codes),
+            },
         )
+
 
 def coupon_code_csv_view(request, version_id):
     """View for returning a csv file of coupon codes"""
