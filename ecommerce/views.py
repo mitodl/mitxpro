@@ -350,8 +350,8 @@ class CouponListView(APIView):
             .select_related("payment")
             .all()
         )
-        matched_codes = set(coupon.coupon_code for coupon in coupons)
-        matched_payment_names = set(coupon.payment.name for coupon in coupons)
+        matched_codes = {coupon.coupon_code for coupon in coupons}
+        matched_payment_names = {coupon.payment.name for coupon in coupons}
 
         all_matched = matched_codes.union(matched_payment_names)
 
