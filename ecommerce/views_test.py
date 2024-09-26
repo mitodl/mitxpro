@@ -1144,11 +1144,11 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
             "At least one product must be selected or coupon should be global.",
         ],
         ["name", "AlreadyExists", "This field must be unique."],  # noqa: PT007
-        [
+        [  # noqa: PT007
             "coupon_code",
             "AlreadyExists",
             "Coupon code already exists in the platform.",
-        ],  # noqa: PT007
+        ],
     ],
 )
 @pytest.mark.parametrize(
@@ -1291,18 +1291,18 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
 @pytest.mark.parametrize(
     "url_name,url_kwarg_name,test_client,expected_status_code",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             "coupons_csv",
             "version_id",
             lazy("admin_client"),
             status.HTTP_404_NOT_FOUND,
-        ],  # noqa: PT007
-        [
+        ],
+        [  # noqa: PT007
             "coupons_csv",
             "version_id",
             lazy("user_client"),
             status.HTTP_403_FORBIDDEN,
-        ],  # noqa: PT007
+        ],
         [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
