@@ -365,7 +365,7 @@ class CouponListView(APIView):
                 serializer.save()
 
         log.info(
-            "User %s has deactivated the following coupon codes: %s",
+            "%s has deactivated the following coupon codes: %s",
             request.user,
             [code.coupon_code for code in coupons],
         )
