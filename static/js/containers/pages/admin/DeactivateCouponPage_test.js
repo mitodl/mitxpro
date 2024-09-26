@@ -32,19 +32,31 @@ describe("DeactivateCouponPage", () => {
 
   it("displays a success message on the page", async () => {
     const { inner } = await renderDeactivateCouponPage();
+    // Without skipped codes
     await inner.instance().setState({ deactivated: true });
-    assert.equal(
-      inner.find(".coupon-success-div").text(),
-      `Coupon(s) successfully deactivated.`,
-    );
+
+    let successMessage = `Coupon(s) successfully deactivated.`;
+
+    assert.equal(inner.find(".coupon-success-div").text(), successMessage);
+
+    // Mock the skipped_codes response
+    const skippedCodes = ["xyz", "pqr"];
+    inner.instance().setState({ skippedCodes: skippedCodes });
+
+    successMessage += `The following coupon(s) were skipped:${skippedCodes.join("")}The coupon(s) is/are either already deactivated or the code(s) is/are incorrect.`;
+
+    assert.equal(inner.find(".coupon-success-div").text(), successMessage);
   });
 
-  it("sets state.couponId to new coupon id if submission is successful", async () => {
+  it("sets state.deactivated if submission is successful", async () => {
     const testCouponsData = {
       coupons: "abc\nbcd",
     };
     helper.handleRequestStub.returns({
-      body: { status: "Deactivated coupon(s) sucessfully!" },
+      body: {
+        status: "Deactivated coupon(s) successfully!",
+        skipped_codes: ["xyz", "pqr"],
+      },
     });
     const { inner } = await renderDeactivateCouponPage();
 
@@ -64,7 +76,7 @@ describe("DeactivateCouponPage", () => {
     assert.equal(inner.state().deactivated, true);
   });
 
-  it("clearSuccess() changes state.couponId", async () => {
+  it("clearSuccess() changes state.deactivated", async () => {
     const { inner } = await renderDeactivateCouponPage();
     inner.instance().setState({ deactivated: true });
     assert.equal(inner.state().deactivated, true);

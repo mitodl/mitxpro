@@ -18,6 +18,7 @@ import { createStructuredSelector } from "reselect";
 
 type State = {
   deactivated: ?boolean,
+  skippedCodes: Array<string>,
 };
 
 type DispatchProps = {|
@@ -33,6 +34,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     super(props);
     this.state = {
       deactivated: false,
+      skippedCodes: [],
     };
   }
 
@@ -43,21 +45,22 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     const { deactivateCoupon } = this.props;
     try {
       const result = await deactivateCoupon(couponData);
-      if (result.body && result.body.errors) {
-        setErrors(mergeAll(result.body.errors));
-      }
-      await this.setState({ deactivated: true });
+
+      await this.setState({
+        deactivated: true,
+        skippedCodes: result.body.skipped_codes || [],
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   clearSuccess = async () => {
-    await this.setState({ deactivated: false });
+    await this.setState({ deactivated: false, skippedCodes: [] });
   };
 
   render() {
-    const { deactivated } = this.state;
+    const { deactivated, skippedCodes } = this.state;
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${DEACTIVATE_COUPONS_PAGE_TITLE}`}
@@ -71,7 +74,18 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
           <h3>Deactivate Coupons</h3>
           {deactivated ? (
             <div className="coupon-success-div">
-              {<span>{`Coupon(s) successfully deactivated.`}</span>}
+              <span>{`Coupon(s) successfully deactivated.`}</span>
+              {skippedCodes.length > 0 && (
+                <div>
+                  <p>{`The following coupon(s) were skipped:`}</p>
+                  <ul>
+                    {skippedCodes.map((code) => (
+                      <li key={code}>{code}</li>
+                    ))}
+                  </ul>
+                  <p>{`The coupon(s) is/are either already deactivated or the code(s) is/are incorrect.`}</p>
+                </div>
+              )}
               <div>
                 <input
                   type="button"
