@@ -890,7 +890,9 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             **super().get_context(request),
             **get_base_context(request),
             "catalog_page": CatalogPage.objects.first(),
-            "topics": CourseTopic.objects.parent_topic_names(),
+            "topics": [
+                topic.name for topic in CourseTopic.parent_topics_with_courses()
+            ],
             "webinars_list_page": WebinarIndexPage.objects.first(),
             # The context variables below are added to avoid duplicate queries within the templates
             "about_mit_xpro": self.about_mit_xpro,

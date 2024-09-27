@@ -151,33 +151,25 @@ def test_home_page_view(client, wagtail_basics):
 
 def test_home_page_context_topics(client, wagtail_basics):
     """
-    Test that parent course topics are included in homepage context.
+    Test that parent course topics having courses are included in homepage context and ordered alphabetically.
     """
     page = HomePage(title="Home Page", subhead="<p>subhead</p>")
     wagtail_basics.root.add_child(instance=page)
 
-    parent_topic = CourseTopicFactory.create()
-    child_topic = CourseTopicFactory.create(parent=parent_topic)
+    topic_name_without_courses_list = ["Analog", "Computer", "Business"]
+    topic_name_with_courses_list = ["Technology", "Engineering"]
+
+    CourseTopicFactory.create_batch(
+        3, name=factory.Iterator(topic_name_without_courses_list)
+    )
+    parent_topics_with_courses = CourseTopicFactory.create_batch(
+        2, name=factory.Iterator(topic_name_with_courses_list)
+    )
+    CourseRunFactory.create(course__page__topics=parent_topics_with_courses)
 
     resp = client.get(page.get_url())
-    context = resp.context_data
-    assert parent_topic.name in context["topics"]
-    assert child_topic.name not in context["topics"]
-
-
-def test_home_page_context_topics_ordering(client, wagtail_basics):
-    """
-    Test that course topics on HomePage are ordered alphabetically.
-    """
-    page = HomePage(title="Home Page", subhead="<p>subhead</p>")
-    wagtail_basics.root.add_child(instance=page)
-
-    topic_name_list = ["Analog", "Computer", "Business", "Technology", "Engineering"]
-    CourseTopicFactory.create_batch(5, name=factory.Iterator(topic_name_list))
-
-    resp = client.get(page.get_url())
-    context = resp.context_data
-    assert sorted(topic_name_list) == context["topics"]
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.context_data["topics"] == sorted(topic_name_with_courses_list)
 
 
 def test_courses_index_view(client, wagtail_basics):

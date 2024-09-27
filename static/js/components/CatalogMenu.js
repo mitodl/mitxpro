@@ -34,7 +34,7 @@ const CatalogMenu = ({ courseTopics }: Props) => {
               <a
                 className="dropdown-item"
                 key={index}
-                href={`/catalog/?topic=${courseTopic.name}`}
+                href={`/catalog/?topic=${encodeURIComponent(courseTopic.name)}`}
                 aria-label={courseTopic.name}
               >
                 {courseTopic.name} ({courseTopic.course_count})
