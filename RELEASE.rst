@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.160.3
+---------------
+
+- fix: display homepage topics with courses (#3166)
+
 Version 0.160.2 (Released September 25, 2024)
 ---------------
 
