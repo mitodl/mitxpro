@@ -111,18 +111,21 @@ class CourseTopicQuerySet(models.QuerySet):
         """
         from courses.utils import get_catalog_course_filter
 
-        catalog_course_visible_filter = get_catalog_course_filter(
+        internal_course_visible_filter = get_catalog_course_filter(
             relative_filter="coursepage__"
+        )
+        external_course_visible_filter = get_catalog_course_filter(
+            relative_filter="externalcoursepage__"
         )
         topics_queryset = (
             self.parent_topics()
             .annotate(
                 internal_course_count=models.Count(
-                    "coursepage", filter=catalog_course_visible_filter, distinct=True
+                    "coursepage", filter=internal_course_visible_filter, distinct=True
                 ),
                 external_course_count=models.Count(
                     "externalcoursepage",
-                    filter=models.Q(externalcoursepage__course__live=True),
+                    filter=external_course_visible_filter,
                     distinct=True,
                 ),
             )
@@ -132,12 +135,12 @@ class CourseTopicQuerySet(models.QuerySet):
                     self.filter(parent__isnull=False).annotate(
                         internal_course_count=models.Count(
                             "coursepage",
-                            filter=catalog_course_visible_filter,
+                            filter=internal_course_visible_filter,
                             distinct=True,
                         ),
                         external_course_count=models.Count(
                             "externalcoursepage",
-                            filter=models.Q(externalcoursepage__course__live=True),
+                            filter=external_course_visible_filter,
                             distinct=True,
                         ),
                     ),
