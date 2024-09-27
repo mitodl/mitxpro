@@ -540,6 +540,10 @@ def test_course_topics_api(client, django_assert_num_queries):
 
     parent_topic = CourseTopicFactory.create()
     child_topic = CourseTopicFactory.create(parent=parent_topic)
+    parent_topic_with_expired_courses = CourseTopicFactory.create()
+    child_topic_with_expired_courses = CourseTopicFactory.create(
+        parent=parent_topic_with_expired_courses
+    )
 
     now = now_in_utc()
     future_start_date = now + timedelta(days=2)
@@ -563,7 +567,24 @@ def test_course_topics_api(client, django_assert_num_queries):
         live=True,
     )
 
-    external_course_pages = ExternalCoursePageFactory.create_batch(2, live=True)
+    live_external_course_pages = ExternalCoursePageFactory.create_batch(2, live=True)
+    for external_course_page in live_external_course_pages:
+        CourseRunFactory.create(
+            course=external_course_page.course,
+            start_date=future_start_date,
+            end_date=future_end_date,
+            live=True,
+        )
+
+    expired_external_course_pages = ExternalCoursePageFactory.create_batch(2, live=True)
+    for external_course_page in expired_external_course_pages:
+        CourseRunFactory.create(
+            course=external_course_page.course,
+            start_date=past_start_date,
+            end_date=past_end_date,
+            enrollment_end=None,
+            live=True,
+        )
 
     for run, topic in zip(future_runs, [parent_topic, child_topic]):
         run.course.coursepage.topics.set([topic.id])
@@ -572,7 +593,13 @@ def test_course_topics_api(client, django_assert_num_queries):
         run.course.coursepage.topics.set([topic.id])
 
     for external_course_page, topic in zip(
-        external_course_pages, [parent_topic, child_topic]
+        live_external_course_pages, [parent_topic, child_topic]
+    ):
+        external_course_page.topics.set([topic.id])
+
+    for external_course_page, topic in zip(
+        expired_external_course_pages,
+        [parent_topic_with_expired_courses, child_topic_with_expired_courses],
     ):
         external_course_page.topics.set([topic.id])
 
