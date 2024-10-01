@@ -638,7 +638,7 @@ class CatalogPage(Page):
                 for sorting_option in CatalogSorting
             ],
             enable_catalog_sorting=settings.FEATURES.get(
-                "ENABLE_CATALOG_SORTING", False
+                "ENABLE_CATALOG_SORTING", True
             ),
         )
 
