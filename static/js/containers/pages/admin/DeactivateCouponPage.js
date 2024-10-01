@@ -16,7 +16,6 @@ import { routes } from "../../../lib/urls";
 import type { Response } from "redux-query";
 import { createStructuredSelector } from "reselect";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
-import { Formik, Field, Form, ErrorMessage } from "formik";
 
 type State = {
   isDeactivated: ?boolean,

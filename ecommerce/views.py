@@ -65,6 +65,8 @@ from mitxpro.utils import (
     make_csv_http_response,
     now_in_utc,
 )
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
 
 log = logging.getLogger(__name__)
 
@@ -357,17 +359,26 @@ class CouponListView(APIView):
 
         skipped_codes = set(coupons_list) - all_matched
 
-        for code in coupons:
+        for coupon in coupons:
             serializer = CouponSerializer(
-                instance=code, data={"coupon_code": code.coupon_code, "enabled": False}
+                instance=coupon, data={"coupon_code": coupon.coupon_code, "enabled": False}
             )
             if serializer.is_valid():
                 serializer.save()
 
+                LogEntry.objects.log_action(
+                    user_id=request.user.id,
+                    content_type_id=ContentType.objects.get_for_model(coupon).pk,
+                    object_id=coupon.id,
+                    object_repr=str(coupon),
+                    action_flag=CHANGE,
+                    change_message="Deactivated coupon",
+                )
+
         log.info(
             "%s has deactivated the following coupon codes: %s",
             request.user,
-            [code.coupon_code for code in coupons],
+            [coupon.coupon_code for coupon in coupons],
         )
 
         return Response(
