@@ -15,9 +15,13 @@ import { routes } from "../../../lib/urls";
 
 import type { Response } from "redux-query";
 import { createStructuredSelector } from "reselect";
+import { Modal, ModalHeader, ModalBody } from "reactstrap";
+import { Formik, Field, Form, ErrorMessage } from "formik";
 
 type State = {
-  deactivated: ?boolean,
+  isDeactivated: ?boolean,
+  openConfirmModal: ?boolean,
+  couponData: Object,
   skippedCodes: Array<string>,
 };
 
@@ -33,57 +37,99 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      deactivated: false,
+      isDeactivated: false,
+      openConfirmModal: false,
+      couponData: {},
       skippedCodes: [],
     };
   }
+
+  toggleOpenConfirmModal = async () => {
+    await this.setState({
+      ...this.state,
+      openConfirmModal: !this.state.openConfirmModal,
+    });
+  };
+
+  onModalSubmit = async () => {
+    const { deactivateCoupon } = this.props;
+    const { couponData } = this.state;
+    const result = await deactivateCoupon(couponData);
+
+    await this.setState({
+      couponData: couponData,
+      openConfirmModal: false,
+      isDeactivated: true,
+      skippedCodes: result.body.skipped_codes || [],
+    });
+  };
 
   onSubmit = async (
     couponData: Object,
     { setSubmitting, setErrors }: Object,
   ) => {
-    const { deactivateCoupon } = this.props;
-    try {
-      const result = await deactivateCoupon(couponData);
-
-      await this.setState({
-        deactivated: true,
-        skippedCodes: result.body.skipped_codes || [],
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    await this.setState({ ...this.state, couponData: couponData });
+    await this.toggleOpenConfirmModal();
+    setSubmitting(false);
   };
 
   clearSuccess = async () => {
-    await this.setState({ deactivated: false, skippedCodes: [] });
+    await this.setState({
+      isDeactivated: false,
+      openConfirmModal: false,
+      couponData: [],
+      skippedCodes: [],
+    });
   };
 
   render() {
-    const { deactivated, skippedCodes } = this.state;
+    const { isDeactivated, openConfirmModal, skippedCodes } = this.state;
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${DEACTIVATE_COUPONS_PAGE_TITLE}`}
       >
         <div className="ecommerce-admin-body">
+          <Modal isOpen={openConfirmModal} toggle={this.toggleOpenConfirmModal}>
+            <ModalHeader toggle={this.toggleOpenConfirmModal}>
+              <h2>Coupon Deactivation Confirmation</h2>
+            </ModalHeader>
+            <ModalBody>
+              <div> Are you sure you want to deactivate coupon(s)?</div>
+              <div className="float-container">
+                <button
+                  className="btn btn-gradient-white-to-blue"
+                  onClick={() => this.toggleOpenConfirmModal()}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-gradient-red-to-blue"
+                  onClick={() => this.onModalSubmit()}
+                >
+                  Deactivate
+                </button>
+              </div>
+            </ModalBody>
+          </Modal>
           <p>
             <Link to={routes.ecommerceAdmin.index}>
               Back to Ecommerce Admin
             </Link>
           </p>
           <h3>Deactivate Coupons</h3>
-          {deactivated ? (
+          {isDeactivated ? (
             <div className="coupon-success-div">
               <span>{`Coupon(s) successfully deactivated.`}</span>
               {skippedCodes.length > 0 && (
                 <div>
-                  <p>{`The following coupon(s) were skipped:`}</p>
-                  <ul>
+                  <p
+                    className={"error"}
+                  >{`The following coupon(s) are either already deactivated or the code(s) are incorrect.`}</p>
+                  <ul className={"error"}>
                     {skippedCodes.map((code) => (
                       <li key={code}>{code}</li>
                     ))}
                   </ul>
-                  <p>{`The coupon(s) is/are either already deactivated or the code(s) is/are incorrect.`}</p>
                 </div>
               )}
               <div>

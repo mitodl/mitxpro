@@ -14,6 +14,41 @@
   }
 }
 
+.float-container {
+  float: right;
+  margin-top: 30px;
+}
+
+.float-container button {
+  margin-left: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  text-align: center;
+  padding: 10px 25px;
+}
+
+button.btn.btn-gradient-red-to-blue {
+  color: #fff;
+  border: 1px solid #a31f34;
+  background: #a31f34 !important;
+  transition: 0.25s;
+}
+
+button.btn.btn-gradient-white-to-blue {
+  color: #03152d;
+  border: 1px solid #dfe5ec;
+  background: #fff;
+  transition: 0.25s;
+}
+
+button.btn.btn-gradient-red-to-blue:hover,
+button.btn.btn-gradient-white-to-blue:hover {
+  border-color: #03152d;
+  background: #03152d !important;
+  color: #fff !important;
+}
+
 .coupon-form {
   div {
     padding-bottom: 20px;
