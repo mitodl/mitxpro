@@ -54,7 +54,7 @@ class CoursewareForm(WagtailAdminPageForm):
         """
         super().__init__(data, files, parent_page, *args, **kwargs)
 
-        instance = kwargs.get("instance", None)
+        instance = kwargs.get("instance")
         if instance and instance.id:
             if instance.is_internal_or_external_course_page and instance.course:
                 course_runs = instance.course.courseruns.all()

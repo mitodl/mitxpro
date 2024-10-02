@@ -25,7 +25,7 @@ class Command(BaseCommand):
         coupon_request_handler = CouponRequestHandler()
         self.stdout.write("Creating coupons and creating/updating Sheets...")
         results = coupon_request_handler.process_sheet(
-            limit_row_index=options.get("row", None)
+            limit_row_index=options.get("row")
         )
         self.stdout.write(
             self.style.SUCCESS(f"Coupon generation succeeded.\n{results}")

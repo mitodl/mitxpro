@@ -25,7 +25,7 @@ class Command(BaseCommand):
         refund_request_handler = RefundRequestHandler()
         self.stdout.write("Handling refunds and updating spreadsheet...")
         results = refund_request_handler.process_sheet(
-            limit_row_index=options.get("row", None)
+            limit_row_index=options.get("row")
         )
         self.stdout.write(
             self.style.SUCCESS(f"Refund sheet successfully processed.\n{results}")

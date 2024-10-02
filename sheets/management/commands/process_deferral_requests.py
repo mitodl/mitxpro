@@ -25,7 +25,7 @@ class Command(BaseCommand):
         defer_request_handler = DeferralRequestHandler()
         self.stdout.write("Handling deferrals and updating spreadsheet...")
         results = defer_request_handler.process_sheet(
-            limit_row_index=options.get("row", None)
+            limit_row_index=options.get("row")
         )
         self.stdout.write(
             self.style.SUCCESS(f"Deferral sheet successfully processed.\n{results}")
