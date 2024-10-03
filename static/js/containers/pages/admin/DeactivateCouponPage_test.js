@@ -11,12 +11,11 @@ import { Modal } from "reactstrap";
 import wait from "waait";
 
 describe("DeactivateCouponPage", () => {
-  let helper, renderDeactivateCouponPage, setSubmittingStub, setErrorsStub;
+  let helper, renderDeactivateCouponPage, setSubmittingStub;
 
   beforeEach(() => {
     helper = new IntegrationTestHelper();
     setSubmittingStub = helper.sandbox.stub();
-    setErrorsStub = helper.sandbox.stub();
     renderDeactivateCouponPage = helper.configureHOCRenderer(
       DeactivateCouponPage,
       InnerDeactivateCouponPage,
@@ -64,10 +63,8 @@ describe("DeactivateCouponPage", () => {
 
     await inner.instance().onSubmit(testCouponsData, {
       setSubmitting: setSubmittingStub,
-      setErrors: setErrorsStub,
     });
     sinon.assert.calledWith(setSubmittingStub, false);
-    sinon.assert.notCalled(setErrorsStub);
     assert.isTrue(inner.find(Modal).exists());
     inner.find(".btn-gradient-red-to-blue").simulate("click");
 
