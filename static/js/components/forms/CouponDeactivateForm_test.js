@@ -37,7 +37,7 @@ describe("CouponDeactivateForm", () => {
   });
 
   [
-    ["coupons", "", "At least one coupon name is required"],
+    ["coupons", "", "At least one coupon name or code is required"],
     ["coupons", "Valid_name", ""],
     [
       "coupons",
