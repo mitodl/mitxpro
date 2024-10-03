@@ -12,7 +12,7 @@ type CouponDeactvateFormProps = {
 const couponValidations = yup.object().shape({
   coupons: yup
     .string()
-    .required("At least one coupon name is required")
+    .required("At least one coupon name or code is required")
     .matches(/^[\w\n]+$/, "Only letters, numbers, and underscores allowed"),
 });
 
@@ -38,7 +38,7 @@ export const CouponDeactivateForm = ({
           <div className="block text-area-div">
             <label htmlFor="coupons">
               Coupon Codes/Names (each coupon at a separate line)*
-              <p className="small-text">
+              <p className="small-text warning">
                 Note: Adding a coupon name will deactivate all coupon codes
                 associated with that name.
               </p>
