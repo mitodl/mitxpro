@@ -1,7 +1,6 @@
 // @flow
 import React from "react";
 import sinon from "sinon";
-import moment from "moment";
 import { assert } from "chai";
 import { mount } from "enzyme";
 import wait from "waait";

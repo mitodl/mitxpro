@@ -343,21 +343,27 @@ class CouponListView(APIView):
 
     def put(self, request):
         """
-        Deactivate coupon(s) whose coupon code(s) or name(s) are passed in the request body,
-        with each entry separated by a new line.
+        Deactivate one or more coupons based on coupon codes or payment names provided in the request body.
         """
-        coupon_codes_and_payment_names = request.data.get("coupons", "").split("\n")
+        coupon_codes_and_payment_names = list(
+            filter(None, request.data.get("coupons", "").strip().split("\n"))
+        )
         coupons = Coupon.objects.filter(
-            Q(coupon_code__in=coupon_codes_and_payment_names) | Q(payment__name__in=coupon_codes_and_payment_names),
+            Q(coupon_code__in=coupon_codes_and_payment_names)
+            | Q(payment__name__in=coupon_codes_and_payment_names),
             enabled=True,
         ).select_related("payment")
 
         matched_coupon_codes = {coupon.coupon_code for coupon in coupons}
         matched_payment_names = {coupon.payment.name for coupon in coupons}
         all_matched_codes_and_names = matched_coupon_codes.union(matched_payment_names)
-        skipped_codes = set(coupon_codes_and_payment_names) - all_matched_codes_and_names
+        skipped_codes = (
+            set(coupon_codes_and_payment_names) - all_matched_codes_and_names
+        )
 
         log_entries = []
+        if coupons:
+            content_type_id = ContentType.objects.get_for_model(coupons[0]).pk
         for coupon in coupons:
             serializer = CouponSerializer(
                 instance=coupon,
@@ -369,7 +375,7 @@ class CouponListView(APIView):
                 log_entries.append(
                     LogEntry(
                         user_id=request.user.id,
-                        content_type_id=ContentType.objects.get_for_model(coupon).pk,
+                        content_type_id=content_type_id,
                         object_id=coupon.id,
                         object_repr=str(coupon),
                         action_flag=CHANGE,

@@ -3,7 +3,6 @@
 import React from "react";
 import DocumentTitle from "react-document-title";
 import { DEACTIVATE_COUPONS_PAGE_TITLE } from "../../../constants";
-import { mergeAll } from "ramda";
 import { mutateAsync } from "redux-query";
 import { compose } from "redux";
 import { connect } from "react-redux";
@@ -18,6 +17,7 @@ import { createStructuredSelector } from "reselect";
 import { Modal, ModalHeader, ModalBody } from "reactstrap";
 
 type State = {
+  submitting: ?boolean,
   isDeactivated: ?boolean,
   openConfirmModal: ?boolean,
   couponData: Object,
@@ -36,6 +36,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
+      submitting: false,
       isDeactivated: false,
       openConfirmModal: false,
       couponData: {},
@@ -51,11 +52,13 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
   };
 
   onModalSubmit = async () => {
+    await this.setState({ ...this.state, submitting: true });
     const { deactivateCoupon } = this.props;
     const { couponData } = this.state;
     const result = await deactivateCoupon(couponData);
 
     await this.setState({
+      submitting: false,
       couponData: couponData,
       openConfirmModal: false,
       isDeactivated: true,
@@ -63,10 +66,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     });
   };
 
-  onSubmit = async (
-    couponData: Object,
-    { setSubmitting, setErrors }: Object,
-  ) => {
+  onSubmit = async (couponData: Object, { setSubmitting }: Object) => {
     await this.setState({ ...this.state, couponData: couponData });
     await this.toggleOpenConfirmModal();
     setSubmitting(false);
@@ -74,6 +74,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
 
   clearSuccess = async () => {
     await this.setState({
+      submitting: false,
       isDeactivated: false,
       openConfirmModal: false,
       couponData: {},
@@ -90,7 +91,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
         <div className="ecommerce-admin-body">
           <Modal isOpen={openConfirmModal} toggle={this.toggleOpenConfirmModal}>
             <ModalHeader toggle={this.toggleOpenConfirmModal}>
-              <h2>Coupon Deactivation Confirmation</h2>
+              Confirm Coupon Deactivation
             </ModalHeader>
             <ModalBody>
               <div> Are you sure you want to deactivate coupon(s)?</div>
@@ -104,6 +105,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
                 <button
                   className="btn btn-gradient-red-to-blue"
                   onClick={() => this.onModalSubmit()}
+                  disabled={this.state.submitting}
                 >
                   Deactivate
                 </button>
@@ -115,10 +117,10 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
               Back to Ecommerce Admin
             </Link>
           </p>
-          <h3>Deactivate Coupons</h3>
+          <h3>Deactivate Coupon(s)</h3>
           {isDeactivated ? (
             <div className="coupon-success-div">
-              <span>{`Coupon(s) successfully deactivated.`}</span>
+              <span>Coupon(s) successfully deactivated.</span>
               {skippedCodes.length > 0 && (
                 <div>
                   <p

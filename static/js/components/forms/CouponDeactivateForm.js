@@ -5,7 +5,7 @@ import * as yup from "yup";
 
 import FormError from "../../components/forms/elements/FormError";
 
-type CouponDeactvateFormProps = {
+type CouponDeactivateFormProps = {
   onSubmit: Function,
 };
 
@@ -18,21 +18,14 @@ const couponValidations = yup.object().shape({
 
 export const CouponDeactivateForm = ({
   onSubmit,
-}: CouponDeactvateFormProps) => (
+}: CouponDeactivateFormProps) => (
   <Formik
     onSubmit={onSubmit}
     validationSchema={couponValidations}
     initialValues={{
       coupons: "",
     }}
-    render={({
-      isSubmitting,
-      setFieldValue,
-      setFieldTouched,
-      errors,
-      touched,
-      values,
-    }) => (
+    render={({ isSubmitting }) => (
       <Form className="coupon-form">
         <div>
           <div className="block text-area-div">

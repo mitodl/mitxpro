@@ -15,7 +15,7 @@ const EcommerceAdminIndexPage = () => (
         <Link to={routes.ecommerceAdmin.coupons}>Create a Coupon</Link>
       </li>
       <li>
-        <Link to={routes.ecommerceAdmin.deactivate}>Deactivate Coupons</Link>
+        <Link to={routes.ecommerceAdmin.deactivate}>Deactivate Coupon(s)</Link>
       </li>
     </ul>
   </div>
