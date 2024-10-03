@@ -342,49 +342,45 @@ class CouponListView(APIView):
         )
 
     def put(self, request):
-        """Deactivate coupon(s)"""
-        coupons_list = request.data.get("coupons", "").strip().split("\n")
-        coupons = (
-            Coupon.objects.filter(
-                Q(coupon_code__in=coupons_list) | Q(payment__name__in=coupons_list),
-                enabled=True,
-            )
-            .select_related("payment")
-            .all()
-        )
-        matched_codes = {coupon.coupon_code for coupon in coupons}
+        """
+        Deactivate coupon(s) whose coupon code(s) or name(s) are passed in the request body,
+        with each entry separated by a new line.
+        """
+        coupon_codes_and_payment_names = request.data.get("coupons", "").split("\n")
+        coupons = Coupon.objects.filter(
+            Q(coupon_code__in=coupon_codes_and_payment_names) | Q(payment__name__in=coupon_codes_and_payment_names),
+            enabled=True,
+        ).select_related("payment")
+
+        matched_coupon_codes = {coupon.coupon_code for coupon in coupons}
         matched_payment_names = {coupon.payment.name for coupon in coupons}
+        all_matched_codes_and_names = matched_coupon_codes.union(matched_payment_names)
+        skipped_codes = set(coupon_codes_and_payment_names) - all_matched_codes_and_names
 
-        all_matched = matched_codes.union(matched_payment_names)
-
-        skipped_codes = set(coupons_list) - all_matched
-
+        log_entries = []
         for coupon in coupons:
             serializer = CouponSerializer(
-                instance=coupon, data={"coupon_code": coupon.coupon_code, "enabled": False}
+                instance=coupon,
+                data={"coupon_code": coupon.coupon_code, "enabled": False},
             )
             if serializer.is_valid():
                 serializer.save()
 
-                LogEntry.objects.log_action(
-                    user_id=request.user.id,
-                    content_type_id=ContentType.objects.get_for_model(coupon).pk,
-                    object_id=coupon.id,
-                    object_repr=str(coupon),
-                    action_flag=CHANGE,
-                    change_message="Deactivated coupon",
+                log_entries.append(
+                    LogEntry(
+                        user_id=request.user.id,
+                        content_type_id=ContentType.objects.get_for_model(coupon).pk,
+                        object_id=coupon.id,
+                        object_repr=str(coupon),
+                        action_flag=CHANGE,
+                        change_message="Deactivated coupon",
+                    )
                 )
-
-        log.info(
-            "%s has deactivated the following coupon codes: %s",
-            request.user,
-            [coupon.coupon_code for coupon in coupons],
-        )
+        LogEntry.objects.bulk_create(log_entries)
 
         return Response(
             status=status.HTTP_200_OK,
             data={
-                "status": "Deactivated coupon(s) sucessfully!",
                 "skipped_codes": list(skipped_codes),
             },
         )

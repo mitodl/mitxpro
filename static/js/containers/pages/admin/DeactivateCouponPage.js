@@ -76,7 +76,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     await this.setState({
       isDeactivated: false,
       openConfirmModal: false,
-      couponData: [],
+      couponData: {},
       skippedCodes: [],
     });
   };

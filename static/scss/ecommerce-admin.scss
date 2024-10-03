@@ -6,11 +6,15 @@
   }
 
   .error {
-    color: red;
+    color: #a31f34;
   }
 
   .success {
     color: green;
+  }
+
+  .warning{
+    color: rgb(76 76 5);
   }
 }
 
@@ -120,6 +124,5 @@ button.btn.btn-gradient-white-to-blue:hover {
 
   .small-text {
     font-size: 14px;
-    color: rgb(76 76 5);
   }
 }
