@@ -55,7 +55,6 @@ describe("DeactivateCouponPage", () => {
     };
     helper.handleRequestStub.returns({
       body: {
-        status: "Deactivated coupon(s) successfully!",
         skipped_codes: ["xyz", "pqr"],
       },
     });
@@ -66,8 +65,9 @@ describe("DeactivateCouponPage", () => {
     });
     sinon.assert.calledWith(setSubmittingStub, false);
     assert.isTrue(inner.find(Modal).exists());
-    inner.find(".btn-gradient-red-to-blue").simulate("click");
 
+    inner.find(".btn-gradient-red-to-blue").simulate("click");
+    await wait;
     sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "PUT", {
       body: testCouponsData,
       headers: {
@@ -75,8 +75,8 @@ describe("DeactivateCouponPage", () => {
       },
       credentials: undefined,
     });
+
     await wait;
-    inner.update();
     assert.equal(inner.state().isDeactivated, true);
   });
 
