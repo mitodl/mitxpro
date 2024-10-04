@@ -351,7 +351,6 @@ class CouponListView(APIView):
         coupons = Coupon.objects.filter(
             Q(coupon_code__in=coupon_codes_and_payment_names)
             | Q(payment__name__in=coupon_codes_and_payment_names),
-            enabled=True,
         ).select_related("payment")
 
         matched_coupon_codes = {coupon.coupon_code for coupon in coupons}
@@ -362,8 +361,7 @@ class CouponListView(APIView):
         )
 
         log_entries = []
-        if coupons:
-            content_type_id = ContentType.objects.get_for_model(coupons[0]).pk
+        content_type = ContentType.objects.get_for_model(Coupon)
         for coupon in coupons:
             serializer = CouponSerializer(
                 instance=coupon,
@@ -375,7 +373,7 @@ class CouponListView(APIView):
                 log_entries.append(
                     LogEntry(
                         user_id=request.user.id,
-                        content_type_id=content_type_id,
+                        content_type=content_type,
                         object_id=coupon.id,
                         object_repr=str(coupon),
                         action_flag=CHANGE,
@@ -387,6 +385,7 @@ class CouponListView(APIView):
         return Response(
             status=status.HTTP_200_OK,
             data={
+                "total_coupons_deactivated": len(coupons),
                 "skipped_codes": list(skipped_codes),
             },
         )
