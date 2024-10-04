@@ -229,7 +229,7 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 emeritus_course.course_run_code,
             )
         )
-        # Skip, if Any of (course_title, course_code, course_run_code) is missing OR the currency is non USD.
+        # Skip, if Any of (course_title, course_code, course_run_code) is missing OR the currency is not USD.
         if not (
             emeritus_course.course_title
             and emeritus_course.course_code
