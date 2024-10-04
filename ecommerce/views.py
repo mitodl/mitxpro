@@ -4,6 +4,8 @@ import logging
 from urllib.parse import urljoin
 
 from django.conf import settings
+from django.contrib.admin.models import CHANGE, LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404
@@ -65,8 +67,6 @@ from mitxpro.utils import (
     make_csv_http_response,
     now_in_utc,
 )
-from django.contrib.admin.models import LogEntry, CHANGE
-from django.contrib.contenttypes.models import ContentType
 
 log = logging.getLogger(__name__)
 
