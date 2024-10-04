@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.160.4
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3171)
+- fix: changed the default value of sorting featureflag (#3172)
+- feat: add catalog filter feature flag (#3167)
+- fix(deps): update dependency boto3 to v1.35.29
+
 Version 0.160.3 (Released September 27, 2024)
 ---------------
 
