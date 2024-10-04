@@ -92,6 +92,17 @@ def emeritus_course_data_with_null_price(emeritus_course_data):
     return emeritus_course_json
 
 
+@pytest.fixture
+def emeritus_course_data_with_non_usd_price(emeritus_course_data):
+    """
+    Emeritus course JSON with non USD price.
+    """
+    emeritus_course_json = emeritus_course_data.copy()
+    emeritus_course_json["list_currency"] = "INR"
+    emeritus_course_json["course_run_code"] = "MO-INRC-98-10#1"
+    return emeritus_course_json
+
+
 @pytest.mark.parametrize(
     ("emeritus_course_run_code", "expected_course_run_tag"),
     [
@@ -430,6 +441,7 @@ def test_update_emeritus_course_runs(  # noqa: PLR0915
     emeritus_expired_course_data,
     emeritus_course_with_bad_data,
     emeritus_course_data_with_null_price,
+    emeritus_course_data_with_non_usd_price,
 ):
     """
     Tests that `update_emeritus_course_runs` creates new courses and updates existing.
@@ -477,6 +489,7 @@ def test_update_emeritus_course_runs(  # noqa: PLR0915
     emeritus_course_runs.append(emeritus_expired_course_data)
     emeritus_course_runs.append(emeritus_course_with_bad_data)
     emeritus_course_runs.append(emeritus_course_data_with_null_price)
+    emeritus_course_runs.append(emeritus_course_data_with_non_usd_price)
     stats = update_emeritus_course_runs(emeritus_course_runs)
     courses = Course.objects.filter(platform=platform)
 
@@ -489,7 +502,7 @@ def test_update_emeritus_course_runs(  # noqa: PLR0915
     num_products_created = 2 if create_existing_data else 4
     num_product_versions_created = 2 if create_existing_data else 4
     assert len(courses) == 4
-    assert len(stats["course_runs_skipped"]) == 1
+    assert len(stats["course_runs_skipped"]) == 2
     assert len(stats["course_runs_expired"]) == 1
     assert len(stats["courses_created"]) == num_courses_created
     assert len(stats["existing_courses"]) == num_existing_courses

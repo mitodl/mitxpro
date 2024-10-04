@@ -29,6 +29,9 @@ from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 log = logging.getLogger(__name__)
 
 
+CURRENCY_USD = "USD"
+
+
 class EmeritusKeyMap(Enum):
     """
     Emeritus course sync keys.
@@ -81,6 +84,7 @@ class EmeritusCourse:
             if emeritus_course_json.get("list_price")
             else None
         )
+        self.list_currency = emeritus_course_json.get("list_currency")
 
         self.start_date = strip_datetime(
             emeritus_course_json.get("start_date"), EmeritusKeyMap.DATE_FORMAT.value
@@ -225,14 +229,15 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 emeritus_course.course_run_code,
             )
         )
-        # If course_title, course_code, or course_run_code is missing, skip.
+        # Skip, if Any of (course_title, course_code, course_run_code) is missing OR the currency is non USD.
         if not (
             emeritus_course.course_title
             and emeritus_course.course_code
             and emeritus_course.course_run_code
+            and emeritus_course.list_currency == CURRENCY_USD
         ):
             log.info(
-                f"Missing required course data. Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
+                f"Skipping due to bad data... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
             stats["course_runs_skipped"].add(emeritus_course.course_run_code)
             continue
