@@ -134,7 +134,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
               )}
 
               {skippedCodes.length > 0 && (
-                <div className="skipped_warning">
+                <div className="skipped-warning">
                   <div className="warning-div">
                     <p className="warning-icon">⚠️</p>
                     <p className="warning-text">
