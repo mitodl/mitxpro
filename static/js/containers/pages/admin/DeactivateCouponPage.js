@@ -22,6 +22,7 @@ type State = {
   openConfirmModal: ?boolean,
   couponData: Object,
   skippedCodes: Array<string>,
+  totalCouponsDeactivated: number,
 };
 
 type DispatchProps = {|
@@ -41,6 +42,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
       openConfirmModal: false,
       couponData: {},
       skippedCodes: [],
+      totalCouponsDeactivated: 0,
     };
   }
 
@@ -63,6 +65,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
       openConfirmModal: false,
       isDeactivated: true,
       skippedCodes: result.body.skipped_codes || [],
+      totalCouponsDeactivated: result.body.total_coupons_deactivated,
     });
   };
 
@@ -79,11 +82,17 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
       openConfirmModal: false,
       couponData: {},
       skippedCodes: [],
+      totalCouponsDeactivated: 0,
     });
   };
 
   render() {
-    const { isDeactivated, openConfirmModal, skippedCodes } = this.state;
+    const {
+      isDeactivated,
+      openConfirmModal,
+      skippedCodes,
+      totalCouponsDeactivated,
+    } = this.state;
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${DEACTIVATE_COUPONS_PAGE_TITLE}`}
@@ -120,13 +129,19 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
           <h3>Deactivate Coupon(s)</h3>
           {isDeactivated ? (
             <div className="coupon-success-div">
-              <span>Coupon(s) successfully deactivated.</span>
+              {totalCouponsDeactivated > 0 && (
+                <p>Coupon(s) successfully deactivated.</p>
+              )}
+
               {skippedCodes.length > 0 && (
-                <div>
-                  <p
-                    className={"error"}
-                  >{`The following coupon(s) are either already deactivated or the code(s) are incorrect.`}</p>
-                  <ul className={"error"}>
+                <div className="skipped_warning">
+                  <div className="warning-div">
+                    <p className="warning-icon">⚠️</p>
+                    <p className="warning-text">
+                      WARNING: The following coupon code(s) are incorrect.
+                    </p>
+                  </div>
+                  <ul className="warning-list">
                     {skippedCodes.map((code) => (
                       <li key={code}>{code}</li>
                     ))}

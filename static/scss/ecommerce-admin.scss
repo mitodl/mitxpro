@@ -18,6 +18,28 @@
   }
 }
 
+.skipped_warning {
+  border-radius: 5px;
+  background-color: #ef5350;
+  color: #fff;
+  padding: 15px;
+  margin-bottom: 16px;
+
+  .warning-div {
+    display: flex;
+  }
+
+  .warning-icon {
+    margin: 0 10px 0 0;
+  }
+  .warning-text {
+    margin: 0;
+  }
+  .warning-list {
+    margin: 0 0 0 10px;
+  }
+}
+
 .modal-title {
   font-size: 28px;
 }
