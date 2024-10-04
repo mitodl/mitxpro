@@ -38,7 +38,7 @@ describe("DeactivateCouponPage", () => {
     await inner
       .instance()
       .setState({ isDeactivated: true, totalCouponsDeactivated: 1 });
-    let successMessage = `Coupon(s) successfully deactivated.`;
+    const successMessage = `Coupon(s) successfully deactivated.`;
     assert.equal(inner.find(".coupon-success-div").text(), successMessage);
 
     // With only skipped_codes response
@@ -46,7 +46,7 @@ describe("DeactivateCouponPage", () => {
     inner
       .instance()
       .setState({ skippedCodes: skippedCodes, totalCouponsDeactivated: 0 });
-    let skippedMessage = `⚠️WARNING: The following coupon code(s) are incorrect.${skippedCodes.join("")}`;
+    const skippedMessage = `⚠️WARNING: The following coupon code(s) are incorrect.${skippedCodes.join("")}`;
     assert.equal(inner.find(".coupon-success-div").text(), skippedMessage);
 
     // With both skipped codes and valid codes
