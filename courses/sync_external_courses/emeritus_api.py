@@ -143,8 +143,9 @@ class EmeritusCourse:
     def valid_list_currency(self):
         """
         Validates that the price is in USD.
+
+        We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
         """
-        # We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
         if self.price and self.list_currency != "USD":
             log.info(f"Invalid currency: {self.list_currency}.")  # noqa: G004
             return False
