@@ -37,6 +37,12 @@ class EmeritusKeyMap(Enum):
     REPORT_NAMES = ["Batch"]
     PLATFORM_NAME = "Emeritus"
     DATE_FORMAT = "%Y-%m-%d"
+    REQUIRED_FIELDS = [
+        "course_title",
+        "course_code",
+        "course_run_code",
+        "list_currency",
+    ]
     COURSE_PAGE_SUBHEAD = "Delivered in collaboration with Emeritus."
     WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
     LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
@@ -128,13 +134,7 @@ class EmeritusCourse:
         """
         Validates the course data.
         """
-        required_fields = [
-            "course_title",
-            "course_code",
-            "course_run_code",
-            "list_currency",
-        ]
-        for field in required_fields:
+        for field in EmeritusKeyMap.REQUIRED_FIELDS.value:
             if not getattr(self, field, None):
                 log.info(f"Missing required field {field}")  # noqa: G004
                 return False
@@ -146,7 +146,7 @@ class EmeritusCourse:
 
         We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
         """
-        if self.price and self.list_currency != "USD":
+        if self.list_currency != "USD":
             log.info(f"Invalid currency: {self.list_currency}.")  # noqa: G004
             return False
         return True
@@ -155,7 +155,7 @@ class EmeritusCourse:
         """
         Validates that the course end date is in the future.
         """
-        return now_in_utc() < self.end_date
+        return self.end_date and now_in_utc() < self.end_date
 
 
 def fetch_emeritus_courses():
