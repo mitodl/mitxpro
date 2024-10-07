@@ -29,9 +29,6 @@ from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 log = logging.getLogger(__name__)
 
 
-CURRENCY_USD = "USD"
-
-
 class EmeritusKeyMap(Enum):
     """
     Emeritus course sync keys.
@@ -126,6 +123,38 @@ class EmeritusCourse:
             if emeritus_course_json.get("program_for")
             else []
         )
+
+    def validate_required_fields(self):
+        """
+        Validates the course data.
+        """
+        required_fields = [
+            "course_title",
+            "course_code",
+            "course_run_code",
+            "list_currency",
+        ]
+        for field in required_fields:
+            if not getattr(self, field, None):
+                log.info(f"Missing required field {field}")  # noqa: G004
+                return False
+        return True
+
+    def valid_list_currency(self):
+        """
+        Validates that the price is in USD.
+        """
+        # We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
+        if self.price and self.list_currency != "USD":
+            log.info(f"Invalid currency: {self.list_currency}.")  # noqa: G004
+            return False
+        return True
+
+    def valid_end_date(self):
+        """
+        Validates that the course end date is in the future.
+        """
+        return now_in_utc() < self.end_date
 
 
 def fetch_emeritus_courses():
@@ -229,12 +258,9 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 emeritus_course.course_run_code,
             )
         )
-        # Skip, if Any of (course_title, course_code, course_run_code) is missing OR the currency is not USD.
-        if not (
-            emeritus_course.course_title
-            and emeritus_course.course_code
-            and emeritus_course.course_run_code
-            and emeritus_course.list_currency == CURRENCY_USD
+        if (
+            not emeritus_course.validate_required_fields()
+            or not emeritus_course.valid_list_currency()
         ):
             log.info(
                 f"Skipping due to bad data... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
@@ -242,7 +268,7 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
             stats["course_runs_skipped"].add(emeritus_course.course_run_code)
             continue
 
-        if now_in_utc() > emeritus_course.end_date:
+        if not emeritus_course.valid_end_date():
             log.info(
                 f"Course run is expired, Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )

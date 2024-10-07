@@ -38,7 +38,7 @@ from courses.sync_external_courses.emeritus_api import (
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
-from mitxpro.utils import clean_url
+from mitxpro.utils import clean_url, now_in_utc
 
 
 @pytest.fixture
@@ -738,3 +738,82 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
 
     if has_unpublished_changes:
         assert external_course_page.has_unpublished_changes
+
+
+@pytest.mark.parametrize(
+    ("title", "course_code", "course_run_code", "is_valid"),
+    [
+        (
+            "Internet of Things (IoT): Design and Applications",
+            "MO-DBIP",
+            "MO-DBIP.ELE-99-07#1",
+            True,
+        ),
+        ("", "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
+        (None, "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
+        (
+            "Internet of Things (IoT): Design and Applications",
+            "",
+            "MO-DBIP.ELE-99-07#1",
+            False,
+        ),
+        (
+            "Internet of Things (IoT): Design and Applications",
+            None,
+            "MO-DBIP.ELE-99-07#1",
+            False,
+        ),
+        ("Internet of Things (IoT): Design and Applications", "MO-DBIP", "", False),
+        ("Internet of Things (IoT): Design and Applications", "MO-DBIP", None, False),
+        ("", "", "", False),
+        (None, None, None, False),
+    ],
+)
+def test_emeritus_course_validate_required_fields(
+    emeritus_course_data, title, course_code, course_run_code, is_valid
+):
+    """
+    Tests that EmeritusCourse.validate_required_fields validates required fields.
+    """
+    emeritus_course = EmeritusCourse(emeritus_course_data)
+    emeritus_course.course_title = title
+    emeritus_course.course_code = course_code
+    emeritus_course.course_run_code = course_run_code
+    assert emeritus_course.validate_required_fields() == is_valid
+
+
+@pytest.mark.parametrize(
+    ("list_currency", "is_valid"),
+    [
+        ("USD", True),
+        ("INR", False),
+        ("EUR", False),
+        ("GBP", False),
+        ("PKR", False),
+    ],
+)
+def test_emeritus_course_valid_list_currency(
+    emeritus_course_data, list_currency, is_valid
+):
+    """
+    Tests that the `USD` is the only valid currency for the Emeritus courses.
+    """
+    emeritus_course = EmeritusCourse(emeritus_course_data)
+    emeritus_course.list_currency = list_currency
+    assert emeritus_course.valid_list_currency() == is_valid
+
+
+@pytest.mark.parametrize(
+    ("end_date", "is_valid"),
+    [
+        (now_in_utc() + timedelta(days=1), True),
+        (now_in_utc() - timedelta(days=1), False),
+    ],
+)
+def test_emeritus_course_valid_end_date(emeritus_course_data, end_date, is_valid):
+    """
+    Tests that the valid end date is in the future for Emeritus courses.
+    """
+    emeritus_course = EmeritusCourse(emeritus_course_data)
+    emeritus_course.end_date = end_date
+    assert emeritus_course.valid_end_date() == is_valid
