@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.160.5
+---------------
+
+- style: add trademark logos (#3176)
+
 Version 0.160.4 (Released October 07, 2024)
 ---------------
 
