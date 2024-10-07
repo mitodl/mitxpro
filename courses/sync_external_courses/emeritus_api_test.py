@@ -792,7 +792,7 @@ def test_emeritus_course_validate_required_fields(
         ("PKR", False),
     ],
 )
-def test_emeritus_course_valid_list_currency(
+def test_emeritus_course_validate_list_currency(
     emeritus_course_data, list_currency, is_valid
 ):
     """
@@ -800,7 +800,7 @@ def test_emeritus_course_valid_list_currency(
     """
     emeritus_course = EmeritusCourse(emeritus_course_data)
     emeritus_course.list_currency = list_currency
-    assert emeritus_course.valid_list_currency() == is_valid
+    assert emeritus_course.validate_list_currency() == is_valid
 
 
 @pytest.mark.parametrize(
@@ -810,10 +810,10 @@ def test_emeritus_course_valid_list_currency(
         (now_in_utc() - timedelta(days=1), False),
     ],
 )
-def test_emeritus_course_valid_end_date(emeritus_course_data, end_date, is_valid):
+def test_emeritus_course_validate_end_date(emeritus_course_data, end_date, is_valid):
     """
     Tests that the valid end date is in the future for Emeritus courses.
     """
     emeritus_course = EmeritusCourse(emeritus_course_data)
     emeritus_course.end_date = end_date
-    assert emeritus_course.valid_end_date() == is_valid
+    assert emeritus_course.validate_end_date() == is_valid

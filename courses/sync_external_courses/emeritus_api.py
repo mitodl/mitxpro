@@ -140,7 +140,7 @@ class EmeritusCourse:
                 return False
         return True
 
-    def valid_list_currency(self):
+    def validate_list_currency(self):
         """
         Validates that the price is in USD.
 
@@ -151,7 +151,7 @@ class EmeritusCourse:
             return False
         return True
 
-    def valid_end_date(self):
+    def validate_end_date(self):
         """
         Validates that the course end date is in the future.
         """
@@ -261,7 +261,7 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
         )
         if (
             not emeritus_course.validate_required_fields()
-            or not emeritus_course.valid_list_currency()
+            or not emeritus_course.validate_list_currency()
         ):
             log.info(
                 f"Skipping due to bad data... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
@@ -269,7 +269,7 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
             stats["course_runs_skipped"].add(emeritus_course.course_run_code)
             continue
 
-        if not emeritus_course.valid_end_date():
+        if not emeritus_course.validate_end_date():
             log.info(
                 f"Course run is expired, Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
