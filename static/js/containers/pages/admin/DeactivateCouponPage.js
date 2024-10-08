@@ -22,7 +22,7 @@ type State = {
   openConfirmModal: ?boolean,
   couponData: Object,
   skippedCodes: Array<string>,
-  totalCouponsDeactivated: number,
+  numOfCouponsDeactivated: number,
 };
 
 type DispatchProps = {|
@@ -42,7 +42,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
       openConfirmModal: false,
       couponData: {},
       skippedCodes: [],
-      totalCouponsDeactivated: 0,
+      numOfCouponsDeactivated: 0,
     };
   }
 
@@ -58,14 +58,14 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     const { deactivateCoupon } = this.props;
     const { couponData } = this.state;
     const result = await deactivateCoupon(couponData);
-
+    console.log(window);
     await this.setState({
       submitting: false,
       couponData: couponData,
       openConfirmModal: false,
       isDeactivated: true,
       skippedCodes: result.body.skipped_codes || [],
-      totalCouponsDeactivated: result.body.total_coupons_deactivated,
+      numOfCouponsDeactivated: result.body.num_of_coupons_deactivated,
     });
   };
 
@@ -82,7 +82,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
       openConfirmModal: false,
       couponData: {},
       skippedCodes: [],
-      totalCouponsDeactivated: 0,
+      numOfCouponsDeactivated: 0,
     });
   };
 
@@ -91,7 +91,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
       isDeactivated,
       openConfirmModal,
       skippedCodes,
-      totalCouponsDeactivated,
+      numOfCouponsDeactivated,
     } = this.state;
     return (
       <DocumentTitle
@@ -129,7 +129,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
           <h3>Deactivate Coupon(s)</h3>
           {isDeactivated ? (
             <div className="coupon-success-div">
-              {totalCouponsDeactivated > 0 && (
+              {numOfCouponsDeactivated > 0 && (
                 <p>Coupon(s) successfully deactivated.</p>
               )}
 

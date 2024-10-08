@@ -10,6 +10,7 @@ const _createSettings = () => ({});
 global.SETTINGS = _createSettings();
 global.TESTING = true;
 global.CSOURCE_PAYLOAD = null;
+global.USER_PERMISSIONS = null;
 
 // polyfill for Object.entries
 import entries from "object.entries";

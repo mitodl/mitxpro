@@ -11,12 +11,14 @@ const EcommerceAdminIndexPage = () => (
   <div className="ecommerce-admin-body">
     <h3>Ecommerce Admin</h3>
     <ul>
-      <li>
+      {USER_PERMISSIONS.has_coupon_create_permission &&
+        <li>
         <Link to={routes.ecommerceAdmin.coupons}>Create a Coupon</Link>
-      </li>
-      <li>
+      </li>}
+      {USER_PERMISSIONS.has_coupon_update_permission &&
+        <li>
         <Link to={routes.ecommerceAdmin.deactivate}>Deactivate Coupon(s)</Link>
-      </li>
+      </li>}
     </ul>
   </div>
 );
