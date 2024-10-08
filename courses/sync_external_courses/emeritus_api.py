@@ -37,6 +37,12 @@ class EmeritusKeyMap(Enum):
     REPORT_NAMES = ["Batch"]
     PLATFORM_NAME = "Emeritus"
     DATE_FORMAT = "%Y-%m-%d"
+    REQUIRED_FIELDS = [
+        "course_title",
+        "course_code",
+        "course_run_code",
+        "list_currency",
+    ]
     COURSE_PAGE_SUBHEAD = "Delivered in collaboration with Emeritus."
     WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
     LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
@@ -81,6 +87,7 @@ class EmeritusCourse:
             if emeritus_course_json.get("list_price")
             else None
         )
+        self.list_currency = emeritus_course_json.get("list_currency")
 
         self.start_date = strip_datetime(
             emeritus_course_json.get("start_date"), EmeritusKeyMap.DATE_FORMAT.value
@@ -122,6 +129,33 @@ class EmeritusCourse:
             if emeritus_course_json.get("program_for")
             else []
         )
+
+    def validate_required_fields(self):
+        """
+        Validates the course data.
+        """
+        for field in EmeritusKeyMap.REQUIRED_FIELDS.value:
+            if not getattr(self, field, None):
+                log.info(f"Missing required field {field}")  # noqa: G004
+                return False
+        return True
+
+    def validate_list_currency(self):
+        """
+        Validates that the price is in USD.
+
+        We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
+        """
+        if self.list_currency != "USD":
+            log.info(f"Invalid currency: {self.list_currency}.")  # noqa: G004
+            return False
+        return True
+
+    def validate_end_date(self):
+        """
+        Validates that the course end date is in the future.
+        """
+        return self.end_date and now_in_utc() < self.end_date
 
 
 def fetch_emeritus_courses():
@@ -225,19 +259,17 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 emeritus_course.course_run_code,
             )
         )
-        # If course_title, course_code, or course_run_code is missing, skip.
-        if not (
-            emeritus_course.course_title
-            and emeritus_course.course_code
-            and emeritus_course.course_run_code
+        if (
+            not emeritus_course.validate_required_fields()
+            or not emeritus_course.validate_list_currency()
         ):
             log.info(
-                f"Missing required course data. Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
+                f"Skipping due to bad data... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
             stats["course_runs_skipped"].add(emeritus_course.course_run_code)
             continue
 
-        if now_in_utc() > emeritus_course.end_date:
+        if not emeritus_course.validate_end_date():
             log.info(
                 f"Course run is expired, Skipping... Course data: {json.dumps(emeritus_course_json)}"  # noqa: G004
             )
