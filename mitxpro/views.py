@@ -84,13 +84,30 @@ def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
     return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
 
 
-def restricted(request):
+def ecommerce_restricted(request):
     """
     Views restricted to admins
     """
-    if not (request.user and request.user.is_staff):
+    has_coupon_create_permission = request.user.has_perm('ecommerce.add_coupon')
+    has_coupon_update_permission = request.user.has_perm('ecommerce.change_coupon')
+
+    if not (request.user and (has_coupon_create_permission or has_coupon_update_permission)):
         raise PermissionDenied
-    return render(request, "index.html", context=get_base_context(request))
+
+    if request.path.startswith('/ecommerce/admin/coupons'):
+            if not has_coupon_create_permission:
+                raise PermissionDenied
+
+    elif request.path.startswith('/ecommerce/admin/deactivate-coupons'):
+        if not has_coupon_update_permission:
+            raise PermissionDenied 
+
+    context = get_base_context(request)
+    context['user_permissions'] = json.dumps({
+        'has_coupon_create_permission': has_coupon_create_permission,
+        'has_coupon_update_permission': has_coupon_update_permission,
+    })
+    return render(request, "index.html", context=context)
 
 
 class AppContextView(APIView):

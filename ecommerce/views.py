@@ -4,8 +4,6 @@ import logging
 from urllib.parse import urljoin
 
 from django.conf import settings
-from django.contrib.admin.models import CHANGE, LogEntry
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404
@@ -48,19 +46,18 @@ from ecommerce.models import (
     Product,
     Receipt,
 )
-from ecommerce.permissions import IsSignedByCyberSource
+from ecommerce.permissions import IsSignedByCyberSource, HasCouponPermission
 from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
     CouponPaymentVersionDetailSerializer,
-    CouponSerializer,
     OrderReceiptSerializer,
     ProductSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
     SingleUseCouponSerializer,
 )
-from ecommerce.utils import make_checkout_url
+from ecommerce.utils import make_checkout_url, deactivate_coupons
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
     format_datetime_for_filename,
@@ -313,7 +310,7 @@ class CouponListView(APIView):
     Admin view for CRUD operations on coupons
     """
 
-    permission_classes = (IsAdminUser,)
+    permission_classes = (HasCouponPermission,)
     authentication_classes = (SessionAuthentication,)
 
     def post(self, request, *args, **kwargs):  # noqa: ARG002
@@ -345,48 +342,22 @@ class CouponListView(APIView):
         """
         Deactivate one or more coupons based on coupon codes or payment names provided in the request body.
         """
-        coupon_codes_and_payment_names = list(
+        coupon_codes_and_payment_names = set(
             filter(None, request.data.get("coupons", "").strip().split("\n"))
         )
+
         coupons = Coupon.objects.filter(
             Q(coupon_code__in=coupon_codes_and_payment_names)
-            | Q(payment__name__in=coupon_codes_and_payment_names),
+            | Q(payment__name__in=coupon_codes_and_payment_names)
         ).select_related("payment")
 
-        matched_coupon_codes = {coupon.coupon_code for coupon in coupons}
-        matched_payment_names = {coupon.payment.name for coupon in coupons}
-        all_matched_codes_and_names = matched_coupon_codes.union(matched_payment_names)
-        skipped_codes = (
-            set(coupon_codes_and_payment_names) - all_matched_codes_and_names
-        )
-
-        log_entries = []
-        content_type = ContentType.objects.get_for_model(Coupon)
-        for coupon in coupons:
-            serializer = CouponSerializer(
-                instance=coupon,
-                data={"coupon_code": coupon.coupon_code, "enabled": False},
-            )
-            if serializer.is_valid():
-                serializer.save()
-
-                log_entries.append(
-                    LogEntry(
-                        user_id=request.user.id,
-                        content_type=content_type,
-                        object_id=coupon.id,
-                        object_repr=str(coupon),
-                        action_flag=CHANGE,
-                        change_message="Deactivated coupon",
-                    )
-                )
-        LogEntry.objects.bulk_create(log_entries)
+        deactivated_codes_and_payment_names = deactivate_coupons(coupons, Coupon, request.user.id)     
 
         return Response(
             status=status.HTTP_200_OK,
             data={
-                "total_coupons_deactivated": len(coupons),
-                "skipped_codes": list(skipped_codes),
+                "num_of_coupons_deactivated": len(coupons),
+                "skipped_codes": list(coupon_codes_and_payment_names.difference(deactivated_codes_and_payment_names)),
             },
         )
 

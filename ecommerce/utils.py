@@ -5,6 +5,8 @@ import logging
 from urllib.parse import urlencode, urljoin
 
 from django.conf import settings
+from django.contrib.admin.models import CHANGE, LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
@@ -176,3 +178,28 @@ def format_run_date(run_date):
         )
         return tuple(formatted_date_time.split("-", 1))
     return "", ""
+
+def deactivate_coupons(coupons, coupon_type, user_id=None):
+    deactivated_codes_and_payment_names = set()
+    log_entries = []
+    content_type = ContentType.objects.get_for_model(coupon_type)
+
+    coupons.update(enabled=False)
+
+    for coupon in coupons:
+        if user_id:
+            log_entries.append(
+                LogEntry(
+                    user_id=user_id,
+                    content_type=content_type,
+                    object_id=coupon.id,
+                    object_repr=str(coupon),
+                    action_flag=CHANGE,
+                    change_message="Deactivated coupon",
+                )
+            )
+        deactivated_codes_and_payment_names.add(coupon.coupon_code)
+        deactivated_codes_and_payment_names.add(coupon.payment.name)
+
+    LogEntry.objects.bulk_create(log_entries)
+    return deactivated_codes_and_payment_names

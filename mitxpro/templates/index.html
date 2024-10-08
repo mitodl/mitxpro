@@ -5,5 +5,8 @@
 
 {% block content %}
 <div id="container"></div>
+<script>
+    var USER_PERMISSIONS = {{user_permissions|safe}};
+</script>
 {% render_bundle 'root' %}
 {% endblock %}
