@@ -345,14 +345,13 @@ class CouponListView(APIView):
         coupon_codes_and_payment_names = set(
             filter(None, request.data.get("coupons", "").strip().split("\n"))
         )
-
+        print(f"\n\n\n{coupon_codes_and_payment_names}\n\n\n")
         coupons = Coupon.objects.filter(
             Q(coupon_code__in=coupon_codes_and_payment_names)
             | Q(payment__name__in=coupon_codes_and_payment_names)
         ).select_related("payment")
 
-        deactivated_codes_and_payment_names = deactivate_coupons(coupons, Coupon, request.user.id)     
-
+        deactivated_codes_and_payment_names = deactivate_coupons(coupons, Coupon, request.user.id)
         return Response(
             status=status.HTTP_200_OK,
             data={

@@ -6,7 +6,7 @@
   }
 
   .error {
-    color: #a31f34;
+    color: $primary;
   }
 
   .success {
@@ -20,8 +20,8 @@
 
 .skipped-warning {
   border-radius: 5px;
-  background-color: #ef5350;
-  color: #fff;
+  background-color: $warning-background;
+  color: $white;
   padding: 15px;
   margin-bottom: 16px;
 
@@ -61,24 +61,24 @@
 }
 
 button.btn.btn-gradient-red-to-blue {
-  color: #fff;
-  border: 1px solid #a31f34;
-  background: #a31f34 !important;
+  color: $white;
+  border: 1px solid $primary;
+  background: $primary !important;
   transition: 0.25s;
 }
 
 button.btn.btn-gradient-white-to-blue {
-  color: #03152d;
-  border: 1px solid #dfe5ec;
-  background: #fff;
+  color: $dark-blue;
+  border: 1px solid $white;
+  background: $white;
   transition: 0.25s;
 }
 
 button.btn.btn-gradient-red-to-blue:hover,
 button.btn.btn-gradient-white-to-blue:hover {
-  border-color: #03152d;
-  background: #03152d !important;
-  color: #fff !important;
+  border-color: $dark-blue;
+  background: $dark-blue !important;
+  color: $white !important;
 }
 
 .coupon-form {
@@ -145,8 +145,8 @@ button.btn.btn-gradient-white-to-blue:hover {
   }
 
   .dangerous {
-    background-color: #ef5350;
-    color: #fff;
+    background-color: $warning-background;
+    color: $white;
     padding: 15px;
   }
 

@@ -87,8 +87,6 @@ urlpatterns = (
         path("profile/", index, name="view-profile"),
         path("profile/edit/", index, name="edit-profile"),
         re_path(r"^ecommerce/admin/", ecommerce_restricted, name="ecommerce-admin"),
-        # re_path(r"^ecommerce/admin/coupons", ecommerce_restricted, name="ecommerce-admin"),
-        # re_path(r"^ecommerce/admin/deactivate-coupons/", ecommerce_restricted, name="ecommerce-admin"),
         # social django needs to be here to preempt the login
         path("", include("social_django.urls", namespace="social")),
         re_path(r"^dashboard/", index, name="user-dashboard"),

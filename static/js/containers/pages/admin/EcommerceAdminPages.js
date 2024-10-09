@@ -1,4 +1,8 @@
 // @flow
+declare var USER_PERMISSIONS: {
+  has_coupon_create_permission: boolean,
+  has_coupon_update_permission: boolean
+};
 import React from "react";
 import { Redirect, Route, Switch, Link } from "react-router-dom";
 
@@ -11,14 +15,18 @@ const EcommerceAdminIndexPage = () => (
   <div className="ecommerce-admin-body">
     <h3>Ecommerce Admin</h3>
     <ul>
-      {USER_PERMISSIONS.has_coupon_create_permission &&
+      {USER_PERMISSIONS.has_coupon_create_permission && (
         <li>
-        <Link to={routes.ecommerceAdmin.coupons}>Create a Coupon</Link>
-      </li>}
-      {USER_PERMISSIONS.has_coupon_update_permission &&
+          <Link to={routes.ecommerceAdmin.coupons}>Create a Coupon</Link>
+        </li>
+      )}
+      {USER_PERMISSIONS.has_coupon_update_permission && (
         <li>
-        <Link to={routes.ecommerceAdmin.deactivate}>Deactivate Coupon(s)</Link>
-      </li>}
+          <Link to={routes.ecommerceAdmin.deactivate}>
+            Deactivate Coupon(s)
+          </Link>
+        </li>
+      )}
     </ul>
   </div>
 );
