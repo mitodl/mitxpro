@@ -191,8 +191,7 @@ def deactivate_coupons(coupons, coupon_type, user_id=None):
     Args:
         coupons (QuerySet): A queryset of coupon objects to be deactivated.
         coupon_type (type): The type of the coupon model (used for logging).
-        user_id (int, optional): The ID of the user performing the deactivation.
-                                    If provided, actions will be logged for this user.
+        user_id (int, optional): The ID of the user performing the deactivation. If provided, actions will be logged for this user.
 
     Returns:
         set: A set containing the coupon codes and payment names of the deactivated coupons.

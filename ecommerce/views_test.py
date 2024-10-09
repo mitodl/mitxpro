@@ -1242,7 +1242,7 @@ def test_deactivate_coupons(mocker, superuser_drf_client):
     assert expected_coupons == actual_coupons
 
     assert response.data["num_of_coupons_deactivated"] == len(coupons)
-    assert not response.data["skipped_codes"]  # All coupons should be deactivated
+    assert not response.data["skipped_codes"]
 
 
 @pytest.mark.parametrize(
