@@ -1,7 +1,7 @@
 // @flow
 declare var USER_PERMISSIONS: {
   has_coupon_create_permission: boolean,
-  has_coupon_update_permission: boolean
+  has_coupon_update_permission: boolean,
 };
 import React from "react";
 import { Redirect, Route, Switch, Link } from "react-router-dom";

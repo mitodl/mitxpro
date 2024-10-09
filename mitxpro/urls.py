@@ -31,8 +31,8 @@ from wagtail.utils.urlpatterns import decorate_urlpatterns
 from mitxpro.views import (
     AppContextView,
     cms_signin_redirect_to_site_signin,
-    index,
     ecommerce_restricted,
+    index,
 )
 from mitxpro.views import (
     handler404 as not_found_handler,

@@ -179,6 +179,7 @@ def format_run_date(run_date):
         return tuple(formatted_date_time.split("-", 1))
     return "", ""
 
+
 def deactivate_coupons(coupons, coupon_type, user_id=None):
     """
     Deactivate a set of coupons and log the changes.

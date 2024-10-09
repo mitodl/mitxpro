@@ -27,15 +27,28 @@ def test_not_found_view(client):
 
 
 @pytest.mark.parametrize(
-    ("add_coupon", "change_coupon", "expected_admin_status", "expected_coupons_status", "expected_deactivate_status"),
+    (
+        "add_coupon",
+        "change_coupon",
+        "expected_admin_status",
+        "expected_coupons_status",
+        "expected_deactivate_status",
+    ),
     [
         (True, False, 200, 200, 403),
         (False, True, 200, 403, 200),
         (False, False, 403, 403, 403),
         (True, True, 200, 200, 200),
-    ]
+    ],
 )
-def test_ecommerce_restricted_view(user, add_coupon, change_coupon, expected_admin_status, expected_coupons_status, expected_deactivate_status):   #noqa: PLR0913
+def test_ecommerce_restricted_view(  # noqa: PLR0913
+    user,
+    add_coupon,
+    change_coupon,
+    expected_admin_status,
+    expected_coupons_status,
+    expected_deactivate_status,
+):
     """Test that the ecommerce restricted view is only accessible with the right permissions."""
 
     user.user_permissions.clear()

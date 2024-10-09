@@ -30,16 +30,17 @@ class IsSignedByCyberSource(BasePermission):
             )
             return False
 
+
 class HasCouponPermission(BasePermission):
     """
     Custom permission to check if the user has the correct coupon permissions based on the HTTP method.
     """
 
     def has_permission(self, request, view):  # noqa: ARG002
-        if request.method == 'POST':
-            return request.user.has_perm('ecommerce.add_coupon')
+        if request.method == "POST":
+            return request.user.has_perm("ecommerce.add_coupon")
 
-        if request.method == 'PUT':
-            return request.user.has_perm('ecommerce.change_coupon')
+        if request.method == "PUT":
+            return request.user.has_perm("ecommerce.change_coupon")
 
-        return False 
+        return False
