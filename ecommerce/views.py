@@ -350,12 +350,18 @@ class CouponListView(APIView):
             | Q(payment__name__in=coupon_codes_and_payment_names)
         ).select_related("payment")
 
-        deactivated_codes_and_payment_names = deactivate_coupons(coupons, Coupon, request.user.id)
+        deactivated_codes_and_payment_names = deactivate_coupons(
+            coupons, Coupon, request.user.id
+        )
         return Response(
             status=status.HTTP_200_OK,
             data={
                 "num_of_coupons_deactivated": len(coupons),
-                "skipped_codes": list(coupon_codes_and_payment_names.difference(deactivated_codes_and_payment_names)),
+                "skipped_codes": list(
+                    coupon_codes_and_payment_names.difference(
+                        deactivated_codes_and_payment_names
+                    )
+                ),
             },
         )
 

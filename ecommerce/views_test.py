@@ -1236,7 +1236,9 @@ def test_deactivate_coupons(mocker, superuser_drf_client):
     assert response.status_code == status.HTTP_200_OK
 
     expected_coupons = [coupon.id for coupon in coupons]
-    actual_coupons = list(mock_deactivate_coupons.call_args[0][0].values_list("id", flat=True))
+    actual_coupons = list(
+        mock_deactivate_coupons.call_args[0][0].values_list("id", flat=True)
+    )
     assert expected_coupons == actual_coupons
 
     assert response.data["num_of_coupons_deactivated"] == len(coupons)

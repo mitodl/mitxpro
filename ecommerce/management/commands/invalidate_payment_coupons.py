@@ -16,8 +16,8 @@ over --file.
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import Coupon, CouponPayment
-
 from ecommerce.utils import deactivate_coupons
+
 
 class Command(BaseCommand):
     """
