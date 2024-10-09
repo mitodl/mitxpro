@@ -88,22 +88,19 @@ def ecommerce_restricted(request):
     """
     Views restricted to admins
     """
-    has_coupon_create_permission = request.user.has_perm('ecommerce.add_coupon')
-    has_coupon_update_permission = request.user.has_perm('ecommerce.change_coupon')
+    has_coupon_create_permission = request.user.has_perm("ecommerce.add_coupon")
+    has_coupon_update_permission = request.user.has_perm("ecommerce.change_coupon")
 
     if not (request.user and (has_coupon_create_permission or has_coupon_update_permission)):
         raise PermissionDenied
 
-    if request.path.startswith('/ecommerce/admin/coupons') and not has_coupon_create_permission:
+    if request.path.startswith("/ecommerce/admin/coupons") and not has_coupon_create_permission or request.path.startswith("/ecommerce/admin/deactivate-coupons") and not has_coupon_update_permission:
         raise PermissionDenied
 
-    elif request.path.startswith('/ecommerce/admin/deactivate-coupons') and not has_coupon_update_permission:
-       raise PermissionDenied 
-
     context = get_base_context(request)
-    context['user_permissions'] = json.dumps({
-        'has_coupon_create_permission': has_coupon_create_permission,
-        'has_coupon_update_permission': has_coupon_update_permission,
+    context["user_permissions"] = json.dumps({
+        "has_coupon_create_permission": has_coupon_create_permission,
+        "has_coupon_update_permission": has_coupon_update_permission,
     })
     return render(request, "index.html", context=context)
 

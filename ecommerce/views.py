@@ -16,7 +16,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     get_object_or_404,
 )
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -46,7 +46,7 @@ from ecommerce.models import (
     Product,
     Receipt,
 )
-from ecommerce.permissions import IsSignedByCyberSource, HasCouponPermission
+from ecommerce.permissions import HasCouponPermission, IsSignedByCyberSource
 from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
@@ -57,7 +57,7 @@ from ecommerce.serializers import (
     PromoCouponSerializer,
     SingleUseCouponSerializer,
 )
-from ecommerce.utils import make_checkout_url, deactivate_coupons
+from ecommerce.utils import deactivate_coupons, make_checkout_url
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
     format_datetime_for_filename,
@@ -345,7 +345,6 @@ class CouponListView(APIView):
         coupon_codes_and_payment_names = set(
             filter(None, request.data.get("coupons", "").strip().split("\n"))
         )
-        print(f"\n\n\n{coupon_codes_and_payment_names}\n\n\n")
         coupons = Coupon.objects.filter(
             Q(coupon_code__in=coupon_codes_and_payment_names)
             | Q(payment__name__in=coupon_codes_and_payment_names)
