@@ -918,21 +918,21 @@ Django = ">=3.2"
 
 [[package]]
 name = "django-hijack"
-version = "3.6.0"
+version = "3.6.1"
 description = "Enable users to hijack (=login as) and work on behalf of another user."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django_hijack-3.6.0-py3-none-any.whl", hash = "sha256:698bbe2bcc95c240e4706d465c3ea6c78c66cdcef357802d171ba7036079b075"},
-    {file = "django_hijack-3.6.0.tar.gz", hash = "sha256:4554f7ceb1a5b39aecacd06fee08933a90a357a9c7eeb018d9483d25938dc637"},
+    {file = "django_hijack-3.6.1-py3-none-any.whl", hash = "sha256:d3162508bcbbccf2e9992c8129e8bf832b16f8ace041d64f04b1f564a9c90892"},
+    {file = "django_hijack-3.6.1.tar.gz", hash = "sha256:1c65e0667c4f85a80341e735c5b5405343492cea29ef9ec4dd99e8dbefacf1d2"},
 ]
 
 [package.dependencies]
 django = ">=4.2"
 
 [package.extras]
-docs = ["mkdocs (==1.6.0)"]
-lint = ["msgcheck (==4.0.0)", "ruff (==0.5.0)"]
+docs = ["mkdocs (==1.6.1)"]
+lint = ["msgcheck (==4.0.0)", "ruff (==0.6.8)"]
 test = ["pytest", "pytest-cov", "pytest-django"]
 
 [[package]]
@@ -4141,4 +4141,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "b7b7111c2bb34feca0e4e2077bba34c68d20826ba9091c8891fc5040962a2feb"
+content-hash = "79f8b658d5dd81f460383b947860f5414658aa45a74cdf122ddd5c69022b0f38"
