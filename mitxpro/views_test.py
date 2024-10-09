@@ -52,7 +52,6 @@ def test_ecommerce_restricted_view(  # noqa: PLR0913
     """Test that the ecommerce restricted view is only accessible with the right permissions."""
 
     user.user_permissions.clear()
-
     if add_coupon:
         user.user_permissions.add(Permission.objects.get(codename="add_coupon"))
     if change_coupon:

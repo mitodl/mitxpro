@@ -202,6 +202,7 @@ def test_make_checkout_url(  # noqa: PLR0913
         == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}{expected_query_params}"
     )
 
+
 @pytest.mark.django_db
 def test_deactivate_coupon():
     """Test that the deactivate_coupons utility method successfully disables enabled coupons"""
