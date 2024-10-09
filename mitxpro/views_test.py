@@ -3,10 +3,10 @@ Test end to end django views.
 """
 
 import pytest
+from django.contrib.auth.models import Permission
 from django.test import Client
 from django.urls import reverse
 from rest_framework import status
-from django.contrib.auth.models import Permission
 
 pytestmark = [pytest.mark.django_db]
 
@@ -27,7 +27,7 @@ def test_not_found_view(client):
 
 
 @pytest.mark.parametrize(
-    "add_coupon, change_coupon, expected_admin_status, expected_coupons_status, expected_deactivate_status",
+    ("add_coupon", "change_coupon", "expected_admin_status", "expected_coupons_status", "expected_deactivate_status"),
     [
         (True, False, 200, 200, 403),
         (False, True, 200, 403, 200),
@@ -35,15 +35,15 @@ def test_not_found_view(client):
         (True, True, 200, 200, 200),
     ]
 )
-def test_ecommerce_restricted_view(user, add_coupon, change_coupon, expected_admin_status, expected_coupons_status, expected_deactivate_status):
+def test_ecommerce_restricted_view(user, add_coupon, change_coupon, expected_admin_status, expected_coupons_status, expected_deactivate_status):   #noqa: PLR0913
     """Test that the ecommerce restricted view is only accessible with the right permissions."""
 
     user.user_permissions.clear()
 
     if add_coupon:
-        user.user_permissions.add(Permission.objects.get(codename='add_coupon'))
+        user.user_permissions.add(Permission.objects.get(codename="add_coupon"))
     if change_coupon:
-        user.user_permissions.add(Permission.objects.get(codename='change_coupon'))
+        user.user_permissions.add(Permission.objects.get(codename="change_coupon"))
 
     client = Client()
     client.force_login(user)

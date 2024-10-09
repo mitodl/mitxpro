@@ -180,6 +180,22 @@ def format_run_date(run_date):
     return "", ""
 
 def deactivate_coupons(coupons, coupon_type, user_id=None):
+    """
+    Deactivate a set of coupons and log the changes.
+
+    This function updates the status of the provided coupons to disabled (enabled=False)
+    and logs the deactivation actions for each coupon. If a user ID is provided,
+    the deactivation actions are recorded in the LogEntry table with the specified user.
+
+    Args:
+        coupons (QuerySet): A queryset of coupon objects to be deactivated.
+        coupon_type (type): The type of the coupon model (used for logging).
+        user_id (int, optional): The ID of the user performing the deactivation.
+                                    If provided, actions will be logged for this user.
+
+    Returns:
+        set: A set containing the coupon codes and payment names of the deactivated coupons.
+    """
     deactivated_codes_and_payment_names = set()
     log_entries = []
     content_type = ContentType.objects.get_for_model(coupon_type)

@@ -7,14 +7,15 @@ from django.urls import reverse
 
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
+from ecommerce.factories import CouponFactory
+from ecommerce.models import Coupon
 from ecommerce.utils import (
+    deactivate_coupons,
     get_order_id_by_reference_number,
     make_checkout_url,
     validate_amount,
 )
-from ecommerce.factories import CouponFactory
-from ecommerce.models import Coupon
-from ecommerce.utils import deactivate_coupons
+
 
 @pytest.mark.parametrize(
     "reference_number, error",  # noqa: PT006

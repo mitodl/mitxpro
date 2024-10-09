@@ -1229,16 +1229,16 @@ def test_deactivate_coupons(mocker, superuser_drf_client):
     mock_deactivate_coupons.return_value = set(mixed_coupons)
 
     data = {"coupons": "\n".join(mixed_coupons)}
-    
+
     assert all(coupon.enabled for coupon in coupons)
 
     response = superuser_drf_client.put(reverse("coupon_api"), data=data, format="json")
     assert response.status_code == status.HTTP_200_OK
 
     expected_coupons = [coupon.id for coupon in coupons]
-    actual_coupons = list(mock_deactivate_coupons.call_args[0][0].values_list('id', flat=True))
+    actual_coupons = list(mock_deactivate_coupons.call_args[0][0].values_list("id", flat=True))
     assert expected_coupons == actual_coupons
-    
+
     assert response.data["num_of_coupons_deactivated"] == len(coupons)
     assert not response.data["skipped_codes"]  # All coupons should be deactivated
 
