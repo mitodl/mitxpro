@@ -1216,23 +1216,31 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_deactivate_coupon(admin_drf_client):
-    """Test that the API successfully disables enabled coupons"""
+def test_deactivate_coupons(mocker, superuser_drf_client):
+    """Test that the API successfully deactivates coupons based on coupon codes or payment names"""
+
+    mock_deactivate_coupons = mocker.patch("ecommerce.views.deactivate_coupons")
+
     coupons = CouponFactory.create_batch(10)
     coupon_codes = [coupon.coupon_code for coupon in coupons[:5]]
     payment_names = [coupon.payment.name for coupon in coupons[5:]]
+    mixed_coupons = coupon_codes + payment_names
 
+    mock_deactivate_coupons.return_value = set(mixed_coupons)
+
+    data = {"coupons": "\n".join(mixed_coupons)}
+    
     assert all(coupon.enabled for coupon in coupons)
 
-    mixed_coupons = coupon_codes + payment_names
-    data = {"coupons": "\n".join(mixed_coupons)}
-    response = admin_drf_client.put(reverse("coupon_api"), type="json", data=data)
-
+    response = superuser_drf_client.put(reverse("coupon_api"), data=data, format="json")
     assert response.status_code == status.HTTP_200_OK
-    refreshed_coupons = Coupon.objects.filter(
-        Q(coupon_code__in=mixed_coupons) | Q(payment__name__in=mixed_coupons)
-    )
-    assert all(not coupon.enabled for coupon in refreshed_coupons)
+
+    expected_coupons = [coupon.id for coupon in coupons]
+    actual_coupons = list(mock_deactivate_coupons.call_args[0][0].values_list('id', flat=True))
+    assert expected_coupons == actual_coupons
+    
+    assert response.data["num_of_coupons_deactivated"] == len(coupons)
+    assert not response.data["skipped_codes"]  # All coupons should be deactivated
 
 
 @pytest.mark.parametrize(

@@ -12,7 +12,9 @@ from ecommerce.utils import (
     make_checkout_url,
     validate_amount,
 )
-
+from ecommerce.factories import CouponFactory
+from ecommerce.models import Coupon
+from ecommerce.utils import deactivate_coupons
 
 @pytest.mark.parametrize(
     "reference_number, error",  # noqa: PT006
@@ -198,3 +200,11 @@ def test_make_checkout_url(  # noqa: PLR0913
         )
         == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}{expected_query_params}"
     )
+
+def test_deactivate_coupon():
+    """Test that the deactivate_coupons utility method successfully disables enabled coupons"""
+    coupons_list = CouponFactory.create_batch(10)
+    coupons = Coupon.objects.filter(id__in=[coupon.id for coupon in coupons_list])
+    assert all(coupon.enabled for coupon in coupons)
+    deactivate_coupons(coupons, Coupon)
+    assert all(not coupon.enabled for coupon in coupons)

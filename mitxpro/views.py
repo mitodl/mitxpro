@@ -94,13 +94,11 @@ def ecommerce_restricted(request):
     if not (request.user and (has_coupon_create_permission or has_coupon_update_permission)):
         raise PermissionDenied
 
-    if request.path.startswith('/ecommerce/admin/coupons'):
-            if not has_coupon_create_permission:
-                raise PermissionDenied
+    if request.path.startswith('/ecommerce/admin/coupons') and not has_coupon_create_permission:
+        raise PermissionDenied
 
-    elif request.path.startswith('/ecommerce/admin/deactivate-coupons'):
-        if not has_coupon_update_permission:
-            raise PermissionDenied 
+    elif request.path.startswith('/ecommerce/admin/deactivate-coupons') and not has_coupon_update_permission:
+       raise PermissionDenied 
 
     context = get_base_context(request)
     context['user_permissions'] = json.dumps({
