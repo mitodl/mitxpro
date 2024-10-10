@@ -27,9 +27,9 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from courses.utils import get_api_course_filter
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
-from courses.utils import get_api_course_filter
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):

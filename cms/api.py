@@ -6,13 +6,14 @@ from collections import defaultdict
 from datetime import MAXYEAR, UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch
 from wagtail.models import Page, Site
 
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
-from mitxpro.utils import now_in_utc
 from courses.utils import get_api_course_filter
+from mitxpro.utils import now_in_utc
+
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
 DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)  # noqa: C408
@@ -44,8 +45,7 @@ def filter_program_pages(is_external=False):  # noqa: FBT002
     return (
         program_page_cls.objects.live()
         .filter(
-            (get_api_course_filter(relative_filter="program__courses__")
-            ),
+            (get_api_course_filter(relative_filter="program__courses__")),
             program__live=True,
         )
         .order_by("id")
@@ -71,8 +71,7 @@ def filter_course_pages(is_external=False):  # noqa: FBT002
     return (
         course_page_cls.objects.live()
         .filter(
-            (get_api_course_filter(relative_filter="course__")
-            ),
+            (get_api_course_filter(relative_filter="course__")),
         )
         .order_by("id")
         .select_related("course")

@@ -345,6 +345,7 @@ def get_catalog_course_filter(relative_filter=""):
         & Q(Q(**courserun_start_date_filter) | Q(**courserun_enrollment_end_filter))
     )
 
+
 def get_api_course_filter(relative_filter=""):
     """
     Generates course filter for the catalog visible course pages.
