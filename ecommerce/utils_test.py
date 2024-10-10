@@ -7,7 +7,10 @@ from django.urls import reverse
 
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
+from ecommerce.factories import CouponFactory
+from ecommerce.models import Coupon
 from ecommerce.utils import (
+    deactivate_coupons,
     get_order_id_by_reference_number,
     make_checkout_url,
     validate_amount,
@@ -198,3 +201,13 @@ def test_make_checkout_url(  # noqa: PLR0913
         )
         == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}{expected_query_params}"
     )
+
+
+@pytest.mark.django_db
+def test_deactivate_coupon():
+    """Test that the deactivate_coupons utility method successfully disables enabled coupons"""
+    coupons_list = CouponFactory.create_batch(10)
+    coupons = Coupon.objects.filter(id__in=[coupon.id for coupon in coupons_list])
+    assert all(coupon.enabled for coupon in coupons)
+    deactivate_coupons(coupons, Coupon)
+    assert all(not coupon.enabled for coupon in coupons)

@@ -108,6 +108,15 @@ export default {
       ...DEFAULT_POST_OPTIONS,
     },
   }),
+  couponsDeactivation: (coupon: Object) => ({
+    queryKey: "couponsDeactivation",
+    url: "/api/coupons/",
+    body: coupon,
+    options: {
+      method: "PUT",
+      ...DEFAULT_POST_OPTIONS,
+    },
+  }),
   b2bCheckoutMutation: (payload: B2BCheckoutPayload) => ({
     queryKey: "b2bCheckoutMutation",
     url: "/api/b2b/checkout/",

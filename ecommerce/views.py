@@ -16,7 +16,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     get_object_or_404,
 )
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -40,12 +40,13 @@ from ecommerce.models import (
     Basket,
     BulkCouponAssignment,
     Company,
+    Coupon,
     CouponPaymentVersion,
     Order,
     Product,
     Receipt,
 )
-from ecommerce.permissions import IsSignedByCyberSource
+from ecommerce.permissions import HasCouponPermission, IsSignedByCyberSource
 from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
@@ -56,7 +57,7 @@ from ecommerce.serializers import (
     PromoCouponSerializer,
     SingleUseCouponSerializer,
 )
-from ecommerce.utils import make_checkout_url
+from ecommerce.utils import deactivate_coupons, make_checkout_url
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
     format_datetime_for_filename,
@@ -309,7 +310,7 @@ class CouponListView(APIView):
     Admin view for CRUD operations on coupons
     """
 
-    permission_classes = (IsAdminUser,)
+    permission_classes = (HasCouponPermission,)
     authentication_classes = (SessionAuthentication,)
 
     def post(self, request, *args, **kwargs):  # noqa: ARG002
@@ -334,6 +335,33 @@ class CouponListView(APIView):
                     {key: str(error[0])}
                     for (key, error) in coupon_serializer.errors.items()
                 ]
+            },
+        )
+
+    def put(self, request):
+        """
+        Deactivate one or more coupons based on coupon codes or payment names provided in the request body.
+        """
+        coupon_codes_and_payment_names = set(
+            filter(None, request.data.get("coupons", "").strip().split("\n"))
+        )
+        coupons = Coupon.objects.filter(
+            Q(coupon_code__in=coupon_codes_and_payment_names)
+            | Q(payment__name__in=coupon_codes_and_payment_names)
+        ).select_related("payment")
+
+        deactivated_codes_and_payment_names = deactivate_coupons(
+            coupons, Coupon, request.user.id
+        )
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "num_of_coupons_deactivated": len(coupons),
+                "skipped_codes": list(
+                    coupon_codes_and_payment_names.difference(
+                        deactivated_codes_and_payment_names
+                    )
+                ),
             },
         )
 
