@@ -6,10 +6,12 @@ from collections import defaultdict
 from datetime import MAXYEAR, UTC, datetime
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Prefetch
 from wagtail.models import Page, Site
 
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
+from courses.utils import get_api_course_filter
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
@@ -30,13 +32,51 @@ def get_catalog_sorting_keys(sorting, *, reverse):
     }
 
 
-def filter_and_sort_catalog_pages(
-    program_pages,
-    course_pages,
-    external_course_pages,
-    external_program_pages,
-    sort_by,
-):
+def filter_program_pages(is_external=False):  # noqa: FBT002
+    """Filter the internal and external program objects"""
+    program_page_cls = cms_models.ProgramPage
+    prefetch_type = "coursepage"
+    if is_external:
+        program_page_cls = cms_models.ExternalProgramPage
+        prefetch_type = "externalcoursepage"
+
+    return (
+        program_page_cls.objects.live()
+        .filter(
+            (get_api_course_filter(relative_filter="program__courses__")),
+            program__live=True,
+        )
+        .order_by("id")
+        .select_related("program")
+        .prefetch_related(
+            Prefetch(
+                "program__courses",
+                cms_models.Course.objects.order_by(
+                    "position_in_program"
+                ).select_related(prefetch_type),
+            ),
+        )
+    )
+
+
+def filter_course_pages(is_external=False):  # noqa: FBT002
+    """Filter the internal and external course pages"""
+    course_page_cls = (
+        cms_models.CoursePage if is_external else cms_models.ExternalCoursePage
+    )
+
+    return (
+        course_page_cls.objects.live()
+        .filter(
+            (get_api_course_filter(relative_filter="course__")),
+        )
+        .order_by("id")
+        .select_related("course")
+        .distinct()
+    )
+
+
+def filter_and_sort_catalog_pages(program_pages, course_pages, sort_by):
     """
     Filters program and course pages to only include those that should be visible in the catalog, then returns a tuple
     of sorted lists of pages
@@ -52,22 +92,13 @@ def filter_and_sort_catalog_pages(
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
             ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the sort_by option.
     """
-    all_program_pages = program_pages + external_program_pages
-    all_course_pages = course_pages + external_course_pages
-
-    valid_program_pages = [
-        page for page in all_program_pages if page.product.is_catalog_visible
-    ]
-    valid_course_pages = [
-        page for page in all_course_pages if page.product.is_catalog_visible
-    ]
 
     page_run_dates = {
         page: page.product.next_run_date
         or datetime(year=MAXYEAR, month=1, day=1, tzinfo=UTC)
         for page in itertools.chain(
-            valid_program_pages,
-            valid_course_pages,
+            program_pages,
+            course_pages,
         )
     }
 
@@ -98,17 +129,17 @@ def filter_and_sort_catalog_pages(
 
     return (
         sorted(
-            valid_program_pages + valid_course_pages,
+            program_pages + course_pages,
             key=sorting["sorting_key"]["all"],
             reverse=sorting["reverse"],
         ),
         sorted(
-            valid_program_pages,
+            program_pages,
             key=sorting["sorting_key"]["programs"],
             reverse=sorting["reverse"],
         ),
         sorted(
-            valid_course_pages,
+            course_pages,
             key=sorting["sorting_key"]["courses"],
             reverse=sorting["reverse"],
         ),
