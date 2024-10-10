@@ -2,14 +2,14 @@
 <a
   data-toggle="modal"
   class="keep-me-updated"
-  href="#signup-modal-{{unique_identifier}}"
+  href="#signup-modal-{{ unique_identifier }}"
 >
   Keep me updated
 </a>
 
 <div
   class="modal fade"
-  id="signup-modal-{{unique_identifier}}"
+  id="signup-modal-{{ unique_identifier }}"
   role="dialog"
   aria-hidden="true"
 >
@@ -41,7 +41,7 @@
           </div>
           <div
             class="container hubspot-form-container"
-            id="marketing-hubspot-form-{{unique_identifier}}"
+            id="marketing-hubspot-form-{{ unique_identifier }}"
           ></div>
         </div>
       </div>
@@ -51,7 +51,7 @@
 
 <div
   class="modal fade"
-  id="confirmation-modal-{{unique_identifier}}"
+  id="confirmation-modal-{{ unique_identifier }}"
   role="dialog"
   aria-hidden="true"
 >
@@ -102,19 +102,19 @@
         hbspt.forms.create({
           portalId: '{{ hubspot_portal_id | safe }}',
           formId: '{{ page.marketing_hubspot_form_id | safe }}',
-          target: '#marketing-hubspot-form-{{unique_identifier}}',
-          formInstanceId: '{{unique_identifier}}',
+          target: '#marketing-hubspot-form-{{ unique_identifier }}',
+          formInstanceId: '{{ unique_identifier }}',
           onFormSubmitted: function ($form, data) {
             if (!data.redirectUrl) {
               if ('firstname' in data.submissionValues) {
                 $(
-                  '#confirmation-modal-{{unique_identifier}} .modal-title',
+                  '#confirmation-modal-{{ unique_identifier }} .modal-title',
                 ).text(
                   'Got it! Thanks, ' + data.submissionValues.firstname + '.',
                 );
               }
-              $('#signup-modal-{{unique_identifier}}').modal('hide');
-              $('#confirmation-modal-{{unique_identifier}}').modal('show');
+              $('#signup-modal-{{ unique_identifier }}').modal('hide');
+              $('#confirmation-modal-{{ unique_identifier }}').modal('show');
               resetForm();
             }
           },
@@ -123,7 +123,7 @@
     }
 
     function resetForm() {
-      $('#marketing-hubspot-form-{{unique_identifier}}').html('');
+      $('#marketing-hubspot-form-{{ unique_identifier }}').html('');
       renderForm();
     }
 
