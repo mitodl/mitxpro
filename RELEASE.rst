@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.160.6
+Version 0.160.6 (Released October 10, 2024)
 ---------------
 
 - feat: skip non usd emeritus courses (#3174)
