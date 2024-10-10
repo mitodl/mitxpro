@@ -1436,9 +1436,7 @@ class CoursePage(CourseProductPage):
         from courses.models import CourseRunEnrollment
 
         run = self.course_with_related_objects.first_unexpired_run
-        product = (
-            list(run.products.all())[0] if run and run.products.all() else None
-        )  # noqa: RUF015
+        product = list(run.products.all())[0] if run and run.products.all() else None  # noqa: RUF015
         is_anonymous = request.user.is_anonymous
         enrolled = (
             CourseRunEnrollment.objects.filter(user=request.user, run=run).exists()
@@ -2073,9 +2071,7 @@ class SignatoryPage(DisableSitemapURLMixin, Page):
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # auto generate a unique slug so we don't hit a ValidationError
         if not self.title:
-            self.title = (
-                self.__class__._meta.verbose_name.title() + "-" + self.name
-            )  # noqa: SLF001
+            self.title = self.__class__._meta.verbose_name.title() + "-" + self.name  # noqa: SLF001
 
         self.slug = slugify(f"{self.title}-{self.id}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
@@ -2233,12 +2229,12 @@ class CertificatePage(CourseProgramChildPage):
                     self.parent.product.first_unexpired_run.start_date
                     if self.parent.product.first_unexpired_run
                     else datetime.now()
-                ),  # noqa: DTZ005
+                ),
                 "end_date": (
                     self.parent.product.first_unexpired_run.end_date
                     if self.parent.product.first_unexpired_run
                     else datetime.now() + timedelta(days=45)
-                ),  # noqa: DTZ005
+                ),
                 "CEUs": self.CEUs,
             }
         elif self.certificate:
