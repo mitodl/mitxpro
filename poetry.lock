@@ -1230,16 +1230,6 @@ lxml = ["lxml (>=4.2.0,<5)"]
 testing = ["beautifulsoup4 (>=4.4.1,<5)", "coverage (>=4.1.0)", "flake8 (>=3.2.0)", "html5lib (>=0.999,<=1.0.1)", "isort (==4.2.5)", "lxml (>=4.2.0,<5)", "markov-draftjs (==0.1.1)", "memory-profiler (==0.47)", "psutil (==5.4.1)", "tox (>=2.3.1)"]
 
 [[package]]
-name = "drf-flex-fields"
-version = "0.9.9"
-description = "Flexible, dynamic fields and nested resources for Django REST Framework serializers."
-optional = false
-python-versions = "*"
-files = [
-    {file = "drf-flex-fields-0.9.9.tar.gz", hash = "sha256:dbbfbdbdc17da79dd10fdf7a4e493913699d2c08321d331afc3fca67522f4334"},
-]
-
-[[package]]
 name = "edx-api-client"
 version = "1.10.0"
 description = "Python interface to the edX REST APIs"
@@ -4165,4 +4155,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "58279e064635daddf40e203c6c4365b0389007459253cfa9e7d848043c39b30a"
+content-hash = "1857c02a92568ceb243050369320786ebdb83e97d3be6d2f1046834a8e8fb6c1"
