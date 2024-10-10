@@ -4102,13 +4102,13 @@ test = ["pytest"]
 
 [[package]]
 name = "xmltodict"
-version = "0.13.0"
+version = "0.14.1"
 description = "Makes working with XML feel like you are working with JSON"
 optional = false
-python-versions = ">=3.4"
+python-versions = ">=3.6"
 files = [
-    {file = "xmltodict-0.13.0-py2.py3-none-any.whl", hash = "sha256:aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852"},
-    {file = "xmltodict-0.13.0.tar.gz", hash = "sha256:341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56"},
+    {file = "xmltodict-0.14.1-py2.py3-none-any.whl", hash = "sha256:3ef4a7b71c08f19047fcbea572e1d7f4207ab269da1565b5d40e9823d3894e63"},
+    {file = "xmltodict-0.14.1.tar.gz", hash = "sha256:338c8431e4fc554517651972d62f06958718f6262b04316917008e8fd677a6b0"},
 ]
 
 [[package]]
@@ -4141,4 +4141,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "cb6c829777ba2a8ad2fb6af2fba51cc91cd5597c14fb34ee6335f820388efa49"
+content-hash = "cdcbe6fe74a1fa26888ec579dc80e9fc0e207ca55fcf8008cbe54af475d9107a"
