@@ -12,7 +12,7 @@ from wagtail.models import Page, Site
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
 from mitxpro.utils import now_in_utc
-
+from courses.utils import get_api_course_filter
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
 DEFAULT_SITE_PROPS = dict(hostname="localhost", port=80)  # noqa: C408
@@ -44,15 +44,7 @@ def filter_program_pages(is_external=False):  # noqa: FBT002
     return (
         program_page_cls.objects.live()
         .filter(
-            (
-                Q(
-                    program__courses__courseruns__start_date__isnull=False,
-                    program__courses__courseruns__start_date__gte=now,
-                )
-                | Q(
-                    program__courses__courseruns__enrollment_end__isnull=False,
-                    program__courses__courseruns__enrollment_end__gte=now,
-                )
+            (get_api_course_filter(relative_filter="program__courses__")
             ),
             program__live=True,
         )
@@ -79,17 +71,8 @@ def filter_course_pages(is_external=False):  # noqa: FBT002
     return (
         course_page_cls.objects.live()
         .filter(
-            (
-                Q(
-                    course__courseruns__start_date__isnull=False,
-                    course__courseruns__start_date__gte=now,
-                )
-                | Q(
-                    course__courseruns__enrollment_end__isnull=False,
-                    course__courseruns__enrollment_end__gte=now,
-                )
+            (get_api_course_filter(relative_filter="course__")
             ),
-            course__live=True,
         )
         .order_by("id")
         .select_related("course")

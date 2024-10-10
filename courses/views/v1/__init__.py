@@ -29,6 +29,7 @@ from courses.serializers import (
 )
 from ecommerce.models import Product
 from mitxpro.utils import now_in_utc
+from courses.utils import get_api_course_filter
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
@@ -51,19 +52,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = []
     serializer_class = ProgramSerializer
     queryset = (
-        Program.objects.filter(
-            (
-                Q(
-                    courses__courseruns__start_date__isnull=False,
-                    courses__courseruns__start_date__gte=now,
-                )
-                | Q(
-                    courses__courseruns__enrollment_end__isnull=False,
-                    courses__courseruns__enrollment_end__gte=now,
-                )
-            ),
-            live=True,
-        )
+        Program.objects.filter(get_api_course_filter(relative_filter="courses__"))
         .exclude(products=None)
         .select_related("programpage", "externalprogrampage", "platform")
         .prefetch_related(courses_prefetch, products_prefetch)
@@ -83,21 +72,8 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CourseSerializer
 
     def get_queryset(self):
-        now = now_in_utc()
         queryset = (
-            Course.objects.filter(
-                (
-                    Q(
-                        courseruns__start_date__isnull=False,
-                        courseruns__start_date__gte=now,
-                    )
-                    | Q(
-                        courseruns__enrollment_end__isnull=False,
-                        courseruns__enrollment_end__gte=now,
-                    )
-                ),
-                live=True,
-            )
+            Course.objects.filter(get_api_course_filter(relative_filter=""))
             .select_related("coursepage", "externalcoursepage", "platform")
             .prefetch_related(
                 "coursepage__topics",

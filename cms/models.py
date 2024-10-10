@@ -2228,12 +2228,12 @@ class CertificatePage(CourseProgramChildPage):
                 "start_date": (
                     self.parent.product.first_unexpired_run.start_date
                     if self.parent.product.first_unexpired_run
-                    else datetime.now()
+                    else datetime.now(tz=datetime.UTC)
                 ),
                 "end_date": (
                     self.parent.product.first_unexpired_run.end_date
                     if self.parent.product.first_unexpired_run
-                    else datetime.now() + timedelta(days=45)
+                    else datetime.now(tz=datetime.UTC) + timedelta(days=45)
                 ),
                 "CEUs": self.CEUs,
             }
