@@ -3876,13 +3876,13 @@ files = [
 
 [[package]]
 name = "ua-parser"
-version = "0.8.0"
+version = "0.18.0"
 description = "Python port of Browserscope's user agent parser"
 optional = false
 python-versions = "*"
 files = [
-    {file = "ua-parser-0.8.0.tar.gz", hash = "sha256:97bbcfc9321a3151d96bb5d62e54270247b0e3be0590a6f2ff12329851718dcb"},
-    {file = "ua_parser-0.8.0-py2.py3-none-any.whl", hash = "sha256:3908c19ea0abdcdfe7245366dc03e5b4a8901ec17105bd66ba2ccbe3948dce8a"},
+    {file = "ua-parser-0.18.0.tar.gz", hash = "sha256:db51f1b59bfaa82ed9e2a1d99a54d3e4153dddf99ac1435d51828165422e624e"},
+    {file = "ua_parser-0.18.0-py2.py3-none-any.whl", hash = "sha256:9d94ac3a80bcb0166823956a779186c746b50ea4c9fd9bf30fdb758553c38950"},
 ]
 
 [[package]]
@@ -3926,17 +3926,17 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "user-agents"
-version = "2.0"
-description = "A library to identify devices (phones, tablets) and their capabilities by parsing (browser/HTTP) user agent strings"
+version = "2.2.0"
+description = "A library to identify devices (phones, tablets) and their capabilities by parsing browser user agent strings."
 optional = false
 python-versions = "*"
 files = [
-    {file = "user-agents-2.0.tar.gz", hash = "sha256:792869b990a244f71efea1cb410ecaba99a270a64c5ac37d365bde5d70d6a2fa"},
-    {file = "user_agents-2.0-py2-none-any.whl", hash = "sha256:7af7419d61ce8f72ad487cc77ea3b4d1dcaa4cbb7b6df533a7c7aa3ccc44e5b3"},
+    {file = "user-agents-2.2.0.tar.gz", hash = "sha256:d36d25178db65308d1458c5fa4ab39c9b2619377010130329f3955e7626ead26"},
+    {file = "user_agents-2.2.0-py3-none-any.whl", hash = "sha256:a98c4dc72ecbc64812c4534108806fb0a0b3a11ec3fd1eafe807cee5b0a942e7"},
 ]
 
 [package.dependencies]
-ua-parser = ">=0.8.0"
+ua-parser = ">=0.10.0"
 
 [[package]]
 name = "user-util"
@@ -4141,4 +4141,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "cd3334094ee6bc9962a0f7ab7abf8a7bdb7b4b458064e89a07fe5663d011a430"
+content-hash = "58279e064635daddf40e203c6c4365b0389007459253cfa9e7d848043c39b30a"
