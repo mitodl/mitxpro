@@ -12,7 +12,6 @@ from wagtail.models import Page, Site
 from cms import models as cms_models
 from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
 from courses.utils import get_api_course_filter
-from mitxpro.utils import now_in_utc
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
@@ -35,7 +34,6 @@ def get_catalog_sorting_keys(sorting, *, reverse):
 
 def filter_program_pages(is_external=False):  # noqa: FBT002
     """Filter the internal and external program objects"""
-    now = now_in_utc()
     program_page_cls = cms_models.ProgramPage
     prefetch_type = "coursepage"
     if is_external:
@@ -63,7 +61,6 @@ def filter_program_pages(is_external=False):  # noqa: FBT002
 
 def filter_course_pages(is_external=False):  # noqa: FBT002
     """Filter the internal and external course pages"""
-    now = now_in_utc()
     course_page_cls = (
         cms_models.CoursePage if is_external else cms_models.ExternalCoursePage
     )
