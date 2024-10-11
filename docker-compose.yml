@@ -1,5 +1,3 @@
-version: "3.6"
-
 x-environment: &py-environment
   NODE_ENV: "production"
   DEV_ENV: "True" # necessary to have nginx connect to web container
