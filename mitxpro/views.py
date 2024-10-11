@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from ecommerce.permissions import COUPON_ADD_PERMISSION, COUPON_UPDATE_PERMISSION
 from mitxpro.serializers import AppContextSerializer
 
 
@@ -88,17 +89,17 @@ def ecommerce_restricted(request):
     """
     Views restricted to admins
     """
-    has_coupon_create_permission = request.user.has_perm("ecommerce.add_coupon")
-    has_coupon_update_permission = request.user.has_perm("ecommerce.change_coupon")
+    has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
+    has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
 
     if not (
-        request.user and (has_coupon_create_permission or has_coupon_update_permission)
+        request.user and (has_coupon_add_permission or has_coupon_update_permission)
     ):
         raise PermissionDenied
 
     if (
         request.path.startswith("/ecommerce/admin/coupons")
-        and not has_coupon_create_permission
+        and not has_coupon_add_permission
     ) or (
         request.path.startswith("/ecommerce/admin/deactivate-coupons")
         and not has_coupon_update_permission
@@ -108,7 +109,7 @@ def ecommerce_restricted(request):
     context = get_base_context(request)
     context["user_permissions"] = json.dumps(
         {
-            "has_coupon_create_permission": has_coupon_create_permission,
+            "has_coupon_create_permission": has_coupon_add_permission,
             "has_coupon_update_permission": has_coupon_update_permission,
         }
     )

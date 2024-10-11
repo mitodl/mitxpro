@@ -3,6 +3,7 @@
 from urllib.parse import urljoin
 
 import pytest
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.urls import reverse
 
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
@@ -204,10 +205,23 @@ def test_make_checkout_url(  # noqa: PLR0913
 
 
 @pytest.mark.django_db
-def test_deactivate_coupon():
-    """Test that the deactivate_coupons utility method successfully disables enabled coupons"""
+def test_deactivate_coupon(user):
+    """Test coupon deactivation and log entry creation based on user presence."""
     coupons_list = CouponFactory.create_batch(10)
     coupons = Coupon.objects.filter(id__in=[coupon.id for coupon in coupons_list])
-    assert all(coupon.enabled for coupon in coupons)
-    deactivate_coupons(coupons, Coupon)
-    assert all(not coupon.enabled for coupon in coupons)
+
+    assert coupons.filter(enabled=True).count() == len(coupons)
+
+    deactivate_coupons(coupons)
+    assert coupons.filter(enabled=False).count() == len(coupons)
+    assert LogEntry.objects.count() == 0
+
+    coupons.update(enabled=True)
+
+    deactivate_coupons(coupons, user_id=user.id)
+    assert coupons.filter(enabled=False).count() == len(coupons)
+    assert LogEntry.objects.filter(user_id=user.id).count() == len(coupons)
+
+    log_entry = LogEntry.objects.filter(user_id=user.id).first()
+    assert log_entry.action_flag == CHANGE
+    assert log_entry.change_message == "Deactivated coupon"

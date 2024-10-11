@@ -351,7 +351,7 @@ class CouponListView(APIView):
         ).select_related("payment")
 
         deactivated_codes_and_payment_names = deactivate_coupons(
-            coupons, Coupon, request.user.id
+            coupons, request.user.id
         )
         return Response(
             status=status.HTTP_200_OK,

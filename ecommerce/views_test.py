@@ -1216,7 +1216,7 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     assert resp.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_deactivate_coupons(mocker, superuser_drf_client):
+def test_deactivate_coupons(mocker, admin_drf_client):
     """Test that the API successfully deactivates coupons based on coupon codes or payment names"""
 
     mock_deactivate_coupons = mocker.patch("ecommerce.views.deactivate_coupons")
@@ -1232,7 +1232,7 @@ def test_deactivate_coupons(mocker, superuser_drf_client):
 
     assert all(coupon.enabled for coupon in coupons)
 
-    response = superuser_drf_client.put(reverse("coupon_api"), data=data, format="json")
+    response = admin_drf_client.put(reverse("coupon_api"), data=data, format="json")
     assert response.status_code == status.HTTP_200_OK
 
     expected_coupons = [coupon.id for coupon in coupons]

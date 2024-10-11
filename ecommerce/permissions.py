@@ -5,6 +5,7 @@ import logging
 from rest_framework.permissions import BasePermission
 
 from ecommerce.api import generate_cybersource_sa_signature
+from ecommerce.constants import COUPON_ADD_PERMISSION, COUPON_UPDATE_PERMISSION
 
 log = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ class HasCouponPermission(BasePermission):
 
     def has_permission(self, request, view):  # noqa: ARG002
         if request.method == "POST":
-            return request.user.has_perm("ecommerce.add_coupon")
+            return request.user.has_perm(COUPON_ADD_PERMISSION)
 
         if request.method == "PUT":
-            return request.user.has_perm("ecommerce.change_coupon")
+            return request.user.has_perm(COUPON_UPDATE_PERMISSION)
 
         return False

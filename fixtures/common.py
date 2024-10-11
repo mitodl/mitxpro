@@ -68,14 +68,6 @@ def admin_drf_client(admin_user):
 
 
 @pytest.fixture
-def superuser_drf_client(super_user):
-    """DRF API test client with super user"""
-    client = APIClient()
-    client.force_authenticate(user=super_user)
-    return client
-
-
-@pytest.fixture
 def mocked_responses():
     """Mocked responses for requests library"""
     with responses.RequestsMock() as rsps:
