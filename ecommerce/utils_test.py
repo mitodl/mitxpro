@@ -5,11 +5,11 @@ from urllib.parse import urljoin
 import pytest
 from django.contrib.admin.models import CHANGE, LogEntry
 from django.urls import reverse
+from pytest_lazy_fixtures import lf as lazy
 
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
 from ecommerce.factories import CouponFactory
-from ecommerce.models import Coupon
 from ecommerce.utils import (
     deactivate_coupons,
     get_order_id_by_reference_number,
@@ -205,23 +205,23 @@ def test_make_checkout_url(  # noqa: PLR0913
 
 
 @pytest.mark.django_db
-def test_deactivate_coupon(user):
+@pytest.mark.parametrize(
+    ("test_user", "expected_log_count"), [(None, 0), (lazy("user"), 10)]
+)
+def test_deactivate_coupon(test_user, expected_log_count):
     """Test coupon deactivation and log entry creation based on user presence."""
-    coupons_list = CouponFactory.create_batch(10)
-    coupons = Coupon.objects.filter(id__in=[coupon.id for coupon in coupons_list])
+    coupons = CouponFactory.create_batch(10)
+    assert all(coupon.enabled for coupon in coupons)
 
-    assert coupons.filter(enabled=True).count() == len(coupons)
+    user_id = test_user.id if test_user else None
 
-    deactivate_coupons(coupons)
-    assert coupons.filter(enabled=False).count() == len(coupons)
-    assert LogEntry.objects.count() == 0
+    deactivate_coupons(coupons, user_id)
 
-    coupons.update(enabled=True)
+    assert not any(coupon.enabled for coupon in coupons)
 
-    deactivate_coupons(coupons, user_id=user.id)
-    assert coupons.filter(enabled=False).count() == len(coupons)
-    assert LogEntry.objects.filter(user_id=user.id).count() == len(coupons)
+    assert LogEntry.objects.filter(user_id=user_id).count() == expected_log_count
 
-    log_entry = LogEntry.objects.filter(user_id=user.id).first()
-    assert log_entry.action_flag == CHANGE
-    assert log_entry.change_message == "Deactivated coupon"
+    if user_id:
+        log_entry = LogEntry.objects.filter(user_id=user_id).first()
+        assert log_entry.action_flag == CHANGE
+        assert log_entry.change_message == "Deactivated coupon"

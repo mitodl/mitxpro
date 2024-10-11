@@ -184,17 +184,17 @@ def deactivate_coupons(coupons, user_id=None):
     """
     Disables the provided coupons (enabled=False) and logs the deactivation with the given user, if specified.
     Args:
-        coupons (QuerySet): Coupons to deactivate.
+        coupons (List | QuerySet): Coupons to deactivate.
         coupon_type (type): Coupon model for logging.
         user_id (int, optional): ID of the user performing the deactivation.
     Returns:
         set: Deactivated coupon codes and payment names.
     """
+    from ecommerce.models import Coupon
+
     deactivated_codes_and_payment_names = set()
     log_entries = []
-    content_type = ContentType.objects.get_for_model(coupons.model)
-
-    coupons.update(enabled=False)
+    content_type = ContentType.objects.get_for_model(Coupon)
 
     for coupon in coupons:
         if user_id:
@@ -208,8 +208,10 @@ def deactivate_coupons(coupons, user_id=None):
                     change_message="Deactivated coupon",
                 )
             )
+        coupon.enabled = False
         deactivated_codes_and_payment_names.add(coupon.coupon_code)
         deactivated_codes_and_payment_names.add(coupon.payment.name)
 
+    Coupon.objects.bulk_update(coupons, ["enabled"])
     LogEntry.objects.bulk_create(log_entries)
     return deactivated_codes_and_payment_names
