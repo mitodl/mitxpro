@@ -40,7 +40,7 @@ describe("CouponDeactivateForm", () => {
     ["coupons", "Valid_name", ""],
     [
       "coupons",
-      "Invalid name",
+      "Invalid+name",
       "Only letters, numbers, and underscores allowed",
     ],
   ].forEach(([name, value, errorMessage]) => {
