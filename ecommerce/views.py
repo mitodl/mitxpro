@@ -376,7 +376,7 @@ class CouponListView(APIView):
 
 def ecommerce_restricted(request):
     """
-    Views restricted to admins
+    Views accessible only to users with permissions to create or modify coupons.
     """
     has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
     has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
