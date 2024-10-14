@@ -41,7 +41,7 @@ describe("CouponDeactivateForm", () => {
     [
       "coupons",
       "Invalid+name",
-      "Only letters, numbers, and underscores allowed",
+      "Only letters, numbers, spaces and underscores allowed",
     ],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
