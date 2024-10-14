@@ -36,8 +36,8 @@ export const CouponDeactivateForm = ({
               Coupon Codes/Names (each code/name at a separate line)*
               <p className="small-text warning">
                 Note: Adding coupon code like <strong>dd5475f4c1c</strong> will
-                deactivate the specific coupon. Adding a coupon name like{" "}
-                <strong>MIT_DIGITALLEARNING_25</strong> will deactivate all the
+                deactivate the specific coupon. Adding a coupon name like
+                <strong> MIT_DIGITALLEARNING_25</strong> will deactivate all the
                 coupon codes i.e. <strong>dd5475f4c1c ab064b8215f2 ...</strong>
               </p>
               <Field name="coupons" component="textarea" rows="4" />
