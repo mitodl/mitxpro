@@ -6,7 +6,6 @@ import json
 
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -15,7 +14,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ecommerce.permissions import COUPON_ADD_PERMISSION, COUPON_UPDATE_PERMISSION
 from mitxpro.serializers import AppContextSerializer
 
 
@@ -83,37 +81,6 @@ def handler500(request):
 def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
     """Redirect wagtail admin signin to site signin page"""
     return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
-
-
-def ecommerce_restricted(request):
-    """
-    Views restricted to admins
-    """
-    has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
-    has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
-
-    if not (
-        request.user and (has_coupon_add_permission or has_coupon_update_permission)
-    ):
-        raise PermissionDenied
-
-    if (
-        request.path.startswith("/ecommerce/admin/coupons")
-        and not has_coupon_add_permission
-    ) or (
-        request.path.startswith("/ecommerce/admin/deactivate-coupons")
-        and not has_coupon_update_permission
-    ):
-        raise PermissionDenied
-
-    context = get_base_context(request)
-    context["user_permissions"] = json.dumps(
-        {
-            "has_coupon_create_permission": has_coupon_add_permission,
-            "has_coupon_update_permission": has_coupon_update_permission,
-        }
-    )
-    return render(request, "index.html", context=context)
 
 
 class AppContextView(APIView):

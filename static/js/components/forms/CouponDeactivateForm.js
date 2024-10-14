@@ -13,7 +13,7 @@ const couponValidations = yup.object().shape({
   coupons: yup
     .string()
     .required("At least one coupon name or code is required")
-    .matches(/^[\w\n ]+$/, "Only letters, numbers, and underscores allowed"),
+    .matches(/^[\w\n ]+$/, "Only letters, numbers, spaces and underscores allowed"),
 });
 
 export const CouponDeactivateForm = ({

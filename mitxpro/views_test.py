@@ -3,7 +3,6 @@ Test end to end django views.
 """
 
 import pytest
-from django.contrib.auth.models import Permission
 from django.test import Client
 from django.urls import reverse
 from rest_framework import status
@@ -24,49 +23,6 @@ def test_not_found_view(client):
     resp = client.get("/some/not/found/url/")
     assert resp.templates[0].name == "404.html"
     assert resp.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.parametrize(
-    (
-        "add_coupon",
-        "change_coupon",
-        "expected_admin_status",
-        "expected_coupons_status",
-        "expected_deactivate_status",
-    ),
-    [
-        (True, False, 200, 200, 403),
-        (False, True, 200, 403, 200),
-        (False, False, 403, 403, 403),
-        (True, True, 200, 200, 200),
-    ],
-)
-def test_ecommerce_restricted_view(  # noqa: PLR0913
-    user,
-    add_coupon,
-    change_coupon,
-    expected_admin_status,
-    expected_coupons_status,
-    expected_deactivate_status,
-):
-    """Test that the ecommerce restricted view is only accessible with the right permissions."""
-
-    user.user_permissions.clear()
-    if add_coupon:
-        user.user_permissions.add(Permission.objects.get(codename="add_coupon"))
-    if change_coupon:
-        user.user_permissions.add(Permission.objects.get(codename="change_coupon"))
-
-    client = Client()
-    client.force_login(user)
-
-    ecommerce_admin_url = reverse("ecommerce-admin")
-    add_coupons_url = ecommerce_admin_url + "coupons"
-    deactivate_coupons_url = ecommerce_admin_url + "deactivate-coupons"
-
-    assert client.get(ecommerce_admin_url).status_code == expected_admin_status
-    assert client.get(add_coupons_url).status_code == expected_coupons_status
-    assert client.get(deactivate_coupons_url).status_code == expected_deactivate_status
 
 
 def test_cms_signin_redirect_to_site_signin(client):

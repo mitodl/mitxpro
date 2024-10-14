@@ -1,5 +1,6 @@
 """Views for ecommerce"""
 
+import json
 import logging
 from urllib.parse import urljoin
 
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404
+from django.shortcuts import render
 from django_filters import rest_framework as filters
 from ipware import get_client_ip
 from rest_framework import status
@@ -46,7 +48,12 @@ from ecommerce.models import (
     Product,
     Receipt,
 )
-from ecommerce.permissions import HasCouponPermission, IsSignedByCyberSource
+from ecommerce.permissions import (
+    COUPON_ADD_PERMISSION,
+    COUPON_UPDATE_PERMISSION,
+    HasCouponPermission,
+    IsSignedByCyberSource,
+)
 from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
@@ -64,6 +71,7 @@ from mitxpro.utils import (
     make_csv_http_response,
     now_in_utc,
 )
+from mitxpro.views import get_base_context
 
 log = logging.getLogger(__name__)
 
@@ -364,6 +372,35 @@ class CouponListView(APIView):
                 ),
             },
         )
+
+
+def ecommerce_restricted(request):
+    """
+    Views restricted to admins
+    """
+    has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
+    has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
+
+    if not (has_coupon_add_permission or has_coupon_update_permission):
+        raise PermissionDenied
+
+    if (
+        request.path.startswith("/ecommerce/admin/coupons")
+        and not has_coupon_add_permission
+    ) or (
+        request.path.startswith("/ecommerce/admin/deactivate-coupons")
+        and not has_coupon_update_permission
+    ):
+        raise PermissionDenied
+
+    context = get_base_context(request)
+    context["user_permissions"] = json.dumps(
+        {
+            "has_coupon_create_permission": has_coupon_add_permission,
+            "has_coupon_update_permission": has_coupon_update_permission,
+        }
+    )
+    return render(request, "index.html", context=context)
 
 
 def coupon_code_csv_view(request, version_id):

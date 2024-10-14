@@ -58,7 +58,7 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
     const { deactivateCoupon } = this.props;
     const { couponData } = this.state;
     const result = await deactivateCoupon(couponData);
-    console.log(window);
+
     await this.setState({
       submitting: false,
       couponData: couponData,

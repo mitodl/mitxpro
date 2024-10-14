@@ -31,7 +31,6 @@ from wagtail.utils.urlpatterns import decorate_urlpatterns
 from mitxpro.views import (
     AppContextView,
     cms_signin_redirect_to_site_signin,
-    ecommerce_restricted,
     index,
 )
 from mitxpro.views import (
@@ -86,7 +85,6 @@ urlpatterns = (
         path("checkout/", index, name="checkout-page"),
         path("profile/", index, name="view-profile"),
         path("profile/edit/", index, name="edit-profile"),
-        re_path(r"^ecommerce/admin/", ecommerce_restricted, name="ecommerce-admin"),
         # social django needs to be here to preempt the login
         path("", include("social_django.urls", namespace="social")),
         re_path(r"^dashboard/", index, name="user-dashboard"),

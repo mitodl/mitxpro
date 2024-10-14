@@ -14,6 +14,7 @@ from ecommerce.views import (
     ProgramRunsViewSet,
     bulk_assignment_csv_view,
     coupon_code_csv_view,
+    ecommerce_restricted,
 )
 
 router = SimpleRouter()
@@ -48,4 +49,5 @@ urlpatterns = [
         bulk_assignment_csv_view,
         name="bulk_assign_csv",
     ),
+    re_path(r"^ecommerce/admin/", ecommerce_restricted, name="ecommerce-admin"),
 ]
