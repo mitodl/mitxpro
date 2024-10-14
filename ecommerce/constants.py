@@ -52,3 +52,6 @@ DISCOUNT_TYPES = [
     DISCOUNT_TYPE_PERCENT_OFF,
     DISCOUNT_TYPE_DOLLARS_OFF,
 ]
+
+COUPON_ADD_PERMISSION = "ecommerce.add_coupon"
+COUPON_UPDATE_PERMISSION = "ecommerce.change_coupon"

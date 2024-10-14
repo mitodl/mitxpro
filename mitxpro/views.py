@@ -6,7 +6,6 @@ import json
 
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -82,15 +81,6 @@ def handler500(request):
 def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
     """Redirect wagtail admin signin to site signin page"""
     return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
-
-
-def restricted(request):
-    """
-    Views restricted to admins
-    """
-    if not (request.user and request.user.is_staff):
-        raise PermissionDenied
-    return render(request, "index.html", context=get_base_context(request))
 
 
 class AppContextView(APIView):

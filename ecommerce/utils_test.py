@@ -3,11 +3,15 @@
 from urllib.parse import urljoin
 
 import pytest
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.urls import reverse
+from pytest_lazy_fixtures import lf as lazy
 
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import ParseException
+from ecommerce.factories import CouponFactory
 from ecommerce.utils import (
+    deactivate_coupons,
     get_order_id_by_reference_number,
     make_checkout_url,
     validate_amount,
@@ -198,3 +202,26 @@ def test_make_checkout_url(  # noqa: PLR0913
         )
         == f"{urljoin(settings.SITE_BASE_URL, reverse('checkout-page'))}{expected_query_params}"
     )
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("test_user", "expected_log_count"), [(None, 0), (lazy("user"), 10)]
+)
+def test_deactivate_coupon(test_user, expected_log_count):
+    """Test coupon deactivation and log entry creation based on user presence."""
+    coupons = CouponFactory.create_batch(10)
+    assert all(coupon.enabled for coupon in coupons)
+
+    user_id = test_user.id if test_user else None
+
+    deactivate_coupons(coupons, user_id)
+
+    assert not any(coupon.enabled for coupon in coupons)
+
+    assert LogEntry.objects.filter(user_id=user_id).count() == expected_log_count
+
+    if user_id:
+        log_entry = LogEntry.objects.filter(user_id=user_id).first()
+        assert log_entry.action_flag == CHANGE
+        assert log_entry.change_message == "Deactivated coupon"

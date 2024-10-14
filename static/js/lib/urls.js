@@ -47,6 +47,7 @@ export const routes = {
   ecommerceAdmin: include("/ecommerce/admin/", {
     index: "",
     coupons: "coupons/",
+    deactivate: "deactivate-coupons/",
   }),
 
   ecommerceBulk: include("/ecommerce/bulk/", {

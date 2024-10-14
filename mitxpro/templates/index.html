@@ -7,3 +7,10 @@
 <div id="container"></div>
 {% render_bundle 'root' %}
 {% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+  var USER_PERMISSIONS = {{user_permissions|safe}};
+</script>
+{% endblock %}

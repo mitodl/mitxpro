@@ -16,6 +16,7 @@ over --file.
 from django.core.management import BaseCommand, CommandError
 
 from ecommerce.models import Coupon, CouponPayment
+from ecommerce.utils import deactivate_coupons
 
 
 class Command(BaseCommand):
@@ -74,9 +75,6 @@ class Command(BaseCommand):
         if len(codes) == 0:
             raise CommandError("No codes found.")  # noqa: EM101
 
-        for code in codes:
-            code.enabled = False
-
-        Coupon.objects.bulk_update(codes, ["enabled"])
+        deactivate_coupons(codes, Coupon)
 
         self.stdout.write(f"Disabled {len(codes)} codes successfully.")

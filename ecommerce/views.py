@@ -1,5 +1,6 @@
 """Views for ecommerce"""
 
+import json
 import logging
 from urllib.parse import urljoin
 
@@ -7,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
 from django.http import Http404
+from django.shortcuts import render
 from django_filters import rest_framework as filters
 from ipware import get_client_ip
 from rest_framework import status
@@ -16,7 +18,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     get_object_or_404,
 )
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -40,12 +42,18 @@ from ecommerce.models import (
     Basket,
     BulkCouponAssignment,
     Company,
+    Coupon,
     CouponPaymentVersion,
     Order,
     Product,
     Receipt,
 )
-from ecommerce.permissions import IsSignedByCyberSource
+from ecommerce.permissions import (
+    COUPON_ADD_PERMISSION,
+    COUPON_UPDATE_PERMISSION,
+    HasCouponPermission,
+    IsSignedByCyberSource,
+)
 from ecommerce.serializers import (
     BasketSerializer,
     CompanySerializer,
@@ -56,13 +64,14 @@ from ecommerce.serializers import (
     PromoCouponSerializer,
     SingleUseCouponSerializer,
 )
-from ecommerce.utils import make_checkout_url
+from ecommerce.utils import deactivate_coupons, make_checkout_url
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.utils import (
     format_datetime_for_filename,
     make_csv_http_response,
     now_in_utc,
 )
+from mitxpro.views import get_base_context
 
 log = logging.getLogger(__name__)
 
@@ -309,7 +318,7 @@ class CouponListView(APIView):
     Admin view for CRUD operations on coupons
     """
 
-    permission_classes = (IsAdminUser,)
+    permission_classes = (HasCouponPermission,)
     authentication_classes = (SessionAuthentication,)
 
     def post(self, request, *args, **kwargs):  # noqa: ARG002
@@ -336,6 +345,62 @@ class CouponListView(APIView):
                 ]
             },
         )
+
+    def put(self, request):
+        """
+        Deactivate one or more coupons based on coupon codes or payment names provided in the request body.
+        """
+        coupon_codes_and_payment_names = set(
+            filter(None, request.data.get("coupons", "").strip().split("\n"))
+        )
+        coupons = Coupon.objects.filter(
+            Q(coupon_code__in=coupon_codes_and_payment_names)
+            | Q(payment__name__in=coupon_codes_and_payment_names)
+        ).select_related("payment")
+
+        deactivated_codes_and_payment_names = deactivate_coupons(
+            coupons, request.user.id
+        )
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "num_of_coupons_deactivated": len(coupons),
+                "skipped_codes": list(
+                    coupon_codes_and_payment_names.difference(
+                        deactivated_codes_and_payment_names
+                    )
+                ),
+            },
+        )
+
+
+def ecommerce_restricted(request):
+    """
+    Views accessible only to users with permissions to create or modify coupons.
+    """
+    has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
+    has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
+
+    if not (has_coupon_add_permission or has_coupon_update_permission):
+        raise PermissionDenied
+
+    if (
+        request.path.startswith("/ecommerce/admin/coupons")
+        and not has_coupon_add_permission
+    ) or (
+        request.path.startswith("/ecommerce/admin/deactivate-coupons")
+        and not has_coupon_update_permission
+    ):
+        raise PermissionDenied
+
+    context = get_base_context(request)
+    context["user_permissions"] = json.dumps(
+        {
+            "has_coupon_create_permission": has_coupon_add_permission,
+            "has_coupon_update_permission": has_coupon_update_permission,
+        }
+    )
+    return render(request, "index.html", context=context)
 
 
 def coupon_code_csv_view(request, version_id):

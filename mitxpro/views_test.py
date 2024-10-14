@@ -25,12 +25,6 @@ def test_not_found_view(client):
     assert resp.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_restricted_view(client, admin_client):
-    """Verify the restricted view is only available to admins"""
-    assert client.get(reverse("ecommerce-admin")).status_code == 403
-    assert admin_client.get(reverse("ecommerce-admin")).status_code == 200
-
-
 def test_cms_signin_redirect_to_site_signin(client):
     """
     Test that the cms/login redirects users to site signin page.

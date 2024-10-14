@@ -6,12 +6,79 @@
   }
 
   .error {
-    color: red;
+    color: $primary;
   }
 
   .success {
     color: green;
   }
+
+  .warning {
+    color: rgb(76 76 5);
+  }
+}
+
+.skipped-warning {
+  border-radius: 5px;
+  background-color: $warning-background;
+  color: $white;
+  padding: 15px;
+  margin-bottom: 16px;
+
+  .warning-div {
+    display: flex;
+  }
+
+  .warning-icon {
+    margin: 0 10px 0 0;
+  }
+
+  .warning-text {
+    margin: 0;
+  }
+
+  .warning-list {
+    margin: 0 0 0 10px;
+  }
+}
+
+.modal-title {
+  font-size: 28px;
+}
+
+.float-container {
+  float: right;
+  margin-top: 30px;
+}
+
+.float-container button {
+  margin-left: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 21px;
+  text-align: center;
+  padding: 10px 25px;
+}
+
+button.btn.btn-gradient-red-to-blue {
+  color: $white;
+  border: 1px solid $primary;
+  background: $primary !important;
+  transition: 0.25s;
+}
+
+button.btn.btn-gradient-white-to-blue {
+  color: $dark-blue;
+  border: 1px solid $white;
+  background: $white;
+  transition: 0.25s;
+}
+
+button.btn.btn-gradient-red-to-blue:hover,
+button.btn.btn-gradient-white-to-blue:hover {
+  border-color: $dark-blue;
+  background: $dark-blue !important;
+  color: $white !important;
 }
 
 .coupon-form {
@@ -28,6 +95,10 @@
     display: unset;
   }
 
+  .text-area-div {
+    max-width: 50%;
+  }
+
   .block {
     /* stylelint-disable-next-line selector-class-pattern */
     .DayPickerInput {
@@ -36,6 +107,10 @@
 
     input {
       display: block;
+    }
+
+    textarea {
+      width: 100%;
     }
 
     select {
@@ -70,8 +145,13 @@
   }
 
   .dangerous {
-    background-color: #ef5350;
-    color: #fff;
+    background-color: $warning-background;
+    color: $white;
     padding: 15px;
+  }
+
+  .small-text {
+    font-size: 14px;
+    max-width: 600px;
   }
 }

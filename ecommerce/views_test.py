@@ -7,7 +7,9 @@ from urllib.parse import quote_plus, urljoin
 import factory
 import faker
 import pytest
+from django.contrib.auth.models import Permission
 from django.db.models import Count, Q
+from django.test import Client
 from django.urls import reverse
 from pytest_lazy_fixtures import lf as lazy
 from rest_framework import status
@@ -1144,7 +1146,11 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
             "At least one product must be selected or coupon should be global.",
         ],
         ["name", "AlreadyExists", "This field must be unique."],  # noqa: PT007
-        ["coupon_code", "AlreadyExists", "Coupon code already exists in the platform."],  # noqa: PT007
+        [  # noqa: PT007
+            "coupon_code",
+            "AlreadyExists",
+            "Coupon code already exists in the platform.",
+        ],
     ],
 )
 @pytest.mark.parametrize(
@@ -1213,6 +1219,78 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
 
 
 @pytest.mark.parametrize(
+    (
+        "add_coupon",
+        "change_coupon",
+        "expected_admin_status",
+        "expected_coupons_status",
+        "expected_deactivate_status",
+    ),
+    [
+        (True, False, 200, 200, 403),
+        (False, True, 200, 403, 200),
+        (False, False, 403, 403, 403),
+        (True, True, 200, 200, 200),
+    ],
+)
+def test_ecommerce_restricted_view(  # noqa: PLR0913
+    user,
+    add_coupon,
+    change_coupon,
+    expected_admin_status,
+    expected_coupons_status,
+    expected_deactivate_status,
+):
+    """Test that the ecommerce restricted view is only accessible with the right permissions."""
+
+    user.user_permissions.clear()
+    if add_coupon:
+        user.user_permissions.add(Permission.objects.get(codename="add_coupon"))
+    if change_coupon:
+        user.user_permissions.add(Permission.objects.get(codename="change_coupon"))
+
+    client = Client()
+    client.force_login(user)
+
+    ecommerce_admin_url = reverse("ecommerce-admin")
+    add_coupons_url = ecommerce_admin_url + "coupons"
+    deactivate_coupons_url = ecommerce_admin_url + "deactivate-coupons"
+
+    assert client.get(ecommerce_admin_url).status_code == expected_admin_status
+    assert client.get(add_coupons_url).status_code == expected_coupons_status
+    assert client.get(deactivate_coupons_url).status_code == expected_deactivate_status
+
+
+def test_deactivate_coupons(mocker, admin_drf_client):
+    """Test that the API successfully deactivates coupons based on coupon codes or payment names"""
+
+    mock_deactivate_coupons = mocker.patch("ecommerce.views.deactivate_coupons")
+
+    coupons = CouponFactory.create_batch(10)
+    coupon_codes = [coupon.coupon_code for coupon in coupons[:5]]
+    payment_names = [coupon.payment.name for coupon in coupons[5:]]
+    mixed_coupons = coupon_codes + payment_names
+
+    mock_deactivate_coupons.return_value = set(mixed_coupons)
+
+    data = {"coupons": "\n".join(mixed_coupons)}
+
+    assert all(coupon.enabled for coupon in coupons)
+
+    response = admin_drf_client.put(reverse("coupon_api"), data=data, format="json")
+    assert response.status_code == status.HTTP_200_OK
+
+    expected_coupons = [coupon.id for coupon in coupons]
+    actual_coupons = list(
+        mock_deactivate_coupons.call_args[0][0].values_list("id", flat=True)
+    )
+    assert expected_coupons == actual_coupons
+
+    assert response.data["num_of_coupons_deactivated"] == len(coupons)
+    assert not response.data["skipped_codes"]
+
+
+@pytest.mark.parametrize(
     "discount_type",
     (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
@@ -1268,8 +1346,18 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
 @pytest.mark.parametrize(
     "url_name,url_kwarg_name,test_client,expected_status_code",  # noqa: PT006
     [
-        ["coupons_csv", "version_id", lazy("admin_client"), status.HTTP_404_NOT_FOUND],  # noqa: PT007
-        ["coupons_csv", "version_id", lazy("user_client"), status.HTTP_403_FORBIDDEN],  # noqa: PT007
+        [  # noqa: PT007
+            "coupons_csv",
+            "version_id",
+            lazy("admin_client"),
+            status.HTTP_404_NOT_FOUND,
+        ],
+        [  # noqa: PT007
+            "coupons_csv",
+            "version_id",
+            lazy("user_client"),
+            status.HTTP_403_FORBIDDEN,
+        ],
         [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
