@@ -73,7 +73,6 @@ from mitxpro.utils import (
 )
 from mitxpro.views import get_base_context
 
-
 log = logging.getLogger(__name__)
 
 
