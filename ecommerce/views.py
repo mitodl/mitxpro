@@ -405,7 +405,7 @@ def ecommerce_restricted(request):
 
 def coupon_code_csv_view(request, version_id):
     """View for returning a csv file of coupon codes"""
-    if not (request.user and request.user.is_staff):
+    if not (request.user and request.user.has_perm(COUPON_ADD_PERMISSION)):
         raise PermissionDenied
     coupon_payment_version = get_object_or_404(CouponPaymentVersion, id=version_id)
 
