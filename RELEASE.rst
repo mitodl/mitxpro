@@ -1,6 +1,32 @@
 Release Notes
 =============
 
+Version 0.161.0
+---------------
+
+- fix: html templates script issue (#3205)
+- Revert "fix(deps): update dependency sass to ~1.79.0" (#3203)
+- fix: coupon code download view permissions (#3201)
+- chore(deps): update actions/setup-python action to v5 (#3197)
+- feat: add coupons deactivate form (#3160)
+- fix(deps): update dependency unzipper to ^0.12.0
+- fix(deps): update dependency sass to ~1.79.0
+- fix(deps): update dependency boto3 to v1.35.39
+- fix: docker compose version warning and remove travis (#3189)
+- deps: remove drf-flex-fields (#3192)
+- fix(deps): update dependency user-agents to v2.2.0 (#3190)
+- chore(deps): lock file maintenance (#3188)
+- fix(deps): update dependency uwsgi to v2.0.27 (#3185)
+- chore(deps): update node.js to v20.18.0 (#3186)
+- fix(deps): update dependency xmltodict to ^0.14.0 (#3187)
+- fix(deps): update dependency boto3 to v1.35.37 (#3184)
+- chore(deps): update nginx docker tag to v1.27.2
+- fix(deps): update dependency @sentry/browser to v7 [security] (#3173)
+- chore(deps): update akhileshns/heroku-deploy digest to e86b991 (#3181)
+- fix(deps): update dependency django-hijack to v3.6.1 (#3180)
+- fix(deps): update dependency boto3 to v1.35.36
+- [pre-commit.ci] pre-commit autoupdate (#3178)
+
 Version 0.160.6 (Released October 10, 2024)
 ---------------
 
