@@ -10,7 +10,9 @@
 
 {% block scripts %}
 {{ block.super }}
+{% if user_permissions %}
 <script>
   var USER_PERMISSIONS = {{user_permissions|safe}};
 </script>
+{% endif %}
 {% endblock %}
