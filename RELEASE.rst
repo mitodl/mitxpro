@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.161.0
+Version 0.161.0 (Released October 15, 2024)
 ---------------
 
 - fix: html templates script issue (#3205)
