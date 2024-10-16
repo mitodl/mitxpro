@@ -15,6 +15,7 @@ from rest_framework import status
 from cms.factories import (
     CoursePageFactory,
     ExternalCoursePageFactory,
+    ExternalProgramPageFactory,
     ProgramPageFactory,
 )
 from courses.api import UserEnrollments
@@ -40,6 +41,8 @@ from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
+
+now = now_in_utc()
 
 
 @pytest.fixture
@@ -70,6 +73,7 @@ def test_get_programs(user_drf_client, programs):
     )  # create live programs with draft pages
     ProgramFactory.create(live=False)  # draft program
     ProgramFactory.create(page=None)  # live program, no CMS page
+    [CourseRunFactory.create(course__program=program) for program in programs]
     resp = user_drf_client.get(reverse("programs_api-list"))
     programs_data = sorted(resp.json(), key=op.itemgetter("id"))
     assert len(programs_data) == len(programs)
@@ -77,9 +81,156 @@ def test_get_programs(user_drf_client, programs):
         assert_drf_json_equal(program_data, ProgramSerializer(program).data)
 
 
+@pytest.mark.parametrize("is_external", [True, False])
+@pytest.mark.parametrize("is_program_live", [True, False])
+@pytest.mark.parametrize("has_program_page", [True, False])
+@pytest.mark.parametrize("is_program_page_live", [True, False])
+@pytest.mark.parametrize("has_course", [True, False])
+@pytest.mark.parametrize("has_course_run", [True, False])
+@pytest.mark.parametrize(
+    "start_date",
+    [None, now + timedelta(days=1), now - timedelta(days=1)],
+)
+@pytest.mark.parametrize(
+    "enrollment_end_date",
+    [None, now + timedelta(days=1), now - timedelta(days=1)],
+)
+@pytest.mark.parametrize("has_product", [True, False])
+def test_get_programs_api(  # noqa: PLR0913
+    user_drf_client,
+    is_external,
+    is_program_live,
+    has_program_page,
+    is_program_page_live,
+    has_course,
+    has_course_run,
+    start_date,
+    enrollment_end_date,
+    has_product,
+):
+    """
+    Test that sort_catalog_pages removes program/course/external course pages that do not have a future start date
+    or enrollment end date, and returns appropriately sorted lists of pages
+    """
+    program = ProgramFactory.create(live=is_program_live, page=None)
+    if has_product:
+        ProductVersionFactory.create(product=ProductFactory(content_object=program))
+
+    if has_program_page:
+        (
+            ExternalProgramPageFactory.create(
+                program=program, live=is_program_page_live
+            )
+            if is_external
+            else ProgramPageFactory.create(program=program, live=is_program_page_live)
+        )
+
+    if has_course:
+        course = CourseFactory.create(program=program, is_external=is_external)
+
+        if has_course_run:
+            CourseRunFactory.create(
+                course=course,
+                start_date=start_date,
+                enrollment_end=enrollment_end_date,
+            )
+    resp = user_drf_client.get(reverse("programs_api-list"))
+    programs_data = sorted(resp.json(), key=op.itemgetter("id"))
+
+    if (
+        is_program_live
+        and has_program_page
+        and is_program_page_live
+        and has_course
+        and has_course_run
+        and has_product
+        and (
+            (start_date is not None and start_date > now)
+            or (enrollment_end_date is not None and enrollment_end_date > now)
+        )
+    ):
+        assert len(programs_data) == 1
+        assert_drf_json_equal(programs_data[0], ProgramSerializer(program).data)
+    else:
+        assert len(programs_data) == 0
+
+
+@pytest.mark.parametrize("is_external", [True, False])
+@pytest.mark.parametrize("is_course_live", [True, False])
+@pytest.mark.parametrize("has_course_page", [True, False])
+@pytest.mark.parametrize("is_course_page_live", [True, False])
+@pytest.mark.parametrize("has_course_run", [True, False])
+@pytest.mark.parametrize(
+    "start_date",
+    [None, now + timedelta(days=1), now - timedelta(days=1)],
+)
+@pytest.mark.parametrize(
+    "enrollment_end_date",
+    [None, now + timedelta(days=1), now - timedelta(days=1)],
+)
+@pytest.mark.parametrize("has_product", [True, False])
+def test_get_courses_api(  # noqa: PLR0913
+    user_drf_client,
+    mock_context,
+    is_external,
+    is_course_live,
+    has_course_page,
+    is_course_page_live,
+    has_course_run,
+    start_date,
+    enrollment_end_date,
+    has_product,
+):
+    """
+    Test that sort_catalog_pages removes program/course/external course pages that do not have a future start date
+    or enrollment end date, and returns appropriately sorted lists of pages
+    """
+    course = CourseFactory.create(live=is_course_live, page=None)
+
+    if has_course_page:
+        (
+            ExternalCoursePageFactory.create(course=course, live=is_course_page_live)
+            if is_external
+            else CoursePageFactory.create(course=course, live=is_course_page_live)
+        )
+    if has_course_run:
+        course_run = CourseRunFactory.create(
+            course=course,
+            start_date=start_date,
+            enrollment_end=enrollment_end_date,
+        )
+        if has_product:
+            ProductVersionFactory.create(
+                product=ProductFactory(content_object=course_run)
+            )
+
+    resp = user_drf_client.get(reverse("courses_api-list"))
+    courses_data = resp.json()
+
+    if (
+        is_course_live
+        and has_course_page
+        and is_course_page_live
+        and has_course_run
+        and has_product
+        and (
+            (start_date is not None and start_date > now)
+            or (enrollment_end_date is not None and enrollment_end_date > now)
+        )
+    ):
+        assert len(courses_data) == 1
+        assert_drf_json_equal(
+            courses_data[0],
+            CourseSerializer(instance=course, context=mock_context).data,
+        )
+    else:
+        assert len(courses_data) == 0
+
+
 def test_get_program(user_drf_client, programs):
     """Test the view that handles a request for single Program"""
     program = programs[0]
+    CourseRunFactory.create(course__program=program)
     resp = user_drf_client.get(
         reverse("programs_api-detail", kwargs={"pk": program.id})
     )
@@ -123,14 +274,17 @@ def test_get_courses(user_drf_client, courses, mock_context, is_anonymous):
     )  # create live courses with draft pages
     CourseFactory.create(page=None)  # live course with no cms page
     CourseFactory.create(live=False)  # Draft course
+    for course in courses:
+        course_run = CourseRunFactory.create(course=course)
+        ProductVersionFactory.create(product=ProductFactory(content_object=course_run))
     if is_anonymous:
         user_drf_client.logout()
     resp = user_drf_client.get(reverse("courses_api-list"))
     courses_data = resp.json()
     assert len(courses_data) == len(courses)
     for course, course_data in zip(courses, courses_data):
-        assert (
-            course_data == CourseSerializer(instance=course, context=mock_context).data
+        assert_drf_json_equal(
+            course_data, CourseSerializer(instance=course, context=mock_context).data
         )
 
 
@@ -140,9 +294,14 @@ def test_get_course(user_drf_client, courses, mock_context, is_anonymous):
     if is_anonymous:
         user_drf_client.logout()
     course = courses[0]
+    course_run = CourseRunFactory.create(course=course)
+    ProductVersionFactory.create(product=ProductFactory(content_object=course_run))
+
     resp = user_drf_client.get(reverse("courses_api-detail", kwargs={"pk": course.id}))
     course_data = resp.json()
-    assert course_data == CourseSerializer(instance=course, context=mock_context).data
+    assert_drf_json_equal(
+        course_data, CourseSerializer(instance=course, context=mock_context).data
+    )
 
 
 def test_create_course(user_drf_client, courses, mock_context):
@@ -304,7 +463,6 @@ def test_program_view(  # noqa: PLR0913
     program = ProgramFactory.create(live=True, page__parent=home_page)
 
     if has_unexpired_run:
-        now = now_in_utc()
         CourseRunFactory.create_batch(
             3,
             course=CourseFactory.create(
@@ -396,8 +554,9 @@ def test_user_enrollments_view(mocker, client, user):
 
 @pytest.mark.parametrize("live", [True, False])
 def test_programs_not_live(client, live):
-    """Programs should be filtered out if live=False"""
+    """Programs should be filtered out if live=False or there is no course associated with enrollable runs"""
     program = ProgramFactory.create(live=live)
+    CourseRunFactory.create(course__program=program)
     ProductVersionFactory.create(product=ProductFactory(content_object=program))
     resp = client.get(reverse("programs_api-list"))
     assert resp.status_code == status.HTTP_200_OK
@@ -410,21 +569,26 @@ def test_programs_not_live(client, live):
 def test_courses_not_live_in_programs_api(client, live):
     """Courses should be filtered out of the programs API if not live"""
     course = CourseFactory.create(live=live, program__live=True)
+    CourseRunFactory.create(course=course)
     ProductVersionFactory.create(product=ProductFactory(content_object=course.program))
     resp = client.get(reverse("programs_api-list"))
     assert resp.status_code == status.HTTP_200_OK
     assert_drf_json_equal(
-        resp.json()[0]["courses"], [CourseSerializer(course).data] if live else []
+        resp.json(), [ProgramSerializer(course.program).data] if live else []
     )
 
 
 @pytest.mark.parametrize("live", [True, False])
 def test_courses_not_live_in_courses_api(client, live):
     """Courses should be filtered out of the courses API if not live"""
-    course = CourseFactory.create(live=live)
+    course_run = CourseRunFactory.create(course__live=live)
+    ProductVersionFactory.create(product=ProductFactory(content_object=course_run))
+
     resp = client.get(reverse("courses_api-list"))
     assert resp.status_code == status.HTTP_200_OK
-    assert_drf_json_equal(resp.json(), [CourseSerializer(course).data] if live else [])
+    assert_drf_json_equal(
+        resp.json(), [CourseSerializer(course_run.course).data] if live else []
+    )
 
 
 @pytest.mark.parametrize("live", [True, False])
@@ -435,7 +599,8 @@ def test_course_runs_not_live_in_courses_api(client, live):
     resp = client.get(reverse("courses_api-list"))
     assert resp.status_code == status.HTTP_200_OK
     assert_drf_json_equal(
-        resp.json()[0]["courseruns"], [CourseRunSerializer(run).data] if live else []
+        resp.json()[0]["courseruns"] if live else resp.json(),
+        [CourseRunSerializer(run).data] if live else [],
     )
 
 
@@ -448,7 +613,7 @@ def test_course_runs_without_product_in_courses_api(client, has_product):
     resp = client.get(reverse("courses_api-list"))
     assert resp.status_code == status.HTTP_200_OK
     assert_drf_json_equal(
-        resp.json()[0]["courseruns"],
+        resp.json()[0]["courseruns"] if has_product else resp.json(),
         [CourseRunSerializer(run).data] if has_product else [],
     )
 
@@ -459,6 +624,7 @@ def test_program_without_product_in_programs_api(client, has_product):
     program = ProgramFactory.create(live=True)
     if has_product:
         ProductVersionFactory.create(product=ProductFactory(content_object=program))
+        CourseRunFactory.create(course__program=program)
     resp = client.get(reverse("programs_api-list"))
     assert resp.status_code == status.HTTP_200_OK
     assert_drf_json_equal(
@@ -545,7 +711,6 @@ def test_course_topics_api(client, django_assert_num_queries):
         parent=parent_topic_with_expired_courses
     )
 
-    now = now_in_utc()
     future_start_date = now + timedelta(days=2)
     future_end_date = now + timedelta(days=10)
     past_start_date = now - timedelta(days=10)

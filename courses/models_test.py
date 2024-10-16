@@ -96,29 +96,6 @@ def test_program_next_run_date():
     assert program.next_run_date == first_course_future_dates[0]
 
 
-def test_program_is_catalog_visible():
-    """
-    is_catalog_visible should return True if a program has any course run that has a start date or enrollment end
-    date in the future
-    """
-    program = ProgramFactory.create()
-    runs = CourseRunFactory.create_batch(
-        2, course__program=program, past_start=True, past_enrollment_end=True
-    )
-    assert program.is_catalog_visible is False
-
-    now = now_in_utc()
-    run = runs[0]
-    run.start_date = now + timedelta(hours=1)
-    run.save()
-    assert program.is_catalog_visible is True
-
-    run.start_date = now - timedelta(hours=1)
-    run.enrollment_end = now + timedelta(hours=1)
-    run.save()
-    assert program.is_catalog_visible is True
-
-
 def test_program_first_course_unexpired_runs():
     """
     first_course_unexpired_runs should return the unexpired course runs of the first course
@@ -522,29 +499,6 @@ def test_course_next_run_date():
     del course.next_run_date
 
     assert course.next_run_date == future_dates[0]
-
-
-def test_course_is_catalog_visible():
-    """
-    is_catalog_visible should return True if a course has any course run that has a start date or enrollment end
-    date in the future
-    """
-    course = CourseFactory.create()
-    runs = CourseRunFactory.create_batch(
-        2, course=course, past_start=True, past_enrollment_end=True
-    )
-    assert course.is_catalog_visible is False
-
-    now = now_in_utc()
-    run = runs[0]
-    run.start_date = now + timedelta(hours=1)
-    run.save()
-    assert course.is_catalog_visible is True
-
-    run.start_date = now - timedelta(hours=1)
-    run.enrollment_end = now + timedelta(hours=1)
-    run.save()
-    assert course.is_catalog_visible is True
 
 
 def test_course_page():

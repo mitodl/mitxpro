@@ -6,7 +6,6 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Q
 from requests.exceptions import HTTPError
 from rest_framework.status import HTTP_404_NOT_FOUND
 
@@ -20,7 +19,7 @@ from courses.models import (
     ProgramEnrollment,
 )
 from courseware.api import get_edx_api_course_detail_client
-from mitxpro.utils import has_equal_properties, now_in_utc
+from mitxpro.utils import has_equal_properties
 
 log = logging.getLogger(__name__)
 
@@ -320,27 +319,3 @@ def is_program_text_id(item_text_id):
         bool: True if the given id is a program id
     """
     return item_text_id.startswith(PROGRAM_TEXT_ID_PREFIX)
-
-
-def get_catalog_course_filter(relative_filter=""):
-    """
-    Generates course filter for the catalog visible course pages.
-    """
-    courseware_live_filter = {
-        f"{relative_filter}course__live": True,
-        f"{relative_filter}course__courseruns__live": True,
-        f"{relative_filter}live": True,
-    }
-    courserun_start_date_filter = {
-        f"{relative_filter}course__courseruns__start_date__isnull": False,
-        f"{relative_filter}course__courseruns__start_date__gt": now_in_utc(),
-    }
-    courserun_enrollment_end_filter = {
-        f"{relative_filter}course__courseruns__enrollment_end__isnull": False,
-        f"{relative_filter}course__courseruns__enrollment_end__gt": now_in_utc(),
-    }
-
-    return Q(
-        Q(**courseware_live_filter)
-        & Q(Q(**courserun_start_date_filter) | Q(**courserun_enrollment_end_filter))
-    )
