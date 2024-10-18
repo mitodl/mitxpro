@@ -37,12 +37,7 @@
       {{ courseware_page.duration }}
     </li>
     {% endif %}
-    {% if courseware_page.is_external_page and courseware_page.next_run_date %}
-    <li>
-      <strong>Next Start Date:</strong>
-      {{ courseware_page.next_run_date|date:"F j, Y" }}
-    </li>
-    {% elif courseware_page.product.next_run_date %}
+    {% if courseware_page.product.next_run_date %}
     <li>
       <strong>Next Start Date:</strong>
       {{ courseware_page.product.next_run_date|date:"F j, Y" }}
