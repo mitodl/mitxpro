@@ -23,6 +23,8 @@ declare type Settings = {
   enable_blog: boolean,
   enable_taxes_display: boolean,
   enable_enterprise: boolean,
+  posthog_api_token: ?string,
+  posthog_api_host: ?string
 };
 declare var SETTINGS: Settings;
 

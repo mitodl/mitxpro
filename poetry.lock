@@ -127,6 +127,17 @@ files = [
 pycodestyle = ">=2.12.0"
 
 [[package]]
+name = "backoff"
+version = "2.2.1"
+description = "Function decoration for backoff and retry"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8"},
+    {file = "backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba"},
+]
+
+[[package]]
 name = "beautifulsoup4"
 version = "4.8.2"
 description = "Screen-scraping library"
@@ -2300,6 +2311,33 @@ pytz = ">=2020.4"
 requests = ">=2.20.0"
 
 [[package]]
+name = "mitol-django-olposthog"
+version = "2024.5.14"
+description = "MIT Open Learning django app extensions for Posthog."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mitol-django-olposthog-2024.5.14.tar.gz", hash = "sha256:089b31d4606b1ef4484f999cf29229f8f0988df41531dd165a7706fc000f4140"},
+    {file = "mitol_django_olposthog-2024.5.14-py3-none-any.whl", hash = "sha256:e3637eb695816e17a8ff1af18c623a21866ecfe8733d9d4d73303ea3391023c1"},
+]
+
+[package.dependencies]
+django = ">=3.0"
+mitol-django-common = "*"
+posthog = ">=3.5.0"
+
+[[package]]
+name = "monotonic"
+version = "1.6"
+description = "An implementation of time.monotonic() for Python 2 & < 3.3"
+optional = false
+python-versions = "*"
+files = [
+    {file = "monotonic-1.6-py2.py3-none-any.whl", hash = "sha256:68687e19a14f11f26d140dd5c86f3dba4bf5df58003000ed467e0e2a69bca96c"},
+    {file = "monotonic-1.6.tar.gz", hash = "sha256:3a55207bcfed53ddd5c5bae174524062935efed17792e9de2ad0205ce9ad63f7"},
+]
+
+[[package]]
 name = "more-itertools"
 version = "10.5.0"
 description = "More routines for operating on iterables, beyond itertools"
@@ -2649,6 +2687,29 @@ files = [
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
+name = "posthog"
+version = "3.7.0"
+description = "Integrate PostHog into any python application."
+optional = false
+python-versions = "*"
+files = [
+    {file = "posthog-3.7.0-py2.py3-none-any.whl", hash = "sha256:3555161c3a9557b5666f96d8e1f17f410ea0f07db56e399e336a1656d4e5c722"},
+    {file = "posthog-3.7.0.tar.gz", hash = "sha256:b095d4354ba23f8b346ab5daed8ecfc5108772f922006982dfe8b2d29ebc6e0e"},
+]
+
+[package.dependencies]
+backoff = ">=1.10.0"
+monotonic = ">=1.5"
+python-dateutil = ">2.1"
+requests = ">=2.7,<3.0"
+six = ">=1.5"
+
+[package.extras]
+dev = ["black", "flake8", "flake8-print", "isort", "pre-commit"]
+sentry = ["django", "sentry-sdk"]
+test = ["coverage", "django", "flake8", "freezegun (==0.3.15)", "mock (>=2.0.0)", "pylint", "pytest", "pytest-timeout"]
 
 [[package]]
 name = "premailer"
@@ -4155,4 +4216,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "738b967428579e5338944baf0c57e13fad2592068069ba38bf0fd63be03a6e24"
+content-hash = "90fdc7bd85ab0ca37315b43647915975ae852c7d0f9015ac580231ef487d4623"

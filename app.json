@@ -500,6 +500,26 @@
     "PGBOUNCER_MIN_POOL_SIZE": {
       "value": "50"
     },
+    "POSTHOG_API_HOST": {
+      "description": "API host for PostHog",
+      "required": false
+    },
+    "POSTHOG_ENABLED": {
+      "description": "Whether PostHog is enabled",
+      "required": false
+    },
+    "POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS": {
+      "description": "Timeout(MS) for PostHog feature flag requests.",
+      "required": false
+    },
+    "POSTHOG_MAX_RETRIES": {
+      "description": "Number of times that requests to PostHog should be retried after failing.",
+      "required": false
+    },
+    "POSTHOG_PROJECT_API_KEY": {
+      "description": "API token to communicate with PostHog",
+      "required": false
+    },
     "RECAPTCHA_SECRET_KEY": {
       "description": "The ReCaptcha secret key",
       "required": false
