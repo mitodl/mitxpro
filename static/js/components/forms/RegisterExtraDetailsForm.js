@@ -22,7 +22,8 @@ const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
     onSubmit={onSubmit}
     validationSchema={profileValidation}
     initialValues={INITIAL_VALUES}
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form>
         <ProfileFields />
         <div className="row submit-row no-gutters justify-content-end">
@@ -36,7 +37,7 @@ const RegisterExtraDetailsForm = ({ onSubmit }: Props) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default RegisterExtraDetailsForm;
