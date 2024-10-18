@@ -19,6 +19,7 @@ import qs from "query-string";
 import * as R from "ramda";
 import moment from "moment";
 import { Link } from "react-router-dom";
+import posthog from "posthog-js";
 
 import type Moment from "moment";
 import type {
@@ -37,6 +38,26 @@ import {
   STATE_INVALID_LINK,
   STATE_EXISTING_ACCOUNT,
 } from "./auth";
+
+if (SETTINGS.posthog_api_host && SETTINGS.posthog_api_token) {
+  const environment = SETTINGS.environment;
+  if (environment === "dev") {
+    posthog.debug();
+  }
+  posthog.init(SETTINGS.posthog_api_token, {
+    api_host: SETTINGS.posthog_api_host,
+    autocapture: false,
+    capture_pageview: false,
+    capture_pageleave: false,
+    cross_subdomain_cookie: false,
+    persistence: "localStorage+cookie",
+    loaded: function (posthog) {
+      posthog.setPersonPropertiesForFlags({
+        environment: environment,
+      });
+    },
+  });
+}
 
 /**
  * Returns a promise which resolves after a number of milliseconds have elapsed

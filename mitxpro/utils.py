@@ -604,6 +604,8 @@ def get_js_settings(request: HttpRequest):
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "enable_taxes_display": display_taxes(request),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
+        "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
+        "posthog_api_host": settings.POSTHOG_API_HOST,
     }
 
 
