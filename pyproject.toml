@@ -42,6 +42,7 @@ mitol-django-digital-credentials = "2023.12.19"
 mitol-django-hubspot-api = { version = "2023.12.19", extras = [] }
 mitol-django-mail = "2023.12.19"
 mitol-django-oauth-toolkit-extensions = "2023.12.19.1"
+mitol-django-olposthog = "^2024.5.14"
 newrelic = "^8.4.0"
 pdftotext = "^2.1.1"
 psycopg2 = "2.9.9"

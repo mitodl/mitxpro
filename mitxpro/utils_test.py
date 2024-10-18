@@ -497,6 +497,8 @@ def test_get_js_settings(settings, rf, user):
         "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
+        "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
+        "posthog_api_host": settings.POSTHOG_API_HOST,
     }
 
 
