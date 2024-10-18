@@ -1,6 +1,6 @@
 """Course views verson 1"""
 
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -10,11 +10,9 @@ from rest_framework.views import APIView
 
 from courses.api import get_user_enrollments
 from courses.models import (
-    Course,
     CourseRun,
     CourseRunCertificate,
     CourseTopic,
-    Program,
     ProgramCertificate,
 )
 from courses.serializers import (
@@ -33,52 +31,24 @@ from ecommerce.models import Product
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Programs"""
 
-    products_prefetch = Prefetch("products", Product.objects.with_ordered_versions())
-    course_runs_prefetch = Prefetch(
-        "courseruns", CourseRun.objects.prefetch_related(products_prefetch)
-    )
-    courses_prefetch = Prefetch(
-        "courses",
-        Course.objects.select_related(
-            "coursepage", "externalcoursepage", "platform"
-        ).prefetch_related(
-            course_runs_prefetch, "coursepage__topics", "externalcoursepage__topics"
-        ),
-    )
-
     permission_classes = []
     serializer_class = ProgramSerializer
-    queryset = (
-        Program.objects.filter(live=True)
-        .exclude(products=None)
-        .select_related("programpage", "externalprogrampage", "platform")
-        .prefetch_related(courses_prefetch, products_prefetch)
-        .filter(Q(programpage__live=True) | Q(externalprogrampage__live=True))
-    )
+
+    from courses.data_provider import ProgramProvider
+
+    queryset = ProgramProvider().get_data()
 
 
 class CourseViewSet(viewsets.ReadOnlyModelViewSet):
     """API view set for Courses"""
 
-    products_prefetch = Prefetch("products", Product.objects.with_ordered_versions())
-    course_runs_prefetch = Prefetch(
-        "courseruns", CourseRun.objects.prefetch_related(products_prefetch)
-    )
-
     permission_classes = []
     serializer_class = CourseSerializer
 
     def get_queryset(self):
-        queryset = (
-            Course.objects.filter(live=True)
-            .select_related("coursepage", "externalcoursepage", "platform")
-            .prefetch_related(
-                "coursepage__topics",
-                "externalcoursepage__topics",
-                self.course_runs_prefetch,
-            )
-            .filter(Q(coursepage__live=True) | Q(externalcoursepage__live=True))
-        )
+        from courses.data_provider import CourseProvider
+
+        queryset = CourseProvider().get_data()
 
         if self.request.user.is_authenticated:
             enrolled_courseruns_prefetch = Prefetch(
@@ -90,7 +60,7 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
             )
             queryset = queryset.prefetch_related(enrolled_courseruns_prefetch)
 
-        return queryset
+        return queryset.distinct()
 
 
 class CourseRunViewSet(viewsets.ReadOnlyModelViewSet):

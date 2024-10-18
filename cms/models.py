@@ -39,12 +39,14 @@ from wagtail.documents.models import Document
 from wagtail.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.images.models import Image
-from wagtail.models import Orderable, Page, PageManager, PageQuerySet
+from wagtail.models import Orderable, Page
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 
 from blog.api import fetch_blog
-from cms.api import filter_and_sort_catalog_pages
+from cms.api import (
+    sort_catalog_pages,
+)
 from cms.blocks import (
     BannerHeadingBlock,
     CourseRunCertificateOverrides,
@@ -515,65 +517,31 @@ class CatalogPage(Page):
 
         # Best Match is the default sorting.
         sort_by = request.GET.get("sort-by", CatalogSorting.BEST_MATCH.sorting_value)
+
         try:
             CatalogSorting[sort_by.upper()]
         except KeyError:
             sort_by = CatalogSorting.BEST_MATCH.sorting_value
 
-        program_page_qset = (
-            ProgramPage.objects.live()
-            .filter(program__live=True)
-            .order_by("id")
-            .select_related("program")
-            .prefetch_related(
-                Prefetch(
-                    "program__courses",
-                    Course.objects.order_by("position_in_program").select_related(
-                        "coursepage"
-                    ),
-                ),
-            )
-        )
-        external_program_qset = ExternalProgramPage.objects.live().order_by("title")
+        # Inline because of circular import issue
+        from courses.data_provider import CoursePageProvider, ProgramPageProvider
 
-        course_page_qset = (
-            CoursePage.objects.live()
-            .filter(course__live=True)
-            .order_by("id")
-            .select_related("course")
-        )
-        external_course_qset = (
-            ExternalCoursePage.objects.live().select_related("course").order_by("title")
-        )
-
-        if topic_filter != ALL_TOPICS:
-            program_page_qset = program_page_qset.related_pages(topic_filter)
-            external_program_qset = external_program_qset.related_pages(topic_filter)
-
-            course_page_qset = course_page_qset.related_pages(topic_filter)
-            external_course_qset = external_course_qset.related_pages(topic_filter)
-
-        program_page_qset = list(program_page_qset)
-        external_program_qset = list(external_program_qset)
-        course_page_qset = list(course_page_qset)
-        external_course_qset = list(external_course_qset)
+        filter_topic = None if topic_filter == ALL_TOPICS else topic_filter
+        program_page_qset = ProgramPageProvider().get_data(filter_topic=filter_topic)
+        course_page_qset = CoursePageProvider().get_data(filter_topic=filter_topic)
 
         # prefetch thumbnail images for all the pages in one query
         prefetch_related_objects(
             [
                 *program_page_qset,
                 *course_page_qset,
-                *external_course_qset,
-                *external_program_qset,
             ],
             "thumbnail_image",
         )
 
-        programs = [
-            page.program for page in [*program_page_qset, *external_program_qset]
-        ]
+        programs = [page.program for page in [*program_page_qset]]
         courses = [
-            *[page.course for page in [*course_page_qset, *external_course_qset]],
+            *[page.course for page in [*course_page_qset]],
             *[course for program in programs for course in program.courses.all()],
         ]
 
@@ -604,11 +572,9 @@ class CatalogPage(Page):
             None,
         )
 
-        all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
+        all_pages, program_pages, course_pages = sort_catalog_pages(
             program_page_qset,
             course_page_qset,
-            external_course_qset,
-            external_program_qset,
             sort_by=sort_by,
         )
         return dict(
@@ -1186,37 +1152,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return self._get_child_page_of_type(NewsAndEventsPage)
 
 
-class ProgramProductPageQuerySet(PageQuerySet):
-    """QuerySet for ProgramProductPage"""
-
-    def related_pages(self, topic_name):
-        """
-        ProgramProductPage QuerySet filter for topics
-        """
-        return self.filter(
-            Q(program__courses__coursepage__topics__name=topic_name)
-            | Q(program__courses__coursepage__topics__parent__name=topic_name)
-        ).distinct()
-
-
-ProgramProductPageManager = PageManager.from_queryset(ProgramProductPageQuerySet)
-
-
-class CourseProductPageQuerySet(PageQuerySet):
-    """QuerySet for CourseProductPage"""
-
-    def related_pages(self, topic_name):
-        """
-        CourseProductPage QuerySet filter for topics
-        """
-        return self.filter(
-            Q(topics__name=topic_name) | Q(topics__parent__name=topic_name)
-        ).distinct()
-
-
-CourseProductPageManager = PageManager.from_queryset(CourseProductPageQuerySet)
-
-
 class ProgramProductPage(ProductPage):
     """
     Abstract Product page for Programs
@@ -1225,7 +1160,6 @@ class ProgramProductPage(ProductPage):
     class Meta:
         abstract = True
 
-    objects = ProgramProductPageManager()
     parent_page_types = ["ProgramIndexPage"]
 
     content_panels = [
@@ -1355,7 +1289,6 @@ class CourseProductPage(ProductPage):
     class Meta:
         abstract = True
 
-    objects = CourseProductPageManager()
     course = models.OneToOneField(
         "courses.Course",
         null=True,
@@ -1477,9 +1410,9 @@ class CoursePage(CourseProductPage):
             **super().get_context(request, **kwargs),
             **get_base_context(request),
             "product_id": product.id if product else None,
-            "checkout_url": f"{reverse('checkout-page')}?product={product.id}"
-            if product
-            else None,
+            "checkout_url": (
+                f"{reverse('checkout-page')}?product={product.id}" if product else None
+            ),
             "enrolled": enrolled,
             "user": request.user,
         }
@@ -2254,12 +2187,16 @@ class CertificatePage(CourseProgramChildPage):
         if request.is_preview:
             preview_context = {
                 "learner_name": "Anthony M. Stark",
-                "start_date": self.parent.product.first_unexpired_run.start_date
-                if self.parent.product.first_unexpired_run
-                else datetime.now(),  # noqa: DTZ005
-                "end_date": self.parent.product.first_unexpired_run.end_date
-                if self.parent.product.first_unexpired_run
-                else datetime.now() + timedelta(days=45),  # noqa: DTZ005
+                "start_date": (
+                    self.parent.product.first_unexpired_run.start_date
+                    if self.parent.product.first_unexpired_run
+                    else datetime.now(tz=datetime.UTC)
+                ),
+                "end_date": (
+                    self.parent.product.first_unexpired_run.end_date
+                    if self.parent.product.first_unexpired_run
+                    else datetime.now(tz=datetime.UTC) + timedelta(days=45)
+                ),
                 "CEUs": self.CEUs,
             }
         elif self.certificate:
