@@ -343,7 +343,7 @@ def defer_enrollment(
                 ENROLL_CHANGE_STATUS_DEFERRED,
                 keep_failed_enrollments=keep_failed_enrollments,
             )
-    except EdxEnrollmentCreateError:  # noqa: TRY302
+    except EdxEnrollmentCreateError:  # noqa: TRY203
         raise
     return from_enrollment, first_or_none(to_enrollments)
 
