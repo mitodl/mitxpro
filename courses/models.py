@@ -109,14 +109,15 @@ class CourseTopicQuerySet(models.QuerySet):
         """
         Returns parent course topics with annotated course counts including the child topic course counts as well.
         """
-        from courses.utils import get_catalog_course_filter
+        from courses.data_provider import DataProvider
 
-        internal_course_visible_filter = get_catalog_course_filter(
-            relative_filter="coursepage__"
+        internal_course_visible_filter = DataProvider().get_courseware_filter(
+            relative_filter="coursepage__course__"
         )
-        external_course_visible_filter = get_catalog_course_filter(
-            relative_filter="externalcoursepage__"
+        external_course_visible_filter = DataProvider().get_courseware_filter(
+            relative_filter="externalcoursepage__course__"
         )
+
         topics_queryset = (
             self.parent_topics()
             .annotate(
@@ -278,12 +279,6 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         )
         if first_course:  # noqa: RET503
             return first_course.next_run_date
-
-    @property
-    def is_catalog_visible(self):
-        """Returns True if this program should be shown on in the catalog"""
-        # NOTE: This is implemented with courses.all() to allow for prefetch_related optimization.
-        return any(course.is_catalog_visible for course in self.courses.all())
 
     @property
     def current_price(self):
@@ -477,21 +472,6 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 and course_run.start_date > now
             ),
             default=None,
-        )
-
-    @property
-    def is_catalog_visible(self):
-        """Returns True if this course should be shown on in the catalog"""
-        now = now_in_utc()
-        # NOTE: This is implemented with courseruns.all() to allow for prefetch_related optimization.
-        return any(
-            course_run
-            for course_run in self.courseruns.all()
-            if course_run.live
-            and (
-                (course_run.start_date and course_run.start_date > now)
-                or (course_run.enrollment_end and course_run.enrollment_end > now)
-            )
         )
 
     @property
