@@ -1174,11 +1174,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return isinstance(self, (ProgramPage, ExternalProgramPage))  # noqa: UP038
 
     @property
-    def is_external_page(self):
-        """Checks whether the page in question is for an external course/program page or not."""
-        return self.is_external_program_page or self.is_external_course_page
-
-    @property
     def news_and_events(self):
         """
         Gets the news and events section subpage
