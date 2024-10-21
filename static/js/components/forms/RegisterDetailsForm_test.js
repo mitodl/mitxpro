@@ -130,7 +130,7 @@ describe("RegisterDetailsForm", () => {
       assert.isTrue(postalCode.exists());
       postalCode.simulate("change", {
         persist: () => {},
-        target: { name: "legal_address.postalCode", value: "" },
+        target: { name: "legal_address.postal_code", value: "wrong_postal" },
       });
       postalCode.simulate("blur");
       await wait();

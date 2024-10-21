@@ -48,9 +48,11 @@ describe("CouponForm", () => {
 
   it("renders the form", () => {
     const wrapper = renderForm();
+    // console.log(wrapper.html())
     const form = wrapper.find("Formik");
     assert.ok(wrapper.find(".picky").exists());
-    assert.ok(wrapper.find("DayPickerInput").at(1).exists);
+    assert.ok(wrapper.find("DayPickerInput").at(1).exists());
+    // console.log(form.html())
     assert.ok(findFormikFieldByName(form, "product_type").exists());
     assert.ok(findFormikFieldByName(form, "coupon_type").exists());
     assert.ok(findFormikFieldByName(form, "is_global").exists());
@@ -132,14 +134,17 @@ describe("CouponForm", () => {
       value,
     )} to date string ${JSON.stringify(formattedDate)}`, async () => {
       const wrapper = renderForm();
-      const formik = wrapper.find("Formik").instance();
       const input = wrapper.find("DayPickerInput").at(idx).find("input");
       input.simulate("click");
       input.simulate("change", { persist: () => {}, target: { name, value } });
       input.simulate("blur");
       await wait();
       wrapper.update();
-      assert.equal(formik.state.values[name].toISOString(), formattedDate);
+      const dayPickerInput = wrapper.find(`DayPickerInput[name="${name}"]`);
+      assert.isTrue(dayPickerInput.exists());
+      const fieldValue = new Date(dayPickerInput.find("input").props().value);
+      dayPickerInput.props().onDayChange(fieldValue);
+      assert.equal(fieldValue.toISOString(), formattedDate);
     });
   });
 
@@ -154,9 +159,9 @@ describe("CouponForm", () => {
       errorMessage,
     )} for coupons`, async () => {
       const wrapper = renderForm();
-      const formik = wrapper.find("Formik").instance();
-      formik.setFieldValue("products", value);
-      formik.setFieldTouched("products");
+      const productField = wrapper.find('Picky2[name="products"]');
+      assert.isTrue(productField.exists());
+      productField.props().onChange(value);
       await wait();
       wrapper.update();
       assert.deepEqual(

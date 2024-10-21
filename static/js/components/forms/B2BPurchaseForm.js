@@ -166,7 +166,7 @@ class B2BPurchaseForm extends React.Component<Props> {
                 setFieldTouched={setFieldTouched}
                 name="product"
               />
-              <ErrorMessage name="product" render={errorMessageRenderer} />
+              <ErrorMessage name="product">{errorMessageRenderer}</ErrorMessage>
             </label>
 
             <label htmlFor="num_seats">
@@ -174,7 +174,9 @@ class B2BPurchaseForm extends React.Component<Props> {
                 *Number of enrollment codes to purchase:
               </span>
               <Field type="text" name="num_seats" className="num-seats" />
-              <ErrorMessage name="num_seats" render={errorMessageRenderer} />
+              <ErrorMessage name="num_seats">
+                {errorMessageRenderer}
+              </ErrorMessage>
             </label>
 
             <label htmlFor="email">
@@ -188,7 +190,7 @@ class B2BPurchaseForm extends React.Component<Props> {
               <span className="explanation">
                 * We will email the enrollment codes to this address.
               </span>
-              <ErrorMessage name="email" render={errorMessageRenderer} />
+              <ErrorMessage name="email">{errorMessageRenderer}</ErrorMessage>
             </label>
 
             {contractNumber && (
@@ -200,10 +202,9 @@ class B2BPurchaseForm extends React.Component<Props> {
                   readOnly={true}
                   value={contractNumber}
                 />
-                <ErrorMessage
-                  name="contract_number"
-                  render={errorMessageRenderer}
-                />
+                <ErrorMessage name="contract_number">
+                  {errorMessageRenderer}
+                </ErrorMessage>
               </label>
             )}
 
@@ -222,7 +223,7 @@ class B2BPurchaseForm extends React.Component<Props> {
                   Apply
                 </button>
               </div>
-              <ErrorMessage name="coupon" render={errorMessageRenderer} />
+              <ErrorMessage name="coupon">{errorMessageRenderer}</ErrorMessage>
             </label>
           </div>
           <div className="col-lg-3" />
@@ -271,9 +272,10 @@ class B2BPurchaseForm extends React.Component<Props> {
         }}
         validationSchema={emailValidation}
         validate={validate}
-        render={this.renderForm}
         ref={this.formikRef}
-      />
+      >
+        {this.renderForm}
+      </Formik>
     );
   }
 }
