@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.161.1
+---------------
+
+- refactor: remove extra condition on Catalog card Next Run Date (#3208)
+- chore(deps): update redis docker tag to v7
+
 Version 0.161.0 (Released October 15, 2024)
 ---------------
 
