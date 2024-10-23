@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.161.1
+Version 0.161.1 (Released October 23, 2024)
 ---------------
 
 - refactor: remove extra condition on Catalog card Next Run Date (#3208)
