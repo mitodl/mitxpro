@@ -292,7 +292,7 @@ def test_payload_coupons():
     line1 = LineFactory.create()
     line2 = LineFactory.create(
         order=line1.order,
-        product_version__product__content_object=CourseFactory.create(),
+        product_version__product__content_object=CourseRunFactory.create(),
     )
     order = line1.order
     username = "username"
@@ -820,14 +820,11 @@ def test_get_product_courses():
     Verify that the correct list of courses for a product is returned
     """
     program = ProgramFactory.create()
-    courses = CourseFactory.create_batch(5, program=program)
     courserun_product = ProductFactory.create(content_object=CourseRunFactory.create())
-    course_product = ProductFactory.create(content_object=courses[0])
     program_product = ProductFactory.create(content_object=program)
     assert get_product_courses(courserun_product) == [
         courserun_product.content_object.course
     ]
-    assert get_product_courses(course_product) == [course_product.content_object]
     assert list(get_product_courses(program_product)) == list(
         program_product.content_object.courses.all().order_by("position_in_program")
     )
