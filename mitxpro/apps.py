@@ -12,5 +12,7 @@ class RootConfig(AppConfig):
 
     def ready(self):
         from mitol.common import envs
+        from mitol.olposthog.features import configure
 
         envs.validate()
+        configure()

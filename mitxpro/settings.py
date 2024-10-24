@@ -203,6 +203,7 @@ INSTALLED_APPS = (
     "mitol.mail.apps.MailApp",
     "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
     "mitol.authentication.apps.TransitionalAuthenticationApp",
+    "mitol.olposthog.apps.OlPosthog",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
@@ -991,6 +992,10 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
     },
+    "durable": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "durable_cache",
+    },
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -1268,6 +1273,37 @@ VOUCHER_INTERNATIONAL_COURSE_NUMBER_KEY = get_string(
 
 VOUCHER_COMPANY_ID = get_int(
     name="VOUCHER_COMPANY_ID", default="1", description="Company ID for vouchers"
+)
+
+# PostHog related settings
+
+POSTHOG_ENABLED = get_bool(
+    name="POSTHOG_ENABLED",
+    default=False,
+    description="Whether PostHog is enabled",
+)
+
+POSTHOG_PROJECT_API_KEY = get_string(
+    name="POSTHOG_PROJECT_API_KEY",
+    default="",
+    description="API token to communicate with PostHog",
+)
+
+POSTHOG_API_HOST = get_string(
+    name="POSTHOG_API_HOST",
+    default="",
+    description="API host for PostHog",
+)
+POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS = get_int(
+    name="POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS",
+    default=3000,
+    description="Timeout(MS) for PostHog feature flag requests.",
+)
+
+POSTHOG_MAX_RETRIES = get_int(
+    name="POSTHOG_MAX_RETRIES",
+    default=3,
+    description="Number of times that requests to PostHog should be retried after failing.",
 )
 
 # Hubspot sync settings
