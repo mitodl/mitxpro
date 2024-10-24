@@ -37,6 +37,13 @@ from mitxpro.utils import first_or_none, serialize_model_object
 log = logging.getLogger()
 
 
+def get_sellable_content_objects():
+    """Return a list of objects that can be sold and associated to the products"""
+    return models.Q(app_label="courses", model="courserun") | models.Q(
+        app_label="courses", model="program"
+    )
+
+
 class Company(TimestampedModel):
     """
     A company that purchases bulk seats/coupons
@@ -85,6 +92,7 @@ class Product(TimestampedModel):
         on_delete=models.PROTECT,
         null=True,
         help_text="content_object is a link to either a CourseRun or a Program",
+        limit_choices_to=get_sellable_content_objects(),
     )
     object_id = models.PositiveIntegerField()
     is_active = models.BooleanField(
@@ -105,6 +113,18 @@ class Product(TimestampedModel):
 
     class Meta:
         unique_together = ("content_type", "object_id")
+
+    def save(self, *args, **kwargs):
+        # Inline import because of circular dependency
+        from courses.models import CourseRun, Program
+
+        if not isinstance(self.content_object, CourseRun) and not isinstance(
+            self.content_object, Program
+        ):
+            raise ValidationError(
+                "Content object is invalid. Allowed objects are CourseRun and Program."  # noqa: EM101
+            )
+        super().save(*args, **kwargs)
 
     @cached_property
     def ordered_versions(self):
@@ -227,13 +247,7 @@ class ProductVersion(TimestampedModel):
         indexes = [models.Index(fields=["created_on"])]
 
     def save(self, *args, **kwargs):
-        try:
-            self.text_id = getattr(self.product.content_object, "text_id")  # noqa: B009
-        except AttributeError:
-            log.error(  # noqa: TRY400
-                "The content object for this ProductVersion (%s) does not have a `text_id` property",
-                str(self.id),
-            )
+        self.text_id = getattr(self.product.content_object, "text_id")  # noqa: B009
         if not self.description:
             raise ValidationError("Description is a required field.")  # noqa: EM101
         super().save(*args, **kwargs)
