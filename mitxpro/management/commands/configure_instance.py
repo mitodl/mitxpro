@@ -2,9 +2,10 @@
 Meta-command to help set up a freshly configured MITxPro instance.
 
 Running this will perform the following functions:
-- Configures a superuser account.
+- Configures a superuser account
 - Creates the OAuth2 application record for edX (optionally with an existing
-  client ID and secret).
+  client ID and secret)
+- Create seed data by using seed_data management command
 
 If the --tutor/-T option is passed, the command will use the local.edly.io
 address for links to edX rather than edx.odl.local:18000.
@@ -13,6 +14,7 @@ This uses other management commands to complete these tasks. So, if you just
 want to run part of this, use one of these commands:
 - createsuperuser to create the super user
 - configure_wagtail for initial setup of Wagtail assets
+- seed_data to creating seed/dummy courses and programs
 
 There are some steps that this command won't do for you:
 - Completing the integration between MITxPro and devstack - there are still
@@ -159,6 +161,13 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Configuring Wagtail..."))
 
+        # Step 3: configure wagtail
         call_command("configure_wagtail")
+        self.stdout.write(self.style.SUCCESS("Wagtail Configured"))
+
+        self.stdout.write(self.style.SUCCESS("Creating Seed Data..."))
+        # Step 4: create example course(s) and program(s)
+        call_command("seed_data")
+        self.stdout.write(self.style.SUCCESS("Seed Data Created"))
 
         self.stdout.write(self.style.SUCCESS("Done!"))
