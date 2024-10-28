@@ -5,7 +5,7 @@ Running this will perform the following functions:
 - Configures a superuser account
 - Creates the OAuth2 application record for edX (optionally with an existing
   client ID and secret)
-- Create seed data and configure wagtail by using seed_data management command
+- Configure wagtail and seed data by using seed_data management command
 
 If the --tutor/-T option is passed, the command will use the local.edly.io
 address for links to edX rather than edx.odl.local:18000.
