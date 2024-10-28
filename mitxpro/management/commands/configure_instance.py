@@ -161,7 +161,7 @@ class Command(BaseCommand):
         # Step 3: create example course(s) and program(s)
         self.stdout.write(self.style.SUCCESS("Creating Seed Data..."))
         call_command("seed_data")
-        self.stdout.write(self.style.SUCCESS("Seed Data Created"))
+        self.stdout.write(self.style.SUCCESS("Seed Data Created\n\n"))
 
         # Print OAuth2 app details at the end of the file for user convenience
         # This allows the user to access their client ID and secret without needing to scroll up,
