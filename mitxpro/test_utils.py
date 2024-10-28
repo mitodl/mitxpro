@@ -165,7 +165,7 @@ def create_tempfile_csv(rows_iter):
     Returns:
         SimpleUploadedFile: A temporary CSV file with the given contents
     """
-    f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)
+    f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)  # noqa: SIM115
     with open(f.name, "w", encoding="utf8", newline="") as f:  # noqa: PTH123
         writer = csv.writer(f, delimiter=",")
         for row in rows_iter:
