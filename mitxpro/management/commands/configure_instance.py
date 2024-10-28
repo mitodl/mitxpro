@@ -108,7 +108,6 @@ class Command(BaseCommand):
             call_command("createsuperuser")
 
         # Step 2: create OAuth2 provider records
-        oauth2_app = None
         if kwargs["platform"] != "none":
             self.stdout.write(self.style.SUCCESS("Creating OAuth2 app..."))
 
@@ -167,10 +166,10 @@ class Command(BaseCommand):
         # Print OAuth2 app details at the end of the file for user convenience
         # This allows the user to access their client ID and secret without needing to scroll up,
         # making it easily accessible after the script completes execution.
-        if oauth2_app:
+        if kwargs["platform"] != "none":
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Created OAuth2 app {oauth2_app.name} for edX. Your client ID is \n{oauth2_app.client_id}\nand your secret is\n{oauth2_app.client_secret}\n\n"
+                    f"== edX OAuth2 Application Details ==\nClient ID: {oauth2_app.client_id}\nSecret: {oauth2_app.client_secret}\n\n"
                 )
             )
 
