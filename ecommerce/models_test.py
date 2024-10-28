@@ -27,7 +27,7 @@ from ecommerce.factories import (
     ProductFactory,
     ProductVersionFactory,
 )
-from ecommerce.models import Coupon, OrderAudit
+from ecommerce.models import Coupon, OrderAudit, Product
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
 
@@ -272,6 +272,7 @@ def test_product_version_save_empty_description():
         (CourseRunFactory, True),
         (ProgramRunFactory, False),
         (ProgramFactory, True),
+        (CourseRunFactory, True),  # noqa: PT014
     ],
 )
 def test_product_valid_content_object(factory, is_valid):
@@ -286,6 +287,27 @@ def test_product_valid_content_object(factory, is_valid):
         )
     else:
         ProductFactory.create(content_object=content_object)
+
+
+@pytest.mark.parametrize(
+    "object_id, is_valid",  # noqa: PT006
+    [
+        (1000, False),
+        (CourseRunFactory, True),
+    ],
+)
+def test_product_valid_object_id(object_id, is_valid):
+    """Test that product objects can only be associated with existing object Ids"""
+    if isinstance(object_id, CourseRunFactory):
+        object_id = CourseRunFactory.create().id
+    if not is_valid:
+        # The factories somehow won't let me create this one product with non-null object_id and and null content_object.
+        # So, I'm trying that case without factories.
+        with pytest.raises(ValidationError) as exc:
+            Product.objects.create(object_id=object_id)
+        assert exc.value.message == "Object Id is invalid."
+    else:
+        ProductFactory.create(object_id=object_id)
 
 
 @pytest.mark.parametrize(
