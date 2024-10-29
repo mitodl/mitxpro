@@ -6,7 +6,12 @@ from django.db.utils import IntegrityError
 
 from b2b_ecommerce.factories import B2BCouponFactory
 from courses.constants import CATALOG_COURSE_IMG_WAGTAIL_FILL
-from courses.factories import CourseFactory, CourseRunFactory, ProgramFactory
+from courses.factories import (
+    CourseFactory,
+    CourseRunFactory,
+    ProgramFactory,
+    ProgramRunFactory,
+)
 from ecommerce.api import (
     get_product_version_price_with_discount,
     get_product_version_price_with_discount_tax,
@@ -22,7 +27,7 @@ from ecommerce.factories import (
     ProductFactory,
     ProductVersionFactory,
 )
-from ecommerce.models import Coupon, OrderAudit
+from ecommerce.models import Coupon, OrderAudit, Product
 from mitxpro.utils import serialize_model_object
 from users.factories import UserFactory
 
@@ -249,28 +254,60 @@ def test_product_version_save_text_id_program():
     assert product_version.text_id == program.readable_id
 
 
-def test_product_version_save_text_id_badproduct(mocker):
-    """ProductVersion.text_id should None if ProductVersion.product is invalid"""
-    mock_log = mocker.patch("ecommerce.models.log")
-    product_version = ProductVersionFactory.create(
-        product=ProductFactory.create(content_object=LineFactory()), id=1
-    )
-    assert product_version.text_id is None
-    mock_log.error.assert_called_once_with(
-        "The content object for this ProductVersion (%s) does not have a `text_id` property",
-        str(product_version.id),
-    )
-
-
-def test_product_version_save_empty_description(mocker):
+def test_product_version_save_empty_description():
     """ProductVersion should raise ValidationError if ProductVersion.description is empty"""
     product_version = ProductVersionFactory.create(
-        product=ProductFactory.create(content_object=LineFactory())
+        product=ProductFactory.create(content_object=CourseRunFactory.create())
     )
     product_version.description = ""
     with pytest.raises(ValidationError) as exc:
         product_version.save()
     assert exc.value.message == "Description is a required field."
+
+
+@pytest.mark.parametrize(
+    "factory, is_valid",  # noqa: PT006
+    [
+        (CourseFactory, False),
+        (CourseRunFactory, True),
+        (ProgramRunFactory, False),
+        (ProgramFactory, True),
+        (CourseRunFactory, True),  # noqa: PT014
+    ],
+)
+def test_product_valid_content_object(factory, is_valid):
+    """Test that product objects can only be associated with CourseRun and Program"""
+    content_object = factory.create()
+    if not is_valid:
+        with pytest.raises(ValidationError) as exc:
+            ProductFactory.create(content_object=content_object)
+        assert (
+            exc.value.message
+            == "Content object is invalid. Allowed objects are CourseRun and Program."
+        )
+    else:
+        ProductFactory.create(content_object=content_object)
+
+
+@pytest.mark.parametrize(
+    "object_id, is_valid",  # noqa: PT006
+    [
+        (1000, False),
+        (CourseRunFactory, True),
+    ],
+)
+def test_product_valid_object_id(object_id, is_valid):
+    """Test that product objects can only be associated with existing object Ids"""
+    if isinstance(object_id, CourseRunFactory):
+        object_id = CourseRunFactory.create().id
+    if not is_valid:
+        # The factories somehow won't let me create this one product with non-null object_id and and null content_object.
+        # So, I'm trying that case without factories.
+        with pytest.raises(ValidationError) as exc:
+            Product.objects.create(object_id=object_id)
+        assert exc.value.message == "Object Id is invalid."
+    else:
+        ProductFactory.create(object_id=object_id)
 
 
 @pytest.mark.parametrize(
