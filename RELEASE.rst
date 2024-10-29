@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.162.0
+---------------
+
+- fix: allow only sellable product creation (#3211)
+- [pre-commit.ci] pre-commit autoupdate (#3213)
+- [pre-commit.ci] pre-commit autoupdate (#3209)
+- feat: add posthog integration (#3207)
+
 Version 0.161.1 (Released October 23, 2024)
 ---------------
 
