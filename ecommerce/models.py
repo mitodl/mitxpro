@@ -114,7 +114,7 @@ class Product(TimestampedModel):
         unique_together = ("content_type", "object_id")
 
     def clean(self):
-        """Filter that the content object being added in the product is correct. The only valid content objects are CourseRun and Program."""
+        """Validates that the content object added in the product is correct. The only valid content objects are CourseRun and Program."""
         super().clean()
         # Inline import because of circular dependency
         from courses.models import CourseRun, Program
