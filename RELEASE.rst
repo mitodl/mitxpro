@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.162.0
+Version 0.162.0 (Released October 31, 2024)
 ---------------
 
 - fix: allow only sellable product creation (#3211)
