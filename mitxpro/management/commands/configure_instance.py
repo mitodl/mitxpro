@@ -7,7 +7,7 @@ Running this will perform the following functions:
   client ID and secret)
 - Configure wagtail and seed data by using seed_data management command
 
-If the --tutor/-T option is passed, the command will use the local.edly.io
+If the --tutor/-T option is passed, the command will use the local.openedx.io
 address for links to edX rather than edx.odl.local:18000.
 
 This uses other management commands to complete these tasks. So, if you just
@@ -90,9 +90,9 @@ class Command(BaseCommand):
         """Returns a tuple of the edX host and port depending on what the user's passed in"""
 
         if kwargs["tutor"]:
-            return ("local.edly.io", "")
+            return ("local.openedx.io", "")
         elif kwargs["tutordev"]:
-            return ("local.edly.io:8000", ":8000")
+            return ("local.openedx.io:8000", ":8000")
         else:
             return ("edx.odl.local:18000", ":18000")
 
