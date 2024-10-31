@@ -15,19 +15,38 @@ from courses.models import CourseTopic
         ("test.csv", "Invalid file path"),
     ],
 )
-def test_command_args(file_path, error_message):
-    """Test that bulk load command throws an error when no file path is provided"""
+@pytest.mark.parametrize("operation_type", ["--create-topics", "--assign-topics"])
+def test_command_args_file(file_path, error_message, operation_type):
+    """Test that manage_topics command throws an error when no file path is provided"""
     with pytest.raises(CommandError) as command_error:
-        call_command("bulk_load_topics", f"--file={file_path}")
+        call_command("manage_topics", operation_type, f"--file={file_path}")
+
     assert error_message in str(command_error.value)
 
 
+def test_command_args_operation():
+    """Test that manage_topics command throws an error when no file path is provided"""
+    with pytest.raises(CommandError) as command_error:
+        call_command("manage_topics", "--file=test.csv")
+    assert (
+        "Please select the operation to perform. Options are --create-topics or --assign-topics"
+        in str(command_error.value)
+    )
+
+    with pytest.raises(CommandError) as command_error:
+        call_command(
+            "manage_topics", "--create-topics", "--assign-topics", "--file=test.csv"
+        )
+    assert "Only one operation is allowed." in str(command_error.value)
+
+
 @pytest.mark.django_db
-def test_command_valid_csv():
+def test_command_create_topics():
     """Test that command creates the topics properly when appropriate file is provided"""
     out = StringIO()
     call_command(
-        "bulk_load_topics",
+        "manage_topics",
+        "--create-topics",
         "--file=courses/management/commands/resources/test_topics_data.csv",
         stdout=out,
     )
@@ -47,7 +66,8 @@ def test_command_valid_csv():
     # The operation should be idempotent. Running the command again should not create any new topics and the messages should be inverted
     out.truncate()
     call_command(
-        "bulk_load_topics",
+        "manage_topics",
+        "--create-topics",
         "--file=courses/management/commands/resources/test_topics_data.csv",
         stdout=out,
     )
@@ -68,7 +88,8 @@ def test_command_valid_csv():
     subtopics.exclude(id__in=[existing_subtopic.id]).delete()
     # Run the command again and verify the stats
     call_command(
-        "bulk_load_topics",
+        "manage_topics",
+        "--create-topics",
         "--file=courses/management/commands/resources/test_topics_data.csv",
         stdout=out,
     )

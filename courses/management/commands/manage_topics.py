@@ -1,4 +1,4 @@
-"""Management command to bulk load topics from a CSV into the system
+"""Management command to create topics from a CSV into the system OR assign topics to courses
 
 Arguments:
 * --file <filename> - Path to the CSV file containing the topics OR the file containing the topics and courses titles (But only one at a time)
