@@ -173,15 +173,18 @@ def perform_assign_topics(file_path):
 
 
 class Command(BaseCommand):
-    """The command reads a list of topics/subtopics from a CSV file and loads them into system"""
+    """The command can performs two operations:
+    1. Reads a list of topics/subtopics from a CSV file and loads them into system
+    2. Read a list of courses and topics from a CSV and associates topics to courses
+    """
 
-    help = "Bulk loads the topics from a CSV file"
+    help = "Manage the topics through a CSV"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--file",
             type=str,
-            help="Path to the CSV file containing topics",
+            help="Path to the CSV file",
             required=True,
             dest="topics_file",
         )
