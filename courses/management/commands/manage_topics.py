@@ -130,20 +130,17 @@ def perform_assign_topics(file_path):
             parent_topic2 = row.get(PARENT_TOPIC_2_COLUMN_NAME)
             sub_topic2 = row.get(SUB_TOPIC_2_COLUMN_NAME)
             course_page = None
-            try:
-                if platform_name.lower() == DEFAULT_PLATFORM_NAME.lower():
-                    # It's possible that multiple course pages might have the same title but different course objects so we will filter() instead of get()
-                    course_pages = CoursePage.objects.filter(
-                        title__iexact=course_title,
-                        course__platform__name=platform_name,
-                    )
-                else:
-                    course_pages = ExternalCoursePage.objects.filter(
-                        title__iexact=course_title,
-                        course__platform__name=platform_name,
-                    )
-            except (CoursePage.DoesNotExist, ExternalCoursePage.DoesNotExist):
-                errors.append(f"{course_title}: Does not exist.")
+            if platform_name.lower() == DEFAULT_PLATFORM_NAME.lower():
+                # It's possible that multiple course pages might have the same title but different course objects so we will filter() instead of get()
+                course_pages = CoursePage.objects.filter(
+                    title__iexact=course_title,
+                    course__platform__name=platform_name,
+                )
+            else:
+                course_pages = ExternalCoursePage.objects.filter(
+                    title__iexact=course_title,
+                    course__platform__name=platform_name,
+                )
 
             if course_pages:
                 parent_topic1 = get_topic(name=parent_topic1)
