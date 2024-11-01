@@ -1,6 +1,6 @@
 """Management command to create topics from a CSV into the system OR assign topics to courses
 
-Arguments:
+## Arguments:
 * --file <filename> - Path to the CSV file containing the topics OR the file containing the topics and courses titles (But only one at a time)
 * --create-topics <filename> - Flag to decide that we should create topics from topics sheet (Format mentioned below)
 * --assign-topics <filename> - Flag to decide that we should only populate topics from course title & topics sheet (Format mentioned below)
@@ -21,6 +21,11 @@ product_platform   | product_name      | High-Level Topic 1        | Sub-topic 1
 xPRO               | Course title      | Parent Topic 1            | Subtopic 1        | Parent Topic 2            | Subtopic 2
 Global Alumni      | Course title      | Parent Topic 1            | Subtopic 1        | Parent Topic 2            | Subtopic 2
 Emeritus           | Course title      | Parent Topic 1            | Subtopic 1        | Parent Topic 2            | Subtopic 2
+
+
+## Usage:
+./manage.py --file <file_path> --create-topics
+./manage.py --file <file_path> --assign-topics
 
 """
 
@@ -175,10 +180,15 @@ def perform_assign_topics(file_path):
 class Command(BaseCommand):
     """The command can performs two operations:
     1. Reads a list of topics/subtopics from a CSV file and loads them into system
-    2. Read a list of courses and topics from a CSV and associates topics to courses
+    2. Reads a list of courses and topics from a CSV and associates topics to courses
     """
 
-    help = "Manage the topics through a CSV"
+    help = """
+    Manage the topics through a CSV
+
+    Creating topics: ./manage.py --file <file_path> --create-topics
+    Assigning topics: ./manage.py --file <file_path> --assign-topics
+    """
 
     def add_arguments(self, parser):
         parser.add_argument(
