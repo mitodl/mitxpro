@@ -6,7 +6,7 @@ Arguments:
 * --assign-topics <filename> - Flag to decide that we should only populate topics from course title & topics sheet (Format mentioned below
 
 ## Conditions for a valid topics file (Used for * --create-topics)
---file must be a valid CSV file. The command assumes that the file would have a header row containing all the topics/subtopics.
+--file must be a valid CSV file. The command assumes th
 The sample file format can be seen below:
 
 Parent Topic       | Parent Topic         | Parent Topic
@@ -82,8 +82,8 @@ def perform_create_topics(file_path):
         "skipped_subtopics": [],
     }
 
-    with open(file_path) as import_raw:  # noqa: PTH123
-        data_dict = csv.DictReader(import_raw)
+    with open(file_path) as topics_csv:  # noqa: PTH123
+        data_dict = csv.DictReader(topics_csv)
         # Top level topic | Parent topics
         # data_dict.fieldnames are all the column names in the header of the CSV file.
         # We will create top level topics assuming each column name represents a top level topic.
@@ -114,15 +114,15 @@ def perform_assign_topics(file_path):
     stats = []
     errors = []
 
-    with open(file_path) as import_raw:  # noqa: PTH123
-        data_dict = csv.DictReader(import_raw)
+    with open(file_path) as topics_csv:  # noqa: PTH123
+        data_dict = csv.DictReader(topics_csv)
         # data_dict.fieldnames are all the column names in the header of the topics association CSV file.
         # Also, We want to scope the things while association so we will strictly need the right data. To make sure we have the
         # right data we will cross check that the sheet contains the required columns
         columns = data_dict.fieldnames
         if not all(required_column in columns for required_column in REQUIRED_COLUMNS):
-            errors.append(
-                "The file data is invalid. Please check file has all the columns."
+            raise CommandError(
+                "The file data is invalid. Please check file has all the columns."  # noqa: EM101
             )
         else:
             for row in data_dict:
@@ -166,8 +166,8 @@ def perform_assign_topics(file_path):
                     course_page.topics.add(sub_topic1) if sub_topic1 else None
 
                     # If sub_topic 2 is blank we only assign High Level topic 1 and Subtopic 1 (See: https://github.com/mitodl/hq/issues/5841#issuecomment-2447413927)
-                    if sub_topic2:
-                        course_page.topics.add(parent_topic2) if parent_topic2 else None
+                    if sub_topic2 and parent_topic2:
+                        course_page.topics.add(parent_topic2)
                         course_page.topics.add(sub_topic2)
 
                     course_page.save()
