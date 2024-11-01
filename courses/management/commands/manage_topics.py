@@ -3,11 +3,10 @@
 Arguments:
 * --file <filename> - Path to the CSV file containing the topics OR the file containing the topics and courses titles (But only one at a time)
 * --create-topics <filename> - Flag to decide that we should create topics from topics sheet (Format mentioned below)
-* --assign-topics <filename> - Flag to decide that we should only populate topics from course title & topics sheet (Format mentioned below
+* --assign-topics <filename> - Flag to decide that we should only populate topics from course title & topics sheet (Format mentioned below)
 
 ## Conditions for a valid topics file (Used for * --create-topics)
---file must be a valid CSV file. The command assumes th
-The sample file format can be seen below:
+--file must be a valid CSV file. The command assumes that the file follows a specific format as mentioned below:
 
 Parent Topic       | Parent Topic         | Parent Topic
 subtopic           | subtopic             | subtopic
@@ -57,7 +56,7 @@ def create_topic(name=None, parent=None):
     if not parent:
         return CourseTopic.objects.get_or_create(name=name)
     parent = parent.strip()
-    parent_topic = CourseTopic.objects.get(name=parent, parent__isnull=True)
+    parent_topic = CourseTopic.objects.parent_topics().get(name=parent)
     return CourseTopic.objects.get_or_create(name=name, parent=parent_topic)
 
 
@@ -67,10 +66,9 @@ def get_topic(name=None, parent=None):
         return None
     name = name.strip()
     parent = parent.strip() if parent else None
-    try:
-        return CourseTopic.objects.get(name__iexact=name, parent__name__iexact=parent)
-    except CourseTopic.DoesNotExist:
-        return None
+    return CourseTopic.objects.filter(
+        name__iexact=name, parent__name__iexact=parent
+    ).first()
 
 
 def perform_create_topics(file_path):
@@ -124,44 +122,44 @@ def perform_assign_topics(file_path):
             raise CommandError(
                 "The file data is invalid. Please check file has all the columns."  # noqa: EM101
             )
-        else:
-            for row in data_dict:
-                platform_name = row.get(PLATFORM_COLUMN_NAME)
-                course_title = row.get(COURSE_TITLE_COLUMN_NAME)
-                parent_topic1 = row.get(PARENT_TOPIC_1_COLUMN_NAME)
-                sub_topic1 = row.get(SUB_TOPIC_1_COLUMN_NAME)
-                parent_topic2 = row.get(PARENT_TOPIC_2_COLUMN_NAME)
-                sub_topic2 = row.get(SUB_TOPIC_2_COLUMN_NAME)
-                course_page = None
-                try:
-                    if platform_name.lower() == DEFAULT_PLATFORM_NAME.lower():
-                        # This is an internal course
-                        course_page = CoursePage.objects.get(
-                            title__iexact=course_title,
-                            course__platform__name=platform_name,
-                        )
-                    else:
-                        course_page = ExternalCoursePage.objects.get(
-                            title__iexact=course_title,
-                            course__platform__name=platform_name,
-                        )
-                except (CoursePage.DoesNotExist, ExternalCoursePage.DoesNotExist):
-                    errors.append(f"{course_title}: Does not exist.")
-
-                if course_page:
-                    parent_topic1 = get_topic(name=parent_topic1)
-                    sub_topic1 = (
-                        get_topic(name=sub_topic1, parent=parent_topic1.name)
-                        if parent_topic1
-                        else None
+        for row in data_dict:
+            platform_name = row.get(PLATFORM_COLUMN_NAME)
+            course_title = row.get(COURSE_TITLE_COLUMN_NAME)
+            parent_topic1 = row.get(PARENT_TOPIC_1_COLUMN_NAME)
+            sub_topic1 = row.get(SUB_TOPIC_1_COLUMN_NAME)
+            parent_topic2 = row.get(PARENT_TOPIC_2_COLUMN_NAME)
+            sub_topic2 = row.get(SUB_TOPIC_2_COLUMN_NAME)
+            course_page = None
+            try:
+                if platform_name.lower() == DEFAULT_PLATFORM_NAME.lower():
+                    # It's possible that multiple course pages might have the same title but different course objects so we will filter() instead of get()
+                    course_pages = CoursePage.objects.filter(
+                        title__iexact=course_title,
+                        course__platform__name=platform_name,
                     )
-                    parent_topic2 = get_topic(name=parent_topic2)
-                    sub_topic2 = (
-                        get_topic(name=sub_topic2, parent=parent_topic2.name)
-                        if parent_topic2
-                        else None
+                else:
+                    course_pages = ExternalCoursePage.objects.filter(
+                        title__iexact=course_title,
+                        course__platform__name=platform_name,
                     )
+            except (CoursePage.DoesNotExist, ExternalCoursePage.DoesNotExist):
+                errors.append(f"{course_title}: Does not exist.")
 
+            if course_pages:
+                parent_topic1 = get_topic(name=parent_topic1)
+                sub_topic1 = (
+                    get_topic(name=sub_topic1, parent=parent_topic1.name)
+                    if parent_topic1
+                    else None
+                )
+                parent_topic2 = get_topic(name=parent_topic2)
+                sub_topic2 = (
+                    get_topic(name=sub_topic2, parent=parent_topic2.name)
+                    if parent_topic2
+                    else None
+                )
+
+                for course_page in course_pages:
                     course_page.topics.add(parent_topic1) if parent_topic1 else None
                     course_page.topics.add(sub_topic1) if sub_topic1 else None
 
