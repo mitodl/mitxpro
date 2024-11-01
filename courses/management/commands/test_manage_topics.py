@@ -11,6 +11,57 @@ from courses.management.commands import manage_topics
 from courses.models import CourseTopic, Platform
 
 
+def create_topic_if_valid(topic=None, parent_topic=None):
+    """Helper method to create a valid topic"""
+    if topic:
+        return CourseTopic.objects.get_or_create(name=topic, parent=parent_topic)
+    return None, None
+
+
+def create_topics(row):
+    """Helper method to create topics from the row"""
+    parent_topic1 = row.get(manage_topics.PARENT_TOPIC_1_COLUMN_NAME)
+    sub_topic1 = row.get(manage_topics.SUB_TOPIC_1_COLUMN_NAME)
+    parent_topic2 = row.get(manage_topics.PARENT_TOPIC_2_COLUMN_NAME)
+    sub_topic2 = row.get(manage_topics.SUB_TOPIC_2_COLUMN_NAME)
+
+    parent_topic1, _ = create_topic_if_valid(topic=parent_topic1)
+    create_topic_if_valid(topic=sub_topic1, parent_topic=parent_topic1)
+    parent_topic2, _ = create_topic_if_valid(topic=parent_topic2)
+    create_topic_if_valid(topic=sub_topic2, parent_topic=parent_topic2)
+
+
+def create_course(row):
+    """Helper method to create or get the course based on platform"""
+    platform_name = row.get(manage_topics.PLATFORM_COLUMN_NAME)
+    course_title = row.get(manage_topics.COURSE_TITLE_COLUMN_NAME)
+
+    platform, _ = Platform.objects.get_or_create(name=platform_name)
+    if platform_name == DEFAULT_PLATFORM_NAME:
+        CoursePageFactory.create(course__platform=platform, title=course_title)
+    else:
+        ExternalCoursePageFactory.create(
+            course__platform=platform,
+            title=course_title,
+            course__is_external=True,
+        )
+
+
+def get_course(row):
+    """Helper method to get a course based on platform"""
+    platform_name = row.get(manage_topics.PLATFORM_COLUMN_NAME)
+    course_title = row.get(manage_topics.COURSE_TITLE_COLUMN_NAME)
+    if platform_name == DEFAULT_PLATFORM_NAME:
+        course_page = CoursePage.objects.get(
+            title__iexact=course_title, course__platform__name=platform_name
+        )
+    else:
+        course_page = ExternalCoursePage.objects.get(
+            title__iexact=course_title, course__platform__name=platform_name
+        )
+    return course_page
+
+
 @pytest.mark.parametrize(
     "file_path, error_message",  # noqa: PT006
     [
@@ -115,7 +166,7 @@ def test_command_create_topics():
 
 
 @pytest.mark.django_db
-def test_command_assign_topics():  # noqa: C901
+def test_command_assign_topics():
     """Test that manage_topics command with "--assign-topics" assigns the topics properly to courses when appropriate file is provided"""
     out = StringIO()
     # Validate that the assign topics accepts files with correct columns and format
@@ -141,30 +192,8 @@ def test_command_assign_topics():  # noqa: C901
 
         # Step 1: Iterating through the sheet to create the initial data. The validation would be tested in the next step
         for row in data_dict:
-            platform_name = row.get(manage_topics.PLATFORM_COLUMN_NAME)
-            course_title = row.get(manage_topics.COURSE_TITLE_COLUMN_NAME)
-            parent_topic1 = row.get(manage_topics.PARENT_TOPIC_1_COLUMN_NAME)
-            sub_topic1 = row.get(manage_topics.SUB_TOPIC_1_COLUMN_NAME)
-            parent_topic2 = row.get(manage_topics.PARENT_TOPIC_2_COLUMN_NAME)
-            sub_topic2 = row.get(manage_topics.SUB_TOPIC_2_COLUMN_NAME)
-            platform, _ = Platform.objects.get_or_create(name=platform_name)
-            if platform_name == DEFAULT_PLATFORM_NAME:
-                CoursePageFactory.create(course__platform=platform, title=course_title)
-            else:
-                ExternalCoursePageFactory.create(
-                    course__platform=platform,
-                    title=course_title,
-                    course__is_external=True,
-                )
-
-            if parent_topic1:
-                parent_topic1, _ = CourseTopic.objects.get_or_create(name=parent_topic1)
-            if sub_topic1:
-                CourseTopic.objects.get_or_create(name=sub_topic1, parent=parent_topic1)
-            if parent_topic2:
-                parent_topic2, _ = CourseTopic.objects.get_or_create(name=parent_topic2)
-            if sub_topic2:
-                CourseTopic.objects.get_or_create(name=sub_topic2, parent=parent_topic2)
+            create_topics(row=row)
+            create_course(row=row)
 
         call_command(
             "manage_topics",
@@ -172,24 +201,16 @@ def test_command_assign_topics():  # noqa: C901
             "--file=courses/management/commands/resources/test_assign_topics_data.csv",
             stdout=out,
         )
+
+        # Step 2: Read the sheet again but this time we're verifying that the command assigned the correct topics to the courses
         topics_csv.seek(0)
         data_dict = csv.DictReader(topics_csv)
-        # Step 2: Read the sheet again but this time we're verifying that the command assigned the correct topics to the courses
         for row in data_dict:
-            platform_name = row.get(manage_topics.PLATFORM_COLUMN_NAME)
-            course_title = row.get(manage_topics.COURSE_TITLE_COLUMN_NAME)
             parent_topic1 = row.get(manage_topics.PARENT_TOPIC_1_COLUMN_NAME)
             sub_topic1 = row.get(manage_topics.SUB_TOPIC_1_COLUMN_NAME)
             parent_topic2 = row.get(manage_topics.PARENT_TOPIC_2_COLUMN_NAME)
             sub_topic2 = row.get(manage_topics.SUB_TOPIC_2_COLUMN_NAME)
-            if platform_name == DEFAULT_PLATFORM_NAME:
-                course_page = CoursePage.objects.get(
-                    title__iexact=course_title, course__platform__name=platform_name
-                )
-            else:
-                course_page = ExternalCoursePage.objects.get(
-                    title__iexact=course_title, course__platform__name=platform_name
-                )
+            course_page = get_course(row)
 
             course_topics = list(course_page.topics.values_list("name", flat=True))
             if parent_topic1:
