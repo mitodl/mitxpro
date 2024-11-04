@@ -34,6 +34,7 @@ from pathlib import Path
 
 from django.core.management import BaseCommand, CommandError
 
+from cms.api import save_page_revision
 from cms.models import CoursePage, ExternalCoursePage
 from courses.constants import DEFAULT_PLATFORM_NAME
 from courses.models import CourseTopic
@@ -158,19 +159,20 @@ def perform_assign_topics(file_path):  # noqa: C901
                 )
 
                 for course_page in course_pages:
+                    latest_revision = course_page.get_latest_revision_as_object()
                     assigned_topics_stats = []
                     skipped_topics_stats = []
                     if parent_topic1:
-                        course_page.topics.add(parent_topic1)
+                        latest_revision.topics.add(parent_topic1)
                         assigned_topics_stats.append(parent_topic1.name)
                     if sub_topic1:
-                        course_page.topics.add(sub_topic1)
+                        latest_revision.topics.add(sub_topic1)
                         assigned_topics_stats.append(sub_topic1.name)
 
                     # If sub_topic 2 is blank we only assign High Level topic 1 and Subtopic 1 (See: https://github.com/mitodl/hq/issues/5841#issuecomment-2447413927)
                     if sub_topic2 and parent_topic2:
-                        course_page.topics.add(parent_topic2)
-                        course_page.topics.add(sub_topic2)
+                        latest_revision.topics.add(parent_topic2)
+                        latest_revision.topics.add(sub_topic2)
                         assigned_topics_stats.extend(
                             [parent_topic2.name, sub_topic2.name]
                         )
@@ -180,7 +182,8 @@ def perform_assign_topics(file_path):  # noqa: C901
                             skipped_topics_stats.append(parent_topic2.name)
                         if sub_topic2:
                             skipped_topics_stats.append(sub_topic2.name)
-                    course_page.save()
+
+                    save_page_revision(course_page, latest_revision)
 
                     stats.append(
                         f"{course_title}  |  Topics Assigned: {', '.join(assigned_topics_stats)}  |  Topics Skipped: {', '.join(skipped_topics_stats) or None}"
