@@ -139,7 +139,7 @@ def perform_assign_topics(file_path):  # noqa: C901
                 course_page_cls = CoursePage
             # Course titles can have trailing spaces so we would regex filter them instead of iexact
             course_pages = course_page_cls.objects.filter(
-                title__regex=rf"(?i){course_title}\s*$",
+                title__regex=rf"(?i)^{course_title}\s*$",
                 course__platform__name=platform_name,
             )
 
