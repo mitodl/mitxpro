@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.163.0
+---------------
+
+- feat: add management command for course/topics assignment (#3216)
+
 Version 0.162.0 (Released October 31, 2024)
 ---------------
 
