@@ -135,17 +135,14 @@ def perform_assign_topics(file_path):
             parent_topic2 = row.get(PARENT_TOPIC_2_COLUMN_NAME)
             sub_topic2 = row.get(SUB_TOPIC_2_COLUMN_NAME)
             course_page = None
+            course_page_cls = ExternalCoursePage
             if platform_name.lower() == DEFAULT_PLATFORM_NAME.lower():
-                # It's possible that multiple course pages might have the same title but different course objects so we will filter() instead of get()
-                course_pages = CoursePage.objects.filter(
-                    title__iexact=course_title,
-                    course__platform__name=platform_name,
-                )
-            else:
-                course_pages = ExternalCoursePage.objects.filter(
-                    title__iexact=course_title,
-                    course__platform__name=platform_name,
-                )
+                course_page_cls = CoursePage
+            # Course titles can have trailing spaces so we would regex filter them instead of iexact
+            course_pages = course_page_cls.objects.filter(
+                title__regex=rf"(?i){course_title}\s*$",
+                course__platform__name=platform_name,
+            )
 
             if course_pages:
                 parent_topic1 = get_topic(name=parent_topic1)
@@ -162,18 +159,46 @@ def perform_assign_topics(file_path):
                 )
 
                 for course_page in course_pages:
-                    course_page.topics.add(parent_topic1) if parent_topic1 else None
-                    course_page.topics.add(sub_topic1) if sub_topic1 else None
+                    assigned_topics_stats = ""
+                    skipped_topics_stats = ""
+                    if parent_topic1:
+                        course_page.topics.add(parent_topic1)
+                        assigned_topics_stats = (
+                            assigned_topics_stats + parent_topic1.name
+                        )
+                    if sub_topic1:
+                        course_page.topics.add(sub_topic1)
+                        assigned_topics_stats = (
+                            assigned_topics_stats + ", " + sub_topic1.name
+                        )
 
                     # If sub_topic 2 is blank we only assign High Level topic 1 and Subtopic 1 (See: https://github.com/mitodl/hq/issues/5841#issuecomment-2447413927)
                     if sub_topic2 and parent_topic2:
                         course_page.topics.add(parent_topic2)
                         course_page.topics.add(sub_topic2)
+                        assigned_topics_stats = (
+                            assigned_topics_stats
+                            + ", "
+                            + parent_topic2.name
+                            + ", "
+                            + sub_topic2.name
+                        )
 
+                    else:
+                        skipped_topics_stats = (
+                            skipped_topics_stats + parent_topic2.name
+                            if parent_topic2
+                            else None + "," + sub_topic2.name
+                            if sub_topic2
+                            else None
+                        )
                     course_page.save()
 
-                    stats.append(f"{course_title}: Topics association success!")
-
+                    stats.append(
+                        f"{course_title}  |  Topics Assigned: {assigned_topics_stats}  |  Topics Skipped: {skipped_topics_stats or None}"
+                    )
+            else:
+                errors.append(f"Course not found: {course_title}")
     return errors, stats
 
 
