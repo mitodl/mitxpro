@@ -2,8 +2,8 @@
 
 ## Arguments:
 * --file <filename> - Path to the CSV file containing the topics OR the file containing the topics and courses titles (But only one at a time)
-* --create-topics <filename> - Flag to decide that we should create topics from topics sheet (Format mentioned below)
-* --assign-topics <filename> - Flag to decide that we should only populate topics from course title & topics sheet (Format mentioned below)
+* --create-topics - Flag to decide that we should create topics from topics sheet (Format mentioned below)
+* --assign-topics - Flag to decide that we should only populate topics from course title & topics sheet (Format mentioned below)
 
 ## Conditions for a valid topics file (Used for * --create-topics)
 --file must be a valid CSV file. The command assumes that the file follows a specific format as mentioned below:
@@ -112,7 +112,7 @@ def perform_create_topics(file_path):
         return stats
 
 
-def perform_assign_topics(file_path):
+def perform_assign_topics(file_path):  # noqa: C901
     """Read the data from the CSV file and associate the topics to courses"""
     stats = []
     errors = []
@@ -134,7 +134,6 @@ def perform_assign_topics(file_path):
             sub_topic1 = row.get(SUB_TOPIC_1_COLUMN_NAME)
             parent_topic2 = row.get(PARENT_TOPIC_2_COLUMN_NAME)
             sub_topic2 = row.get(SUB_TOPIC_2_COLUMN_NAME)
-            course_page = None
             course_page_cls = ExternalCoursePage
             if platform_name.lower() == DEFAULT_PLATFORM_NAME.lower():
                 course_page_cls = CoursePage
@@ -159,43 +158,32 @@ def perform_assign_topics(file_path):
                 )
 
                 for course_page in course_pages:
-                    assigned_topics_stats = ""
-                    skipped_topics_stats = ""
+                    assigned_topics_stats = []
+                    skipped_topics_stats = []
                     if parent_topic1:
                         course_page.topics.add(parent_topic1)
-                        assigned_topics_stats = (
-                            assigned_topics_stats + parent_topic1.name
-                        )
+                        assigned_topics_stats.append(parent_topic1.name)
                     if sub_topic1:
                         course_page.topics.add(sub_topic1)
-                        assigned_topics_stats = (
-                            assigned_topics_stats + ", " + sub_topic1.name
-                        )
+                        assigned_topics_stats.append(sub_topic1.name)
 
                     # If sub_topic 2 is blank we only assign High Level topic 1 and Subtopic 1 (See: https://github.com/mitodl/hq/issues/5841#issuecomment-2447413927)
                     if sub_topic2 and parent_topic2:
                         course_page.topics.add(parent_topic2)
                         course_page.topics.add(sub_topic2)
-                        assigned_topics_stats = (
-                            assigned_topics_stats
-                            + ", "
-                            + parent_topic2.name
-                            + ", "
-                            + sub_topic2.name
+                        assigned_topics_stats.extend(
+                            [parent_topic2.name, sub_topic2.name]
                         )
 
                     else:
-                        skipped_topics_stats = (
-                            skipped_topics_stats + parent_topic2.name
-                            if parent_topic2
-                            else None + "," + sub_topic2.name
-                            if sub_topic2
-                            else None
-                        )
+                        if parent_topic2:
+                            skipped_topics_stats.append(parent_topic2.name)
+                        if sub_topic2:
+                            skipped_topics_stats.append(sub_topic2.name)
                     course_page.save()
 
                     stats.append(
-                        f"{course_title}  |  Topics Assigned: {assigned_topics_stats}  |  Topics Skipped: {skipped_topics_stats or None}"
+                        f"{course_title}  |  Topics Assigned: {', '.join(assigned_topics_stats)}  |  Topics Skipped: {', '.join(skipped_topics_stats) or None}"
                     )
             else:
                 errors.append(f"Course not found: {course_title}")
@@ -203,7 +191,7 @@ def perform_assign_topics(file_path):
 
 
 class Command(BaseCommand):
-    """The command can performs two operations:
+    """The command can perform two operations:
     1. Reads a list of topics/subtopics from a CSV file and loads them into system
     2. Reads a list of courses and topics from a CSV and associates topics to courses
     """
