@@ -186,10 +186,10 @@ def perform_assign_topics(file_path):  # noqa: C901
                     save_page_revision(course_page, latest_revision)
 
                     stats.append(
-                        f"{course_title}  |  Topics Assigned: {', '.join(assigned_topics_stats)}  |  Topics Skipped: {', '.join(skipped_topics_stats) or None}"
+                        f"{platform_name} : {course_title}  |  Topics Assigned: {', '.join(assigned_topics_stats)}  |  Topics Skipped: {', '.join(skipped_topics_stats) or None}"
                     )
             else:
-                errors.append(f"Course not found: {course_title}")
+                errors.append(f"Course not found: {platform_name} : {course_title}")
     return errors, stats
 
 
