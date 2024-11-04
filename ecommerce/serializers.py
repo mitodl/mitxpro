@@ -1006,7 +1006,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 certificate_page = program.page.certificate_page
 
             if certificate_page:
-                CEUs = certificate_page.CEUs
+                CEUs = certificate_page.normalized_ceus
                 for override in certificate_page.overrides:
                     if (
                         override.value.get("readable_id")
@@ -1021,7 +1021,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                     tax_paid=str(tax_paid),
                     discount=str(discount),
                     total_before_tax=str(total_before_tax),
-                    CEUs=str(CEUs) if CEUs else None,
+                    CEUs=CEUs if CEUs else None,
                     **BaseProductVersionSerializer(line.product_version).data,
                     start_date=dates["start_date"],
                     end_date=dates["end_date"],

@@ -3,6 +3,7 @@ Tests for course serializers
 """
 
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 import factory
 import pytest
@@ -60,7 +61,7 @@ def test_base_program_serializer():
             "2 Months",
             "2 Hours",
             "http://www.testvideourl.com",
-            "2 Test CEUs",
+            "2.0",
             "https://www.testexternalcourse1.com",
             "fb4f5b79-test-4972-92c3-test",
         ),
@@ -156,7 +157,7 @@ def test_serialize_program(  # noqa: PLR0913
             "duration": duration,
             "format": program_format,
             "video_url": video_url,
-            "credits": ceus,
+            "credits": str(Decimal(ceus).normalize()) if ceus else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url,
             "marketing_hubspot_form_id": marketing_hubspot_form_id,
@@ -193,7 +194,7 @@ def test_base_course_serializer():
             "2 Months",
             "2 Hours",
             "http://www.testvideourl.com",
-            "2 Test CEUs",
+            "2",
             "http://www.testexternalmarketingurl.com",
             "fb4f5b79-test-4972-92c3-test",
         ),
@@ -291,7 +292,7 @@ def test_serialize_course(  # noqa: PLR0913
             "duration": duration if course_page else None,
             "format": course_format if course_page else None,
             "video_url": video_url if course_page else None,
-            "credits": ceus if course_page else None,
+            "credits": str(Decimal(ceus).normalize()) if course_page and ceus else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
             "marketing_hubspot_form_id": (

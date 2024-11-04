@@ -1074,7 +1074,9 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "techniques": self.techniques,
             "propel_career": self.propel_career,
             "news_and_events": self.news_and_events,
-            "ceus": self.certificate_page.CEUs if self.certificate_page else None,
+            "ceus": self.certificate_page.normalized_ceus
+            if self.certificate_page
+            else None,
         }
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
@@ -2142,11 +2144,12 @@ class CertificatePage(CourseProgramChildPage):
         max_length=255, null=True, blank=True, help_text="Specify the institute text"
     )
 
-    CEUs = models.CharField(  # noqa: DJ001
-        max_length=250,
+    CEUs = models.DecimalField(
         null=True,
         blank=True,
-        help_text="Optional text field for CEU (continuing education unit).",
+        decimal_places=2,
+        max_digits=5,
+        help_text="Optional field for CEU (continuing education unit).",
     )
 
     partner_logo = models.ForeignKey(
@@ -2242,6 +2245,13 @@ class CertificatePage(CourseProgramChildPage):
         """
         return self.get_parent().specific
 
+    @property
+    def normalized_ceus(self):
+        """
+        Normalizes the CEUs from decimal to string. Removes the trailing zeros if any.
+        """
+        return f"{self.CEUs.normalize():f}" if self.CEUs else None
+
     def get_context(self, request, *args, **kwargs):
         preview_context = {}
         context = {}
@@ -2255,14 +2265,14 @@ class CertificatePage(CourseProgramChildPage):
                 "end_date": self.parent.product.first_unexpired_run.end_date
                 if self.parent.product.first_unexpired_run
                 else datetime.now() + timedelta(days=45),  # noqa: DTZ005
-                "CEUs": self.CEUs,
+                "CEUs": self.normalized_ceus,
             }
         elif self.certificate:
             # Verify that the certificate in fact is for this same course
             if self.parent.product.id != self.certificate.get_courseware_object_id():
                 raise Http404
             start_date, end_date = self.certificate.start_end_dates
-            CEUs = self.CEUs
+            CEUs = self.normalized_ceus
 
             for override in self.overrides:
                 if (
