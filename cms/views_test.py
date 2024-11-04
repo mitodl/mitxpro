@@ -693,7 +693,7 @@ def test_product_page_context_has_certificate(
 
     if published_certificate:
         assert resp.context["ceus"] is not None
-        assert resp.context["ceus"] == "12.0"
+        assert resp.context["ceus"] == "12"
     else:
         assert resp.context["ceus"] is None
 

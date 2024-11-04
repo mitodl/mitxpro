@@ -209,7 +209,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
     def get_credits(self, instance):
         """Returns the credits for this product"""
         return (
-            instance.page.certificate_page.CEUs
+            instance.page.certificate_page.normalized_ceus
             if instance.page and instance.page.certificate_page
             else None
         )

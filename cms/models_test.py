@@ -2,6 +2,7 @@
 
 import json
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 import factory
 import pytest
@@ -1401,12 +1402,13 @@ def test_certificate_for_course_page():
     certificate_page = CertificatePageFactory.create(
         parent=course_page,
         product_name="product_name",
-        CEUs="1.8",
+        CEUs=Decimal("1.8"),
         partner_logo__image__title="Partner Logo",
         signatories__0__signatory__page=signatory,
     )
     assert certificate_page.get_parent() == course_page
-    assert certificate_page.CEUs == "1.8"
+    assert certificate_page.CEUs == Decimal("1.8")
+    assert certificate_page.normalized_ceus == "1.8"
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:
@@ -1436,13 +1438,14 @@ def test_certificate_for_program_page():
     certificate_page = CertificatePageFactory.create(
         parent=program_page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo__image__title="Partner Logo",
         signatories__0__signatory__page=signatory,
     )
 
     assert certificate_page.get_parent() == program_page
-    assert certificate_page.CEUs == "2.8"
+    assert certificate_page.CEUs == Decimal("2.8")
+    assert certificate_page.normalized_ceus == "2.8"
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:
@@ -2001,7 +2004,7 @@ def test_certificatepage_no_signatories_internal_courseware(
     certificate_page = CertificatePageFactory.create(
         parent=page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo=None,
     )
 
@@ -2044,7 +2047,7 @@ def test_certificatepage_with_signatories_internal_courseware(
     certificate_page = CertificatePageFactory.create(
         parent=page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo=None,
         signatories__0__signatory__page=signatory,
     )
@@ -2085,7 +2088,7 @@ def test_certificatepage_saved_no_signatories_external_courseware(
     certificate_page = CertificatePageFactory.create(
         parent=page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo=None,
     )
 
