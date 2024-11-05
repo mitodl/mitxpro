@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.163.1
+Version 0.163.1 (Released November 05, 2024)
 ---------------
 
 - refactor: enhance topic assignment command to ignore course pages without course (#3220)
