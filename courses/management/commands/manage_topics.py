@@ -183,11 +183,16 @@ def perform_assign_topics(file_path):  # noqa: C901
                         if sub_topic2:
                             skipped_topics_stats.append(sub_topic2.name)
 
-                    save_page_revision(course_page, latest_revision)
+                    if latest_revision.course:
+                        save_page_revision(course_page, latest_revision)
+                        stats.append(
+                            f"{platform_name} : {course_title}  |  Topics Assigned: {', '.join(assigned_topics_stats)}  |  Topics Skipped: {', '.join(skipped_topics_stats) or None}"
+                        )
+                    else:
+                        errors.append(
+                            f"Course page has no course: {platform_name} : {course_title}"
+                        )
 
-                    stats.append(
-                        f"{platform_name} : {course_title}  |  Topics Assigned: {', '.join(assigned_topics_stats)}  |  Topics Skipped: {', '.join(skipped_topics_stats) or None}"
-                    )
             else:
                 errors.append(f"Course not found: {platform_name} : {course_title}")
     return errors, stats
