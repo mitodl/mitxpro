@@ -825,15 +825,6 @@ def create_oauth_application():
     )
 
 
-def delete_oauth_application():
-    """Delete oAuth application"""
-
-    _, deleted_applications_count = Application.objects.filter(
-        name=settings.OPENEDX_OAUTH_APP_NAME
-    ).delete()
-    return _, deleted_applications_count
-
-
 def validate_name_with_edx(name):
     """
     Returns validation message after validating it with Open edX.

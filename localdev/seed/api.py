@@ -33,7 +33,6 @@ from courses.models import (
     ProgramEnrollment,
     ProgramEnrollmentAudit,
 )
-from courseware.api import create_oauth_application, delete_oauth_application
 from ecommerce.api import create_coupons
 from ecommerce.models import (
     Basket,
@@ -672,7 +671,7 @@ class SeedDataLoader:
                 model_cls=CouponPayment, data=raw_coupon_data, parent=None
             )
 
-    def create_seed_data(self, raw_data):  # noqa: C901
+    def create_seed_data(self, raw_data):
         """
         Iterate over all objects described in the seed data spec, add/update them one-by-one, and return the results
         """
@@ -681,12 +680,6 @@ class SeedDataLoader:
         configure_wagtail()
 
         self.seed_result = SeedResult()
-        application, application_created = create_oauth_application()
-        if application_created:
-            self.seed_result.add_created(application)
-        else:
-            self.seed_result.add_ignored(application)
-
         for seed_data_spec in self.iter_seed_data(raw_data):
             if seed_data_spec.model_cls in [Program, Course, CourseRun]:
                 serializer_cls = self.SEED_DATA_DESERIALIZER[seed_data_spec.model_cls]
@@ -740,9 +733,6 @@ class SeedDataLoader:
         """Iterate over all objects described in the seed data spec, delete them one-by-one, and return the results"""
 
         self.seed_result = SeedResult()
-        _, deleted_applications_count = delete_oauth_application()
-        self.seed_result.add_deleted(deleted_applications_count)
-
         # Traversing in reverse since we want to delete 'leaf' objects first (e.g.: we want to delete CourseRuns
         # before deleting Courses)
         for seed_data_spec in reversed(list(self.iter_seed_data(raw_data))):
