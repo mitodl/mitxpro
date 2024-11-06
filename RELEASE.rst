@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.163.2
+---------------
+
+- Add a `configure_instance` management command (#3212)
+
 Version 0.163.1 (Released November 05, 2024)
 ---------------
 
