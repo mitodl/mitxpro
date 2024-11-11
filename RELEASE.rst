@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.164.0
+---------------
+
+- fix(deps): update dependency psycopg2 to v2.9.10 (#3227)
+- fix(deps): update dependency boto3 to v1.35.57 (#3226)
+- fix(deps): update dependency zeep to v4.3.1 (#3223)
+- [pre-commit.ci] pre-commit autoupdate (#3219)
+
 Version 0.163.2 (Released November 06, 2024)
 ---------------
 
