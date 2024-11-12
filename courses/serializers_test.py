@@ -31,7 +31,7 @@ from courses.serializers import (
 from ecommerce.factories import ProductVersionFactory
 from ecommerce.models import Order
 from ecommerce.serializers import CompanySerializer
-from ecommerce.serializers_test import datetime_format
+from ecommerce.serializers_test import datetime_millis_format
 from mitxpro.test_utils import assert_drf_json_equal, drf_datetime
 
 pytestmark = [pytest.mark.django_db]
@@ -147,7 +147,7 @@ def test_serialize_program(  # noqa: PLR0913
             "start_date": program.first_unexpired_run.start_date,
             "end_date": sorted(runs, key=lambda run: run.end_date)[
                 -1
-            ].end_date.strftime(datetime_format),
+            ].end_date.strftime(datetime_millis_format),
             "enrollment_start": program.first_unexpired_run.enrollment_start,
             "url": f"http://localhost{program.page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
@@ -164,7 +164,7 @@ def test_serialize_program(  # noqa: PLR0913
             "availability": "dated",
         },
     )
-    assert data["end_date"] != non_live_run.end_date.strftime(datetime_format)
+    assert data["end_date"] != non_live_run.end_date.strftime(datetime_millis_format)
 
 
 def test_base_course_serializer():
