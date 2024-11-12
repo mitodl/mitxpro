@@ -1841,6 +1841,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kwsites/file-exists@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@kwsites/file-exists@npm:1.1.1"
+  dependencies:
+    debug: ^4.1.1
+  checksum: 4ff945de7293285133aeae759caddc71e73c4a44a12fac710fdd4f574cce2671a3f89d8165fdb03d383cfc97f3f96f677d8de3c95133da3d0e12a123a23109fe
+  languageName: node
+  linkType: hard
+
+"@kwsites/promise-deferred@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "@kwsites/promise-deferred@npm:1.1.1"
+  checksum: 07455477a0123d9a38afb503739eeff2c5424afa8d3dbdcc7f9502f13604488a4b1d9742fc7288832a52a6422cf1e1c0a1d51f69a39052f14d27c9a0420b6629
+  languageName: node
+  linkType: hard
+
 "@material/animation@npm:^1.0.0":
   version: 1.0.0
   resolution: "@material/animation@npm:1.0.0"
@@ -5987,9 +6003,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"flow-typed@npm:^3.2.1":
-  version: 3.9.0
-  resolution: "flow-typed@npm:3.9.0"
+"flow-typed@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "flow-typed@npm:4.0.0"
   dependencies:
     "@octokit/rest": ^18.12.0
     colors: 1.4.0
@@ -5997,18 +6013,20 @@ __metadata:
     fs-extra: ^8.1.0
     glob: ^7.1.6
     got: ^11.8.5
+    js-yaml: ^4.1.0
     md5: ^2.2.1
     mkdirp: ^1.0.3
     node-stream-zip: ^1.15.0
     prettier: ^1.19.1
     rimraf: ^3.0.2
     semver: ^7.5.4
+    simple-git: ^3.10.0
     table: ^6.7.3
     which: ^2.0.2
     yargs: ^15.1.0
   bin:
     flow-typed: dist/cli.js
-  checksum: ec410b9dc1f979c3feee92258f9d5fc6087529991e4be0f4f8dd8e2af95d2903927f4bd37e032f9c50f3f21224bff08f8fb73dc5d3b7fd9ec4fcf43b75d42e08
+  checksum: 4a7dca6a7e964b9f9c54e920d27cd4959006379b239b8060e2aebeb232bc2cee9a3f40d870609334511ba0e82be9d546d918fb706c9ae8f8ff940f3fdbbccb5a
   languageName: node
   linkType: hard
 
@@ -8857,7 +8875,7 @@ __metadata:
     fetch-mock: ^5.12.1
     flow: ^0.2.3
     flow-bin: ^0.95.1
-    flow-typed: ^3.2.1
+    flow-typed: ^4.0.0
     formik: ^1.5.1
     history: ^4.6.3
     hls.js: ^0.14.0
@@ -11516,6 +11534,17 @@ __metadata:
   version: 4.1.0
   resolution: "signal-exit@npm:4.1.0"
   checksum: 64c757b498cb8629ffa5f75485340594d2f8189e9b08700e69199069c8e3070fb3e255f7ab873c05dc0b3cec412aea7402e10a5990cb6a050bd33ba062a6c549
+  languageName: node
+  linkType: hard
+
+"simple-git@npm:^3.10.0":
+  version: 3.27.0
+  resolution: "simple-git@npm:3.27.0"
+  dependencies:
+    "@kwsites/file-exists": ^1.1.1
+    "@kwsites/promise-deferred": ^1.1.1
+    debug: ^4.3.5
+  checksum: bc602d67317a5421363f4cbe446bc71336387a7ea9864b23993dcbbd7e4847e346a234aa5b46bf9d80130d2448cbaeb21cf8f7b62572dce093fb4643ff7ffafd
   languageName: node
   linkType: hard
 

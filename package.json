@@ -52,7 +52,7 @@
     "fetch-mock": "^5.12.1",
     "flow": "^0.2.3",
     "flow-bin": "^0.95.1",
-    "flow-typed": "^3.2.1",
+    "flow-typed": "^4.0.0",
     "formik": "^1.5.1",
     "history": "^4.6.3",
     "hls.js": "^0.14.0",
