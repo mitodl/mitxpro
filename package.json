@@ -81,7 +81,7 @@
     "react-device-detect": "^1.17.0",
     "react-document-title": "^2.0.3",
     "react-dom": "^16.8.4",
-    "react-ga": "^2.2.0",
+    "react-ga": "^3.0.0",
     "react-google-recaptcha": "^1.0.5",
     "react-hot-loader": "^4.8.0",
     "react-markdown": "^5.0.3",
