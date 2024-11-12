@@ -89,7 +89,7 @@
     "react-redux": "^5.0.5",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
-    "react-select": "^3.0.4",
+    "react-select": "^5.0.0",
     "react-test-renderer": "^16.8.4",
     "react-zendesk": "^0.1.5",
     "reactstrap": "^8.0.0",
