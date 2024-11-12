@@ -56,7 +56,7 @@
     "formik": "^1.5.1",
     "history": "^4.6.3",
     "hls.js": "^0.14.0",
-    "isomorphic-fetch": "^2.2.1",
+    "isomorphic-fetch": "^3.0.0",
     "jquery": "^3.5.1",
     "jsdom": "^16.2.2",
     "lodash": "^4.17.21",
