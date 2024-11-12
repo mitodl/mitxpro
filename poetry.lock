@@ -1081,6 +1081,44 @@ s3 = ["boto3 (>=1.4.4)"]
 sftp = ["paramiko (>=1.15)"]
 
 [[package]]
+name = "django-stubs"
+version = "5.1.1"
+description = "Mypy stubs for Django"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "django_stubs-5.1.1-py3-none-any.whl", hash = "sha256:c4dc64260bd72e6d32b9e536e8dd0d9247922f0271f82d1d5132a18f24b388ac"},
+    {file = "django_stubs-5.1.1.tar.gz", hash = "sha256:126d354bbdff4906c4e93e6361197f6fbfb6231c3df6def85a291dae6f9f577b"},
+]
+
+[package.dependencies]
+asgiref = "*"
+django = "*"
+django-stubs-ext = ">=5.1.1"
+types-PyYAML = "*"
+typing-extensions = ">=4.11.0"
+
+[package.extras]
+compatible-mypy = ["mypy (>=1.12,<1.14)"]
+oracle = ["oracledb"]
+redis = ["redis"]
+
+[[package]]
+name = "django-stubs-ext"
+version = "5.1.1"
+description = "Monkey-patching and extensions for django-stubs"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "django_stubs_ext-5.1.1-py3-none-any.whl", hash = "sha256:3907f99e178c93323e2ce908aef8352adb8c047605161f8d9e5e7b4efb5a6a9c"},
+    {file = "django_stubs_ext-5.1.1.tar.gz", hash = "sha256:db7364e4f50ae7e5360993dbd58a3a57ea4b2e7e5bab0fbd525ccdb3e7975d1c"},
+]
+
+[package.dependencies]
+django = "*"
+typing-extensions = "*"
+
+[[package]]
 name = "django-taggit"
 version = "4.0.0"
 description = "django-taggit is a reusable Django application for simple tagging."
@@ -2273,19 +2311,20 @@ urllib3 = ">=1.26.5"
 
 [[package]]
 name = "mitol-django-mail"
-version = "2023.12.19"
+version = "2024.11.5"
 description = "MIT Open Learning django app extensions for mail"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mitol-django-mail-2023.12.19.tar.gz", hash = "sha256:824f6ff0a7fb7b996962e608c61e5d02d06c174e466d00896eb43fdac864148f"},
-    {file = "mitol_django_mail-2023.12.19-py3-none-any.whl", hash = "sha256:a32853bfe7da39d4c34651d7e5bddc547678c1b5b3a54e56e492879276eab371"},
+    {file = "mitol_django_mail-2024.11.5-py3-none-any.whl", hash = "sha256:fe50258b3fc3e566ed71684b53d76e0d1cf75feb403cbf16d5bf65de37808aa3"},
+    {file = "mitol_django_mail-2024.11.5.tar.gz", hash = "sha256:0e89ec8d2c051b6a036e5e533c6669e97aee7636c884231e6f438074a14b6058"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.6.0"
 django = ">=3.0"
 django-anymail = ">=6.0"
+django-stubs = ">=1.13.1"
 html5lib = ">=1.1"
 mitol-django-common = "*"
 premailer = ">=3.7.0"
@@ -3924,6 +3963,17 @@ shellingham = ">=1.3.0"
 typing-extensions = ">=3.7.4.3"
 
 [[package]]
+name = "types-pyyaml"
+version = "6.0.12.20240917"
+description = "Typing stubs for PyYAML"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-PyYAML-6.0.12.20240917.tar.gz", hash = "sha256:d1405a86f9576682234ef83bcb4e6fff7c9305c8b1fbad5e0bcd4f7dbdc9c587"},
+    {file = "types_PyYAML-6.0.12.20240917-py3-none-any.whl", hash = "sha256:392b267f1c0fe6022952462bf5d6523f31e37f6cea49b14cee7ad634b6301570"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -4212,4 +4262,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "f1443c96a948649c4417a6bc6f42431f9bbc8c9966570b6db31e773840ba5c61"
+content-hash = "54d0af9025b39d96cd600b1d5a16eb2c3c664aba7262c2e00dac6c222b3031bf"
