@@ -2350,26 +2350,40 @@ files = [
 
 [[package]]
 name = "newrelic"
-version = "8.11.0"
+version = "10.2.0"
 description = "New Relic Python Agent"
 optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*"
+python-versions = ">=3.7"
 files = [
-    {file = "newrelic-8.11.0-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:41cf36017b1b54187c5b422fff32528abc4f2043227397f7a242864c31939c37"},
-    {file = "newrelic-8.11.0-cp27-cp27m-manylinux2010_x86_64.whl", hash = "sha256:2e70371c8b5fcfca6e7f57395f205ed6b38228b4a5594f49f7aae4d978aa9eef"},
-    {file = "newrelic-8.11.0-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:18dae1606f79a92c21967d11cbd4f42c03eb5b04b2f6b86a954b5e6a736113d7"},
-    {file = "newrelic-8.11.0-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:cc169ad19cb3b44ec028df08d172327b72d0137d62935c87cbbef173f710c2ed"},
-    {file = "newrelic-8.11.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d95eade883fb3aa0a2a2d04f1dd85f0df04d31bfc32f78139fe91c0362c1987e"},
-    {file = "newrelic-8.11.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:313aa30918e54bfc226229d3b4fa7f8879fa5beab98ed46218ef36265b7205e5"},
-    {file = "newrelic-8.11.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7a649068a0cf5c4a7ba0f9739e52f1ad9d2882aafcfe3361fd264cbb975c5318"},
-    {file = "newrelic-8.11.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1c9463dd1b1407ade27a4c7ebb2137b77c51e23498cec7ee2671fff3fd33fd73"},
-    {file = "newrelic-8.11.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:fc4e0fe04ad4f1fc19cb86844d73e834d99dd613dd8a4f2e7be204193d5b8dc8"},
-    {file = "newrelic-8.11.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5d5a3921c73913ea91407a6b2cda4e68aa3e52d7ceba77365d9b090b184f7e15"},
-    {file = "newrelic-8.11.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b8954dcfa78cb5d0398490938f3a84f29d53554bb498bb50bf232715a3577a68"},
-    {file = "newrelic-8.11.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5e32b7c92ed8922df599769270dbc5a322ca78e29b5c89083b2b39af80a44361"},
-    {file = "newrelic-8.11.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:68fec20006b312a3c93de82e91cb39be44ac73ba08d15552fff5206dfabda227"},
-    {file = "newrelic-8.11.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:16761522dde9c05146078f7729aefbf05cea7fc42c703c0b756618168939f872"},
-    {file = "newrelic-8.11.0.tar.gz", hash = "sha256:59cb3da7e5dd526e7f8696a5ed704d06c43bc2d4da840897534e9a51da7266eb"},
+    {file = "newrelic-10.2.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e6f822e6a43151af13a748fb2de6ff298aeb6eee03bf6512afba6aaa79211172"},
+    {file = "newrelic-10.2.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:501cc575b3fd702a21542a0f5dac59b83f47e2806f5b7c0f4e4510b5474ed77f"},
+    {file = "newrelic-10.2.0-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:3f15a940b6794b4008ab983e7ac3b4d179efe609e040ee96ed5744723fc580c8"},
+    {file = "newrelic-10.2.0-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:60d01303807228718c4099d8550f72d21ee8b61a33555d8974800f6868f2144a"},
+    {file = "newrelic-10.2.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e5809b4111ef3b1d0b5fa66ad06a81de512842370707863d44888c9439f16c4c"},
+    {file = "newrelic-10.2.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3415b1c7cab5e586e72cca467dd80cd0507f23a3139c02911cf75892fdbb48a6"},
+    {file = "newrelic-10.2.0-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:3d9c8297ba158ce4570fc48cfea7bdf3678b2054baaf0cad4debcbca33c2af3a"},
+    {file = "newrelic-10.2.0-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:3bee0b9ce1eccf6ac63e51113781743853b1b84c98ae48ed17d0410c352ccb4d"},
+    {file = "newrelic-10.2.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a6ff022c7556b61b067e8e6b729fe60f437a8356f319ae3b8342858792f3930d"},
+    {file = "newrelic-10.2.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3521d646c0032db53b7320fe6b6859eebd863f1b47d7c7dd480073727091e50e"},
+    {file = "newrelic-10.2.0-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:b4220b97669d214e75d2039fea9e0505fde5bc450832210abbc76b9a635785ed"},
+    {file = "newrelic-10.2.0-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:c6aa9cf936b16d13b65c1b7aa6c722a76a0702469f91bcfc3c5b39f3293181eb"},
+    {file = "newrelic-10.2.0-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:36a2218c9e79897d9b5671cdeac30c467d7fbac10cda4f2d79062f2bd0fcaed8"},
+    {file = "newrelic-10.2.0-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7f021eac4c2e3b14eab90c608d8bd25b4e3c6b0b0d40796ec1c1260cc47b5e83"},
+    {file = "newrelic-10.2.0-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:69aa68cae47c595bdeb95f275d78693ec27a9fd9353bf81257e21f8607134db6"},
+    {file = "newrelic-10.2.0-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:ef5d27001d3b5ca53f19d150c60b570c1b0c774d082ab9bf8349f4430ed85b48"},
+    {file = "newrelic-10.2.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:00df1aa613294cb592a52157f789e75166dbf439cfa9e6cf59f6cf4a265dada9"},
+    {file = "newrelic-10.2.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a6d4094d19db924c51ca35da603344907bcbca030822f7a78d5d9c6ad361d419"},
+    {file = "newrelic-10.2.0-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:62d521a5d7269c8a5c5838c4ca3b757ef63a13257302c901223c75510cc6f9f5"},
+    {file = "newrelic-10.2.0-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:3cd5aeade6462519328fc42f4e98948a45571f3d22360a0559e19a6525c723a6"},
+    {file = "newrelic-10.2.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f6333aa7051544ddc7f8a85f344bc3f401ddd8635540878da34de7bfd91f5d95"},
+    {file = "newrelic-10.2.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7b449546ebb89feaadfd36fda7735ce06023fc90979b838e244f98369aba5ccb"},
+    {file = "newrelic-10.2.0-cp38-cp38-musllinux_1_2_aarch64.whl", hash = "sha256:fc3d34db12133b481636384663f45b9ccd7f0f41554a59c15ec37aeb4f77227d"},
+    {file = "newrelic-10.2.0-cp38-cp38-musllinux_1_2_x86_64.whl", hash = "sha256:a15df23effd09bb1d1f5c38866b75cc5f380b6aa953efbca9e95e79b72744db4"},
+    {file = "newrelic-10.2.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bc693e0db87ab4cf6623847c3949debbcc991554edfb4dd8c02c136e0770b367"},
+    {file = "newrelic-10.2.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c57e79d37ed87e2790c5e66253f9a5d91ed8cc218f160d5a4d062fc759791a78"},
+    {file = "newrelic-10.2.0-cp39-cp39-musllinux_1_2_aarch64.whl", hash = "sha256:23400846dad2283693eade90b6d3c3462301a4b7735c7f76009b1fa445660aeb"},
+    {file = "newrelic-10.2.0-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:32bd34e4cd73c2435472c0b67869fd2db914d6c99d3e1e404e09affe61a8551e"},
+    {file = "newrelic-10.2.0.tar.gz", hash = "sha256:03ab987eae0452aeb5aed8571c100d1735613a3a227387f99fe54ed38f1ae0e9"},
 ]
 
 [package.extras]
@@ -4212,4 +4226,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "f1443c96a948649c4417a6bc6f42431f9bbc8c9966570b6db31e773840ba5c61"
+content-hash = "fba1e75f1f03dcf573ff09e57a1ec496ca8e47fd4b1db6811fa772097600ce91"
