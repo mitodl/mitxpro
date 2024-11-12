@@ -2449,6 +2449,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/use-sync-external-store@npm:^0.0.3":
+  version: 0.0.3
+  resolution: "@types/use-sync-external-store@npm:0.0.3"
+  checksum: 161ddb8eec5dbe7279ac971531217e9af6b99f7783213566d2b502e2e2378ea19cf5e5ea4595039d730aa79d3d35c6567d48599f69773a02ffcff1776ec2a44e
+  languageName: node
+  linkType: hard
+
 "@webassemblyjs/ast@npm:1.12.1, @webassemblyjs/ast@npm:^1.12.1":
   version: 1.12.1
   resolution: "@webassemblyjs/ast@npm:1.12.1"
@@ -8891,7 +8898,7 @@ __metadata:
     react-hot-loader: ^4.8.0
     react-markdown: ^5.0.3
     react-picky: ^5.3.2
-    react-redux: ^5.0.5
+    react-redux: ^9.0.0
     react-router: ^4.1.1
     react-router-dom: ^4.1.1
     react-select: ^3.0.4
@@ -10376,7 +10383,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-lifecycles-compat@npm:^3.0.0, react-lifecycles-compat@npm:^3.0.4":
+"react-lifecycles-compat@npm:^3.0.4":
   version: 3.0.4
   resolution: "react-lifecycles-compat@npm:3.0.4"
   checksum: a904b0fc0a8eeb15a148c9feb7bc17cec7ef96e71188280061fc340043fd6d8ee3ff233381f0e8f95c1cf926210b2c4a31f38182c8f35ac55057e453d6df204f
@@ -10431,21 +10438,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-redux@npm:^5.0.5":
-  version: 5.1.2
-  resolution: "react-redux@npm:5.1.2"
+"react-redux@npm:^9.0.0":
+  version: 9.1.2
+  resolution: "react-redux@npm:9.1.2"
   dependencies:
-    "@babel/runtime": ^7.1.2
-    hoist-non-react-statics: ^3.3.0
-    invariant: ^2.2.4
-    loose-envify: ^1.1.0
-    prop-types: ^15.6.1
-    react-is: ^16.6.0
-    react-lifecycles-compat: ^3.0.0
+    "@types/use-sync-external-store": ^0.0.3
+    use-sync-external-store: ^1.0.0
   peerDependencies:
-    react: ^0.14.0 || ^15.0.0-0 || ^16.0.0-0
-    redux: ^2.0.0 || ^3.0.0 || ^4.0.0-0
-  checksum: 2079b57f4d25a8b2f535009eb7f5be53c5d3334b4ad2224f63309e3caa1b90209f6b6321c2bd509f715333102d645a8ed698f2c6298f05801095776c295478a8
+    "@types/react": ^18.2.25
+    react: ^18.0
+    redux: ^5.0.0
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    redux:
+      optional: true
+  checksum: 1ee9cf41f29f68267320b4fc3bcf6a76a3825c82441612582678ddd827a2b60834f687d2a8b755c905885dfce476a1eb41af42b36f4dd71f8ee9991296a1e515
   languageName: node
   linkType: hard
 
@@ -12906,6 +12914,15 @@ __metadata:
   version: 0.4.4
   resolution: "urlgrey@npm:0.4.4"
   checksum: db5884ffca497430eb99fcf7bd88402ff3647c1ba7b5687c595d3af884afc198399301ec181582501ff61074d9bf342ad12825eb11aa020bc6aeae7bc815a04c
+  languageName: node
+  linkType: hard
+
+"use-sync-external-store@npm:^1.0.0":
+  version: 1.2.2
+  resolution: "use-sync-external-store@npm:1.2.2"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+  checksum: fe07c071c4da3645f112c38c0e57beb479a8838616ff4e92598256ecce527f2888c08febc7f9b2f0ce2f0e18540ba3cde41eb2035e4fafcb4f52955037098a81
   languageName: node
   linkType: hard
 
