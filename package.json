@@ -98,7 +98,7 @@
     "redux-asserts": "^0.0.12",
     "redux-logger": "^3.0.6",
     "redux-query": "^2.3.1",
-    "reselect": "^4.0.0",
+    "reselect": "^5.0.0",
     "sass": "~1.64.2",
     "sass-lint": "^1.13.1",
     "sass-loader": "^12.1.0",
