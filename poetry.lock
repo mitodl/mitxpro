@@ -4011,13 +4011,13 @@ ua-parser = ">=0.10.0"
 
 [[package]]
 name = "user-util"
-version = "0.3.1"
+version = "1.1.0"
 description = "User utilities for the Open edX platform"
 optional = false
 python-versions = "*"
 files = [
-    {file = "user_util-0.3.1-py2.py3-none-any.whl", hash = "sha256:20af28318a2f6f1919cb2238250db9002ba1a0ebfeedc5b2d677a94db8d15e23"},
-    {file = "user_util-0.3.1.tar.gz", hash = "sha256:11e54d67bb98adf763f758fa4698aec1b7637bfb007075f0859d07e236c9142f"},
+    {file = "user_util-1.1.0-py2.py3-none-any.whl", hash = "sha256:5bfc7896831efa7c18abaa87c0793a5eacc039b682fc71b18997b0e09d0bff52"},
+    {file = "user_util-1.1.0.tar.gz", hash = "sha256:5f9016e637e642fa448618a6b02fc9c439d49c7aa65b01787a300c6f68161fd0"},
 ]
 
 [package.dependencies]
@@ -4212,4 +4212,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "f1443c96a948649c4417a6bc6f42431f9bbc8c9966570b6db31e773840ba5c61"
+content-hash = "febadb243cd854c818fd5270f7492c28b27870a82014c3340b91668ada27a195"
