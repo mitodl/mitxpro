@@ -101,7 +101,7 @@
     "reselect": "^4.0.0",
     "sass": "~1.64.2",
     "sass-lint": "^1.13.1",
-    "sass-loader": "^12.1.0",
+    "sass-loader": "^16.0.0",
     "serialize-javascript": "^3.1.0",
     "shelljs": "^0.8.3",
     "sinon": "^4.1.3",
