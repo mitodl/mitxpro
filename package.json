@@ -93,7 +93,7 @@
     "react-test-renderer": "^16.8.4",
     "react-zendesk": "^0.1.5",
     "reactstrap": "^8.0.0",
-    "redux": "^3.7.2",
+    "redux": "^5.0.0",
     "redux-actions": "^2.2.1",
     "redux-asserts": "^0.0.12",
     "redux-logger": "^3.0.6",
