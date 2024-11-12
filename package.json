@@ -82,7 +82,7 @@
     "react-document-title": "^2.0.3",
     "react-dom": "^16.8.4",
     "react-ga": "^2.2.0",
-    "react-google-recaptcha": "^1.0.5",
+    "react-google-recaptcha": "^3.0.0",
     "react-hot-loader": "^4.8.0",
     "react-markdown": "^5.0.3",
     "react-picky": "^5.3.2",
