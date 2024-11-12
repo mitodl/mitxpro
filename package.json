@@ -92,7 +92,7 @@
     "react-select": "^3.0.4",
     "react-test-renderer": "^16.8.4",
     "react-zendesk": "^0.1.5",
-    "reactstrap": "^8.0.0",
+    "reactstrap": "^9.0.0",
     "redux": "^3.7.2",
     "redux-actions": "^2.2.1",
     "redux-asserts": "^0.0.12",
