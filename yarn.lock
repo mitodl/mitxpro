@@ -8883,7 +8883,7 @@ __metadata:
     react: ^16.8.4
     react-addons-shallow-compare: ^15.6.0
     react-day-picker: ^7.3.0
-    react-device-detect: ^1.17.0
+    react-device-detect: ^2.0.0
     react-document-title: ^2.0.3
     react-dom: ^16.8.4
     react-ga: ^2.2.0
@@ -10270,15 +10270,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-device-detect@npm:^1.17.0":
-  version: 1.17.0
-  resolution: "react-device-detect@npm:1.17.0"
+"react-device-detect@npm:^2.0.0":
+  version: 2.2.3
+  resolution: "react-device-detect@npm:2.2.3"
   dependencies:
-    ua-parser-js: ^0.7.24
+    ua-parser-js: ^1.0.33
   peerDependencies:
-    react: ">= 0.14.0 < 18.0.0"
-    react-dom: ">= 0.14.0 < 18.0.0"
-  checksum: bd3583e392af0e807f5329c0763d4f4f15d211363c3cfbb5308221a874faf68a7d7ac339f3c0a4d0c5878e04eaf859e9a7405f2a8ee4a57e739ac7762c1907a1
+    react: ">= 0.14.0"
+    react-dom: ">= 0.14.0"
+  checksum: 42d9b3182b9d2495bf0d7914c9f370da51d8bdb853a3eba2acaf433894ae760386a075ba103185be825b33d42f50d85ef462087f261656d433f4c74dab23861f
   languageName: node
   linkType: hard
 
@@ -12655,12 +12655,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ua-parser-js@npm:^0.7.24, ua-parser-js@npm:^0.7.30":
+"ua-parser-js@npm:^0.7.30":
   version: 0.7.39
   resolution: "ua-parser-js@npm:0.7.39"
   bin:
     ua-parser-js: script/cli.js
   checksum: 3488852961485b80b65a8dbc978098cdf1c51bb7765262698ee1a29304786f667272182e9cee15433e7792981376b1ca59ca77e126fee0b41b104085f4be9a3c
+  languageName: node
+  linkType: hard
+
+"ua-parser-js@npm:^1.0.33":
+  version: 1.0.39
+  resolution: "ua-parser-js@npm:1.0.39"
+  bin:
+    ua-parser-js: script/cli.js
+  checksum: 19455df8c2348ef53f2e150e7406d3a025a619c2fd69722a1e63363d5ba8d91731ef7585f2dce7d8f14c8782734b4d704c05f246dca5f7565b5ae7d318084f2a
   languageName: node
   linkType: hard
 

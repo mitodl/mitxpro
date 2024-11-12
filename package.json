@@ -78,7 +78,7 @@
     "react": "^16.8.4",
     "react-addons-shallow-compare": "^15.6.0",
     "react-day-picker": "^7.3.0",
-    "react-device-detect": "^1.17.0",
+    "react-device-detect": "^2.0.0",
     "react-document-title": "^2.0.3",
     "react-dom": "^16.8.4",
     "react-ga": "^2.2.0",
