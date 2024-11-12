@@ -67,7 +67,7 @@
     "nyc": "^15.1.0",
     "object.entries": "^1.0.4",
     "popper.js": "^1.16.0",
-    "postcss-loader": "^6.1.1",
+    "postcss-loader": "^8.0.0",
     "posthog-js": "^1.171.0",
     "prettier": "^3.0.3",
     "prettier-plugin-django-alpine": "^1.1.1",
