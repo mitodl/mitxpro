@@ -7942,10 +7942,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"just-curry-it@npm:^3.1.0":
-  version: 3.2.1
-  resolution: "just-curry-it@npm:3.2.1"
-  checksum: 21b7bd6aaccfc908a89d16238f6b05408fd83a0489269ca5068bf99bcbc4e98c92afc368d86c64769be8c98580aabf822e00bb4c5c372d1a60619404a92cfbe0
+"just-curry-it@npm:5.3.0":
+  version: 5.3.0
+  resolution: "just-curry-it@npm:5.3.0"
+  checksum: 7a7d2e118c23e47374efa1a388f82d8b698953203408f398cd5333d22ea31aaa7ea7a10022f9475ba76c6068468bbb0476398a069f7129586f44ee51ef28a88f
   languageName: node
   linkType: hard
 
@@ -8899,7 +8899,7 @@ __metadata:
     react-zendesk: ^0.1.5
     reactstrap: ^8.0.0
     redux: ^3.7.2
-    redux-actions: ^2.2.1
+    redux-actions: ^3.0.0
     redux-asserts: ^0.0.12
     redux-logger: ^3.0.6
     redux-query: ^2.3.1
@@ -10678,23 +10678,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"reduce-reducers@npm:^0.4.3":
-  version: 0.4.3
-  resolution: "reduce-reducers@npm:0.4.3"
-  checksum: 6e33cafc4e7c67e8973fbde543839c3efd982a712a4fb15f6cdf45072a9fa2c17aef1f9a44330665a2c351ac7ebbb8a47afcec2932ee486c72cfd04ed1e2ad0c
+"reduce-reducers@npm:1.0.4":
+  version: 1.0.4
+  resolution: "reduce-reducers@npm:1.0.4"
+  checksum: 9b3648fa505a3ac7834cd8150ec98f9915e4020c8df0e9a4eddb5d3615814067943913f2582d0be4763ad6583209c0cf7ad3cc1021745b9b8e6ace768d49f6a9
   languageName: node
   linkType: hard
 
-"redux-actions@npm:^2.2.1":
-  version: 2.6.5
-  resolution: "redux-actions@npm:2.6.5"
+"redux-actions@npm:^3.0.0":
+  version: 3.0.3
+  resolution: "redux-actions@npm:3.0.3"
   dependencies:
-    invariant: ^2.2.4
-    just-curry-it: ^3.1.0
-    loose-envify: ^1.4.0
-    reduce-reducers: ^0.4.3
-    to-camel-case: ^1.0.0
-  checksum: 677a727d0be42aa1cbdb4c8d6296b4167c0c4ce4f28d36453764edba3c4dc5f82064290ce494209fa56eeb245262b4cdc58e7e6a50fe2f17e1d94d79c387e9e3
+    just-curry-it: 5.3.0
+    reduce-reducers: 1.0.4
+  checksum: 1d23fb991110dc4cdf214e710f62e354179d02e3088548791790069e55b5032c21624d53a9d4306e25266bc248d376fc2adeadf4efcb80584b5568b753ebdfdf
   languageName: node
   linkType: hard
 
@@ -12365,26 +12362,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"to-camel-case@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "to-camel-case@npm:1.0.0"
-  dependencies:
-    to-space-case: ^1.0.0
-  checksum: 2f74cfcffa58e8ddede7e01a03eda2cc3f0ab50efdad1d0f1092d55b4e499be43846d1f9087c458fa9efde4958e407738197d65858272c56c915b649b9ca1e62
-  languageName: node
-  linkType: hard
-
 "to-fast-properties@npm:^2.0.0":
   version: 2.0.0
   resolution: "to-fast-properties@npm:2.0.0"
   checksum: be2de62fe58ead94e3e592680052683b1ec986c72d589e7b21e5697f8744cdbf48c266fa72f6c15932894c10187b5f54573a3bcf7da0bfd964d5caf23d436168
-  languageName: node
-  linkType: hard
-
-"to-no-case@npm:^1.0.0":
-  version: 1.0.2
-  resolution: "to-no-case@npm:1.0.2"
-  checksum: 1d85326eeb89f9f3a805bf5b395bcabb8556e882350164c1faa10846076732f4cec02ac95b016e7d6bb2f55e448ce5dd227c7699ec43e387c705a5b2b1ee2963
   languageName: node
   linkType: hard
 
@@ -12394,15 +12375,6 @@ __metadata:
   dependencies:
     is-number: ^7.0.0
   checksum: f76fa01b3d5be85db6a2a143e24df9f60dd047d151062d0ba3df62953f2f697b16fe5dad9b0ac6191c7efc7b1d9dcaa4b768174b7b29da89d4428e64bc0a20ed
-  languageName: node
-  linkType: hard
-
-"to-space-case@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "to-space-case@npm:1.0.0"
-  dependencies:
-    to-no-case: ^1.0.0
-  checksum: 157cebe3e98e7cb465fe1978cf26450cc8ea8e637a01039854fac7ed60ad074e5e18b32333cc5f30df81b81ca374d63df768cd4c1fa0fe672605f965376227f4
   languageName: node
   linkType: hard
 
