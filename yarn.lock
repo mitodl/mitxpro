@@ -5338,15 +5338,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-mocha@npm:^6.3.0":
-  version: 6.3.0
-  resolution: "eslint-plugin-mocha@npm:6.3.0"
+"eslint-plugin-mocha@npm:^10.0.0":
+  version: 10.5.0
+  resolution: "eslint-plugin-mocha@npm:10.5.0"
   dependencies:
-    eslint-utils: ^2.0.0
-    ramda: ^0.27.0
+    eslint-utils: ^3.0.0
+    globals: ^13.24.0
+    rambda: ^7.4.0
   peerDependencies:
-    eslint: ">= 4.0.0"
-  checksum: 8f127f4c0cd410ffebf825bda330f937e6b46841a39d0cae962d12a0646930409448c5822f4325e24297a8210d6acd52b75c83aba70b2be8dd403a7346e636c5
+    eslint: ">=7.0.0"
+  checksum: 07fc975c7768b19de4d2883307177f10e94b6318a4971dbc3c52edcea01977a59a54b85fe564974e43b29b12b821b06afd48d95b631e84d203c44676778aa019
   languageName: node
   linkType: hard
 
@@ -5395,12 +5396,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-utils@npm:^2.0.0, eslint-utils@npm:^2.1.0":
+"eslint-utils@npm:^2.1.0":
   version: 2.1.0
   resolution: "eslint-utils@npm:2.1.0"
   dependencies:
     eslint-visitor-keys: ^1.1.0
   checksum: 27500938f348da42100d9e6ad03ae29b3de19ba757ae1a7f4a087bdcf83ac60949bbb54286492ca61fac1f5f3ac8692dd21537ce6214240bf95ad0122f24d71d
+  languageName: node
+  linkType: hard
+
+"eslint-utils@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "eslint-utils@npm:3.0.0"
+  dependencies:
+    eslint-visitor-keys: ^2.0.0
+  peerDependencies:
+    eslint: ">=5"
+  checksum: 0668fe02f5adab2e5a367eee5089f4c39033af20499df88fe4e6aba2015c20720404d8c3d6349b6f716b08fdf91b9da4e5d5481f265049278099c4c836ccb619
   languageName: node
   linkType: hard
 
@@ -6465,7 +6477,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:^13.6.0, globals@npm:^13.9.0":
+"globals@npm:^13.24.0, globals@npm:^13.6.0, globals@npm:^13.9.0":
   version: 13.24.0
   resolution: "globals@npm:13.24.0"
   dependencies:
@@ -8850,7 +8862,7 @@ __metadata:
     eslint-plugin-babel: ^5.3.0
     eslint-plugin-flow-vars: ^0.5.0
     eslint-plugin-flowtype: ^4.7.0
-    eslint-plugin-mocha: ^6.3.0
+    eslint-plugin-mocha: ^10.0.0
     eslint-plugin-react: ^7.19.0
     expose-loader: ^5.0.0
     express: ^4.19.2
@@ -10186,10 +10198,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ramda@npm:^0.27.0":
-  version: 0.27.2
-  resolution: "ramda@npm:0.27.2"
-  checksum: 28d6735dd1eea1a796c56cf6111f3673c6105bbd736e521cdd7826c46a18eeff337c2dba4668f6eed990d539b9961fd6db19aa46ccc1530ba67a396c0a9f580d
+"rambda@npm:^7.4.0":
+  version: 7.5.0
+  resolution: "rambda@npm:7.5.0"
+  checksum: ad608a9a4160d0b6b0921047cea1329276bf239ff58d439135288712dcdbbf0df47c76591843ad249d89e7c5a9109ce86fe099aa54aef0dc0aa92a9b4dd1b8eb
   languageName: node
   linkType: hard
 
