@@ -24,7 +24,7 @@
     "@fancyapps/fancybox": "^3.5.7",
     "@material/layout-grid": "^0.41.0",
     "@material/top-app-bar": "^1.1.1",
-    "@sentry/browser": "^7.0.0",
+    "@sentry/browser": "^8.0.0",
     "@trust/webcrypto": "^0.9.2",
     "autoprefixer": "^9.7.3",
     "babel-eslint": "^10.0.1",
