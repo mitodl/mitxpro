@@ -14,6 +14,7 @@ function run_test {
 
 run_test ./scripts/test/detect_missing_migrations.sh
 run_test ./scripts/test/no_auto_migrations.sh
+run_test pytest -n logical
 
 # shellcheck disable=SC2154
 exit $status

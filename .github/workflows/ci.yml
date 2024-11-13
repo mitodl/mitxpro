@@ -108,7 +108,6 @@ jobs:
           source .venv/bin/activate
           export MEDIA_ROOT="$(mktemp -d)"
           poetry run ./scripts/test/python_tests.sh
-          pytest --cov -n logical
         env:
           DEBUG: False
           NODE_ENV: "production"
