@@ -11,6 +11,7 @@ omit =
     *_tests.py
 
 [report]
+fail_under = 80.0
 exclude_lines =
     pragma: no cover
 show_missing = True
