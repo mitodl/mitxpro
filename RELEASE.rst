@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.164.0
+Version 0.164.0 (Released November 13, 2024)
 ---------------
 
 - fix(deps): update dependency psycopg2 to v2.9.10 (#3227)
