@@ -10,7 +10,6 @@ from django.core.exceptions import ValidationError
 from voucher.forms import UploadVoucherForm
 
 
-@pytest.mark.xdist_group(name="group1")
 @patch("voucher.forms.read_pdf", return_value="Success")
 def test_clean_voucher(mock_pdf_parser, upload_voucher_form_with_file_field):
     """
@@ -25,7 +24,6 @@ def test_clean_voucher(mock_pdf_parser, upload_voucher_form_with_file_field):
     )
 
 
-@pytest.mark.xdist_group(name="group1")
 @patch("voucher.forms.read_pdf", return_value=None)
 def test_clean_voucher_error(mock_pdf_parser, upload_voucher_form_with_file_field):
     """
