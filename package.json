@@ -142,7 +142,6 @@
   },
   "resolutions": {
     "cheerio": "1.0.0-rc.12",
-    "set-value": "^2.0.1",
     "js-yaml": "^3.13.1",
     "kind-of": "6.0.3",
     "minimist": "1.2.8",
