@@ -147,6 +147,6 @@
     "kind-of": "6.0.3",
     "minimist": "1.2.8",
     "merge": "^2.1.1",
-    "normalize-url": "^6.0.1"
+    "normalize-url": "^8.0.0"
   }
 }
