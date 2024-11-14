@@ -72,7 +72,7 @@ def clean_up_files():  # noqa: PT004
     """
     yield
     if os.path.exists(settings.MEDIA_ROOT):  # noqa: PTH110
-        shutil.rmtree(settings.MEDIA_ROOT)
+        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")
