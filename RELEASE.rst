@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.164.1
+---------------
+
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8 (#3243)
+- chore(deps): update node.js to v22 (#3244)
+- chore(deps): update dependency normalize-url to v8 (#3240)
+- chore: run tests in parallel (#3304)
+- chore(deps): update postgres docker tag to v17 (#3198)
+- chore(deps): update dependency faker to v30 (#3224)
+- chore(deps): update dependency freezegun to v1 (#3236)
+- chore(deps): lock file maintenance (#3302)
+- fix(deps): update dependency django-hijack to v3.7.0 (#3234)
+- chore: remove unused dep mixin-deep (#3303)
+- chore(deps): update dependency ruff to ^0.7.0 (#3233)
+- fix(deps): update dependency wagtail to v5.2.7 (#3232)
+- fix(deps): update dependency boto3 to v1.35.58 (#3230)
+- fix(deps): update dependency uwsgi to v2.0.28 (#3231)
+- chore(deps): update actions/setup-python digest to 0b93645 (#3225)
+- [pre-commit.ci] pre-commit autoupdate (#3229)
+
 Version 0.164.0 (Released November 13, 2024)
 ---------------
 
