@@ -72,7 +72,8 @@ class EmeritusCourse:
     """
 
     def __init__(self, emeritus_course_json):
-        self.course_title = emeritus_course_json.get("program_name", None)
+        program_name = emeritus_course_json.get("program_name", None)
+        self.course_title = program_name.strip() if program_name else None
         self.course_code = emeritus_course_json.get("course_code")
 
         # Emeritus course code format is `MO-<COURSE_TAG>`, where course tag can contain `.`,
