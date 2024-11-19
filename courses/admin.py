@@ -55,6 +55,7 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ["title", "readable_id", "platform__name", "external_course_id"]
     list_display = ("id", "title", "get_program", "position_in_program", "platform")
     list_filter = ["live", "platform", "program"]
+    list_select_related = ["program", "platform"]
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
@@ -90,6 +91,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
         "enrollment_start",
     )
     list_filter = ["live", "course__platform", "course"]
+    list_select_related = ["course", "course__platform"]
 
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
