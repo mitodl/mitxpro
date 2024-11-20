@@ -744,7 +744,7 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
     ("title", "course_code", "course_run_code", "is_valid"),
     [
         (
-            "Internet of Things (IoT): Design and Applications",
+            "Internet of Things (IoT): Design and Applications     ",
             "MO-DBIP",
             "MO-DBIP.ELE-99-07#1",
             True,
@@ -752,13 +752,13 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
         ("", "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
         (None, "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
         (
-            "Internet of Things (IoT): Design and Applications",
+            "    Internet of Things (IoT): Design and Applications   ",
             "",
             "MO-DBIP.ELE-99-07#1",
             False,
         ),
         (
-            "Internet of Things (IoT): Design and Applications",
+            "    Internet of Things (IoT): Design and Applications",
             None,
             "MO-DBIP.ELE-99-07#1",
             False,
@@ -776,7 +776,7 @@ def test_emeritus_course_validate_required_fields(
     Tests that EmeritusCourse.validate_required_fields validates required fields.
     """
     emeritus_course = EmeritusCourse(emeritus_course_data)
-    emeritus_course.course_title = title
+    emeritus_course.course_title = title.strip() if title else title
     emeritus_course.course_code = course_code
     emeritus_course.course_run_code = course_run_code
     assert emeritus_course.validate_required_fields() == is_valid
