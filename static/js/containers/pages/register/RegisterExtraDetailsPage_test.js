@@ -102,7 +102,7 @@ describe("RegisterExtraDetailsPage", () => {
       { body, headers: undefined, credentials: undefined },
     );
 
-    assert.lengthOf(helper.browserHistory, 1);
+    assert.equal(helper.browserHistory.index, 0);
     sinon.assert.calledWith(setErrorsStub, fieldErrors);
     sinon.assert.calledWith(setSubmittingStub, false);
   });
@@ -138,15 +138,15 @@ describe("RegisterExtraDetailsPage", () => {
 
   //
   [
-    [STATE_ERROR_TEMPORARY, [], routes.register.error, ""],
-    [STATE_ERROR, [], routes.register.error, ""], // cover the case with an error but no  messages
+    [STATE_ERROR_TEMPORARY, [], routes.register.error, "?"],
+    [STATE_ERROR, [], routes.register.error, "?"], // cover the case with an error but no  messages
     [
       STATE_USER_BLOCKED,
       ["error_code"],
       routes.register.denied,
       "?error=error_code",
     ],
-    [STATE_USER_BLOCKED, [], routes.register.denied, ""],
+    [STATE_USER_BLOCKED, [], routes.register.denied, "?"],
   ].forEach(([state, errors, pathname, search]) => {
     it(`redirects to ${pathname} when it receives auth state ${state}`, async () => {
       const { inner } = await renderPage();
