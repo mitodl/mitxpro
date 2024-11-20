@@ -78,7 +78,6 @@ from cms.constants import (
     CatalogSorting,
 )
 from cms.forms import CertificatePageForm, CoursewareForm
-from cms.utils import create_b2b_section, create_how_you_will_learn_section
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
 from courses.models import (
     Course,
@@ -1487,23 +1486,6 @@ class ExternalCoursePage(CourseProductPage):
     """
 
     template = "product_page.html"
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            super().save(*args, **kwargs)
-            return
-
-        icongrid_page = self.get_child_page_of_type_including_draft(
-            LearningTechniquesPage
-        )
-        if not icongrid_page:
-            icongrid_page = create_how_you_will_learn_section()
-            self.add_child(instance=icongrid_page)
-
-        b2b_page = self.get_child_page_of_type_including_draft(ForTeamsPage)
-        if not b2b_page:
-            b2b_page = create_b2b_section()
-            self.add_child(instance=b2b_page)
 
 
 class ExternalProgramPage(ProgramProductPage):

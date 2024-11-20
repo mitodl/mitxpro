@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 
 from django.core.files import File
@@ -9,7 +10,7 @@ from cms.constants import B2B_SECTION, HOW_YOU_WILL_LEARN_SECTION
 def create_how_you_will_learn_section():
     from cms.models import LearningTechniquesPage
 
-    section_content = HOW_YOU_WILL_LEARN_SECTION.copy()
+    section_content = deepcopy(HOW_YOU_WILL_LEARN_SECTION)
     for technique in section_content["technique_items"]:
         image_title = technique["value"]["heading"]
         with Path(technique["value"]["image"]).open("rb") as img:
@@ -25,7 +26,7 @@ def create_how_you_will_learn_section():
 def create_b2b_section():
     from cms.models import ForTeamsPage
 
-    section_content = B2B_SECTION.copy()
+    section_content = deepcopy(B2B_SECTION)
     with Path(section_content["image"]).open("rb") as img:
         img_file = File(img)
         image, _ = Image.objects.get_or_create(
