@@ -14,9 +14,11 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
+    B2B_SECTION,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
     FORMAT_OTHER,
+    HOW_YOU_WILL_LEARN_SECTION,
     ON_DEMAND_WEBINAR,
     ON_DEMAND_WEBINAR_BUTTON_TITLE,
     UPCOMING_WEBINAR,
@@ -57,7 +59,9 @@ from cms.factories import (
 )
 from cms.models import (
     CertificatePage,
+    CourseIndexPage,
     CoursesInProgramPage,
+    ExternalCoursePage,
     ForTeamsPage,
     FrequentlyAskedQuestionPage,
     LearningJourneySection,
@@ -2089,3 +2093,49 @@ def test_certificatepage_saved_no_signatories_external_courseware(
 
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
+
+
+def test_external_course_page_auto_created_sections(superuser_client):
+    """
+    Creating ExternalCoursePage should also create sub pages:
+    1. LearningTechniquesPage
+    2. ForTeamsPage
+    """
+    external_course_page_slug = "icon-grid-6064"
+    course = CourseFactory.create()
+    post_data = {
+        "course": course.id,
+        "title": "Icon Grid #6064",
+        "subhead": "testing #6064",
+        "format": "Online",
+        "content-count": 0,
+        "slug": external_course_page_slug,
+        "action-publish": "action-publish",
+    }
+    response = superuser_client.post(
+        reverse(
+            "wagtailadmin_pages:add",
+            args=("cms", "externalcoursepage", CourseIndexPage.objects.first().id),
+        ),
+        post_data,
+    )
+
+    assert response.status_code == 302
+    external_course_page = ExternalCoursePage.objects.get(
+        slug=external_course_page_slug
+    )
+    assert external_course_page.course.id == course.id
+    assert len(external_course_page.child_pages) >= 2
+    learning_technical_page = (
+        external_course_page.get_child_page_of_type_including_draft(
+            LearningTechniquesPage
+        )
+    )
+    for_teams_page = external_course_page.get_child_page_of_type_including_draft(
+        ForTeamsPage
+    )
+    assert learning_technical_page
+    assert for_teams_page
+    assert learning_technical_page.title == HOW_YOU_WILL_LEARN_SECTION["title"]
+    assert len(learning_technical_page.technique_items) == 6
+    assert for_teams_page.title == B2B_SECTION["title"]

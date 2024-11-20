@@ -4,6 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from wagtail import hooks
 from wagtail.admin.api.views import PagesAdminAPIViewSet
 
+from cms.models import ExternalCoursePage, ForTeamsPage, LearningTechniquesPage
+from cms.utils import create_b2b_section, create_how_you_will_learn_section
 from courses.models import CourseRun, Program
 from ecommerce.models import Product, ProductVersion
 
@@ -73,3 +75,20 @@ def create_product_and_versions_for_courseware_pages(request, page):
         ProductVersion.objects.create(
             product=product, price=price, description=page.program.text_id
         )
+
+
+@hooks.register("after_create_page")
+def create_how_you_will_learn_and_b2b_sections(request, page):  # noqa: ARG001
+    if not isinstance(page, ExternalCoursePage):
+        # We need to create sections only for External Course Pages
+        return
+
+    icongrid_page = page.get_child_page_of_type_including_draft(LearningTechniquesPage)
+    if not icongrid_page:
+        icongrid_page = create_how_you_will_learn_section()
+        page.add_child(instance=icongrid_page)
+
+    b2b_page = page.get_child_page_of_type_including_draft(ForTeamsPage)
+    if not b2b_page:
+        b2b_page = create_b2b_section()
+        page.add_child(instance=b2b_page)
