@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.164.1
+Version 0.164.1 (Released November 21, 2024)
 ---------------
 
 - chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8 (#3243)
