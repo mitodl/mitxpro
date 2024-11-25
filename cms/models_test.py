@@ -26,6 +26,7 @@ from cms.constants import (
 from cms.factories import (
     CertificatePageFactory,
     CompaniesLogoCarouselPageFactory,
+    CourseOverviewPageFactory,
     CoursePageFactory,
     CoursesInProgramPageFactory,
     EnterprisePageFactory,
@@ -57,6 +58,7 @@ from cms.factories import (
 )
 from cms.models import (
     CertificatePage,
+    CourseOverviewPage,
     CoursesInProgramPage,
     ForTeamsPage,
     FrequentlyAskedQuestionPage,
@@ -2089,3 +2091,29 @@ def test_certificatepage_saved_no_signatories_external_courseware(
 
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
+
+
+def test_course_overview_page():
+    external_course_page = ExternalCoursePageFactory.create()
+    assert not external_course_page.course_overview
+    assert CourseOverviewPage.can_create_at(external_course_page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=external_course_page,
+        sub_heading="<p>paragraph content</p>",
+        heading="test heading",
+    )
+
+    # invalidate cached property
+    del external_course_page.child_pages
+
+    assert overview_page.get_parent() == external_course_page
+    assert external_course_page.course_overview == overview_page
+    assert overview_page.heading == "test heading"
+    assert overview_page.sub_heading == "<p>paragraph content</p>"
+
+    # test that it can be modified
+    new_heading = "new test heading"
+    overview_page.heading = new_heading
+    overview_page.save()
+
+    assert overview_page.heading == new_heading
