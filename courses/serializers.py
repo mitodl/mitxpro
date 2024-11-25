@@ -114,6 +114,16 @@ class CourseSerializer(serializers.ModelSerializer):
     platform = serializers.SerializerMethodField()
     marketing_hubspot_form_id = serializers.SerializerMethodField()
     availability = serializers.SerializerMethodField()
+    prerequisites = serializers.SerializerMethodField()
+
+    def get_prerequisites(self, instance):  # noqa: ARG002
+        """Get course prerequisites"""
+
+        # This is a hard coded value because the consumers of the API need this field.
+        # In an ideal situation the prerequisites could be list of courses.
+        # Since in xPRO we don't have support for prerequisites
+        # so we will not get/check for prerequisites
+        return []
 
     def get_availability(self, instance):  # noqa: ARG002
         """Get course availability"""
@@ -228,6 +238,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "is_external",
             "platform",
             "availability",
+            "prerequisites",
         ]
 
 
@@ -292,6 +303,16 @@ class ProgramSerializer(serializers.ModelSerializer):
     credits = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
     availability = serializers.SerializerMethodField()
+    prerequisites = serializers.SerializerMethodField()
+
+    def get_prerequisites(self, instance):  # noqa: ARG002
+        """Get course prerequisites"""
+
+        # This is a hard coded value because the consumers of the API need this field.
+        # In an ideal situation the prerequisites could be list of courses.
+        # Since in xPRO we don't have support for prerequisites
+        # so we will not get/check for prerequisites
+        return []
 
     def get_availability(self, instance):  # noqa: ARG002
         """Get program availability"""
@@ -433,6 +454,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             "is_external",
             "platform",
             "availability",
+            "prerequisites",
         ]
 
 
