@@ -48,6 +48,9 @@
   {% include "partials/hero.html" %}
   {% include "partials/metadata-tiles.html" %}
   {% include "partials/subnav.html" with product=page.product %}
+  {% if course_overview %}
+  {% include "partials/course-overview.html" with page=course_overview %}
+  {% endif %}
   {% if outcomes %}
   {% include "partials/learning-outcomes.html" with page=outcomes %}
   {% endif %}

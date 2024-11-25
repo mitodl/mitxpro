@@ -13,6 +13,11 @@
   </a>
   <div id="subNavBar" class="collapse navbar-collapse justify-content-center">
     <ul class="navbar-nav container justify-content-center">
+      {% if course_overview %}
+      <li class="nav-item px-2 d-flex align-items-center">
+        <a class="nav-link text-center" href="#courseOverview">Overview</a>
+      </li>
+      {% endif %}
       {% if outcomes %}
       <li class="nav-item px-2 d-flex align-items-center">
         <a class="nav-link text-center" href="#learningOutcomes"
