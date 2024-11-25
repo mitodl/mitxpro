@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.164.2
+---------------
+
+- feat(api): has_prerequisites field added in courses and programs API (#3306)
+- Revert "fix(deps): update dependency sass to ~1.81.0" (#3323)
+- chore(deps): Remove unused package 'set-value' (#3307)
+- perf: select related objects for course and courserun admin (#3316)
+- chore(deps): update codecov/codecov-action action to v5 (#3314)
+- fix: strip emeritus course title during sync (#3317)
+- [pre-commit.ci] pre-commit autoupdate (#3315)
+- fix(deps): update dependency sass to ~1.81.0 (#3313)
+- chore(deps): update postgres docker tag to v17.1 (#3312)
+- chore(deps): update dependency faker to v30.10.0 (#3311)
+- fix(deps): update dependency boto3 to v1.35.63 (#3310)
+
 Version 0.164.1 (Released November 21, 2024)
 ---------------
 
