@@ -17,6 +17,7 @@ from cms.api import save_page_revision
 from cms.models import (
     CertificatePage,
     CourseIndexPage,
+    CourseOverviewPage,
     ExternalCoursePage,
     LearningOutcomesPage,
     WhoShouldEnrollPage,
@@ -462,6 +463,13 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                     stats["certificates_updated"].add(course.readable_id)
                     log.info("Certificate Page Updated")
 
+            overview_page = course_page.get_child_page_of_type_including_draft(
+                CourseOverviewPage
+            )
+            if not overview_page and emeritus_course.description:
+                create_course_overview_page(course_page, emeritus_course)
+                log.info("Created CourseOverviewPage.")
+
     # As we get the API data for course runs, we can have duplicate course codes in course created and updated,
     # so, we are removing the courses created from the updated courses list.
     stats["existing_courses"] = stats["existing_courses"].difference(
@@ -765,3 +773,18 @@ def parse_external_course_data_str(items_str):
     """
     items_list = items_str.strip().split("\r\n")
     return [item.replace("●", "").strip() for item in items_list][1:]
+
+
+def create_course_overview_page(
+    course_page: ExternalCoursePage, emeritus_course: EmeritusCourse
+):
+    """
+    Creates `CourseOverviewPage` for Emeritus course.
+
+    Args:
+        course_page(ExternalCoursePage): ExternalCoursePage object.
+        emeritus_course(EmeritusCourse): EmeritusCourse object
+    """
+    overview_page = CourseOverviewPage(sub_heading=emeritus_course.description)
+    course_page.add_child(instance=overview_page)
+    overview_page.save()
