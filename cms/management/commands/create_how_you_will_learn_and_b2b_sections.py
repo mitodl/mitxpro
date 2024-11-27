@@ -2,8 +2,8 @@
 
 from django.core.management.base import BaseCommand
 
-from cms.models import ExternalCoursePage, ForTeamsPage, LearningTechniquesPage
-from cms.utils import create_b2b_section, create_how_you_will_learn_section
+from cms.models import ExternalCoursePage
+from cms.wagtail_hooks import create_static_pages_for_external_courses
 
 
 class Command(BaseCommand):
@@ -13,16 +13,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  # noqa: ARG002
         for page in ExternalCoursePage.objects.all():
-            # Check if the sections already exist
-            icongrid_page = page.get_child_page_of_type_including_draft(
-                LearningTechniquesPage
-            )
-            if not icongrid_page:
-                icongrid_page = create_how_you_will_learn_section()
-                page.add_child(instance=icongrid_page)
-
-            # Check if the sections already exist
-            b2b_page = page.get_child_page_of_type_including_draft(ForTeamsPage)
-            if not b2b_page:
-                b2b_page = create_b2b_section()
-                page.add_child(instance=b2b_page)
+            create_static_pages_for_external_courses(None, page)
