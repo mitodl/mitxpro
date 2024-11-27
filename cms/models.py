@@ -61,6 +61,7 @@ from cms.constants import (
     ALL_TOPICS,
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
+    COMMON_EXTERNAL_COURSE_SLUG,
     COURSE_INDEX_SLUG,
     ENTERPRISE_PAGE_SLUG,
     FORMAT_HYBRID,
@@ -83,6 +84,7 @@ from courses.models import (
     Course,
     CourseRunCertificate,
     CourseTopic,
+    Platform,
     Program,
     ProgramCertificate,
     ProgramRun,
@@ -2635,3 +2637,93 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
                 "HUBSPOT_ENTERPRISE_PAGE_FORM_ID"
             ),
         }
+
+
+class ExternalCoursePagePlatform(models.Model):
+    """
+    Abstract model for platform specific pages
+    """
+
+    platform = models.ForeignKey(
+        Platform, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class CommonExternalCoursePage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
+    """
+    A placeholder class to group CommonExternalCoursePages as children.
+    This class logically acts as no more than a "folder" to organize
+    pages and add parent slug segment to the page url.
+    """
+
+    slug = COMMON_EXTERNAL_COURSE_SLUG
+
+    parent_page_types = ["CourseIndexPage"]
+
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
+
+
+class ForTeamsExternalCoursePage(ForTeamsPage, ExternalCoursePagePlatform):
+    """
+    ForTeamsPage for platform specific page
+    """
+
+    parent_page_types = [
+        "CommonExternalCoursePage",
+    ]
+
+    content_panels = [
+        FieldPanel("platform"),
+        *ForTeamsPage.content_panels,
+    ]
+
+    class Meta:
+        verbose_name = "Text-Image Section - platform"
+
+    def __str__(self):
+        return self.title
+
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
+
+
+class LearningTechniquesExternalCoursePage(
+    LearningTechniquesPage, ExternalCoursePagePlatform
+):
+    """
+    LearningTechniquesPage for platform specific page
+    """
+
+    parent_page_types = [
+        "CommonExternalCoursePage",
+    ]
+
+    content_panels = [
+        FieldPanel("platform"),
+        *LearningTechniquesPage.content_panels,
+    ]
+
+    class Meta:
+        verbose_name = "Icon Grid - platform"
+
+    def __str__(self):
+        return self.title
+
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
