@@ -1,37 +1,49 @@
-from copy import deepcopy
-from pathlib import Path
-
-from django.core.files import File
-from wagtail.images.models import Image
-
-from cms.constants import B2B_SECTION, HOW_YOU_WILL_LEARN_SECTION
-
-
-def create_how_you_will_learn_section():
-    from cms.models import LearningTechniquesPage
-
-    section_content = deepcopy(HOW_YOU_WILL_LEARN_SECTION)
-    for technique in section_content["technique_items"]:
-        image_title = technique["value"]["heading"]
-        with Path(technique["value"]["image"]).open("rb") as img:
-            img_file = File(img)
-            image, _ = Image.objects.get_or_create(
-                title=image_title, defaults={"file": img_file}
-            )
-            technique["value"]["image"] = image.id
-
-    return LearningTechniquesPage(**section_content)
+from cms.models import (
+    ForTeamsExternalCoursePage,
+    ForTeamsPage,
+    LearningTechniquesExternalCoursePage,
+    LearningTechniquesPage,
+)
 
 
-def create_b2b_section():
-    from cms.models import ForTeamsPage
+def create_how_you_will_learn_section(platform=None):
+    learning_tech_page = LearningTechniquesExternalCoursePage.objects.all()
+    if platform:
+        learning_tech_page = learning_tech_page.filter(platform__name__iexact=platform)
 
-    section_content = deepcopy(B2B_SECTION)
-    with Path(section_content["image"]).open("rb") as img:
-        img_file = File(img)
-        image, _ = Image.objects.get_or_create(
-            title=section_content["title"], defaults={"file": img_file}
+    learning_tech_page = learning_tech_page.first()
+    if not learning_tech_page:
+        learning_tech_page = LearningTechniquesExternalCoursePage.objects.get(
+            platform__isnull=True
         )
-        section_content["image"] = image
 
-    return ForTeamsPage(**section_content)
+    return (
+        LearningTechniquesPage(
+            title=learning_tech_page.title,
+            technique_items=learning_tech_page.technique_items,
+        )
+        if learning_tech_page
+        else None
+    )
+
+
+def create_b2b_section(platform=None):
+    b2b_page = ForTeamsExternalCoursePage.objects.all()
+    if platform:
+        b2b_page = b2b_page.filter(platform__name__iexact=platform)
+
+    b2b_page = b2b_page.first()
+    if not b2b_page:
+        b2b_page = ForTeamsExternalCoursePage.objects.get(platform__isnull=True)
+
+    return (
+        ForTeamsPage(
+            title=b2b_page.title,
+            content=b2b_page.content,
+            action_title=b2b_page.action_title,
+            action_url=b2b_page.action_url,
+            image=b2b_page.image,
+        )
+        if b2b_page
+        else None
+    )

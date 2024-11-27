@@ -78,17 +78,21 @@ def create_product_and_versions_for_courseware_pages(request, page):
 
 
 @hooks.register("after_create_page")
-def create_how_you_will_learn_and_b2b_sections(request, page):  # noqa: ARG001
+def create_static_pages_for_external_courses(request, page):  # noqa: ARG001
     if not isinstance(page, ExternalCoursePage):
         # We need to create sections only for External Course Pages
         return
 
+    platform = page.course.platform.name
+
     icongrid_page = page.get_child_page_of_type_including_draft(LearningTechniquesPage)
     if not icongrid_page:
-        icongrid_page = create_how_you_will_learn_section()
-        page.add_child(instance=icongrid_page)
+        icongrid_page = create_how_you_will_learn_section(platform)
+        if icongrid_page:
+            page.add_child(instance=icongrid_page)
 
     b2b_page = page.get_child_page_of_type_including_draft(ForTeamsPage)
     if not b2b_page:
-        b2b_page = create_b2b_section()
-        page.add_child(instance=b2b_page)
+        b2b_page = create_b2b_section(platform)
+        if b2b_page:
+            page.add_child(instance=b2b_page)
