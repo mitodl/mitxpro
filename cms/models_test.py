@@ -2209,6 +2209,10 @@ def test_common_external_course_pages():
 
 
 def test_common_external_course_pages_uniqueness():
+    """
+    Tests the uniqueness constraint for creating multiple instances of the same page
+    under a CommonExternalCoursePage.
+    """
     course_page = CourseIndexPageFactory.create()
     assert CommonExternalCoursePage.can_create_at(course_page)
     common_folder = CommonExternalCoursePageFactory.create()
