@@ -20,6 +20,7 @@ from cms.models import (
     BlogIndexPage,
     CatalogPage,
     CertificatePage,
+    CommonExternalCoursePage,
     CompaniesLogoCarouselSection,
     CourseIndexPage,
     CoursePage,
@@ -28,6 +29,7 @@ from cms.models import (
     ExternalCoursePage,
     ExternalProgramPage,
     FacultyMembersPage,
+    ForTeamsExternalCoursePage,
     ForTeamsPage,
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
@@ -36,6 +38,7 @@ from cms.models import (
     LearningJourneySection,
     LearningOutcomesPage,
     LearningStrategyFormSection,
+    LearningTechniquesExternalCoursePage,
     LearningTechniquesPage,
     NewsAndEventsBlock,
     NewsAndEventsPage,
@@ -52,7 +55,7 @@ from cms.models import (
     WebinarPage,
     WhoShouldEnrollPage,
 )
-from courses.factories import CourseFactory, ProgramFactory
+from courses.factories import CourseFactory, PlatformFactory, ProgramFactory
 
 factory.Faker.add_provider(internet)
 
@@ -576,3 +579,32 @@ class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = LearningStrategyFormSection
+
+
+class CommonExternalCoursePageFactory(wagtail_factories.PageFactory):
+    """CommonExternalCoursePage factory class"""
+
+    title = factory.fuzzy.FuzzyText()
+
+    class Meta:
+        model = CommonExternalCoursePage
+
+
+class LearningTechniqueExternalCoursPageFactory(LearningTechniquesPageFactory):
+    """LearningTechniqueExternalCoursPage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
+    title = factory.fuzzy.FuzzyText(prefix=f"{platform} - ")
+
+    class Meta:
+        model = LearningTechniquesExternalCoursePage
+
+
+class ForTeamsExternalCoursePageFactory(ForTeamsPageFactory):
+    """ForTeamsExternalCoursePage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
+    title = factory.fuzzy.FuzzyText(prefix=f"{platform} - ")
+
+    class Meta:
+        model = ForTeamsExternalCoursePage
