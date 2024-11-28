@@ -13,8 +13,11 @@ def create_how_you_will_learn_section(platform=None):
 
     learning_tech_page = learning_tech_page.first()
     if not learning_tech_page:
-        learning_tech_page = LearningTechniquesExternalCoursePage.objects.get(
-            platform__isnull=True
+        learning_tech_page = (
+            LearningTechniquesExternalCoursePage.objects.filter(
+                platform__isnull=True
+            ).first()
+            or None
         )
 
     return (
@@ -34,7 +37,10 @@ def create_b2b_section(platform=None):
 
     b2b_page = b2b_page.first()
     if not b2b_page:
-        b2b_page = ForTeamsExternalCoursePage.objects.get(platform__isnull=True)
+        b2b_page = (
+            ForTeamsExternalCoursePage.objects.filter(platform__isnull=True).first()
+            or None
+        )
 
     return (
         ForTeamsPage(
