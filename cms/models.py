@@ -2652,7 +2652,7 @@ class ExternalCoursePagePlatform(models.Model):
         abstract = True
 
 
-class CommonExternalCoursePage(DisableSitemapURLMixin, Page, CanCreatePageMixin):
+class CommonExternalCoursePage(CanCreatePageMixin, DisableSitemapURLMixin, Page):
     """
     A placeholder class to group CommonExternalCoursePages as children.
     This class logically acts as no more than a "folder" to organize
@@ -2671,7 +2671,35 @@ class CommonExternalCoursePage(DisableSitemapURLMixin, Page, CanCreatePageMixin)
         raise Http404
 
 
-class ForTeamsExternalCoursePage(ForTeamsPage, ExternalCoursePagePlatform):
+class CommonExternalCoursePageMixin:
+    def clean(self):
+        super().clean()
+        existing_obj = self.__class__.objects.filter(platform=self.platform).first()
+        if existing_obj:
+            raise ValidationError(
+                {"platform": "Page for this platform already exists."}
+            )
+
+    @classmethod
+    def can_create_at(cls, parent):  # noqa: ARG003
+        # Overrides base can_create_at from CourseProgramChildPage
+        # Override clean for better control on uniqueness and error handling
+        return True
+
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
+
+    def __str__(self):
+        return self.title
+
+
+class ForTeamsExternalCoursePage(
+    CommonExternalCoursePageMixin, ForTeamsPage, ExternalCoursePagePlatform
+):
     """
     ForTeamsPage for platform specific page
     """
@@ -2691,16 +2719,9 @@ class ForTeamsExternalCoursePage(ForTeamsPage, ExternalCoursePagePlatform):
     def __str__(self):
         return self.title
 
-    def serve(self, request, *args, **kwargs):  # noqa: ARG002
-        """
-        For index pages we raise a 404 because these pages do not have a template
-        of their own and we do not expect a page to available at their slug.
-        """
-        raise Http404
-
 
 class LearningTechniquesExternalCoursePage(
-    LearningTechniquesPage, ExternalCoursePagePlatform
+    CommonExternalCoursePageMixin, LearningTechniquesPage, ExternalCoursePagePlatform
 ):
     """
     LearningTechniquesPage for platform specific page
@@ -2717,13 +2738,3 @@ class LearningTechniquesExternalCoursePage(
 
     class Meta:
         verbose_name = "Icon Grid - platform"
-
-    def __str__(self):
-        return self.title
-
-    def serve(self, request, *args, **kwargs):  # noqa: ARG002
-        """
-        For index pages we raise a 404 because these pages do not have a template
-        of their own and we do not expect a page to available at their slug.
-        """
-        raise Http404

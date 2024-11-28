@@ -44,7 +44,7 @@ from cms.factories import (
     LearningJourneyPageFactory,
     LearningOutcomesPageFactory,
     LearningStrategyFormPageFactory,
-    LearningTechniqueExternalCoursPageFactory,
+    LearningTechniqueExternalCoursePageFactory,
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
     PlatformFactory,
@@ -71,6 +71,7 @@ from cms.models import (
     FrequentlyAskedQuestionPage,
     LearningJourneySection,
     LearningOutcomesPage,
+    LearningTechniquesExternalCoursePage,
     LearningTechniquesPage,
     SignatoryPage,
     UserTestimonialsPage,
@@ -2180,7 +2181,7 @@ def _create_static_external_course_pages(platform=None):
     """
     common_external_pages = CommonExternalCoursePageFactory.create()
     tech_heading = f"{platform.name} - heading" if platform else "heading"
-    learning_tech_page = LearningTechniqueExternalCoursPageFactory.create(
+    learning_tech_page = LearningTechniqueExternalCoursePageFactory.create(
         platform=platform,
         technique_items__0__techniques__heading=tech_heading,
         technique_items__0__techniques__sub_heading="sub_heading",
@@ -2205,6 +2206,30 @@ def test_common_external_course_pages():
     )
     assert common_folder.slug == COMMON_EXTERNAL_COURSE_SLUG
     assert common_folder.title == "common external course pages"
+
+
+def test_common_external_course_pages_uniqueness():
+    course_page = CourseIndexPageFactory.create()
+    assert CommonExternalCoursePage.can_create_at(course_page)
+    common_folder = CommonExternalCoursePageFactory.create()
+    assert LearningTechniquesExternalCoursePage.can_create_at(common_folder)
+    tech_page = LearningTechniqueExternalCoursePageFactory.create(parent=common_folder)
+
+    # Check if we can create more instances of same page
+    assert LearningTechniquesExternalCoursePage.can_create_at(common_folder)
+
+    LearningTechniqueExternalCoursePageFactory.create(parent=common_folder)
+    assert len(common_folder.get_children()) == 2
+
+    # Shouldn't be able to create 2 instance of same page with same platform
+    with pytest.raises(ValidationError) as context:
+        LearningTechniqueExternalCoursePageFactory.create(
+            parent=common_folder, platform=tech_page.platform
+        )
+
+    assert (
+        str(context.value) == "{'platform': ['Page for this platform already exists.']}"
+    )
 
 
 def test_external_course_page_wo_static_page(superuser_client):
