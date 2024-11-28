@@ -590,7 +590,7 @@ class CommonExternalCoursePageFactory(wagtail_factories.PageFactory):
         model = CommonExternalCoursePage
 
 
-class LearningTechniqueExternalCoursPageFactory(LearningTechniquesPageFactory):
+class LearningTechniqueExternalCoursePageFactory(LearningTechniquesPageFactory):
     """LearningTechniqueExternalCoursPage factory class"""
 
     platform = factory.SubFactory(PlatformFactory)
