@@ -4,7 +4,7 @@ from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -210,13 +210,12 @@ class EmeritusCourseListView(APIView):
     ReadOnly View to list Emeritus courses.
     """
 
+    permission_classes = [IsAdminUser]
+
     def get(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Get Emeritus courses list from the Emeritus API and return it.
         """
-        if not request.user.is_authenticated or not request.user.is_superuser:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         try:
             data = fetch_emeritus_courses()
             return Response(data, status=status.HTTP_200_OK)
