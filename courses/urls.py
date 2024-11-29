@@ -4,6 +4,7 @@ from django.urls import include, path, re_path
 from rest_framework import routers
 
 from courses.views import v1
+from courses.views.v1 import EmeritusCourseListView
 
 router = routers.SimpleRouter()
 router.register(r"programs", v1.ProgramViewSet, basename="programs_api")
@@ -28,5 +29,10 @@ urlpatterns = [
     path("api/", include(router.urls)),
     re_path(
         r"^api/enrollments/", v1.UserEnrollmentsView.as_view(), name="user-enrollments"
+    ),
+    path(
+        "api/emeritus_courses/",
+        EmeritusCourseListView.as_view(),
+        name="emeritus_courses",
     ),
 ]

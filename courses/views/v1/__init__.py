@@ -27,6 +27,7 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from courses.sync_external_courses.emeritus_api import fetch_emeritus_courses
 from ecommerce.models import Product
 
 
@@ -202,3 +203,22 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
         Returns parent topics with course count > 0.
         """
         return CourseTopic.parent_topics_with_courses()
+
+
+class EmeritusCourseListView(APIView):
+    """
+    ReadOnly View to list Emeritus courses.
+    """
+
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        Get Emeritus courses list from the Emeritus API and return it.
+        """
+        try:
+            data = fetch_emeritus_courses()
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception:  # noqa: BLE001
+            return Response(
+                {"error": "Some error occurred."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

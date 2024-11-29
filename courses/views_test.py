@@ -2,8 +2,10 @@
 Tests for course views
 """
 
+import json
 import operator as op
 from datetime import timedelta
+from pathlib import Path
 
 import pytest
 from django.contrib.auth.models import AnonymousUser
@@ -611,3 +613,23 @@ def test_course_topics_api(client, django_assert_num_queries):
         assert len(resp_json) == 1
         assert resp_json[0]["name"] == parent_topic.name
         assert resp_json[0]["course_count"] == 4
+
+
+def test_emeritus_course_list_view(admin_drf_client, mocker):
+    """
+    Test that the Emeritus API List calls fetch_emeritus_courses and returns its mocked response.
+    """
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        mocked_response = json.load(test_data_file)
+
+    patched_fetch_emeritus_courses = mocker.patch(
+        "courses.sync_external_courses.emeritus_api.fetch_emeritus_courses",
+        return_value=mocked_response,
+    )
+
+    response = admin_drf_client.get(reverse("emeritus_courses"))
+    assert response.json() == mocked_response
+    assert response.status_code == 200
+    patched_fetch_emeritus_courses.assert_called_once()
