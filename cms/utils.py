@@ -6,7 +6,11 @@ from cms.models import (
 )
 
 
-def create_how_you_will_learn_section(platform=None):
+def create_how_you_will_learn_section(page, platform=None):
+    icongrid_page = page.get_child_page_of_type_including_draft(LearningTechniquesPage)
+    if icongrid_page:
+        return None
+
     learning_tech_page = LearningTechniquesExternalCoursePage.objects.all()
     if platform:
         learning_tech_page = learning_tech_page.filter(platform__name__iexact=platform)
@@ -30,7 +34,11 @@ def create_how_you_will_learn_section(platform=None):
     )
 
 
-def create_b2b_section(platform=None):
+def create_b2b_section(page, platform=None):
+    b2b_page = page.get_child_page_of_type_including_draft(ForTeamsPage)
+    if b2b_page:
+        return None
+
     b2b_page = ForTeamsExternalCoursePage.objects.all()
     if platform:
         b2b_page = b2b_page.filter(platform__name__iexact=platform)

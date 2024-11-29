@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from wagtail import hooks
 from wagtail.admin.api.views import PagesAdminAPIViewSet
 
-from cms.models import ExternalCoursePage, ForTeamsPage, LearningTechniquesPage
+from cms.models import ExternalCoursePage
 from cms.utils import create_b2b_section, create_how_you_will_learn_section
 from courses.models import CourseRun, Program
 from ecommerce.models import Product, ProductVersion
@@ -85,14 +85,10 @@ def create_static_pages_for_external_courses(request, page):  # noqa: ARG001
 
     platform = page.course.platform.name
 
-    icongrid_page = page.get_child_page_of_type_including_draft(LearningTechniquesPage)
-    if not icongrid_page:
-        icongrid_page = create_how_you_will_learn_section(platform)
-        if icongrid_page:
-            page.add_child(instance=icongrid_page)
+    icongrid_page = create_how_you_will_learn_section(page, platform)
+    if icongrid_page:
+        page.add_child(instance=icongrid_page)
 
-    b2b_page = page.get_child_page_of_type_including_draft(ForTeamsPage)
-    if not b2b_page:
-        b2b_page = create_b2b_section(platform)
-        if b2b_page:
-            page.add_child(instance=b2b_page)
+    b2b_page = create_b2b_section(page, platform)
+    if b2b_page:
+        page.add_child(instance=b2b_page)
