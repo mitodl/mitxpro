@@ -214,6 +214,9 @@ class EmeritusCourseListView(APIView):
         """
         Get Emeritus courses list from the Emeritus API and return it.
         """
+        if not request.user.is_authenticated or not request.user.is_superuser:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
         try:
             data = fetch_emeritus_courses()
             return Response(data, status=status.HTTP_200_OK)
