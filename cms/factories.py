@@ -583,7 +583,7 @@ class CourseOverviewPageFactory(wagtail_factories.PageFactory):
     """CourseOverviewPage factory class"""
 
     heading = factory.fuzzy.FuzzyText(prefix="heading ")
-    sub_heading = factory.LazyFunction(lambda: RichText(f"<p>{FAKE.paragraph()}</p>"))
+    overview = factory.LazyFunction(lambda: RichText(f"<p>{FAKE.paragraph()}</p>"))
 
     class Meta:
         model = CourseOverviewPage
