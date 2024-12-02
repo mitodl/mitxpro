@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.164.2
+Version 0.164.2 (Released December 02, 2024)
 ---------------
 
 - feat(api): has_prerequisites field added in courses and programs API (#3306)
