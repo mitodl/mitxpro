@@ -2093,23 +2093,34 @@ def test_certificatepage_saved_no_signatories_external_courseware(
     assert resp.status_code == 302
 
 
-def test_course_overview_page():
-    external_course_page = ExternalCoursePageFactory.create()
-    assert not external_course_page.course_overview
-    assert CourseOverviewPage.can_create_at(external_course_page)
+def _test_course_overview(page):
+    """
+    Tests the creation and modification of a CourseOverviewPage
+    associated with a given page.
+
+    Args:
+        page: The parent page under which the CourseOverviewPage is created.
+              Can be one of the following types:
+              - `ExternalCoursePage`
+              - `CoursePage`
+              - `ProgramPage`
+              - `ExternalProgramPage`
+    """
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
     overview_page = CourseOverviewPageFactory.create(
-        parent=external_course_page,
-        sub_heading="<p>paragraph content</p>",
+        parent=page,
         heading="test heading",
+        overview="<p>paragraph content</p>",
     )
 
     # invalidate cached property
-    del external_course_page.child_pages
+    del page.child_pages
 
-    assert overview_page.get_parent() == external_course_page
-    assert external_course_page.course_overview == overview_page
+    assert overview_page.get_parent() == page
+    assert page.course_overview == overview_page
     assert overview_page.heading == "test heading"
-    assert overview_page.sub_heading == "<p>paragraph content</p>"
+    assert overview_page.get_overview == "<p>paragraph content</p>"
 
     # test that it can be modified
     new_heading = "new test heading"
@@ -2117,3 +2128,82 @@ def test_course_overview_page():
     overview_page.save()
 
     assert overview_page.heading == new_heading
+
+
+def test_course_overview_page_with_external_course_page():
+    """Tests the integration of an CourseOverviewPage with a ExternalCoursePage."""
+    external_course_page = ExternalCoursePageFactory.create()
+    _test_course_overview(external_course_page)
+
+
+def test_course_overview_with_course_page():
+    """Tests the creation and behavior of a CourseOverviewPage associated with a CoursePage."""
+    course_page = CoursePageFactory.create()
+    _test_course_overview(course_page)
+
+
+def test_course_overview_with_program_page():
+    """Tests the creation and behavior of a CourseOverviewPage associated with a ProgramPage."""
+    program_page = ProgramPageFactory.create()
+    _test_course_overview(program_page)
+
+
+def test_course_overview_with_external_program_page():
+    """Tests the creation and behavior of a CourseOverviewPage associated with an ExternalProgramPage."""
+    external_program_page = ExternalProgramPageFactory.create()
+    _test_course_overview(external_program_page)
+
+
+def test_course_overview_without_overview_and_heading():
+    """Tests the behavior of a CourseOverviewPage when created without an overview or heading."""
+    page = ExternalCoursePageFactory.create()
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        overview=None,
+        heading=None,
+    )
+
+    # invalidate cached property
+    del page.child_pages
+
+    assert overview_page.heading is None
+    assert overview_page.get_overview == ""
+
+    # test that it can be modified
+    new_heading = "new heading"
+    new_overview = "new test overview"
+    overview_page.heading = new_heading
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    assert overview_page.get_overview == new_overview
+    assert overview_page.heading == new_heading
+
+
+def test_course_overview_with_course_description():
+    """
+    Tests the behavior of a CourseOverviewPage when created
+    without an overview and get_overview matches with its course description.
+    """
+    course_description = "<p>testing description</p>"
+    page = ExternalCoursePageFactory.create(description=course_description)
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        overview=None,
+    )
+
+    # invalidate cached property
+    del page.child_pages
+
+    assert overview_page.get_overview == course_description
+
+    # test that it can be modified
+    new_overview = "new test overview"
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    assert overview_page.overview == new_overview

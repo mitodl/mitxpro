@@ -2656,15 +2656,22 @@ class CourseOverviewPage(CourseProgramChildPage):
         blank=True,
     )
 
-    sub_heading = RichTextField(
+    overview = RichTextField(
         help_text="A subheading to provide additional context or information.",
         null=True,
         blank=True,
     )
 
+    @property
+    def get_overview(self):
+        """Returns overview else parent description"""
+        return (
+            self.overview if self.overview else self.get_parent().specific.description
+        )
+
     content_panels = [
         FieldPanel("heading"),
-        FieldPanel("sub_heading"),
+        FieldPanel("overview"),
     ]
 
     class Meta:
