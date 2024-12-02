@@ -30,13 +30,10 @@ from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 log = logging.getLogger(__name__)
 
 
-class EmeritusKeyMap(Enum):
+class BaseKeyMap(Enum):
     """
-    Emeritus course sync keys.
+    Base class for external course sync keys with common attributes.
     """
-
-    REPORT_NAMES = ["Batch"]
-    PLATFORM_NAME = "Emeritus"
     DATE_FORMAT = "%Y-%m-%d"
     REQUIRED_FIELDS = [
         "course_title",
@@ -47,11 +44,40 @@ class EmeritusKeyMap(Enum):
     COURSE_PAGE_SUBHEAD = "Delivered in collaboration with Emeritus."
     WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
     LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
-    LEARNING_OUTCOMES_PAGE_SUBHEAD = (
-        "MIT xPRO is collaborating with online education provider Emeritus to "
-        "deliver this online course. By clicking LEARN MORE, you will be taken to "
-        "a page where you can download the brochure and apply to the program via Emeritus."
-    )
+    
+    @property
+    def COURSE_PAGE_SUBHEAD(self):
+        """
+        Generate the course page sub heading dynamically based on the platform name.
+        """
+        return f"Delivered in collaboration with {self.PLATFORM_NAME}."
+    @property
+    def LEARNING_OUTCOMES_PAGE_SUBHEAD(self):
+        """
+        Generate the learning outcome page sub heading dynamically based on the platform name.
+        """
+        return (
+            f"MIT xPRO is collaborating with online education provider {self.PLATFORM_NAME} to "
+            "deliver this online course. By clicking LEARN MORE, you will be taken to "
+            "a page where you can download the brochure and apply to the program via "
+            f"{self.PLATFORM_NAME}."
+        )
+class EmeritusKeyMap(BaseKeyMap):
+    """
+    Emeritus course sync keys.
+    """
+
+    REPORT_NAMES = ["Batch"]
+    PLATFORM_NAME = "Emeritus"
+
+
+class GlobalAlumniKeyMap(BaseKeyMap):
+    """
+    Emeritus course sync keys.
+    """
+
+    REPORT_NAMES = ["GA - Batch"]
+    PLATFORM_NAME = "Global Alumni"
 
 
 class EmeritusJobStatus(Enum):
