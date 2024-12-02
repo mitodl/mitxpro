@@ -31,7 +31,7 @@ CYBERSOURCE_SECURITY_KEY = "security"
 
 
 @pytest.fixture(autouse=True)
-def cybersource_settings(settings):  # noqa: PT004
+def cybersource_settings(settings):
     """
     Set cybersource settings
     """

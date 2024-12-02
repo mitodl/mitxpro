@@ -19,7 +19,7 @@ from sheets.utils import ResultType
 
 
 @pytest.fixture
-def courseware_objects():  # noqa: PT004
+def courseware_objects():
     """Database objects that CSV data depends on"""
     run = CourseRunFactory.create(courseware_id="course-v1:edX+DemoX+Demo_Course")
     ProductVersionFactory.create(product__content_object=run)

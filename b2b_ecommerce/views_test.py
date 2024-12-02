@@ -33,7 +33,7 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):  # noqa: PT004
+def ecommerce_settings(settings):
     """
     Set cybersource settings
     """
