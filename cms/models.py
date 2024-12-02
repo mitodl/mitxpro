@@ -2151,7 +2151,7 @@ class CertificatePage(CourseProgramChildPage):
         blank=True,
         decimal_places=2,
         max_digits=5,
-        validators=[MinValueValidator(Decimal("0.01"))],
+        validators=[MinValueValidator(Decimal("0.00"))],
         help_text="Optional field for CEU (continuing education unit).",
     )
 
