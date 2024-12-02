@@ -1,21 +1,11 @@
-{% load static wagtailimages_tags wagtailcore_tags %}
-<div
-  id="courseOverview"
-  class="text-block {% if page.dark_theme %} dark-theme {% endif %}"
->
-  <div class="container section-spacing">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        {% if page.heading %}
-        <h1 class="text-center">{{ page.heading }}</h1>
-        {% endif %}
-
-        {% if page.sub_heading %}
-        {{ page.sub_heading|richtext }}
-        {% else %}
-        {{ page.get_parent.specific.description|richtext }}
-        {% endif %}
-      </div>
+{% load static wagtailcore_tags %}
+<div id="courseOverview" class="course-overview-block section-spacing">
+  <div class="container">
+    <div class="course-overview-heading">
+      {% if page.heading %}
+      <h1>{{ page.heading | safe }}</h1>
+      {% endif %}
+      {{ page.get_overview | richtext }}
     </div>
   </div>
 </div>

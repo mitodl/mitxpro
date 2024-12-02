@@ -1,0 +1,18 @@
+// sass-lint:disable mixins-before-declarations
+@import "common";
+
+.course-overview-block {
+  background: white url("#{$static-path}/images/dotted-bg.png") repeat-x 0 0;
+
+  .course-overview-heading {
+    margin: 0 auto;
+    max-width: 1000px;
+    text-align: center;
+  }
+
+  h1 {
+    max-width: 700px;
+    margin: 0 auto 20px;
+    color: $primary;
+  }
+}
