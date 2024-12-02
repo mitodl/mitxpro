@@ -785,6 +785,6 @@ def create_course_overview_page(
         course_page(ExternalCoursePage): ExternalCoursePage object.
         emeritus_course(EmeritusCourse): EmeritusCourse object
     """
-    overview_page = CourseOverviewPage(sub_heading=emeritus_course.description)
+    overview_page = CourseOverviewPage(overview=emeritus_course.description)
     course_page.add_child(instance=overview_page)
     overview_page.save()
