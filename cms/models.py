@@ -5,12 +5,14 @@ Page models for the CMS
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta
+from decimal import Decimal
 from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
@@ -2149,6 +2151,7 @@ class CertificatePage(CourseProgramChildPage):
         blank=True,
         decimal_places=2,
         max_digits=5,
+        validators=[MinValueValidator(Decimal("0.01"))],
         help_text="Optional field for CEU (continuing education unit).",
     )
 

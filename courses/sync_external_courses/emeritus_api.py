@@ -121,7 +121,7 @@ class EmeritusCourse:
         self.format = emeritus_course_json.get("format")
         self.category = emeritus_course_json.get("Category", None)
         self.image_name = emeritus_course_json.get("image_name", None)
-        self.CEUs = Decimal(str(emeritus_course_json.get("ceu"))) or None
+        self.CEUs = Decimal(str(emeritus_course_json.get("ceu") or "0.0")) or None
         self.learning_outcomes_list = (
             parse_emeritus_data_str(emeritus_course_json.get("learning_outcomes"))
             if emeritus_course_json.get("learning_outcomes")
