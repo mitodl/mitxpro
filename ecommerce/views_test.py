@@ -92,7 +92,7 @@ def render_json(serializer):
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):  # noqa: PT004
+def ecommerce_settings(settings):
     """
     Set cybersource settings
     """

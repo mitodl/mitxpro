@@ -421,7 +421,7 @@ def get_hubspot_id_for_object(
         return hubspot_obj.id
     elif raise_error:
         raise ValueError(
-            "Hubspot id could not be found for %s for id %d"
+            "Hubspot id could not be found for %s for id %d"  # noqa: UP031
             % (content_type.name, obj.id)
         )
 
