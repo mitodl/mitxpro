@@ -2,10 +2,13 @@
 
 from django.core.management.base import BaseCommand
 
-from courses.sync_external_courses.emeritus_api import (
+from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
+    GLOBAL_ALUMNI_PLATFORM_NAME,
     EmeritusKeyMap,
-    fetch_emeritus_courses,
-    update_emeritus_course_runs,
+    GlobalAlumniKeyMap,
+    fetch_external_courses,
+    update_external_course_runs,
 )
 from mitxpro import settings
 
@@ -36,18 +39,23 @@ class Command(BaseCommand):
             return
 
         vendor_name = options["vendor_name"]
-        if vendor_name.lower() == EmeritusKeyMap.PLATFORM_NAME.value.lower():
-            self.stdout.write(f"Starting course sync for {vendor_name}.")
-            emeritus_course_runs = fetch_emeritus_courses()
-            stats = update_emeritus_course_runs(emeritus_course_runs)
-            self.log_stats(stats)
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"External course sync successful for {vendor_name}."
-                )
-            )
+        if vendor_name.lower() == EMERITUS_PLATFORM_NAME.lower():
+            keymap = EmeritusKeyMap()
+        elif vendor_name.lower() == GLOBAL_ALUMNI_PLATFORM_NAME.lower():
+            keymap = GlobalAlumniKeyMap()
         else:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
+            return
+        self.stdout.write(f"Starting course sync for {vendor_name}.")
+        emeritus_course_runs = fetch_external_courses(keymap)
+        stats = update_external_course_runs(emeritus_course_runs, keymap)
+        self.log_stats(stats)
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"External course sync successful for {vendor_name}."
+            )
+        )
+        
 
     def log_stats(self, stats):
         """

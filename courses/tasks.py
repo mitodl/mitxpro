@@ -11,8 +11,8 @@ from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunCertificate
 from courses.sync_external_courses.emeritus_api import (
-    fetch_emeritus_courses,
-    update_emeritus_course_runs,
+    fetch_external_courses,
+    update_external_course_runs,
 )
 from courses.utils import (
     ensure_course_run_grade,
@@ -120,5 +120,5 @@ def task_sync_emeritus_course_runs():
         log.info("External Course sync is disabled.")
         return
 
-    emeritus_course_runs = fetch_emeritus_courses()
-    update_emeritus_course_runs(emeritus_course_runs)
+    emeritus_course_runs = fetch_external_courses()
+    update_external_course_runs(emeritus_course_runs)

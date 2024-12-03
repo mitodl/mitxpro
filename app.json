@@ -234,11 +234,11 @@
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false
     },
-    "EMERITUS_API_BASE_URL": {
+    "EXTERNAL_COURSE_SYNC_API_BASE_URL": {
       "description": "Base API URL for Emeritus API",
       "required": false
     },
-    "EMERITUS_API_KEY": {
+    "EXTERNAL_COURSE_SYNC_API_KEY": {
       "description": "The API Key for Emeritus API",
       "required": true
     },
