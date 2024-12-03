@@ -28,10 +28,10 @@ def test_sync_courseruns_data(mocker):
 def test_task_sync_emeritus_course_runs(mocker, settings):
     """Test task_sync_emeritus_course_runs calls the right api functionality"""
     settings.FEATURES["ENABLE_EXTERNAL_COURSE_SYNC"] = True
-    mock_fetch_emeritus_courses = mocker.patch("courses.tasks.fetch_emeritus_courses")
-    mock_update_emeritus_course_runs = mocker.patch(
-        "courses.tasks.update_emeritus_course_runs"
+    mock_fetch_external_courses = mocker.patch("courses.tasks.fetch_external_courses")
+    mock_update_external_course_runs = mocker.patch(
+        "courses.tasks.update_external_course_runs"
     )
     task_sync_emeritus_course_runs.delay()
-    mock_fetch_emeritus_courses.assert_called_once()
-    mock_update_emeritus_course_runs.assert_called_once()
+    mock_fetch_external_courses.assert_called_once()
+    mock_update_external_course_runs.assert_called_once()
