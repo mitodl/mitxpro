@@ -3,8 +3,7 @@
 from django.core.management.base import BaseCommand
 
 from courses.sync_external_courses.external_course_sync_api import (
-    EMERITUS_PLATFORM_NAME,
-    GLOBAL_ALUMNI_PLATFORM_NAME,
+    VENDOR_KEYMAPS,
     EmeritusKeyMap,
     GlobalAlumniKeyMap,
     fetch_external_courses,
@@ -39,13 +38,11 @@ class Command(BaseCommand):
             return
 
         vendor_name = options["vendor_name"]
-        if vendor_name.lower() == EMERITUS_PLATFORM_NAME.lower():
-            keymap = EmeritusKeyMap()
-        elif vendor_name.lower() == GLOBAL_ALUMNI_PLATFORM_NAME.lower():
-            keymap = GlobalAlumniKeyMap()
-        else:
+        keymap = VENDOR_KEYMAPS.get(vendor_name.lower())
+        if not keymap:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
             return
+
         self.stdout.write(f"Starting course sync for {vendor_name}.")
         emeritus_course_runs = fetch_external_courses(keymap)
         stats = update_external_course_runs(emeritus_course_runs, keymap)

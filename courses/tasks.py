@@ -9,8 +9,9 @@ from django.conf import settings
 from django.db.models import Q
 from requests.exceptions import HTTPError
 
-from courses.models import CourseRun, CourseRunCertificate
-from courses.sync_external_courses.emeritus_api import (
+from courses.models import CourseRun, CourseRunCertificate, Platform
+from courses.sync_external_courses.external_course_sync_api import (
+    VENDOR_KEYMAPS,
     fetch_external_courses,
     update_external_course_runs,
 )
@@ -114,11 +115,20 @@ def sync_courseruns_data():
 
 
 @app.task
-def task_sync_emeritus_course_runs():
+def task_sync_external_course_runs():
     """Task to sync Emeritus course runs"""
     if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
         log.info("External Course sync is disabled.")
         return
 
-    emeritus_course_runs = fetch_external_courses()
-    update_external_course_runs(emeritus_course_runs)
+    platforms = Platform.objects.filter(sync_daily=True)
+    for platform in platforms:
+        keymap = VENDOR_KEYMAPS.get(platform.name.lower())
+        if not keymap:
+            log.exception(
+                "The platform '%s' does not have a sync API configured. Please disable the 'sync_daily' setting for this platform.",
+                platform.name,
+            )
+            continue
+        emeritus_course_runs = fetch_external_courses(keymap)
+        update_external_course_runs(emeritus_course_runs, keymap)

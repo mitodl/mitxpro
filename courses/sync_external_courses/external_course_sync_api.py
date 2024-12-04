@@ -30,9 +30,6 @@ from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 log = logging.getLogger(__name__)
 
 
-EMERITUS_PLATFORM_NAME = "Emeritus"
-GLOBAL_ALUMNI_PLATFORM_NAME = "Global Alumni"
-
 class BaseKeyMap:
     """
     Base class for course sync keys with common attributes.
@@ -52,11 +49,11 @@ class BaseKeyMap:
         self.report_names = report_names
 
     @property
-    def COURSE_PAGE_SUBHEAD(self):
+    def course_page_subhead(self):
         return f"Delivered in collaboration with {self.platform_name}."
 
     @property
-    def LEARNING_OUTCOMES_PAGE_SUBHEAD(self):
+    def learning_outcomes_page_subhead(self):
         return (
             f"MIT xPRO is collaborating with online education provider {self.platform_name} to "
             "deliver this online course. By clicking LEARN MORE, you will be taken to "
@@ -70,7 +67,7 @@ class EmeritusKeyMap(BaseKeyMap):
     Emeritus course sync keys.
     """
     def __init__(self):
-        super().__init__(platform_name=EMERITUS_PLATFORM_NAME, report_names=["Batch"])
+        super().__init__(platform_name="Emeritus", report_names=["Batch"])
 
 
 class GlobalAlumniKeyMap(BaseKeyMap):
@@ -78,8 +75,12 @@ class GlobalAlumniKeyMap(BaseKeyMap):
     Global Alumni course sync keys.
     """
     def __init__(self):
-        super().__init__(platform_name=GLOBAL_ALUMNI_PLATFORM_NAME, report_names=["GA - Batch"])
+        super().__init__(platform_name="Global Alumni", report_names=["GA - Batch"])
 
+VENDOR_KEYMAPS = {
+    "emeritus": EmeritusKeyMap(),
+    "global alumni": GlobalAlumniKeyMap(),
+}
 
 class ExternalCourseSyncAPIJobStatus(Enum):
     """
@@ -543,7 +544,7 @@ def create_or_update_external_course_page(course_index_page, course, external_co
             course=course,
             title=external_course.course_title,
             external_marketing_url=external_course.marketing_url,
-            subhead=keymap.COURSE_PAGE_SUBHEAD,
+            subhead=keymap.course_page_subhead,
             duration=external_course.duration,
             format=external_course.format,
             description=external_course.description,
@@ -684,7 +685,7 @@ def create_learning_outcomes_page(course_page, outcomes_list, keymap):
 
     learning_outcome_page = LearningOutcomesPage(
         heading=keymap.LEARNING_OUTCOMES_PAGE_HEADING,
-        sub_heading=keymap.LEARNING_OUTCOMES_PAGE_SUBHEAD,
+        sub_heading=keymap.learning_outcomes_page_subhead,
         outcome_items=outcome_items,
     )
     course_page.add_child(instance=learning_outcome_page)
