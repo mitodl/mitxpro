@@ -26,14 +26,14 @@ def test_sync_courseruns_data(mocker):
 
 
 def test_task_sync_external_course_runs(mocker, settings):
-    """Test task_sync_external_course_runs skips platforms not in VENDOR_KEYMAPS"""
+    """Test task_sync_external_course_runs calls the right api functionality and skips platforms not in VENDOR_KEYMAPS"""
     settings.FEATURES["ENABLE_EXTERNAL_COURSE_SYNC"] = True
     
     mock_fetch_external_courses = mocker.patch("courses.tasks.fetch_external_courses")
     mock_update_external_course_runs = mocker.patch(
         "courses.tasks.update_external_course_runs"
     )
-    log_mock = mocker.patch("courses.tasks.log")
+    mock_log = mocker.patch("courses.tasks.log")
 
     PlatformFactory.create(name="Emeritus", sync_daily=True)
     PlatformFactory.create(name="UnknownPlatform", sync_daily=True)
@@ -43,7 +43,7 @@ def test_task_sync_external_course_runs(mocker, settings):
     mock_fetch_external_courses.assert_called_once()
     mock_update_external_course_runs.assert_called_once()
 
-    log_mock.exception.assert_called_once_with(
+    mock_log.exception.assert_called_once_with(
         "The platform '%s' does not have a sync API configured. Please disable the 'sync_daily' setting for this platform.",
         "UnknownPlatform",
     )
