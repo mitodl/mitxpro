@@ -2130,33 +2130,32 @@ def _test_course_overview(page):
     assert overview_page.heading == new_heading
 
 
-def test_course_overview_page_with_external_course_page():
-    """Tests the integration of an CourseOverviewPage with a ExternalCoursePage."""
-    external_course_page = ExternalCoursePageFactory.create()
-    _test_course_overview(external_course_page)
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ProgramPageFactory,
+        ExternalProgramPageFactory,
+    ],
+)
+def test_coure_overview_page(page_klass):
+    page = page_klass.create()
+    _test_course_overview(page)
 
 
-def test_course_overview_with_course_page():
-    """Tests the creation and behavior of a CourseOverviewPage associated with a CoursePage."""
-    course_page = CoursePageFactory.create()
-    _test_course_overview(course_page)
-
-
-def test_course_overview_with_program_page():
-    """Tests the creation and behavior of a CourseOverviewPage associated with a ProgramPage."""
-    program_page = ProgramPageFactory.create()
-    _test_course_overview(program_page)
-
-
-def test_course_overview_with_external_program_page():
-    """Tests the creation and behavior of a CourseOverviewPage associated with an ExternalProgramPage."""
-    external_program_page = ExternalProgramPageFactory.create()
-    _test_course_overview(external_program_page)
-
-
-def test_course_overview_without_overview_and_heading():
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ProgramPageFactory,
+        ExternalProgramPageFactory,
+    ],
+)
+def test_course_overview_without_overview_and_heading(page_klass):
     """Tests the behavior of a CourseOverviewPage when created without an overview or heading."""
-    page = ExternalCoursePageFactory.create()
+    page = page_klass.create()
     assert not page.course_overview
     assert CourseOverviewPage.can_create_at(page)
     overview_page = CourseOverviewPageFactory.create(
@@ -2182,13 +2181,22 @@ def test_course_overview_without_overview_and_heading():
     assert overview_page.heading == new_heading
 
 
-def test_course_overview_with_course_description():
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ProgramPageFactory,
+        ExternalProgramPageFactory,
+    ],
+)
+def test_course_overview_with_course_description(page_klass):
     """
     Tests the behavior of a CourseOverviewPage when created
     without an overview and get_overview matches with its course description.
     """
     course_description = "<p>testing description</p>"
-    page = ExternalCoursePageFactory.create(description=course_description)
+    page = page_klass.create(description=course_description)
     assert not page.course_overview
     assert CourseOverviewPage.can_create_at(page)
     overview_page = CourseOverviewPageFactory.create(
@@ -2206,4 +2214,4 @@ def test_course_overview_with_course_description():
     overview_page.overview = new_overview
     overview_page.save()
 
-    assert overview_page.overview == new_overview
+    assert overview_page.get_overview == new_overview
