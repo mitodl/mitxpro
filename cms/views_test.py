@@ -25,6 +25,7 @@ from cms.factories import (
     CatalogPageFactory,
     CertificatePageFactory,
     CourseIndexPageFactory,
+    CourseOverviewPageFactory,
     CoursePageFactory,
     EnterprisePageFactory,
     ExternalCoursePageFactory,
@@ -38,7 +39,13 @@ from cms.factories import (
     WebinarIndexPageFactory,
     WebinarPageFactory,
 )
-from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
+from cms.models import (
+    CourseIndexPage,
+    CourseOverviewPage,
+    HomePage,
+    ProgramIndexPage,
+    TextVideoSection,
+)
 from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunFactory,
@@ -689,3 +696,109 @@ def test_product_page_context_has_certificate(
         assert resp.context["ceus"] == "12.0"
     else:
         assert resp.context["ceus"] is None
+
+
+def _get_course_page(client, url):
+    resp = client.get(url)
+    assert resp.status_code == 200
+    assert resp.context_data["page"]
+
+    return resp.context_data["page"]
+
+
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ProgramPageFactory,
+        ExternalProgramPageFactory,
+    ],
+)
+def test_course_overview_context(client, page_klass):
+    """Test that course page have course_overview in context"""
+
+    page = page_klass.create()
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        heading="test heading",
+        overview="<p>paragraph content</p>",
+    )
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview == overview_page
+    assert resp_page.course_overview.get_overview == overview_page.overview
+    assert resp_page.course_overview.heading == overview_page.heading
+
+
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ProgramPageFactory,
+        ExternalProgramPageFactory,
+    ],
+)
+def test_course_overview_context_wo_overview(client, page_klass):
+    """Test that course page have course_overview in context"""
+
+    page = page_klass.create()
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        heading="test heading",
+        overview=None,
+    )
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview == overview_page
+    assert resp_page.course_overview.get_overview == ""
+    assert resp_page.course_overview.heading == overview_page.heading
+
+    new_overview = "new_overview"
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview == overview_page
+    assert resp_page.course_overview.get_overview == new_overview
+    assert resp_page.course_overview.heading == overview_page.heading
+
+
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ProgramPageFactory,
+        ExternalProgramPageFactory,
+    ],
+)
+def test_course_overview_context_with_course_description(client, page_klass):
+    """Test that course page have course_overview in context"""
+
+    description = "test description"
+    page = page_klass.create(description=description)
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        heading="test heading",
+        overview=None,
+    )
+
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview == overview_page
+    assert resp_page.course_overview.get_overview == description
+    assert resp_page.course_overview.heading == overview_page.heading
+
+    new_overview = "new_overview"
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview == overview_page
+    assert resp_page.course_overview.get_overview == new_overview
+    assert resp_page.course_overview.heading == overview_page.heading
