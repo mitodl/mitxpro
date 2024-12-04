@@ -5,7 +5,10 @@ from wagtail import hooks
 from wagtail.admin.api.views import PagesAdminAPIViewSet
 
 from cms.models import ExternalCoursePage
-from cms.utils import create_b2b_section, create_how_you_will_learn_section
+from cms.utils import (
+    create_and_add_b2b_section,
+    create_and_add_how_you_will_learn_section,
+)
 from courses.models import CourseRun, Program
 from ecommerce.models import Product, ProductVersion
 
@@ -79,16 +82,19 @@ def create_product_and_versions_for_courseware_pages(request, page):
 
 @hooks.register("after_create_page")
 def create_static_pages_for_external_courses(request, page):  # noqa: ARG001
+    """
+    Automatically creates static sections ("How You Will Learn" and "For Teams")
+    for newly created ExternalCoursePage instances.
+
+    Args:
+        request: The HTTP request that triggered the page creation.
+        page: The newly created page. Static sections are created only if the page
+              is an instance of `ExternalCoursePage`.
+    """
     if not isinstance(page, ExternalCoursePage):
         # We need to create sections only for External Course Pages
         return
 
     platform = page.course.platform.name
-
-    icongrid_page = create_how_you_will_learn_section(page, platform)
-    if icongrid_page:
-        page.add_child(instance=icongrid_page)
-
-    b2b_page = create_b2b_section(page, platform)
-    if b2b_page:
-        page.add_child(instance=b2b_page)
+    create_and_add_how_you_will_learn_section(page, platform)
+    create_and_add_b2b_section(page, platform)

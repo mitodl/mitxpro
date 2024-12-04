@@ -14,7 +14,7 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
-    COMMON_EXTERNAL_COURSE_SLUG,
+    COMMON_CHILD_INDEX_PAGE_SLUG,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
     FORMAT_OTHER,
@@ -26,16 +26,15 @@ from cms.constants import (
 )
 from cms.factories import (
     CertificatePageFactory,
-    CommonExternalCoursePageFactory,
+    CommonChildIndexPageFactory,
     CompaniesLogoCarouselPageFactory,
-    CourseIndexPageFactory,
     CoursePageFactory,
     CoursesInProgramPageFactory,
     EnterprisePageFactory,
     ExternalCoursePageFactory,
     ExternalProgramPageFactory,
     FacultyMembersPageFactory,
-    ForTeamsExternalCoursePageFactory,
+    ForTeamsCommonPageFactory,
     ForTeamsPageFactory,
     FrequentlyAskedQuestionFactory,
     FrequentlyAskedQuestionPageFactory,
@@ -44,7 +43,7 @@ from cms.factories import (
     LearningJourneyPageFactory,
     LearningOutcomesPageFactory,
     LearningStrategyFormPageFactory,
-    LearningTechniqueExternalCoursePageFactory,
+    LearningTechniqueCommonPageFactory,
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
     PlatformFactory,
@@ -63,15 +62,16 @@ from cms.factories import (
 )
 from cms.models import (
     CertificatePage,
-    CommonExternalCoursePage,
+    CommonChildIndexPage,
     CourseIndexPage,
     CoursesInProgramPage,
     ExternalCoursePage,
+    ForTeamsCommonPage,
     ForTeamsPage,
     FrequentlyAskedQuestionPage,
     LearningJourneySection,
     LearningOutcomesPage,
-    LearningTechniquesExternalCoursePage,
+    LearningTechniquesCommonPage,
     LearningTechniquesPage,
     SignatoryPage,
     UserTestimonialsPage,
@@ -2133,7 +2133,7 @@ def _create_external_course_page(superuser_client, course_id, slug):
     assert response.status_code == 302
 
 
-def _is_static_pages_created(external_course_slug, course_id):
+def _is_common_child_pages_created(external_course_slug, course_id):
     """
     Validates the creation of static child pages under an ExternalCoursePage.
 
@@ -2166,9 +2166,9 @@ def _is_static_pages_created(external_course_slug, course_id):
     return learning_technical_page, for_teams_page
 
 
-def _create_static_external_course_pages(platform=None):
+def _create_common_child_pages(platform=None):
     """
-    Creates static external course pages under a CommonExternalCoursePage.
+    Creates static common child pages under a CommonChildIndexPage.
 
     Args:
         platform (Platform, optional): Optional platform object for customizing
@@ -2176,58 +2176,61 @@ def _create_static_external_course_pages(platform=None):
 
     Returns:
         tuple:
-            - `LearningTechniqueExternalCoursPage` with platform-specific attributes.
-            - `ForTeamsExternalCoursePage` under the same parent page.
+            - `LearningTechniqueCommonPage` with platform-specific attributes.
+            - `ForTeamsCommonPage` under the same parent page.
     """
-    common_external_pages = CommonExternalCoursePageFactory.create()
+    common_index = CommonChildIndexPageFactory.create()
     tech_heading = f"{platform.name} - heading" if platform else "heading"
-    learning_tech_page = LearningTechniqueExternalCoursePageFactory.create(
+    title = (
+        f"{platform.name} - Learning tech title" if platform else "Learning tech title"
+    )
+    learning_tech_page = LearningTechniqueCommonPageFactory.create(
         platform=platform,
+        title=title,
         technique_items__0__techniques__heading=tech_heading,
         technique_items__0__techniques__sub_heading="sub_heading",
         technique_items__0__techniques__image__image__title="image-title",
-        parent=common_external_pages,
+        parent=common_index,
     )
-    b2b_page = ForTeamsExternalCoursePageFactory.create(
-        platform=platform, parent=common_external_pages
-    )
+    title = f"{platform.name} - For teams title" if platform else "For teamstitle"
+    b2b_page = ForTeamsCommonPageFactory.create(platform=platform, parent=common_index)
     return learning_tech_page, b2b_page
 
 
-def test_common_external_course_pages():
+def test_common_child_index_page():
     """
-    Tests the creation of a CommonExternalCoursePage and its relationship
+    Tests the creation of a CommonChildIndexPage and its relationship
     to a CourseIndexPage.
     """
-    course_page = CourseIndexPageFactory.create()
-    assert CommonExternalCoursePage.can_create_at(course_page)
-    common_folder = CommonExternalCoursePageFactory.create(
+    home_page = HomePageFactory.create()
+    assert CommonChildIndexPage.can_create_at(home_page)
+    common_folder = CommonChildIndexPageFactory.create(
         title="common external course pages"
     )
-    assert common_folder.slug == COMMON_EXTERNAL_COURSE_SLUG
+    assert common_folder.slug == COMMON_CHILD_INDEX_PAGE_SLUG
     assert common_folder.title == "common external course pages"
 
 
-def test_common_external_course_pages_uniqueness():
+def test_common_child_pages_uniqueness():
     """
     Tests the uniqueness constraint for creating multiple instances of the same page
-    under a CommonExternalCoursePage.
+    under a CommonChildIndexPage.
     """
-    course_page = CourseIndexPageFactory.create()
-    assert CommonExternalCoursePage.can_create_at(course_page)
-    common_folder = CommonExternalCoursePageFactory.create()
-    assert LearningTechniquesExternalCoursePage.can_create_at(common_folder)
-    tech_page = LearningTechniqueExternalCoursePageFactory.create(parent=common_folder)
+    home_page = HomePageFactory.create()
+    assert CommonChildIndexPage.can_create_at(home_page)
+    common_folder = CommonChildIndexPageFactory.create()
+    assert LearningTechniquesCommonPage.can_create_at(common_folder)
+    tech_page = LearningTechniqueCommonPageFactory.create(parent=common_folder)
 
     # Check if we can create more instances of same page
-    assert LearningTechniquesExternalCoursePage.can_create_at(common_folder)
+    assert ForTeamsCommonPage.can_create_at(common_folder)
 
-    LearningTechniqueExternalCoursePageFactory.create(parent=common_folder)
+    ForTeamsCommonPageFactory.create(parent=common_folder)
     assert len(common_folder.get_children()) == 2
 
     # Shouldn't be able to create 2 instance of same page with same platform
     with pytest.raises(ValidationError) as context:
-        LearningTechniqueExternalCoursePageFactory.create(
+        LearningTechniqueCommonPageFactory.create(
             parent=common_folder, platform=tech_page.platform
         )
 
@@ -2236,7 +2239,7 @@ def test_common_external_course_pages_uniqueness():
     )
 
 
-def test_external_course_page_wo_static_page(superuser_client):
+def test_common_child_page_wo_static_page(superuser_client):
     """Tests that an ExternalCoursePage is created without static child pages."""
     external_course_page_slug = "icon-grid-6064"
     course = CourseFactory.create()
@@ -2251,15 +2254,15 @@ def test_external_course_page_wo_static_page(superuser_client):
     assert not external_course_page.get_child_page_of_type_including_draft(ForTeamsPage)
 
 
-def test_external_course_page_with_static_pages(superuser_client):
+def test_child_page_with_static_pages(superuser_client):
     """Tests the creation of an ExternalCoursePage with static child pages."""
     platform = PlatformFactory.create()
     course = CourseFactory.create(platform=platform)
-    learning_tech_page, b2b_page = _create_static_external_course_pages(platform)
+    learning_tech_page, b2b_page = _create_common_child_pages(platform)
     external_course_page_slug = "icon-grid-6064"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
 
-    learning_technical_page, for_teams_page = _is_static_pages_created(
+    learning_technical_page, for_teams_page = _is_common_child_pages_created(
         external_course_page_slug, course.id
     )
 
@@ -2268,18 +2271,18 @@ def test_external_course_page_with_static_pages(superuser_client):
     assert for_teams_page.title == b2b_page.title
 
 
-def test_external_course_page_with_static_pages_wo_platform(superuser_client):
+def test_child_page_with_static_pages_wo_platform(superuser_client):
     """
     Tests the creation of an ExternalCoursePage and its static child pages
     without a platform.
     """
     platform = PlatformFactory.create()
-    learning_tech_page, b2b_page = _create_static_external_course_pages()
+    learning_tech_page, b2b_page = _create_common_child_pages()
 
     course = CourseFactory.create(platform=platform)
     external_course_page_slug = "icon-grid-6064"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
-    learning_technical_page, for_teams_page = _is_static_pages_created(
+    learning_technical_page, for_teams_page = _is_common_child_pages_created(
         external_course_page_slug, course.id
     )
 
@@ -2288,21 +2291,18 @@ def test_external_course_page_with_static_pages_wo_platform(superuser_client):
     assert for_teams_page.title == b2b_page.title
 
 
-def test_external_course_page_with_static_pages_with_and_wo_platform(superuser_client):
+def test_child_page_with_static_pages_with_and_wo_platform(superuser_client):
     """
     Tests the creation of an ExternalCoursePage with static child pages,
     comparing the results with and without a platform.
     """
     platform = PlatformFactory.create()
-    learning_tech_page_no_platform, b2b_page_no_platform = (
-        _create_static_external_course_pages()
-    )
-    learning_tech_page, b2b_page = _create_static_external_course_pages(platform)
-
+    learning_tech_page_no_platform, b2b_page_no_platform = _create_common_child_pages()
+    learning_tech_page, b2b_page = _create_common_child_pages(platform)
     course = CourseFactory.create(platform=platform)
     external_course_page_slug = "icon-grid-6064"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
-    learning_technical_page, for_teams_page = _is_static_pages_created(
+    learning_technical_page, for_teams_page = _is_common_child_pages_created(
         external_course_page_slug, course.id
     )
 
