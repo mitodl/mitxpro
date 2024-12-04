@@ -34,15 +34,15 @@ class BaseKeyMap:
     """
     Base class for course sync keys with common attributes.
     """
-    DATE_FORMAT = "%Y-%m-%d"
-    REQUIRED_FIELDS = [
+    date_format = "%Y-%m-%d"
+    required_fields = [
         "course_title",
         "course_code",
         "course_run_code",
         "list_currency",
     ]
-    WHO_SHOULD_ENROLL_PAGE_HEADING = "WHO SHOULD ENROLL"
-    LEARNING_OUTCOMES_PAGE_HEADING = "WHAT YOU WILL LEARN"
+    who_should_enroll_page_heading = "WHO SHOULD ENROLL"
+    learning_outcomes_page_heading = "WHAT YOU WILL LEARN"
 
     def __init__(self, platform_name, report_names):
         self.platform_name = platform_name
@@ -120,10 +120,10 @@ class ExternalCourse:
         self.list_currency = external_course_json.get("list_currency")
 
         self.start_date = strip_datetime(
-            external_course_json.get("start_date"), keymap.DATE_FORMAT
+            external_course_json.get("start_date"), keymap.date_format
         )
         end_datetime = strip_datetime(
-            external_course_json.get("end_date"), keymap.DATE_FORMAT
+            external_course_json.get("end_date"), keymap.date_format
         )
         self.end_date = (
             end_datetime.replace(hour=23, minute=59) if end_datetime else None
@@ -164,7 +164,7 @@ class ExternalCourse:
         """
         Validates the course data.
         """
-        for field in keymap.REQUIRED_FIELDS:
+        for field in keymap.required_fields:
             if not getattr(self, field, None):
                 log.info(f"Missing required field {field}")  # noqa: G004
                 return False
@@ -664,7 +664,7 @@ def create_who_should_enroll_in_page(course_page, who_should_enroll_list, keymap
     )
 
     who_should_enroll_page = WhoShouldEnrollPage(
-        heading=keymap.WHO_SHOULD_ENROLL_PAGE_HEADING,
+        heading=keymap.who_should_enroll_page_heading,
         content=content,
     )
     course_page.add_child(instance=who_should_enroll_page)
@@ -684,7 +684,7 @@ def create_learning_outcomes_page(course_page, outcomes_list, keymap):
     )
 
     learning_outcome_page = LearningOutcomesPage(
-        heading=keymap.LEARNING_OUTCOMES_PAGE_HEADING,
+        heading=keymap.learning_outcomes_page_heading,
         sub_heading=keymap.learning_outcomes_page_subhead,
         outcome_items=outcome_items,
     )
