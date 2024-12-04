@@ -4,8 +4,8 @@ from collections import Counter
 
 import pytest
 
-from courses.factories import CourseRunFactory
-from courses.tasks import sync_courseruns_data, task_sync_emeritus_course_runs
+from courses.factories import CourseRunFactory, PlatformFactory
+from courses.tasks import sync_courseruns_data, task_sync_external_course_runs
 
 pytestmark = [pytest.mark.django_db]
 
@@ -25,13 +25,25 @@ def test_sync_courseruns_data(mocker):
     assert Counter(actual_course_runs) == Counter(course_runs)
 
 
-def test_task_sync_emeritus_course_runs(mocker, settings):
-    """Test task_sync_emeritus_course_runs calls the right api functionality"""
+def test_task_sync_external_course_runs(mocker, settings):
+    """Test task_sync_external_course_runs skips platforms not in VENDOR_KEYMAPS"""
     settings.FEATURES["ENABLE_EXTERNAL_COURSE_SYNC"] = True
+    
     mock_fetch_external_courses = mocker.patch("courses.tasks.fetch_external_courses")
     mock_update_external_course_runs = mocker.patch(
         "courses.tasks.update_external_course_runs"
     )
-    task_sync_emeritus_course_runs.delay()
+    log_mock = mocker.patch("courses.tasks.log")
+
+    PlatformFactory.create(name="Emeritus", sync_daily=True)
+    PlatformFactory.create(name="UnknownPlatform", sync_daily=True)
+    
+    task_sync_external_course_runs.delay()
+    
     mock_fetch_external_courses.assert_called_once()
     mock_update_external_course_runs.assert_called_once()
+
+    log_mock.exception.assert_called_once_with(
+        "The platform '%s' does not have a sync API configured. Please disable the 'sync_daily' setting for this platform.",
+        "UnknownPlatform",
+    )
