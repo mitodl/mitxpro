@@ -9,7 +9,7 @@ CERTIFICATE_INDEX_SLUG = "certificate"
 WEBINAR_INDEX_SLUG = "webinars"
 BLOG_INDEX_SLUG = "blog"
 ENTERPRISE_PAGE_SLUG = "enterprise"
-COMMON_EXTERNAL_COURSE_SLUG = "common-external-course-pages"
+COMMON_CHILD_INDEX_PAGE_SLUG = "common-child-index-page"
 
 ALL_TOPICS = "All Topics"
 ALL_TAB = "all-tab"

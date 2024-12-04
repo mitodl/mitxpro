@@ -15,12 +15,12 @@ from cms.blocks import (
     SuccessStoriesBlock,
     UserTestimonialBlock,
 )
-from cms.constants import UPCOMING_WEBINAR
+from cms.constants import COMMON_CHILD_INDEX_PAGE_SLUG, UPCOMING_WEBINAR
 from cms.models import (
     BlogIndexPage,
     CatalogPage,
     CertificatePage,
-    CommonExternalCoursePage,
+    CommonChildIndexPage,
     CompaniesLogoCarouselSection,
     CourseIndexPage,
     CoursePage,
@@ -29,7 +29,7 @@ from cms.models import (
     ExternalCoursePage,
     ExternalProgramPage,
     FacultyMembersPage,
-    ForTeamsExternalCoursePage,
+    ForTeamsCommonPage,
     ForTeamsPage,
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
@@ -38,7 +38,7 @@ from cms.models import (
     LearningJourneySection,
     LearningOutcomesPage,
     LearningStrategyFormSection,
-    LearningTechniquesExternalCoursePage,
+    LearningTechniquesCommonPage,
     LearningTechniquesPage,
     NewsAndEventsBlock,
     NewsAndEventsPage,
@@ -581,30 +581,31 @@ class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
         model = LearningStrategyFormSection
 
 
-class CommonExternalCoursePageFactory(wagtail_factories.PageFactory):
-    """CommonExternalCoursePage factory class"""
+class CommonChildIndexPageFactory(wagtail_factories.PageFactory):
+    """CommonChildIndexPage factory class"""
 
+    title = factory.fuzzy.FuzzyText()
+    slug = COMMON_CHILD_INDEX_PAGE_SLUG
+
+    class Meta:
+        model = CommonChildIndexPage
+
+
+class LearningTechniqueCommonPageFactory(LearningTechniquesPageFactory):
+    """LearningTechniquesCommonPage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
     title = factory.fuzzy.FuzzyText()
 
     class Meta:
-        model = CommonExternalCoursePage
+        model = LearningTechniquesCommonPage
 
 
-class LearningTechniqueExternalCoursePageFactory(LearningTechniquesPageFactory):
-    """LearningTechniqueExternalCoursPage factory class"""
-
-    platform = factory.SubFactory(PlatformFactory)
-    title = factory.fuzzy.FuzzyText(prefix=f"{platform} - ")
-
-    class Meta:
-        model = LearningTechniquesExternalCoursePage
-
-
-class ForTeamsExternalCoursePageFactory(ForTeamsPageFactory):
-    """ForTeamsExternalCoursePage factory class"""
+class ForTeamsCommonPageFactory(ForTeamsPageFactory):
+    """ForTeamsCommonPage factory class"""
 
     platform = factory.SubFactory(PlatformFactory)
-    title = factory.fuzzy.FuzzyText(prefix=f"{platform} - ")
+    title = factory.fuzzy.FuzzyText()
 
     class Meta:
-        model = ForTeamsExternalCoursePage
+        model = ForTeamsCommonPage
