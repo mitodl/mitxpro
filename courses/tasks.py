@@ -130,5 +130,10 @@ def task_sync_external_course_runs():
                 platform.name,
             )
             continue
-        emeritus_course_runs = fetch_external_courses(keymap)
-        update_external_course_runs(emeritus_course_runs, keymap)
+        try:
+            emeritus_course_runs = fetch_external_courses(keymap)
+            update_external_course_runs(emeritus_course_runs, keymap)
+        except Exception as e:  # noqa: BLE001
+            log.exception(
+                "Some error occurred. Details: %s", str(e),
+            )
