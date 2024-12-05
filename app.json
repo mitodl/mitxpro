@@ -238,15 +238,15 @@
       "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
       "required": false
     },
-    "EXTERNAL_COURSE_SYNC_API_BASE_URL": {
+    "EMERITUS_API_BASE_URL": {
       "description": "Base API URL for Emeritus API",
       "required": false
     },
-    "EXTERNAL_COURSE_SYNC_API_KEY": {
-      "description": "The API Key for EXTERNAL_COURSE_SYNC API",
+    "EMERITUS_API_KEY": {
+      "description": "The API Key for Emeritus API",
       "required": true
     },
-    "EXTERNAL_COURSE_SYNC_API_TIMEOUT": {
+    "EMERITUS_API_TIMEOUT": {
       "description": "API request timeout for Emeritus APIs in seconds",
       "required": false
     },
