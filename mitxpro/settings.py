@@ -1070,7 +1070,18 @@ MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
 
 
-MITXPRO_OAUTH_PROVIDER = "ol-oauth2"
+MITXPRO_OAUTH_PROVIDER = get_string(
+    name="MITXPRO_OAUTH_PROVIDER",
+    default="mitxpro-oauth2",
+    description="Social auth oauth provider backend name"
+)
+
+OPENEDX_SOCIAL_LOGIN_PATH = get_string(
+    name="OPENEDX_SOCIAL_LOGIN_PATH",
+    default="/auth/login/mitxpro-oauth2/?auth_entry=login",
+    description="Open edX social auth login url"
+)
+
 OPENEDX_OAUTH_APP_NAME = get_string(
     name="OPENEDX_OAUTH_APP_NAME",
     default="edx-oauth-app",

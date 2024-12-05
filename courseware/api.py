@@ -52,7 +52,6 @@ OPENEDX_USER_ACCOUNT_DETAIL_PATH = "/api/user/v1/accounts"
 OPENEDX_REGISTER_USER_PATH = "/user_api/v1/account/registration/"
 OPENEDX_REQUEST_DEFAULTS = dict(country="US", honor_code=True)  # noqa: C408
 
-OPENEDX_SOCIAL_LOGIN_PATH = "/auth/login/ol-oauth2/?auth_entry=login"
 OPENEDX_OAUTH2_AUTHORIZE_PATH = "/oauth2/authorize"
 OPENEDX_OAUTH2_ACCESS_TOKEN_PATH = "/oauth2/access_token"  # noqa: S105
 OPENEDX_OAUTH2_SCOPES = ["read", "write"]
@@ -256,7 +255,7 @@ def create_edx_auth_token(user):
         req_session.cookies.set_cookie(session_cookie)
 
         # Step 3
-        url = edx_url(OPENEDX_SOCIAL_LOGIN_PATH)
+        url = edx_url(settings.OPENEDX_SOCIAL_LOGIN_PATH)
         resp = req_session.get(url)
         resp.raise_for_status()
 
@@ -316,7 +315,7 @@ def update_edx_user_email(user):
         )
         req_session.cookies.set_cookie(session_cookie)
 
-        url = edx_url(OPENEDX_SOCIAL_LOGIN_PATH)
+        url = edx_url(settings.OPENEDX_SOCIAL_LOGIN_PATH)
         resp = req_session.get(url)
         resp.raise_for_status()
 
