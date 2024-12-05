@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.164.3
+---------------
+
+- feat: add emeritus api list view (#3329)
+- [pre-commit.ci] pre-commit autoupdate (#3326)
+
 Version 0.164.2 (Released December 02, 2024)
 ---------------
 
