@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.164.3
+Version 0.164.3 (Released December 05, 2024)
 ---------------
 
 - feat: add emeritus api list view (#3329)
