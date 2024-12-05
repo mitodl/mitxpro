@@ -616,9 +616,9 @@ def test_course_topics_api(client, django_assert_num_queries):
 
 
 @pytest.mark.parametrize("expected_status_code", [200, 500])
-def test_emeritus_course_list_view(admin_drf_client, mocker, expected_status_code):
+def test_external_course_list_view(admin_drf_client, mocker, expected_status_code):
     """
-    Test that the Emeritus API List calls fetch_emeritus_courses and returns its mocked response.
+    Test that the External API List calls fetch_external_courses and returns its mocked response.
     """
     if expected_status_code == 200:
         with Path(
@@ -626,12 +626,12 @@ def test_emeritus_course_list_view(admin_drf_client, mocker, expected_status_cod
         ).open() as test_data_file:
             mocked_response = json.load(test_data_file)["rows"]
 
-        patched_fetch_emeritus_courses = mocker.patch(
-            "courses.views.v1.fetch_emeritus_courses", return_value=mocked_response
+        patched_fetch_external_courses = mocker.patch(
+            "courses.views.v1.fetch_external_courses", return_value=mocked_response
         )
     else:
-        patched_fetch_emeritus_courses = mocker.patch(
-            "courses.views.v1.fetch_emeritus_courses",
+        patched_fetch_external_courses = mocker.patch(
+            "courses.views.v1.fetch_external_courses",
             side_effect=Exception("Some error occurred."),
         )
         mocked_response = {
@@ -639,7 +639,7 @@ def test_emeritus_course_list_view(admin_drf_client, mocker, expected_status_cod
             "details": "Some error occurred.",
         }
 
-    response = admin_drf_client.get(reverse("emeritus_courses"))
+    response = admin_drf_client.get(reverse("external_courses", kwargs={"vendor": "emeritus"}))
     assert response.json() == mocked_response
     assert response.status_code == expected_status_code
-    patched_fetch_emeritus_courses.assert_called_once()
+    patched_fetch_external_courses.assert_called_once()
