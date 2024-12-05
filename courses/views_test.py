@@ -634,7 +634,10 @@ def test_emeritus_course_list_view(admin_drf_client, mocker, expected_status_cod
             "courses.views.v1.fetch_emeritus_courses",
             side_effect=Exception("Some error occurred."),
         )
-        mocked_response = {"error": "Some error occurred."}
+        mocked_response = {
+            "error": "Some error occurred.",
+            "details": "Some error occurred.",
+        }
 
     response = admin_drf_client.get(reverse("emeritus_courses"))
     assert response.json() == mocked_response

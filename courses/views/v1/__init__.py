@@ -1,7 +1,5 @@
 """Course views verson 1"""
 
-import logging
-
 from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
@@ -31,8 +29,6 @@ from courses.serializers import (
 )
 from courses.sync_external_courses.emeritus_api import fetch_emeritus_courses
 from ecommerce.models import Product
-
-log = logging.getLogger(__name__)
 
 
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
@@ -223,9 +219,8 @@ class EmeritusCourseListView(APIView):
         try:
             data = fetch_emeritus_courses()
             return Response(data, status=status.HTTP_200_OK)
-        except Exception:
-            log.exception("Some error occurred fetching Emeritus courses")
+        except Exception as e:  # noqa: BLE001
             return Response(
-                {"error": "Some error occurred."},
+                {"error": "Some error occurred.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
