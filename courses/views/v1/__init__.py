@@ -4,7 +4,7 @@ from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -27,6 +27,7 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from courses.sync_external_courses.emeritus_api import fetch_emeritus_courses
 from ecommerce.models import Product
 
 
@@ -202,3 +203,24 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
         Returns parent topics with course count > 0.
         """
         return CourseTopic.parent_topics_with_courses()
+
+
+class EmeritusCourseListView(APIView):
+    """
+    ReadOnly View to list Emeritus courses.
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        Get Emeritus courses list from the Emeritus API and return it.
+        """
+        try:
+            data = fetch_emeritus_courses()
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:  # noqa: BLE001
+            return Response(
+                {"error": "Some error occurred.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
