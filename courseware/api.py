@@ -193,7 +193,7 @@ def create_edx_user(user):
                 username=user.username,
                 email=user.email,
                 name=user.name,
-                provider=settings.MITXPRO_OAUTH_PROVIDER,
+                provider=settings.OPENEDX_OAUTH_PROVIDER,
                 access_token=access_token.token,
                 **OPENEDX_REQUEST_DEFAULTS,
             ),
@@ -814,7 +814,7 @@ def create_oauth_application():
         defaults=dict(  # noqa: C408
             redirect_uris=urljoin(
                 settings.OPENEDX_BASE_REDIRECT_URL,
-                f"/auth/complete/{settings.MITXPRO_OAUTH_PROVIDER}/",
+                f"/auth/complete/{settings.OPENEDX_OAUTH_PROVIDER}/",
             ),
             client_type="confidential",
             authorization_grant_type="authorization-code",

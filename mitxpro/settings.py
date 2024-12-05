@@ -1070,8 +1070,8 @@ MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
 
 
-MITXPRO_OAUTH_PROVIDER = get_string(
-    name="MITXPRO_OAUTH_PROVIDER",
+OPENEDX_OAUTH_PROVIDER = get_string(
+    name="OPENEDX_OAUTH_PROVIDER",
     default="mitxpro-oauth2",
     description="Social auth oauth provider backend name"
 )

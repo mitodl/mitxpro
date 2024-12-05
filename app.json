@@ -234,10 +234,6 @@
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false
     },
-    "ENROLLMENT_CHANGE_SHEET_ID": {
-      "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
-      "required": false
-    },
     "EMERITUS_API_BASE_URL": {
       "description": "Base API URL for Emeritus API",
       "required": false
@@ -248,6 +244,10 @@
     },
     "EMERITUS_API_TIMEOUT": {
       "description": "API request timeout for Emeritus APIs in seconds",
+      "required": false
+    },
+    "ENROLLMENT_CHANGE_SHEET_ID": {
+      "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
       "required": false
     },
     "GA_TRACKING_ID": {
@@ -430,10 +430,6 @@
       "description": "The email backend to use for application emails",
       "required": false
     },
-    "MITXPRO_OAUTH_PROVIDER": {
-      "description": "Social auth oauth provider backend name",
-      "required": false
-    },
     "MITXPRO_REGISTRATION_ACCESS_TOKEN": {
       "description": "Access token to secure Open edX registration API with",
       "required": false
@@ -485,6 +481,10 @@
     "OPENEDX_OAUTH_APP_NAME": {
       "description": "The 'name' value for the Open edX OAuth Application",
       "required": true
+    },
+    "OPENEDX_OAUTH_PROVIDER": {
+      "description": "Social auth oauth provider backend name",
+      "required": false
     },
     "OPENEDX_SERVICE_WORKER_API_TOKEN": {
       "description": "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
