@@ -4,8 +4,6 @@ from django.core.management.base import BaseCommand
 
 from courses.sync_external_courses.external_course_sync_api import (
     VENDOR_KEYMAPS,
-    EmeritusKeyMap,
-    GlobalAlumniKeyMap,
     fetch_external_courses,
     update_external_course_runs,
 )
@@ -48,11 +46,8 @@ class Command(BaseCommand):
         stats = update_external_course_runs(emeritus_course_runs, keymap)
         self.log_stats(stats)
         self.stdout.write(
-            self.style.SUCCESS(
-                f"External course sync successful for {vendor_name}."
-            )
+            self.style.SUCCESS(f"External course sync successful for {vendor_name}.")
         )
-        
 
     def log_stats(self, stats):
         """

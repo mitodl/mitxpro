@@ -23,7 +23,9 @@ from cms.models import (
 )
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseRun, CourseTopic, Platform
-from courses.sync_external_courses.external_course_sync_api_client import ExternalCourseSyncAPIClient
+from courses.sync_external_courses.external_course_sync_api_client import (
+    ExternalCourseSyncAPIClient,
+)
 from ecommerce.models import Product, ProductVersion
 from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 
@@ -34,6 +36,7 @@ class BaseKeyMap:
     """
     Base class for course sync keys with common attributes.
     """
+
     date_format = "%Y-%m-%d"
     required_fields = [
         "course_title",
@@ -66,6 +69,7 @@ class EmeritusKeyMap(BaseKeyMap):
     """
     Emeritus course sync keys.
     """
+
     def __init__(self):
         super().__init__(platform_name="Emeritus", report_names=["Batch"])
 
@@ -74,13 +78,16 @@ class GlobalAlumniKeyMap(BaseKeyMap):
     """
     Global Alumni course sync keys.
     """
+
     def __init__(self):
         super().__init__(platform_name="Global Alumni", report_names=["GA - Batch"])
+
 
 VENDOR_KEYMAPS = {
     "emeritus": EmeritusKeyMap(),
     "global alumni": GlobalAlumniKeyMap(),
 }
+
 
 class ExternalCourseSyncAPIJobStatus(Enum):
     """
@@ -150,7 +157,9 @@ class ExternalCourse:
         self.image_name = external_course_json.get("image_name", None)
         self.CEUs = str(external_course_json.get("ceu") or "")
         self.learning_outcomes_list = (
-            parse_external_course_data_str(external_course_json.get("learning_outcomes"))
+            parse_external_course_data_str(
+                external_course_json.get("learning_outcomes")
+            )
             if external_course_json.get("learning_outcomes")
             else []
         )
@@ -222,7 +231,10 @@ def fetch_external_courses(keymap):
             )
             while True:
                 job_status = external_course_sync_api_client.get_job_status(job_id)
-                if job_status["job"]["status"] == ExternalCourseSyncAPIJobStatus.READY.value:
+                if (
+                    job_status["job"]["status"]
+                    == ExternalCourseSyncAPIJobStatus.READY.value
+                ):
                     # If true, the query_result is ready to be collected.
                     log.info("Job complete... requesting results...")
                     query_response = external_course_sync_api_client.get_query_result(
@@ -508,7 +520,9 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
     return f"{course_readable_id}+{course_run_tag}"
 
 
-def create_or_update_external_course_page(course_index_page, course, external_course, keymap):
+def create_or_update_external_course_page(
+    course_index_page, course, external_course, keymap
+):
     """
     Creates or updates external course page for External course.
 

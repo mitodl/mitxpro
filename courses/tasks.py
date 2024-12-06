@@ -133,5 +133,5 @@ def task_sync_external_course_runs():
         try:
             external_course_runs = fetch_external_courses(keymap)
             update_external_course_runs(external_course_runs, keymap)
-        except:  # noqa: BLE001
+        except Exception:
             log.exception("Some error occurred")

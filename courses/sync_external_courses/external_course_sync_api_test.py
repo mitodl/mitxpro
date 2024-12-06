@@ -21,8 +21,8 @@ from cms.models import CertificatePage
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.external_course_sync_api import (
-    ExternalCourse,
     EmeritusKeyMap,
+    ExternalCourse,
     create_learning_outcomes_page,
     create_or_update_certificate_page,
     create_or_update_external_course_page,
@@ -30,8 +30,8 @@ from courses.sync_external_courses.external_course_sync_api import (
     create_or_update_product_and_product_version,
     create_who_should_enroll_in_page,
     fetch_external_courses,
-    generate_external_course_run_tag,
     generate_external_course_run_courseware_id,
+    generate_external_course_run_tag,
     parse_external_course_data_str,
     save_page_revision,
     update_external_course_runs,
@@ -206,7 +206,10 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913
 
     external_course_page, course_page_created, course_page_updated = (
         create_or_update_external_course_page(
-            course_index_page, course, ExternalCourse(external_course_data, keymap=EmeritusKeyMap()), keymap=EmeritusKeyMap()
+            course_index_page,
+            course,
+            ExternalCourse(external_course_data, keymap=EmeritusKeyMap()),
+            keymap=EmeritusKeyMap(),
         )
     )
     external_course_page = external_course_page.revisions.last().as_object()
@@ -287,7 +290,8 @@ def test_create_or_update_certificate_page(
             certificate_page.unpublish()
 
     certificate_page, is_created, is_updated = create_or_update_certificate_page(
-        external_course_page, ExternalCourse(external_course_data, keymap=EmeritusKeyMap())
+        external_course_page,
+        ExternalCourse(external_course_data, keymap=EmeritusKeyMap()),
     )
     certificate_page = certificate_page.revisions.last().as_object()
     assert certificate_page.CEUs == external_course_data["ceu"]
@@ -317,7 +321,9 @@ def test_create_who_should_enroll_in_page():
         "looking to add critical cybersecurity knowledge and foundational lessons to their resume"
     )
     create_who_should_enroll_in_page(
-        course_page, parse_external_course_data_str(who_should_enroll_str), keymap=EmeritusKeyMap()
+        course_page,
+        parse_external_course_data_str(who_should_enroll_str),
+        keymap=EmeritusKeyMap(),
     )
     assert parse_external_course_data_str(who_should_enroll_str) == [
         item.value.source for item in course_page.who_should_enroll.content
@@ -340,7 +346,9 @@ def test_create_learning_outcomes_page():
         "organizations to prepare themselves against cybersecurity attacks"
     )
     create_learning_outcomes_page(
-        course_page, parse_external_course_data_str(learning_outcomes_str), keymap=EmeritusKeyMap()
+        course_page,
+        parse_external_course_data_str(learning_outcomes_str),
+        keymap=EmeritusKeyMap(),
     )
     assert parse_external_course_data_str(learning_outcomes_str) == [
         item.value for item in course_page.outcomes.outcome_items
@@ -568,7 +576,9 @@ def test_fetch_external_courses_success(settings, mocker):
         5. If job status is 1 or 2, it is in progress. Wait for 2 seconds and make a get request for Job status.
         6. If job status is 3, the results are ready, make a get request to collect the results and return the data.
     """
-    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = "https://test_external_course_sync_api.io"
+    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = (
+        "https://test_external_course_sync_api.io"
+    )
     settings.EXTERNAL_COURSE_SYNC_API_KEY = "test_EXTERNAL_COURSE_SYNC_API_KEY"
     settings.EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT = 60
 
@@ -619,7 +629,9 @@ def test_fetch_external_courses_error(settings, mocker, caplog):
     """
     Tests that `fetch_external_courses` specific calls to the External Course Sync API and Fails for Job status 3 and 4.
     """
-    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = "https://test_external_course_sync_api.com"
+    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = (
+        "https://test_external_course_sync_api.com"
+    )
     settings.EXTERNAL_COURSE_SYNC_API_KEY = "test_EXTERNAL_COURSE_SYNC_API_KEY"
     mock_get = mocker.patch(
         "courses.sync_external_courses.external_course_sync_api_client.requests.get"
@@ -729,9 +741,7 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
         external_course_page.save_revision()
 
     latest_revision = external_course_page.get_latest_revision_as_object()
-    latest_revision.external_marketing_url = (
-        "https://test-external-course-sync-api.io/Internet-of-things-iot-design-and-applications"
-    )
+    latest_revision.external_marketing_url = "https://test-external-course-sync-api.io/Internet-of-things-iot-design-and-applications"
     save_page_revision(external_course_page, latest_revision)
 
     assert external_course_page.live == (not is_draft_page)
