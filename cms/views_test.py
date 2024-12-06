@@ -707,98 +707,58 @@ def _get_course_page(client, url):
 
 
 @pytest.mark.parametrize(
-    "page_klass",
+    ("page_klass", "overview", "course_description"),
     [
-        ExternalCoursePageFactory,
-        CoursePageFactory,
-        ProgramPageFactory,
-        ExternalProgramPageFactory,
+        # With Overview
+        (
+            ExternalCoursePageFactory,
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        (CoursePageFactory, "<p>Dummy overview</p>", "shouldn't matter description"),
+        (ProgramPageFactory, "<p>Dummy overview</p>", "shouldn't matter description"),
+        (
+            ExternalProgramPageFactory,
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        # Without overview and course description
+        (ExternalCoursePageFactory, None, ""),
+        (CoursePageFactory, None, ""),
+        (ProgramPageFactory, None, ""),
+        (ExternalProgramPageFactory, None, ""),
+        # Without overview but with course description
+        (ExternalCoursePageFactory, None, "course test description"),
+        (CoursePageFactory, None, "course test description"),
+        (ProgramPageFactory, None, "course test description"),
+        (ExternalProgramPageFactory, None, "course test description"),
+        # With overview and course description
+        (ExternalCoursePageFactory, "<p>Overview</p>", "shouldn't matter description"),
+        (CoursePageFactory, "<p>Overview</p>", "shouldn't matter description"),
+        (ProgramPageFactory, "<p>Overview</p>", "shouldn't matter description"),
+        (ExternalProgramPageFactory, "<p>Overview</p>", "shouldn't matter description"),
     ],
 )
-def test_course_overview_context(client, page_klass):
-    """Test that course page have course_overview in context"""
-
-    page = page_klass.create()
+def test_course_overview_context(client, page_klass, overview, course_description):
+    """Test that course page have expected course_overview in context"""
+    expected_overview = overview or course_description
+    page = page_klass.create(description=course_description)
     assert not page.course_overview
     assert CourseOverviewPage.can_create_at(page)
     overview_page = CourseOverviewPageFactory.create(
         parent=page,
         heading="test heading",
-        overview="<p>paragraph content</p>",
+        overview=overview,
     )
     resp_page = _get_course_page(client, page.get_url())
     assert resp_page.course_overview == overview_page
-    assert resp_page.course_overview.get_overview == overview_page.overview
+    assert resp_page.course_overview.get_overview == expected_overview
     assert resp_page.course_overview.heading == overview_page.heading
 
-
-@pytest.mark.parametrize(
-    "page_klass",
-    [
-        ExternalCoursePageFactory,
-        CoursePageFactory,
-        ProgramPageFactory,
-        ExternalProgramPageFactory,
-    ],
-)
-def test_course_overview_context_wo_overview(client, page_klass):
-    """Test that course page have course_overview in context"""
-
-    page = page_klass.create()
-    assert not page.course_overview
-    assert CourseOverviewPage.can_create_at(page)
-    overview_page = CourseOverviewPageFactory.create(
-        parent=page,
-        heading="test heading",
-        overview=None,
-    )
-    resp_page = _get_course_page(client, page.get_url())
-    assert resp_page.course_overview == overview_page
-    assert resp_page.course_overview.get_overview == ""
-    assert resp_page.course_overview.heading == overview_page.heading
-
+    # Test modification
     new_overview = "new_overview"
     overview_page.overview = new_overview
     overview_page.save()
 
     resp_page = _get_course_page(client, page.get_url())
-    assert resp_page.course_overview == overview_page
     assert resp_page.course_overview.get_overview == new_overview
-    assert resp_page.course_overview.heading == overview_page.heading
-
-
-@pytest.mark.parametrize(
-    "page_klass",
-    [
-        ExternalCoursePageFactory,
-        CoursePageFactory,
-        ProgramPageFactory,
-        ExternalProgramPageFactory,
-    ],
-)
-def test_course_overview_context_with_course_description(client, page_klass):
-    """Test that course page have course_overview in context"""
-
-    description = "test description"
-    page = page_klass.create(description=description)
-    assert not page.course_overview
-    assert CourseOverviewPage.can_create_at(page)
-    overview_page = CourseOverviewPageFactory.create(
-        parent=page,
-        heading="test heading",
-        overview=None,
-    )
-
-    resp_page = _get_course_page(client, page.get_url())
-    assert resp_page.course_overview == overview_page
-    assert resp_page.course_overview.get_overview == description
-    assert resp_page.course_overview.heading == overview_page.heading
-
-    new_overview = "new_overview"
-    overview_page.overview = new_overview
-    overview_page.save()
-
-    resp_page = _get_course_page(client, page.get_url())
-    assert resp_page.course_overview == overview_page
-    assert resp_page.course_overview.get_overview == new_overview
-    assert resp_page.course_overview.heading == overview_page.heading
