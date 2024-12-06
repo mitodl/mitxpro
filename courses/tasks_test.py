@@ -5,9 +5,10 @@ from collections import Counter
 import pytest
 
 from courses.factories import CourseRunFactory, PlatformFactory
+from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
+)
 from courses.tasks import sync_courseruns_data, task_sync_external_course_runs
-
-from sync_external_courses.external_course_sync_api import EMERITUS_PLATFORM_NAME
 
 pytestmark = [pytest.mark.django_db]
 
