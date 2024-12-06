@@ -28,7 +28,7 @@ from courses.serializers import (
     ProgramSerializer,
 )
 from courses.sync_external_courses.external_course_sync_api import (
-    VENDOR_KEYMAPS,
+    EXTERNAL_COURSE_VENDOR_KEYMAPS,
     fetch_external_courses,
 )
 from ecommerce.models import Product
@@ -221,16 +221,16 @@ class ExternalCourseListView(APIView):
         """
 
         vendor = kwargs.get("vendor").replace("_", " ")
-        keymap = VENDOR_KEYMAPS.get(vendor.lower())
+        keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor.lower())
         if not keymap:
             return Response(
                 {
-                    "error": f"The vendor '{vendor}' is not supported. Supported vendors are {", ".join(VENDOR_KEYMAPS)}"
+                    "error": f"The vendor '{vendor}' is not supported. Supported vendors are {", ".join(EXTERNAL_COURSE_VENDOR_KEYMAPS)}"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            data = fetch_external_courses(keymap)
+            data = fetch_external_courses(keymap())
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:  # noqa: BLE001
             return Response(

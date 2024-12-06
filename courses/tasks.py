@@ -11,7 +11,7 @@ from requests.exceptions import HTTPError
 
 from courses.models import CourseRun, CourseRunCertificate, Platform
 from courses.sync_external_courses.external_course_sync_api import (
-    VENDOR_KEYMAPS,
+    EXTERNAL_COURSE_VENDOR_KEYMAPS,
     fetch_external_courses,
     update_external_course_runs,
 )
@@ -123,7 +123,7 @@ def task_sync_external_course_runs():
 
     platforms = Platform.objects.filter(sync_daily=True)
     for platform in platforms:
-        keymap = VENDOR_KEYMAPS.get(platform.name.lower())
+        keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(platform.name.lower())
         if not keymap:
             log.exception(
                 "The platform '%s' does not have a sync API configured. Please disable the 'sync_daily' setting for this platform.",
@@ -131,7 +131,7 @@ def task_sync_external_course_runs():
             )
             continue
         try:
-            external_course_runs = fetch_external_courses(keymap)
-            update_external_course_runs(external_course_runs, keymap)
+            external_course_runs = fetch_external_courses(keymap())
+            update_external_course_runs(external_course_runs, keymap())
         except Exception:
             log.exception("Some error occurred")

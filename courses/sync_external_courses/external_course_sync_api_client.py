@@ -1,5 +1,5 @@
 """
-API client for Emeritus
+External course sync API client
 """
 
 import json
@@ -10,7 +10,7 @@ from django.conf import settings
 
 class ExternalCourseSyncAPIClient:
     """
-    API client for Emeritus
+    External course sync API client
     """
 
     def __init__(self):
