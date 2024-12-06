@@ -117,7 +117,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres # pragma: allowlist secret
           WEBPACK_DISABLE_LOADER_STATS: "True"
           ELASTICSEARCH_URL: localhost:9200
-          EMERITUS_API_KEY: fake_emeritus_api_key # pragma: allowlist secret
+          EXTERNAL_COURSE_SYNC_API_KEY: fake_external_course_sync_api_key # pragma: allowlist secret
           MAILGUN_KEY: fake_mailgun_key
           MAILGUN_SENDER_DOMAIN: other.fake.site
           MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL: http://localhost:5000
