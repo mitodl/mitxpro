@@ -28,7 +28,7 @@ def test_sync_courseruns_data(mocker):
 def test_task_sync_external_course_runs(mocker, settings):
     """Test task_sync_external_course_runs to call APIs for supported platforms and skip unsupported ones in VENDOR_KEYMAPS"""
     settings.FEATURES["ENABLE_EXTERNAL_COURSE_SYNC"] = True
-    
+
     mock_fetch_external_courses = mocker.patch("courses.tasks.fetch_external_courses")
     mock_update_external_course_runs = mocker.patch(
         "courses.tasks.update_external_course_runs"
@@ -37,9 +37,9 @@ def test_task_sync_external_course_runs(mocker, settings):
 
     PlatformFactory.create(name="Emeritus", sync_daily=True)
     PlatformFactory.create(name="UnknownPlatform", sync_daily=True)
-    
+
     task_sync_external_course_runs.delay()
-    
+
     mock_fetch_external_courses.assert_called_once()
     mock_update_external_course_runs.assert_called_once()
 

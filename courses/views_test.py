@@ -639,7 +639,9 @@ def test_external_course_list_view(admin_drf_client, mocker, expected_status_cod
             "details": "Some error occurred.",
         }
 
-    response = admin_drf_client.get(reverse("external_courses", kwargs={"vendor": "emeritus"}))
+    response = admin_drf_client.get(
+        reverse("external_courses", kwargs={"vendor": "emeritus"})
+    )
     assert response.json() == mocked_response
     assert response.status_code == expected_status_code
     patched_fetch_external_courses.assert_called_once()

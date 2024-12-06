@@ -7,7 +7,9 @@ from datetime import timedelta
 
 import pytest
 
-from courses.sync_external_courses.external_course_sync_api_client import ExternalCourseSyncAPIClient
+from courses.sync_external_courses.external_course_sync_api_client import (
+    ExternalCourseSyncAPIClient,
+)
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import now_in_utc
 
@@ -63,7 +65,9 @@ def test_external_course_sync_api_client_get_requests(  # noqa: PLR0913
     expected_api_url,
 ):
     settings.EXTERNAL_COURSE_SYNC_API_KEY = "test_external_course_sync_api_key"
-    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = "https://test-external-course-sync-api.io"
+    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = (
+        "https://test-external-course-sync-api.io"
+    )
     settings.EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT = 60
 
     mock_get = mocker.patch(patch_request_path)
@@ -90,7 +94,9 @@ def test_get_query_response(mocker, settings):
     start_date = end_date - timedelta(days=1)
 
     settings.EXTERNAL_COURSE_SYNC_API_KEY = "test_external_course_sync_api_key"
-    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = "https://test-external-course-sync-api.io"
+    settings.EXTERNAL_COURSE_SYNC_API_BASE_URL = (
+        "https://test-external-course-sync-api.io"
+    )
 
     mock_post = mocker.patch(
         "courses.sync_external_courses.external_course_sync_api_client.requests.post"
