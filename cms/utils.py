@@ -28,7 +28,8 @@ def create_and_add_how_you_will_learn_section(page, platform=None):
     learning_tech_page = (
         LearningTechniquesCommonPage.objects.filter(
             models.Q(platform__name__iexact=platform)
-            | models.Q(platform__name__isnull=True)
+            | models.Q(platform__name__isnull=True),
+            live=True,
         )
         .order_by("platform__name")
         .first()
@@ -62,7 +63,8 @@ def create_and_add_b2b_section(page, platform=None):
     b2b_page = (
         ForTeamsCommonPage.objects.filter(
             models.Q(platform__name__iexact=platform)
-            | models.Q(platform__name__isnull=True)
+            | models.Q(platform__name__isnull=True),
+            live=True,
         )
         .order_by("platform__name")
         .first()
