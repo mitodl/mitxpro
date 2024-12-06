@@ -114,8 +114,8 @@ class Command(BaseCommand):
             if kwargs["platform"] == "macos":
                 redirects = "\n".join(
                     [
-                        f"http://{edx_host}/auth/complete/mitxpro-oauth2/",
-                        f"http://host.docker.internal{edx_gateway_port}/auth/complete/mitxpro-oauth2/",
+                        f"http://{edx_host}/auth/complete/ol-oauth2/",
+                        f"http://host.docker.internal{edx_gateway_port}/auth/complete/ol-oauth2/",
                     ]
                 )
             else:
@@ -129,8 +129,8 @@ class Command(BaseCommand):
 
                 redirects = "\n".join(
                     [
-                        f"http://{edx_host}/auth/complete/mitxpro-oauth2/",
-                        f"http://{kwargs['gateway']}{edx_gateway_port}/auth/complete/mitxpro-oauth2/",
+                        f"http://{edx_host}/auth/complete/ol-oauth2/",
+                        f"http://{kwargs['gateway']}{edx_gateway_port}/auth/complete/ol-oauth2/",
                     ]
                 )
 

@@ -482,12 +482,20 @@
       "description": "The 'name' value for the Open edX OAuth Application",
       "required": true
     },
+    "OPENEDX_OAUTH_PROVIDER": {
+      "description": "Social auth oauth provider backend name",
+      "required": false
+    },
     "OPENEDX_SERVICE_WORKER_API_TOKEN": {
       "description": "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
       "required": false
     },
     "OPENEDX_SERVICE_WORKER_USERNAME": {
       "description": "Username of the user whose token has been set in OPENEDX_SERVICE_WORKER_API_TOKEN",
+      "required": false
+    },
+    "OPENEDX_SOCIAL_LOGIN_PATH": {
+      "description": "Open edX social auth login url",
       "required": false
     },
     "OPENEDX_TOKEN_EXPIRES_HOURS": {
