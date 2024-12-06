@@ -2093,25 +2093,61 @@ def test_certificatepage_saved_no_signatories_external_courseware(
     assert resp.status_code == 302
 
 
-def _test_course_overview(page):
-    """
-    Tests the creation and modification of a CourseOverviewPage
-    associated with a given page.
-
-    Args:
-        page: The parent page under which the CourseOverviewPage is created.
-              Can be one of the following types:
-              - `ExternalCoursePage`
-              - `CoursePage`
-              - `ProgramPage`
-              - `ExternalProgramPage`
-    """
+@pytest.mark.parametrize(
+    ("page_klass", "heading", "overview", "course_description"),
+    [
+        # With heading and overview
+        (
+            ExternalCoursePageFactory,
+            "heading",
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        (
+            CoursePageFactory,
+            "heading",
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        (
+            ProgramPageFactory,
+            "heading",
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        (
+            ExternalProgramPageFactory,
+            "heading",
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        # Without overview and course description
+        (ExternalCoursePageFactory, "heading", None, ""),
+        (CoursePageFactory, "heading", None, ""),
+        (ProgramPageFactory, "heading", None, ""),
+        (ExternalProgramPageFactory, "heading", None, ""),
+        # Without overview but with course description
+        (ExternalCoursePageFactory, "heading", None, "course description"),
+        (CoursePageFactory, "heading", None, "course description"),
+        (ProgramPageFactory, "heading", None, "course description"),
+        (ExternalProgramPageFactory, "heading", None, "course description"),
+        # Without heading
+        (ExternalCoursePageFactory, None, "", "course description"),
+        (CoursePageFactory, None, "", "course description"),
+        (ProgramPageFactory, None, "", "course description"),
+        (ExternalProgramPageFactory, None, "", "course description"),
+    ],
+)
+def test_coure_overview_page(page_klass, heading, overview, course_description):
+    """Test CourseOverview Page"""
+    expected_overview = overview or course_description
+    page = page_klass.create(description=course_description)
     assert not page.course_overview
     assert CourseOverviewPage.can_create_at(page)
     overview_page = CourseOverviewPageFactory.create(
         parent=page,
-        heading="test heading",
-        overview="<p>paragraph content</p>",
+        heading=heading,
+        overview=overview,
     )
 
     # invalidate cached property
@@ -2119,56 +2155,8 @@ def _test_course_overview(page):
 
     assert overview_page.get_parent() == page
     assert page.course_overview == overview_page
-    assert overview_page.heading == "test heading"
-    assert overview_page.get_overview == "<p>paragraph content</p>"
-
-    # test that it can be modified
-    new_heading = "new test heading"
-    overview_page.heading = new_heading
-    overview_page.save()
-
-    assert overview_page.heading == new_heading
-
-
-@pytest.mark.parametrize(
-    "page_klass",
-    [
-        ExternalCoursePageFactory,
-        CoursePageFactory,
-        ProgramPageFactory,
-        ExternalProgramPageFactory,
-    ],
-)
-def test_coure_overview_page(page_klass):
-    page = page_klass.create()
-    _test_course_overview(page)
-
-
-@pytest.mark.parametrize(
-    "page_klass",
-    [
-        ExternalCoursePageFactory,
-        CoursePageFactory,
-        ProgramPageFactory,
-        ExternalProgramPageFactory,
-    ],
-)
-def test_course_overview_without_overview_and_heading(page_klass):
-    """Tests the behavior of a CourseOverviewPage when created without an overview or heading."""
-    page = page_klass.create()
-    assert not page.course_overview
-    assert CourseOverviewPage.can_create_at(page)
-    overview_page = CourseOverviewPageFactory.create(
-        parent=page,
-        overview=None,
-        heading=None,
-    )
-
-    # invalidate cached property
-    del page.child_pages
-
-    assert overview_page.heading is None
-    assert overview_page.get_overview == ""
+    assert overview_page.heading == heading
+    assert overview_page.get_overview == expected_overview
 
     # test that it can be modified
     new_heading = "new heading"
@@ -2179,39 +2167,3 @@ def test_course_overview_without_overview_and_heading(page_klass):
 
     assert overview_page.get_overview == new_overview
     assert overview_page.heading == new_heading
-
-
-@pytest.mark.parametrize(
-    "page_klass",
-    [
-        ExternalCoursePageFactory,
-        CoursePageFactory,
-        ProgramPageFactory,
-        ExternalProgramPageFactory,
-    ],
-)
-def test_course_overview_with_course_description(page_klass):
-    """
-    Tests the behavior of a CourseOverviewPage when created
-    without an overview and get_overview matches with its course description.
-    """
-    course_description = "<p>testing description</p>"
-    page = page_klass.create(description=course_description)
-    assert not page.course_overview
-    assert CourseOverviewPage.can_create_at(page)
-    overview_page = CourseOverviewPageFactory.create(
-        parent=page,
-        overview=None,
-    )
-
-    # invalidate cached property
-    del page.child_pages
-
-    assert overview_page.get_overview == course_description
-
-    # test that it can be modified
-    new_overview = "new test overview"
-    overview_page.overview = new_overview
-    overview_page.save()
-
-    assert overview_page.get_overview == new_overview
