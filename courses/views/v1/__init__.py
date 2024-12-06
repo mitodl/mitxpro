@@ -217,14 +217,14 @@ class ExternalCourseListView(APIView):
         Get External courses list from the External API and return it.
         """
         
-        vendor = kwargs.get("vendor")
+        vendor = kwargs.get("vendor").replace("_"," ")
         keymap = VENDOR_KEYMAPS.get(vendor.lower())
         if not keymap:
             return Response(
-                {"error": f"The vendor '{vendor}' is not supported."},
+                {"error": f"The vendor '{vendor}' is not supported. Supported vendors are {", ".join(VENDOR_KEYMAPS)}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        try:       
+        try:
             data = fetch_external_courses(keymap)
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:  # noqa: BLE001
