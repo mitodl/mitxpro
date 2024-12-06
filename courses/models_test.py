@@ -27,6 +27,7 @@ from courses.factories import (
 )
 from courses.models import CourseRunEnrollment, limit_to_certificate_pages
 from ecommerce.factories import ProductFactory, ProductVersionFactory
+from sync_external_courses.external_course_sync_api import EMERITUS_PLATFORM_NAME
 from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
@@ -812,7 +813,7 @@ def test_platform_name_is_unique():
     """
     Tests that case-insensitive platform name is unique.
     """
-    PlatformFactory.create(name="Emeritus")
+    PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
 
     with pytest.raises(ValidationError):
-        PlatformFactory.create(name="emeritus")
+        PlatformFactory.create(name=EMERITUS_PLATFORM_NAME.lower())

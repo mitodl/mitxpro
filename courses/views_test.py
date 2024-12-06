@@ -37,6 +37,7 @@ from courses.serializers import (
     ProgramCertificateSerializer,
     ProgramSerializer,
 )
+from courses.sync_external_courses.external_course_sync_api import EMERITUS_PLATFORM_NAME
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc
@@ -640,7 +641,7 @@ def test_external_course_list_view(admin_drf_client, mocker, expected_status_cod
         }
 
     response = admin_drf_client.get(
-        reverse("external_courses", kwargs={"vendor": "emeritus"})
+        reverse("external_courses", kwargs={"vendor": EMERITUS_PLATFORM_NAME})
     )
     assert response.json() == mocked_response
     assert response.status_code == expected_status_code

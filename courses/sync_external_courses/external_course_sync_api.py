@@ -31,8 +31,10 @@ from mitxpro.utils import clean_url, now_in_utc, strip_datetime
 
 log = logging.getLogger(__name__)
 
+EMERITUS_PLATFORM_NAME = "Emeritus"
+GLOBAL_ALUMNI_PLATFORM_NAME = "Global Alumni"
 
-class BaseKeyMap:
+class ExternalCourseVendorBaseKeyMap:
     """
     Base class for course sync keys with common attributes.
     """
@@ -65,27 +67,27 @@ class BaseKeyMap:
         )
 
 
-class EmeritusKeyMap(BaseKeyMap):
+class EmeritusKeyMap(ExternalCourseVendorBaseKeyMap):
     """
     Emeritus course sync keys.
     """
 
     def __init__(self):
-        super().__init__(platform_name="Emeritus", report_names=["Batch"])
+        super().__init__(platform_name=EMERITUS_PLATFORM_NAME, report_names=["Batch"])
 
 
-class GlobalAlumniKeyMap(BaseKeyMap):
+class GlobalAlumniKeyMap(ExternalCourseVendorBaseKeyMap):
     """
     Global Alumni course sync keys.
     """
 
     def __init__(self):
-        super().__init__(platform_name="Global Alumni", report_names=["GA - Batch"])
+        super().__init__(platform_name=GLOBAL_ALUMNI_PLATFORM_NAME, report_names=["GA - Batch"])
 
 
-VENDOR_KEYMAPS = {
-    "emeritus": EmeritusKeyMap(),
-    "global alumni": GlobalAlumniKeyMap(),
+EXTERNAL_COURSE_VENDOR_KEYMAPS = {
+    EMERITUS_PLATFORM_NAME.lower(): EmeritusKeyMap,
+    GLOBAL_ALUMNI_PLATFORM_NAME.lower(): GlobalAlumniKeyMap,
 }
 
 
@@ -111,7 +113,7 @@ class ExternalCourse:
         self.course_title = program_name.strip() if program_name else None
         self.course_code = external_course_json.get("course_code")
 
-        # External course code format is `MO-<COURSE_TAG>`, where course tag can contain `.`,
+        # External course code format is `<MXP | MO>-<COURSE_TAG>`, where course tag can contain `.`,
         # we will replace `.` with `_` to follow the internal readable id format.
         self.course_readable_id = generate_course_readable_id(
             self.course_code.split("-")[1].replace(".", "_")
@@ -172,6 +174,8 @@ class ExternalCourse:
     def validate_required_fields(self, keymap):
         """
         Validates the course data.
+        Args:
+            keymap(ExternalCourseVendorBaseKeyMap): An ExternalCourseVendorBaseKeyMap object
         """
         for field in keymap.required_fields:
             if not getattr(self, field, None):
@@ -200,6 +204,8 @@ class ExternalCourse:
 def fetch_external_courses(keymap):
     """
     Fetches external courses data.
+    Args:
+        keymap(ExternalCourseVendorBaseKeyMap): An ExternalCourseVendorBaseKeyMap object
 
     Makes a request to get the list of available queries and then queries the required reports.
     """
@@ -266,7 +272,7 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
 
     Args:
         external_courses(list[dict]): A list of External Courses as a dict.
-
+        keymap(ExternalCourseVendorBaseKeyMap): An ExternalCourseVendorBaseKeyMap object
     Returns:
         dict: Stats of all the objects created/updated.
     """
@@ -494,7 +500,7 @@ def generate_external_course_run_tag(course_run_code):
     """
     Returns the course run tag generated using the External Course run code.
 
-    External course run codes follow a pattern `MO-<COURSE_CODE>-<RUN_TAG>`. This method returns the run tag.
+    External course run codes follow a pattern `<MXP | MO>-<COURSE_CODE>-<RUN_TAG>`. This method returns the run tag.
 
     Args:
         course_run_code(str): External course code

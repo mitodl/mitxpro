@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 
 from courses.sync_external_courses.external_course_sync_api import (
-    VENDOR_KEYMAPS,
+    EXTERNAL_COURSE_VENDOR_KEYMAPS,
     fetch_external_courses,
     update_external_course_runs,
 )
@@ -36,14 +36,14 @@ class Command(BaseCommand):
             return
 
         vendor_name = options["vendor_name"]
-        keymap = VENDOR_KEYMAPS.get(vendor_name.lower())
+        keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor_name.lower())
         if not keymap:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
             return
 
         self.stdout.write(f"Starting course sync for {vendor_name}.")
-        emeritus_course_runs = fetch_external_courses(keymap)
-        stats = update_external_course_runs(emeritus_course_runs, keymap)
+        external_course_runs = fetch_external_courses(keymap())
+        stats = update_external_course_runs(external_course_runs, keymap())
         self.log_stats(stats)
         self.stdout.write(
             self.style.SUCCESS(f"External course sync successful for {vendor_name}.")

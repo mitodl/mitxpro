@@ -21,6 +21,7 @@ from cms.models import CertificatePage
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
     EmeritusKeyMap,
     ExternalCourse,
     create_learning_outcomes_page,
@@ -459,7 +460,7 @@ def test_update_external_course_runs(  # noqa: PLR0915
     ).open() as test_data_file:
         external_course_runs = json.load(test_data_file)["rows"]
 
-    platform = PlatformFactory.create(name="Emeritus")
+    platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
 
     if create_existing_data:
         for run in random.sample(external_course_runs, len(external_course_runs) // 2):
@@ -688,7 +689,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     """
     external_course_data["list_price"] = new_price
     external_course = ExternalCourse(external_course_data, keymap=EmeritusKeyMap())
-    platform = PlatformFactory.create(name="Emeritus")
+    platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
     course = CourseFactory.create(
         external_course_id=external_course.course_code,
         platform=platform,
