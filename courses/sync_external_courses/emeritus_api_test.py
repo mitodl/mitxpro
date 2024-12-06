@@ -6,6 +6,7 @@ import json
 import logging
 import random
 from datetime import datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -276,12 +277,12 @@ def test_create_or_update_certificate_page(
     )
     if existing_cert_page:
         certificate_page = CertificatePageFactory.create(
-            parent=external_course_page, CEUs=""
+            parent=external_course_page, CEUs=None
         )
         if publish_certificate:
             certificate_page.save_revision().publish()
             if is_live_and_draft:
-                certificate_page.CEUs = "1.2"
+                certificate_page.CEUs = Decimal("1.2")
                 certificate_page.save_revision()
         else:
             certificate_page.unpublish()
@@ -290,7 +291,7 @@ def test_create_or_update_certificate_page(
         external_course_page, EmeritusCourse(emeritus_course_data)
     )
     certificate_page = certificate_page.revisions.last().as_object()
-    assert certificate_page.CEUs == emeritus_course_data["ceu"]
+    assert certificate_page.CEUs == Decimal(str(emeritus_course_data["ceu"]))
     assert is_created == (not existing_cert_page)
     assert is_updated == existing_cert_page
 
@@ -481,7 +482,7 @@ def test_update_emeritus_course_runs(  # noqa: PLR0915
                 description="",
             )
             CertificatePageFactory.create(
-                parent=course_page, CEUs="1.0", partner_logo=None
+                parent=course_page, CEUs=Decimal("1.0"), partner_logo=None
             )
             product = ProductFactory.create(content_object=course_run)
             ProductVersionFactory.create(product=product, price=run["list_price"])
@@ -553,7 +554,7 @@ def test_update_emeritus_course_runs(  # noqa: PLR0915
                 CertificatePage
             )
             assert certificate_page
-            assert certificate_page.CEUs == emeritus_course_run["ceu"]
+            assert certificate_page.CEUs == Decimal(str(emeritus_course_run["ceu"]))
 
 
 def test_fetch_emeritus_courses_success(settings, mocker):
