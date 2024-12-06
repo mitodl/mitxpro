@@ -37,7 +37,9 @@ from courses.serializers import (
     ProgramCertificateSerializer,
     ProgramSerializer,
 )
-from courses.sync_external_courses.external_course_sync_api import EMERITUS_PLATFORM_NAME
+from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
+)
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
 from mitxpro.utils import now_in_utc

@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 EMERITUS_PLATFORM_NAME = "Emeritus"
 GLOBAL_ALUMNI_PLATFORM_NAME = "Global Alumni"
 
+
 class ExternalCourseVendorBaseKeyMap:
     """
     Base class for course sync keys with common attributes.
@@ -82,7 +83,9 @@ class GlobalAlumniKeyMap(ExternalCourseVendorBaseKeyMap):
     """
 
     def __init__(self):
-        super().__init__(platform_name=GLOBAL_ALUMNI_PLATFORM_NAME, report_names=["GA - Batch"])
+        super().__init__(
+            platform_name=GLOBAL_ALUMNI_PLATFORM_NAME, report_names=["GA - Batch"]
+        )
 
 
 EXTERNAL_COURSE_VENDOR_KEYMAPS = {

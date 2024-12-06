@@ -26,8 +26,10 @@ from courses.factories import (
     ProgramRunFactory,
 )
 from courses.models import CourseRunEnrollment, limit_to_certificate_pages
+from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
+)
 from ecommerce.factories import ProductFactory, ProductVersionFactory
-from sync_external_courses.external_course_sync_api import EMERITUS_PLATFORM_NAME
 from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
