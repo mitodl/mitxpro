@@ -116,7 +116,7 @@ def sync_courseruns_data():
 
 @app.task
 def task_sync_external_course_runs():
-    """Task to sync Emeritus course runs"""
+    """Task to sync external course runs"""
     if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
         log.info("External Course sync is disabled.")
         return
@@ -131,9 +131,7 @@ def task_sync_external_course_runs():
             )
             continue
         try:
-            emeritus_course_runs = fetch_external_courses(keymap)
-            update_external_course_runs(emeritus_course_runs, keymap)
-        except Exception as e:  # noqa: BLE001
-            log.exception(
-                "Some error occurred. Details: %s", str(e),
-            )
+            external_course_runs = fetch_external_courses(keymap)
+            update_external_course_runs(external_course_runs, keymap)
+        except:  # noqa: BLE001
+            log.exception("Some error occurred")
