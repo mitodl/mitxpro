@@ -22,8 +22,10 @@ from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
 from courses.models import Course
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
+    GLOBAL_ALUMNI_PLATFORM_NAME,
     EmeritusKeyMap,
     ExternalCourse,
+    GlobalAlumniKeyMap,
     create_learning_outcomes_page,
     create_or_update_certificate_page,
     create_or_update_external_course_page,
@@ -43,7 +45,7 @@ from mitxpro.utils import clean_url, now_in_utc
 
 
 @pytest.fixture
-def external_course_data():
+def external_course_data(request):
     """
     External Course data with Future dates.
     """
@@ -52,9 +54,16 @@ def external_course_data():
     ).open() as test_data_file:
         external_course_data = json.load(test_data_file)["rows"][0]
 
+    params = request.param
+    platform = params.get("platform", EMERITUS_PLATFORM_NAME)
+    if platform == EMERITUS_PLATFORM_NAME:
+        external_course_data["course_run_code"] = "MO-DBIP.ELE-99-09#1"
+    elif platform == GLOBAL_ALUMNI_PLATFORM_NAME:
+        external_course_data["course_run_code"] = "MXP-DBIP.ELE-99-09#1"
+        external_course_data.pop("ceu", None)
+
     external_course_data["start_date"] = "2099-09-30"
     external_course_data["end_date"] = "2099-11-30"
-    external_course_data["course_run_code"] = "MO-DBIP.ELE-99-09#1"
     return external_course_data
 
 
@@ -100,7 +109,9 @@ def external_course_data_with_non_usd_price(external_course_data):
     """
     external_course_json = external_course_data.copy()
     external_course_json["list_currency"] = "INR"
-    external_course_json["course_run_code"] = "MO-INRC-98-10#1"
+    external_course_json["course_run_code"] = (
+        f"{external_course_data["course_run_code"].split("-")[0]}-INRC-98-10#1"
+    )
     return external_course_json
 
 
@@ -108,10 +119,15 @@ def external_course_data_with_non_usd_price(external_course_data):
     ("external_course_run_code", "expected_course_run_tag"),
     [
         ("MO-EOB-18-01#1", "18-01-1"),
+        ("MXP-EOB-18-01#1", "18-01-1"),
         ("MO-EOB-08-01#1", "08-01-1"),
+        ("MXP-EOB-08-01#1", "08-01-1"),
         ("MO-EOB-08-12#1", "08-12-1"),
+        ("MXP-EOB-08-12#1", "08-12-1"),
         ("MO-EOB-18-01#12", "18-01-12"),
+        ("MXP-EOB-18-01#12", "18-01-12"),
         ("MO-EOB-18-01#212", "18-01-212"),
+        ("MXP-EOB-18-01#212", "18-01-212"),
     ],
 )
 def test_generate_external_course_run_tag(
@@ -148,6 +164,11 @@ def test_generate_external_course_run_courseware_id(
     )
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize(
     (
         "create_course_page",
@@ -252,6 +273,9 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913
 
 
 @pytest.mark.parametrize(
+    "external_course_data", [{"platform": EMERITUS_PLATFORM_NAME}], indirect=True
+)
+@pytest.mark.parametrize(
     ("existing_cert_page", "publish_certificate", "is_live_and_draft"),
     [
         (True, False, False),
@@ -306,8 +330,11 @@ def test_create_or_update_certificate_page(
         assert certificate_page.live
 
 
+@pytest.mark.parametrize(
+    "external_course_vendor_keymap", [EmeritusKeyMap, GlobalAlumniKeyMap]
+)
 @pytest.mark.django_db
-def test_create_who_should_enroll_in_page():
+def test_create_who_should_enroll_in_page(external_course_vendor_keymap):
     """
     Tests that `create_who_should_enroll_in_page` creates the `WhoShouldEnrollPage`.
     """
@@ -324,7 +351,7 @@ def test_create_who_should_enroll_in_page():
     create_who_should_enroll_in_page(
         course_page,
         parse_external_course_data_str(who_should_enroll_str),
-        keymap=EmeritusKeyMap(),
+        keymap=external_course_vendor_keymap(),
     )
     assert parse_external_course_data_str(who_should_enroll_str) == [
         item.value.source for item in course_page.who_should_enroll.content
@@ -332,8 +359,11 @@ def test_create_who_should_enroll_in_page():
     assert course_page.who_should_enroll is not None
 
 
+@pytest.mark.parametrize(
+    "external_course_vendor_keymap", [EmeritusKeyMap, GlobalAlumniKeyMap]
+)
 @pytest.mark.django_db
-def test_create_learning_outcomes_page():
+def test_create_learning_outcomes_page(external_course_vendor_keymap):
     """
     Tests that `create_learning_outcomes_page` creates the `LearningOutcomesPage`.
     """
@@ -349,7 +379,7 @@ def test_create_learning_outcomes_page():
     create_learning_outcomes_page(
         course_page,
         parse_external_course_data_str(learning_outcomes_str),
-        keymap=EmeritusKeyMap(),
+        keymap=external_course_vendor_keymap(),
     )
     assert parse_external_course_data_str(learning_outcomes_str) == [
         item.value for item in course_page.outcomes.outcome_items
@@ -379,6 +409,11 @@ def test_parse_external_course_data_str():
     ]
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize(
     ("create_existing_course_run", "empty_dates"),
     [
@@ -443,9 +478,15 @@ def test_create_or_update_external_course_run(
         assert getattr(course_runs[0], attr_name) == expected_value
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
-def test_update_external_course_runs(  # noqa: PLR0915
+def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
+    external_course_data,
     create_existing_data,
     external_expired_course_data,
     external_course_with_bad_data,
@@ -565,7 +606,12 @@ def test_update_external_course_runs(  # noqa: PLR0915
             assert certificate_page.CEUs == external_course_run["ceu"]
 
 
-def test_fetch_external_courses_success(settings, mocker):
+@pytest.mark.parametrize(
+    "external_course_vendor_keymap", [EmeritusKeyMap, GlobalAlumniKeyMap]
+)
+def test_fetch_external_courses_success(
+    settings, mocker, external_course_vendor_keymap
+):
     """
     Tests that `fetch_external_courses` makes the required calls to the `Emeritus` API. Tests the success scenario.
 
@@ -595,9 +641,10 @@ def test_fetch_external_courses_success(settings, mocker):
     ).open() as test_data_file:
         external_course_runs = json.load(test_data_file)
 
+    keymap = external_course_vendor_keymap()
     batch_query = {
         "id": 77,
-        "name": "Batch",
+        "name": keymap.report_names[0],
     }
     mock_get.side_effect = [
         MockResponse({"results": [batch_query]}),
@@ -608,7 +655,7 @@ def test_fetch_external_courses_success(settings, mocker):
     ]
     mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
 
-    actual_course_runs = fetch_external_courses(keymap=EmeritusKeyMap())
+    actual_course_runs = fetch_external_courses(keymap=keymap)
 
     mock_get.assert_any_call(
         "https://test_external_course_sync_api.io/api/queries?api_key=test_EXTERNAL_COURSE_SYNC_API_KEY",
@@ -626,7 +673,12 @@ def test_fetch_external_courses_success(settings, mocker):
     assert actual_course_runs == external_course_runs["rows"]
 
 
-def test_fetch_external_courses_error(settings, mocker, caplog):
+@pytest.mark.parametrize(
+    "external_course_vendor_keymap", [EmeritusKeyMap, GlobalAlumniKeyMap]
+)
+def test_fetch_external_courses_error(
+    settings, mocker, caplog, external_course_vendor_keymap
+):
     """
     Tests that `fetch_external_courses` specific calls to the External Course Sync API and Fails for Job status 3 and 4.
     """
@@ -641,9 +693,10 @@ def test_fetch_external_courses_error(settings, mocker, caplog):
         "courses.sync_external_courses.external_course_sync_api_client.requests.post"
     )
 
+    keymap = external_course_vendor_keymap()
     batch_query = {
         "id": 77,
-        "name": "Batch",
+        "name": keymap.report_names[0],
     }
     mock_get.side_effect = [
         MockResponse({"results": [batch_query]}),
@@ -653,11 +706,16 @@ def test_fetch_external_courses_error(settings, mocker, caplog):
     ]
     mock_post.side_effect = [MockResponse({"job": {"id": 1}})]
     with caplog.at_level(logging.ERROR):
-        fetch_external_courses(keymap=EmeritusKeyMap())
+        fetch_external_courses(keymap=keymap)
     assert "Job failed!" in caplog.text
     assert "Something unexpected happened!" in caplog.text
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize(
     (
         "create_existing_product",
@@ -752,6 +810,11 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
 
 
 @pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
+@pytest.mark.parametrize(
     ("title", "course_code", "course_run_code", "is_valid"),
     [
         (
@@ -760,12 +823,26 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
             "MO-DBIP.ELE-99-07#1",
             True,
         ),
+        (
+            "Internet of Things (IoT): Design and Applications     ",
+            "MXP-DBIP",
+            "MXP-DBIP.ELE-99-07#1",
+            True,
+        ),
         ("", "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
+        ("", "MXP-DBIP", "MXP-DBIP.ELE-99-07#1", False),
         (None, "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
+        (None, "MXP-DBIP", "MXP-DBIP.ELE-99-07#1", False),
         (
             "    Internet of Things (IoT): Design and Applications   ",
             "",
             "MO-DBIP.ELE-99-07#1",
+            False,
+        ),
+        (
+            "    Internet of Things (IoT): Design and Applications   ",
+            "",
+            "MXP-DBIP.ELE-99-07#1",
             False,
         ),
         (
@@ -774,8 +851,16 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
             "MO-DBIP.ELE-99-07#1",
             False,
         ),
+        (
+            "    Internet of Things (IoT): Design and Applications",
+            None,
+            "MXP-DBIP.ELE-99-07#1",
+            False,
+        ),
         ("Internet of Things (IoT): Design and Applications", "MO-DBIP", "", False),
+        ("Internet of Things (IoT): Design and Applications", "MXP-DBIP", "", False),
         ("Internet of Things (IoT): Design and Applications", "MO-DBIP", None, False),
+        ("Internet of Things (IoT): Design and Applications", "MXP-DBIP", None, False),
         ("", "", "", False),
         (None, None, None, False),
     ],
@@ -793,6 +878,11 @@ def test_external_course_validate_required_fields(
     assert external_course.validate_required_fields(keymap=EmeritusKeyMap()) == is_valid
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize(
     ("list_currency", "is_valid"),
     [
@@ -814,6 +904,11 @@ def test_external_course_validate_list_currency(
     assert external_course.validate_list_currency() == is_valid
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize(
     ("end_date", "is_valid"),
     [
