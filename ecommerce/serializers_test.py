@@ -465,7 +465,7 @@ def test_serialize_order_receipt(receipt_data):
                 "tax_paid": "0.00",
                 "total_before_tax": str(line.quantity * product_version.price),
                 "quantity": line.quantity,
-                "CEUs": product_version.product.content_object.course.page.certificate_page.CEUs,
+                "CEUs": product_version.product.content_object.course.page.certificate_page.normalized_ceus,
             }
         ],
         "order": {

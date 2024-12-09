@@ -5,6 +5,7 @@ import logging
 import re
 import time
 from datetime import timedelta
+from decimal import Decimal
 from enum import Enum
 from pathlib import Path
 
@@ -120,7 +121,7 @@ class EmeritusCourse:
         self.format = emeritus_course_json.get("format")
         self.category = emeritus_course_json.get("Category", None)
         self.image_name = emeritus_course_json.get("image_name", None)
-        self.CEUs = str(emeritus_course_json.get("ceu") or "")
+        self.CEUs = Decimal(str(emeritus_course_json.get("ceu") or "0.0")) or None
         self.learning_outcomes_list = (
             parse_emeritus_data_str(emeritus_course_json.get("learning_outcomes"))
             if emeritus_course_json.get("learning_outcomes")
