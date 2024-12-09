@@ -761,14 +761,14 @@ CRON_COURSERUN_SYNC_DAYS = get_string(
 )
 
 CRON_EXTERNAL_COURSERUN_SYNC_HOURS = get_string(
-    name="CRON_EMERITUS_COURSERUN_SYNC_HOURS",
+    name="CRON_EXTERNAL_COURSERUN_SYNC_HOURS",
     default="0",
-    description="'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+    description="'hours' value for the 'sync-external-course-runs' scheduled task (defaults to midnight)",
 )
 CRON_EXTERNAL_COURSERUN_SYNC_DAYS = get_string(
-    name="CRON_EMERITUS_COURSERUN_SYNC_DAYS",
+    name="CRON_EXTERNAL_COURSERUN_SYNC_DAYS",
     default=None,
-    description="'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
+    description="'day_of_week' value for 'sync-external-course-runs' scheduled task (default will run once a day).",
 )
 
 CRON_BASKET_DELETE_HOURS = get_string(
@@ -885,8 +885,8 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year="*",
         ),
     },
-    "sync-emeritus-course-runs": {
-        "task": "courses.tasks.task_sync_emeritus_course_runs",
+    "sync-external-course-runs": {
+        "task": "courses.tasks.task_sync_external_course_runs",
         "schedule": crontab(
             minute="0",
             hour=CRON_EXTERNAL_COURSERUN_SYNC_HOURS,
@@ -1139,21 +1139,21 @@ EDX_API_CLIENT_TIMEOUT = get_int(
     description="Timeout (in seconds) for requests made via the edX API client",
 )
 
-EMERITUS_API_KEY = get_string(
-    name="EMERITUS_API_KEY",
+EXTERNAL_COURSE_SYNC_API_KEY = get_string(
+    name="EXTERNAL_COURSE_SYNC_API_KEY",
     default=None,
-    description="The API Key for Emeritus API",
+    description="The API Key for external course sync API",
     required=True,
 )
-EMERITUS_API_BASE_URL = get_string(
-    name="EMERITUS_API_BASE_URL",
+EXTERNAL_COURSE_SYNC_API_BASE_URL = get_string(
+    name="EXTERNAL_COURSE_SYNC_API_BASE_URL",
     default="https://mit-xpro.emeritus-analytics.io/",
-    description="Base API URL for Emeritus API",
+    description="Base API URL for external course sync API",
 )
-EMERITUS_API_REQUEST_TIMEOUT = get_int(
-    name="EMERITUS_API_TIMEOUT",
+EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT = get_int(
+    name="EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT",
     default=60,
-    description="API request timeout for Emeritus APIs in seconds",
+    description="API request timeout for external course sync APIs in seconds",
 )
 
 # django debug toolbar only in debug mode

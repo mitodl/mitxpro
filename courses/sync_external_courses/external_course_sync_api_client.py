@@ -1,5 +1,5 @@
 """
-API client for Emeritus
+External course sync API client
 """
 
 import json
@@ -8,15 +8,15 @@ import requests
 from django.conf import settings
 
 
-class EmeritusAPIClient:
+class ExternalCourseSyncAPIClient:
     """
-    API client for Emeritus
+    External course sync API client
     """
 
     def __init__(self):
-        self.api_key = settings.EMERITUS_API_KEY
-        self.base_url = settings.EMERITUS_API_BASE_URL
-        self.request_timeout = settings.EMERITUS_API_REQUEST_TIMEOUT
+        self.api_key = settings.EXTERNAL_COURSE_SYNC_API_KEY
+        self.base_url = settings.EXTERNAL_COURSE_SYNC_API_BASE_URL
+        self.request_timeout = settings.EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT
 
     def get_queries_list(self):
         """

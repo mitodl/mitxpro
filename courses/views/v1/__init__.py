@@ -27,7 +27,10 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
-from courses.sync_external_courses.emeritus_api import fetch_emeritus_courses
+from courses.sync_external_courses.external_course_sync_api import (
+    EXTERNAL_COURSE_VENDOR_KEYMAPS,
+    fetch_external_courses,
+)
 from ecommerce.models import Product
 
 
@@ -205,19 +208,29 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
         return CourseTopic.parent_topics_with_courses()
 
 
-class EmeritusCourseListView(APIView):
+class ExternalCourseListView(APIView):
     """
-    ReadOnly View to list Emeritus courses.
+    ReadOnly View to list External courses.
     """
 
     permission_classes = [IsAdminUser]
 
     def get(self, request, *args, **kwargs):  # noqa: ARG002
         """
-        Get Emeritus courses list from the Emeritus API and return it.
+        Get External courses list from the External API and return it.
         """
+
+        vendor = kwargs.get("vendor").replace("_", " ")
+        keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor.lower())
+        if not keymap:
+            return Response(
+                {
+                    "error": f"The vendor '{vendor}' is not supported. Supported vendors are {', '.join(EXTERNAL_COURSE_VENDOR_KEYMAPS)}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
-            data = fetch_emeritus_courses()
+            data = fetch_external_courses(keymap())
             return Response(data, status=status.HTTP_200_OK)
         except Exception as e:  # noqa: BLE001
             return Response(
