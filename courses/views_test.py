@@ -39,6 +39,7 @@ from courses.serializers import (
 )
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
+    GLOBAL_ALUMNI_PLATFORM_NAME,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
@@ -619,7 +620,12 @@ def test_course_topics_api(client, django_assert_num_queries):
 
 
 @pytest.mark.parametrize("expected_status_code", [200, 500])
-def test_external_course_list_view(admin_drf_client, mocker, expected_status_code):
+@pytest.mark.parametrize(
+    "vendor_name", [EMERITUS_PLATFORM_NAME, GLOBAL_ALUMNI_PLATFORM_NAME]
+)
+def test_external_course_list_view(
+    admin_drf_client, mocker, expected_status_code, vendor_name
+):
     """
     Test that the External API List calls fetch_external_courses and returns its mocked response.
     """
@@ -643,7 +649,7 @@ def test_external_course_list_view(admin_drf_client, mocker, expected_status_cod
         }
 
     response = admin_drf_client.get(
-        reverse("external_courses", kwargs={"vendor": EMERITUS_PLATFORM_NAME})
+        reverse("external_courses", kwargs={"vendor": vendor_name})
     )
     assert response.json() == mocked_response
     assert response.status_code == expected_status_code

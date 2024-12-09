@@ -131,7 +131,8 @@ def task_sync_external_course_runs():
             )
             continue
         try:
-            external_course_runs = fetch_external_courses(keymap())
-            update_external_course_runs(external_course_runs, keymap())
+            keymap = keymap()
+            external_course_runs = fetch_external_courses(keymap)
+            update_external_course_runs(external_course_runs, keymap)
         except Exception:
             log.exception("Some error occurred")

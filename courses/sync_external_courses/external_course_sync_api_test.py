@@ -110,7 +110,7 @@ def external_course_data_with_non_usd_price(external_course_data):
     external_course_json = external_course_data.copy()
     external_course_json["list_currency"] = "INR"
     external_course_json["course_run_code"] = (
-        f"{external_course_data["course_run_code"].split("-")[0]}-INRC-98-10#1"
+        f"{external_course_data['course_run_code'].split('-')[0]}-INRC-98-10#1"
     )
     return external_course_json
 
