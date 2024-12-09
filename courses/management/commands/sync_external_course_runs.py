@@ -42,8 +42,9 @@ class Command(BaseCommand):
             return
 
         self.stdout.write(f"Starting course sync for {vendor_name}.")
-        external_course_runs = fetch_external_courses(keymap())
-        stats = update_external_course_runs(external_course_runs, keymap())
+        keymap = keymap()
+        external_course_runs = fetch_external_courses(keymap)
+        stats = update_external_course_runs(external_course_runs, keymap)
         self.log_stats(stats)
         self.stdout.write(
             self.style.SUCCESS(f"External course sync successful for {vendor_name}.")

@@ -225,7 +225,7 @@ class ExternalCourseListView(APIView):
         if not keymap:
             return Response(
                 {
-                    "error": f"The vendor '{vendor}' is not supported. Supported vendors are {", ".join(EXTERNAL_COURSE_VENDOR_KEYMAPS)}"
+                    "error": f"The vendor '{vendor}' is not supported. Supported vendors are {', '.join(EXTERNAL_COURSE_VENDOR_KEYMAPS)}"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
