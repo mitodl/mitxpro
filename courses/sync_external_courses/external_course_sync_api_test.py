@@ -115,6 +115,18 @@ def external_course_data_with_non_usd_price(external_course_data):
     return external_course_json
 
 
+def get_keymap(run_code):
+    return EmeritusKeyMap() if run_code.startswith("MO") else GlobalAlumniKeyMap()
+
+
+def get_platform(run_code):
+    return (
+        EMERITUS_PLATFORM_NAME
+        if run_code.startswith("MO")
+        else GLOBAL_ALUMNI_PLATFORM_NAME
+    )
+
+
 @pytest.mark.parametrize(
     ("external_course_run_code", "expected_course_run_tag"),
     [
@@ -226,11 +238,7 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913
         else:
             external_course_page.unpublish()
 
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     external_course_page, course_page_created, course_page_updated = (
         create_or_update_external_course_page(
             course_index_page,
@@ -319,11 +327,7 @@ def test_create_or_update_certificate_page(
         else:
             certificate_page.unpublish()
 
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     certificate_page, is_created, is_updated = create_or_update_certificate_page(
         external_course_page,
         ExternalCourse(external_course_data, keymap=keymap),
@@ -439,11 +443,7 @@ def test_create_or_update_external_course_run(
     """
     Tests that `create_or_update_external_course_run` creates or updates a course run
     """
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     course = CourseFactory.create()
     if create_existing_course_run:
@@ -516,11 +516,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     ).open() as test_data_file:
         external_course_runs = json.load(test_data_file)["rows"]
 
-    platform_name = (
-        EMERITUS_PLATFORM_NAME
-        if external_course_data["course_run_code"].startswith("MO")
-        else GLOBAL_ALUMNI_PLATFORM_NAME
-    )
+    platform_name = get_platform(external_course_data["course_run_code"])
     platform = PlatformFactory.create(name=platform_name)
 
     if create_existing_data:
@@ -560,11 +556,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     external_course_runs.append(external_course_with_bad_data)
     external_course_runs.append(external_course_data_with_null_price)
     external_course_runs.append(external_course_data_with_non_usd_price)
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     stats = update_external_course_runs(external_course_runs, keymap=keymap)
     courses = Course.objects.filter(platform=platform)
 
@@ -772,13 +764,8 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     """
     external_course_data["list_price"] = new_price
 
-    if external_course_data["course_run_code"].startswith("MO"):
-        keymap = EmeritusKeyMap()
-        platform_name = EMERITUS_PLATFORM_NAME
-    else:
-        keymap = GlobalAlumniKeyMap()
-        platform_name = GLOBAL_ALUMNI_PLATFORM_NAME
-
+    keymap = get_keymap(external_course_data["course_run_code"])
+    platform_name = get_platform(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     platform = PlatformFactory.create(name=platform_name)
     course = CourseFactory.create(
@@ -904,11 +891,7 @@ def test_external_course_validate_required_fields(
     """
     Tests that ExternalCourse.validate_required_fields validates required fields.
     """
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.course_title = title.strip() if title else title
     external_course.course_code = course_code
@@ -937,11 +920,7 @@ def test_external_course_validate_list_currency(
     """
     Tests that the `USD` is the only valid currency for the External courses.
     """
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.list_currency = list_currency
     assert external_course.validate_list_currency() == is_valid
@@ -963,11 +942,7 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
     """
     Tests that the valid end date is in the future for External courses.
     """
-    keymap = (
-        EmeritusKeyMap()
-        if external_course_data["course_run_code"].startswith("MO")
-        else GlobalAlumniKeyMap()
-    )
+    keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.end_date = end_date
     assert external_course.validate_end_date() == is_valid
