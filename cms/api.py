@@ -30,51 +30,36 @@ def get_catalog_sorting_keys(sorting, *, reverse):
     }
 
 
-def filter_and_sort_catalog_pages(
-    program_pages,
-    course_pages,
-    external_course_pages,
-    external_program_pages,
-    sort_by,
-):
+def sort_catalog_pages(program_pages, course_pages, sort_by):
     """
-    Filters program and course pages to only include those that should be visible in the catalog, then returns a tuple
+    Sorts program and course pages based on run dates and sort_by, then returns a tuple
     of sorted lists of pages
 
     Args:
-        program_pages (iterable of ProgramPage): ProgramPages to filter and sort
-        course_pages (iterable of CoursePage): CoursePages to filter and sort
-        external_course_pages (iterable of ExternalCoursePage): ExternalCoursePages to filter and sort
-        external_program_pages (iterable of ExternalProgramPage): ExternalProgramPages to filter and sort
+        program_pages (iterable of ProgramPage): ProgramPages/ExternalProgramPages to filter and sort
+        course_pages (iterable of CoursePage): CoursePages/ExternalCoursePages to filter and sort
         sort_by (str): Sorting applicable.
 
     Returns:
         tuple of (list of Pages): A tuple containing a list of combined ProgramPages, CoursePages, ExternalCoursePages and ExternalProgramPages, a list of
             ProgramPages and ExternalProgramPages, and a list of CoursePages and ExternalCoursePages, all sorted by the sort_by option.
     """
-    all_program_pages = program_pages + external_program_pages
-    all_course_pages = course_pages + external_course_pages
-
-    valid_program_pages = [
-        page for page in all_program_pages if page.product.is_catalog_visible
-    ]
-    valid_course_pages = [
-        page for page in all_course_pages if page.product.is_catalog_visible
-    ]
 
     page_run_dates = {
         page: page.product.next_run_date
         or datetime(year=MAXYEAR, month=1, day=1, tzinfo=UTC)
         for page in itertools.chain(
-            valid_program_pages,
-            valid_course_pages,
+            program_pages,
+            course_pages,
         )
     }
 
     price_desc_sorting_key = lambda page: (  # noqa: E731
-        page.product.current_price
-        if page.product.current_price is not None
-        else float("-inf"),
+        (
+            page.product.current_price
+            if page.product.current_price is not None
+            else float("-inf")
+        ),
         page.title,
     )
     price_asc_sorting_key = lambda page: (  # noqa: E731
@@ -98,17 +83,17 @@ def filter_and_sort_catalog_pages(
 
     return (
         sorted(
-            valid_program_pages + valid_course_pages,
+            program_pages + course_pages,
             key=sorting["sorting_key"]["all"],
             reverse=sorting["reverse"],
         ),
         sorted(
-            valid_program_pages,
+            program_pages,
             key=sorting["sorting_key"]["programs"],
             reverse=sorting["reverse"],
         ),
         sorted(
-            valid_course_pages,
+            course_pages,
             key=sorting["sorting_key"]["courses"],
             reverse=sorting["reverse"],
         ),

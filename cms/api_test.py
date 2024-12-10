@@ -4,7 +4,7 @@ from datetime import timedelta
 
 import pytest
 
-from cms.api import filter_and_sort_catalog_pages
+from cms.api import sort_catalog_pages
 from cms.constants import CatalogSorting
 from cms.factories import (
     ExternalCoursePageFactory,
@@ -21,6 +21,9 @@ from mitxpro.utils import now_in_utc
 pytestmark = pytest.mark.django_db
 
 
+now = now_in_utc()
+
+
 @pytest.mark.parametrize(
     "sort_by",
     [
@@ -28,12 +31,11 @@ pytestmark = pytest.mark.django_db
         CatalogSorting.START_DATE_ASC.sorting_value,
     ],
 )
-def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
+def test_sort_catalog_pages_with_default_sorting(sort_by):
     """
-    Test that filter_and_sort_catalog_pages removes program/course/external course pages that do not have a future start date
+    Test that sort_catalog_pages removes program/course/external course pages that do not have a future start date
     or enrollment end date, and returns appropriately sorted lists of pages
     """
-    now = now_in_utc()
 
     earlier_external_course_page = ExternalCoursePageFactory.create()
     CourseRunFactory.create(course=earlier_external_course_page.course, start_date=now)
@@ -49,7 +51,8 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
     second_program_run = CourseRunFactory.create(start_date=(now + timedelta(days=3)))
     later_external_course_page = ExternalCoursePageFactory.create()
     CourseRunFactory.create(
-        course=later_external_course_page.course, start_date=now + timedelta(days=4)
+        course=later_external_course_page.course,
+        start_date=now + timedelta(days=4),
     )
     later_external_program_page = ExternalProgramPageFactory.create()
     # Create course run with past start_date and future enrollment_end, which should appear in the catalog
@@ -85,12 +88,12 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
     initial_program_pages = [
         run.course.program.page for run in [second_program_run, first_program_run]
     ]
+    course_pages = initial_course_pages + external_course_pages
+    program_pages = initial_program_pages + external_program_pages
 
-    all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
-        initial_program_pages,
-        initial_course_pages,
-        external_course_pages,
-        external_program_pages,
+    all_pages, program_pages, course_pages = sort_catalog_pages(
+        program_pages,
+        course_pages,
         sort_by,
     )
 
@@ -100,19 +103,11 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
         + len(initial_course_pages)
         + len(external_course_pages)
         + len(external_program_pages)
-        - 2
     )
-    assert len(course_pages) == (
-        len(initial_course_pages) + len(external_course_pages) - 1
-    )
+    assert len(course_pages) == (len(initial_course_pages) + len(external_course_pages))
 
     assert len(program_pages) == (
-        len(initial_program_pages) + len(external_program_pages) - 1
-    )
-
-    # Filtered out external course page because it does not have a `course` attribute
-    assert past_run.course not in (
-        None if page.is_external_course_page else page.course for page in course_pages
+        len(initial_program_pages) + len(external_program_pages)
     )
 
     # Pages should be sorted by next run date
@@ -120,16 +115,18 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
         first_program_run.course.program,
         second_program_run.course.program,
         later_external_program_page.program,
+        earlier_external_program_page.program,
     ]
+
     expected_course_run_sort = [
         non_program_run,
         first_program_run,
         second_program_run,
         later_external_course_page,
         future_enrollment_end_run,
+        past_run,
         earlier_external_course_page,
     ]
-
     # The sort should also include external course pages as expected
     assert [page.course for page in course_pages] == [
         run.course for run in expected_course_run_sort
@@ -164,7 +161,7 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
         ),
     ],
 )
-def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
+def test_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
     sort_by,
     course_prices,
     program_prices,
@@ -172,8 +169,7 @@ def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
     expected_course_tab_prices,
     expected_program_tab_prices,
 ):
-    """Tests that `filter_and_sort_catalog_pages` returns appropriately sorted lists of courseware pages"""
-    now = now_in_utc()
+    """Tests that `sort_catalog_pages` returns appropriately sorted lists of courseware pages"""
 
     course_page_list = []
     for price in course_prices:
@@ -207,11 +203,9 @@ def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
 
         program_page_list.append(program.programpage)
 
-    all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
+    all_pages, program_pages, course_pages = sort_catalog_pages(
         program_page_list,
         course_page_list,
-        [],
-        [],
         sort_by,
     )
 
