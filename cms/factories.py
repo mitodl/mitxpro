@@ -15,12 +15,12 @@ from cms.blocks import (
     SuccessStoriesBlock,
     UserTestimonialBlock,
 )
-from cms.constants import COMMON_CHILD_INDEX_PAGE_SLUG, UPCOMING_WEBINAR
+from cms.constants import COMMON_COURSEWARE_COMPONENT_INDEX_SLUG, UPCOMING_WEBINAR
 from cms.models import (
     BlogIndexPage,
     CatalogPage,
     CertificatePage,
-    CommonChildIndexPage,
+    CommonComponentIndexPage,
     CompaniesLogoCarouselSection,
     CourseIndexPage,
     CoursePage,
@@ -581,14 +581,14 @@ class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
         model = LearningStrategyFormSection
 
 
-class CommonChildIndexPageFactory(wagtail_factories.PageFactory):
-    """CommonChildIndexPage factory class"""
+class CommonComponentIndexPageFactory(wagtail_factories.PageFactory):
+    """CommonComponentIndexPage factory class"""
 
     title = factory.fuzzy.FuzzyText()
-    slug = COMMON_CHILD_INDEX_PAGE_SLUG
+    slug = COMMON_COURSEWARE_COMPONENT_INDEX_SLUG
 
     class Meta:
-        model = CommonChildIndexPage
+        model = CommonComponentIndexPage
 
 
 class LearningTechniqueCommonPageFactory(LearningTechniquesPageFactory):
