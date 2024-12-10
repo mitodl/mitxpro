@@ -14,7 +14,7 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
-    COMMON_CHILD_INDEX_PAGE_SLUG,
+    COMMON_COURSEWARE_COMPONENT_INDEX_SLUG,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
     FORMAT_OTHER,
@@ -26,7 +26,7 @@ from cms.constants import (
 )
 from cms.factories import (
     CertificatePageFactory,
-    CommonChildIndexPageFactory,
+    CommonComponentIndexPageFactory,
     CompaniesLogoCarouselPageFactory,
     CoursePageFactory,
     CoursesInProgramPageFactory,
@@ -62,7 +62,7 @@ from cms.factories import (
 )
 from cms.models import (
     CertificatePage,
-    CommonChildIndexPage,
+    CommonComponentIndexPage,
     CourseIndexPage,
     CoursesInProgramPage,
     ExternalCoursePage,
@@ -2168,7 +2168,7 @@ def _is_common_child_pages_created(external_course_slug, course_id):
 
 def _create_common_child_pages(platform=None):
     """
-    Creates static common child pages under a CommonChildIndexPage.
+    Creates static common child pages under a CommonComponentIndexPage.
 
     Args:
         platform (Platform, optional): Optional platform object for customizing
@@ -2179,7 +2179,7 @@ def _create_common_child_pages(platform=None):
             - `LearningTechniqueCommonPage` with platform-specific attributes.
             - `ForTeamsCommonPage` under the same parent page.
     """
-    common_index = CommonChildIndexPageFactory.create()
+    common_index = CommonComponentIndexPageFactory.create()
     tech_heading = f"{platform.name} - heading" if platform else "heading"
     title = (
         f"{platform.name} - Learning tech title" if platform else "Learning tech title"
@@ -2199,26 +2199,26 @@ def _create_common_child_pages(platform=None):
 
 def test_common_child_index_page():
     """
-    Tests the creation of a CommonChildIndexPage and its relationship
+    Tests the creation of a CommonComponentIndexPage and its relationship
     to a CourseIndexPage.
     """
     home_page = HomePageFactory.create()
-    assert CommonChildIndexPage.can_create_at(home_page)
-    common_folder = CommonChildIndexPageFactory.create(
+    assert CommonComponentIndexPage.can_create_at(home_page)
+    common_folder = CommonComponentIndexPageFactory.create(
         title="common external course pages"
     )
-    assert common_folder.slug == COMMON_CHILD_INDEX_PAGE_SLUG
+    assert common_folder.slug == COMMON_COURSEWARE_COMPONENT_INDEX_SLUG
     assert common_folder.title == "common external course pages"
 
 
 def test_common_child_pages_uniqueness():
     """
     Tests the uniqueness constraint for creating multiple instances of the same page
-    under a CommonChildIndexPage.
+    under a CommonComponentIndexPage.
     """
     home_page = HomePageFactory.create()
-    assert CommonChildIndexPage.can_create_at(home_page)
-    common_folder = CommonChildIndexPageFactory.create()
+    assert CommonComponentIndexPage.can_create_at(home_page)
+    common_folder = CommonComponentIndexPageFactory.create()
     assert LearningTechniquesCommonPage.can_create_at(common_folder)
     tech_page = LearningTechniqueCommonPageFactory.create(parent=common_folder)
 

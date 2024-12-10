@@ -3,7 +3,7 @@
 from django.core.management.base import BaseCommand
 
 from cms.models import ExternalCoursePage
-from cms.wagtail_hooks import create_static_pages_for_external_courses
+from cms.wagtail_hooks import create_common_child_pages_for_external_courses
 
 
 class Command(BaseCommand):
@@ -13,4 +13,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  # noqa: ARG002
         for page in ExternalCoursePage.objects.all():
-            create_static_pages_for_external_courses(None, page)
+            create_common_child_pages_for_external_courses(None, page)
