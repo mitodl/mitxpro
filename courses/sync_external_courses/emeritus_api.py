@@ -21,6 +21,7 @@ from cms.models import (
     LearningOutcomesPage,
     WhoShouldEnrollPage,
 )
+from cms.wagtail_hooks import create_common_child_pages_for_external_courses
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.emeritus_api_client import EmeritusAPIClient
@@ -412,6 +413,8 @@ def update_emeritus_course_runs(emeritus_courses):  # noqa: C901, PLR0915
                 elif is_certificatepage_updated:
                     stats["certificates_updated"].add(course.readable_id)
                     log.info("Certificate Page Updated")
+
+            create_common_child_pages_for_external_courses(None, course_page)
 
     # As we get the API data for course runs, we can have duplicate course codes in course created and updated,
     # so, we are removing the courses created from the updated courses list.

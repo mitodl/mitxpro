@@ -15,11 +15,12 @@ from cms.blocks import (
     SuccessStoriesBlock,
     UserTestimonialBlock,
 )
-from cms.constants import UPCOMING_WEBINAR
+from cms.constants import COMMON_COURSEWARE_COMPONENT_INDEX_SLUG, UPCOMING_WEBINAR
 from cms.models import (
     BlogIndexPage,
     CatalogPage,
     CertificatePage,
+    CommonComponentIndexPage,
     CompaniesLogoCarouselSection,
     CourseIndexPage,
     CoursePage,
@@ -28,6 +29,7 @@ from cms.models import (
     ExternalCoursePage,
     ExternalProgramPage,
     FacultyMembersPage,
+    ForTeamsCommonPage,
     ForTeamsPage,
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
@@ -36,6 +38,7 @@ from cms.models import (
     LearningJourneySection,
     LearningOutcomesPage,
     LearningStrategyFormSection,
+    LearningTechniquesCommonPage,
     LearningTechniquesPage,
     NewsAndEventsBlock,
     NewsAndEventsPage,
@@ -52,7 +55,7 @@ from cms.models import (
     WebinarPage,
     WhoShouldEnrollPage,
 )
-from courses.factories import CourseFactory, ProgramFactory
+from courses.factories import CourseFactory, PlatformFactory, ProgramFactory
 
 factory.Faker.add_provider(internet)
 
@@ -576,3 +579,33 @@ class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = LearningStrategyFormSection
+
+
+class CommonComponentIndexPageFactory(wagtail_factories.PageFactory):
+    """CommonComponentIndexPage factory class"""
+
+    title = factory.fuzzy.FuzzyText()
+    slug = COMMON_COURSEWARE_COMPONENT_INDEX_SLUG
+
+    class Meta:
+        model = CommonComponentIndexPage
+
+
+class LearningTechniqueCommonPageFactory(LearningTechniquesPageFactory):
+    """LearningTechniquesCommonPage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
+    title = factory.fuzzy.FuzzyText()
+
+    class Meta:
+        model = LearningTechniquesCommonPage
+
+
+class ForTeamsCommonPageFactory(ForTeamsPageFactory):
+    """ForTeamsCommonPage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
+    title = factory.fuzzy.FuzzyText()
+
+    class Meta:
+        model = ForTeamsCommonPage
