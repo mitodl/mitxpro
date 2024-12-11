@@ -2094,51 +2094,32 @@ def test_certificatepage_saved_no_signatories_external_courseware(
 
 
 @pytest.mark.parametrize(
-    ("page_klass", "heading", "overview", "course_description"),
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ExternalProgramPageFactory,
+        ProgramPageFactory,
+    ],
+)
+@pytest.mark.parametrize(
+    ("heading", "overview", "course_description"),
     [
         # With heading and overview
         (
-            ExternalCoursePageFactory,
-            "heading",
-            "<p>Dummy overview</p>",
-            "shouldn't matter description",
-        ),
-        (
-            CoursePageFactory,
-            "heading",
-            "<p>Dummy overview</p>",
-            "shouldn't matter description",
-        ),
-        (
-            ProgramPageFactory,
-            "heading",
-            "<p>Dummy overview</p>",
-            "shouldn't matter description",
-        ),
-        (
-            ExternalProgramPageFactory,
             "heading",
             "<p>Dummy overview</p>",
             "shouldn't matter description",
         ),
         # Without overview and course description
-        (ExternalCoursePageFactory, "heading", None, ""),
-        (CoursePageFactory, "heading", None, ""),
-        (ProgramPageFactory, "heading", None, ""),
-        (ExternalProgramPageFactory, "heading", None, ""),
+        ("heading", None, ""),
         # Without overview but with course description
-        (ExternalCoursePageFactory, "heading", None, "course description"),
-        (CoursePageFactory, "heading", None, "course description"),
-        (ProgramPageFactory, "heading", None, "course description"),
-        (ExternalProgramPageFactory, "heading", None, "course description"),
+        ("heading", None, "course description"),
         # Without heading
-        (ExternalCoursePageFactory, None, "", "course description"),
-        (CoursePageFactory, None, "", "course description"),
-        (ProgramPageFactory, None, "", "course description"),
-        (ExternalProgramPageFactory, None, "", "course description"),
+        (None, "", "course description"),
     ],
 )
-def test_coure_overview_page(page_klass, heading, overview, course_description):
+def test_course_overview_page(page_klass, heading, overview, course_description):
     """Test CourseOverview Page"""
     expected_overview = overview or course_description
     page = page_klass.create(description=course_description)
