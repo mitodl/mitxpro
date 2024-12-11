@@ -707,36 +707,28 @@ def _get_course_page(client, url):
 
 
 @pytest.mark.parametrize(
-    ("page_klass", "overview", "course_description"),
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ExternalProgramPageFactory,
+        ProgramPageFactory,
+    ],
+)
+@pytest.mark.parametrize(
+    ("overview", "course_description"),
     [
         # With Overview
         (
-            ExternalCoursePageFactory,
-            "<p>Dummy overview</p>",
-            "shouldn't matter description",
-        ),
-        (CoursePageFactory, "<p>Dummy overview</p>", "shouldn't matter description"),
-        (ProgramPageFactory, "<p>Dummy overview</p>", "shouldn't matter description"),
-        (
-            ExternalProgramPageFactory,
             "<p>Dummy overview</p>",
             "shouldn't matter description",
         ),
         # Without overview and course description
-        (ExternalCoursePageFactory, None, ""),
-        (CoursePageFactory, None, ""),
-        (ProgramPageFactory, None, ""),
-        (ExternalProgramPageFactory, None, ""),
+        (None, ""),
         # Without overview but with course description
-        (ExternalCoursePageFactory, None, "course test description"),
-        (CoursePageFactory, None, "course test description"),
-        (ProgramPageFactory, None, "course test description"),
-        (ExternalProgramPageFactory, None, "course test description"),
+        (None, "course test description"),
         # With overview and course description
-        (ExternalCoursePageFactory, "<p>Overview</p>", "shouldn't matter description"),
-        (CoursePageFactory, "<p>Overview</p>", "shouldn't matter description"),
-        (ProgramPageFactory, "<p>Overview</p>", "shouldn't matter description"),
-        (ExternalProgramPageFactory, "<p>Overview</p>", "shouldn't matter description"),
+        ("<p>Overview</p>", "shouldn't matter description"),
     ],
 )
 def test_course_overview_context(client, page_klass, overview, course_description):
