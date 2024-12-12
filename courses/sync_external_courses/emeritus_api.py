@@ -22,7 +22,7 @@ from cms.models import (
     WhoShouldEnrollPage,
 )
 from courses.api import generate_course_readable_id
-from courses.models import Course, CourseRun, CourseTopic, Platform
+from courses.models import Course, CourseLanguage, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.emeritus_api_client import EmeritusAPIClient
 from ecommerce.models import Product, ProductVersion
 from mitxpro.utils import clean_url, now_in_utc, strip_datetime
@@ -110,6 +110,8 @@ class EmeritusCourse:
         )
         total_weeks = int(emeritus_course_json.get("total_weeks"))
         self.duration = f"{total_weeks} Weeks" if total_weeks != 0 else ""
+        # If there is no language in the API we will default it to "English"
+        self.language = emeritus_course_json.get("language", "English")
 
         # Description can be null in Emeritus API data, we cannot store `None` as description is Non-Nullable
         self.description = (
@@ -495,6 +497,9 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
     )
+    course_language = CourseLanguage.objects.get_or_create(
+        name__icontains=emeritus_course.language
+    )
 
     image = None
     if emeritus_course.image_name:
@@ -522,6 +527,7 @@ def create_or_update_emeritus_course_page(course_index_page, course, emeritus_co
             description=emeritus_course.description,
             background_image=image,
             thumbnail_image=image,
+            language=course_language,
         )
         course_index_page.add_child(instance=course_page)
         course_page.save_revision().publish()

@@ -238,6 +238,36 @@ class Platform(TimestampedModel, ValidateOnSaveMixin):
         super().validate_unique(exclude=exclude)
 
 
+class CourseLanguage(TimestampedModel, ValidateOnSaveMixin):
+    """
+    Model for courseware language
+    """
+
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        """
+        Call full_clean to validate the case-insensitive language name.
+        """
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def validate_unique(self, exclude=None):
+        """
+        Validates case insensitive platform name uniqueness.
+        """
+        course_languages = CourseLanguage.objects.filter(name__iexact=self.name)
+        if self._state.adding and course_languages:
+            raise ValidationError({"name": "A language with this name already exists."})
+        if len(course_languages) == 1 and course_languages[0].id != self.id:
+            raise ValidationError({"name": "A language with this name already exists."})
+
+        super().validate_unique(exclude=exclude)
+
+
 class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course program"""
 

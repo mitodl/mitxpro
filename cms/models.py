@@ -1362,6 +1362,13 @@ class CourseProductPage(ProductPage):
         blank=True,
         help_text="The topics for this course page.",
     )
+    language = models.ForeignKey(
+        "courses.CourseLanguage",
+        null=False,
+        blank=False,
+        on_delete=models.PROTECT,
+        help_text="The course language for this page",
+    )
 
     parent_page_types = ["CourseIndexPage"]
 
