@@ -8,6 +8,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from rest_framework import serializers
 
+from cms.models import ProductPage
 from courses import models
 from ecommerce.serializers import CompanySerializer
 
@@ -96,16 +97,14 @@ class CourseRunSerializer(BaseCourseRunSerializer):
         ]
 
 
-class CourseSerializer(serializers.ModelSerializer):
-    """Course model serializer - also serializes child course runs"""
+class BaseProductSerializer(serializers.ModelSerializer):
+    """Basic product model serializer"""
 
     url = serializers.SerializerMethodField()
-    external_marketing_url = serializers.SerializerMethodField()
-    thumbnail_url = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
-    courseruns = serializers.SerializerMethodField()
-    next_run_id = serializers.SerializerMethodField()
-    topics = serializers.SerializerMethodField()
+    external_marketing_url = serializers.SerializerMethodField()
+    marketing_hubspot_form_id = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     min_weeks = serializers.SerializerMethodField()
@@ -113,54 +112,123 @@ class CourseSerializer(serializers.ModelSerializer):
     format = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
-    platform = serializers.SerializerMethodField()
-    marketing_hubspot_form_id = serializers.SerializerMethodField()
+
     availability = serializers.SerializerMethodField()
     prerequisites = serializers.SerializerMethodField()
 
+    class Meta:
+        model = ProductPage
+        fields = [
+            "url",
+            "description",
+            "external_marketing_url",
+            "marketing_hubspot_form_id",
+            "thumbnail_url",
+            "time_commitment",
+            "duration",
+            "min_weeks",
+            "max_weeks",
+            "format",
+            "video_url",
+            "credits",
+            "availability",
+            "prerequisites",
+        ]
+
     def get_prerequisites(self, instance):  # noqa: ARG002
-        """Get course prerequisites"""
+        """Get product prerequisites"""
 
         # This is a hard coded value because the consumers of the API need this field.
-        # In an ideal situation the prerequisites could be list of courses.
+        # In an ideal situation the prerequisites could be list of products.
         # Since in xPRO we don't have support for prerequisites
         # so we will not get/check for prerequisites
         return []
 
     def get_availability(self, instance):  # noqa: ARG002
-        """Get course availability"""
+        """Get product availability"""
 
         # This is a hard coded value because the consumers of the API need this field.
         # In an ideal situation the availability could be "dated" or "anytime".
-        # Since all the courses in xPRO are dated so we will not check for "self paced"
-        # courses to determine if the course could be "anytime"
+        # Since all the products in xPRO are dated so we will not check for "self paced"
+        # products to determine if the product could be "anytime"
         return "dated"
 
     def get_url(self, instance):
-        """Get CMS Page URL for the course"""
+        """Get URL"""
         page = instance.page
         return page.get_full_url() if page else None
 
+    def get_description(self, instance):
+        """Description"""
+        return instance.page.description if instance.page else None
+
     def get_external_marketing_url(self, instance):
-        """Return the external marketing URL for the course that's set in CMS page"""
+        """Return the external marketing URL for this product that's set in CMS page"""
         return instance.page.external_marketing_url if instance.page else None
 
     def get_marketing_hubspot_form_id(self, instance):
-        """Return the marketing HubSpot form ID associated with the course that's set in CMS page"""
+        """Return the marketing HubSpot form ID associated with the product that's set in CMS page"""
         return instance.page.marketing_hubspot_form_id if instance.page else None
 
     def get_thumbnail_url(self, instance):
         """Thumbnail URL"""
         return _get_thumbnail_url(instance.page)
 
+    def get_time_commitment(self, instance):
+        """Returns the time commitment for this product that's set in CMS page"""
+        return instance.page.time_commitment if instance.page else None
+
+    def get_duration(self, instance):
+        """Returns the duration for this product that's set in CMS page"""
+        return instance.page.duration if instance.page else None
+
+    def get_min_weeks(self, instance):
+        """
+        Get the min weeks of the product from the CMS page.
+        """
+        if hasattr(instance, "page") and hasattr(instance.page, "min_weeks"):
+            return instance.page.min_weeks
+
+        return None
+
+    def get_max_weeks(self, instance):
+        """
+        Get the max weeks of the product from the CMS page.
+        """
+        if hasattr(instance, "page") and hasattr(instance.page, "max_weeks"):
+            return instance.page.max_weeks
+
+        return None
+
+    def get_format(self, instance):
+        """Returns the format of the product"""
+        return instance.page.format if instance.page and instance.page.format else None
+
+    def get_video_url(self, instance):
+        """Video URL"""
+        return instance.page.video_url if instance.page else None
+
+    def get_credits(self, instance):
+        """Returns the credits for this product"""
+        return (
+            instance.page.certificate_page.CEUs
+            if instance.page and instance.page.certificate_page
+            else None
+        )
+
+
+class CourseSerializer(BaseProductSerializer):
+    """Course model serializer - also serializes child course runs"""
+
+    courseruns = serializers.SerializerMethodField()
+    next_run_id = serializers.SerializerMethodField()
+    topics = serializers.SerializerMethodField()
+    platform = serializers.SerializerMethodField()
+
     def get_next_run_id(self, instance):
         """Get next run id"""
         run = instance.first_unexpired_run
         return run.id if run is not None else None
-
-    def get_description(self, instance):
-        """Description"""
-        return instance.page.description if instance.page else None
 
     def get_courseruns(self, instance):
         """Unexpired and unenrolled course runs"""
@@ -190,48 +258,6 @@ class CourseSerializer(serializers.ModelSerializer):
             )
         return []
 
-    def get_time_commitment(self, instance):
-        """Returns the time commitment for this course that's set in CMS page"""
-        return instance.page.time_commitment if instance.page else None
-
-    def get_duration(self, instance):
-        """Returns the duration for this course that's set in CMS page"""
-        return instance.page.duration if instance.page else None
-
-    def get_min_weeks(self, instance):
-        """
-        Get the min weeks of the course from the CMS page.
-        """
-        if hasattr(instance, "page") and hasattr(instance.page, "min_weeks"):
-            return instance.page.min_weeks
-
-        return None
-
-    def get_max_weeks(self, instance):
-        """
-        Get the max weeks of the course from the CMS page.
-        """
-        if hasattr(instance, "page") and hasattr(instance.page, "max_weeks"):
-            return instance.page.max_weeks
-
-        return None
-
-    def get_video_url(self, instance):
-        """Video URL"""
-        return instance.page.video_url if instance.page else None
-
-    def get_credits(self, instance):
-        """Returns the credits for this Course"""
-        return (
-            instance.page.certificate_page.CEUs
-            if instance.page and instance.page.certificate_page
-            else None
-        )
-
-    def get_format(self, instance):
-        """Returns the format of the course"""
-        return instance.page.format if instance.page and instance.page.format else None
-
     def get_platform(self, instance):
         """Returns the platform name of the course"""
         return getattr(instance.platform, "name", None)
@@ -239,28 +265,15 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Course
         fields = [
+            *BaseProductSerializer.Meta.fields,
             "id",
             "title",
-            "description",
-            "url",
-            "external_marketing_url",
-            "marketing_hubspot_form_id",
-            "thumbnail_url",
             "readable_id",
             "courseruns",
             "next_run_id",
             "topics",
-            "time_commitment",
-            "duration",
-            "min_weeks",
-            "max_weeks",
-            "video_url",
-            "format",
-            "credits",
             "is_external",
             "platform",
-            "availability",
-            "prerequisites",
         ]
 
 
@@ -304,48 +317,16 @@ class BaseProgramSerializer(serializers.ModelSerializer):
         fields = ["title", "description", "thumbnail_url", "readable_id", "id"]
 
 
-class ProgramSerializer(serializers.ModelSerializer):
+class ProgramSerializer(BaseProductSerializer):
     """Program model serializer"""
 
-    thumbnail_url = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
     courses = serializers.SerializerMethodField()
     start_date = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
     enrollment_start = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
-    external_marketing_url = serializers.SerializerMethodField()
-    marketing_hubspot_form_id = serializers.SerializerMethodField()
     instructors = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
-    time_commitment = serializers.SerializerMethodField()
-    duration = serializers.SerializerMethodField()
-    min_weeks = serializers.SerializerMethodField()
-    max_weeks = serializers.SerializerMethodField()
-    format = serializers.SerializerMethodField()
-    video_url = serializers.SerializerMethodField()
-    credits = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
-    availability = serializers.SerializerMethodField()
-    prerequisites = serializers.SerializerMethodField()
-
-    def get_prerequisites(self, instance):  # noqa: ARG002
-        """Get course prerequisites"""
-
-        # This is a hard coded value because the consumers of the API need this field.
-        # In an ideal situation the prerequisites could be list of courses.
-        # Since in xPRO we don't have support for prerequisites
-        # so we will not get/check for prerequisites
-        return []
-
-    def get_availability(self, instance):  # noqa: ARG002
-        """Get program availability"""
-
-        # This is a hard coded value because the consumers of the API need this field.
-        # In an ideal situation the availability could be "dated" or "anytime".
-        # Since all the programs in xPRO are dated so we will not check for "self paced"
-        # courses to determine if the course could be "anytime"
-        return "dated"
 
     def get_courses(self, instance):
         """Serializer for courses"""
@@ -357,14 +338,6 @@ class ProgramSerializer(serializers.ModelSerializer):
             many=True,
             context={"filter_products": False},
         ).data
-
-    def get_thumbnail_url(self, instance):
-        """Thumbnail URL"""
-        return _get_thumbnail_url(instance.page)
-
-    def get_description(self, instance):
-        """Description"""
-        return instance.page.description if instance.page else None
 
     def get_start_date(self, instance):
         """
@@ -397,19 +370,6 @@ class ProgramSerializer(serializers.ModelSerializer):
         first_unexpired_run = instance.first_unexpired_run
         return getattr(first_unexpired_run, "enrollment_start", None)
 
-    def get_url(self, instance):
-        """Get URL"""
-        page = instance.page
-        return page.get_full_url() if page else None
-
-    def get_external_marketing_url(self, instance):
-        """Return the external marketing URL for this program that's set in CMS page"""
-        return instance.page.external_marketing_url if instance.page else None
-
-    def get_marketing_hubspot_form_id(self, instance):
-        """Return the marketing HubSpot form ID associated with the program that's set in CMS page"""
-        return instance.page.marketing_hubspot_form_id if instance.page else None
-
     def get_instructors(self, instance):
         """List all instructors who are a part of any course run within a program"""
         return instance.instructors
@@ -424,48 +384,6 @@ class ProgramSerializer(serializers.ModelSerializer):
         }
         return [{"name": topic} for topic in sorted(topics)]
 
-    def get_time_commitment(self, instance):
-        """Returns the time commitment for this program that's set in CMS page"""
-        return instance.page.time_commitment if instance.page else None
-
-    def get_duration(self, instance):
-        """Returns the duration for this course that's set in CMS page"""
-        return instance.page.duration if instance.page else None
-
-    def get_min_weeks(self, instance):
-        """
-        Get the min weeks of the course from the CMS page.
-        """
-        if hasattr(instance, "page") and hasattr(instance.page, "min_weeks"):
-            return instance.page.min_weeks
-
-        return None
-
-    def get_max_weeks(self, instance):
-        """
-        Get the max weeks of the course from the CMS page.
-        """
-        if hasattr(instance, "page") and hasattr(instance.page, "max_weeks"):
-            return instance.page.max_weeks
-
-        return None
-
-    def get_video_url(self, instance):
-        """Video URL"""
-        return instance.page.video_url if instance.page else None
-
-    def get_credits(self, instance):
-        """Returns the credits for this Course"""
-        return (
-            instance.page.certificate_page.CEUs
-            if instance.page and instance.page.certificate_page
-            else None
-        )
-
-    def get_format(self, instance):
-        """Returns the format of the program"""
-        return instance.page.format if instance.page and instance.page.format else None
-
     def get_platform(self, instance):
         """Returns the platform name of the program"""
         return getattr(instance.platform, "name", None)
@@ -473,9 +391,8 @@ class ProgramSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Program
         fields = [
+            *BaseProductSerializer.Meta.fields,
             "title",
-            "description",
-            "thumbnail_url",
             "readable_id",
             "current_price",
             "id",
@@ -483,22 +400,10 @@ class ProgramSerializer(serializers.ModelSerializer):
             "start_date",
             "end_date",
             "enrollment_start",
-            "url",
-            "external_marketing_url",
-            "marketing_hubspot_form_id",
             "instructors",
             "topics",
-            "time_commitment",
-            "duration",
-            "min_weeks",
-            "max_weeks",
-            "video_url",
-            "format",
-            "credits",
             "is_external",
             "platform",
-            "availability",
-            "prerequisites",
         ]
 
 
