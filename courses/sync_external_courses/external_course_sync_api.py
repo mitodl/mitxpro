@@ -466,8 +466,8 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             overview_page = course_page.get_child_page_of_type_including_draft(
                 CourseOverviewPage
             )
-            if not overview_page and emeritus_course.description:
-                create_course_overview_page(course_page, emeritus_course)
+            if not overview_page and external_course.description:
+                create_course_overview_page(course_page, external_course)
                 log.info("Created CourseOverviewPage.")
 
     # As we get the API data for course runs, we can have duplicate course codes in course created and updated,
@@ -776,15 +776,15 @@ def parse_external_course_data_str(items_str):
 
 
 def create_course_overview_page(
-    course_page: ExternalCoursePage, emeritus_course: EmeritusCourse
+    course_page: ExternalCoursePage, external_course: ExternalCourse
 ):
     """
-    Creates `CourseOverviewPage` for Emeritus course.
+    Creates `CourseOverviewPage` for External course.
 
     Args:
         course_page(ExternalCoursePage): ExternalCoursePage object.
-        emeritus_course(EmeritusCourse): EmeritusCourse object
+        external_course(ExternalCourse): ExternalCourse object
     """
-    overview_page = CourseOverviewPage(overview=emeritus_course.description)
+    overview_page = CourseOverviewPage(overview=external_course.description)
     course_page.add_child(instance=overview_page)
     overview_page.save()
