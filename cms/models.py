@@ -953,6 +953,16 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
     )
+    min_weeks = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The minimum number of weeks required to complete the course/program.",
+    )
+    max_weeks = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The maximum number of weeks required to complete the course/program.",
+    )
     FORMAT_CHOICES = [
         (FORMAT_ONLINE, FORMAT_ONLINE),
         (FORMAT_HYBRID, FORMAT_HYBRID),
@@ -1014,6 +1024,8 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         FieldPanel("video_title"),
         FieldPanel("video_url"),
         FieldPanel("duration"),
+        FieldPanel("min_weeks"),
+        FieldPanel("max_weeks"),
         FieldPanel("format"),
         FieldPanel("time_commitment"),
         FieldPanel("description", classname="full"),

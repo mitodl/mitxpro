@@ -108,6 +108,8 @@ class CourseSerializer(serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    min_weeks = serializers.SerializerMethodField()
+    max_weeks = serializers.SerializerMethodField()
     format = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
@@ -196,6 +198,24 @@ class CourseSerializer(serializers.ModelSerializer):
         """Returns the duration for this course that's set in CMS page"""
         return instance.page.duration if instance.page else None
 
+    def get_min_weeks(self, instance):
+        """
+        Get the min weeks of the course from the CMS page.
+        """
+        if hasattr(instance, "page") and hasattr(instance.page, "min_weeks"):
+            return instance.page.min_weeks
+
+        return None
+
+    def get_max_weeks(self, instance):
+        """
+        Get the max weeks of the course from the CMS page.
+        """
+        if hasattr(instance, "page") and hasattr(instance.page, "max_weeks"):
+            return instance.page.max_weeks
+
+        return None
+
     def get_video_url(self, instance):
         """Video URL"""
         return instance.page.video_url if instance.page else None
@@ -232,6 +252,8 @@ class CourseSerializer(serializers.ModelSerializer):
             "topics",
             "time_commitment",
             "duration",
+            "min_weeks",
+            "max_weeks",
             "video_url",
             "format",
             "credits",
@@ -298,6 +320,8 @@ class ProgramSerializer(serializers.ModelSerializer):
     topics = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
+    min_weeks = serializers.SerializerMethodField()
+    max_weeks = serializers.SerializerMethodField()
     format = serializers.SerializerMethodField()
     video_url = serializers.SerializerMethodField()
     credits = serializers.SerializerMethodField()
@@ -408,6 +432,24 @@ class ProgramSerializer(serializers.ModelSerializer):
         """Returns the duration for this course that's set in CMS page"""
         return instance.page.duration if instance.page else None
 
+    def get_min_weeks(self, instance):
+        """
+        Get the min weeks of the course from the CMS page.
+        """
+        if hasattr(instance, "page") and hasattr(instance.page, "min_weeks"):
+            return instance.page.min_weeks
+
+        return None
+
+    def get_max_weeks(self, instance):
+        """
+        Get the max weeks of the course from the CMS page.
+        """
+        if hasattr(instance, "page") and hasattr(instance.page, "max_weeks"):
+            return instance.page.max_weeks
+
+        return None
+
     def get_video_url(self, instance):
         """Video URL"""
         return instance.page.video_url if instance.page else None
@@ -448,6 +490,8 @@ class ProgramSerializer(serializers.ModelSerializer):
             "topics",
             "time_commitment",
             "duration",
+            "min_weeks",
+            "max_weeks",
             "video_url",
             "format",
             "credits",
