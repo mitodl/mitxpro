@@ -54,10 +54,12 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
-            "2 Months",
+            "2 weeks",
+            4,
+            4,
             "2 Hours",
             "http://www.testvideourl.com",
             "2 Test CEUs",
@@ -65,6 +67,8 @@ def test_base_program_serializer():
             "fb4f5b79-test-4972-92c3-test",
         ),
         (
+            None,
+            None,
             None,
             None,
             None,
@@ -80,6 +84,8 @@ def test_serialize_program(  # noqa: PLR0913
     is_external,
     program_format,
     duration,
+    min_weeks,
+    max_weeks,
     time_commitment,
     video_url,
     ceus,
@@ -92,6 +98,8 @@ def test_serialize_program(  # noqa: PLR0913
         is_external=is_external,
         page__certificate_page__CEUs=ceus,
         page__duration=duration,
+        page__min_weeks=min_weeks,
+        page__max_weeks=max_weeks,
         page__format=program_format,
         page__time_commitment=time_commitment,
         page__video_url=video_url,
@@ -154,6 +162,8 @@ def test_serialize_program(  # noqa: PLR0913
             "topics": [{"name": topic.name} for topic in topics],
             "time_commitment": time_commitment,
             "duration": duration,
+            "max_weeks": max_weeks,
+            "min_weeks": min_weeks,
             "format": program_format,
             "video_url": video_url,
             "credits": ceus,
@@ -187,10 +197,12 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
-            "2 Months",
+            "2 weeks",
+            2,
+            2,
             "2 Hours",
             "http://www.testvideourl.com",
             "2 Test CEUs",
@@ -198,6 +210,8 @@ def test_base_course_serializer():
             "fb4f5b79-test-4972-92c3-test",
         ),
         (
+            None,
+            None,
             None,
             None,
             None,
@@ -215,6 +229,8 @@ def test_serialize_course(  # noqa: PLR0913
     course_page,
     course_format,
     duration,
+    min_weeks,
+    max_weeks,
     time_commitment,
     video_url,
     ceus,
@@ -235,6 +251,8 @@ def test_serialize_course(  # noqa: PLR0913
             is_external=is_external,
             page__time_commitment=time_commitment,
             page__duration=duration,
+            page__min_weeks=min_weeks,
+            page__max_weeks=max_weeks,
             page__format=course_format,
             page__video_url=video_url,
             page__certificate_page__CEUs=ceus,
@@ -289,6 +307,8 @@ def test_serialize_course(  # noqa: PLR0913
             "topics": [{"name": topic}] if course_page else [],
             "time_commitment": time_commitment if course_page else None,
             "duration": duration if course_page else None,
+            "max_weeks": max_weeks if course_page else None,
+            "min_weeks": min_weeks if course_page else None,
             "format": course_format if course_page else None,
             "video_url": video_url if course_page else None,
             "credits": ceus if course_page else None,
