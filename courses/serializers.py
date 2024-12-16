@@ -106,6 +106,8 @@ class BaseProductSerializer(serializers.ModelSerializer):
     marketing_hubspot_form_id = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
+    min_weekly_hours = serializers.SerializerMethodField()
+    max_weekly_hours = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     min_weeks = serializers.SerializerMethodField()
     max_weeks = serializers.SerializerMethodField()

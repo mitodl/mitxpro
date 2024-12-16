@@ -54,13 +54,15 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, min_weeks, max_weeks, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
             "2 weeks",
             4,
             4,
             "2 Hours",
+            2,
+            4,
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "https://www.testexternalcourse1.com",
@@ -87,6 +89,8 @@ def test_serialize_program(  # noqa: PLR0913
     min_weeks,
     max_weeks,
     time_commitment,
+    min_weekly_hours,
+    max_weekly_hours,
     video_url,
     ceus,
     external_marketing_url,
@@ -102,6 +106,8 @@ def test_serialize_program(  # noqa: PLR0913
         page__max_weeks=max_weeks,
         page__format=program_format,
         page__time_commitment=time_commitment,
+        page__min_weekly_hours=min_weekly_hours,
+        page__max_weekly_hours=max_weekly_hours,
         page__video_url=video_url,
         page__external_marketing_url=external_marketing_url,
         page__marketing_hubspot_form_id=marketing_hubspot_form_id,
@@ -161,6 +167,8 @@ def test_serialize_program(  # noqa: PLR0913
             "instructors": [{"name": name} for name in faculty_names],
             "topics": [{"name": topic.name} for topic in topics],
             "time_commitment": time_commitment,
+            "min_weekly_hours": min_weekly_hours,
+            "max_weekly_hours": max_weekly_hours,
             "duration": duration,
             "max_weeks": max_weeks,
             "min_weeks": min_weeks,
@@ -197,13 +205,15 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, min_weeks, max_weeks, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
             "2 weeks",
             2,
             2,
             "2 Hours",
+            2,
+            4,
             "http://www.testvideourl.com",
             "2 Test CEUs",
             "http://www.testexternalmarketingurl.com",
@@ -232,6 +242,8 @@ def test_serialize_course(  # noqa: PLR0913
     min_weeks,
     max_weeks,
     time_commitment,
+    min_weekly_hours,
+    max_weekly_hours,
     video_url,
     ceus,
     external_marketing_url,
@@ -250,6 +262,8 @@ def test_serialize_course(  # noqa: PLR0913
         course = CourseFactory.create(
             is_external=is_external,
             page__time_commitment=time_commitment,
+            page__min_weekly_hours=min_weekly_hours,
+            page__max_weekly_hours=max_weekly_hours,
             page__duration=duration,
             page__min_weeks=min_weeks,
             page__max_weeks=max_weeks,
@@ -306,6 +320,8 @@ def test_serialize_course(  # noqa: PLR0913
             "next_run_id": course.first_unexpired_run.id,
             "topics": [{"name": topic}] if course_page else [],
             "time_commitment": time_commitment if course_page else None,
+            "min_weekly_hours": min_weekly_hours if course_page else None,
+            "max_weekly_hours": max_weekly_hours if course_page else None,
             "duration": duration if course_page else None,
             "max_weeks": max_weeks if course_page else None,
             "min_weeks": min_weeks if course_page else None,
