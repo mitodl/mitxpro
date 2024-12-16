@@ -2133,12 +2133,12 @@ def _create_external_course_page(superuser_client, course_id, slug):
     assert response.status_code == 302
 
 
-def _is_common_child_pages_created(external_course_slug, course_id):
+def _is_common_child_pages_created(external_course_page_slug, course_id):
     """
     Validates the creation of static child pages under an ExternalCoursePage.
 
     Args:
-        external_course_slug (str): The slug of the ExternalCoursePage.
+        external_course_page_slug (str): The slug of the ExternalCoursePage.
         course_id (int): The ID of the associated course.
 
     Asserts:
@@ -2149,7 +2149,9 @@ def _is_common_child_pages_created(external_course_slug, course_id):
     Returns:
         tuple: The `LearningTechniquesPage` and `ForTeamsPage` child pages.
     """
-    external_course_page = ExternalCoursePage.objects.get(slug=external_course_slug)
+    external_course_page = ExternalCoursePage.objects.get(
+        slug=external_course_page_slug
+    )
     assert external_course_page.course.id == course_id
     assert len(external_course_page.child_pages) >= 2
     learning_technical_page = (
@@ -2179,7 +2181,7 @@ def _create_common_child_pages(platform=None):
             - `LearningTechniqueCommonPage` with platform-specific attributes.
             - `ForTeamsCommonPage` under the same parent page.
     """
-    common_index = CommonComponentIndexPageFactory.create()
+    common_component_index = CommonComponentIndexPageFactory.create()
     tech_heading = f"{platform.name} - heading" if platform else "heading"
     title = (
         f"{platform.name} - Learning tech title" if platform else "Learning tech title"
@@ -2190,10 +2192,12 @@ def _create_common_child_pages(platform=None):
         technique_items__0__techniques__heading=tech_heading,
         technique_items__0__techniques__sub_heading="sub_heading",
         technique_items__0__techniques__image__image__title="image-title",
-        parent=common_index,
+        parent=common_component_index,
     )
     title = f"{platform.name} - For teams title" if platform else "For teamstitle"
-    b2b_page = ForTeamsCommonPageFactory.create(platform=platform, parent=common_index)
+    b2b_page = ForTeamsCommonPageFactory.create(
+        platform=platform, parent=common_component_index
+    )
     return learning_tech_page, b2b_page
 
 
@@ -2241,7 +2245,7 @@ def test_common_child_pages_uniqueness():
 
 def test_common_child_page_wo_static_page(superuser_client):
     """Tests that an ExternalCoursePage is created without static child pages."""
-    external_course_page_slug = "icon-grid-6064"
+    external_course_page_slug = "external_course_page"
     course = CourseFactory.create()
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
     external_course_page = ExternalCoursePage.objects.get(
@@ -2254,12 +2258,18 @@ def test_common_child_page_wo_static_page(superuser_client):
     assert not external_course_page.get_child_page_of_type_including_draft(ForTeamsPage)
 
 
-def test_child_page_with_static_pages(superuser_client):
+@pytest.mark.parametrize(
+    "with_platform",
+    [True, False],
+)
+def test_child_page_with_static_pages(superuser_client, with_platform):
     """Tests the creation of an ExternalCoursePage with static child pages."""
     platform = PlatformFactory.create()
     course = CourseFactory.create(platform=platform)
-    learning_tech_page, b2b_page = _create_common_child_pages(platform)
-    external_course_page_slug = "icon-grid-6064"
+    learning_tech_page, b2b_page = _create_common_child_pages(
+        platform if with_platform else None
+    )
+    external_course_page_slug = "external_course_page"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
 
     learning_technical_page, for_teams_page = _is_common_child_pages_created(
@@ -2271,48 +2281,28 @@ def test_child_page_with_static_pages(superuser_client):
     assert for_teams_page.title == b2b_page.title
 
 
-def test_child_page_with_static_pages_wo_platform(superuser_client):
-    """
-    Tests the creation of an ExternalCoursePage and its static child pages
-    without a platform.
-    """
-    platform = PlatformFactory.create()
-    learning_tech_page, b2b_page = _create_common_child_pages()
-
-    course = CourseFactory.create(platform=platform)
-    external_course_page_slug = "icon-grid-6064"
-    _create_external_course_page(superuser_client, course.id, external_course_page_slug)
-    learning_technical_page, for_teams_page = _is_common_child_pages_created(
-        external_course_page_slug, course.id
-    )
-
-    assert learning_technical_page.title == learning_tech_page.title
-    assert learning_technical_page.technique_items == learning_tech_page.technique_items
-    assert for_teams_page.title == b2b_page.title
-
-
-def test_child_page_with_static_pages_with_and_wo_platform(superuser_client):
+def test_child_page_with_static_pages_with_platform(superuser_client):
     """
     Tests the creation of an ExternalCoursePage with static child pages,
     comparing the results with and without a platform.
     """
     platform = PlatformFactory.create()
-    learning_tech_page_no_platform, b2b_page_no_platform = _create_common_child_pages()
+    learning_tech_page_wo_platform, b2b_page_wo_platform = _create_common_child_pages()
     learning_tech_page, b2b_page = _create_common_child_pages(platform)
     course = CourseFactory.create(platform=platform)
-    external_course_page_slug = "icon-grid-6064"
+    external_course_page_slug = "external_course_page"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
     learning_technical_page, for_teams_page = _is_common_child_pages_created(
         external_course_page_slug, course.id
     )
 
-    assert learning_technical_page.title != learning_tech_page_no_platform.title
+    assert learning_technical_page.title != learning_tech_page_wo_platform.title
     assert learning_technical_page.title == learning_tech_page.title
     assert (
         learning_technical_page.technique_items
-        != learning_tech_page_no_platform.technique_items
+        != learning_tech_page_wo_platform.technique_items
     )
     assert learning_technical_page.technique_items == learning_tech_page.technique_items
 
-    assert for_teams_page.title != b2b_page_no_platform.title
+    assert for_teams_page.title != b2b_page_wo_platform.title
     assert for_teams_page.title == b2b_page.title

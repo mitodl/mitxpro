@@ -18,8 +18,7 @@ def create_and_add_how_you_will_learn_section(page, platform=None):
             techniques content. Defaults to None.
 
     Returns:
-        None if the section already exists or no matching content is found. Otherwise,
-        adds a `LearningTechniquesPage` with the relevant content as a child of the given page.
+        None
     """
     icongrid_page = page.get_child_page_of_type_including_draft(LearningTechniquesPage)
     if icongrid_page:
@@ -53,8 +52,7 @@ def create_and_add_b2b_section(page, platform=None):
         platform (str, optional): The name of the platform to filter the B2B content. Defaults to None.
 
     Returns:
-        None if the section already exists or no matching content is found. Otherwise,
-        adds a `ForTeamsPage` with the relevant content as a child of the given page.
+        None
     """
     b2b_page = page.get_child_page_of_type_including_draft(ForTeamsPage)
     if b2b_page:

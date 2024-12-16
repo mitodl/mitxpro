@@ -1535,9 +1535,10 @@ class CourseProgramChildPage(DisableSitemapURLMixin, Page):
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
-        if not self.title:
-            self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
-        self.slug = slugify(f"{self.get_parent().id}-{self.title}")
+        if not self.slug:
+            if not self.title:
+                self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
+            self.slug = slugify(f"{self.get_parent().id}-{self.title}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     def get_url_parts(self, request=None):
