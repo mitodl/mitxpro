@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.166.0
+Version 0.166.0 (Released December 16, 2024)
 ---------------
 
 - feat: add Global Alumni in external course sync (#3330)
