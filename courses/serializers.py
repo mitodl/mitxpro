@@ -186,19 +186,13 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """
         Get the min weeks of the product from the CMS page.
         """
-        if hasattr(instance, "page") and hasattr(instance.page, "min_weeks"):
-            return instance.page.min_weeks
-
-        return None
+        return instance.page.min_weeks if instance.page else None
 
     def get_max_weeks(self, instance):
         """
         Get the max weeks of the product from the CMS page.
         """
-        if hasattr(instance, "page") and hasattr(instance.page, "max_weeks"):
-            return instance.page.max_weeks
-
-        return None
+        return instance.page.max_weeks if instance.page else None
 
     def get_format(self, instance):
         """Returns the format of the product"""
