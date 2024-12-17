@@ -1033,6 +1033,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         "TextSection",
         "CertificatePage",
         "NewsAndEventsPage",
+        "CourseOverviewPage",
     ]
 
     # Matches the standard page path that Wagtail returns for this page type.
@@ -1075,6 +1076,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "propel_career": self.propel_career,
             "news_and_events": self.news_and_events,
             "ceus": self.certificate_page.CEUs if self.certificate_page else None,
+            "course_overview": self.course_overview,
         }
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
@@ -1137,6 +1139,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     def certificate_page(self):
         """Gets the certificate child page"""
         return self._get_child_page_of_type(CertificatePage)
+
+    @property
+    def course_overview(self):
+        """Gets the course overview child page"""
+        return self._get_child_page_of_type(CourseOverviewPage)
 
     @property
     def is_course_page(self):
@@ -2635,3 +2642,35 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
                 "HUBSPOT_ENTERPRISE_PAGE_FORM_ID"
             ),
         }
+
+
+class CourseOverviewPage(CourseProgramChildPage):
+    """
+    CMS Page representing a "Course Overview" section in course
+    """
+
+    heading = models.CharField(  # noqa: DJ001
+        max_length=255,
+        help_text="The Heading to show in this section.",
+        null=True,
+        blank=True,
+    )
+
+    overview = RichTextField(
+        help_text="An overview to provide additional context or information about the course",
+        null=True,
+        blank=True,
+    )
+
+    @property
+    def get_overview(self):
+        """Returns overview if available otherwise returns course page description"""
+        return self.overview or self.get_parent().specific.description
+
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("overview"),
+    ]
+
+    class Meta:
+        verbose_name = "Course Overview"
