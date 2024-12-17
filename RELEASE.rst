@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.167.0
+---------------
+
+- feat: Course overview child page added (#3324)
+- fix(deps): update dependency history to v5 (#3262)
+
 Version 0.166.0 (Released December 16, 2024)
 ---------------
 
