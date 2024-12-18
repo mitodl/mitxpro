@@ -9,6 +9,7 @@ CERTIFICATE_INDEX_SLUG = "certificate"
 WEBINAR_INDEX_SLUG = "webinars"
 BLOG_INDEX_SLUG = "blog"
 ENTERPRISE_PAGE_SLUG = "enterprise"
+COMMON_COURSEWARE_COMPONENT_INDEX_SLUG = "common-courseware-component-pages"
 
 ALL_TOPICS = "All Topics"
 ALL_TAB = "all-tab"
