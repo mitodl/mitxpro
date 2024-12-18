@@ -28,6 +28,7 @@ from cms.factories import (
     CertificatePageFactory,
     CommonComponentIndexPageFactory,
     CompaniesLogoCarouselPageFactory,
+    CourseOverviewPageFactory,
     CoursePageFactory,
     CoursesInProgramPageFactory,
     EnterprisePageFactory,
@@ -64,6 +65,7 @@ from cms.models import (
     CertificatePage,
     CommonComponentIndexPage,
     CourseIndexPage,
+    CourseOverviewPage,
     CoursesInProgramPage,
     ExternalCoursePage,
     ForTeamsCommonPage,
@@ -2099,6 +2101,63 @@ def test_certificatepage_saved_no_signatories_external_courseware(
 
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
+
+
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ExternalProgramPageFactory,
+        ProgramPageFactory,
+    ],
+)
+@pytest.mark.parametrize(
+    ("heading", "overview", "course_description"),
+    [
+        # With heading and overview
+        (
+            "heading",
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        # Without overview and course description
+        ("heading", None, ""),
+        # Without overview but with course description
+        ("heading", None, "course description"),
+        # Without heading
+        (None, "", "course description"),
+    ],
+)
+def test_course_overview_page(page_klass, heading, overview, course_description):
+    """Test CourseOverview Page"""
+    expected_overview = overview or course_description
+    page = page_klass.create(description=course_description)
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        heading=heading,
+        overview=overview,
+    )
+
+    # invalidate cached property
+    del page.child_pages
+
+    assert overview_page.get_parent() == page
+    assert page.course_overview == overview_page
+    assert overview_page.heading == heading
+    assert overview_page.get_overview == expected_overview
+
+    # test that it can be modified
+    new_heading = "new heading"
+    new_overview = "new test overview"
+    overview_page.heading = new_heading
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    assert overview_page.get_overview == new_overview
+    assert overview_page.heading == new_heading
 
 
 def _create_external_course_page(superuser_client, course_id, slug):

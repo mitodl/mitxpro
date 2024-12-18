@@ -1,3 +1,7 @@
+"""
+This module provides utility functions for creating and adding specific sections to a given page in a Django CMS application.
+"""
+
 from django.db import models
 
 from cms.models import (

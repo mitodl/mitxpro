@@ -23,6 +23,7 @@ from cms.models import (
     CommonComponentIndexPage,
     CompaniesLogoCarouselSection,
     CourseIndexPage,
+    CourseOverviewPage,
     CoursePage,
     CoursesInProgramPage,
     EnterprisePage,
@@ -579,6 +580,16 @@ class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = LearningStrategyFormSection
+
+
+class CourseOverviewPageFactory(wagtail_factories.PageFactory):
+    """CourseOverviewPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    overview = factory.LazyFunction(lambda: RichText(f"<p>{FAKE.paragraph()}</p>"))
+
+    class Meta:
+        model = CourseOverviewPage
 
 
 class CommonComponentIndexPageFactory(wagtail_factories.PageFactory):
