@@ -953,12 +953,12 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
     )
-    min_weeks = models.SmallIntegerField(
+    min_weeks = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="The minimum number of weeks required to complete the course/program.",
     )
-    max_weeks = models.SmallIntegerField(
+    max_weeks = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="The maximum number of weeks required to complete the course/program.",
