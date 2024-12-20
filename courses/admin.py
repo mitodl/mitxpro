@@ -92,6 +92,7 @@ class CourseRunAdmin(TimestampedModelAdmin):
     )
     list_filter = ["live", "course__platform", "course"]
     list_select_related = ["course", "course__platform"]
+    autocomplete_fields = ["course"]
 
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
