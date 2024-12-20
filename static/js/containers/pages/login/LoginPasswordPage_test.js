@@ -69,7 +69,7 @@ describe("LoginPasswordPage", () => {
       { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     );
 
-    assert.lengthOf(helper.browserHistory, 1);
+    assert.equal(helper.browserHistory.index, 0);
     sinon.assert.calledWith(setErrorsStub, fieldErrors);
     sinon.assert.calledWith(setSubmittingStub, false);
   });

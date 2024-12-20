@@ -58,8 +58,14 @@ describe("RegisterConfirmPage", () => {
         },
       },
     });
-    assert.equal(helper.currentLocation.pathname, "/create-account/details/");
-    assert.equal(helper.currentLocation.search, `?partial_token=${token}`);
+    assert.equal(
+      helper.currentLocation.location.pathname,
+      "/create-account/details/",
+    );
+    assert.equal(
+      helper.currentLocation.location.search,
+      `?partial_token=${token}`,
+    );
   });
 
   it("Shows a register link with invalid/expired confirmation code", async () => {

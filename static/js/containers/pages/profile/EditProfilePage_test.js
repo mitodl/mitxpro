@@ -122,7 +122,7 @@ describe("EditProfilePage", () => {
         assert.equal(setErrors.length, 0);
         assert.isNull(helper.currentLocation);
       } else {
-        assert.equal(helper.currentLocation.pathname, "/profile/");
+        assert.equal(helper.currentLocation.location.pathname, "/profile/");
       }
     });
   });
