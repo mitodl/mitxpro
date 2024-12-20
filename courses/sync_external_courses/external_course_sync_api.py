@@ -22,6 +22,7 @@ from cms.models import (
     LearningOutcomesPage,
     WhoShouldEnrollPage,
 )
+from cms.wagtail_hooks import create_common_child_pages_for_external_courses
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.external_course_sync_api_client import (
@@ -469,6 +470,8 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             if not overview_page and external_course.description:
                 create_course_overview_page(course_page, external_course)
                 log.info("Created CourseOverviewPage.")
+
+            create_common_child_pages_for_external_courses(None, course_page)
 
     # As we get the API data for course runs, we can have duplicate course codes in course created and updated,
     # so, we are removing the courses created from the updated courses list.
