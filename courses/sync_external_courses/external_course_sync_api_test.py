@@ -256,6 +256,8 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913
     assert (
         external_course_page.duration == f"{external_course_data['total_weeks']} Weeks"
     )
+    assert external_course_page.min_weeks == external_course_data["total_weeks"]
+    assert external_course_page.max_weeks == external_course_data["total_weeks"]
     assert external_course_page.description == external_course_data["description"]
     assert course_page_created == (not create_course_page)
     assert course_page_updated == create_course_page

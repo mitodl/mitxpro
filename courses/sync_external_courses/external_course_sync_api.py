@@ -152,6 +152,8 @@ class ExternalCourse:
         )
         total_weeks = int(external_course_json.get("total_weeks"))
         self.duration = f"{total_weeks} Weeks" if total_weeks != 0 else ""
+        self.min_weeks = total_weeks
+        self.max_weeks = total_weeks
 
         # Description can be null in External Course API data, we cannot store `None` as description is Non-Nullable
         self.description = (
@@ -540,7 +542,7 @@ def generate_external_course_run_courseware_id(course_run_tag, course_readable_i
     return f"{course_readable_id}+{course_run_tag}"
 
 
-def create_or_update_external_course_page(
+def create_or_update_external_course_page(  # noqa: C901
     course_index_page, course, external_course, keymap
 ):
     """
@@ -580,6 +582,8 @@ def create_or_update_external_course_page(
             external_marketing_url=external_course.marketing_url,
             subhead=keymap.course_page_subhead,
             duration=external_course.duration,
+            min_weeks=external_course.min_weeks,
+            max_weeks=external_course.max_weeks,
             format=external_course.format,
             description=external_course.description,
             background_image=image,
@@ -598,6 +602,14 @@ def create_or_update_external_course_page(
 
         if not latest_revision.duration and external_course.duration:
             latest_revision.duration = external_course.duration
+            is_updated = True
+
+        if not latest_revision.min_weeks and external_course.min_weeks:
+            latest_revision.min_weeks = external_course.min_weeks
+            is_updated = True
+
+        if not latest_revision.max_weeks and external_course.max_weeks:
+            latest_revision.max_weeks = external_course.max_weeks
             is_updated = True
 
         if not latest_revision.description and external_course.description:
