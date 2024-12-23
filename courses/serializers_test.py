@@ -76,6 +76,8 @@ def test_base_program_serializer():
             None,
             None,
             None,
+            None,
+            None,
             "",
         ),
     ],
@@ -220,6 +222,8 @@ def test_base_course_serializer():
             "fb4f5b79-test-4972-92c3-test",
         ),
         (
+            None,
+            None,
             None,
             None,
             None,
