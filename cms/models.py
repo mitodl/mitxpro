@@ -993,12 +993,12 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating about the time commitments.",
     )
-    min_weekly_hours = models.SmallIntegerField(
+    min_weekly_hours = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="The minimum number of hours per week required to complete the course.",
     )
-    max_weekly_hours = models.SmallIntegerField(
+    max_weekly_hours = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="The maximum number of hours per week required to complete the course.",
