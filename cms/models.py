@@ -993,6 +993,16 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating about the time commitments.",
     )
+    min_weekly_hours = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The minimum number of hours per week required to complete the course.",
+    )
+    max_weekly_hours = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The maximum number of hours per week required to complete the course.",
+    )
     thumbnail_image = models.ForeignKey(
         Image,
         null=True,
@@ -1028,6 +1038,8 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         FieldPanel("max_weeks"),
         FieldPanel("format"),
         FieldPanel("time_commitment"),
+        FieldPanel("min_weekly_hours"),
+        FieldPanel("max_weekly_hours"),
         FieldPanel("description", classname="full"),
         FieldPanel("catalog_details", classname="full"),
         FieldPanel("background_image"),

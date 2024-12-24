@@ -106,6 +106,8 @@ class BaseProductSerializer(serializers.ModelSerializer):
     marketing_hubspot_form_id = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
     time_commitment = serializers.SerializerMethodField()
+    min_weekly_hours = serializers.SerializerMethodField()
+    max_weekly_hours = serializers.SerializerMethodField()
     duration = serializers.SerializerMethodField()
     min_weeks = serializers.SerializerMethodField()
     max_weeks = serializers.SerializerMethodField()
@@ -125,6 +127,8 @@ class BaseProductSerializer(serializers.ModelSerializer):
             "marketing_hubspot_form_id",
             "thumbnail_url",
             "time_commitment",
+            "min_weekly_hours",
+            "max_weekly_hours",
             "duration",
             "min_weeks",
             "max_weeks",
@@ -209,6 +213,14 @@ class BaseProductSerializer(serializers.ModelSerializer):
             if instance.page and instance.page.certificate_page
             else None
         )
+
+    def get_min_weekly_hours(self, instance):
+        """Returns the minimum weekly hours for this product"""
+        return instance.page.min_weekly_hours if instance.page else None
+
+    def get_max_weekly_hours(self, instance):
+        """Returns the maximum weekly hours for this product"""
+        return instance.page.max_weekly_hours if instance.page else None
 
 
 class CourseSerializer(BaseProductSerializer):
