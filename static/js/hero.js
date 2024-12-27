@@ -2,6 +2,7 @@
 /*eslint semi: ["error", "always"]*/
 /* global Hls */
 /* eslint-disable no-unused-vars */
+import Hls from 'hls.js'
 const backgroundVideoSel = "#background-video";
 const promoVideoSel = "#promo-video";
 
