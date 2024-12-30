@@ -1,6 +1,6 @@
 /*eslint-env jquery*/
 /*eslint semi: ["error", "always"]*/
-/* global Hls */
+import Hls from "hls.js";
 
 function initializeHlsVideo(VideoSelector) {
   const video = VideoSelector.get(0);
