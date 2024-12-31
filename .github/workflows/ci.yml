@@ -148,7 +148,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 22.5.0
+          node-version: 22.6.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
