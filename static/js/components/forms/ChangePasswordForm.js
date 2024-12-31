@@ -27,7 +27,8 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
       newPassword: "",
       confirmPassword: "",
     }}
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form>
         <section className="email-section">
           <h4>Change Password</h4>
@@ -70,7 +71,7 @@ const ChangePasswordForm = ({ onSubmit }: Props) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default ChangePasswordForm;

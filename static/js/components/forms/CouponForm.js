@@ -133,7 +133,8 @@ export const CouponForm = ({
       include_future_runs: false,
       is_global: false,
     }}
-    render={({
+  >
+    {({
       isSubmitting,
       setFieldValue,
       setFieldTouched,
@@ -436,5 +437,5 @@ export const CouponForm = ({
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );

@@ -39,7 +39,8 @@ const ChangeEmailForm = ({ onSubmit, user }: Props) => (
         currentEmail: user.email,
       }).catch((err) => Promise.reject(yupToFormErrors(err)))
     }
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form>
         <section className="email-section">
           <h4>Change Email</h4>
@@ -77,7 +78,7 @@ const ChangeEmailForm = ({ onSubmit, user }: Props) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default ChangeEmailForm;

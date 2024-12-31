@@ -3,13 +3,11 @@ import { shallow } from "enzyme/build";
 import React from "react";
 
 export const findFormikFieldByName = (wrapper: any, name: string) =>
-  wrapper
-    .find("FormikConnect(FieldInner)")
-    .filterWhere((node) => node.prop("name") === name);
+  wrapper.find("Field").filterWhere((node) => node.prop("name") === name);
 
 export const findFormikErrorByName = (wrapper: any, name: string) =>
   wrapper
-    .find("FormikConnect(ErrorMessageImpl)")
+    .find("ErrorMessageImpl")
     .filterWhere((node) => node.prop("name") === name);
 
 /**

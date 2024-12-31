@@ -23,7 +23,8 @@ const LoginPasswordForm = ({ onSubmit }: LoginPasswordFormProps) => (
     onSubmit={onSubmit}
     validationSchema={passwordValidation}
     initialValues={{ password: "" }}
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form>
         <div className="form-group">
           <label htmlFor="password">Password</label>
@@ -50,7 +51,7 @@ const LoginPasswordForm = ({ onSubmit }: LoginPasswordFormProps) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default LoginPasswordForm;
