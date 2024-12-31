@@ -9,7 +9,7 @@ elif [[ -n $CODECOV ]]; then
 elif [[ -n $WATCH ]]; then
 	export CMD="node --no-experimental-detect-module ./node_modules/mocha/bin/_mocha --watch"
 else
-	export CMD="node --no-experimental-detect-module ./node_modules/mocha/bin/_mocha "
+	export CMD="node --no-experimental-detect-module ./node_modules/mocha/bin/_mocha"
 fi
 
 export FILE_PATTERN=${1:-'"static/**/*/*_test.js"'}
