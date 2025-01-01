@@ -3,13 +3,13 @@ TMP_FILE=$(mktemp)
 export TMP_FILE
 
 if [[ -n $COVERAGE ]]; then
-	export CMD="node --no-experimental-detect-module ./node_modules/nyc/bin/nyc.js --reporter=html mocha"
+	export CMD="node ./node_modules/nyc/bin/nyc.js --reporter=html mocha"
 elif [[ -n $CODECOV ]]; then
-	export CMD="node --no-experimental-detect-module ./node_modules/nyc/bin/nyc.js --reporter=lcovonly -R spec mocha"
+	export CMD="node ./node_modules/nyc/bin/nyc.js --reporter=lcovonly -R spec mocha"
 elif [[ -n $WATCH ]]; then
-	export CMD="node --no-experimental-detect-module ./node_modules/mocha/bin/_mocha --watch"
+	export CMD="node ./node_modules/mocha/bin/_mocha --watch"
 else
-	export CMD="node --no-experimental-detect-module ./node_modules/mocha/bin/_mocha"
+	export CMD="node ./node_modules/mocha/bin/_mocha"
 fi
 
 export FILE_PATTERN=${1:-'"static/**/*/*_test.js"'}
