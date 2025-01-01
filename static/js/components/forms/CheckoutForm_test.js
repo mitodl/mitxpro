@@ -400,10 +400,9 @@ describe("CheckoutForm", () => {
         values={{}}
       />,
     );
-
-    await inner
-      .find("FormikConnect(FieldInner)[component='select']")
-      .prop("onChange")({ target: { value: String(run.id) } });
+    await inner.find("[component='select']").prop("onChange")({
+      target: { value: String(run.id) },
+    });
     sinon.assert.calledWith(updateProductStub, run.product_id, run.id);
     sinon.assert.calledWith(resetFormStub);
   });

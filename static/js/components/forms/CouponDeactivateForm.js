@@ -28,7 +28,8 @@ export const CouponDeactivateForm = ({
     initialValues={{
       coupons: "",
     }}
-    render={({ isSubmitting }) => (
+  >
+    {({ isSubmitting }) => (
       <Form className="coupon-form">
         <div>
           <div className="block text-area-div">
@@ -53,5 +54,5 @@ export const CouponDeactivateForm = ({
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
