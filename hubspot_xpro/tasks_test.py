@@ -17,8 +17,7 @@ from mitol.hubspot_api.models import HubspotObject
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
-from courses.factories import CourseFactory, CourseRunFactory
-from courses.models import CourseRun
+from courses.factories import CourseFactory
 from ecommerce.factories import (
     LineFactory,
     OrderFactory,
@@ -166,11 +165,7 @@ def test_batch_upsert_hubspot_objects(settings, mocker, mocked_celery, create):
     )
     unsynced_products = ProductFactory.create_batch(2)
     course = CourseFactory.create()
-    course_runs = [CourseRunFactory.build(course=course) for _ in range(103)]
-    CourseRun.objects.bulk_create(course_runs)
-    synced_products = Product.objects.bulk_create(
-        [ProductFactory.build(content_object=course_run) for course_run in course_runs]
-    )
+    synced_products = ProductFactory.create_batch(103, content_object__course=course)
     content_type = ContentType.objects.get_for_model(Product)
     hs_objects = [
         HubspotObjectFactory.create(
