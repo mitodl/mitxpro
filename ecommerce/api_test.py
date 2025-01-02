@@ -1219,7 +1219,7 @@ def test_validate_basket_product_requires_enrollment_code(basket_and_coupons):
 
 def test_apply_coupon_to_product_requires_enrollment_code(user, basket_and_coupons):
     """
-    if product that requires enrollment code, a promo coupon is not valid and can't be applied in checkout;
+    If product that requires enrollment code, a promo coupon is not valid and can't be applied in checkout;
     An enrollment code is valid if it's eligible for the product
     """
 

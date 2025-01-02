@@ -176,7 +176,7 @@ def test_type_string():
 
 def test_title():
     """
-    title should return a string representation of the Product's title
+    Title should return a string representation of the Product's title
     """
     program = ProgramFactory.create(title="test title of the program")
     course = CourseFactory.create(title="test title of the course")

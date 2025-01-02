@@ -546,7 +546,7 @@ def _assert_faculty_members(obj):
 
 def test_course_page_testimonials():
     """
-    testimonials property should return expected value if associated with a CoursePage
+    Testimonials property should return expected value if associated with a CoursePage
     """
     course_page = CoursePageFactory.create()
     assert UserTestimonialsPage.can_create_at(course_page)
@@ -571,7 +571,7 @@ def test_course_page_testimonials():
 
 def test_external_course_page_testimonials():
     """
-    testimonials property should return expected value if associated with an ExternalCoursePage
+    Testimonials property should return expected value if associated with an ExternalCoursePage
     """
     external_course_page = ExternalCoursePageFactory.create()
     assert UserTestimonialsPage.can_create_at(external_course_page)
@@ -596,7 +596,7 @@ def test_external_course_page_testimonials():
 
 def test_program_page_testimonials():
     """
-    testimonials property should return expected value if associated with a ProgramPage
+    Testimonials property should return expected value if associated with a ProgramPage
     """
     program_page = ProgramPageFactory.create()
     assert UserTestimonialsPage.can_create_at(program_page)
@@ -621,7 +621,7 @@ def test_program_page_testimonials():
 
 def test_external_program_page_testimonials():
     """
-    testimonials property should return expected value if associated with an ExternalProgramPage
+    Testimonials property should return expected value if associated with an ExternalProgramPage
     """
     external_program_page = ExternalProgramPageFactory.create()
     assert UserTestimonialsPage.can_create_at(external_program_page)

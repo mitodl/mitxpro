@@ -209,7 +209,7 @@ def test_external_courseware_marketing_url():
 
 def test_program_page():
     """
-    page property should return an associated Wagtail page if one exists
+    Page property should return an associated Wagtail page if one exists
     """
     program = ProgramFactory.create(page=None)
     assert program.page is None
@@ -552,7 +552,7 @@ def test_course_is_catalog_visible():
 
 def test_course_page():
     """
-    page property should return an associated Wagtail page if one exists
+    Page property should return an associated Wagtail page if one exists
     """
     course = CourseFactory.create(page=None)
     assert course.page is None

@@ -3,7 +3,7 @@
   "extends": ["local>mitodl/.github:renovate-config"],
   "packageRules": [
     {
-      "matchPackages": ["sass"],
+      "matchPackageNames": ["sass"],
       "automerge": false
     }
   ]
