@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.167.0
+Version 0.167.0 (Released January 02, 2025)
 ---------------
 
 - feat: How you will learn and B2B section added for external courses (#3318)
