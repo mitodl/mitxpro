@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: release-candidate
-      - uses: akhileshns/heroku-deploy@e86b991436e126ff9d78399b801a6610a64881c9
+      - uses: akhileshns/heroku-deploy@96f4455bfc127bf16feac4b180aae9ec380c5a20
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: "xpro-rc"
