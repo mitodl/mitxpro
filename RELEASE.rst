@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.168.0
+---------------
+
+- chore: improve tests execution time for hubspot (#3350)
+- revert: node version (#3352)
+- fix: npm tests locally (#3351)
+- fix(deps): update dependency django to v4.2.17 [security] (#3345)
+- fix: replace matchPackages with matchPackageNames (#3343)
+- [pre-commit.ci] pre-commit autoupdate (#3344)
+- fix(deps): update dependency hls.js to v1 (#3060)
+- Add min and max weekly_hours to reflect time_commitment (#3337)
+- [pre-commit.ci] pre-commit autoupdate (#3342)
+- min_weeks and max_weeks field added to replace duration field (#3336)
+- feat: make course searchable in courseRun admin (#3341)
+
 Version 0.167.0 (Released January 02, 2025)
 ---------------
 
