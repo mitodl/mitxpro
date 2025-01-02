@@ -1408,6 +1408,7 @@ class CourseProductPage(ProductPage):
 
     content_panels = [
         FieldPanel("course"),
+        FieldPanel("language"),
         FieldPanel("topics"),
         *ProductPage.content_panels,
         MultiFieldPanel(
