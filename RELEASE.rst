@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.167.0 (Released January 02, 2025)
+---------------
+
+- feat: How you will learn and B2B section added for external courses (#3318)
+- [pre-commit.ci] pre-commit autoupdate (#3338)
+- feat: Course overview child page added (#3324)
+- fix(deps): update dependency history to v5 (#3262)
+
 Version 0.166.0 (Released December 16, 2024)
 ---------------
 
