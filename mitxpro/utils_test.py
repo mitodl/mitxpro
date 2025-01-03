@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import pytest
 from rest_framework import status
 
+from ecommerce.api import display_taxes
 from ecommerce.models import Order
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
@@ -455,7 +456,7 @@ def test_request_get_with_timeout_retry(mocker):
     assert result == mock_response
 
 
-def test_get_js_settings(settings, rf, user):
+def test_get_js_settings(settings, rf, user, mocker):
     """Test get_js_settings"""
     settings.GA_TRACKING_ID = "fake"
     settings.GTM_TRACKING_ID = "fake"
@@ -472,9 +473,9 @@ def test_get_js_settings(settings, rf, user):
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
     settings.FEATURES["COURSE_DROPDOWN"] = False
     settings.FEATURES["WEBINARS"] = False
-    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
     settings.FEATURES["ENABLE_BLOG"] = False
     settings.FEATURES["ENABLE_ENTERPRISE"] = False
+    mocker.patch("ecommerce.api.display_taxes", return_value=False)
 
     request = rf.get("/")
     request.user = user
@@ -494,7 +495,7 @@ def test_get_js_settings(settings, rf, user):
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
-        "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
+        "enable_taxes_display": display_taxes(request),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,

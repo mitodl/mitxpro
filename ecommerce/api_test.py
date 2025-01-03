@@ -1903,7 +1903,7 @@ def test_display_taxes(  # noqa: PLR0913
     mocker.patch(
         "ecommerce.api.determine_visitor_country", return_value=user_determined_country
     )
-    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = is_taxes_display_flag_enabled
+    mocker.patch("ecommerce.api.is_enabled", return_value=is_taxes_display_flag_enabled)
     settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = is_force_profile_country_flag_enabled
     user = UserFactory.create(legal_address__country=user_profile_country)
     request = FakeRequest()

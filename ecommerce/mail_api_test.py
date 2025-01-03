@@ -260,7 +260,7 @@ def test_send_b2b_receipt_email_error(mocker):
 )
 def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
     """send_ecommerce_order_receipt should send a receipt email"""
-    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
+    mocker.patch("ecommerce.api.display_taxes", return_value=False)
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     date = datetime.datetime(2010, 1, 1, 0, tzinfo=datetime.UTC)
     user = UserFactory.create(
