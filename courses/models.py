@@ -248,6 +248,13 @@ class CourseLanguage(TimestampedModel, ValidateOnSaveMixin):
     """
 
     name = models.CharField(max_length=255, unique=True)
+    priority = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        default=100,
+        validators=[MinValueValidator(1)],
+        help_text="The priority of this language in the list of languages.",
+    )
 
     def __str__(self):
         return self.name

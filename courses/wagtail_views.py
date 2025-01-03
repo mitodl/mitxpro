@@ -22,6 +22,6 @@ class CourseLanguageViewSet(ModelViewSet):
     model = CourseLanguage
     icon = "snippet"
     search_fields = ["name"]
-    form_fields = ["name"]
-    list_display = ["name"]
+    form_fields = ["name", "priority"]
+    list_display = ["name", "priority"]
     add_to_admin_menu = True

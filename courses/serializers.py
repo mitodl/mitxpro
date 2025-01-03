@@ -230,6 +230,11 @@ class CourseSerializer(BaseProductSerializer):
     next_run_id = serializers.SerializerMethodField()
     topics = serializers.SerializerMethodField()
     platform = serializers.SerializerMethodField()
+    language = serializers.SerializerMethodField()
+
+    def get_language(self, instance):
+        """Get the language of the product"""
+        return instance.page.language.name if instance.page else None
 
     def get_next_run_id(self, instance):
         """Get next run id"""
@@ -280,6 +285,7 @@ class CourseSerializer(BaseProductSerializer):
             "topics",
             "is_external",
             "platform",
+            "language",
         ]
 
 
