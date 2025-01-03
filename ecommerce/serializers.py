@@ -1006,7 +1006,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                 certificate_page = program.page.certificate_page
 
             if certificate_page:
-                CEUs = certificate_page.normalized_ceus
+                CEUs = certificate_page.CEUs
                 for override in certificate_page.overrides:
                     if (
                         override.value.get("readable_id")

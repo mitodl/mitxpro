@@ -38,7 +38,7 @@ def build_program_credential(certificate: ProgramCertificate) -> dict:
             "name": certificate.program.title,
             "description": certificate.program.page.description,
             "numberOfCredits": {
-                "value": certificate.program.page.certificate_page.normalized_ceus
+                "value": certificate.program.page.certificate_page.CEUs
             },
             "startDate": start_date.isoformat(),
             "endDate": end_date.isoformat(),
@@ -72,7 +72,7 @@ def build_course_run_credential(certificate: CourseRunCertificate) -> dict:
             "courseCode": course.readable_id,
             "name": course.title,
             "description": course.page.description,
-            "numberOfCredits": {"value": course.page.certificate_page.normalized_ceus},
+            "numberOfCredits": {"value": course.page.certificate_page.CEUs},
             "startDate": start_date.isoformat(),
             "endDate": end_date.isoformat(),
         },

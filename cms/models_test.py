@@ -1408,7 +1408,6 @@ def test_certificate_for_course_page():
     )
     assert certificate_page.get_parent() == course_page
     assert certificate_page.CEUs == Decimal("1.8")
-    assert certificate_page.normalized_ceus == "1.8"
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:
@@ -1445,7 +1444,6 @@ def test_certificate_for_program_page():
 
     assert certificate_page.get_parent() == program_page
     assert certificate_page.CEUs == Decimal("2.8")
-    assert certificate_page.normalized_ceus == "2.8"
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:

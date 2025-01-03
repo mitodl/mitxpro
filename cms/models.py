@@ -1104,9 +1104,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "techniques": self.techniques,
             "propel_career": self.propel_career,
             "news_and_events": self.news_and_events,
-            "ceus": self.certificate_page.normalized_ceus
-            if self.certificate_page
-            else None,
+            "ceus": self.certificate_page.CEUs if self.certificate_page else None,
             "course_overview": self.course_overview,
         }
 
@@ -2282,13 +2280,6 @@ class CertificatePage(CourseProgramChildPage):
         """
         return self.get_parent().specific
 
-    @property
-    def normalized_ceus(self):
-        """
-        Normalizes the CEUs from decimal to string. Removes the trailing zeros if any.
-        """
-        return f"{self.CEUs.normalize():f}" if self.CEUs else None
-
     def get_context(self, request, *args, **kwargs):
         preview_context = {}
         context = {}
@@ -2302,14 +2293,14 @@ class CertificatePage(CourseProgramChildPage):
                 "end_date": self.parent.product.first_unexpired_run.end_date
                 if self.parent.product.first_unexpired_run
                 else datetime.now() + timedelta(days=45),  # noqa: DTZ005
-                "CEUs": self.normalized_ceus,
+                "CEUs": self.CEUs,
             }
         elif self.certificate:
             # Verify that the certificate in fact is for this same course
             if self.parent.product.id != self.certificate.get_courseware_object_id():
                 raise Http404
             start_date, end_date = self.certificate.start_end_dates
-            CEUs = self.normalized_ceus
+            CEUs = self.CEUs
 
             for override in self.overrides:
                 if (
