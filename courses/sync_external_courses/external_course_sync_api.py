@@ -562,7 +562,7 @@ def create_or_update_external_course_page(  # noqa: C901
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
     )
     course_language = CourseLanguage.objects.get_or_create(
-        name__icontains=emeritus_course.language
+        name__icontains=external_course.language
     )
 
     image = None
