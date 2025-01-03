@@ -2,6 +2,7 @@
 
 import textwrap
 from datetime import datetime, timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 
 import factory
@@ -693,7 +694,7 @@ def test_product_page_context_has_certificate(
 
     if published_certificate:
         assert resp.context["ceus"] is not None
-        assert resp.context["ceus"] == "12"
+        assert resp.context["ceus"] == Decimal("12.00")
     else:
         assert resp.context["ceus"] is None
 

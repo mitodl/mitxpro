@@ -177,7 +177,7 @@ def test_serialize_program(  # noqa: PLR0913
             "min_weeks": min_weeks,
             "format": program_format,
             "video_url": video_url,
-            "credits": str(Decimal(ceus).normalize()) if ceus else None,
+            "credits": Decimal(ceus) if ceus else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url,
             "marketing_hubspot_form_id": marketing_hubspot_form_id,
@@ -332,7 +332,7 @@ def test_serialize_course(  # noqa: PLR0913
             "min_weeks": min_weeks if course_page else None,
             "format": course_format if course_page else None,
             "video_url": video_url if course_page else None,
-            "credits": str(Decimal(ceus).normalize()) if course_page and ceus else None,
+            "credits": Decimal(ceus) if course_page and ceus else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
             "marketing_hubspot_form_id": (
