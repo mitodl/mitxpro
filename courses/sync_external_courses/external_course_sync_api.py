@@ -5,6 +5,7 @@ import logging
 import re
 import time
 from datetime import timedelta
+from decimal import Decimal
 from enum import Enum
 from pathlib import Path
 
@@ -164,7 +165,7 @@ class ExternalCourse:
         self.format = external_course_json.get("format")
         self.category = external_course_json.get("Category", None)
         self.image_name = external_course_json.get("image_name", None)
-        self.CEUs = str(external_course_json.get("ceu") or "")
+        self.CEUs = Decimal(str(external_course_json.get("ceu") or "0.0")) or None
         self.learning_outcomes_list = (
             parse_external_course_data_str(
                 external_course_json.get("learning_outcomes")
