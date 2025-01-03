@@ -14,6 +14,7 @@ from users.factories import UserFactory
 
 from .models import (
     Course,
+    CourseLanguage,
     CourseRun,
     CourseRunCertificate,
     CourseRunEnrollment,
@@ -36,6 +37,20 @@ class CompanyFactory(DjangoModelFactory):
 
     class Meta:
         model = Company
+
+
+class CourseLanguageFactory(DjangoModelFactory):
+    """Factory for Course Language"""
+
+    name = factory.Iterator(["English", "Spanish", "French"])
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        obj, _ = model_class.objects.get_or_create(*args, **kwargs)
+        return obj
+
+    class Meta:
+        model = CourseLanguage
 
 
 class PlatformFactory(DjangoModelFactory):

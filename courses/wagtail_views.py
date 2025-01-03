@@ -2,7 +2,7 @@
 
 from wagtail.admin.viewsets.model import ModelViewSet
 
-from courses.models import CourseTopic
+from courses.models import CourseLanguage, CourseTopic
 
 
 class CourseTopicViewSet(ModelViewSet):
@@ -13,4 +13,15 @@ class CourseTopicViewSet(ModelViewSet):
     search_fields = ["name"]
     form_fields = ["parent", "name"]
     list_display = ["name", "parent"]
+    add_to_admin_menu = True
+
+
+class CourseLanguageViewSet(ModelViewSet):
+    """Wagtail ModelViewSet for CourseLanguage"""
+
+    model = CourseLanguage
+    icon = "snippet"
+    search_fields = ["name"]
+    form_fields = ["name", "priority"]
+    list_display = ["name", "priority"]
     add_to_admin_menu = True
