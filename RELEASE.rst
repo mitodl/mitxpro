@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.168.0
+Version 0.168.0 (Released January 06, 2025)
 ---------------
 
 - chore: improve tests execution time for hubspot (#3350)
