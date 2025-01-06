@@ -1,3 +1,1 @@
 """MIT xPro feature flags"""
-
-ENABLE_TAXES_DISPLAY = "ENABLE_TAXES_DISPLAY"

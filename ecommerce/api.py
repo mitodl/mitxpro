@@ -21,7 +21,6 @@ from django.db.models import Count, F, Max, Prefetch, Q, Subquery
 from django.http import HttpRequest
 from django.urls import reverse
 from ipware import get_client_ip
-from mitol.olposthog.features import is_enabled
 from rest_framework.exceptions import ValidationError
 
 import sheets.tasks
@@ -70,7 +69,6 @@ from ecommerce.models import (
 from ecommerce.utils import positive_or_zero
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from maxmind.api import ip_to_country_code
-from mitxpro import features
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
 log = logging.getLogger(__name__)
@@ -167,13 +165,10 @@ def display_taxes(request):
         request(HttpRequest): Request object
 
     Returns:
-        Boolean: True if flag and taxes are enabled for the specific country.
+        Boolean: True if taxes are enabled for the specific country.
     """
     visitor_country = determine_visitor_country(request)
-    return (
-        is_enabled(features.ENABLE_TAXES_DISPLAY, default=True)
-        and TaxRate.objects.filter(active=True, country_code=visitor_country).exists()
-    )
+    return TaxRate.objects.filter(active=True, country_code=visitor_country).exists()
 
 
 def generate_cybersource_sa_signature(payload):
