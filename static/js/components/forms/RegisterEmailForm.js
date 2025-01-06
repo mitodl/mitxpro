@@ -34,7 +34,8 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
       email: "",
       recaptcha: SETTINGS.recaptchaKey ? "" : undefined,
     }}
-    render={({ isSubmitting, setFieldValue }) => (
+  >
+    {({ isSubmitting, setFieldValue }) => (
       <Form>
         <div className="form-group">
           <label htmlFor="email">Email</label>
@@ -66,7 +67,7 @@ const RegisterEmailForm = ({ onSubmit }: Props) => (
         </div>
       </Form>
     )}
-  />
+  </Formik>
 );
 
 export default RegisterEmailForm;
