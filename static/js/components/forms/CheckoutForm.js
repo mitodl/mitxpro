@@ -345,7 +345,7 @@ export class InnerCheckoutForm extends React.Component<InnerProps, InnerState> {
                     </span>
                   </div>
                 ) : null}
-                {SETTINGS.enable_taxes_display ? (
+                {SETTINGS.is_tax_applicable ? (
                   <div>
                     <div className="bar" />
                     <div className="flex-row total-before-tax-row">

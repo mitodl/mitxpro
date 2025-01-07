@@ -9,7 +9,7 @@ from types import SimpleNamespace
 import pytest
 from rest_framework import status
 
-from ecommerce.api import display_taxes
+from ecommerce.api import is_tax_applicable
 from ecommerce.models import Order
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
@@ -475,7 +475,7 @@ def test_get_js_settings(settings, rf, user, mocker):
     settings.FEATURES["WEBINARS"] = False
     settings.FEATURES["ENABLE_BLOG"] = False
     settings.FEATURES["ENABLE_ENTERPRISE"] = False
-    mocker.patch("ecommerce.api.display_taxes", return_value=False)
+    mocker.patch("ecommerce.api.is_tax_applicable", return_value=False)
 
     request = rf.get("/")
     request.user = user
@@ -495,7 +495,7 @@ def test_get_js_settings(settings, rf, user, mocker):
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
-        "enable_taxes_display": display_taxes(request),
+        "is_tax_applicable": is_tax_applicable(request),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,

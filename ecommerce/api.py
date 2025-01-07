@@ -157,9 +157,9 @@ def calculate_tax(
     return (0, "", item_price)
 
 
-def display_taxes(request):
+def is_tax_applicable(request):
     """
-    Returns a boolean to manage the taxes display.
+    Returns a boolean to indicate whether the user is tax applicable.
 
     Args:
         request(HttpRequest): Request object
