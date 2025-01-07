@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.169.0
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3355)
+- feat: convert CEUs to decimal (#3217)
+
 Version 0.168.0 (Released January 06, 2025)
 ---------------
 
