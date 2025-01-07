@@ -5,6 +5,7 @@ Tests for course views
 import json
 import operator as op
 from datetime import timedelta
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -135,6 +136,9 @@ def test_get_courses(user_drf_client, courses, mock_context, is_anonymous):
     courses_data = resp.json()
     assert len(courses_data) == len(courses)
     for course, course_data in zip(courses, courses_data):
+        course_data["credits"] = (
+            Decimal(str(course_data["credits"])) if course_data["credits"] else None
+        )
         assert (
             course_data == CourseSerializer(instance=course, context=mock_context).data
         )
@@ -148,6 +152,9 @@ def test_get_course(user_drf_client, courses, mock_context, is_anonymous):
     course = courses[0]
     resp = user_drf_client.get(reverse("courses_api-detail", kwargs={"pk": course.id}))
     course_data = resp.json()
+    course_data["credits"] = (
+        Decimal(str(course_data["credits"])) if course_data["credits"] else None
+    )
     assert course_data == CourseSerializer(instance=course, context=mock_context).data
 
 
