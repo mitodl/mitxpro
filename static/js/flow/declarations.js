@@ -21,7 +21,7 @@ declare type Settings = {
   course_dropdown: boolean,
   webinars: boolean,
   enable_blog: boolean,
-  enable_taxes_display: boolean,
+  is_tax_applicable: boolean,
   enable_enterprise: boolean,
   posthog_api_token: ?string,
   posthog_api_host: ?string

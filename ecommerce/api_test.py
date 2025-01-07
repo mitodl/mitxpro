@@ -39,7 +39,6 @@ from ecommerce.api import (
     complete_order,
     create_coupons,
     create_unfulfilled_order,
-    display_taxes,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
     generate_cybersource_sa_payload,
@@ -52,6 +51,7 @@ from ecommerce.api import (
     get_product_version_price_with_discount,
     get_readable_id,
     get_valid_coupon_versions,
+    is_tax_applicable,
     latest_coupon_version,
     latest_product_version,
     make_receipt_url,
@@ -1866,7 +1866,6 @@ def test_tax_country_and_no_ip_tax(user):
 
 @pytest.mark.parametrize(
     (
-        "is_taxes_display_flag_enabled",
         "is_force_profile_country_flag_enabled",
         "user_profile_country",
         "user_determined_country",
@@ -1876,18 +1875,17 @@ def test_tax_country_and_no_ip_tax(user):
         "expected_taxes_display",
     ),
     [
-        (True, True, "US", "US", "US", True, True, True),
-        (True, True, "US", "US", "PK", True, True, False),
-        (True, False, "US", "US", "US", True, True, True),
-        (True, False, "PK", "US", "US", True, True, True),
-        (True, False, "PK", "US", "PK", True, True, False),
-        (True, False, "US", "US", "US", True, False, False),
-        (True, False, "PK", "US", "US", True, False, False),
-        (True, False, "US", "US", "US", False, False, False),
+        (True, "US", "US", "US", True, True, True),
+        (True, "US", "US", "PK", True, True, False),
+        (False, "US", "US", "US", True, True, True),
+        (False, "PK", "US", "US", True, True, True),
+        (False, "PK", "US", "PK", True, True, False),
+        (False, "US", "US", "US", True, False, False),
+        (False, "PK", "US", "US", True, False, False),
+        (False, "US", "US", "US", False, False, False),
     ],
 )
-def test_display_taxes(  # noqa: PLR0913
-    is_taxes_display_flag_enabled,
+def test_is_tax_applicable(  # noqa: PLR0913
     is_force_profile_country_flag_enabled,
     user_profile_country,
     user_determined_country,
@@ -1898,12 +1896,11 @@ def test_display_taxes(  # noqa: PLR0913
     mocker,
 ):
     """
-    Tests that `display_taxes` returns the expected display status.
+    Tests that `is_tax_applicable` returns the expected display status.
     """
     mocker.patch(
         "ecommerce.api.determine_visitor_country", return_value=user_determined_country
     )
-    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = is_taxes_display_flag_enabled
     settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = is_force_profile_country_flag_enabled
     user = UserFactory.create(legal_address__country=user_profile_country)
     request = FakeRequest()
@@ -1912,4 +1909,4 @@ def test_display_taxes(  # noqa: PLR0913
     if tax_rate_created:
         TaxRateFactory.create(country_code=tax_rate_country, active=tax_rate_enabled)
 
-    assert display_taxes(request) == expected_taxes_display
+    assert is_tax_applicable(request) == expected_taxes_display

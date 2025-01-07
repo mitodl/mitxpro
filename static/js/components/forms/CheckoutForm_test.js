@@ -114,7 +114,7 @@ describe("CheckoutForm", () => {
   });
   [true, false].forEach((taxDisplayEnabled) => {
     it(`handles basket tax details display as per feature flag`, async () => {
-      SETTINGS.enable_taxes_display = taxDisplayEnabled;
+      SETTINGS.is_tax_applicable = taxDisplayEnabled;
 
       const inner = await renderForm();
 
@@ -136,7 +136,7 @@ describe("CheckoutForm", () => {
     it(`Calculates and displayes the tax correctly ${
       hasCoupon ? "with" : "without"
     } a coupon`, async () => {
-      SETTINGS.enable_taxes_display = true;
+      SETTINGS.is_tax_applicable = true;
       basket.tax_info.tax_rate = taxRate;
 
       const inner = await renderForm({

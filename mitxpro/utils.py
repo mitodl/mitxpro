@@ -581,7 +581,7 @@ def get_js_settings(request: HttpRequest):
     Returns:
         dict: the settings object
     """
-    from ecommerce.api import display_taxes
+    from ecommerce.api import is_tax_applicable
 
     return {
         "gtmTrackingID": settings.GTM_TRACKING_ID,
@@ -602,7 +602,7 @@ def get_js_settings(request: HttpRequest):
         "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
-        "enable_taxes_display": display_taxes(request),
+        "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
         "posthog_api_host": settings.POSTHOG_API_HOST,

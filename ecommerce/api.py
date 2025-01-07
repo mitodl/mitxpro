@@ -157,21 +157,18 @@ def calculate_tax(
     return (0, "", item_price)
 
 
-def display_taxes(request):
+def is_tax_applicable(request):
     """
-    Returns a boolean to manage the taxes display.
+    Returns a boolean to indicate whether the user is tax applicable.
 
     Args:
         request(HttpRequest): Request object
 
     Returns:
-        Boolean: True if flag and taxes are enabled for the specific country.
+        Boolean: True if taxes are enabled for the specific country.
     """
     visitor_country = determine_visitor_country(request)
-    return (
-        settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False)
-        and TaxRate.objects.filter(active=True, country_code=visitor_country).exists()
-    )
+    return TaxRate.objects.filter(active=True, country_code=visitor_country).exists()
 
 
 def generate_cybersource_sa_signature(payload):
