@@ -184,6 +184,7 @@ def test_serialize_program(  # noqa: PLR0913
             "platform": program.platform.name,
             "availability": "dated",
             "prerequisites": [],
+            "language": program.page.language.name if program.page else None,
         },
     )
     assert data["end_date"] != non_live_run.end_date.strftime(datetime_millis_format)
@@ -341,6 +342,7 @@ def test_serialize_course(  # noqa: PLR0913
             "platform": course.platform.name,
             "availability": "dated",
             "prerequisites": [],
+            "language": course.page.language.name if course.page else None,
         },
     )
 

@@ -85,7 +85,6 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
     initial_program_pages = [
         run.course.program.page for run in [second_program_run, first_program_run]
     ]
-
     all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
         initial_program_pages,
         initial_course_pages,
@@ -114,13 +113,13 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
     assert past_run.course not in (
         None if page.is_external_course_page else page.course for page in course_pages
     )
-
-    # Pages should be sorted by next run date
+    # Pages should be sorted by language and then next run date (When language priority is the same)
     assert [page.program for page in program_pages] == [
         first_program_run.course.program,
         second_program_run.course.program,
         later_external_program_page.program,
     ]
+
     expected_course_run_sort = [
         non_program_run,
         first_program_run,
@@ -130,6 +129,41 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
         earlier_external_course_page,
     ]
 
+    # The sort should also include external course pages as expected
+    assert [page.course for page in course_pages] == [
+        run.course for run in expected_course_run_sort
+    ]
+
+    # Pages should be sorted by language then next run date (When language priority is the different)
+    first_program_run.course.program.page.language.priority = 2
+    first_program_run.course.program.page.save()
+    second_program_run.course.program.page.language.priority = 1
+    second_program_run.course.program.page.save()
+    later_external_program_page.language.priority = 3
+    later_external_program_page.save()
+
+    all_pages, program_pages, course_pages = filter_and_sort_catalog_pages(
+        initial_program_pages,
+        initial_course_pages,
+        external_course_pages,
+        external_program_pages,
+        sort_by,
+    )
+
+    assert [page.program for page in program_pages] == [
+        second_program_run.course.program,
+        first_program_run.course.program,
+        later_external_program_page.program,
+    ]
+
+    expected_course_run_sort = [
+        non_program_run,
+        first_program_run,
+        second_program_run,
+        later_external_course_page,
+        future_enrollment_end_run,
+        earlier_external_course_page,
+    ]
     # The sort should also include external course pages as expected
     assert [page.course for page in course_pages] == [
         run.course for run in expected_course_run_sort

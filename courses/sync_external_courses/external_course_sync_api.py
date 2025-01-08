@@ -25,7 +25,7 @@ from cms.models import (
 )
 from cms.wagtail_hooks import create_common_child_pages_for_external_courses
 from courses.api import generate_course_readable_id
-from courses.models import Course, CourseRun, CourseTopic, Platform
+from courses.models import Course, CourseLanguage, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.external_course_sync_api_client import (
     ExternalCourseSyncAPIClient,
 )
@@ -155,6 +155,8 @@ class ExternalCourse:
         self.duration = f"{total_weeks} Weeks" if total_weeks != 0 else ""
         self.min_weeks = total_weeks
         self.max_weeks = total_weeks
+        # If there is no language in the API we will default it to "English"
+        self.language = external_course_json.get("language", "English").strip()
 
         # Description can be null in External Course API data, we cannot store `None` as description is Non-Nullable
         self.description = (
@@ -560,6 +562,9 @@ def create_or_update_external_course_page(  # noqa: C901
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
     )
+    course_language, _ = CourseLanguage.objects.get_or_create(
+        name__icontains=external_course.language
+    )
 
     image = None
     if external_course.image_name:
@@ -589,6 +594,7 @@ def create_or_update_external_course_page(  # noqa: C901
             description=external_course.description,
             background_image=image,
             thumbnail_image=image,
+            language=course_language,
         )
         course_index_page.add_child(instance=course_page)
         course_page.save_revision().publish()
@@ -623,6 +629,11 @@ def create_or_update_external_course_page(  # noqa: C901
 
         if not latest_revision.thumbnail_image and image:
             latest_revision.thumbnail_image = image
+            is_updated = True
+
+        # If the language is different from the course page language, update the language.
+        if latest_revision.language != course_language:
+            latest_revision.language = course_language
             is_updated = True
 
         if is_updated:

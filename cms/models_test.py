@@ -83,6 +83,7 @@ from cms.models import (
 from cms.wagtail_hooks import create_product_and_versions_for_courseware_pages
 from courses.factories import (
     CourseFactory,
+    CourseLanguageFactory,
     CourseRunCertificateFactory,
     CourseRunFactory,
     ProgramCertificateFactory,
@@ -2173,7 +2174,7 @@ def _create_external_course_page(superuser_client, course_id, slug):
     Asserts:
         Response status code is 302 (successful redirection).
     """
-
+    language = CourseLanguageFactory.create()
     post_data = {
         "course": course_id,
         "title": "Icon Grid #6064",
@@ -2182,6 +2183,7 @@ def _create_external_course_page(superuser_client, course_id, slug):
         "content-count": 0,
         "slug": slug,
         "action-publish": "action-publish",
+        "language": language.id,
     }
     response = superuser_client.post(
         reverse(

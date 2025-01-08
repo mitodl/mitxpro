@@ -6,7 +6,7 @@ from courses.wagtail_views import CourseTopicViewSet
 
 
 @hooks.register("register_admin_viewset")
-def register_viewset():
+def register_topics_viewset():
     """
     Register `CourseTopicViewSet` in wagtail
     """
