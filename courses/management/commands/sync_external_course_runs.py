@@ -7,7 +7,6 @@ from courses.sync_external_courses.external_course_sync_api import (
     fetch_external_courses,
     update_external_course_runs,
 )
-from mitxpro import settings
 
 
 class Command(BaseCommand):
@@ -26,15 +25,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
-        if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
-            self.stdout.write(
-                self.style.ERROR(
-                    "External Course Sync is disabled. You can enable it by turning on the feature flag "
-                    "`ENABLE_EXTERNAL_COURSE_SYNC`"
-                )
-            )
-            return
-
         vendor_name = options["vendor_name"]
         keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor_name.lower())
         if not keymap:
