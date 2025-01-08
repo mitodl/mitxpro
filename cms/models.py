@@ -856,17 +856,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         return self._get_child_page_of_type(UserTestimonialsPage)
 
     @property
-    def news_and_events(self):
-        """
-        Gets the news and events section subpage
-        """
-        webinars_enabled = settings.FEATURES.get("WEBINARS", False)
-        if webinars_enabled:
-            return None
-
-        return self._get_child_page_of_type(NewsAndEventsPage)
-
-    @property
     def upcoming_courseware(self):
         """
         Gets the upcoming courseware section subpage
@@ -909,7 +898,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             "image_carousel_section": self.image_carousel_section,
             "inquiry_section": self.inquiry_section,
             "learning_experience": self.learning_experience,
-            "news_and_events": self.news_and_events,
             "testimonials": self.testimonials,
             "upcoming_courseware": self.upcoming_courseware,
         }

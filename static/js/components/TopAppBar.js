@@ -74,17 +74,15 @@ const TopAppBar = ({
                 </a>
               </li>
             ) : null}
-            {SETTINGS.webinars ? (
-              <li>
-                <a
-                  href={routes.webinars}
-                  className="webinar-link"
-                  aria-label="webinars"
-                >
-                  Webinars
-                </a>
-              </li>
-            ) : null}
+            <li>
+              <a
+                href={routes.webinars}
+                className="webinar-link"
+                aria-label="webinars"
+              >
+                Webinars
+              </a>
+            </li>
             <li>
               <a href={routes.blog} className="blog-link" aria-label="blog">
                 Blog

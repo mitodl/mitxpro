@@ -471,7 +471,6 @@ def test_get_js_settings(settings, rf, user, mocker):
     }
     settings.FEATURES["DIGITAL_CREDENTIALS"] = True
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
-    settings.FEATURES["WEBINARS"] = False
     settings.FEATURES["ENABLE_ENTERPRISE"] = False
     mocker.patch("ecommerce.api.is_tax_applicable", return_value=False)
 
@@ -491,7 +490,6 @@ def test_get_js_settings(settings, rf, user, mocker):
         "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
-        "webinars": settings.FEATURES.get("WEBINARS", False),
         "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
