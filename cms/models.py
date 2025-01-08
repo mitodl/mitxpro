@@ -860,10 +860,8 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         """
         Gets the news and events section subpage
         """
-        webinar_or_blog_enabled = settings.FEATURES.get(
-            "WEBINARS", False
-        ) or settings.FEATURES.get("ENABLE_BLOG", False)
-        if webinar_or_blog_enabled:
+        webinars_enabled = settings.FEATURES.get("WEBINARS", False)
+        if webinars_enabled:
             return None
 
         return self._get_child_page_of_type(NewsAndEventsPage)

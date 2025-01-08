@@ -85,13 +85,11 @@ const TopAppBar = ({
                 </a>
               </li>
             ) : null}
-            {SETTINGS.enable_blog ? (
-              <li>
-                <a href={routes.blog} className="blog-link" aria-label="blog">
-                  Blog
-                </a>
-              </li>
-            ) : null}
+            <li>
+              <a href={routes.blog} className="blog-link" aria-label="blog">
+                Blog
+              </a>
+            </li>
             {shouldShowLoginSignup(location) ? (
               currentUser && currentUser.is_authenticated ? (
                 <li>
