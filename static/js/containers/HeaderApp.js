@@ -80,10 +80,7 @@ const mapStateToProps = createStructuredSelector({
 const mapPropsToConfig = () =>
   errorPageHeader
     ? []
-    : [
-        users.currentUserQuery(),
-        SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : [],
-      ];
+    : [users.currentUserQuery(), catalog.courseTopicsQuery()];
 
 const mapDispatchToProps = {
   addUserNotification,

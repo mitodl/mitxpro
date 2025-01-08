@@ -599,7 +599,6 @@ def get_js_settings(request: HttpRequest):
         },
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
-        "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
         "webinars": settings.FEATURES.get("WEBINARS", False),
         "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "is_tax_applicable": is_tax_applicable(request),
