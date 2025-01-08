@@ -1,6 +1,11 @@
 Release Notes
 =============
 
+Version 0.169.1
+---------------
+
+- refactor: remove ENABLE_TAXES_DISPLAY feature flag (#3354)
+
 Version 0.169.0 (Released January 07, 2025)
 ---------------
 
