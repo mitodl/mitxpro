@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand
 
+from courses.models import Platform
 from courses.sync_external_courses.external_course_sync_api import (
     EXTERNAL_COURSE_VENDOR_KEYMAPS,
     fetch_external_courses,
@@ -29,6 +30,15 @@ class Command(BaseCommand):
         keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor_name.lower())
         if not keymap:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
+            return
+
+        platform = Platform.objects.filter(name__iexact=vendor_name).first()
+        if platform and not platform.sync_daily:
+            self.stdout.write(
+                self.style.ERROR(
+                    f"Daily sync is off for {vendor_name}. Please enable it before syncing."
+                )
+            )
             return
 
         self.stdout.write(f"Starting course sync for {vendor_name}.")
