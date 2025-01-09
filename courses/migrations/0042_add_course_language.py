@@ -64,6 +64,7 @@ class Migration(migrations.Migration):
             constraint=models.UniqueConstraint(
                 django.db.models.functions.text.Lower("name"),
                 name="unique_language_name",
+                violation_error_message="A language with this name already exists.",
             ),
         ),
         migrations.RunPython(

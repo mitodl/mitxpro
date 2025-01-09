@@ -259,7 +259,11 @@ class CourseLanguage(TimestampedModel, ValidateOnSaveMixin):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(Lower("name"), name="unique_language_name")
+            models.UniqueConstraint(
+                Lower("name"),
+                name="unique_language_name",
+                violation_error_message="A language with this name already exists.",
+            )
         ]
 
     def __str__(self):

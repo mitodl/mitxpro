@@ -55,7 +55,13 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         Program.objects.filter(live=True)
         .exclude(products=None)
-        .select_related("programpage", "externalprogrampage", "platform")
+        .select_related(
+            "programpage",
+            "externalprogrampage",
+            "platform",
+            "programpage__language",
+            "externalprogrampage__language",
+        )
         .prefetch_related(courses_prefetch, products_prefetch)
         .filter(Q(programpage__live=True) | Q(externalprogrampage__live=True))
     )
@@ -79,6 +85,8 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
             .prefetch_related(
                 "coursepage__topics",
                 "externalcoursepage__topics",
+                "coursepage__language",
+                "externalcoursepage__language",
                 self.course_runs_prefetch,
             )
             .filter(Q(coursepage__live=True) | Q(externalcoursepage__live=True))

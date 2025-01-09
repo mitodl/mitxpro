@@ -243,6 +243,7 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
 
     keymap = get_keymap(external_course_data["course_run_code"])
 
+    # Explicitly remove the language key from the dictionary to test the case where the language is not present
     if not has_language:
         external_course_data.pop("language")
 
@@ -292,7 +293,11 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
             external_course_page.thumbnail_image.title
             == external_course_data["image_name"]
         )
-    if not has_language:
+
+    # Check if the language is set correctly if it is present in the external course data, otherwise it should be English
+    if has_language:
+        assert external_course_page.language.name == external_course_data["language"]
+    else:
         assert external_course_page.language.name == "English"
 
 
