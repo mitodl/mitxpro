@@ -22,6 +22,13 @@ class Command(BaseCommand):
             help="The name of the vendor i.e. `Emeritus`",
             required=True,
         )
+        parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            dest="force",
+            help="Sync courses even if the daily sync is off.",
+        )
         super().add_arguments(parser)
 
     def handle(self, *args, **options):  # noqa: ARG002
@@ -33,7 +40,7 @@ class Command(BaseCommand):
             return
 
         platform = Platform.objects.filter(name__iexact=vendor_name).first()
-        if platform and not platform.sync_daily:
+        if platform and not platform.sync_daily and not options.get("force"):
             self.stdout.write(
                 self.style.ERROR(
                     f"Daily sync is off for {vendor_name}. Please enable it before syncing."
