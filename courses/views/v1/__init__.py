@@ -44,7 +44,11 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     courses_prefetch = Prefetch(
         "courses",
         Course.objects.select_related(
-            "coursepage", "externalcoursepage", "platform"
+            "coursepage",
+            "externalcoursepage",
+            "platform",
+            "coursepage__language",
+            "externalcoursepage__language",
         ).prefetch_related(
             course_runs_prefetch, "coursepage__topics", "externalcoursepage__topics"
         ),
