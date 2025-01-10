@@ -5,6 +5,8 @@ from datetime import timedelta
 import factory
 import pytest
 from django.core.exceptions import ValidationError
+from django.db.models.deletion import ProtectedError
+from django.db.utils import IntegrityError
 
 from cms.factories import (
     CertificatePageFactory,
@@ -16,6 +18,7 @@ from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.factories import (
     CompanyFactory,
     CourseFactory,
+    CourseLanguageFactory,
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
     CourseRunFactory,
@@ -819,3 +822,22 @@ def test_platform_name_is_unique():
 
     with pytest.raises(ValidationError):
         PlatformFactory.create(name=EMERITUS_PLATFORM_NAME.lower())
+
+
+def test_course_language_unique():
+    """
+    Tests that case-insensitive course language is unique.
+    """
+    CourseLanguageFactory.create(name="UNIQUE_LANGUAGE")
+
+    with pytest.raises(IntegrityError):
+        CourseLanguageFactory.create(name="unique_language")
+
+
+def test_course_language_prevent_delete():
+    """
+    Tests that course language cannot be deleted if associated with a Courseware Page.
+    """
+    course_page = CoursePageFactory.create()
+    with pytest.raises(ProtectedError):
+        course_page.language.delete()

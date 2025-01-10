@@ -189,22 +189,24 @@ def test_generate_external_course_run_courseware_id(
         "is_live_and_draft",
         "create_image",
         "test_image_name_without_extension",
+        "has_language",
     ),
     [
-        (True, False, False, True, True),
-        (True, True, True, True, False),
-        (True, True, False, True, False),
-        (False, False, False, False, False),
+        (True, False, False, True, True, True),
+        (True, True, True, True, False, True),
+        (True, True, False, True, False, True),
+        (False, False, False, False, False, False),
     ],
 )
 @pytest.mark.django_db
-def test_create_or_update_external_course_page(  # noqa: PLR0913
+def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
     create_course_page,
     publish_page,
     is_live_and_draft,
     create_image,
     test_image_name_without_extension,
     external_course_data,
+    has_language,
 ):
     """
     Test that `create_or_update_external_course_page` creates a new course or updates the existing.
@@ -240,6 +242,11 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913
             external_course_page.unpublish()
 
     keymap = get_keymap(external_course_data["course_run_code"])
+
+    # Explicitly remove the language key from the dictionary to test the case where the language is not present
+    if not has_language:
+        external_course_data.pop("language")
+
     external_course_page, course_page_created, course_page_updated = (
         create_or_update_external_course_page(
             course_index_page,
@@ -286,6 +293,12 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913
             external_course_page.thumbnail_image.title
             == external_course_data["image_name"]
         )
+
+    # Check if the language is set correctly if it is present in the external course data, otherwise it should be English
+    if has_language:
+        assert external_course_page.language.name == external_course_data["language"]
+    else:
+        assert external_course_page.language.name == "English"
 
 
 @pytest.mark.parametrize(

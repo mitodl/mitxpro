@@ -24,6 +24,7 @@ from cms.models import (
 from courses.constants import CONTENT_TYPE_MODEL_COURSERUN, DEFAULT_PLATFORM_NAME
 from courses.models import (
     Course,
+    CourseLanguage,
     CourseRun,
     CourseRunEnrollment,
     CourseRunEnrollmentAudit,
@@ -483,6 +484,11 @@ class SeedDataLoader:
             return existing_page
         else:
             page_obj = cms_page_cls(**cms_model_data)
+            course_language, _ = CourseLanguage.objects.get_or_create(
+                name="English", priority=1
+            )
+            page_obj.language = course_language
+
             courseware_page_parent = get_courseware_page_parent(courseware_obj)
             courseware_page_parent.add_child(instance=page_obj)
             self._set_page_topics(topics, page_obj)

@@ -11,6 +11,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
+from django.db.models.functions import Lower
 from django.utils.functional import cached_property
 
 from cms.urls import detail_path_char_pattern
@@ -240,6 +241,33 @@ class Platform(TimestampedModel, ValidateOnSaveMixin):
             raise ValidationError({"name": "A platform with this name already exists."})
 
         super().validate_unique(exclude=exclude)
+
+
+class CourseLanguage(TimestampedModel, ValidateOnSaveMixin):
+    """
+    Model for courseware language
+    """
+
+    name = models.CharField(max_length=255, unique=True)
+    priority = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        default=100,
+        validators=[MinValueValidator(1)],
+        help_text="The priority of this language in the course/program sorting.",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower("name"),
+                name="unique_language_name",
+                violation_error_message="A language with this name already exists.",
+            )
+        ]
+
+    def __str__(self):
+        return self.name
 
 
 class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):

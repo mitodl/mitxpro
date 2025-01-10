@@ -528,7 +528,7 @@ class CatalogPage(Page):
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
-            .select_related("program")
+            .select_related("program", "language")
             .prefetch_related(
                 Prefetch(
                     "program__courses",
@@ -538,16 +538,22 @@ class CatalogPage(Page):
                 ),
             )
         )
-        external_program_qset = ExternalProgramPage.objects.live().order_by("title")
+        external_program_qset = (
+            ExternalProgramPage.objects.live()
+            .select_related("program", "language")
+            .order_by("title")
+        )
 
         course_page_qset = (
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
-            .select_related("course")
+            .select_related("course", "language")
         )
         external_course_qset = (
-            ExternalCoursePage.objects.live().select_related("course").order_by("title")
+            ExternalCoursePage.objects.live()
+            .select_related("course", "language")
+            .order_by("title")
         )
 
         if topic_filter != ALL_TOPICS:
@@ -922,6 +928,14 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     class Meta:
         abstract = True
 
+    language = models.ForeignKey(
+        "courses.CourseLanguage",
+        null=False,
+        blank=False,
+        on_delete=models.PROTECT,
+        help_text="The course/program language for this page",
+    )
+
     description = RichTextField(
         blank=True, help_text="The description shown on the product page"
     )
@@ -1030,6 +1044,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         use_json_field=True,
     )
     content_panels = Page.content_panels + [  # noqa: RUF005
+        FieldPanel("language"),
         FieldPanel("external_marketing_url"),
         FieldPanel("marketing_hubspot_form_id"),
         FieldPanel("subhead"),

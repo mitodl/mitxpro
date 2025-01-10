@@ -56,7 +56,12 @@ from cms.models import (
     WebinarPage,
     WhoShouldEnrollPage,
 )
-from courses.factories import CourseFactory, PlatformFactory, ProgramFactory
+from courses.factories import (
+    CourseFactory,
+    CourseLanguageFactory,
+    PlatformFactory,
+    ProgramFactory,
+)
 
 factory.Faker.add_provider(internet)
 
@@ -78,6 +83,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
@@ -108,6 +114,7 @@ class CoursePageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
@@ -141,6 +148,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:
@@ -170,6 +178,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:

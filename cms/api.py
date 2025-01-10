@@ -82,7 +82,11 @@ def filter_and_sort_catalog_pages(
         page.product.current_price,
         page.title,
     )
-    default_sorting_key = lambda page: (page_run_dates[page], page.title)  # noqa: E731
+    default_sorting_key = lambda page: (  # noqa: E731
+        page.language.priority,
+        page_run_dates[page],
+        page.title,
+    )
 
     # Best Match and Start Date sorting has same logic
     sorting_key_map = defaultdict(

@@ -117,6 +117,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
 
     availability = serializers.SerializerMethodField()
     prerequisites = serializers.SerializerMethodField()
+    language = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductPage
@@ -137,7 +138,12 @@ class BaseProductSerializer(serializers.ModelSerializer):
             "credits",
             "availability",
             "prerequisites",
+            "language",
         ]
+
+    def get_language(self, instance):
+        """Get the language of the product"""
+        return instance.page.language.name if instance.page else None
 
     def get_prerequisites(self, instance):  # noqa: ARG002
         """Get product prerequisites"""

@@ -13,6 +13,7 @@ from mitxpro.utils import get_field_names, now_in_utc
 
 from .models import (
     Course,
+    CourseLanguage,
     CourseRun,
     CourseRunCertificate,
     CourseRunEnrollment,
@@ -421,4 +422,13 @@ class PlatformAdmin(TimestampedModelAdmin):
 
     model = Platform
     list_display = ["id", "name", "created_on", "updated_on"]
+    search_fields = ["name"]
+
+
+@admin.register(CourseLanguage)
+class CourseLanguageAdmin(admin.ModelAdmin):
+    """Admin for CourseLanguage"""
+
+    model = CourseLanguage
+    list_display = ["id", "name", "priority"]
     search_fields = ["name"]
