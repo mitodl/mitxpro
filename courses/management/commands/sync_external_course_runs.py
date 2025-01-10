@@ -40,10 +40,10 @@ class Command(BaseCommand):
             return
 
         platform = Platform.objects.filter(name__iexact=vendor_name).first()
-        if platform and not platform.sync_daily and not options.get("force"):
+        if platform and not platform.enable_sync and not options.get("force"):
             self.stdout.write(
                 self.style.ERROR(
-                    f"Daily sync is off for {vendor_name}. Please enable it before syncing."
+                    f"Course sync is off for {vendor_name}. Please enable it before syncing."
                 )
             )
             return
