@@ -61,13 +61,7 @@ const TopAppBar = ({
             className="collapse navbar-collapse px-0 justify-content-end"
           >
             <li>
-              {SETTINGS.course_dropdown ? (
-                <CatalogMenu courseTopics={courseTopics} />
-              ) : (
-                <a href={routes.catalog} className="" aria-label="catalog">
-                  Catalog
-                </a>
-              )}
+              <CatalogMenu courseTopics={courseTopics} />
             </li>
             {SETTINGS.enable_enterprise ? (
               <li>
