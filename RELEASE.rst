@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.169.2
+---------------
+
+- refactor: remove ENABLE_CATALOG_SORTING (#3359)
+- refactor: remove ENABLE_EXTERNAL_COURSE_SYNC (#3360)
+- feat: Add language support in courses (#3335)
+- refactor: remove COURSE_DROPDOWN flag (#3361)
+
 Version 0.169.1 (Released January 08, 2025)
 ---------------
 
