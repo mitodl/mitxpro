@@ -7,7 +7,7 @@ import pycountry
 from django.conf import settings
 from django.core import mail
 from django.urls import reverse
-from mitol.olposthog import features
+from mitol.olposthog.features import is_enabled
 
 from courses.models import CourseRun
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG, CYBERSOURCE_CARD_TYPES
@@ -21,6 +21,7 @@ from mail.constants import (
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
 )
+from mitxpro import features
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
@@ -201,7 +202,7 @@ def send_course_run_enrollment_welcome_email(enrollment):
     Args:
         enrollment (CourseRunEnrollment): the enrollment for which to send the welcome email
     """
-    if not features.is_enabled("enrollment_welcome_email", default=False):
+    if not is_enabled(features.ENROLLMENT_WELCOME_EMAIL, default=False):
         log.info("Feature `enrollment_welcome_email` is disabled.")
         return
     run_start_date, run_start_time = format_run_date(enrollment.run.start_date)
