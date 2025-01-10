@@ -2,12 +2,12 @@
 
 from django.core.management.base import BaseCommand
 
+from courses.models import Platform
 from courses.sync_external_courses.external_course_sync_api import (
     EXTERNAL_COURSE_VENDOR_KEYMAPS,
     fetch_external_courses,
     update_external_course_runs,
 )
-from mitxpro import settings
 
 
 class Command(BaseCommand):
@@ -22,23 +22,30 @@ class Command(BaseCommand):
             help="The name of the vendor i.e. `Emeritus`",
             required=True,
         )
+        parser.add_argument(
+            "-f",
+            "--force",
+            action="store_true",
+            dest="force",
+            help="Sync courses even if the daily sync is off.",
+        )
         super().add_arguments(parser)
 
     def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
-        if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
-            self.stdout.write(
-                self.style.ERROR(
-                    "External Course Sync is disabled. You can enable it by turning on the feature flag "
-                    "`ENABLE_EXTERNAL_COURSE_SYNC`"
-                )
-            )
-            return
-
         vendor_name = options["vendor_name"]
         keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor_name.lower())
         if not keymap:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
+            return
+
+        platform = Platform.objects.filter(name__iexact=vendor_name).first()
+        if platform and not platform.enable_sync and not options.get("force"):
+            self.stdout.write(
+                self.style.ERROR(
+                    f"Course sync is off for {vendor_name}. Please enable it before syncing."
+                )
+            )
             return
 
         self.stdout.write(f"Starting course sync for {vendor_name}.")

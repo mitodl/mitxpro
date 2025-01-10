@@ -117,16 +117,12 @@ def sync_courseruns_data():
 @app.task
 def task_sync_external_course_runs():
     """Task to sync external course runs"""
-    if not settings.FEATURES.get("ENABLE_EXTERNAL_COURSE_SYNC", False):
-        log.info("External Course sync is disabled.")
-        return
-
-    platforms = Platform.objects.filter(sync_daily=True)
+    platforms = Platform.objects.filter(enable_sync=True)
     for platform in platforms:
         keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(platform.name.lower())
         if not keymap:
             log.exception(
-                "The platform '%s' does not have a sync API configured. Please disable the 'sync_daily' setting for this platform.",
+                "The platform '%s' does not have a sync API configured. Please disable the 'enable_sync' setting for this platform.",
                 platform.name,
             )
             continue

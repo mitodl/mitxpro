@@ -215,9 +215,9 @@ class Platform(TimestampedModel, ValidateOnSaveMixin):
     """
 
     name = models.CharField(max_length=255, unique=True)
-    sync_daily = models.BooleanField(
+    enable_sync = models.BooleanField(
         default=False,
-        help_text="Select this option to enable daily syncing for external course platforms.",
+        help_text="Select this option to enable course sync for external platforms.",
     )
 
     def __str__(self):
