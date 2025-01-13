@@ -828,7 +828,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "CoursesInProgramPage",
         "LearningTechniquesPage",
         "UserTestimonialsPage",
-        "NewsAndEventsPage",
         "ForTeamsPage",
         "TextVideoSection",
         "ResourcePage",
