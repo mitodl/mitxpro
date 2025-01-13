@@ -161,9 +161,7 @@ def read_pdf_domestic(pdf):  # noqa: C901
                         try:
                             float(last_val)
                             column_values[settings.VOUCHER_DOMESTIC_COURSE_KEY] = (
-                                column_values[
-                                    settings.VOUCHER_DOMESTIC_COURSE_KEY
-                                ][
+                                column_values[settings.VOUCHER_DOMESTIC_COURSE_KEY][
                                     0 : column_values[
                                         settings.VOUCHER_DOMESTIC_COURSE_KEY
                                     ].index(last_val)

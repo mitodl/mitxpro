@@ -254,8 +254,8 @@ def send_b2b_receipt_email(order):
         date_range = ""
 
     download_url = (
-        f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?'
-        f'{urlencode({"hash": str(order.unique_id)})}'
+        f"{urljoin(settings.SITE_BASE_URL, reverse('bulk-enrollment-code-receipt'))}?"
+        f"{urlencode({'hash': str(order.unique_id)})}"
     )
     try:
         api.send_message(

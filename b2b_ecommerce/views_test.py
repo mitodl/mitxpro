@@ -84,7 +84,7 @@ def test_create_order(client, mocker):
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
+    receipt_url = f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
     assert generate_mock.call_count == 1
     assert generate_mock.call_args[0] == ()
     assert generate_mock.call_args[1] == {
@@ -137,7 +137,7 @@ def test_create_order_with_coupon(client, mocker):
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
     base_url = "http://testserver/"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
+    receipt_url = f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
     assert generate_payload_mock.call_count == 1
     assert generate_payload_mock.call_args[0] == ()
     assert generate_payload_mock.call_args[1] == {
@@ -278,7 +278,7 @@ def test_zero_price_checkout(client, mocker):
     assert B2BOrder.objects.count() == 1
     order = B2BOrder.objects.first()
     base_url = "http://testserver"
-    receipt_url = f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
+    receipt_url = f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {"payload": {}, "url": receipt_url, "method": "GET"}
 
@@ -443,8 +443,8 @@ def test_coupon_view(client):
     coupon = B2BCouponFactory.create(product=order.product_version.product)
     B2BCouponRedemption.objects.create(coupon=coupon, order=order)
     response = client.get(
-        f'{reverse("b2b-coupon-view")}?'
-        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'
+        f"{reverse('b2b-coupon-view')}?"
+        f"{urlencode({'code': coupon.coupon_code, 'product_id': order.product_version.product_id})}"
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -460,8 +460,8 @@ def test_coupon_view_product_with_text_id(client):
     coupon = B2BCouponFactory.create(product=order.product_version.product)
     B2BCouponRedemption.objects.create(coupon=coupon, order=order)
     response = client.get(
-        f'{reverse("b2b-coupon-view")}?'
-        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.text_id})}'
+        f"{reverse('b2b-coupon-view')}?"
+        f"{urlencode({'code': coupon.coupon_code, 'product_id': order.product_version.text_id})}"
     )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -479,8 +479,8 @@ def test_reusable_coupon_order_fulfilled(client, reusable, order_status):
     coupon = B2BCouponFactory.create(product=None, reusable=reusable)
     B2BCouponRedemption.objects.create(coupon=coupon, order=order)
     response = client.get(
-        f'{reverse("b2b-coupon-view")}?'
-        f'{urlencode({"code": coupon.coupon_code, "product_id": order.product_version.product_id})}'
+        f"{reverse('b2b-coupon-view')}?"
+        f"{urlencode({'code': coupon.coupon_code, 'product_id': order.product_version.product_id})}"
     )
 
     if reusable:
@@ -500,7 +500,7 @@ def test_coupon_view_invalid(client, mocker):
         B2BCoupon.objects, "get_unexpired_coupon", side_effect=B2BCoupon.DoesNotExist
     )
     params = {"code": "x", "product_id": 3}
-    response = client.get(f'{reverse("b2b-coupon-view")}?' f"{urlencode(params)}")
+    response = client.get(f"{reverse('b2b-coupon-view')}?{urlencode(params)}")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     patched.assert_called_once_with(
         coupon_code=params["code"], product_id=params["product_id"]
@@ -512,6 +512,6 @@ def test_coupon_view_missing_param(client, key):
     """Information about a coupon should be returned"""
     params = {"code": "code", "product_id": "product_id"}
     del params[key]
-    response = client.get(f'{reverse("b2b-coupon-view")}?{urlencode(params)}')
+    response = client.get(f"{reverse('b2b-coupon-view')}?{urlencode(params)}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"errors": [f"Missing parameter {key}"]}

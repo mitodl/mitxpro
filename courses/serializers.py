@@ -528,7 +528,9 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         assert (  # noqa: PT018, S101
             "context" in kwargs and "course_run_enrollments" in kwargs["context"]
-        ), "An iterable of course run enrollments must be passed in the context (key: course_run_enrollments)"
+        ), (
+            "An iterable of course run enrollments must be passed in the context (key: course_run_enrollments)"
+        )
         super().__init__(*args, **kwargs)
 
     def get_course_run_enrollments(self, instance):

@@ -205,7 +205,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
     send_b2b_receipt_email(order)
 
     run = order.product_version.product.content_object
-    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
+    download_url = f"{urljoin(settings.SITE_BASE_URL, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
 
     patched_mail_api.context_for_user.assert_called_once_with(
         user=None,
