@@ -632,7 +632,7 @@ def create_or_update_external_course_page(  # noqa: C901
             is_updated = True
 
         # If the language is different from the course page language, update the language.
-        if latest_revision.language != course_language:
+        if getattr(latest_revision, "language", None) != course_language:
             latest_revision.language = course_language
             is_updated = True
 
