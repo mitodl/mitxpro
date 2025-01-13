@@ -125,19 +125,6 @@ describe("TopAppBar component", () => {
           .find("CatalogMenu")
           .exists(),
       );
-      assert.isNotOk(
-        shallow(
-          <TopAppBar
-            currentUser={user}
-            location={null}
-            errorPageHeader={null}
-            courseTopics={courseTopics}
-          />,
-        )
-          .find("a")
-          .at(1)
-          .exists(),
-      );
       assert.equal(
         shallow(
           <TopAppBar
@@ -148,7 +135,7 @@ describe("TopAppBar component", () => {
           />,
         )
           .find("a")
-          .at(2)
+          .at(1)
           .prop("href"),
         routes.webinars,
       );
@@ -162,7 +149,7 @@ describe("TopAppBar component", () => {
           />,
         )
           .find("a")
-          .at(3)
+          .at(2)
           .prop("href"),
         routes.blog,
       );
