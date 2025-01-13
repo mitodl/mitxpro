@@ -1640,7 +1640,6 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         "ExternalCoursePage",
         "CoursePage",
         "ProgramPage",
-        "HomePage",
         "ExternalProgramPage",
     ]
 
