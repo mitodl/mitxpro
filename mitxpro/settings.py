@@ -905,38 +905,39 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year="*",
         ),
     },
-}
-if FEATURES.get("COUPON_SHEETS"):
-    CELERY_BEAT_SCHEDULE["renew_all_file_watches"] = {
+    "renew_all_file_watches": {
         "task": "sheets.tasks.renew_all_file_watches",
         "schedule": (
             DRIVE_WEBHOOK_EXPIRATION_MINUTES - DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
         )
         * 60,
-    }
-    alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
-    if alt_sheets_processing:
-        CELERY_BEAT_SCHEDULE.update(
-            {
-                "handle-coupon-request-sheet": {
-                    "task": "sheets.tasks.handle_unprocessed_coupon_requests",
-                    "schedule": SHEETS_MONITORING_FREQUENCY,
-                }
-            }
-        )
+    },
+}
+
+alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
+if alt_sheets_processing:
     CELERY_BEAT_SCHEDULE.update(
         {
-            "update-assignment-delivery-dates": {
-                "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
-                "schedule": OffsettingSchedule(
-                    run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
-                    offset=timedelta(
-                        seconds=0 if not alt_sheets_processing else SHEETS_TASK_OFFSET
-                    ),
-                ),
+            "handle-coupon-request-sheet": {
+                "task": "sheets.tasks.handle_unprocessed_coupon_requests",
+                "schedule": SHEETS_MONITORING_FREQUENCY,
             }
         }
     )
+
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "update-assignment-delivery-dates": {
+            "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
+            "schedule": OffsettingSchedule(
+                run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
+                offset=timedelta(
+                    seconds=0 if not alt_sheets_processing else SHEETS_TASK_OFFSET
+                ),
+            ),
+        }
+    }
+)
 
 # Hijack
 HIJACK_INSERT_BEFORE = "</body>"
