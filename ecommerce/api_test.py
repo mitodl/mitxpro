@@ -540,7 +540,7 @@ def test_get_valid_coupon_versions_full_discount(basket_and_coupons):
             full_discount=True,
         )
     ) == [basket_and_coupons.coupongroup_best.coupon_version]
-    assert basket_and_coupons.coupongroup_best.payment_version.amount == Decimal(1.0)
+    assert basket_and_coupons.coupongroup_best.payment_version.amount == Decimal("1.0")
 
 
 def test_get_valid_coupon_versions_by_company(basket_and_coupons):
