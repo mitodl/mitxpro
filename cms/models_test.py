@@ -351,27 +351,6 @@ def test_home_page_testimonials():
         assert testimonial.value.get("quote") == "quote"
 
 
-def test_home_page_news_and_events():
-    """
-    NewsAndEvents subpage should provide expected values
-    """
-    home_page = HomePageFactory.create()
-    assert not home_page.news_and_events
-
-    del home_page.child_pages
-
-    news_and_events_page = create_news_and_events(parent=home_page)
-    assert home_page.news_and_events == news_and_events_page
-    assert news_and_events_page.heading == "heading"
-    for count, news_and_events in enumerate(news_and_events_page.items):
-        assert news_and_events.value.get("content_type") == f"content_type-{count}"
-        assert news_and_events.value.get("title") == f"title-{count}"
-        assert news_and_events.value.get("image").title == f"image-{count}"
-        assert news_and_events.value.get("content") == f"content-{count}"
-        assert news_and_events.value.get("call_to_action") == f"call_to_action-{count}"
-        assert news_and_events.value.get("action_url") == f"action_url-{count}"
-
-
 def test_home_page_inquiry_section():
     """
     inquiry_section property should return expected values

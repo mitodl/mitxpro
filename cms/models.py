@@ -828,7 +828,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "CoursesInProgramPage",
         "LearningTechniquesPage",
         "UserTestimonialsPage",
-        "NewsAndEventsPage",
         "ForTeamsPage",
         "TextVideoSection",
         "ResourcePage",
@@ -854,19 +853,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         Gets the testimonials section subpage
         """
         return self._get_child_page_of_type(UserTestimonialsPage)
-
-    @property
-    def news_and_events(self):
-        """
-        Gets the news and events section subpage
-        """
-        webinar_or_blog_enabled = settings.FEATURES.get(
-            "WEBINARS", False
-        ) or settings.FEATURES.get("ENABLE_BLOG", False)
-        if webinar_or_blog_enabled:
-            return None
-
-        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def upcoming_courseware(self):
@@ -911,7 +897,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             "image_carousel_section": self.image_carousel_section,
             "inquiry_section": self.inquiry_section,
             "learning_experience": self.learning_experience,
-            "news_and_events": self.news_and_events,
             "testimonials": self.testimonials,
             "upcoming_courseware": self.upcoming_courseware,
         }
@@ -1655,7 +1640,6 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         "ExternalCoursePage",
         "CoursePage",
         "ProgramPage",
-        "HomePage",
         "ExternalProgramPage",
     ]
 

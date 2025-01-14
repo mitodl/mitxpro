@@ -599,8 +599,6 @@ def get_js_settings(request: HttpRequest):
         },
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
-        "webinars": settings.FEATURES.get("WEBINARS", False),
-        "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
         "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
