@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.170.0
+Version 0.170.0 (Released January 14, 2025)
 ---------------
 
 - fix: language not available in course draft pages (#3365)
