@@ -47,14 +47,11 @@ for running the app
     docker-compose run --rm web pytest /path/to/test.py
     # Run Python test cases in a single file that match some function/class name
     docker-compose run --rm web pytest /path/to/test.py -k test_some_logic
-    # Run Python linter
-    docker-compose run --rm web ruff check .
 
     ### PYTHON FORMATTING
-    # Format all python files
-    docker-compose run --rm web ruff format --check .
-    # Format a specific file
-    docker-compose run --rm ruff format --check /path/to/file.py
+    # We have a Ruff hook in the pre-commit that checks and formats files wherever possible.
+    pip install pre-commit
+    pre-commit run --all-files
 
     ### JS/CSS TESTS/LINTING
     # We also include a helper script to execute JS tests in most of our projects
