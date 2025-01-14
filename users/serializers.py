@@ -77,7 +77,7 @@ class LegalAddressSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "street_address lines must be 60 characters or less"  # noqa: EM101
             )
-        return {f"street_address_{idx+1}": line for idx, line in enumerate(value)}
+        return {f"street_address_{idx + 1}": line for idx, line in enumerate(value)}
 
     def get_street_address(self, instance):
         """Return the list of street address lines"""

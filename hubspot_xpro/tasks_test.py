@@ -351,7 +351,7 @@ def test_batch_upsert_associations_chunked(mocker):
     for order in orders:
         LineFactory.create(
             order=order,
-            product_version=ProductVersionFactory.create(price=Decimal(200.00)),
+            product_version=ProductVersionFactory.create(price=Decimal("200.00")),
         )
     expected_line_associations = [
         PublicAssociation(

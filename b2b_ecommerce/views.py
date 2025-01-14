@@ -110,8 +110,8 @@ class B2BCheckoutView(APIView):
 
         base_url = request.build_absolute_uri("/")
         receipt_url = (
-            f'{urljoin(base_url, reverse("bulk-enrollment-code-receipt"))}?'
-            f'{urlencode({"hash": str(order.unique_id)})}'
+            f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?"
+            f"{urlencode({'hash': str(order.unique_id)})}"
         )
         cancel_url = urljoin(base_url, reverse("bulk-enrollment-code"))
         if total_price == 0:

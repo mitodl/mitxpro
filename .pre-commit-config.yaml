@@ -51,7 +51,7 @@ repos:
           - --exclude-files
           - "_test.js$"
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.8.6"
+    rev: "v0.9.1"
     hooks:
       - id: ruff-format
       - id: ruff

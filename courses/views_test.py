@@ -289,7 +289,7 @@ def test_course_view(  # noqa: PLR0913
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_id}'
+            url = f"{reverse('checkout-page')}?product={product_id}"
             class_name = "enroll-now"
         if is_enrolled and has_unexpired_run:
             url = reverse("user-dashboard")
@@ -354,7 +354,7 @@ def test_program_view(  # noqa: PLR0913
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_id}'
+            url = f"{reverse('checkout-page')}?product={product_id}"
             class_name = "enroll-now"
         if is_enrolled:
             url = reverse("user-dashboard")

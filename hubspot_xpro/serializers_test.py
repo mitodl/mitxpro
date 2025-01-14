@@ -111,8 +111,8 @@ def test_serialize_order(settings, hubspot_order, status):
 @pytest.mark.parametrize(
     "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, Decimal(0.75)],  # noqa: PT007
-        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, Decimal("0.75")],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal("75")],  # noqa: PT007
     ],
 )
 def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amount):
@@ -215,7 +215,7 @@ def test_serialize_b2b_order_with_coupon(settings, client, mocker):
         return_value=payload,
     )
     coupon = B2BCouponFactory.create(
-        product=product_version.product, discount_percent=Decimal(0.8)
+        product=product_version.product, discount_percent=Decimal("0.8")
     )
     num_seats = 10
     resp = client.post(
