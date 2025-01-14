@@ -47,7 +47,7 @@ for running the app
     docker-compose run --rm web pytest /path/to/test.py
     # Run Python test cases in a single file that match some function/class name
     docker-compose run --rm web pytest /path/to/test.py -k test_some_logic
-    
+
     ### PYTHON FORMATTING
     # We have a Ruff hook in the pre-commit that checks and formats files wherever possible.
     pip install pre-commit
