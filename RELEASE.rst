@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.170.0 (Released January 14, 2025)
+---------------
+
+- fix: language not available in course draft pages (#3365)
+- chore(deps): lock file maintenance (#3366)
+- chore(deps): update codecov/codecov-action digest to 1e68e06 (#3364)
+- refactor: remove ENABLE_CATALOG_SORTING (#3359)
+- refactor: remove ENABLE_EXTERNAL_COURSE_SYNC (#3360)
+- feat: Add language support in courses (#3335)
+- refactor: remove COURSE_DROPDOWN flag (#3361)
+
 Version 0.169.1 (Released January 08, 2025)
 ---------------
 
