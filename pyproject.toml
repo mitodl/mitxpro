@@ -17,7 +17,7 @@ boto3 = "1.35.97"
 celery = "5.4.0"
 celery-redbeat = "2.2.0"
 dj-database-url = "0.5.0"
-django = "4.2.17"
+django = "4.2.18"
 django-anymail = { version = "8.6", extras = ["mailgun"] }
 django-filter = "^23.4"
 django-hijack = "3.7.1"
