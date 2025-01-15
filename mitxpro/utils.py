@@ -17,6 +17,8 @@ from django.http.response import HttpResponse
 from django.templatetags.static import static
 from rest_framework import status
 
+from mitxpro import features
+
 log = logging.getLogger(__name__)
 
 
@@ -581,6 +583,8 @@ def get_js_settings(request: HttpRequest):
     Returns:
         dict: the settings object
     """
+    from mitol.olposthog.features import is_enabled
+
     from ecommerce.api import is_tax_applicable
 
     return {
@@ -600,7 +604,7 @@ def get_js_settings(request: HttpRequest):
         "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "is_tax_applicable": is_tax_applicable(request),
-        "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
+        "enable_enterprise": is_enabled(features.ENABLE_ENTERPRISE, default=False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
         "posthog_api_host": settings.POSTHOG_API_HOST,
     }
