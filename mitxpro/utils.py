@@ -601,7 +601,7 @@ def get_js_settings(request: HttpRequest):
             "help_widget_enabled": settings.ZENDESK_CONFIG.get("HELP_WIDGET_ENABLED"),
             "help_widget_key": settings.ZENDESK_CONFIG.get("HELP_WIDGET_KEY"),
         },
-        "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
+        "digital_credentials": is_enabled(features.DIGITAL_CREDENTIALS, default=False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": is_enabled(features.ENABLE_ENTERPRISE, default=False),
