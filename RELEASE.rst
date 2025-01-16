@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.171.0
+---------------
+
+- refactor: migrate ENABLE_ENTERPRISE to posthog (#3368)
+- refactor: migrate FEATURE_ENROLLMENT_WELCOME_EMAIL to posthog (#3362)
+- fix(deps): update dependency django to v4.2.18 [security] (#3376)
+- [pre-commit.ci] pre-commit autoupdate (#3374)
+- chore: remove ruff (#3375)
+- refactor: remove ENABLE_BLOG & WEBINARS feature flags (#3358)
+- chore(deps): update dependency ruff to ^0.9.0 (#3373)
+- fix(deps): update dependency django-hijack to v3.7.1 (#3372)
+- fix(deps): update dependency boto3 to v1.35.97 (#3371)
+
 Version 0.170.0 (Released January 14, 2025)
 ---------------
 
