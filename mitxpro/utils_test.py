@@ -11,6 +11,7 @@ from rest_framework import status
 
 from ecommerce.api import is_tax_applicable
 from ecommerce.models import Order
+from mitxpro import features
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
     all_equal,
@@ -463,6 +464,8 @@ def test_get_js_settings(settings, rf, user, mocker):
         """
         Side effect to return True/False for specific features while mocking posthog is_enabled.
         """
+        if args[0] == features.DIGITAL_CREDENTIALS:  # noqa: SIM103
+            return True
         return False
 
     settings.GA_TRACKING_ID = "fake"
@@ -476,7 +479,6 @@ def test_get_js_settings(settings, rf, user, mocker):
         "HELP_WIDGET_ENABLED": False,
         "HELP_WIDGET_KEY": "fake_key",
     }
-    settings.FEATURES["DIGITAL_CREDENTIALS"] = True
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
     mocker.patch(
         "mitol.olposthog.features.is_enabled",
@@ -498,7 +500,7 @@ def test_get_js_settings(settings, rf, user, mocker):
         "support_email": settings.EMAIL_SUPPORT,
         "site_name": settings.SITE_NAME,
         "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
-        "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
+        "digital_credentials": True,
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": False,
