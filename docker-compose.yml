@@ -28,7 +28,7 @@ services:
       - "5432"
 
   redis:
-    image: redis:7.4.1
+    image: redis:7.4.2
     ports:
       - "6379"
 
