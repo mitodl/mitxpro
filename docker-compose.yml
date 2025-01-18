@@ -33,7 +33,7 @@ services:
       - "6379"
 
   nginx:
-    image: nginx:1.27.2
+    image: nginx:1.27.3
     ports:
       - "8053:8053"
     links:
