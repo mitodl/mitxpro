@@ -35,12 +35,19 @@ class Command(BaseCommand):
         """Handle command execution"""
         vendor_name = options["vendor_name"]
         keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor_name.lower())
-        if not keymap:
+        platform = Platform.objects.filter(name__iexact=vendor_name).first()
+
+        if not platform:
             self.stdout.write(self.style.ERROR(f"Unknown vendor name {vendor_name}."))
             return
 
-        platform = Platform.objects.filter(name__iexact=vendor_name).first()
-        if platform and not platform.enable_sync and not options.get("force"):
+        if not keymap:
+            self.stdout.write(
+                self.style.ERROR(f"Mapping does not exist for {vendor_name}.")
+            )
+            return
+
+        if not platform.enable_sync and not options.get("force"):
             self.stdout.write(
                 self.style.ERROR(
                     f"Course sync is off for {vendor_name}. Please enable it before syncing."
