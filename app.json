@@ -98,12 +98,12 @@
       "description": "'hours' value for the 'generate-course-certificate' scheduled task (defaults to midnight)",
       "required": false
     },
-    "CRON_EMERITUS_COURSERUN_SYNC_DAYS": {
-      "description": "'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
+    "CRON_EXTERNAL_COURSERUN_SYNC_DAYS": {
+      "description": "'day_of_week' value for 'sync-external-course-runs' scheduled task (default will run once a day).",
       "required": false
     },
-    "CRON_EMERITUS_COURSERUN_SYNC_HOURS": {
-      "description": "'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+    "CRON_EXTERNAL_COURSERUN_SYNC_HOURS": {
+      "description": "'hours' value for the 'sync-external-course-runs' scheduled task (defaults to midnight)",
       "required": false
     },
     "CSRF_TRUSTED_ORIGINS": {
@@ -234,20 +234,20 @@
       "description": "Timeout (in seconds) for requests made via the edX API client",
       "required": false
     },
-    "EMERITUS_API_BASE_URL": {
-      "description": "Base API URL for Emeritus API",
-      "required": false
-    },
-    "EMERITUS_API_KEY": {
-      "description": "The API Key for Emeritus API",
-      "required": true
-    },
-    "EMERITUS_API_TIMEOUT": {
-      "description": "API request timeout for Emeritus APIs in seconds",
-      "required": false
-    },
     "ENROLLMENT_CHANGE_SHEET_ID": {
       "description": "ID of the Google Sheet that contains the enrollment change request worksheets (refunds, transfers, etc)",
+      "required": false
+    },
+    "EXTERNAL_COURSE_SYNC_API_BASE_URL": {
+      "description": "Base API URL for external course sync API",
+      "required": false
+    },
+    "EXTERNAL_COURSE_SYNC_API_KEY": {
+      "description": "The API Key for external course sync API",
+      "required": true
+    },
+    "EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT": {
+      "description": "API request timeout for external course sync APIs in seconds",
       "required": false
     },
     "GA_TRACKING_ID": {
@@ -482,12 +482,20 @@
       "description": "The 'name' value for the Open edX OAuth Application",
       "required": true
     },
+    "OPENEDX_OAUTH_PROVIDER": {
+      "description": "Social auth oauth provider backend name",
+      "required": false
+    },
     "OPENEDX_SERVICE_WORKER_API_TOKEN": {
       "description": "Active access token with staff level permissions to use with OpenEdX API client for service tasks",
       "required": false
     },
     "OPENEDX_SERVICE_WORKER_USERNAME": {
       "description": "Username of the user whose token has been set in OPENEDX_SERVICE_WORKER_API_TOKEN",
+      "required": false
+    },
+    "OPENEDX_SOCIAL_LOGIN_PATH": {
+      "description": "Open edX social auth login url",
       "required": false
     },
     "OPENEDX_TOKEN_EXPIRES_HOURS": {

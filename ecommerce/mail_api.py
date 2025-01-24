@@ -7,6 +7,7 @@ import pycountry
 from django.conf import settings
 from django.core import mail
 from django.urls import reverse
+from mitol.olposthog.features import is_enabled
 
 from courses.models import CourseRun
 from ecommerce.constants import BULK_ENROLLMENT_EMAIL_TAG, CYBERSOURCE_CARD_TYPES
@@ -20,6 +21,7 @@ from mail.constants import (
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
 )
+from mitxpro import features
 from mitxpro.utils import format_price
 
 log = logging.getLogger()
@@ -200,8 +202,8 @@ def send_course_run_enrollment_welcome_email(enrollment):
     Args:
         enrollment (CourseRunEnrollment): the enrollment for which to send the welcome email
     """
-    if not settings.FEATURES.get("ENROLLMENT_WELCOME_EMAIL", False):
-        log.info("Feature ENROLLMENT_WELCOME_EMAIL is disabled.")
+    if not is_enabled(features.ENROLLMENT_WELCOME_EMAIL, default=False):
+        log.info("Feature `enrollment_welcome_email` is disabled.")
         return
     run_start_date, run_start_time = format_run_date(enrollment.run.start_date)
     run_end_date, _ = format_run_date(enrollment.run.end_date)
@@ -254,8 +256,8 @@ def send_b2b_receipt_email(order):
         date_range = ""
 
     download_url = (
-        f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?'
-        f'{urlencode({"hash": str(order.unique_id)})}'
+        f"{urljoin(settings.SITE_BASE_URL, reverse('bulk-enrollment-code-receipt'))}?"
+        f"{urlencode({'hash': str(order.unique_id)})}"
     )
     try:
         api.send_message(
@@ -357,7 +359,7 @@ def send_ecommerce_order_receipt(order, cyber_source_provided_email=None):
                                     "company": purchaser.get("company"),
                                     "vat_id": purchaser.get("vat_id"),
                                 },
-                                "enable_taxes_display": bool(order["tax_rate"]),
+                                "is_tax_applicable": bool(order["tax_rate"]),
                                 "support_email": settings.EMAIL_SUPPORT,
                             },
                         ),

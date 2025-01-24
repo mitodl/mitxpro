@@ -4,7 +4,7 @@ from django.db.models import Prefetch, Q
 from mitol.digitalcredentials.mixins import DigitalCredentialsRequestViewSetMixin
 from rest_framework import status, viewsets
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -27,6 +27,10 @@ from courses.serializers import (
     ProgramEnrollmentSerializer,
     ProgramSerializer,
 )
+from courses.sync_external_courses.external_course_sync_api import (
+    EXTERNAL_COURSE_VENDOR_KEYMAPS,
+    fetch_external_courses,
+)
 from ecommerce.models import Product
 
 
@@ -40,7 +44,11 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     courses_prefetch = Prefetch(
         "courses",
         Course.objects.select_related(
-            "coursepage", "externalcoursepage", "platform"
+            "coursepage",
+            "externalcoursepage",
+            "platform",
+            "coursepage__language",
+            "externalcoursepage__language",
         ).prefetch_related(
             course_runs_prefetch, "coursepage__topics", "externalcoursepage__topics"
         ),
@@ -51,7 +59,13 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = (
         Program.objects.filter(live=True)
         .exclude(products=None)
-        .select_related("programpage", "externalprogrampage", "platform")
+        .select_related(
+            "programpage",
+            "externalprogrampage",
+            "platform",
+            "programpage__language",
+            "externalprogrampage__language",
+        )
         .prefetch_related(courses_prefetch, products_prefetch)
         .filter(Q(programpage__live=True) | Q(externalprogrampage__live=True))
     )
@@ -75,6 +89,8 @@ class CourseViewSet(viewsets.ReadOnlyModelViewSet):
             .prefetch_related(
                 "coursepage__topics",
                 "externalcoursepage__topics",
+                "coursepage__language",
+                "externalcoursepage__language",
                 self.course_runs_prefetch,
             )
             .filter(Q(coursepage__live=True) | Q(externalcoursepage__live=True))
@@ -202,3 +218,34 @@ class CourseTopicViewSet(viewsets.ReadOnlyModelViewSet):
         Returns parent topics with course count > 0.
         """
         return CourseTopic.parent_topics_with_courses()
+
+
+class ExternalCourseListView(APIView):
+    """
+    ReadOnly View to list External courses.
+    """
+
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        Get External courses list from the External API and return it.
+        """
+
+        vendor = kwargs.get("vendor").replace("_", " ")
+        keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor.lower())
+        if not keymap:
+            return Response(
+                {
+                    "error": f"The vendor '{vendor}' is not supported. Supported vendors are {', '.join(EXTERNAL_COURSE_VENDOR_KEYMAPS)}"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            data = fetch_external_courses(keymap())
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:  # noqa: BLE001
+            return Response(
+                {"error": "Some error occurred.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

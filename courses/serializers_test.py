@@ -3,6 +3,7 @@ Tests for course serializers
 """
 
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 
 import factory
 import pytest
@@ -31,7 +32,7 @@ from courses.serializers import (
 from ecommerce.factories import ProductVersionFactory
 from ecommerce.models import Order
 from ecommerce.serializers import CompanySerializer
-from ecommerce.serializers_test import datetime_format
+from ecommerce.serializers_test import datetime_millis_format
 from mitxpro.test_utils import assert_drf_json_equal, drf_datetime
 
 pytestmark = [pytest.mark.django_db]
@@ -54,17 +55,25 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
-            "2 Months",
+            "2 weeks",
+            4,
+            4,
             "2 Hours",
+            2,
+            4,
             "http://www.testvideourl.com",
-            "2 Test CEUs",
+            "2.0",
             "https://www.testexternalcourse1.com",
             "fb4f5b79-test-4972-92c3-test",
         ),
         (
+            None,
+            None,
+            None,
+            None,
             None,
             None,
             None,
@@ -80,7 +89,11 @@ def test_serialize_program(  # noqa: PLR0913
     is_external,
     program_format,
     duration,
+    min_weeks,
+    max_weeks,
     time_commitment,
+    min_weekly_hours,
+    max_weekly_hours,
     video_url,
     ceus,
     external_marketing_url,
@@ -92,8 +105,12 @@ def test_serialize_program(  # noqa: PLR0913
         is_external=is_external,
         page__certificate_page__CEUs=ceus,
         page__duration=duration,
+        page__min_weeks=min_weeks,
+        page__max_weeks=max_weeks,
         page__format=program_format,
         page__time_commitment=time_commitment,
+        page__min_weekly_hours=min_weekly_hours,
+        page__max_weekly_hours=max_weekly_hours,
         page__video_url=video_url,
         page__external_marketing_url=external_marketing_url,
         page__marketing_hubspot_form_id=marketing_hubspot_form_id,
@@ -147,24 +164,30 @@ def test_serialize_program(  # noqa: PLR0913
             "start_date": program.first_unexpired_run.start_date,
             "end_date": sorted(runs, key=lambda run: run.end_date)[
                 -1
-            ].end_date.strftime(datetime_format),
+            ].end_date.strftime(datetime_millis_format),
             "enrollment_start": program.first_unexpired_run.enrollment_start,
             "url": f"http://localhost{program.page.get_url()}",
             "instructors": [{"name": name} for name in faculty_names],
             "topics": [{"name": topic.name} for topic in topics],
             "time_commitment": time_commitment,
+            "min_weekly_hours": min_weekly_hours,
+            "max_weekly_hours": max_weekly_hours,
             "duration": duration,
+            "max_weeks": max_weeks,
+            "min_weeks": min_weeks,
             "format": program_format,
             "video_url": video_url,
-            "credits": ceus,
+            "credits": Decimal(ceus) if ceus else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url,
             "marketing_hubspot_form_id": marketing_hubspot_form_id,
             "platform": program.platform.name,
             "availability": "dated",
+            "prerequisites": [],
+            "language": program.page.language.name if program.page else None,
         },
     )
-    assert data["end_date"] != non_live_run.end_date.strftime(datetime_format)
+    assert data["end_date"] != non_live_run.end_date.strftime(datetime_millis_format)
 
 
 def test_base_course_serializer():
@@ -186,17 +209,25 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
 @pytest.mark.parametrize(
-    "duration, time_commitment, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
     [
         (
-            "2 Months",
+            "2 weeks",
+            2,
+            2,
             "2 Hours",
+            2,
+            4,
             "http://www.testvideourl.com",
-            "2 Test CEUs",
+            "2",
             "http://www.testexternalmarketingurl.com",
             "fb4f5b79-test-4972-92c3-test",
         ),
         (
+            None,
+            None,
+            None,
+            None,
             None,
             None,
             None,
@@ -214,7 +245,11 @@ def test_serialize_course(  # noqa: PLR0913
     course_page,
     course_format,
     duration,
+    min_weeks,
+    max_weeks,
     time_commitment,
+    min_weekly_hours,
+    max_weekly_hours,
     video_url,
     ceus,
     external_marketing_url,
@@ -233,7 +268,11 @@ def test_serialize_course(  # noqa: PLR0913
         course = CourseFactory.create(
             is_external=is_external,
             page__time_commitment=time_commitment,
+            page__min_weekly_hours=min_weekly_hours,
+            page__max_weekly_hours=max_weekly_hours,
             page__duration=duration,
+            page__min_weeks=min_weeks,
+            page__max_weeks=max_weeks,
             page__format=course_format,
             page__video_url=video_url,
             page__certificate_page__CEUs=ceus,
@@ -287,10 +326,14 @@ def test_serialize_course(  # noqa: PLR0913
             "next_run_id": course.first_unexpired_run.id,
             "topics": [{"name": topic}] if course_page else [],
             "time_commitment": time_commitment if course_page else None,
+            "min_weekly_hours": min_weekly_hours if course_page else None,
+            "max_weekly_hours": max_weekly_hours if course_page else None,
             "duration": duration if course_page else None,
+            "max_weeks": max_weeks if course_page else None,
+            "min_weeks": min_weeks if course_page else None,
             "format": course_format if course_page else None,
             "video_url": video_url if course_page else None,
-            "credits": ceus if course_page else None,
+            "credits": Decimal(ceus) if course_page and ceus else None,
             "is_external": is_external,
             "external_marketing_url": external_marketing_url if course_page else None,
             "marketing_hubspot_form_id": (
@@ -298,6 +341,8 @@ def test_serialize_course(  # noqa: PLR0913
             ),
             "platform": course.platform.name,
             "availability": "dated",
+            "prerequisites": [],
+            "language": course.page.language.name if course.page else None,
         },
     )
 

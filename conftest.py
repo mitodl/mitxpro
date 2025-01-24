@@ -65,18 +65,18 @@ def pytest_configure(config):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def clean_up_files():  # noqa: PT004
+def clean_up_files():
     """
     Fixture that removes the media root folder after the suite has finished running,
     effectively deleting any files that were created by factories over the course of the test suite.
     """
     yield
     if os.path.exists(settings.MEDIA_ROOT):  # noqa: PTH110
-        shutil.rmtree(settings.MEDIA_ROOT)
+        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")
-def django_db_setup(django_db_setup, django_db_blocker):  # noqa: ARG001, PT004
+def django_db_setup(django_db_setup, django_db_blocker):  # noqa: ARG001
     """
     Creates all the index pages during the tests setup as index pages are required by the factories.
     """

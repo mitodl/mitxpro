@@ -143,7 +143,7 @@ const mapDispatchToProps = {
 
 const mapPropsToConfig = () => [
   users.currentUserQuery(),
-  SETTINGS.course_dropdown ? catalog.courseTopicsQuery() : [],
+  catalog.courseTopicsQuery(),
 ];
 
 export default compose(

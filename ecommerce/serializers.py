@@ -1021,7 +1021,7 @@ class OrderReceiptSerializer(serializers.ModelSerializer):
                     tax_paid=str(tax_paid),
                     discount=str(discount),
                     total_before_tax=str(total_before_tax),
-                    CEUs=str(CEUs) if CEUs else None,
+                    CEUs=CEUs if CEUs else None,
                     **BaseProductVersionSerializer(line.product_version).data,
                     start_date=dates["start_date"],
                     end_date=dates["end_date"],

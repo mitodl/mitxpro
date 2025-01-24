@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -32,8 +32,6 @@ log = logging.getLogger(__name__)
 @staff_member_required(login_url="login")
 def sheets_admin_view(request):
     """Admin view that renders a page that allows a user to begin Google OAuth auth"""
-    if not settings.FEATURES.get("COUPON_SHEETS"):
-        raise Http404
     existing_api_auth = GoogleApiAuth.objects.first()
     successful_action = request.GET.get("success")
     return render(
@@ -49,8 +47,6 @@ def sheets_admin_view(request):
 @staff_member_required(login_url="login")
 def request_google_auth(request):
     """Admin view to begin Google OAuth auth"""
-    if not settings.FEATURES.get("COUPON_SHEETS"):
-        raise Http404
     flow = Flow.from_client_config(
         generate_google_client_config(), scopes=REQUIRED_GOOGLE_API_SCOPES
     )
@@ -66,8 +62,6 @@ def request_google_auth(request):
 @csrf_exempt
 def complete_google_auth(request):
     """Admin view that handles the redirect from Google after completing Google auth"""
-    if not settings.FEATURES.get("COUPON_SHEETS"):
-        raise Http404
     state = request.session.get("state")
     if not state:
         raise GoogleAuthError(
@@ -98,8 +92,6 @@ def handle_watched_sheet_update(request):
     View that handles requests sent from Google's push notification service when changes are made to the
     a sheet with a file watch applied.
     """
-    if not settings.FEATURES.get("COUPON_SHEETS"):
-        raise Http404
     channel_id = request.META.get("HTTP_X_GOOG_CHANNEL_ID")
     if not channel_id:
         log.error(

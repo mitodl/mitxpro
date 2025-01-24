@@ -5,12 +5,14 @@ Page models for the CMS
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta
+from decimal import Decimal
 from urllib.parse import urljoin
 
 from django import forms
 from django.conf import settings
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Prefetch, Q, prefetch_related_objects
 from django.http.response import Http404
@@ -61,6 +63,7 @@ from cms.constants import (
     ALL_TOPICS,
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
+    COMMON_COURSEWARE_COMPONENT_INDEX_SLUG,
     COURSE_INDEX_SLUG,
     ENTERPRISE_PAGE_SLUG,
     FORMAT_HYBRID,
@@ -83,6 +86,7 @@ from courses.models import (
     Course,
     CourseRunCertificate,
     CourseTopic,
+    Platform,
     Program,
     ProgramCertificate,
     ProgramRun,
@@ -524,7 +528,7 @@ class CatalogPage(Page):
             ProgramPage.objects.live()
             .filter(program__live=True)
             .order_by("id")
-            .select_related("program")
+            .select_related("program", "language")
             .prefetch_related(
                 Prefetch(
                     "program__courses",
@@ -534,16 +538,22 @@ class CatalogPage(Page):
                 ),
             )
         )
-        external_program_qset = ExternalProgramPage.objects.live().order_by("title")
+        external_program_qset = (
+            ExternalProgramPage.objects.live()
+            .select_related("program", "language")
+            .order_by("title")
+        )
 
         course_page_qset = (
             CoursePage.objects.live()
             .filter(course__live=True)
             .order_by("id")
-            .select_related("course")
+            .select_related("course", "language")
         )
         external_course_qset = (
-            ExternalCoursePage.objects.live().select_related("course").order_by("title")
+            ExternalCoursePage.objects.live()
+            .select_related("course", "language")
+            .order_by("title")
         )
 
         if topic_filter != ALL_TOPICS:
@@ -637,9 +647,6 @@ class CatalogPage(Page):
                 }
                 for sorting_option in CatalogSorting
             ],
-            enable_catalog_sorting=settings.FEATURES.get(
-                "ENABLE_CATALOG_SORTING", True
-            ),
         )
 
 
@@ -821,7 +828,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "CoursesInProgramPage",
         "LearningTechniquesPage",
         "UserTestimonialsPage",
-        "NewsAndEventsPage",
         "ForTeamsPage",
         "TextVideoSection",
         "ResourcePage",
@@ -831,6 +837,7 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         "WebinarIndexPage",
         "BlogIndexPage",
         "EnterprisePage",
+        "CommonComponentIndexPage",
     ]
 
     @property
@@ -846,19 +853,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
         Gets the testimonials section subpage
         """
         return self._get_child_page_of_type(UserTestimonialsPage)
-
-    @property
-    def news_and_events(self):
-        """
-        Gets the news and events section subpage
-        """
-        webinar_or_blog_enabled = settings.FEATURES.get(
-            "WEBINARS", False
-        ) or settings.FEATURES.get("ENABLE_BLOG", False)
-        if webinar_or_blog_enabled:
-            return None
-
-        return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
     def upcoming_courseware(self):
@@ -903,7 +897,6 @@ class HomePage(RoutablePageMixin, MetadataPageMixin, WagtailCachedPageMixin, Pag
             "image_carousel_section": self.image_carousel_section,
             "inquiry_section": self.inquiry_section,
             "learning_experience": self.learning_experience,
-            "news_and_events": self.news_and_events,
             "testimonials": self.testimonials,
             "upcoming_courseware": self.upcoming_courseware,
         }
@@ -916,6 +909,14 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
 
     class Meta:
         abstract = True
+
+    language = models.ForeignKey(
+        "courses.CourseLanguage",
+        null=False,
+        blank=False,
+        on_delete=models.PROTECT,
+        help_text="The course/program language for this page",
+    )
 
     description = RichTextField(
         blank=True, help_text="The description shown on the product page"
@@ -950,6 +951,16 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating how long it takes to complete (e.g. '4 weeks')",
     )
+    min_weeks = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The minimum number of weeks required to complete the course/program.",
+    )
+    max_weeks = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The maximum number of weeks required to complete the course/program.",
+    )
     FORMAT_CHOICES = [
         (FORMAT_ONLINE, FORMAT_ONLINE),
         (FORMAT_HYBRID, FORMAT_HYBRID),
@@ -980,6 +991,16 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         blank=True,
         help_text="A short description indicating about the time commitments.",
     )
+    min_weekly_hours = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The minimum number of hours per week required to complete the course.",
+    )
+    max_weekly_hours = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="The maximum number of hours per week required to complete the course.",
+    )
     thumbnail_image = models.ForeignKey(
         Image,
         null=True,
@@ -1005,14 +1026,19 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         use_json_field=True,
     )
     content_panels = Page.content_panels + [  # noqa: RUF005
+        FieldPanel("language"),
         FieldPanel("external_marketing_url"),
         FieldPanel("marketing_hubspot_form_id"),
         FieldPanel("subhead"),
         FieldPanel("video_title"),
         FieldPanel("video_url"),
         FieldPanel("duration"),
+        FieldPanel("min_weeks"),
+        FieldPanel("max_weeks"),
         FieldPanel("format"),
         FieldPanel("time_commitment"),
+        FieldPanel("min_weekly_hours"),
+        FieldPanel("max_weekly_hours"),
         FieldPanel("description", classname="full"),
         FieldPanel("catalog_details", classname="full"),
         FieldPanel("background_image"),
@@ -1033,6 +1059,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         "TextSection",
         "CertificatePage",
         "NewsAndEventsPage",
+        "CourseOverviewPage",
     ]
 
     # Matches the standard page path that Wagtail returns for this page type.
@@ -1075,6 +1102,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             "propel_career": self.propel_career,
             "news_and_events": self.news_and_events,
             "ceus": self.certificate_page.CEUs if self.certificate_page else None,
+            "course_overview": self.course_overview,
         }
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
@@ -1137,6 +1165,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     def certificate_page(self):
         """Gets the certificate child page"""
         return self._get_child_page_of_type(CertificatePage)
+
+    @property
+    def course_overview(self):
+        """Gets the course overview child page"""
+        return self._get_child_page_of_type(CourseOverviewPage)
 
     @property
     def is_course_page(self):
@@ -1607,7 +1640,6 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         "ExternalCoursePage",
         "CoursePage",
         "ProgramPage",
-        "HomePage",
         "ExternalProgramPage",
     ]
 
@@ -2142,11 +2174,13 @@ class CertificatePage(CourseProgramChildPage):
         max_length=255, null=True, blank=True, help_text="Specify the institute text"
     )
 
-    CEUs = models.CharField(  # noqa: DJ001
-        max_length=250,
+    CEUs = models.DecimalField(
         null=True,
         blank=True,
-        help_text="Optional text field for CEU (continuing education unit).",
+        decimal_places=2,
+        max_digits=5,
+        validators=[MinValueValidator(Decimal("0.00"))],
+        help_text="Optional field for CEU (continuing education unit).",
     )
 
     partner_logo = models.ForeignKey(
@@ -2635,3 +2669,155 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
                 "HUBSPOT_ENTERPRISE_PAGE_FORM_ID"
             ),
         }
+
+
+class CourseOverviewPage(CourseProgramChildPage):
+    """
+    CMS Page representing a "Course Overview" section in course
+    """
+
+    heading = models.CharField(  # noqa: DJ001
+        max_length=255,
+        help_text="The Heading to show in this section.",
+        null=True,
+        blank=True,
+    )
+
+    overview = RichTextField(
+        help_text="An overview to provide additional context or information about the course",
+        null=True,
+        blank=True,
+    )
+
+    @property
+    def get_overview(self):
+        """Returns overview if available otherwise returns course page description"""
+        return self.overview or self.get_parent().specific.description
+
+    content_panels = [
+        FieldPanel("heading"),
+        FieldPanel("overview"),
+    ]
+
+    class Meta:
+        verbose_name = "Course Overview"
+
+
+class CommonComponentIndexPage(CanCreatePageMixin, DisableSitemapURLMixin, Page):
+    """
+    A placeholder class to group CommonChildPages as children.
+    This class logically acts as no more than a "folder" to organize
+    pages and add parent slug segment to the page url.
+    """
+
+    slug = COMMON_COURSEWARE_COMPONENT_INDEX_SLUG
+
+    parent_page_types = ["HomePage"]
+
+    subpage_types = [
+        "ForTeamsCommonPage",
+        "LearningTechniquesCommonPage",
+    ]
+
+    # disable promote panels, no need for slug entry, it will be autogenerated
+    promote_panels = []
+
+    def serve(self, request, *args, **kwargs):  # noqa: ARG002
+        """
+        For index pages we raise a 404 because these pages do not have a template
+        of their own and we do not expect a page to available at their slug.
+        """
+        raise Http404
+
+
+class CommonChildPageMixin(models.Model):
+    """
+    Abstract model for common child pages associated with a platform.
+
+    Attributes:
+        platform (ForeignKey): Optional reference to a platform for the page.
+    """
+
+    platform = models.ForeignKey(
+        Platform, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    parent_page_types = [
+        "CommonComponentIndexPage",
+    ]
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.title} - {self.platform}" if self.platform else self.title
+
+    def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
+        # autogenerate a unique slug so we don't hit a ValidationError
+        if not self.title:
+            self.title = self.__class__._meta.verbose_name.title()  # noqa: SLF001
+        self.slug = slugify(f"{self.get_parent().id}-{self.title}-{self.platform}")
+        Page.save(self, clean=clean, user=user, log_action=log_action, **kwargs)
+
+    @classmethod
+    def can_create_at(cls, parent):  # noqa: ARG003
+        # Overrides base can_create_at from CourseProgramChildPage to allow multiple page creation
+        # Check overridden clean for better control on uniqueness and error handling
+        return True
+
+    def clean(self):
+        """
+        Validates the uniqueness of the platform for the current page.
+
+        Raises:
+            ValidationError: If a page with the same platform already exists.
+        """
+        super().clean()
+        field_error = {"platform": "Page for this platform already exists."}
+        if (
+            not self.platform
+            and self.__class__.objects.exclude(pk=self.pk)
+            .filter(platform__isnull=True)
+            .exists()
+        ) or (
+            self.__class__.objects.exclude(pk=self.pk)
+            .filter(platform=self.platform)
+            .exists()
+        ):
+            raise ValidationError(field_error)
+
+
+class ForTeamsCommonPage(CommonChildPageMixin, ForTeamsPage):
+    """
+    Represents a platform-specific "For Teams" (text-image) section.
+
+    This class is used to store common "ForTeamsPage" content that can be reused across multiple pages.
+    It allows easy duplication and creation of specific `ForTeamsPage` instances in their respective
+    parent pages whenever needed.
+    """
+
+    content_panels = [
+        FieldPanel("platform"),
+        *ForTeamsPage.content_panels,
+    ]
+
+    class Meta:
+        verbose_name = "Reusable Text-Image Section for ForTeamsPage"
+
+
+class LearningTechniquesCommonPage(CommonChildPageMixin, LearningTechniquesPage):
+    """
+    Represents a platform-specific "LearningTechniquesPage" (Icon Grid) section.
+
+    This class is used to store common "LearningTechniquesPage" content that can be reused across multiple pages.
+    It allows easy duplication and creation of specific `LearningTechniquesPage` instances in their respective
+    parent pages whenever needed.
+    """
+
+    content_panels = [
+        FieldPanel("platform"),
+        *LearningTechniquesPage.content_panels,
+    ]
+
+    class Meta:
+        verbose_name = "Reusable Icon Grid Section for LearningTechniquesPage"

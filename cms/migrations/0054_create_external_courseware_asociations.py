@@ -63,7 +63,7 @@ def migrate_external_courses(apps, schema_editor):
             defaults={
                 "is_external": True,
                 "title": external_course.title,
-                "live" "": external_course.live,
+                "live": external_course.live,
             },
         )
         # If already exists, Just set value for newly added field

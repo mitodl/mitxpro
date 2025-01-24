@@ -2,6 +2,7 @@
 
 import json
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from urllib.parse import quote_plus, urljoin
 
 import factory
@@ -92,7 +93,7 @@ def render_json(serializer):
 
 
 @pytest.fixture(autouse=True)
-def ecommerce_settings(settings):  # noqa: PT004
+def ecommerce_settings(settings):
     """
     Set cybersource settings
     """
@@ -604,6 +605,13 @@ def test_patch_basket_update_coupon_valid(
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
+
+    for item in resp_data.get("items", []):
+        for course in item.get("courses", []):
+            course["credits"] = (
+                Decimal(str(course["credits"])) if course["credits"] else None
+            )
+
     assert resp_data.get("items") == original_basket.get("items")
     assert CouponSelection.objects.get(basket=basket).coupon.coupon_code == new_code
     assert len(resp_data.get("coupons")) == 1
@@ -670,6 +678,13 @@ def test_patch_basket_clear_coupon_no_auto(
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
+
+    for item in resp_data.get("items", []):
+        for course in item.get("courses", []):
+            course["credits"] = (
+                Decimal(str(course["credits"])) if course["credits"] else None
+            )
+
     assert resp_data.get("coupons") == []
     assert resp_data.get("items") == original_basket.get("items")
     assert CouponSelection.objects.filter(basket=basket).first() is None

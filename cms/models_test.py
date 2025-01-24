@@ -2,6 +2,7 @@
 
 import json
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 import factory
 import pytest
@@ -14,6 +15,7 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
+    COMMON_COURSEWARE_COMPONENT_INDEX_SLUG,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
     FORMAT_OTHER,
@@ -25,13 +27,16 @@ from cms.constants import (
 )
 from cms.factories import (
     CertificatePageFactory,
+    CommonComponentIndexPageFactory,
     CompaniesLogoCarouselPageFactory,
+    CourseOverviewPageFactory,
     CoursePageFactory,
     CoursesInProgramPageFactory,
     EnterprisePageFactory,
     ExternalCoursePageFactory,
     ExternalProgramPageFactory,
     FacultyMembersPageFactory,
+    ForTeamsCommonPageFactory,
     ForTeamsPageFactory,
     FrequentlyAskedQuestionFactory,
     FrequentlyAskedQuestionPageFactory,
@@ -40,8 +45,10 @@ from cms.factories import (
     LearningJourneyPageFactory,
     LearningOutcomesPageFactory,
     LearningStrategyFormPageFactory,
+    LearningTechniqueCommonPageFactory,
     LearningTechniquesPageFactory,
     NewsAndEventsPageFactory,
+    PlatformFactory,
     ProgramFactory,
     ProgramPageFactory,
     ResourcePageFactory,
@@ -57,11 +64,17 @@ from cms.factories import (
 )
 from cms.models import (
     CertificatePage,
+    CommonComponentIndexPage,
+    CourseIndexPage,
+    CourseOverviewPage,
     CoursesInProgramPage,
+    ExternalCoursePage,
+    ForTeamsCommonPage,
     ForTeamsPage,
     FrequentlyAskedQuestionPage,
     LearningJourneySection,
     LearningOutcomesPage,
+    LearningTechniquesCommonPage,
     LearningTechniquesPage,
     SignatoryPage,
     UserTestimonialsPage,
@@ -70,6 +83,7 @@ from cms.models import (
 from cms.wagtail_hooks import create_product_and_versions_for_courseware_pages
 from courses.factories import (
     CourseFactory,
+    CourseLanguageFactory,
     CourseRunCertificateFactory,
     CourseRunFactory,
     ProgramCertificateFactory,
@@ -337,27 +351,6 @@ def test_home_page_testimonials():
         assert testimonial.value.get("quote") == "quote"
 
 
-def test_home_page_news_and_events():
-    """
-    NewsAndEvents subpage should provide expected values
-    """
-    home_page = HomePageFactory.create()
-    assert not home_page.news_and_events
-
-    del home_page.child_pages
-
-    news_and_events_page = create_news_and_events(parent=home_page)
-    assert home_page.news_and_events == news_and_events_page
-    assert news_and_events_page.heading == "heading"
-    for count, news_and_events in enumerate(news_and_events_page.items):
-        assert news_and_events.value.get("content_type") == f"content_type-{count}"
-        assert news_and_events.value.get("title") == f"title-{count}"
-        assert news_and_events.value.get("image").title == f"image-{count}"
-        assert news_and_events.value.get("content") == f"content-{count}"
-        assert news_and_events.value.get("call_to_action") == f"call_to_action-{count}"
-        assert news_and_events.value.get("action_url") == f"action_url-{count}"
-
-
 def test_home_page_inquiry_section():
     """
     inquiry_section property should return expected values
@@ -534,7 +527,7 @@ def _assert_faculty_members(obj):
 
 def test_course_page_testimonials():
     """
-    testimonials property should return expected value if associated with a CoursePage
+    Testimonials property should return expected value if associated with a CoursePage
     """
     course_page = CoursePageFactory.create()
     assert UserTestimonialsPage.can_create_at(course_page)
@@ -559,7 +552,7 @@ def test_course_page_testimonials():
 
 def test_external_course_page_testimonials():
     """
-    testimonials property should return expected value if associated with an ExternalCoursePage
+    Testimonials property should return expected value if associated with an ExternalCoursePage
     """
     external_course_page = ExternalCoursePageFactory.create()
     assert UserTestimonialsPage.can_create_at(external_course_page)
@@ -584,7 +577,7 @@ def test_external_course_page_testimonials():
 
 def test_program_page_testimonials():
     """
-    testimonials property should return expected value if associated with a ProgramPage
+    Testimonials property should return expected value if associated with a ProgramPage
     """
     program_page = ProgramPageFactory.create()
     assert UserTestimonialsPage.can_create_at(program_page)
@@ -609,7 +602,7 @@ def test_program_page_testimonials():
 
 def test_external_program_page_testimonials():
     """
-    testimonials property should return expected value if associated with an ExternalProgramPage
+    Testimonials property should return expected value if associated with an ExternalProgramPage
     """
     external_program_page = ExternalProgramPageFactory.create()
     assert UserTestimonialsPage.can_create_at(external_program_page)
@@ -1389,12 +1382,12 @@ def test_certificate_for_course_page():
     certificate_page = CertificatePageFactory.create(
         parent=course_page,
         product_name="product_name",
-        CEUs="1.8",
+        CEUs=Decimal("1.8"),
         partner_logo__image__title="Partner Logo",
         signatories__0__signatory__page=signatory,
     )
     assert certificate_page.get_parent() == course_page
-    assert certificate_page.CEUs == "1.8"
+    assert certificate_page.CEUs == Decimal("1.8")
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:
@@ -1424,13 +1417,13 @@ def test_certificate_for_program_page():
     certificate_page = CertificatePageFactory.create(
         parent=program_page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo__image__title="Partner Logo",
         signatories__0__signatory__page=signatory,
     )
 
     assert certificate_page.get_parent() == program_page
-    assert certificate_page.CEUs == "2.8"
+    assert certificate_page.CEUs == Decimal("2.8")
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
     for signatory in certificate_page.signatories:
@@ -1989,7 +1982,7 @@ def test_certificatepage_no_signatories_internal_courseware(
     certificate_page = CertificatePageFactory.create(
         parent=page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo=None,
     )
 
@@ -2032,7 +2025,7 @@ def test_certificatepage_with_signatories_internal_courseware(
     certificate_page = CertificatePageFactory.create(
         parent=page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo=None,
         signatories__0__signatory__page=signatory,
     )
@@ -2073,7 +2066,7 @@ def test_certificatepage_saved_no_signatories_external_courseware(
     certificate_page = CertificatePageFactory.create(
         parent=page,
         product_name="product_name",
-        CEUs="2.8",
+        CEUs=Decimal("2.8"),
         partner_logo=None,
     )
 
@@ -2089,3 +2082,268 @@ def test_certificatepage_saved_no_signatories_external_courseware(
 
     resp = superuser_client.post(path, data_to_post)
     assert resp.status_code == 302
+
+
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ExternalProgramPageFactory,
+        ProgramPageFactory,
+    ],
+)
+@pytest.mark.parametrize(
+    ("heading", "overview", "course_description"),
+    [
+        # With heading and overview
+        (
+            "heading",
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        # Without overview and course description
+        ("heading", None, ""),
+        # Without overview but with course description
+        ("heading", None, "course description"),
+        # Without heading
+        (None, "", "course description"),
+    ],
+)
+def test_course_overview_page(page_klass, heading, overview, course_description):
+    """Test CourseOverview Page"""
+    expected_overview = overview or course_description
+    page = page_klass.create(description=course_description)
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        heading=heading,
+        overview=overview,
+    )
+
+    # invalidate cached property
+    del page.child_pages
+
+    assert overview_page.get_parent() == page
+    assert page.course_overview == overview_page
+    assert overview_page.heading == heading
+    assert overview_page.get_overview == expected_overview
+
+    # test that it can be modified
+    new_heading = "new heading"
+    new_overview = "new test overview"
+    overview_page.heading = new_heading
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    assert overview_page.get_overview == new_overview
+    assert overview_page.heading == new_heading
+
+
+def _create_external_course_page(superuser_client, course_id, slug):
+    """
+    Creates and publishes an ExternalCoursePage via the Wagtail admin API.
+
+    Args:
+        superuser_client (Client): Superuser client to send the API request.
+        course_id (int): ID of the course to associate with the page.
+        slug (str): Slug for the new ExternalCoursePage.
+
+    Asserts:
+        Response status code is 302 (successful redirection).
+    """
+    language = CourseLanguageFactory.create()
+    post_data = {
+        "course": course_id,
+        "title": "Icon Grid #6064",
+        "subhead": "testing #6064",
+        "format": "Online",
+        "content-count": 0,
+        "slug": slug,
+        "action-publish": "action-publish",
+        "language": language.id,
+    }
+    response = superuser_client.post(
+        reverse(
+            "wagtailadmin_pages:add",
+            args=("cms", "externalcoursepage", CourseIndexPage.objects.first().id),
+        ),
+        post_data,
+    )
+    assert response.status_code == 302
+
+
+def _is_common_child_pages_created(external_course_page_slug, course_id):
+    """
+    Validates the creation of static child pages under an ExternalCoursePage.
+
+    Args:
+        external_course_page_slug (str): The slug of the ExternalCoursePage.
+        course_id (int): The ID of the associated course.
+
+    Asserts:
+        - The ExternalCoursePage matches the given course ID.
+        - At least two child pages exist.
+        - A `LearningTechniquesPage` and a `ForTeamsPage` are present as child pages.
+
+    Returns:
+        tuple: The `LearningTechniquesPage` and `ForTeamsPage` child pages.
+    """
+    external_course_page = ExternalCoursePage.objects.get(
+        slug=external_course_page_slug
+    )
+    assert external_course_page.course.id == course_id
+    assert len(external_course_page.child_pages) >= 2
+    learning_technical_page = (
+        external_course_page.get_child_page_of_type_including_draft(
+            LearningTechniquesPage
+        )
+    )
+    for_teams_page = external_course_page.get_child_page_of_type_including_draft(
+        ForTeamsPage
+    )
+    assert learning_technical_page
+    assert for_teams_page
+
+    return learning_technical_page, for_teams_page
+
+
+def _create_common_child_pages(platform=None):
+    """
+    Creates static common child pages under a CommonComponentIndexPage.
+
+    Args:
+        platform (Platform, optional): Optional platform object for customizing
+            attributes like headings. Defaults to None.
+
+    Returns:
+        tuple:
+            - `LearningTechniqueCommonPage` with platform-specific attributes.
+            - `ForTeamsCommonPage` under the same parent page.
+    """
+    common_component_index = CommonComponentIndexPageFactory.create()
+    tech_heading = f"{platform.name} - heading" if platform else "heading"
+    title = (
+        f"{platform.name} - Learning tech title" if platform else "Learning tech title"
+    )
+    learning_tech_page = LearningTechniqueCommonPageFactory.create(
+        platform=platform,
+        title=title,
+        technique_items__0__techniques__heading=tech_heading,
+        technique_items__0__techniques__sub_heading="sub_heading",
+        technique_items__0__techniques__image__image__title="image-title",
+        parent=common_component_index,
+    )
+    title = f"{platform.name} - For teams title" if platform else "For teamstitle"
+    b2b_page = ForTeamsCommonPageFactory.create(
+        platform=platform, parent=common_component_index
+    )
+    return learning_tech_page, b2b_page
+
+
+def test_common_child_index_page():
+    """
+    Tests the creation of a CommonComponentIndexPage and its relationship
+    to a CourseIndexPage.
+    """
+    home_page = HomePageFactory.create()
+    assert CommonComponentIndexPage.can_create_at(home_page)
+    common_folder = CommonComponentIndexPageFactory.create(
+        title="common external course pages"
+    )
+    assert common_folder.slug == COMMON_COURSEWARE_COMPONENT_INDEX_SLUG
+    assert common_folder.title == "common external course pages"
+
+
+def test_common_child_pages_uniqueness():
+    """
+    Tests the uniqueness constraint for creating multiple instances of the same page
+    under a CommonComponentIndexPage.
+    """
+    home_page = HomePageFactory.create()
+    assert CommonComponentIndexPage.can_create_at(home_page)
+    common_folder = CommonComponentIndexPageFactory.create()
+    assert LearningTechniquesCommonPage.can_create_at(common_folder)
+    tech_page = LearningTechniqueCommonPageFactory.create(parent=common_folder)
+
+    # Check if we can create more instances of same page
+    assert ForTeamsCommonPage.can_create_at(common_folder)
+
+    ForTeamsCommonPageFactory.create(parent=common_folder)
+    assert len(common_folder.get_children()) == 2
+
+    # Shouldn't be able to create 2 instance of same page with same platform
+    with pytest.raises(ValidationError) as context:
+        LearningTechniqueCommonPageFactory.create(
+            parent=common_folder, platform=tech_page.platform
+        )
+
+    assert (
+        str(context.value) == "{'platform': ['Page for this platform already exists.']}"
+    )
+
+
+def test_common_child_page_wo_static_page(superuser_client):
+    """Tests that an ExternalCoursePage is created without static child pages."""
+    external_course_page_slug = "external_course_page"
+    course = CourseFactory.create()
+    _create_external_course_page(superuser_client, course.id, external_course_page_slug)
+    external_course_page = ExternalCoursePage.objects.get(
+        slug=external_course_page_slug
+    )
+    assert external_course_page.course.id == course.id
+    assert not external_course_page.get_child_page_of_type_including_draft(
+        LearningTechniquesPage
+    )
+    assert not external_course_page.get_child_page_of_type_including_draft(ForTeamsPage)
+
+
+@pytest.mark.parametrize(
+    "with_platform",
+    [True, False],
+)
+def test_child_page_with_static_pages(superuser_client, with_platform):
+    """Tests the creation of an ExternalCoursePage with static child pages."""
+    platform = PlatformFactory.create()
+    course = CourseFactory.create(platform=platform)
+    learning_tech_page, b2b_page = _create_common_child_pages(
+        platform if with_platform else None
+    )
+    external_course_page_slug = "external_course_page"
+    _create_external_course_page(superuser_client, course.id, external_course_page_slug)
+
+    learning_technical_page, for_teams_page = _is_common_child_pages_created(
+        external_course_page_slug, course.id
+    )
+
+    assert learning_technical_page.title == learning_tech_page.title
+    assert learning_technical_page.technique_items == learning_tech_page.technique_items
+    assert for_teams_page.title == b2b_page.title
+
+
+def test_child_page_with_static_pages_with_platform(superuser_client):
+    """
+    Tests the creation of an ExternalCoursePage with static child pages,
+    comparing the results with and without a platform.
+    """
+    platform = PlatformFactory.create()
+    learning_tech_page_wo_platform, b2b_page_wo_platform = _create_common_child_pages()
+    learning_tech_page, b2b_page = _create_common_child_pages(platform)
+    course = CourseFactory.create(platform=platform)
+    external_course_page_slug = "external_course_page"
+    _create_external_course_page(superuser_client, course.id, external_course_page_slug)
+    learning_technical_page, for_teams_page = _is_common_child_pages_created(
+        external_course_page_slug, course.id
+    )
+
+    assert learning_technical_page.title != learning_tech_page_wo_platform.title
+    assert learning_technical_page.title == learning_tech_page.title
+    assert (
+        learning_technical_page.technique_items
+        != learning_tech_page_wo_platform.technique_items
+    )
+    assert learning_technical_page.technique_items == learning_tech_page.technique_items
+
+    assert for_teams_page.title != b2b_page_wo_platform.title
+    assert for_teams_page.title == b2b_page.title

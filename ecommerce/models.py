@@ -634,7 +634,7 @@ class CouponPaymentVersion(TimestampedModel):
         price = price or (product_version.price if product_version else None)
 
         if not price:
-            return Decimal(0.00)
+            return Decimal("0.00")
 
         price = Decimal(price)
 
@@ -643,7 +643,7 @@ class CouponPaymentVersion(TimestampedModel):
         elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
             return round_half_up(self.amount)
         else:
-            return Decimal(0.00)
+            return Decimal("0.00")
 
     def calculate_discount_percent(self, product_version=None, price=None):
         """
@@ -655,14 +655,14 @@ class CouponPaymentVersion(TimestampedModel):
         price = price or (product_version.price if product_version else None)
 
         if not price:
-            return Decimal(0.00)
+            return Decimal("0.00")
 
         if self.discount_type == DISCOUNT_TYPE_PERCENT_OFF:
             return round_half_up(self.amount * 100)
         elif self.discount_type == DISCOUNT_TYPE_DOLLARS_OFF:
             return round_half_up((self.amount / price) * 100)
         else:
-            return Decimal(0.00)
+            return Decimal("0.00")
 
 
 class Coupon(TimestampedModel):

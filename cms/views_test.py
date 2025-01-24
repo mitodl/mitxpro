@@ -2,6 +2,7 @@
 
 import textwrap
 from datetime import datetime, timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 
 import factory
@@ -25,6 +26,7 @@ from cms.factories import (
     CatalogPageFactory,
     CertificatePageFactory,
     CourseIndexPageFactory,
+    CourseOverviewPageFactory,
     CoursePageFactory,
     EnterprisePageFactory,
     ExternalCoursePageFactory,
@@ -38,7 +40,13 @@ from cms.factories import (
     WebinarIndexPageFactory,
     WebinarPageFactory,
 )
-from cms.models import CourseIndexPage, HomePage, ProgramIndexPage, TextVideoSection
+from cms.models import (
+    CourseIndexPage,
+    CourseOverviewPage,
+    HomePage,
+    ProgramIndexPage,
+    TextVideoSection,
+)
 from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunFactory,
@@ -686,6 +694,64 @@ def test_product_page_context_has_certificate(
 
     if published_certificate:
         assert resp.context["ceus"] is not None
-        assert resp.context["ceus"] == "12.0"
+        assert resp.context["ceus"] == Decimal("12.00")
     else:
         assert resp.context["ceus"] is None
+
+
+def _get_course_page(client, url):
+    resp = client.get(url)
+    assert resp.status_code == 200
+    assert resp.context_data["page"]
+
+    return resp.context_data["page"]
+
+
+@pytest.mark.parametrize(
+    "page_klass",
+    [
+        ExternalCoursePageFactory,
+        CoursePageFactory,
+        ExternalProgramPageFactory,
+        ProgramPageFactory,
+    ],
+)
+@pytest.mark.parametrize(
+    ("overview", "course_description"),
+    [
+        # With Overview
+        (
+            "<p>Dummy overview</p>",
+            "shouldn't matter description",
+        ),
+        # Without overview and course description
+        (None, ""),
+        # Without overview but with course description
+        (None, "course test description"),
+        # With overview and course description
+        ("<p>Overview</p>", "shouldn't matter description"),
+    ],
+)
+def test_course_overview_context(client, page_klass, overview, course_description):
+    """Test that course page have expected course_overview in context"""
+    expected_overview = overview or course_description
+    page = page_klass.create(description=course_description)
+    assert not page.course_overview
+    assert CourseOverviewPage.can_create_at(page)
+    overview_page = CourseOverviewPageFactory.create(
+        parent=page,
+        heading="test heading",
+        overview=overview,
+    )
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview == overview_page
+    assert resp_page.course_overview.get_overview == expected_overview
+    assert resp_page.course_overview.heading == overview_page.heading
+
+    # Test modification
+    new_overview = "new_overview"
+    overview_page.overview = new_overview
+    overview_page.save()
+
+    resp_page = _get_course_page(client, page.get_url())
+    assert resp_page.course_overview.get_overview == new_overview

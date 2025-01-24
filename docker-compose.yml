@@ -21,19 +21,19 @@ x-extra-hosts: &default-extra-hosts
 
 services:
   db:
-    image: postgres:16.4
+    image: postgres:17.1
     environment:
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
     ports:
       - "5432"
 
   redis:
-    image: redis:7.4.1
+    image: redis:7.4.2
     ports:
       - "6379"
 
   nginx:
-    image: nginx:1.27.2
+    image: nginx:1.27.3
     ports:
       - "8053:8053"
     links:
@@ -68,7 +68,7 @@ services:
     extra_hosts: *default-extra-hosts
 
   watch:
-    image: node:20.18.0
+    image: node:20.18.1
     working_dir: /src
     command: >
       /bin/bash -c './webpack_dev_server.sh --install'

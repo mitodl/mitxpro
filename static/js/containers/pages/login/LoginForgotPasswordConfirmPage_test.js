@@ -86,7 +86,7 @@ describe("LoginForgotPasswordConfirmPage", () => {
         },
       );
 
-      assert.lengthOf(helper.browserHistory, 2);
+      assert.equal(helper.browserHistory.index, 1);
       assert.include(helper.browserHistory.location, {
         pathname: expectedUrl,
         search: "",

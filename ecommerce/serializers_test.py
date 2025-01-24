@@ -377,7 +377,7 @@ def test_serialize_coupon_payment_version_serializer(basket_and_coupons):
     for attr in ("activation_date", "expiration_date"):
         assert serializer.data.get(attr) == getattr(
             basket_and_coupons.coupongroup_best.payment_version, attr
-        ).strftime(datetime_format)
+        ).strftime(datetime_millis_format)
     assert (
         Decimal(serializer.data.get("amount"))
         == basket_and_coupons.coupongroup_best.payment_version.amount
@@ -409,8 +409,12 @@ def test_coupon_payment_version_serializer():
         "max_redemptions": payment_version.max_redemptions,
         "max_redemptions_per_user": payment_version.max_redemptions_per_user,
         "amount": str(payment_version.amount),
-        "expiration_date": payment_version.expiration_date.strftime(datetime_format),
-        "activation_date": payment_version.activation_date.strftime(datetime_format),
+        "expiration_date": payment_version.expiration_date.strftime(
+            datetime_millis_format
+        ),
+        "activation_date": payment_version.activation_date.strftime(
+            datetime_millis_format
+        ),
         "payment_type": payment_version.payment_type,
         "discount_type": DISCOUNT_TYPE_PERCENT_OFF,
         "payment_transaction": payment_version.payment_transaction,

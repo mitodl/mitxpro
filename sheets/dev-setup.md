@@ -85,7 +85,6 @@ First, gather a bunch of ID-type values from Drive:
 _If it's not obvious, remove the angle brackets (`<>`) for the actual values._
 
 ```dotenv
-FEATURE_COUPON_SHEETS=True
 SHEETS_ADMIN_EMAILS=<Your email address>
 DRIVE_CLIENT_ID=<Client ID from step 1>
 DRIVE_CLIENT_SECRET=<Client secret from step 1>

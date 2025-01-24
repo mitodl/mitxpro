@@ -6,7 +6,7 @@ jobs:
 
     services:
       db:
-        image: postgres:16.4
+        image: postgres:17.1
         # Health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -21,12 +21,12 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:7.4.1
+        image: redis:7.4.2
         ports:
           - 6379:6379
 
       elastic:
-        image: docker.elastic.co/elasticsearch/elasticsearch:6.8.23
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
         env:
           network.host: "0.0.0.0"
           http.cors.enabled: "true"
@@ -47,7 +47,7 @@ jobs:
 
       - name: Set up Python
         id: setup-python
-        uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3 # v5
+        uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
         with:
           python-version: "3.12.6"
 
@@ -117,7 +117,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres # pragma: allowlist secret
           WEBPACK_DISABLE_LOADER_STATS: "True"
           ELASTICSEARCH_URL: localhost:9200
-          EMERITUS_API_KEY: fake_emeritus_api_key # pragma: allowlist secret
+          EXTERNAL_COURSE_SYNC_API_KEY: fake_external_course_sync_api_key # pragma: allowlist secret
           MAILGUN_KEY: fake_mailgun_key
           MAILGUN_SENDER_DOMAIN: other.fake.site
           MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL: http://localhost:5000
@@ -136,7 +136,7 @@ jobs:
           SECRET_KEY: local_unsafe_key # pragma: allowlist secret
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303 # v5
         with:
           file: ./coverage.xml
 
@@ -148,7 +148,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 20.16.0
+          node-version: 20.18.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -186,6 +186,6 @@ jobs:
         run: node node_modules/webpack/bin/webpack.js --config webpack.config.prod.js --bail
 
       - name: Upload test coverage to CodeCov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303 # v5
         with:
           file: coverage/lcov.info

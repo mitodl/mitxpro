@@ -14,6 +14,7 @@ from users.factories import UserFactory
 
 from .models import (
     Course,
+    CourseLanguage,
     CourseRun,
     CourseRunCertificate,
     CourseRunEnrollment,
@@ -36,6 +37,15 @@ class CompanyFactory(DjangoModelFactory):
 
     class Meta:
         model = Company
+
+
+class CourseLanguageFactory(DjangoModelFactory):
+    """Factory for Course Language"""
+
+    name = factory.Sequence(lambda n: f"Language_{n}")
+
+    class Meta:
+        model = CourseLanguage
 
 
 class PlatformFactory(DjangoModelFactory):

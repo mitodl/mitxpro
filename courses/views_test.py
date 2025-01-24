@@ -2,8 +2,11 @@
 Tests for course views
 """
 
+import json
 import operator as op
 from datetime import timedelta
+from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from django.contrib.auth.models import AnonymousUser
@@ -34,6 +37,10 @@ from courses.serializers import (
     CourseSerializer,
     ProgramCertificateSerializer,
     ProgramSerializer,
+)
+from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
+    GLOBAL_ALUMNI_PLATFORM_NAME,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import assert_drf_json_equal
@@ -129,6 +136,9 @@ def test_get_courses(user_drf_client, courses, mock_context, is_anonymous):
     courses_data = resp.json()
     assert len(courses_data) == len(courses)
     for course, course_data in zip(courses, courses_data):
+        course_data["credits"] = (
+            Decimal(str(course_data["credits"])) if course_data["credits"] else None
+        )
         assert (
             course_data == CourseSerializer(instance=course, context=mock_context).data
         )
@@ -142,6 +152,9 @@ def test_get_course(user_drf_client, courses, mock_context, is_anonymous):
     course = courses[0]
     resp = user_drf_client.get(reverse("courses_api-detail", kwargs={"pk": course.id}))
     course_data = resp.json()
+    course_data["credits"] = (
+        Decimal(str(course_data["credits"])) if course_data["credits"] else None
+    )
     assert course_data == CourseSerializer(instance=course, context=mock_context).data
 
 
@@ -276,7 +289,7 @@ def test_course_view(  # noqa: PLR0913
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_id}'
+            url = f"{reverse('checkout-page')}?product={product_id}"
             class_name = "enroll-now"
         if is_enrolled and has_unexpired_run:
             url = reverse("user-dashboard")
@@ -341,7 +354,7 @@ def test_program_view(  # noqa: PLR0913
     class_name = ""
     if not is_anonymous:
         if not is_enrolled and has_product and has_unexpired_run:
-            url = f'{reverse("checkout-page")}?product={product_id}'
+            url = f"{reverse('checkout-page')}?product={product_id}"
             class_name = "enroll-now"
         if is_enrolled:
             url = reverse("user-dashboard")
@@ -611,3 +624,40 @@ def test_course_topics_api(client, django_assert_num_queries):
         assert len(resp_json) == 1
         assert resp_json[0]["name"] == parent_topic.name
         assert resp_json[0]["course_count"] == 4
+
+
+@pytest.mark.parametrize("expected_status_code", [200, 500])
+@pytest.mark.parametrize(
+    "vendor_name", [EMERITUS_PLATFORM_NAME, GLOBAL_ALUMNI_PLATFORM_NAME]
+)
+def test_external_course_list_view(
+    admin_drf_client, mocker, expected_status_code, vendor_name
+):
+    """
+    Test that the External API List calls fetch_external_courses and returns its mocked response.
+    """
+    if expected_status_code == 200:
+        with Path(
+            "courses/sync_external_courses/test_data/batch_test.json"
+        ).open() as test_data_file:
+            mocked_response = json.load(test_data_file)["rows"]
+
+        patched_fetch_external_courses = mocker.patch(
+            "courses.views.v1.fetch_external_courses", return_value=mocked_response
+        )
+    else:
+        patched_fetch_external_courses = mocker.patch(
+            "courses.views.v1.fetch_external_courses",
+            side_effect=Exception("Some error occurred."),
+        )
+        mocked_response = {
+            "error": "Some error occurred.",
+            "details": "Some error occurred.",
+        }
+
+    response = admin_drf_client.get(
+        reverse("external_courses", kwargs={"vendor": vendor_name})
+    )
+    assert response.json() == mocked_response
+    assert response.status_code == expected_status_code
+    patched_fetch_external_courses.assert_called_once()

@@ -17,6 +17,8 @@ from django.http.response import HttpResponse
 from django.templatetags.static import static
 from rest_framework import status
 
+from mitxpro import features
+
 log = logging.getLogger(__name__)
 
 
@@ -581,7 +583,9 @@ def get_js_settings(request: HttpRequest):
     Returns:
         dict: the settings object
     """
-    from ecommerce.api import display_taxes
+    from mitol.olposthog.features import is_enabled
+
+    from ecommerce.api import is_tax_applicable
 
     return {
         "gtmTrackingID": settings.GTM_TRACKING_ID,
@@ -597,13 +601,10 @@ def get_js_settings(request: HttpRequest):
             "help_widget_enabled": settings.ZENDESK_CONFIG.get("HELP_WIDGET_ENABLED"),
             "help_widget_key": settings.ZENDESK_CONFIG.get("HELP_WIDGET_KEY"),
         },
-        "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
+        "digital_credentials": is_enabled(features.DIGITAL_CREDENTIALS, default=False),
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
-        "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
-        "webinars": settings.FEATURES.get("WEBINARS", False),
-        "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
-        "enable_taxes_display": display_taxes(request),
-        "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
+        "is_tax_applicable": is_tax_applicable(request),
+        "enable_enterprise": is_enabled(features.ENABLE_ENTERPRISE, default=False),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
         "posthog_api_host": settings.POSTHOG_API_HOST,
     }

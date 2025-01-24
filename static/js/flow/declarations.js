@@ -18,10 +18,7 @@ declare type Settings = {
   },
   digital_credentials: boolean,
   digital_credentials_supported_runs: Array<string>,
-  course_dropdown: boolean,
-  webinars: boolean,
-  enable_blog: boolean,
-  enable_taxes_display: boolean,
+  is_tax_applicable: boolean,
   enable_enterprise: boolean,
   posthog_api_token: ?string,
   posthog_api_host: ?string

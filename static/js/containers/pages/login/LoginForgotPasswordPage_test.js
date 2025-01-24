@@ -63,7 +63,7 @@ describe("LoginForgotPasswordPage", () => {
       },
     );
 
-    assert.lengthOf(helper.browserHistory, 2);
+    assert.equal(helper.browserHistory.index, 1);
     assert.include(helper.browserHistory.location, {
       pathname: routes.root,
       search: "",

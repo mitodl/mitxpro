@@ -21,7 +21,7 @@
       <br />
       Cambridge, MA 02139 USA
       <br />
-      {% if enable_taxes_display %}
+      {% if is_tax_applicable %}
       GSTIN: 9923USA29055OSB
       <br />
       {% endif %}
@@ -51,7 +51,7 @@
             {% for line in lines %}
             <p>
                 <strong style="font-weight: 700;">Order Item:</strong> {{ line.content_title }}<br>
-                {% if enable_taxes_display %}
+                {% if is_tax_applicable %}
                 <strong style="font-weight: 700;">HSN:</strong> 9992<br>
                 {% endif %}
                 <strong style="font-weight: 700;">Product Number:</strong> {{ line.readable_id }}<br>
@@ -61,7 +61,7 @@
                 <strong style="font-weight: 700;">Quantity:</strong>  {{ line.quantity }}<br>
                 <strong style="font-weight: 700;">Unit Price:</strong> ${{ line.price }}<br>
                 <strong style="font-weight: 700;">Discount:</strong> {{ line.discount|format_discount }}<br>
-                {% if enable_taxes_display %}
+                {% if is_tax_applicable %}
                 <strong style="font-weight: 700;">Total Before Tax:</strong> ${{ line.total_before_tax|floatformat:2 }}<br>
                 <strong style="font-weight: 700;">Tax ({{ order.tax_rate|floatformat:"-2" }}%):</strong> ${{ line.tax_paid|floatformat:2 }}<br>
                 {% endif %}

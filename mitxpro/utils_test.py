@@ -9,7 +9,9 @@ from types import SimpleNamespace
 import pytest
 from rest_framework import status
 
+from ecommerce.api import is_tax_applicable
 from ecommerce.models import Order
+from mitxpro import features
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
     all_equal,
@@ -455,8 +457,17 @@ def test_request_get_with_timeout_retry(mocker):
     assert result == mock_response
 
 
-def test_get_js_settings(settings, rf, user):
+def test_get_js_settings(settings, rf, user, mocker):
     """Test get_js_settings"""
+
+    def posthog_is_enabled_side_effect(*args, **kwargs):
+        """
+        Side effect to return True/False for specific features while mocking posthog is_enabled.
+        """
+        if args[0] == features.DIGITAL_CREDENTIALS:  # noqa: SIM103
+            return True
+        return False
+
     settings.GA_TRACKING_ID = "fake"
     settings.GTM_TRACKING_ID = "fake"
     settings.ENVIRONMENT = "test"
@@ -468,13 +479,12 @@ def test_get_js_settings(settings, rf, user):
         "HELP_WIDGET_ENABLED": False,
         "HELP_WIDGET_KEY": "fake_key",
     }
-    settings.FEATURES["DIGITAL_CREDENTIALS"] = True
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
-    settings.FEATURES["COURSE_DROPDOWN"] = False
-    settings.FEATURES["WEBINARS"] = False
-    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
-    settings.FEATURES["ENABLE_BLOG"] = False
-    settings.FEATURES["ENABLE_ENTERPRISE"] = False
+    mocker.patch(
+        "mitol.olposthog.features.is_enabled",
+        side_effect=posthog_is_enabled_side_effect,
+    )
+    mocker.patch("ecommerce.api.is_tax_applicable", return_value=False)
 
     request = rf.get("/")
     request.user = user
@@ -490,13 +500,10 @@ def test_get_js_settings(settings, rf, user):
         "support_email": settings.EMAIL_SUPPORT,
         "site_name": settings.SITE_NAME,
         "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
-        "digital_credentials": settings.FEATURES.get("DIGITAL_CREDENTIALS", False),
+        "digital_credentials": True,
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
-        "course_dropdown": settings.FEATURES.get("COURSE_DROPDOWN", False),
-        "webinars": settings.FEATURES.get("WEBINARS", False),
-        "enable_taxes_display": settings.FEATURES.get("ENABLE_TAXES_DISPLAY", False),
-        "enable_blog": settings.FEATURES.get("ENABLE_BLOG", False),
-        "enable_enterprise": settings.FEATURES.get("ENABLE_ENTERPRISE", False),
+        "is_tax_applicable": is_tax_applicable(request),
+        "enable_enterprise": False,
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
         "posthog_api_host": settings.POSTHOG_API_HOST,
     }

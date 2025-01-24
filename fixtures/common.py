@@ -107,7 +107,7 @@ def valid_address_dict():
 
 
 @pytest.fixture
-def nplusone_fail(settings):  # noqa: PT004
+def nplusone_fail(settings):
     """Configures the nplusone app to raise errors"""
     settings.NPLUSONE_RAISE = True
 

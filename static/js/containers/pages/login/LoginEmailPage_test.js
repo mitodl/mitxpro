@@ -77,8 +77,7 @@ describe("LoginEmailPage", () => {
         { email },
         { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
       );
-
-      assert.lengthOf(helper.browserHistory, 1);
+      assert.equal(helper.browserHistory.index, 0);
       sinon.assert.calledWith(setErrorsStub, fieldErrors);
       sinon.assert.calledWith(setSubmittingStub, false);
     });
@@ -100,7 +99,7 @@ describe("LoginEmailPage", () => {
       { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
     );
 
-    assert.lengthOf(helper.browserHistory, 2);
+    assert.equal(helper.browserHistory.index, 1);
     assert.include(helper.browserHistory.location, {
       pathname: routes.login.password,
       search: "",

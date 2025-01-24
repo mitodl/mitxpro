@@ -112,64 +112,47 @@ describe("TopAppBar component", () => {
           .exists(),
       );
     });
-    [true, false].forEach((courseDropdown) => {
-      it("has a CatalogMenu component", () => {
-        SETTINGS.course_dropdown = courseDropdown;
-        if (courseDropdown) {
-          assert.isOk(
-            shallow(
-              <TopAppBar
-                currentUser={user}
-                location={null}
-                errorPageHeader={null}
-                courseTopics={courseTopics}
-              />,
-            )
-              .find("CatalogMenu")
-              .exists(),
-          );
-          assert.isNotOk(
-            shallow(
-              <TopAppBar
-                currentUser={user}
-                location={null}
-                errorPageHeader={null}
-                courseTopics={courseTopics}
-              />,
-            )
-              .find("a")
-              .at(1)
-              .exists(),
-          );
-        } else {
-          assert.isNotOk(
-            shallow(
-              <TopAppBar
-                currentUser={user}
-                location={null}
-                errorPageHeader={null}
-                courseTopics={courseTopics}
-              />,
-            )
-              .find("CatalogMenu")
-              .exists(),
-          );
-          assert.equal(
-            shallow(
-              <TopAppBar
-                currentUser={user}
-                location={null}
-                errorPageHeader={null}
-                courseTopics={courseTopics}
-              />,
-            )
-              .find("a")
-              .at(1)
-              .prop("href"),
-            routes.catalog,
-          );
-        }
-      });
+    it("has a CatalogMenu component", () => {
+      assert.isOk(
+        shallow(
+          <TopAppBar
+            currentUser={user}
+            location={null}
+            errorPageHeader={null}
+            courseTopics={courseTopics}
+          />,
+        )
+          .find("CatalogMenu")
+          .exists(),
+      );
+      assert.equal(
+        shallow(
+          <TopAppBar
+            currentUser={user}
+            location={null}
+            errorPageHeader={null}
+            courseTopics={courseTopics}
+          />,
+        )
+          .find("a")
+          .at(1)
+          .prop("href"),
+        routes.webinars,
+      );
+      assert.equal(
+        shallow(
+          <TopAppBar
+            currentUser={user}
+            location={null}
+            errorPageHeader={null}
+            courseTopics={courseTopics}
+          />,
+        )
+          .find("a")
+          .at(2)
+          .prop("href"),
+        routes.blog,
+      );
     });
 
     it("does have a button to collapse the menu", () => {
@@ -217,7 +200,6 @@ describe("TopAppBar component", () => {
     });
 
     it("does not have a login/register on ecommerce bulk receipt page", () => {
-      SETTINGS.course_dropdown = true;
       const location = {
         pathname: "/ecommerce/bulk/receipt/",
         hash: "",

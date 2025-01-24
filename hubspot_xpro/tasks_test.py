@@ -17,6 +17,7 @@ from mitol.hubspot_api.models import HubspotObject
 
 from b2b_ecommerce.factories import B2BOrderFactory
 from b2b_ecommerce.models import B2BOrder
+from courses.factories import CourseFactory
 from ecommerce.factories import (
     LineFactory,
     OrderFactory,
@@ -163,7 +164,8 @@ def test_batch_upsert_hubspot_objects(settings, mocker, mocked_celery, create):
         "hubspot_xpro.tasks.batch_update_hubspot_objects_chunked.s"
     )
     unsynced_products = ProductFactory.create_batch(2)
-    synced_products = ProductFactory.create_batch(103)
+    course = CourseFactory.create()
+    synced_products = ProductFactory.create_batch(103, content_object__course=course)
     content_type = ContentType.objects.get_for_model(Product)
     hs_objects = [
         HubspotObjectFactory.create(
@@ -349,7 +351,7 @@ def test_batch_upsert_associations_chunked(mocker):
     for order in orders:
         LineFactory.create(
             order=order,
-            product_version=ProductVersionFactory.create(price=Decimal(200.00)),
+            product_version=ProductVersionFactory.create(price=Decimal("200.00")),
         )
     expected_line_associations = [
         PublicAssociation(

@@ -5,6 +5,8 @@ from datetime import timedelta
 import factory
 import pytest
 from django.core.exceptions import ValidationError
+from django.db.models.deletion import ProtectedError
+from django.db.utils import IntegrityError
 
 from cms.factories import (
     CertificatePageFactory,
@@ -16,6 +18,7 @@ from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.factories import (
     CompanyFactory,
     CourseFactory,
+    CourseLanguageFactory,
     CourseRunCertificateFactory,
     CourseRunEnrollmentFactory,
     CourseRunFactory,
@@ -26,6 +29,9 @@ from courses.factories import (
     ProgramRunFactory,
 )
 from courses.models import CourseRunEnrollment, limit_to_certificate_pages
+from courses.sync_external_courses.external_course_sync_api import (
+    EMERITUS_PLATFORM_NAME,
+)
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import format_as_iso8601
 from mitxpro.utils import now_in_utc
@@ -206,7 +212,7 @@ def test_external_courseware_marketing_url():
 
 def test_program_page():
     """
-    page property should return an associated Wagtail page if one exists
+    Page property should return an associated Wagtail page if one exists
     """
     program = ProgramFactory.create(page=None)
     assert program.page is None
@@ -549,7 +555,7 @@ def test_course_is_catalog_visible():
 
 def test_course_page():
     """
-    page property should return an associated Wagtail page if one exists
+    Page property should return an associated Wagtail page if one exists
     """
     course = CourseFactory.create(page=None)
     assert course.page is None
@@ -812,7 +818,26 @@ def test_platform_name_is_unique():
     """
     Tests that case-insensitive platform name is unique.
     """
-    PlatformFactory.create(name="Emeritus")
+    PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
 
     with pytest.raises(ValidationError):
-        PlatformFactory.create(name="emeritus")
+        PlatformFactory.create(name=EMERITUS_PLATFORM_NAME.lower())
+
+
+def test_course_language_unique():
+    """
+    Tests that case-insensitive course language is unique.
+    """
+    CourseLanguageFactory.create(name="UNIQUE_LANGUAGE")
+
+    with pytest.raises(IntegrityError):
+        CourseLanguageFactory.create(name="unique_language")
+
+
+def test_course_language_prevent_delete():
+    """
+    Tests that course language cannot be deleted if associated with a Courseware Page.
+    """
+    course_page = CoursePageFactory.create()
+    with pytest.raises(ProtectedError):
+        course_page.language.delete()

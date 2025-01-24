@@ -3,7 +3,7 @@
 **SECTIONS**
 
 1. [Initial Setup](#initial-setup)
-1. [Optional Setup](#optional-setup)
+2. [Optional Setup](#optional-setup)
 
 # Initial Setup
 
@@ -13,13 +13,10 @@ Run through those steps **including the addition of `/etc/hosts` aliases and the
 
 ### Configure xPro and Open edX
 
-1. See [Configure Open edX](docs/configure_open_edx.md)
-1. Add an alias to `/etc/hosts` for Open edX. We have standardized this alias
-   to `edx.odl.local`. Your `/etc/hosts` entry should look like this:
+See Configure Open edX:
 
-   ```
-   127.0.0.1       edx.odl.local
-   ```
+- [Using Tutor](https://github.com/mitodl/handbook/tree/master/openedx/MITx-edx-integration-tutor.md) (Recommended)
+- [Using Devstack](https://github.com/mitodl/handbook/tree/master/openedx/MITx-edx-integration-devstack.md) (Deprecated)
 
 ### Add settings values
 
@@ -31,27 +28,6 @@ MAILGUN_RECIPIENT_OVERRIDE=<your email address>
 # Ask a fellow developer for these values
 MAILGUN_SENDER_DOMAIN=
 MAILGUN_KEY=
-```
-
-OS-specific settings to add to your `.env` file:
-
-```
-### Linux
-# EDX_IP should be something like 172.22.0.1
-OPENEDX_API_BASE_URL=http://$EDX_IP:18000
-
-### OSX
-OPENEDX_API_BASE_URL=http://docker.for.mac.localhost:18000
-OPENEDX_BASE_REDIRECT_URL=http://edx.odl.local:18000
-```
-
-### Configure Wagtail (CMS)
-
-There are a few changes that must be made to the CMS for the site
-to be usable. You can apply all of those changes by running a management command:
-
-```
-docker-compose run --rm web ./manage.py configure_wagtail
 ```
 
 # Optional Setup
@@ -71,14 +47,11 @@ for running the app
     docker-compose run --rm web pytest /path/to/test.py
     # Run Python test cases in a single file that match some function/class name
     docker-compose run --rm web pytest /path/to/test.py -k test_some_logic
-    # Run Python linter
-    docker-compose run --rm web ruff check .
 
     ### PYTHON FORMATTING
-    # Format all python files
-    docker-compose run --rm web ruff format --check .
-    # Format a specific file
-    docker-compose run --rm ruff format --check /path/to/file.py
+    # We have a Ruff hook in the pre-commit that checks and formats files wherever possible.
+    pip install pre-commit
+    pre-commit run --all-files
 
     ### JS/CSS TESTS/LINTING
     # We also include a helper script to execute JS tests in most of our projects
@@ -100,6 +73,7 @@ for running the app
 ### Seed data
 
 Seed data can be generated via management command. It's designed to be idempotent, so running it multiple times should not create multiple sets of data.
+**NOTE:** If you have run `configure_instance` command, it will also create seed data, you don't need to run `seed_data` command again
 
 ```
 docker-compose run --rm web ./manage.py seed_data

@@ -15,19 +15,22 @@ from cms.blocks import (
     SuccessStoriesBlock,
     UserTestimonialBlock,
 )
-from cms.constants import UPCOMING_WEBINAR
+from cms.constants import COMMON_COURSEWARE_COMPONENT_INDEX_SLUG, UPCOMING_WEBINAR
 from cms.models import (
     BlogIndexPage,
     CatalogPage,
     CertificatePage,
+    CommonComponentIndexPage,
     CompaniesLogoCarouselSection,
     CourseIndexPage,
+    CourseOverviewPage,
     CoursePage,
     CoursesInProgramPage,
     EnterprisePage,
     ExternalCoursePage,
     ExternalProgramPage,
     FacultyMembersPage,
+    ForTeamsCommonPage,
     ForTeamsPage,
     FrequentlyAskedQuestion,
     FrequentlyAskedQuestionPage,
@@ -36,6 +39,7 @@ from cms.models import (
     LearningJourneySection,
     LearningOutcomesPage,
     LearningStrategyFormSection,
+    LearningTechniquesCommonPage,
     LearningTechniquesPage,
     NewsAndEventsBlock,
     NewsAndEventsPage,
@@ -52,7 +56,12 @@ from cms.models import (
     WebinarPage,
     WhoShouldEnrollPage,
 )
-from courses.factories import CourseFactory, ProgramFactory
+from courses.factories import (
+    CourseFactory,
+    CourseLanguageFactory,
+    PlatformFactory,
+    ProgramFactory,
+)
 
 factory.Faker.add_provider(internet)
 
@@ -74,6 +83,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
@@ -104,6 +114,7 @@ class CoursePageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
     certificate_page = factory.RelatedFactory(
         "cms.factories.CertificatePageFactory", "parent"
@@ -137,6 +148,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:
@@ -166,6 +178,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
     subhead = factory.fuzzy.FuzzyText(prefix="Subhead ")
     thumbnail_image = factory.SubFactory(wagtail_factories.ImageFactory)
     background_image = factory.SubFactory(wagtail_factories.ImageFactory)
+    language = factory.SubFactory(CourseLanguageFactory)
     parent = factory.SubFactory(wagtail_factories.PageFactory)
 
     class Meta:
@@ -465,7 +478,7 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
     """CertificatePage factory class"""
 
     product_name = factory.fuzzy.FuzzyText(prefix="product_name")
-    CEUs = factory.Faker("pystr_format", string_format="#.#")
+    CEUs = factory.fuzzy.FuzzyDecimal(low=1, high=10, precision=2)
     partner_logo = factory.SubFactory(wagtail_factories.ImageChooserBlockFactory)
     signatories = wagtail_factories.StreamFieldFactory(
         {"signatory": factory.SubFactory(SignatoryChooserBlockFactory)}
@@ -576,3 +589,43 @@ class LearningStrategyFormPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = LearningStrategyFormSection
+
+
+class CourseOverviewPageFactory(wagtail_factories.PageFactory):
+    """CourseOverviewPage factory class"""
+
+    heading = factory.fuzzy.FuzzyText(prefix="heading ")
+    overview = factory.LazyFunction(lambda: RichText(f"<p>{FAKE.paragraph()}</p>"))
+
+    class Meta:
+        model = CourseOverviewPage
+
+
+class CommonComponentIndexPageFactory(wagtail_factories.PageFactory):
+    """CommonComponentIndexPage factory class"""
+
+    title = factory.fuzzy.FuzzyText()
+    slug = COMMON_COURSEWARE_COMPONENT_INDEX_SLUG
+
+    class Meta:
+        model = CommonComponentIndexPage
+
+
+class LearningTechniqueCommonPageFactory(LearningTechniquesPageFactory):
+    """LearningTechniquesCommonPage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
+    title = factory.fuzzy.FuzzyText()
+
+    class Meta:
+        model = LearningTechniquesCommonPage
+
+
+class ForTeamsCommonPageFactory(ForTeamsPageFactory):
+    """ForTeamsCommonPage factory class"""
+
+    platform = factory.SubFactory(PlatformFactory)
+    title = factory.fuzzy.FuzzyText()
+
+    class Meta:
+        model = ForTeamsCommonPage

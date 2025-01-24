@@ -19,7 +19,7 @@ from sheets.utils import ResultType
 
 
 @pytest.fixture
-def courseware_objects():  # noqa: PT004
+def courseware_objects():
     """Database objects that CSV data depends on"""
     run = CourseRunFactory.create(courseware_id="course-v1:edX+DemoX+Demo_Course")
     ProductVersionFactory.create(product__content_object=run)
@@ -96,13 +96,13 @@ def test_full_sheet_process(
     expected_processed_rows = {6, 8}
     expected_failed_rows = {5, 7}
     assert ResultType.PROCESSED.value in result
-    assert (
-        set(result[ResultType.PROCESSED.value]) == expected_processed_rows
-    ), f"Rows {expected_processed_rows!s} as defined in coupon_requests.csv should be processed"
+    assert set(result[ResultType.PROCESSED.value]) == expected_processed_rows, (
+        f"Rows {expected_processed_rows!s} as defined in coupon_requests.csv should be processed"
+    )
     assert ResultType.FAILED.value in result
-    assert (
-        set(result[ResultType.FAILED.value]) == expected_failed_rows
-    ), f"Rows {expected_failed_rows!s} as defined in coupon_requests.csv should fail"
+    assert set(result[ResultType.FAILED.value]) == expected_failed_rows, (
+        f"Rows {expected_failed_rows!s} as defined in coupon_requests.csv should fail"
+    )
     # A CouponGenerationRequest should be created for each row that wasn't ignored and did not fail full sheet
     # validation (CSV has 1 row that should fail validation, hence the 1)
     assert CouponGenerationRequest.objects.all().count() == (

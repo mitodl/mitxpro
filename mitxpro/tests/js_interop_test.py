@@ -12,7 +12,7 @@ def test_js_settings(mocker, rf):
 
     request = rf.get("/")
     context = Context({"request": request})
-    template = Template("{% load js_interop %}" "{% js_settings %}")
+    template = Template("{% load js_interop %}{% js_settings %}")
 
     rendered_template = template.render(context)
     assert (

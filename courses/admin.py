@@ -13,6 +13,7 @@ from mitxpro.utils import get_field_names, now_in_utc
 
 from .models import (
     Course,
+    CourseLanguage,
     CourseRun,
     CourseRunCertificate,
     CourseRunEnrollment,
@@ -55,6 +56,7 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ["title", "readable_id", "platform__name", "external_course_id"]
     list_display = ("id", "title", "get_program", "position_in_program", "platform")
     list_filter = ["live", "platform", "program"]
+    list_select_related = ["program", "platform"]
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
@@ -90,6 +92,8 @@ class CourseRunAdmin(TimestampedModelAdmin):
         "enrollment_start",
     )
     list_filter = ["live", "course__platform", "course"]
+    list_select_related = ["course", "course__platform"]
+    autocomplete_fields = ["course"]
 
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
@@ -418,4 +422,13 @@ class PlatformAdmin(TimestampedModelAdmin):
 
     model = Platform
     list_display = ["id", "name", "created_on", "updated_on"]
+    search_fields = ["name"]
+
+
+@admin.register(CourseLanguage)
+class CourseLanguageAdmin(admin.ModelAdmin):
+    """Admin for CourseLanguage"""
+
+    model = CourseLanguage
+    list_display = ["id", "name", "priority"]
     search_fields = ["name"]

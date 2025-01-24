@@ -151,7 +151,7 @@ def test_send_course_run_enrollment_email_error(mocker):
 @pytest.mark.parametrize("enabled", [True, False])
 def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
     """send_course_run_enrollment_welcome_email should send a welcome email for the given enrollment"""
-    settings.FEATURES["ENROLLMENT_WELCOME_EMAIL"] = enabled
+    mocker.patch("ecommerce.mail_api.is_enabled", return_value=enabled)
     mock_log = mocker.patch("ecommerce.mail_api.log")
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     enrollment = CourseRunEnrollmentFactory.create()
@@ -168,7 +168,7 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
 
     if not enabled:
         mock_log.info.assert_called_once_with(
-            "Feature ENROLLMENT_WELCOME_EMAIL is disabled."
+            "Feature `enrollment_welcome_email` is disabled."
         )
     else:
         patched_mail_api.context_for_user.assert_called_once_with(
@@ -205,7 +205,7 @@ def test_send_b2b_receipt_email(mocker, settings, has_discount):
     send_b2b_receipt_email(order)
 
     run = order.product_version.product.content_object
-    download_url = f'{urljoin(settings.SITE_BASE_URL, reverse("bulk-enrollment-code-receipt"))}?hash={str(order.unique_id)}'  # noqa: RUF010
+    download_url = f"{urljoin(settings.SITE_BASE_URL, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
 
     patched_mail_api.context_for_user.assert_called_once_with(
         user=None,
@@ -260,7 +260,7 @@ def test_send_b2b_receipt_email_error(mocker):
 )
 def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
     """send_ecommerce_order_receipt should send a receipt email"""
-    settings.FEATURES["ENABLE_TAXES_DISPLAY"] = False
+    mocker.patch("ecommerce.api.is_tax_applicable", return_value=False)
     patched_mail_api = mocker.patch("ecommerce.mail_api.api")
     date = datetime.datetime(2010, 1, 1, 0, tzinfo=datetime.UTC)
     user = UserFactory.create(
@@ -344,7 +344,7 @@ def test_send_ecommerce_order_receipt(mocker, receipt_data, settings):
                 "company": user.profile.company,
                 "vat_id": "AT12349876",
             },
-            "enable_taxes_display": False,
+            "is_tax_applicable": False,
             "support_email": settings.EMAIL_SUPPORT,
         },
     )

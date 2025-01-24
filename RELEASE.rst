@@ -1,6 +1,134 @@
 Release Notes
 =============
 
+Version 0.170.0 (Released January 14, 2025)
+---------------
+
+- fix: language not available in course draft pages (#3365)
+- chore(deps): lock file maintenance (#3366)
+- chore(deps): update codecov/codecov-action digest to 1e68e06 (#3364)
+- refactor: remove ENABLE_CATALOG_SORTING (#3359)
+- refactor: remove ENABLE_EXTERNAL_COURSE_SYNC (#3360)
+- feat: Add language support in courses (#3335)
+- refactor: remove COURSE_DROPDOWN flag (#3361)
+
+Version 0.169.1 (Released January 08, 2025)
+---------------
+
+- refactor: remove ENABLE_TAXES_DISPLAY feature flag (#3354)
+
+Version 0.169.0 (Released January 07, 2025)
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3355)
+- feat: convert CEUs to decimal (#3217)
+
+Version 0.168.0 (Released January 06, 2025)
+---------------
+
+- chore: improve tests execution time for hubspot (#3350)
+- revert: node version (#3352)
+- fix: npm tests locally (#3351)
+- fix(deps): update dependency django to v4.2.17 [security] (#3345)
+- fix: replace matchPackages with matchPackageNames (#3343)
+- [pre-commit.ci] pre-commit autoupdate (#3344)
+- fix(deps): update dependency hls.js to v1 (#3060)
+- Add min and max weekly_hours to reflect time_commitment (#3337)
+- [pre-commit.ci] pre-commit autoupdate (#3342)
+- min_weeks and max_weeks field added to replace duration field (#3336)
+- feat: make course searchable in courseRun admin (#3341)
+
+Version 0.167.0 (Released January 02, 2025)
+---------------
+
+- feat: How you will learn and B2B section added for external courses (#3318)
+- [pre-commit.ci] pre-commit autoupdate (#3338)
+- feat: Course overview child page added (#3324)
+- fix(deps): update dependency history to v5 (#3262)
+
+Version 0.166.0 (Released December 16, 2024)
+---------------
+
+- feat: add Global Alumni in external course sync (#3330)
+- [pre-commit.ci] pre-commit autoupdate (#3332)
+
+Version 0.165.0 (Released December 11, 2024)
+---------------
+
+- chore: change backend name (#3327)
+
+Version 0.164.3 (Released December 05, 2024)
+---------------
+
+- feat: add emeritus api list view (#3329)
+- [pre-commit.ci] pre-commit autoupdate (#3326)
+
+Version 0.164.2 (Released December 02, 2024)
+---------------
+
+- feat(api): has_prerequisites field added in courses and programs API (#3306)
+- Revert "fix(deps): update dependency sass to ~1.81.0" (#3323)
+- chore(deps): Remove unused package 'set-value' (#3307)
+- perf: select related objects for course and courserun admin (#3316)
+- chore(deps): update codecov/codecov-action action to v5 (#3314)
+- fix: strip emeritus course title during sync (#3317)
+- [pre-commit.ci] pre-commit autoupdate (#3315)
+- fix(deps): update dependency sass to ~1.81.0 (#3313)
+- chore(deps): update postgres docker tag to v17.1 (#3312)
+- chore(deps): update dependency faker to v30.10.0 (#3311)
+- fix(deps): update dependency boto3 to v1.35.63 (#3310)
+
+Version 0.164.1 (Released November 21, 2024)
+---------------
+
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8 (#3243)
+- chore(deps): update node.js to v22 (#3244)
+- chore(deps): update dependency normalize-url to v8 (#3240)
+- chore: run tests in parallel (#3304)
+- chore(deps): update postgres docker tag to v17 (#3198)
+- chore(deps): update dependency faker to v30 (#3224)
+- chore(deps): update dependency freezegun to v1 (#3236)
+- chore(deps): lock file maintenance (#3302)
+- fix(deps): update dependency django-hijack to v3.7.0 (#3234)
+- chore: remove unused dep mixin-deep (#3303)
+- chore(deps): update dependency ruff to ^0.7.0 (#3233)
+- fix(deps): update dependency wagtail to v5.2.7 (#3232)
+- fix(deps): update dependency boto3 to v1.35.58 (#3230)
+- fix(deps): update dependency uwsgi to v2.0.28 (#3231)
+- chore(deps): update actions/setup-python digest to 0b93645 (#3225)
+- [pre-commit.ci] pre-commit autoupdate (#3229)
+
+Version 0.164.0 (Released November 13, 2024)
+---------------
+
+- fix(deps): update dependency psycopg2 to v2.9.10 (#3227)
+- fix(deps): update dependency boto3 to v1.35.57 (#3226)
+- fix(deps): update dependency zeep to v4.3.1 (#3223)
+- [pre-commit.ci] pre-commit autoupdate (#3219)
+
+Version 0.163.2 (Released November 06, 2024)
+---------------
+
+- Add a `configure_instance` management command (#3212)
+
+Version 0.163.1 (Released November 05, 2024)
+---------------
+
+- refactor: enhance topic assignment command to ignore course pages without course (#3220)
+
+Version 0.163.0 (Released November 05, 2024)
+---------------
+
+- feat: add management command for course/topics assignment (#3216)
+
+Version 0.162.0 (Released October 31, 2024)
+---------------
+
+- fix: allow only sellable product creation (#3211)
+- [pre-commit.ci] pre-commit autoupdate (#3213)
+- [pre-commit.ci] pre-commit autoupdate (#3209)
+- feat: add posthog integration (#3207)
+
 Version 0.161.1 (Released October 23, 2024)
 ---------------
 

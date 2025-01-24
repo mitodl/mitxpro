@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.161.1"
+VERSION = "0.170.0"
 
 env.reset()
 
@@ -761,14 +761,14 @@ CRON_COURSERUN_SYNC_DAYS = get_string(
 )
 
 CRON_EXTERNAL_COURSERUN_SYNC_HOURS = get_string(
-    name="CRON_EMERITUS_COURSERUN_SYNC_HOURS",
+    name="CRON_EXTERNAL_COURSERUN_SYNC_HOURS",
     default="0",
-    description="'hours' value for the 'sync-emeritus-course-runs' scheduled task (defaults to midnight)",
+    description="'hours' value for the 'sync-external-course-runs' scheduled task (defaults to midnight)",
 )
 CRON_EXTERNAL_COURSERUN_SYNC_DAYS = get_string(
-    name="CRON_EMERITUS_COURSERUN_SYNC_DAYS",
+    name="CRON_EXTERNAL_COURSERUN_SYNC_DAYS",
     default=None,
-    description="'day_of_week' value for 'sync-emeritus-course-runs' scheduled task (default will run once a day).",
+    description="'day_of_week' value for 'sync-external-course-runs' scheduled task (default will run once a day).",
 )
 
 CRON_BASKET_DELETE_HOURS = get_string(
@@ -885,8 +885,8 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year="*",
         ),
     },
-    "sync-emeritus-course-runs": {
-        "task": "courses.tasks.task_sync_emeritus_course_runs",
+    "sync-external-course-runs": {
+        "task": "courses.tasks.task_sync_external_course_runs",
         "schedule": crontab(
             minute="0",
             hour=CRON_EXTERNAL_COURSERUN_SYNC_HOURS,
@@ -905,38 +905,39 @@ CELERY_BEAT_SCHEDULE = {
             month_of_year="*",
         ),
     },
-}
-if FEATURES.get("COUPON_SHEETS"):
-    CELERY_BEAT_SCHEDULE["renew_all_file_watches"] = {
+    "renew_all_file_watches": {
         "task": "sheets.tasks.renew_all_file_watches",
         "schedule": (
             DRIVE_WEBHOOK_EXPIRATION_MINUTES - DRIVE_WEBHOOK_RENEWAL_PERIOD_MINUTES
         )
         * 60,
-    }
-    alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
-    if alt_sheets_processing:
-        CELERY_BEAT_SCHEDULE.update(
-            {
-                "handle-coupon-request-sheet": {
-                    "task": "sheets.tasks.handle_unprocessed_coupon_requests",
-                    "schedule": SHEETS_MONITORING_FREQUENCY,
-                }
-            }
-        )
+    },
+}
+
+alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
+if alt_sheets_processing:
     CELERY_BEAT_SCHEDULE.update(
         {
-            "update-assignment-delivery-dates": {
-                "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
-                "schedule": OffsettingSchedule(
-                    run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
-                    offset=timedelta(
-                        seconds=0 if not alt_sheets_processing else SHEETS_TASK_OFFSET
-                    ),
-                ),
+            "handle-coupon-request-sheet": {
+                "task": "sheets.tasks.handle_unprocessed_coupon_requests",
+                "schedule": SHEETS_MONITORING_FREQUENCY,
             }
         }
     )
+
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "update-assignment-delivery-dates": {
+            "task": "sheets.tasks.update_incomplete_assignment_delivery_statuses",
+            "schedule": OffsettingSchedule(
+                run_every=timedelta(seconds=SHEETS_MONITORING_FREQUENCY),
+                offset=timedelta(
+                    seconds=0 if not alt_sheets_processing else SHEETS_TASK_OFFSET
+                ),
+            ),
+        }
+    }
+)
 
 # Hijack
 HIJACK_INSERT_BEFORE = "</body>"
@@ -1070,7 +1071,18 @@ MITOL_AUTHENTICATION_FROM_EMAIL = MAILGUN_FROM_EMAIL
 MITOL_AUTHENTICATION_REPLY_TO_EMAIL = MITXPRO_REPLY_TO_ADDRESS
 
 
-MITXPRO_OAUTH_PROVIDER = "mitxpro-oauth2"
+OPENEDX_OAUTH_PROVIDER = get_string(
+    name="OPENEDX_OAUTH_PROVIDER",
+    default="mitxpro-oauth2",
+    description="Social auth oauth provider backend name",
+)
+
+OPENEDX_SOCIAL_LOGIN_PATH = get_string(
+    name="OPENEDX_SOCIAL_LOGIN_PATH",
+    default="/auth/login/mitxpro-oauth2/?auth_entry=login",
+    description="Open edX social auth login url",
+)
+
 OPENEDX_OAUTH_APP_NAME = get_string(
     name="OPENEDX_OAUTH_APP_NAME",
     default="edx-oauth-app",
@@ -1128,21 +1140,21 @@ EDX_API_CLIENT_TIMEOUT = get_int(
     description="Timeout (in seconds) for requests made via the edX API client",
 )
 
-EMERITUS_API_KEY = get_string(
-    name="EMERITUS_API_KEY",
+EXTERNAL_COURSE_SYNC_API_KEY = get_string(
+    name="EXTERNAL_COURSE_SYNC_API_KEY",
     default=None,
-    description="The API Key for Emeritus API",
+    description="The API Key for external course sync API",
     required=True,
 )
-EMERITUS_API_BASE_URL = get_string(
-    name="EMERITUS_API_BASE_URL",
+EXTERNAL_COURSE_SYNC_API_BASE_URL = get_string(
+    name="EXTERNAL_COURSE_SYNC_API_BASE_URL",
     default="https://mit-xpro.emeritus-analytics.io/",
-    description="Base API URL for Emeritus API",
+    description="Base API URL for external course sync API",
 )
-EMERITUS_API_REQUEST_TIMEOUT = get_int(
-    name="EMERITUS_API_TIMEOUT",
+EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT = get_int(
+    name="EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT",
     default=60,
-    description="API request timeout for Emeritus APIs in seconds",
+    description="API request timeout for external course sync APIs in seconds",
 )
 
 # django debug toolbar only in debug mode

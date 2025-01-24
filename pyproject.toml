@@ -13,14 +13,14 @@ python = "3.12.6"
 Pillow = "10.4.0"
 PyNaCl = "1.5.0"
 beautifulsoup4 = "4.8.2"
-boto3 = "1.35.39"
+boto3 = "1.36.2"
 celery = "5.4.0"
 celery-redbeat = "2.2.0"
 dj-database-url = "0.5.0"
-django = "4.2.16"
+django = "4.2.18"
 django-anymail = { version = "8.6", extras = ["mailgun"] }
 django-filter = "^23.4"
-django-hijack = "3.6.1"
+django-hijack = "3.7.1"
 django-ipware = "3.0.7"
 django-oauth-toolkit = "1.7.1"
 django-redis = "5.0.0"
@@ -45,7 +45,7 @@ mitol-django-oauth-toolkit-extensions = "2023.12.19.1"
 mitol-django-olposthog = "^2024.5.14"
 newrelic = "^8.4.0"
 pdftotext = "^2.1.1"
-psycopg2 = "2.9.9"
+psycopg2 = "2.9.10"
 pycountry = "24.6.1"
 pygsheets = "2.0.2"
 redis = "4.6.0"
@@ -55,18 +55,18 @@ social-auth-app-django = "^5.4.0"
 ulid-py = "^1.1.0"
 user-agents = "2.2.0"
 user-util = "0.3.1"
-uwsgi = "2.0.27"
-wagtail = "5.2.6"
+uwsgi = "2.0.28"
+wagtail = "5.2.7"
 wagtail-metadata = "5.0.0"
 xmltodict = "^0.14.0"
-zeep = "4.2.1"
+zeep = "4.3.1"
 
 [tool.poetry.group.dev.dependencies]
 bpython = "*"
 django-debug-toolbar = "*"
 factory-boy = "3.3.1"
-faker = "13.16.0"
-freezegun = "0.3.15"
+faker = "30.10.0"
+freezegun = "1.5.1"
 hypothesis = "4.24.6"
 ipdb = "*"
 nplusone = ">=0.8.1"
@@ -77,8 +77,8 @@ pytest-django = "*"
 pytest-env = "*"
 pytest-lazy-fixtures = "*"
 pytest-mock = "*"
+pytest-xdist = "*"
 responses = "*"
-ruff = "^0.6.0"
 safety = "*"
 semantic-version = "*"
 wagtail-factories = "*"
@@ -86,116 +86,3 @@ wagtail-factories = "*"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.ruff]
-target-version = "py312"
-line-length = 88
-
-[tool.ruff.lint]
-select = [
-    "A",  # flake8-builtins
-    # "AIR",  # Airflow
-    # "ANN",  # flake8-annotations
-    "ARG",  # flake8-unused-arguments
-    # "ASYNC",  # flake8-async
-    "B",  # flake8-bugbear
-    "BLE",  # flake8-blind-except
-    "C4",  # flake8-comprehensions
-    "C90",  # mccabe
-    # "COM",  # flake8-commas
-    # "CPY",  # flake8-copyright
-    "D",  # pydocstyle
-    "DJ",  # flake8-django
-    "DTZ",  # flake8-datetimez
-    "E",  # Pycodestyle Error
-    "EM",  # flake8-errmsg
-    "ERA",  # eradicate
-    "EXE",  # flake8-executable
-    "F",  # Pyflakes
-    "FA",  # flake8-future-annotations
-    "FBT",  # flake8-boolean-trap
-    "FIX",  # flake8-fixme
-    "FLY",  # flynt
-    # "FURB",  # refurb
-    "G",  # flake8-logging-format
-    "I",  # isort
-    "ICN",  # flake8-import-conventions
-    "INP",  # flake8-no-pep420
-    "INT",  # flake8-gettext
-    "ISC",  # flake8-implicit-str-concat
-    "N",  # pep8-naming
-    # "NPY",  # NumPy-specific rules
-    # "PD",  # pandas-vet
-    "PERF",  # Perflint
-    "PGH",  # pygrep-hooks
-    "PIE",  # flake8-pie
-    "PL",  # Pylint
-    "PT",  # flake8-pytest-style
-    "PTH",  # flake8-use-pathlib
-    "PYI",  # flake8-pyi
-    "Q",  # flake8-quotes
-    "RET",  # flake8-return
-    "RSE",  # flake8-raise
-    "RUF",  # Ruff-specific rules
-    "S",  # flake8-bandit
-    "SIM",  # flake8-simplify
-    "SLF",  # flake8-self
-    "SLOT",  # flake8-slots
-    "T10",  # flake8-debugger
-    "T20",  # flake8-print
-    "TCH",  # flake8-type-checking
-    "TD",  # flake8-todos
-    "TID",  # flake8-tidy-imports
-    "TRY",  # tryceratops
-    "UP",  # pyupgrade
-    "W",  # Pycodestyle Warning
-    "YTT",  # flake8-2020
-]
-ignore = [
-    "B008",
-    "B905",
-    "D106",
-    "D104",
-    "D200",
-    "D202",
-    "D205",
-    "D301",
-    "D400",
-    "D401",
-    "E501",
-    "N803",
-    "N806",
-    "N999",
-    "PIE804",
-    "PT023",
-    "RET505",
-    "RET506",
-    "RET507",
-    "RET508",
-    "RUF012",
-    "UP007",
-    "A003",
-    "TRY003",
-    "INP001",
-    "D105",
-    "D107",
-    "PLR0912",
-    "ISC001",
-]
-
-typing-modules = ["colour.hints"]
-
-[tool.ruff.lint.pydocstyle]
-convention = "pep257"
-
-[tool.ruff.lint.flake8-quotes]
-inline-quotes = "double"
-
-[tool.ruff.lint.flake8-pytest-style]
-fixture-parentheses = false
-
-[tool.ruff.lint.per-file-ignores]
-"*_test.py" = ["ARG001", "E501", "S101", "PLR2004"]
-"test_*.py" = ["ARG001", "E501", "S101", "PLR2004"]
-"**/migrations/**" = ["ARG001", "D101", "D100"]
-"repl.py" = ["S603"]
