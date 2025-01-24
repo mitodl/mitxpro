@@ -305,7 +305,12 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
         "course_runs_without_prices": set(),
         "certificates_created": set(),
         "certificates_updated": set(),
+        "deactivated_course_runs": set(),
     }
+
+    external_course_run_codes = [run["course_run_code"] for run in external_courses]
+    deactivated_course_run_codes = deactivate_removed_course_runs(external_course_run_codes, platform.name.lower())
+    stats["deactivated_course_runs"] = deactivated_course_run_codes
 
     for external_course_json in external_courses:
         external_course = ExternalCourse(external_course_json, keymap)
@@ -815,3 +820,20 @@ def create_course_overview_page(
     overview_page = CourseOverviewPage(overview=external_course.description)
     course_page.add_child(instance=overview_page)
     overview_page.save()
+
+def deactivate_removed_course_runs(external_course_run_codes, platform_name):
+    """
+    Deactivate the course runs in future that are not returned by external course sync.
+
+    Args:
+        external_course_run_codes (list): List of external course run codes.
+        platform_name (str): Name of the platform.
+    """
+    course_runs = CourseRun.objects.filter(course__platform__name__iexact=platform_name, start_date__gt=now_in_utc()).exclude(
+        external_course_run_id__in=external_course_run_codes
+    )  
+    course_runs.update(live=False)
+    log.info(
+        f"Deactivated {course_runs.count()} course runs for platform {platform_name}."
+    )
+    return set(course_runs.values_list("external_course_run_id", flat=True))
