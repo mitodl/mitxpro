@@ -11,6 +11,7 @@ from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Subquery
 from wagtail.images.models import Image
 from wagtail.models import Page
 
@@ -832,10 +833,12 @@ def deactivate_removed_course_runs(external_course_run_codes, platform_name):
         external_course_run_codes (list): List of external course run codes.
         platform_name (str): Name of the platform.
     """
-    course_runs = CourseRun.objects.filter(
-        course__platform__name__iexact=platform_name, start_date__gt=now_in_utc()
-    ).exclude(external_course_run_id__in=external_course_run_codes)
+    course_runs = CourseRun.objects.filter(course__platform__name__iexact=platform_name, start_date__gt=now_in_utc()).exclude(
+        external_course_run_id__in=external_course_run_codes
+    )
+    Product.objects.filter(object_id__in=Subquery(course_runs.values("id"))).update(is_active=False)
     course_runs.update(live=False)
+
     log.info(
         f"Deactivated {course_runs.count()} course runs for platform {platform_name}."
     )
