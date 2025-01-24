@@ -312,6 +312,10 @@ def defer_enrollment(
         .order_by("-created_on")
         .first()
     )
+    if not from_enrollment:
+        raise ValidationError(
+            f"User is not enrolled in course run '{from_courseware_id}'"  # noqa: EM102
+        )
     if not force and not from_enrollment.active:
         raise ValidationError(
             f"Cannot defer from inactive enrollment (id: {from_enrollment.id}, run: {from_enrollment.run.courseware_id}, user: {user.email}). "  # noqa: EM102
