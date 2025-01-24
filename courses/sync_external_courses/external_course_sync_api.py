@@ -514,6 +514,9 @@ def create_or_update_product_and_product_version(external_course, course_run):
             content_type=ContentType.objects.get_for_model(CourseRun),
             object_id=course_run.id,
         )
+        if not product_created and not product.is_active:
+            product.is_active = True
+            product.save()
         ProductVersion.objects.create(
             product=product,
             price=external_course.price,
@@ -704,10 +707,12 @@ def create_or_update_external_course_run(course, external_course):
             and course_run.enrollment_end.date()
             != external_course.enrollment_end.date()
         )
+        or course_run.live is False
     ):
         course_run.start_date = external_course.start_date
         course_run.end_date = external_course.end_date
         course_run.enrollment_end = external_course.enrollment_end
+        course_run.live = True
         course_run.save()
         is_updated = True
 
