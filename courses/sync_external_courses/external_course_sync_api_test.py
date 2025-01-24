@@ -39,6 +39,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     parse_external_course_data_str,
     save_page_revision,
     update_external_course_runs,
+    deactivate_removed_course_runs,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
@@ -962,3 +963,25 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.end_date = end_date
     assert external_course.validate_end_date() == is_valid
+
+@pytest.mark.parametrize(
+    ("external_course_run_id","api_course_run_codes","start_date", "is_live"),
+    [
+        ("MO-DBIP.ELE-99-09#1",["MO-DBIP.ELE-99-09#1"], now_in_utc() + timedelta(days=1), True),
+        ("MO-DBIP.ELE-99-09#1",["MO-DBIP.ELE-99-09#2"], now_in_utc() - timedelta(days=1), True),
+        ("MO-DBIP.ELE-99-09#1",["MO-DBIP.ELE-99-09#1"], now_in_utc() - timedelta(days=1), True),
+        ("MO-DBIP.ELE-99-09#1",["MO-DBIP.ELE-99-09#2"], now_in_utc() + timedelta(days=1), False),
+    ],
+)
+@pytest.mark.django_db
+def test_deactivate_removed_course_runs(external_course_run_id, api_course_run_codes, start_date, is_live):
+    """
+    Tests that `deactivate_removed_course_runs` deactivates the removed course runs.
+    """
+    platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
+    course = CourseFactory.create(platform=platform, is_external=True)
+    course_run = CourseRunFactory.create(course=course, live=True, external_course_run_id=external_course_run_id, start_date=start_date)
+    deactivate_removed_course_runs(api_course_run_codes, EMERITUS_PLATFORM_NAME)
+    course_run.refresh_from_db()
+    assert course_run.live == is_live
+    
