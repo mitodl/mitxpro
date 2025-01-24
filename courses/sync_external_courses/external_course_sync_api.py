@@ -833,7 +833,7 @@ def deactivate_removed_course_runs(external_course_run_codes, platform_name):
         external_course_run_codes (list): List of external course run codes.
         platform_name (str): Name of the platform.
     """
-    course_runs = CourseRun.objects.filter(course__platform__name__iexact=platform_name, start_date__gt=now_in_utc()).exclude(
+    course_runs = CourseRun.objects.filter(course__platform__name__iexact=platform_name, start_date__gt=now_in_utc(), live=True).exclude(
         external_course_run_id__in=external_course_run_codes
     )
     Product.objects.filter(object_id__in=Subquery(course_runs.values("id"))).update(is_active=False)
