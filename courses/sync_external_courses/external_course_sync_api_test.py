@@ -1003,7 +1003,12 @@ def test_deactivate_removed_course_runs(
     """
     platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
     course = CourseFactory.create(platform=platform, is_external=True)
-    course_run = CourseRunFactory.create(course=course, live=True, external_course_run_id=external_course_run_id, start_date=start_date)
+    course_run = CourseRunFactory.create(
+        course=course,
+        live=True,
+        external_course_run_id=external_course_run_id,
+        start_date=start_date,
+    )
     product = ProductFactory.create(content_object=course_run)
     deactivate_removed_course_runs(api_course_run_codes, EMERITUS_PLATFORM_NAME)
     course_run.refresh_from_db()
