@@ -61,6 +61,7 @@ from cms.blocks import (
 from cms.constants import (
     ALL_TAB,
     ALL_TOPICS,
+    ALL_LANGUAGES,
     BLOG_INDEX_SLUG,
     CERTIFICATE_INDEX_SLUG,
     COMMON_COURSEWARE_COMPONENT_INDEX_SLUG,
@@ -90,8 +91,11 @@ from courses.models import (
     Program,
     ProgramCertificate,
     ProgramRun,
+    CourseLanguage,
 )
 from ecommerce.models import Product
+from mitol.olposthog.features import is_enabled
+from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 
@@ -516,6 +520,9 @@ class CatalogPage(Page):
         Populate the context with live programs, courses and programs + courses
         """
         topic_filter = request.GET.get("topic", ALL_TOPICS)
+        language_filter = request.GET.get("language", ALL_LANGUAGES)
+
+        is_language_filter_enabled = is_enabled(CATALOG_LANGUAGE_FILTER, default=False)
 
         # Best Match is the default sorting.
         sort_by = request.GET.get("sort-by", CatalogSorting.BEST_MATCH.sorting_value)
@@ -556,10 +563,19 @@ class CatalogPage(Page):
             .order_by("title")
         )
 
+        if language_filter != ALL_LANGUAGES:
+            program_page_qset = program_page_qset.filter(language__name=language_filter)
+            external_program_qset = external_program_qset.filter(
+                language__name=language_filter
+            )
+            course_page_qset = course_page_qset.filter(language__name=language_filter)
+            external_course_qset = external_course_qset.filter(
+                language__name=language_filter
+            )
+
         if topic_filter != ALL_TOPICS:
             program_page_qset = program_page_qset.related_pages(topic_filter)
             external_program_qset = external_program_qset.related_pages(topic_filter)
-
             course_page_qset = course_page_qset.related_pages(topic_filter)
             external_course_qset = external_course_qset.related_pages(topic_filter)
 
@@ -647,6 +663,15 @@ class CatalogPage(Page):
                 }
                 for sorting_option in CatalogSorting
             ],
+            show_language_filter=is_language_filter_enabled,
+            selected_language=language_filter,
+            language_options=[ALL_LANGUAGES]
+            + [
+                course_language.name
+                for course_language in CourseLanguage.objects.filter(is_active=True)
+            ]
+            if is_language_filter_enabled
+            else [],
         )
 
 

@@ -256,6 +256,7 @@ class CourseLanguage(TimestampedModel, ValidateOnSaveMixin):
         validators=[MinValueValidator(1)],
         help_text="The priority of this language in the course/program sorting.",
     )
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         constraints = [
