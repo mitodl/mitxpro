@@ -201,3 +201,42 @@
     }
   }
 }
+
+.catalog-filter-dropdown {
+  @extend .catalog-sort-by-dropdown;
+
+  display: block;
+  margin-left: 0;
+  border: none;
+  margin-bottom: 32px;
+  padding: 0;
+
+  &.show,
+  &:hover {
+    border: none;
+  }
+
+  .dropdown-toggle {
+    border: 1px solid #dde1ec;
+    padding: 16px;
+    width: 220px;
+    border-radius: 4px;
+    text-wrap-mode: wrap;
+
+    &::after {
+      float: right;
+    }
+  }
+
+  .dropdown-menu {
+    .dropdown-item {
+      text-wrap-mode: wrap;
+      line-height: 25px;
+      margin-top: 0;
+    }
+  }
+
+  .col-2 {
+    max-width: 100%;
+  }
+}
