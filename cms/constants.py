@@ -12,6 +12,7 @@ ENTERPRISE_PAGE_SLUG = "enterprise"
 COMMON_COURSEWARE_COMPONENT_INDEX_SLUG = "common-courseware-component-pages"
 
 ALL_TOPICS = "All Topics"
+ALL_LANGUAGES = "All Languages"
 ALL_TAB = "all-tab"
 
 # ************** CONSTANTS FOR WEBINARS **************
