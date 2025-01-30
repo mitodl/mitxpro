@@ -51,7 +51,7 @@
     "express": "^4.19.2",
     "fetch-mock": "^5.12.1",
     "flow": "^0.2.3",
-    "flow-bin": "^0.95.1",
+    "flow-bin": "^0.259.0",
     "flow-typed": "^3.2.1",
     "formik": "^1.5.1",
     "history": "^5.0.0",
