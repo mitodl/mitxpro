@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.171.0
+Version 0.171.0 (Released January 30, 2025)
 ---------------
 
 - refactor: migrate ENABLE_ENTERPRISE to posthog (#3368)
