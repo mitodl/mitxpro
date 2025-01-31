@@ -815,7 +815,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     assert version_created == expected_product_version_created
     assert course_run.products.first().latest_version.description
     assert course_run.products.first().latest_version.text_id
-    assert course_run.products.first().is_active == True
+    assert course_run.products.first().is_active
 
 
 @pytest.mark.django_db
