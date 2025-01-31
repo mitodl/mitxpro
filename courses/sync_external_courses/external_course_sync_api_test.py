@@ -446,16 +446,17 @@ def test_parse_external_course_data_str():
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("create_existing_course_run", "empty_dates"),
+    ("create_existing_course_run", "empty_dates", "is_live"),
     [
-        (True, True),
-        (True, False),
-        (False, False),
+        (True, True, True),
+        (True, False, True),
+        (False, False, True),
+        (True, False, False),
     ],
 )
 @pytest.mark.django_db
 def test_create_or_update_external_course_run(
-    create_existing_course_run, empty_dates, external_course_data
+    create_existing_course_run, empty_dates, external_course_data, is_live
 ):
     """
     Tests that `create_or_update_external_course_run` creates or updates a course run
@@ -470,6 +471,7 @@ def test_create_or_update_external_course_run(
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
+            live=is_live,
         )
         if empty_dates:
             run.start_date = None
@@ -494,6 +496,7 @@ def test_create_or_update_external_course_run(
             "start_date": external_course.start_date,
             "end_date": external_course.end_date,
             "enrollment_end": external_course.enrollment_end,
+            "live": True,
         }
     else:
         expected_data = {
@@ -758,12 +761,14 @@ def test_fetch_external_courses_error(
         "expected_price",
         "expected_product_created",
         "expected_product_version_created",
+        "existing_product_is_active",
     ),
     [
-        (True, None, float(100), float(100), False, True),
-        (False, None, float(100), float(100), True, True),
-        (True, float(100), float(100), float(100), False, False),
-        (True, float(100), float(111), float(111), False, True),
+        (True, None, float(100), float(100), False, True, True),
+        (False, None, float(100), float(100), True, True, True),
+        (True, float(100), float(100), float(100), False, False, True),
+        (True, float(100), float(111), float(111), False, True, True),
+        (True, float(100), float(100), float(100), False, False, False)
     ],
 )
 @pytest.mark.django_db
@@ -775,6 +780,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     expected_price,
     expected_product_created,
     expected_product_version_created,
+    existing_product_is_active,
 ):
     """
     Tests that `create_or_update_product_and_product_version` creates or updates products and versions as required.
@@ -796,7 +802,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     course_run, _, _ = create_or_update_external_course_run(course, external_course)
 
     if create_existing_product:
-        product = ProductFactory.create(content_object=course_run)
+        product = ProductFactory.create(content_object=course_run, is_active=existing_product_is_active)
 
         if existing_price:
             ProductVersionFactory.create(product=product, price=existing_price)
@@ -809,6 +815,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     assert version_created == expected_product_version_created
     assert course_run.products.first().latest_version.description
     assert course_run.products.first().latest_version.text_id
+    assert course_run.products.first().is_active == True
 
 
 @pytest.mark.django_db

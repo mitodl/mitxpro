@@ -306,14 +306,14 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
         "course_runs_without_prices": set(),
         "certificates_created": set(),
         "certificates_updated": set(),
-        "deactivated_course_runs": set(),
+        "course_runs_deactivated": set(),
     }
 
     external_course_run_codes = [run["course_run_code"] for run in external_courses]
     deactivated_course_run_codes = deactivate_removed_course_runs(
         external_course_run_codes, platform.name.lower()
     )
-    stats["deactivated_course_runs"] = deactivated_course_run_codes
+    stats["course_runs_deactivated"] = deactivated_course_run_codes
 
     for external_course_json in external_courses:
         external_course = ExternalCourse(external_course_json, keymap)
@@ -508,22 +508,23 @@ def create_or_update_product_and_product_version(external_course, course_run):
     Returns:
         tuple: (product is created, product version is created)
     """
-    current_price = course_run.current_price
-    if not current_price or current_price != external_course.price:
-        product, product_created = Product.objects.get_or_create(
+    product, product_created = Product.all_objects.get_or_create(
             content_type=ContentType.objects.get_for_model(CourseRun),
             object_id=course_run.id,
         )
-        if not product_created and not product.is_active:
-            product.is_active = True
-            product.save()
+    if not product_created and not product.is_active:
+        product.is_active = True
+        product.save()
+
+    current_price = course_run.current_price
+    if not current_price or current_price != external_course.price:    
         ProductVersion.objects.create(
             product=product,
             price=external_course.price,
             description=course_run.courseware_id,
         )
         return product_created, True
-    return False, False
+    return product_created, False
 
 
 def generate_external_course_run_tag(course_run_code):
@@ -843,10 +844,11 @@ def deactivate_removed_course_runs(external_course_run_codes, platform_name):
         start_date__gt=now_in_utc(),
         live=True,
     ).exclude(external_course_run_id__in=external_course_run_codes)
+    course_runs.update(live=False)
+
     Product.objects.filter(object_id__in=Subquery(course_runs.values("id"))).update(
         is_active=False
     )
-    course_runs.update(live=False)
 
     log.info(
         f"Deactivated {course_runs.count()} course runs for platform {platform_name}."
