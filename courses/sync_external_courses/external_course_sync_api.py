@@ -509,15 +509,15 @@ def create_or_update_product_and_product_version(external_course, course_run):
         tuple: (product is created, product version is created)
     """
     product, product_created = Product.all_objects.get_or_create(
-            content_type=ContentType.objects.get_for_model(CourseRun),
-            object_id=course_run.id,
-        )
+        content_type=ContentType.objects.get_for_model(CourseRun),
+        object_id=course_run.id,
+    )
     if not product_created and not product.is_active:
         product.is_active = True
         product.save()
 
     current_price = course_run.current_price
-    if not current_price or current_price != external_course.price:    
+    if not current_price or current_price != external_course.price:
         ProductVersion.objects.create(
             product=product,
             price=external_course.price,
@@ -851,7 +851,7 @@ def deactivate_removed_course_runs(external_course_run_codes, platform_name):
 
     deactivated_runs_count = course_runs.count()
     deactivated_runs_list = course_runs.values_list("external_course_run_id", flat=True)
-    course_runs.update(live=False)    
+    course_runs.update(live=False)
     log.info(
         f"Deactivated {deactivated_runs_count} course runs for platform {platform_name}."
     )

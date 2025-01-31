@@ -768,7 +768,7 @@ def test_fetch_external_courses_error(
         (False, None, float(100), float(100), True, True, True),
         (True, float(100), float(100), float(100), False, False, True),
         (True, float(100), float(111), float(111), False, True, True),
-        (True, float(100), float(100), float(100), False, False, False)
+        (True, float(100), float(100), float(100), False, False, False),
     ],
 )
 @pytest.mark.django_db
@@ -802,7 +802,9 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     course_run, _, _ = create_or_update_external_course_run(course, external_course)
 
     if create_existing_product:
-        product = ProductFactory.create(content_object=course_run, is_active=existing_product_is_active)
+        product = ProductFactory.create(
+            content_object=course_run, is_active=existing_product_is_active
+        )
 
         if existing_price:
             ProductVersionFactory.create(product=product, price=existing_price)
