@@ -844,13 +844,15 @@ def deactivate_removed_course_runs(external_course_run_codes, platform_name):
         start_date__gt=now_in_utc(),
         live=True,
     ).exclude(external_course_run_id__in=external_course_run_codes)
-    course_runs.update(live=False)
 
     Product.objects.filter(object_id__in=Subquery(course_runs.values("id"))).update(
         is_active=False
     )
 
+    deactivated_runs_count = course_runs.count()
+    deactivated_runs_list = course_runs.values_list("external_course_run_id", flat=True)
+    course_runs.update(live=False)    
     log.info(
-        f"Deactivated {course_runs.count()} course runs for platform {platform_name}."
+        f"Deactivated {deactivated_runs_count} course runs for platform {platform_name}."
     )
-    return set(course_runs.values_list("external_course_run_id", flat=True))
+    return set(deactivated_runs_list)
