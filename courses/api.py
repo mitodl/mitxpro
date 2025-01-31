@@ -305,9 +305,17 @@ def defer_enrollment(
         (CourseRunEnrollment, CourseRunEnrollment): The deactivated enrollment paired with the
             new enrollment that was the target of the deferral
     """
-    from_enrollment = CourseRunEnrollment.all_objects.get(
-        user=user, run__courseware_id=from_courseware_id
+    from_enrollment = (
+        CourseRunEnrollment.all_objects.filter(
+            user=user, run__courseware_id=from_courseware_id
+        )
+        .order_by("-created_on")
+        .first()
     )
+    if not from_enrollment:
+        raise ValidationError(
+            f"User is not enrolled in course run '{from_courseware_id}'"  # noqa: EM102
+        )
     if not force and not from_enrollment.active:
         raise ValidationError(
             f"Cannot defer from inactive enrollment (id: {from_enrollment.id}, run: {from_enrollment.run.courseware_id}, user: {user.email}). "  # noqa: EM102

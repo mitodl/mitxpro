@@ -21,12 +21,12 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:7.4.1
+        image: redis:7.4.2
         ports:
           - 6379:6379
 
       elastic:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
         env:
           network.host: "0.0.0.0"
           http.cors.enabled: "true"
