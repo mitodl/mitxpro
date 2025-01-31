@@ -146,6 +146,12 @@ class Command(BaseCommand):
         self.log_style_success(
             f"External Course Codes: {stats.get('course_runs_expired') or 0}.\n"
         )
+        self.log_style_success(
+            f"Number of Course Runs Deactivated {len(stats['course_runs_deactivated'])}."
+        )
+        self.log_style_success(
+            f"External Course Codes: {stats.get('course_runs_deactivated') or 0}.\n"
+        )
 
     def log_style_success(self, log_msg):
         """
