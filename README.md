@@ -49,7 +49,7 @@ You need the below configurations in the application to use PostHog. Once enable
 - POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS (`Default value: 3000`)
 - POSTHOG_MAX_RETRIES (`Default value: 3`)
 
-# PostHog Feature Flags
+### PostHog Feature Flags
 
 We are using a couple of feature flags for xPRO. All these feature flags are listed in [features.py](https://github.com/mitodl/mitxpro/blob/master/mitxpro/features.py). To work with these flags, you need to integrate Posthog as mentioned in the step above. If you don't have the API key or you do not want to integrate the Posthog but still want to use it, you can use the default return value in the `is_enabled` method which is called for accessing the value of a feature flag.
 
