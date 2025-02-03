@@ -249,12 +249,12 @@ def test_webinar_detail_page_button_title():
         (None, ALL_LANGUAGES),
         (
             [
-                "Languag1",
+                "Language1",
                 "Language2",
             ],
             "Language2",
         ),
-        (["Languag1", "Language2", "Language3"], "Languag1"),
+        (["Language1", "Language2", "Language3"], "Language1"),
     ],
 )
 def test_catalog_page_language_context(
@@ -293,7 +293,7 @@ def test_catalog_page_language_context(
 )
 def test_catalog_page_language_feature_flag(mocker, staff_user, is_enabled):
     """
-    Verify the language context is properly passed to the catalog_page.html
+    Verify the language context is properly passed to the catalog_page.html if CATALOG_LANGUAGE_FILTER is enabled
     """
     mocker.patch("cms.models.is_enabled", return_value=is_enabled)
     CourseLanguage.objects.all().delete()

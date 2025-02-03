@@ -20,9 +20,7 @@ import topicsCarousel from "../catalog-topics-carousel.js";
 import blogPostsCarousel from "../blog_posts_carousel";
 import companiesLogoCarousel from "../companies_logo_carousel.js";
 import successStoriesCarousel from "../success_stories_carousel.js";
-import applySorting from "../catalogSorting";
-import applyTopicFilter from "../topicFilter.js";
-import applyLanguageFilter from "../languageFilter.js";
+import refineCatalogCourses from "../refineCatalog.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   notifications();
@@ -39,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
   productDetails();
   companiesLogoCarousel();
   successStoriesCarousel();
-  applySorting();
-  applyTopicFilter();
-  applyLanguageFilter();
+  refineCatalogCourses("catalog-sort-option", "sort-by");
+  refineCatalogCourses("topic-filter-option", "topic");
+  refineCatalogCourses("language-filter-option", "language");
 });

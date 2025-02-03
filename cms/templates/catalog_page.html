@@ -44,12 +44,12 @@
           {% if topic == selected_topic %}
           <div
             class="dropdown-item topic-filter-option selected"
-            data-filter-value="{{ topic }}"
+            data-value="{{ topic }}"
           >
             {% else %}
             <div
               class="dropdown-item topic-filter-option"
-              data-filter-value="{{ topic }}"
+              data-value="{{ topic }}"
             >
               {% endif %}
               {{ topic }}
@@ -80,12 +80,12 @@
             {% if language == selected_language %}
             <div
               class="dropdown-item language-filter-option selected"
-              data-filter-value="{{ language }}"
+              data-value="{{ language }}"
             >
               {% else %}
               <div
                 class="dropdown-item language-filter-option"
-                data-filter-value="{{ language }}"
+                data-value="{{ language }}"
               >
                 {% endif %}
                 {{ language }}
@@ -225,12 +225,12 @@
                     {% if sorting.title == active_sorting_title %}
                     <div
                       class="dropdown-item catalog-sort-option selected"
-                      data-sort-value="{{ sorting.value }}"
+                      data-value="{{ sorting.value }}"
                     >
                       {% else %}
                       <div
                         class="dropdown-item catalog-sort-option"
-                        data-sort-value="{{ sorting.value }}"
+                        data-value="{{ sorting.value }}"
                       >
                         {% endif %}
                         {{ sorting.title }}
