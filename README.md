@@ -30,6 +30,29 @@ MAILGUN_SENDER_DOMAIN=
 MAILGUN_KEY=
 ```
 
+# PostHog Integration
+
+We are using PostHog for managing the features. PostHog provides many built-in filters/conditions to enable/disable features in the application without any code change or deployment.
+
+_NOTE:_ We are using [olposthog](https://github.com/mitodl/ol-django/tree/main/src/olposthog) which is our own wrapper around PostHog to make things simpler and add caching. As part of this, we run `./manage.py createcachetable` to create the cache table required for the feature flags.
+
+You need the below configurations in the application to use PostHog. Once enabled, you can manage the feature flags through your PostHog account dashboard.
+
+**\*(Required)**
+
+- POSTHOG_ENABLED
+- POSTHOG_PROJECT_API_KEY
+- POSTHOG_API_HOST
+
+**(Optional)**
+
+- POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS (`Default value: 3000`)
+- POSTHOG_MAX_RETRIES (`Default value: 3`)
+
+### PostHog Feature Flags
+
+We are using a couple of feature flags for xPRO. All these feature flags are listed in [features.py](https://github.com/mitodl/mitxpro/blob/master/mitxpro/features.py). To work with these flags, you need to integrate Posthog as mentioned in the step above. If you don't have the API key or you do not want to integrate the Posthog but still want to use it, you can use the default return value in the `is_enabled` method which is called for accessing the value of a feature flag.
+
 # Optional Setup
 
 Described below are some setup steps that are not strictly necessary
@@ -156,22 +179,3 @@ docker compose run --rm web poetry add <dependency>
 
 This will update the `pyproject.toml` and `poetry.lock` files. Then run `docker-compose build web celery` to make the change permanent in your docker images.
 Refer to the [poetry documentation](https://python-poetry.org/docs/cli/) for particulars about specifying versions, removing dependencies, etc.
-
-# PostHog Integration
-
-We are using PostHog for managing the features. PostHog provides many built-in filters/conditions to enable/disable features in the application without any code change or deployment.
-
-_NOTE:_ We are using [olposthog](https://github.com/mitodl/ol-django/tree/main/src/olposthog) which is our own wrapper around PostHog to make things simpler and add caching.
-
-You need below configurations in the application to use PostHog. Once enabled you can manage the feature flags through your PostHog account dashboard.
-
-**\*(Required)**
-
-- POSTHOG_ENABLED
-- POSTHOG_PROJECT_API_KEY
-- POSTHOG_API_HOST
-
-**(Optional)**
-
-- POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS (`Default value: 3000`)
-- POSTHOG_MAX_RETRIES (`Default value: 3`)
