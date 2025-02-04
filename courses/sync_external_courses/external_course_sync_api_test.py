@@ -39,7 +39,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     parse_external_course_data_str,
     save_page_revision,
     update_external_course_runs,
-    deactivate_removed_course_runs,
+    deactivate_missing_course_runs,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
@@ -768,7 +768,7 @@ def test_fetch_external_courses_error(
         (False, None, float(100), float(100), True, True, True),
         (True, float(100), float(100), float(100), False, False, True),
         (True, float(100), float(111), float(111), False, True, True),
-        (True, float(100), float(100), float(100), False, False, False)
+        (True, float(100), float(100), float(100), False, True, False),
     ],
 )
 @pytest.mark.django_db
@@ -802,7 +802,9 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     course_run, _, _ = create_or_update_external_course_run(course, external_course)
 
     if create_existing_product:
-        product = ProductFactory.create(content_object=course_run, is_active=existing_product_is_active)
+        product = ProductFactory.create(
+            content_object=course_run, is_active=existing_product_is_active
+        )
 
         if existing_price:
             ProductVersionFactory.create(product=product, price=existing_price)
@@ -973,40 +975,62 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
 
 
 @pytest.mark.parametrize(
-    ("external_course_run_id", "api_course_run_codes", "start_date", "is_live"),
+    (
+        "external_course_run_id",
+        "api_course_run_codes",
+        "start_date",
+        "is_unexpired",
+        "is_live",
+    ),
     [
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#1"],
-            now_in_utc() + timedelta(days=1),
+            now_in_utc() + timedelta(days=2),
+            True,
             True,
         ),
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#2"],
-            now_in_utc() - timedelta(days=1),
+            now_in_utc() - timedelta(days=2),
+            True,
             True,
         ),
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#1"],
-            now_in_utc() - timedelta(days=1),
+            now_in_utc() - timedelta(days=2),
+            True,
             True,
         ),
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#2"],
-            now_in_utc() + timedelta(days=1),
+            now_in_utc() + timedelta(days=2),
+            True,
             False,
+        ),
+        (
+            "MO-DBIP.ELE-99-09#1",
+            ["MO-DBIP.ELE-99-09#2"],
+            now_in_utc() + timedelta(days=2),
+            False,
+            True,
         ),
     ],
 )
 @pytest.mark.django_db
-def test_deactivate_removed_course_runs(
-    external_course_run_id, api_course_run_codes, start_date, is_live
+def test_deactivate_missing_course_runs(
+    mocker,
+    external_course_run_id,
+    api_course_run_codes,
+    start_date,
+    is_unexpired,
+    is_live,
 ):
     """
-    Tests that `deactivate_removed_course_runs` deactivates the removed course runs.
+    Tests that `deactivate_missing_course_runs` deactivates the missing API course runs.
     """
     platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
     course = CourseFactory.create(platform=platform, is_external=True)
@@ -1017,7 +1041,13 @@ def test_deactivate_removed_course_runs(
         start_date=start_date,
     )
     product = ProductFactory.create(content_object=course_run)
-    deactivate_removed_course_runs(api_course_run_codes, EMERITUS_PLATFORM_NAME)
+    mocker.patch.object(
+        course_run.__class__,
+        "is_unexpired",
+        new_callable=mocker.PropertyMock,
+        return_value=is_unexpired,
+    )
+    deactivate_missing_course_runs(api_course_run_codes, platform)
     course_run.refresh_from_db()
     product.refresh_from_db()
     assert course_run.live == is_live
