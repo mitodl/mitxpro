@@ -16,6 +16,7 @@ from wagtail.models import Site
 
 from cms.constants import (
     ALL_TOPICS,
+    ALL_LANGUAGES,
     ON_DEMAND_WEBINAR,
     UPCOMING_WEBINAR,
     WEBINAR_DEFAULT_IMAGES,
@@ -48,6 +49,7 @@ from cms.models import (
     TextVideoSection,
 )
 from courses.factories import (
+    CourseLanguageFactory,
     CourseRunCertificateFactory,
     CourseRunFactory,
     CourseTopicFactory,
@@ -55,6 +57,7 @@ from courses.factories import (
     ProgramFactory,
     ProgramRunFactory,
 )
+from courses.models import CourseLanguage
 from ecommerce.factories import ProductVersionFactory
 from mitxpro.utils import now_in_utc
 
@@ -437,6 +440,70 @@ def test_catalog_page_topics(  # noqa: PLR0913
         [ALL_TOPICS] + [topic.name for topic in parent_topics]
     )
     assert resp.context_data["selected_topic"] == expected_selected_topic
+    assert len(resp.context_data["course_pages"]) == expected_courses_count
+    assert len(resp.context_data["program_pages"]) == expected_program_count
+
+
+@pytest.mark.parametrize(  # noqa: PT007
+    "language_options, selected_language, assign_language, expected_courses_count, expected_program_count",  # noqa: PT006
+    [
+        [["Language1", "Language2"], ALL_LANGUAGES, "Language1", 2, 2],
+        [["Language1", "Language2"], "Language1", "Language1", 2, 2],
+        [["Language1", "Language2"], "Language2", "Language2", 2, 2],
+        [["Language1", "Language2"], "Language2", "Language1", 0, 0],
+        [["Language1", "Language2"], "Language1", "Language2", 0, 0],
+    ],
+)
+def test_catalog_page_languages(  # noqa: PLR0913
+    mocker,
+    client,
+    wagtail_basics,
+    language_options,
+    selected_language,
+    assign_language,
+    expected_courses_count,
+    expected_program_count,
+):
+    """
+    Test that language filters are working fine.
+    """
+    mocker.patch("cms.models.is_enabled", return_value=True)
+    CourseLanguage.objects.all().delete()
+    homepage = wagtail_basics.root
+    catalog_page = CatalogPageFactory.create(parent=homepage)
+    catalog_page.save_revision().publish()
+
+    now = now_in_utc()
+    start_date = now + timedelta(days=2)
+    end_date = now + timedelta(days=10)
+
+    courseware_languages = CourseLanguageFactory.create_batch(
+        2, name=factory.Iterator(language_options)
+    )
+    assign_language = next(
+        language
+        for language in courseware_languages
+        if language.name == assign_language
+    )
+    program_pages = ProgramPageFactory.create_batch(2, language=assign_language)
+
+    CourseRunFactory.create_batch(
+        2,
+        course__program=factory.Iterator(
+            [program_page.program for program_page in program_pages]
+        ),
+        course__live=True,
+        course__page__language=assign_language,
+        start_date=start_date,
+        end_date=end_date,
+        live=True,
+    )
+
+    resp = client.get(f"{catalog_page.get_url()}?language={selected_language}")
+
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.context_data["language_options"] == [ALL_LANGUAGES] + language_options
+    assert resp.context_data["selected_language"] == selected_language
     assert len(resp.context_data["course_pages"]) == expected_courses_count
     assert len(resp.context_data["program_pages"]) == expected_program_count
 

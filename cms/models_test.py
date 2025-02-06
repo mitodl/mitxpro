@@ -24,8 +24,10 @@ from cms.constants import (
     UPCOMING_WEBINAR,
     UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_HEADER_BANNER,
+    ALL_LANGUAGES,
 )
 from cms.factories import (
+    CatalogPageFactory,
     CertificatePageFactory,
     CommonComponentIndexPageFactory,
     CompaniesLogoCarouselPageFactory,
@@ -88,6 +90,7 @@ from courses.factories import (
     CourseRunFactory,
     ProgramCertificateFactory,
 )
+from courses.models import CourseLanguage
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 
 pytestmark = [pytest.mark.django_db]
@@ -238,6 +241,78 @@ def test_webinar_detail_page_button_title():
         category=UPCOMING_WEBINAR, parent=webinar_index
     )
     assert upcoming_webinar.detail_page_button_title == UPCOMING_WEBINAR_BUTTON_TITLE
+
+
+@pytest.mark.parametrize(
+    "languages, selected_language",
+    [
+        (None, ALL_LANGUAGES),
+        (
+            [
+                "Language1",
+                "Language2",
+            ],
+            "Language2",
+        ),
+        (["Language1", "Language2", "Language3"], "Language1"),
+    ],
+)
+def test_catalog_page_language_context(
+    mocker, staff_user, languages, selected_language
+):
+    """
+    Verify the language context is properly passed to the catalog_page.html
+    """
+    mocker.patch("cms.models.is_enabled", return_value=True)
+    CourseLanguage.objects.all().delete()
+    catalog_page = CatalogPageFactory.create()
+    if languages:
+        CourseLanguageFactory.create_batch(
+            len(languages), name=factory.Iterator(languages)
+        )
+
+    rf = RequestFactory()
+    request = rf.get(f"/?language={selected_language}")
+    request.user = staff_user
+    context = catalog_page.get_context(request=request)
+
+    assert context.get("self") == catalog_page
+    assert context.get("page") == catalog_page
+    assert context.get("request") == request
+    assert context.get("selected_language") == selected_language
+    assert (
+        context.get("language_options") == [ALL_LANGUAGES] + languages
+        if languages
+        else ALL_LANGUAGES
+    )
+
+
+@pytest.mark.parametrize(
+    "is_enabled",
+    [True, False],
+)
+def test_catalog_page_language_feature_flag(mocker, staff_user, is_enabled):
+    """
+    Verify the language context is properly passed to the catalog_page.html if CATALOG_LANGUAGE_FILTER is enabled
+    """
+    mocker.patch("cms.models.is_enabled", return_value=is_enabled)
+    CourseLanguage.objects.all().delete()
+    catalog_page = CatalogPageFactory.create()
+    languages = CourseLanguageFactory.create_batch(2)
+
+    rf = RequestFactory()
+    request = rf.get("/")
+    request.user = staff_user
+    context = catalog_page.get_context(request=request)
+
+    assert context.get("selected_language") == ALL_LANGUAGES
+    assert context.get("show_language_filter") == is_enabled
+    expected_languages = (
+        [ALL_LANGUAGES] + [language.name for language in languages]
+        if is_enabled
+        else []
+    )
+    assert context.get("language_options") == expected_languages
 
 
 def test_course_page_program_page():

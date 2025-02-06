@@ -9,7 +9,11 @@ from django.contrib.contenttypes.models import ContentType
 from wagtail.models import Page, Site
 
 from cms import models as cms_models
-from cms.constants import CERTIFICATE_INDEX_SLUG, ENTERPRISE_PAGE_SLUG, CatalogSorting
+from cms.constants import (
+    CERTIFICATE_INDEX_SLUG,
+    ENTERPRISE_PAGE_SLUG,
+    CatalogSorting,
+)
 
 log = logging.getLogger(__name__)
 DEFAULT_HOMEPAGE_PROPS = dict(title="Home Page", subhead="This is the home page")  # noqa: C408
