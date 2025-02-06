@@ -666,7 +666,7 @@ class CatalogPage(Page):
             show_language_filter=is_language_filter_enabled,
             selected_language=language_filter,
             language_options=[
-                *[ALL_LANGUAGES],
+                ALL_LANGUAGES,
                 *[
                     course_language.name
                     for course_language in CourseLanguage.objects.filter(is_active=True)
