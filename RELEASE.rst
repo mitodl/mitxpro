@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.172.0
+Version 0.172.0 (Released February 06, 2025)
 ---------------
 
 - fix: filter enrollments instead of get in defer_enrollment (#3215)
