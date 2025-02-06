@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.173.0
+---------------
+
+- feat: Add course language filter (#3384)
+- [pre-commit.ci] pre-commit autoupdate (#3388)
+- docs: Update README.md to include posthog details (#3389)
+
 Version 0.172.0 (Released February 06, 2025)
 ---------------
 
