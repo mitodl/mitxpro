@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.172.0 (Released February 06, 2025)
+---------------
+
+- fix: filter enrollments instead of get in defer_enrollment (#3215)
+- fix: external sync when there is no platform with passed name (#3385)
+- fix(deps): update dependency boto3 to v1.36.2 (#3383)
+- [pre-commit.ci] pre-commit autoupdate (#3382)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8.17.0 (#3381)
+- refactor: remove COUPON_SHEETS (#3370)
+- chore(deps): update node.js to v20.18.1 (#3379)
+- chore(deps): update redis docker tag to v7.4.2 (#3380)
+- chore(deps): update nginx docker tag to v1.27.3 (#3378)
+- refactor: migrate digital credentials flag to posthog (#3367)
+
 Version 0.171.0 (Released January 30, 2025)
 ---------------
 
