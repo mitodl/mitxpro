@@ -514,14 +514,11 @@ def create_or_update_product_and_product_version(external_course, course_run):
     """
     current_price = course_run.current_price
     if not current_price or current_price != external_course.price:
-        product, product_created = Product.all_objects.get_or_create(
+        product, product_created = Product.all_objects.update_or_create(
             content_type=ContentType.objects.get_for_model(CourseRun),
             object_id=course_run.id,
+            defaults={"is_active": True},
         )
-
-        if not product_created:
-            product.is_active = True
-            product.save()
 
         ProductVersion.objects.create(
             product=product,
@@ -842,14 +839,13 @@ def deactivate_missing_course_runs(external_course_run_codes, platform):
 
     Args:
         external_course_run_codes (list): List of external course run codes.
-        platform_name (str): Name of the platform.
+        platform (courses.models.Platform): Platform object
     """
     updated_products = []
 
     course_runs = (
         CourseRun.objects.filter(
             course__platform=platform,
-            start_date__gt=now_in_utc(),
             live=True,
         )
         .exclude(external_course_run_id__in=external_course_run_codes)
@@ -861,8 +857,9 @@ def deactivate_missing_course_runs(external_course_run_codes, platform):
     for course_run in course_runs:
         if course_run.is_unexpired:
             course_run.live = False
-            related_product = course_run.product.all()[0]
-            related_product.is_active = False
+            related_product = course_run.product.first()
+            if related_product:
+                related_product.is_active = False
             updated_products.append(related_product)
 
     deactivated_runs_count = len(course_runs)

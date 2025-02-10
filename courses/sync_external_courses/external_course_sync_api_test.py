@@ -978,7 +978,6 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
     (
         "external_course_run_id",
         "api_course_run_codes",
-        "start_date",
         "is_unexpired",
         "is_live",
     ),
@@ -986,35 +985,18 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#1"],
-            now_in_utc() + timedelta(days=2),
             True,
             True,
         ),
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#2"],
-            now_in_utc() - timedelta(days=2),
-            True,
-            True,
-        ),
-        (
-            "MO-DBIP.ELE-99-09#1",
-            ["MO-DBIP.ELE-99-09#1"],
-            now_in_utc() - timedelta(days=2),
-            True,
-            True,
-        ),
-        (
-            "MO-DBIP.ELE-99-09#1",
-            ["MO-DBIP.ELE-99-09#2"],
-            now_in_utc() + timedelta(days=2),
             True,
             False,
         ),
         (
             "MO-DBIP.ELE-99-09#1",
             ["MO-DBIP.ELE-99-09#2"],
-            now_in_utc() + timedelta(days=2),
             False,
             True,
         ),
@@ -1025,7 +1007,6 @@ def test_deactivate_missing_course_runs(
     mocker,
     external_course_run_id,
     api_course_run_codes,
-    start_date,
     is_unexpired,
     is_live,
 ):
@@ -1038,7 +1019,6 @@ def test_deactivate_missing_course_runs(
         course=course,
         live=True,
         external_course_run_id=external_course_run_id,
-        start_date=start_date,
     )
     product = ProductFactory.create(content_object=course_run)
     mocker.patch.object(
