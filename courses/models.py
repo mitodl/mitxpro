@@ -757,14 +757,22 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         1. Later than end_date if end_date is set
         2. Later than start_date if start_date is set
         """
-        if not self.expiration_date:
-            return
+        now = now_in_utc()
 
-        if self.start_date and self.expiration_date < self.start_date:
-            raise ValidationError("Expiration date must be later than start date.")  # noqa: EM101
+        if not self.start_date and not self.enrollment_end:
+            raise ValidationError("Either start_date or enrollment_end must be provided.")  # noqa: EM101
 
-        if self.end_date and self.expiration_date < self.end_date:
-            raise ValidationError("Expiration date must be later than end date.")  # noqa: EM101
+        if (not self.start_date or self.start_date < now) and (not self.enrollment_end or self.enrollment_end < now):
+            raise ValidationError("Either start_date or enrollment_end must be in the future.")  # noqa: EM101
+
+        if self.start_date and self.end_date and self.start_date > self.end_date:
+            raise ValidationError("End date must be later than start date.")  # noqa: EM101
+
+        if self.expiration_date:
+            if self.start_date and self.expiration_date < self.start_date:
+                raise ValidationError("Expiration date must be later than start date.")  # noqa: EM101
+            if self.end_date and self.expiration_date < self.end_date:
+                raise ValidationError("Expiration date must be later than end date.")  # noqa: EM101
 
     def save(
         self,
