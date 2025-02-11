@@ -136,6 +136,20 @@ class CourseRunFactory(DjangoModelFactory):
             enrollment_end=factory.Faker("past_datetime", tzinfo=UTC)
         )
 
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Allow creating test objects without validation."""
+        clean_disabled = kwargs.pop("clean_disabled", False)
+        obj = model_class(*args, **kwargs)
+
+        if not clean_disabled:
+            obj.clean()
+            obj.save()
+        else:
+            # Directly insert into DB without triggering save()
+            model_class.objects.bulk_create([obj])
+
+        return obj
 
 class CourseRunCertificateFactory(DjangoModelFactory):
     """Factory for CourseRunCertificate"""
