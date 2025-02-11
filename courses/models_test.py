@@ -228,6 +228,31 @@ def test_courseware_url(settings):
     assert course_run.courseware_url == "http://example.com/path"
     assert course_run_no_path.courseware_url is None
 
+@pytest.mark.parametrize(
+    "start_date, enrollment_end, end_date, expiration_date, expected_error",
+    [
+        (None, None, None, None, "Either start_date or enrollment_end must be provided."),
+        (now_in_utc() - timedelta(days=1), now_in_utc() - timedelta(days=1), None, None, "Either start_date or enrollment_end must be in the future."),
+        (now_in_utc() + timedelta(days=1), now_in_utc() + timedelta(days=2), now_in_utc() + timedelta(days=3), now_in_utc() + timedelta(days=4), None),
+        (now_in_utc() + timedelta(days=3), now_in_utc() + timedelta(days=2), now_in_utc() + timedelta(days=1), now_in_utc() + timedelta(days=4), "End date must be later than start date."),
+        (now_in_utc() + timedelta(days=1), now_in_utc() + timedelta(days=2), now_in_utc() + timedelta(days=3), now_in_utc() - timedelta(days=1), "Expiration date must be later than start date."),
+        (now_in_utc() + timedelta(days=1), now_in_utc() + timedelta(days=2), now_in_utc() + timedelta(days=3), now_in_utc() + timedelta(days=2), "Expiration date must be later than end date."),
+    ]
+)
+def test_course_run_clean(start_date, enrollment_end, end_date, expiration_date, expected_error):
+    course_run = CourseRunFactory.create(
+        start_date=start_date,
+        enrollment_end=enrollment_end,
+        end_date=end_date,
+        expiration_date=expiration_date,
+    )
+    
+    if expected_error:
+        with pytest.raises(ValidationError) as exc_info:
+            course_run.clean()
+        assert expected_error in str(exc_info.value)
+    else:
+        course_run.clean()  # Should not raise any error
 
 @pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])  # noqa: PT006, PT007
 def test_course_run_past(end_days, expected):
