@@ -1699,6 +1699,7 @@ def test_patch_basket_expired_run(basket_client, basket_and_coupons):
         enrollment_end=(now - timedelta(days=120)),
         start_date=(now - timedelta(days=120)),
         end_date=(now - timedelta(days=10)),
+        clean_disabled=True,
     )
     product.content_object = course_run
     product.save()

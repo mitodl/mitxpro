@@ -488,7 +488,7 @@ def test_defer_enrollment_validation(mocker, user):
         run__course=factory.Iterator([courses[0], courses[0], courses[1]]),
     )
     unenrollable_run = CourseRunFactory.create(
-        enrollment_end=now_in_utc() - timedelta(days=1)
+        enrollment_end=now_in_utc() - timedelta(days=1), clean_disabled=True
     )
     patched_create_enrollments = mocker.patch(
         "courses.api.create_run_enrollments", return_value=([], False)
