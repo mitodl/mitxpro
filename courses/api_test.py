@@ -61,6 +61,7 @@ def test_get_user_enrollments(user):
         start_date=factory.Iterator(past_start_dates),
         end_date=past_date,
         course__program=past_program,
+        force_insert=True,
     )
     non_program_course_runs = CourseRunFactory.create_batch(2, course__program=None)
     past_non_program_course_runs = CourseRunFactory.create_batch(
@@ -68,6 +69,7 @@ def test_get_user_enrollments(user):
         start_date=factory.Iterator(past_start_dates),
         end_date=past_date,
         course__program=None,
+        force_insert=True,
     )
     all_course_runs = (
         program_course_runs
@@ -488,7 +490,7 @@ def test_defer_enrollment_validation(mocker, user):
         run__course=factory.Iterator([courses[0], courses[0], courses[1]]),
     )
     unenrollable_run = CourseRunFactory.create(
-        enrollment_end=now_in_utc() - timedelta(days=1)
+        enrollment_end=now_in_utc() - timedelta(days=1), force_insert=True
     )
     patched_create_enrollments = mocker.patch(
         "courses.api.create_run_enrollments", return_value=([], False)

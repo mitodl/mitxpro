@@ -164,10 +164,10 @@ def test_generate_program_certificate_success(user, program):
             CourseDetail(
                 {
                     "id": "course-v1:edX+DemoX+2020_T1",
-                    "start": "2019-01-01T00:00:00Z",
-                    "end": "2020-02-01T00:00:00Z",
-                    "enrollment_start": "2019-01-01T00:00:00Z",
-                    "enrollment_end": "2020-02-01T00:00:00Z",
+                    "start": "2098-01-01T00:00:00Z",
+                    "end": "2099-02-01T00:00:00Z",
+                    "enrollment_start": "2098-01-01T00:00:00Z",
+                    "enrollment_end": "2099-02-01T00:00:00Z",
                     "name": "Demonstration Course",
                 }
             ),
@@ -199,7 +199,6 @@ def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success)
     settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
     mocker.patch.object(CourseDetails, "get_detail", side_effect=[mocked_api_response])
     course_run = CourseRunFactory.create()
-
     success_count, failure_count = sync_course_runs([course_run])
 
     if expect_success:
@@ -246,6 +245,7 @@ def test_catalog_visible_languages():
         enrollment_end=now - timedelta(days=2),
         course__page__language=factory.Iterator(catalog_invisble_languages),
         course__program__page__language=factory.Iterator(catalog_invisble_languages),
+        force_insert=True,
     )
 
     # The expected languages are the ones that are associated with unexpuired/catalog visible courses

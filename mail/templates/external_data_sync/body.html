@@ -126,18 +126,18 @@
             </li>
             <li>
               <span style="color: #ff0000"
-                >Course Runs Expired ({{ stats.course_runs_expired|length }}):</span
+                >Course Runs With Invalid Dates ({{ stats.course_runs_with_invalid_dates|length }}):</span
               >
-              {% if stats.course_runs_expired %}
+              {% if stats.course_runs_with_invalid_dates %}
               <ul>
-                {% for run in stats.course_runs_expired %}
+                {% for run in stats.course_runs_with_invalid_dates %}
                 <li>
                   {{ run.code }}
                   ({{ run.title }})
                 </li>
                 {% endfor %}
               </ul>
-              {% else %}No course runs expired.{% endif %}
+              {% else %}No course runs with invalid dates.{% endif %}
             </li>
             <li>
               <span style="color: #ff0000"

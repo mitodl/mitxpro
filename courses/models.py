@@ -30,6 +30,7 @@ from mitxpro.utils import (
     first_matching_item,
     now_in_utc,
     serialize_model_object,
+    validate_courserun_dates,
 )
 
 User = get_user_model()
@@ -749,22 +750,20 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
 
     def clean(self):
         """
-        If expiration_date is not set:
-        1. If end_date is provided: set expiration_date to default end_date + 90 days.
-        2. If end_date is None, don't do anything.
+        Validate that the course run dates follow the rules
 
-        Validate that the expiration date is:
-        1. Later than end_date if end_date is set
-        2. Later than start_date if start_date is set
+        Raises:
+            ValidationError: If any of the date rules are violated.
         """
-        if not self.expiration_date:
-            return
-
-        if self.start_date and self.expiration_date < self.start_date:
-            raise ValidationError("Expiration date must be later than start date.")  # noqa: EM101
-
-        if self.end_date and self.expiration_date < self.end_date:
-            raise ValidationError("Expiration date must be later than end date.")  # noqa: EM101
+        is_valid, error_msg = validate_courserun_dates(
+            self.start_date,
+            self.end_date,
+            self.enrollment_end,
+            self.enrollment_start,
+            self.expiration_date,
+        )
+        if not is_valid:
+            raise ValidationError(error_msg)  # noqa: EM101
 
     def save(
         self,
