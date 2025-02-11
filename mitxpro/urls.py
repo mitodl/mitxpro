@@ -28,6 +28,8 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.images.views.serve import ServeView
 from wagtail.utils.urlpatterns import decorate_urlpatterns
 
+from cms.wagtail_api import api_router
+
 from mitxpro.views import (
     AppContextView,
     cms_signin_redirect_to_site_signin,
@@ -62,6 +64,7 @@ urlpatterns = (
         path("", include("sheets.urls")),
         path("", include("mail.urls")),
         path("api/v1/", include("mitol.digitalcredentials.urls")),
+        path("api/v2/", api_router.urls),
         path("", include("mitol.mail.urls")),
         path("boeing/", include(("voucher.urls", "voucher"))),
         path("api/app_context", AppContextView.as_view(), name="api-app_context"),
