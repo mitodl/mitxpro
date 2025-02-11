@@ -696,7 +696,6 @@ def create_or_update_external_course_run(course, external_course):
             log.error(
                 f"Error creating course run for course: {course.readable_id}, course run code: {external_course.course_run_code}, error: {e}"  # noqa: G004
             )
-            return course_run, is_created, is_updated
     elif (
         (not course_run.start_date and external_course.start_date)
         or (
@@ -719,12 +718,17 @@ def create_or_update_external_course_run(course, external_course):
         )
         or course_run.live is False
     ):
-        course_run.start_date = external_course.start_date
-        course_run.end_date = external_course.end_date
-        course_run.enrollment_end = external_course.enrollment_end
-        course_run.live = True
-        course_run.save()
-        is_updated = True
+        try:
+            course_run.start_date = external_course.start_date
+            course_run.end_date = external_course.end_date
+            course_run.enrollment_end = external_course.enrollment_end
+            course_run.live = True
+            course_run.save()
+            is_updated = True
+        except ValidationError as e:
+            log.error(
+                f"Error updating course run for course: {course.readable_id}, course run code: {external_course.course_run_code}, error: {e}"  # noqa: G004
+            )
 
     return course_run, is_created, is_updated
 
