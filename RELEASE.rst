@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.173.0
+Version 0.173.0 (Released February 11, 2025)
 ---------------
 
 - feat: Add course language filter (#3384)
