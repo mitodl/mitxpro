@@ -39,6 +39,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     parse_external_course_data_str,
     save_page_revision,
     update_external_course_runs,
+    deactivate_missing_course_runs,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
@@ -445,16 +446,17 @@ def test_parse_external_course_data_str():
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("create_existing_course_run", "empty_dates"),
+    ("create_existing_course_run", "empty_dates", "is_live"),
     [
-        (True, True),
-        (True, False),
-        (False, False),
+        (True, True, True),
+        (True, False, True),
+        (False, False, True),
+        (True, False, False),
     ],
 )
 @pytest.mark.django_db
 def test_create_or_update_external_course_run(
-    create_existing_course_run, empty_dates, external_course_data
+    create_existing_course_run, empty_dates, external_course_data, is_live
 ):
     """
     Tests that `create_or_update_external_course_run` creates or updates a course run
@@ -469,6 +471,7 @@ def test_create_or_update_external_course_run(
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
+            live=is_live,
         )
         if empty_dates:
             run.start_date = None
@@ -493,6 +496,7 @@ def test_create_or_update_external_course_run(
             "start_date": external_course.start_date,
             "end_date": external_course.end_date,
             "enrollment_end": external_course.enrollment_end,
+            "live": True,
         }
     else:
         expected_data = {
@@ -757,12 +761,14 @@ def test_fetch_external_courses_error(
         "expected_price",
         "expected_product_created",
         "expected_product_version_created",
+        "existing_product_is_active",
     ),
     [
-        (True, None, float(100), float(100), False, True),
-        (False, None, float(100), float(100), True, True),
-        (True, float(100), float(100), float(100), False, False),
-        (True, float(100), float(111), float(111), False, True),
+        (True, None, float(100), float(100), False, True, True),
+        (False, None, float(100), float(100), True, True, True),
+        (True, float(100), float(100), float(100), False, False, True),
+        (True, float(100), float(111), float(111), False, True, True),
+        (True, float(100), float(100), float(100), False, True, False),
     ],
 )
 @pytest.mark.django_db
@@ -774,6 +780,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     expected_price,
     expected_product_created,
     expected_product_version_created,
+    existing_product_is_active,
 ):
     """
     Tests that `create_or_update_product_and_product_version` creates or updates products and versions as required.
@@ -795,7 +802,9 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     course_run, _, _ = create_or_update_external_course_run(course, external_course)
 
     if create_existing_product:
-        product = ProductFactory.create(content_object=course_run)
+        product = ProductFactory.create(
+            content_object=course_run, is_active=existing_product_is_active
+        )
 
         if existing_price:
             ProductVersionFactory.create(product=product, price=existing_price)
@@ -808,6 +817,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     assert version_created == expected_product_version_created
     assert course_run.products.first().latest_version.description
     assert course_run.products.first().latest_version.text_id
+    assert course_run.products.first().is_active
 
 
 @pytest.mark.django_db
@@ -962,3 +972,66 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.end_date = end_date
     assert external_course.validate_end_date() == is_valid
+
+
+@pytest.mark.parametrize(
+    (
+        "external_course_run_id",
+        "api_course_run_codes",
+        "is_unexpired",
+        "expected_is_live",
+    ),
+    [
+        (
+            "MO-DBIP.ELE-99-09#1",
+            ["MO-DBIP.ELE-99-09#1"],
+            True,
+            True,
+        ),
+        (
+            "MO-DBIP.ELE-99-09#1",
+            ["MO-DBIP.ELE-99-09#2"],
+            True,
+            False,
+        ),
+        (
+            "MO-DBIP.ELE-99-09#1",
+            ["MO-DBIP.ELE-99-09#2"],
+            False,
+            True,
+        ),
+    ],
+)
+@pytest.mark.django_db
+def test_deactivate_missing_course_runs(
+    mocker,
+    external_course_run_id,
+    api_course_run_codes,
+    is_unexpired,
+    expected_is_live,
+):
+    """
+    Tests that `deactivate_missing_course_runs` deactivates the missing API course runs.
+    """
+    platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
+    course = CourseFactory.create(platform=platform, is_external=True)
+    course_run = CourseRunFactory.create(
+        course=course,
+        live=True,
+        external_course_run_id=external_course_run_id,
+    )
+    product = ProductFactory.create(content_object=course_run)
+    mocker.patch.object(
+        course_run.__class__,
+        "is_unexpired",
+        new_callable=mocker.PropertyMock,
+        return_value=is_unexpired,
+    )
+    deactivated_runs_list = deactivate_missing_course_runs(
+        api_course_run_codes, platform
+    )
+    course_run.refresh_from_db()
+    product.refresh_from_db()
+    assert (external_course_run_id in deactivated_runs_list) == (not expected_is_live)
+    assert course_run.live == expected_is_live
+    assert product.is_active == expected_is_live
