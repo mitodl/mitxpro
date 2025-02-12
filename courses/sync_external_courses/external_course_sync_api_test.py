@@ -979,7 +979,7 @@ def test_external_course_validate_end_date(external_course_data, end_date, is_va
         "external_course_run_id",
         "api_course_run_codes",
         "is_unexpired",
-        "is_live",
+        "expected_is_live",
     ),
     [
         (
@@ -1008,7 +1008,7 @@ def test_deactivate_missing_course_runs(
     external_course_run_id,
     api_course_run_codes,
     is_unexpired,
-    is_live,
+    expected_is_live,
 ):
     """
     Tests that `deactivate_missing_course_runs` deactivates the missing API course runs.
@@ -1030,6 +1030,6 @@ def test_deactivate_missing_course_runs(
     deactivated_runs_list = deactivate_missing_course_runs(api_course_run_codes, platform)
     course_run.refresh_from_db()
     product.refresh_from_db()
-    assert (external_course_run_id in deactivated_runs_list) == (not is_live)
-    assert course_run.live == is_live
-    assert product.is_active == is_live
+    assert (external_course_run_id in deactivated_runs_list) == (not expected_is_live)
+    assert course_run.live == expected_is_live
+    assert product.is_active == expected_is_live
