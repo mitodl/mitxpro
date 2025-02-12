@@ -841,6 +841,7 @@ def deactivate_missing_course_runs(external_course_run_codes, platform):
         external_course_run_codes (list): List of external course run codes.
         platform (courses.models.Platform): Platform object
     """
+    deactivated_runs_list = []
     updated_products = []
 
     course_runs = (
@@ -857,18 +858,15 @@ def deactivate_missing_course_runs(external_course_run_codes, platform):
     for course_run in course_runs:
         if course_run.is_unexpired:
             course_run.live = False
+            deactivated_runs_list.append(course_run.external_course_run_id)
             related_product = course_run.product.first()
             if related_product:
                 related_product.is_active = False
-            updated_products.append(related_product)
+                updated_products.append(related_product)
 
-    deactivated_runs_count = len(course_runs)
-    deactivated_runs_list = [
-        course_run.external_course_run_id for course_run in course_runs
-    ]
     CourseRun.objects.bulk_update(course_runs, ["live"])
     Product.objects.bulk_update(updated_products, ["is_active"])
     log.info(
-        f"Deactivated {deactivated_runs_count} course runs for platform {platform.name}."
+        f"Deactivated {len(deactivated_runs_list)} course runs for platform {platform.name}."
     )
     return set(deactivated_runs_list)

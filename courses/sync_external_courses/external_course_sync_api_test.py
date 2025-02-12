@@ -1027,8 +1027,9 @@ def test_deactivate_missing_course_runs(
         new_callable=mocker.PropertyMock,
         return_value=is_unexpired,
     )
-    deactivate_missing_course_runs(api_course_run_codes, platform)
+    deactivated_runs_list = deactivate_missing_course_runs(api_course_run_codes, platform)
     course_run.refresh_from_db()
     product.refresh_from_db()
+    assert (external_course_run_id in deactivated_runs_list) == (not is_live)
     assert course_run.live == is_live
     assert product.is_active == is_live

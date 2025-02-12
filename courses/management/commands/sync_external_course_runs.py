@@ -138,19 +138,19 @@ class Command(BaseCommand):
             f"Number of Course Runs Skipped due to bad data {len(stats['course_runs_skipped'])}."
         )
         self.log_style_success(
-            f"External Course Codes: {stats.get('course_runs_skipped') or 0}.\n"
+            f"External Course Run Codes: {stats.get('course_runs_skipped') or 0}.\n"
         )
         self.log_style_success(
             f"Number of Expired Course Runs {len(stats['course_runs_expired'])}."
         )
         self.log_style_success(
-            f"External Course Codes: {stats.get('course_runs_expired') or 0}.\n"
+            f"External Course Run Codes: {stats.get('course_runs_expired') or 0}.\n"
         )
         self.log_style_success(
             f"Number of Course Runs Deactivated {len(stats['course_runs_deactivated'])}."
         )
         self.log_style_success(
-            f"External Course Codes: {stats.get('course_runs_deactivated') or 0}.\n"
+            f"External Course Run Codes: {stats.get('course_runs_deactivated') or 0}.\n"
         )
 
     def log_style_success(self, log_msg):
