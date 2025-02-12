@@ -34,6 +34,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$POETRY_HOME/bin:$PATH"
 
 # Install project packages
 COPY pyproject.toml /src
+COPY poetry.toml /src
 COPY poetry.lock /src
 RUN chown -R mitodl:mitodl /src
 RUN mkdir ${VIRTUAL_ENV} && chown -R mitodl:mitodl ${VIRTUAL_ENV}

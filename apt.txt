@@ -2,6 +2,7 @@
 git
 curl
 libjpeg-dev
+libxmlsec1-dev
 zlib1g-dev
 net-tools
 pkg-config

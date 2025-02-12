@@ -11,6 +11,7 @@ from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
+from django.db.models import Prefetch
 from wagtail.images.models import Image
 from wagtail.models import Page
 
@@ -305,7 +306,18 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
         "course_runs_without_prices": set(),
         "certificates_created": set(),
         "certificates_updated": set(),
+        "course_runs_deactivated": set(),
     }
+
+    external_course_run_codes = [
+        course_run.get("course_run_code")
+        for course_run in external_courses
+        if "course_run_code" in course_run
+    ]
+    deactivated_course_run_codes = deactivate_missing_course_runs(
+        external_course_run_codes, platform
+    )
+    stats["course_runs_deactivated"] = deactivated_course_run_codes
 
     for external_course_json in external_courses:
         external_course = ExternalCourse(external_course_json, keymap)
@@ -502,10 +514,12 @@ def create_or_update_product_and_product_version(external_course, course_run):
     """
     current_price = course_run.current_price
     if not current_price or current_price != external_course.price:
-        product, product_created = Product.objects.get_or_create(
+        product, product_created = Product.all_objects.update_or_create(
             content_type=ContentType.objects.get_for_model(CourseRun),
             object_id=course_run.id,
+            defaults={"is_active": True},
         )
+
         ProductVersion.objects.create(
             product=product,
             price=external_course.price,
@@ -696,10 +710,12 @@ def create_or_update_external_course_run(course, external_course):
             and course_run.enrollment_end.date()
             != external_course.enrollment_end.date()
         )
+        or course_run.live is False
     ):
         course_run.start_date = external_course.start_date
         course_run.end_date = external_course.end_date
         course_run.enrollment_end = external_course.enrollment_end
+        course_run.live = True
         course_run.save()
         is_updated = True
 
@@ -815,3 +831,42 @@ def create_course_overview_page(
     overview_page = CourseOverviewPage(overview=external_course.description)
     course_page.add_child(instance=overview_page)
     overview_page.save()
+
+
+def deactivate_missing_course_runs(external_course_run_codes, platform):
+    """
+    Deactivate the active external course runs that are missing in the external course API data
+
+    Args:
+        external_course_run_codes (list): List of external course run codes.
+        platform (courses.models.Platform): Platform object
+    """
+    deactivated_runs_list = []
+    updated_products = []
+
+    course_runs = (
+        CourseRun.objects.filter(
+            course__platform=platform,
+            live=True,
+        )
+        .exclude(external_course_run_id__in=external_course_run_codes)
+        .prefetch_related(
+            Prefetch("product", queryset=Product.all_objects.filter(is_active=True))
+        )
+    )
+
+    for course_run in course_runs:
+        if course_run.is_unexpired:
+            course_run.live = False
+            deactivated_runs_list.append(course_run.external_course_run_id)
+            related_product = course_run.product.first()
+            if related_product:
+                related_product.is_active = False
+                updated_products.append(related_product)
+
+    CourseRun.objects.bulk_update(course_runs, ["live"])
+    Product.objects.bulk_update(updated_products, ["is_active"])
+    log.info(
+        f"Deactivated {len(deactivated_runs_list)} course runs for platform {platform.name}."
+    )
+    return set(deactivated_runs_list)
