@@ -16,7 +16,6 @@ from mail import api
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
     EMAIL_BULK_ENROLL,
-    EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_COURSE_RUN_UNENROLLMENT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
@@ -149,28 +148,6 @@ def send_bulk_enroll_emails(bulk_assignment_id, product_coupon_assignments):
             ),
         )
     )
-
-
-def send_course_run_enrollment_email(enrollment):
-    """
-    Notify the user of successful enrollment for a course run
-
-    Args:
-        enrollment (CourseRunEnrollment): the enrollment for which to send the email
-    """
-    try:
-        user = enrollment.user
-        api.send_message(
-            api.message_for_recipient(
-                user.email,
-                api.context_for_user(
-                    user=user, extra_context={"enrollment": enrollment}
-                ),
-                EMAIL_COURSE_RUN_ENROLLMENT,
-            )
-        )
-    except:  # noqa: E722
-        log.exception("Error sending enrollment success email")
 
 
 def send_course_run_unenrollment_email(enrollment):
