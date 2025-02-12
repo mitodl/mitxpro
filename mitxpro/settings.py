@@ -175,6 +175,7 @@ INSTALLED_APPS = (
     "wagtailmetadata",
     "modelcluster",
     "taggit",
+    "wagtail.api.v2",
     # django-robots
     "robots",
     # Put our apps after this point
