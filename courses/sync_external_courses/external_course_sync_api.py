@@ -416,7 +416,9 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                     log.info(
                         f"Price is Null for course run code: {external_course.course_run_code}"  # noqa: G004
                     )
-                    stats["course_runs_without_prices"].add(external_course.course_run_code)
+                    stats["course_runs_without_prices"].add(
+                        external_course.course_run_code
+                    )
 
             log.info(
                 f"Creating or Updating course page, title: {external_course.course_title}, course_code: {external_course.course_run_code}"  # noqa: G004

@@ -149,6 +149,7 @@ class CourseRunFactory(DjangoModelFactory):
 
         return obj
 
+
 class CourseRunCertificateFactory(DjangoModelFactory):
     """Factory for CourseRunCertificate"""
 

@@ -760,10 +760,16 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         now = now_in_utc()
 
         if not self.start_date and not self.enrollment_end:
-            raise ValidationError("Either start_date or enrollment_end must be provided.")  # noqa: EM101
+            raise ValidationError(
+                "Either start_date or enrollment_end must be provided."
+            )  # noqa: EM101
 
-        if (not self.start_date or self.start_date < now) and (not self.enrollment_end or self.enrollment_end < now):
-            raise ValidationError("Either start_date or enrollment_end must be in the future.")  # noqa: EM101
+        if (not self.start_date or self.start_date < now) and (
+            not self.enrollment_end or self.enrollment_end < now
+        ):
+            raise ValidationError(
+                "Either start_date or enrollment_end must be in the future."
+            )  # noqa: EM101
 
         if self.start_date and self.end_date and self.start_date > self.end_date:
             raise ValidationError("End date must be later than start date.")  # noqa: EM101
