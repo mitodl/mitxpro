@@ -1,6 +1,6 @@
 """Factories for creating course data in tests"""
 
-from datetime import UTC
+from datetime import UTC, timedelta
 
 import factory
 import faker
@@ -111,9 +111,7 @@ class CourseRunFactory(DjangoModelFactory):
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
     )
-    end_date = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=UTC
-    )
+    end_date = factory.LazyAttribute(lambda obj: obj.start_date + timedelta(days=30))
     enrollment_start = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
     )
