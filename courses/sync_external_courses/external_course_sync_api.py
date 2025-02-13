@@ -10,6 +10,7 @@ from enum import Enum
 from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Prefetch
 from wagtail.images.models import Image
@@ -376,46 +377,48 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             course_run, course_run_created, course_run_updated = (
                 create_or_update_external_course_run(course, external_course)
             )
-
-            if course_run_created:
-                stats["course_runs_created"].add(course_run.external_course_run_id)
-                log.info(
-                    f"Created Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
-                )
-            elif course_run_updated:
-                stats["course_runs_updated"].add(course_run.external_course_run_id)
-                log.info(
-                    f"Updated Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
-                )
-
-            log.info(
-                f"Creating or Updating Product and Product Version, course run courseware_id: {course_run.external_course_run_id}, Price: {external_course.price}"  # noqa: G004
-            )
-
-            if external_course.price:
-                product_created, product_version_created = (
-                    create_or_update_product_and_product_version(
-                        external_course, course_run
-                    )
-                )
-                if product_created:
-                    stats["products_created"].add(course_run.external_course_run_id)
+            if course_run:
+                if course_run_created:
+                    stats["course_runs_created"].add(course_run.external_course_run_id)
                     log.info(
-                        f"Created Product for course run: {course_run.courseware_id}"  # noqa: G004
+                        f"Created Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
+                    )
+                elif course_run_updated:
+                    stats["course_runs_updated"].add(course_run.external_course_run_id)
+                    log.info(
+                        f"Updated Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
                     )
 
-                if product_version_created:
-                    stats["product_versions_created"].add(
-                        course_run.external_course_run_id
-                    )
-                    log.info(
-                        f"Created Product Version for course run: {course_run.courseware_id}, Price: {external_course.price}"  # noqa: G004
-                    )
-            else:
                 log.info(
-                    f"Price is Null for course run code: {external_course.course_run_code}"  # noqa: G004
+                    f"Creating or Updating Product and Product Version, course run courseware_id: {course_run.external_course_run_id}, Price: {external_course.price}"  # noqa: G004
                 )
-                stats["course_runs_without_prices"].add(external_course.course_run_code)
+
+                if external_course.price:
+                    product_created, product_version_created = (
+                        create_or_update_product_and_product_version(
+                            external_course, course_run
+                        )
+                    )
+                    if product_created:
+                        stats["products_created"].add(course_run.external_course_run_id)
+                        log.info(
+                            f"Created Product for course run: {course_run.courseware_id}"  # noqa: G004
+                        )
+
+                    if product_version_created:
+                        stats["product_versions_created"].add(
+                            course_run.external_course_run_id
+                        )
+                        log.info(
+                            f"Created Product Version for course run: {course_run.courseware_id}, Price: {external_course.price}"  # noqa: G004
+                        )
+                else:
+                    log.info(
+                        f"Price is Null for course run code: {external_course.course_run_code}"  # noqa: G004
+                    )
+                    stats["course_runs_without_prices"].add(
+                        external_course.course_run_code
+                    )
 
             log.info(
                 f"Creating or Updating course page, title: {external_course.course_title}, course_code: {external_course.course_run_code}"  # noqa: G004
@@ -678,18 +681,23 @@ def create_or_update_external_course_run(course, external_course):
     is_created = is_updated = False
 
     if not course_run:
-        course_run = CourseRun.objects.create(
-            external_course_run_id=external_course.course_run_code,
-            course=course,
-            title=external_course.course_title,
-            courseware_id=course_run_courseware_id,
-            run_tag=external_course.course_run_tag,
-            start_date=external_course.start_date,
-            end_date=external_course.end_date,
-            enrollment_end=external_course.enrollment_end,
-            live=True,
-        )
-        is_created = True
+        try:
+            course_run = CourseRun.objects.create(
+                external_course_run_id=external_course.course_run_code,
+                course=course,
+                title=external_course.course_title,
+                courseware_id=course_run_courseware_id,
+                run_tag=external_course.course_run_tag,
+                start_date=external_course.start_date,
+                end_date=external_course.end_date,
+                enrollment_end=external_course.enrollment_end,
+                live=True,
+            )
+            is_created = True
+        except ValidationError as e:
+            log.error(
+                f"Error creating course run for course: {course.readable_id}, course run code: {external_course.course_run_code}, error: {e}"  # noqa: G004
+            )
     elif (
         (not course_run.start_date and external_course.start_date)
         or (
@@ -712,12 +720,17 @@ def create_or_update_external_course_run(course, external_course):
         )
         or course_run.live is False
     ):
-        course_run.start_date = external_course.start_date
-        course_run.end_date = external_course.end_date
-        course_run.enrollment_end = external_course.enrollment_end
-        course_run.live = True
-        course_run.save()
-        is_updated = True
+        try:
+            course_run.start_date = external_course.start_date
+            course_run.end_date = external_course.end_date
+            course_run.enrollment_end = external_course.enrollment_end
+            course_run.live = True
+            course_run.save()
+            is_updated = True
+        except ValidationError as e:
+            log.error(
+                f"Error updating course run for course: {course.readable_id}, course run code: {external_course.course_run_code}, error: {e}"  # noqa: G004
+            )
 
     return course_run, is_created, is_updated
 

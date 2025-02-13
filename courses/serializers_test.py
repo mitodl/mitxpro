@@ -292,8 +292,12 @@ def test_serialize_course(  # noqa: PLR0913
         course.page.topics.set([CourseTopic.objects.create(name=topic)])
 
     # Create expired, enrollment_ended, future, and enrolled course runs
-    CourseRunFactory.create(course=course, end_date=now - timedelta(1), live=True)
-    CourseRunFactory.create(course=course, enrollment_end=now - timedelta(1), live=True)
+    CourseRunFactory.create(
+        course=course, end_date=now - timedelta(1), live=True, clean_disabled=True
+    )
+    CourseRunFactory.create(
+        course=course, enrollment_end=now - timedelta(1), live=True, clean_disabled=True
+    )
     CourseRunFactory.create(
         course=course, enrollment_start=now + timedelta(1), live=True
     )
