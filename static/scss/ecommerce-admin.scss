@@ -18,29 +18,37 @@
   }
 }
 
-.skipped-warning {
+.form-message {
   border-radius: 5px;
-  background-color: $warning-background;
   color: $white;
   padding: 15px;
   margin-bottom: 16px;
 
-  .warning-div {
+  .message-div {
     display: flex;
   }
 
-  .warning-icon {
+  .message-icon {
     margin: 0 10px 0 0;
   }
 
-  .warning-text {
+  .message-text {
     margin: 0;
   }
 
-  .warning-list {
+  .message-list {
     margin: 0 0 0 10px;
   }
+
+  &.form-success {
+    background-color: $success-background;
+  }
+
+  &.form-warning {
+    background-color: $warning-background;
+  }
 }
+
 
 .modal-title {
   font-size: 28px;

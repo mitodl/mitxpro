@@ -40,3 +40,7 @@ class FailedBatchRequestException(Exception):  # noqa: N818
     """
     General exception for a failure during a Google batch API request
     """
+
+
+class CouponAssignmentError(Exception):
+    """Custom exception for coupon assignment errors."""

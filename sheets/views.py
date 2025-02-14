@@ -13,6 +13,8 @@ from django.views.decorators.csrf import csrf_exempt
 from google.auth.exceptions import GoogleAuthError
 from google_auth_oauthlib.flow import Flow
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from mitxpro.utils import now_in_utc
 from sheets import tasks
@@ -25,6 +27,8 @@ from sheets.constants import (
 )
 from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.utils import generate_google_client_config
+from sheets.management.utils import assign_coupons_from_spreadsheet
+from sheets.exceptions import CouponAssignmentError
 
 log = logging.getLogger(__name__)
 
@@ -151,3 +155,43 @@ def handle_watched_sheet_update(request):
         tasks.handle_unprocessed_deferral_requests.delay()
 
     return HttpResponse(status=status.HTTP_200_OK)
+
+
+class ProcessCouponSheetAssignmentView(APIView):
+    def post(self, request):
+        """Handles the assignment of coupons from a sheet (by ID or Title)."""
+        sheet_identifier_type = request.data.get("sheet_identifier_type")
+        sheet_identifier_value = request.data.get("sheet_identifier_value")
+        force = request.data.get("force", True)
+
+        if sheet_identifier_type is None or not sheet_identifier_value:
+            return Response(
+                {"error": "Both 'sheet_identifier_type' and 'sheet_value' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Call the updated utility function for coupon assignment
+            spreadsheet_repr, num_created, num_removed, bulk_assignment_id = assign_coupons_from_spreadsheet(
+                sheet_identifier_type=="id", sheet_identifier_value, force
+            )
+
+            # Return success response with relevant data
+            return Response(
+                {
+                    "message": f"Successfully processed coupon assignment sheet ({spreadsheet_repr}).",
+                    "num_created": num_created,
+                    "num_removed": num_removed,
+                    "bulk_assignment_id": bulk_assignment_id,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except CouponAssignmentError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # except Exception as e:
+        #     return Response(
+        #         {"error": "An error occurred while processing the coupon sheet."},
+        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     )

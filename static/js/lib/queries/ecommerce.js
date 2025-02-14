@@ -117,6 +117,15 @@ export default {
       ...DEFAULT_POST_OPTIONS,
     },
   }),
+  sheetCouponsAssignment: (payload: Object) => ({
+    queryKey: "couponsAssignment",
+    url: "/api/sheets/process_coupon_sheet_assignment/",
+    body: payload,
+    options: {
+      method: "POST",
+      ...DEFAULT_POST_OPTIONS,
+    },
+  }),
   b2bCheckoutMutation: (payload: B2BCheckoutPayload) => ({
     queryKey: "b2bCheckoutMutation",
     url: "/api/b2b/checkout/",
