@@ -10,6 +10,9 @@ export const ENROLLABLE_ITEM_ID_SEPARATOR = "+";
 export const PRODUCT_TYPE_PROGRAM = "program";
 export const PRODUCT_TYPE_COURSERUN = "courserun";
 
+export const SHEET_IDENTIFIER_ID = "id";
+export const SHEET_IDENTIFIER_TITLE = "title";
+
 export const GENDER_CHOICES = [
   ["m", "Male"],
   ["f", "Female"],
