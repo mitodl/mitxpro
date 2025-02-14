@@ -5,11 +5,7 @@ based on the sheet data, and sends a message to all recipients who received a co
 
 from django.core.management import BaseCommand, CommandError
 
-from ecommerce.models import BulkCouponAssignment
-from sheets.api import ExpandedSheetsClient, get_authorized_pygsheets_client
-from sheets.coupon_assign_api import CouponAssignmentHandler
-from sheets.management.utils import get_assignment_spreadsheet_by_title
-from sheets.utils import google_date_string_to_datetime, spreadsheet_repr
+from sheets.management.utils import assign_coupons_from_spreadsheet
 
 
 class Command(BaseCommand):
@@ -45,57 +41,30 @@ class Command(BaseCommand):
         super().add_arguments(parser)
 
     def handle(self, *args, **options):  # noqa: ARG002
-        if not options["id"] and not options["title"]:
+        sheet_id = options.get("id")
+        title = options.get("title")
+
+        if not sheet_id and not title:
             raise CommandError("Need to provide --id or --title")  # noqa: EM101
 
-        pygsheets_client = get_authorized_pygsheets_client()
-        # Fetch the correct spreadsheet
-        if options["id"]:
-            spreadsheet = pygsheets_client.open_by_key(options["id"])
-        else:
-            spreadsheet = get_assignment_spreadsheet_by_title(
-                pygsheets_client, options["title"]
-            )
-        # Process the sheet
-        self.stdout.write(
-            "Found spreadsheet ({}). Processing...".format(  # noqa: UP032
-                spreadsheet_repr(spreadsheet)
-            )
-        )
+        use_sheet_id = bool(sheet_id)
+        value = sheet_id if use_sheet_id else title
 
-        expanded_sheets_client = ExpandedSheetsClient(pygsheets_client)
-        metadata = expanded_sheets_client.get_drive_file_metadata(
-            file_id=spreadsheet.id, fields="modifiedTime"
-        )
-        sheet_last_modified = google_date_string_to_datetime(metadata["modifiedTime"])
-        bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
-            assignment_sheet_id=spreadsheet.id
-        )
-
-        if (
-            bulk_assignment.sheet_last_modified_date
-            and sheet_last_modified <= bulk_assignment.sheet_last_modified_date
-            and not options["force"]
-        ):
-            raise CommandError(
-                "Spreadsheet is unchanged since it was last processed (%s, last modified: %s). "  # noqa: UP031
-                "Add the '-f/--force' flag to process it anyway."
-                % (spreadsheet_repr(spreadsheet), sheet_last_modified.isoformat())
+        try:
+            spreadsheet, num_created, num_removed, bulk_assignment_id = assign_coupons_from_spreadsheet(
+                use_sheet_id=use_sheet_id, value=value, force=options.get("force")
             )
 
-        coupon_assignment_handler = CouponAssignmentHandler(
-            spreadsheet_id=spreadsheet.id, bulk_assignment=bulk_assignment
-        )
-        (
-            bulk_assignment,
-            num_created,
-            num_removed,
-        ) = coupon_assignment_handler.process_assignment_spreadsheet()
-        bulk_assignment.sheet_last_modified_date = sheet_last_modified
-        bulk_assignment.save()
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Successfully processed coupon assignment sheet ({spreadsheet_repr(spreadsheet)}).\n"
-                f"{num_created} individual coupon assignment(s) added, {num_removed} deleted (BulkCouponAssignment id: {bulk_assignment.id})."
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Successfully processed coupon assignment sheet ({spreadsheet}).\n"
+                    f"{num_created} individual coupon assignment(s) added, {num_removed} deleted "
+                    f"(BulkCouponAssignment id: {bulk_assignment_id})."
+                )
             )
-        )
+
+        except CommandError as e:
+            raise CommandError(str(e))
+
+        except Exception as e:
+            raise CommandError(f"An unexpected error occurred: {e}")

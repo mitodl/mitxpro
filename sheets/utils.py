@@ -10,6 +10,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from mitxpro.utils import matching_item_index
+# from sheets.api import ExpandedSheetsClient, get_authorized_pygsheets_client
 from sheets.constants import (
     ASSIGNMENT_SHEET_PREFIX,
     GOOGLE_AUTH_PROVIDER_X509_CERT_URL,

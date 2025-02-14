@@ -10,6 +10,7 @@ import { routes } from "../../../lib/urls";
 
 import CouponCreationPage from "./CreateCouponPage";
 import DeactivateCouponPage from "./DeactivateCouponPage";
+import ProcessCouponAssignmentSheetPage from "./ProcessCouponAssignmentSheetPage";
 
 const EcommerceAdminIndexPage = () => (
   <div className="ecommerce-admin-body">
@@ -27,6 +28,9 @@ const EcommerceAdminIndexPage = () => (
           </Link>
         </li>
       )}
+      <li>
+        <Link to={routes.ecommerceAdmin.processSheets}>Process Coupon Assignment Sheet</Link>
+      </li>
     </ul>
   </div>
 );
@@ -48,6 +52,11 @@ const EcommerceAdminPages = () => (
         exact
         path={routes.ecommerceAdmin.deactivate}
         component={DeactivateCouponPage}
+      />
+      <Route
+        exact
+        path={routes.ecommerceAdmin.processSheets}
+        component={ProcessCouponAssignmentSheetPage}
       />
       <Redirect to={routes.ecommerceAdmin.index} />
     </Switch>
