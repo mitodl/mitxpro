@@ -7,6 +7,7 @@ from factory.django import DjangoModelFactory
 
 from users.factories import UserFactory
 from voucher.models import Voucher
+from datetime import UTC
 
 
 class VoucherFactory(DjangoModelFactory):
@@ -17,7 +18,9 @@ class VoucherFactory(DjangoModelFactory):
     employee_name = factory.Faker("name")
     employee_id = factory.Faker("password", special_chars=False)
 
-    course_start_date_input = factory.Faker("date_object")
+    course_start_date_input = factory.Faker(
+        "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
+    )
     course_id_input = factory.Sequence("course-{}".format)
     course_title_input = factory.fuzzy.FuzzyText(prefix="Course ")
 
