@@ -3,7 +3,6 @@
 EMAIL_VERIFICATION = "verification"
 EMAIL_PW_RESET = "password_reset"
 EMAIL_BULK_ENROLL = "bulk_enroll"
-EMAIL_COURSE_RUN_ENROLLMENT = "course_run_enrollment"
 EMAIL_COURSE_RUN_UNENROLLMENT = "course_run_unenrollment"
 EMAIL_B2B_RECEIPT = "b2b_receipt"
 EMAIL_PRODUCT_ORDER_RECEIPT = "product_order_receipt"
@@ -14,7 +13,6 @@ EMAIL_TYPE_DESCRIPTIONS = {
     EMAIL_VERIFICATION: "Verify Email",
     EMAIL_PW_RESET: "Password Reset",
     EMAIL_BULK_ENROLL: "Bulk Enrollment",
-    EMAIL_COURSE_RUN_ENROLLMENT: "Course Run Enrollment",
     EMAIL_B2B_RECEIPT: "Enrollment Code Purchase Receipt",
     EMAIL_CHANGE_EMAIL: "Change Email",
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT: "Welcome Course Run Enrollment",
