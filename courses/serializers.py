@@ -8,7 +8,7 @@ from django.conf import settings
 from django.templatetags.static import static
 from rest_framework import serializers
 
-from cms.models import ProductPage
+# from cms.models import ProductPage
 from courses import models
 from ecommerce.serializers import CompanySerializer
 
@@ -120,7 +120,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
 
     class Meta:
-        model = ProductPage
+        model = "cms.ProductPage"
         fields = [
             "url",
             "description",

@@ -44,6 +44,10 @@ from wagtail.images.models import Image
 from wagtail.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
+from wagtail.api import APIField
+
+from .wagtail_api_serializers import ProductChildPageSerializer
+from courses.serializers import CourseSerializer
 
 from blog.api import fetch_blog
 from cms.api import filter_and_sort_catalog_pages
@@ -1136,6 +1140,15 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             for child_class in courseware_subclasses:
                 child_class.objects.filter(featured=True).update(featured=False)
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
+
+    api_fields = [
+        APIField("product", serializer=CourseSerializer()),
+        APIField("child_pages", serializer=ProductChildPageSerializer()),
+    ]
+
+    @property
+    def child_pages(self):
+        return self.get_children().public().live()
 
     @property
     def product(self):
