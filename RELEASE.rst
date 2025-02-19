@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.174.0
+Version 0.174.0 (Released February 19, 2025)
 ---------------
 
 - config: changed default backend to ol-oauth (#3393)
