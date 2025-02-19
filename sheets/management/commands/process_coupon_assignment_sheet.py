@@ -6,6 +6,7 @@ based on the sheet data, and sends a message to all recipients who received a co
 from django.core.management import BaseCommand, CommandError
 
 from sheets.management.utils import assign_coupons_from_spreadsheet
+from sheets.exceptions import CouponAssignmentError
 
 
 class Command(BaseCommand):
@@ -63,8 +64,8 @@ class Command(BaseCommand):
                 )
             )
 
-        except CommandError as e:
-            raise CommandError(str(e))
+        except CouponAssignmentError as e:
+            raise  CommandError(str(e))
 
         except Exception as e:
             raise CommandError(f"An unexpected error occurred: {e}")

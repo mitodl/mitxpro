@@ -2,6 +2,7 @@
 declare var USER_PERMISSIONS: {
   has_coupon_create_permission: boolean,
   has_coupon_update_permission: boolean,
+  has_coupon_product_assignment_permission: boolean,
 };
 import React from "react";
 import { Redirect, Route, Switch, Link } from "react-router-dom";
@@ -28,9 +29,13 @@ const EcommerceAdminIndexPage = () => (
           </Link>
         </li>
       )}
-      <li>
-        <Link to={routes.ecommerceAdmin.processSheets}>Process Coupon Assignment Sheet</Link>
-      </li>
+      {USER_PERMISSIONS.has_coupon_product_assignment_permission && (
+        <li>
+          <Link to={routes.ecommerceAdmin.processSheets}>
+            Process Coupon Assignment Sheet
+          </Link>
+        </li>
+      )}
     </ul>
   </div>
 );

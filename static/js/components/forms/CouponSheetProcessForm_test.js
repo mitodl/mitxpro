@@ -38,23 +38,40 @@ describe("CouponSheetProcessForm", () => {
   });
 
   [
-    ["sheet_identifier_value", "", "Sheet ID or Title is required"],
-    ["sheet_identifier_value", "Valid_name", ""],
+    // Sheet Title validation (allows spaces)
+    ["sheet_identifier_value", "", "Sheet Title is required", SHEET_IDENTIFIER_TITLE],
+    ["sheet_identifier_value", "Valid Name", "", SHEET_IDENTIFIER_TITLE],
     [
       "sheet_identifier_value",
       "Invalid+value",
       "Only letters, numbers, spaces, underscores, and hyphens allowed",
+      SHEET_IDENTIFIER_TITLE,
     ],
-  ].forEach(([name, value, errorMessage]) => {
+  
+    // Sheet ID validation (no spaces allowed)
+    ["sheet_identifier_value", "", "Sheet ID is required", SHEET_IDENTIFIER_ID],
+    ["sheet_identifier_value", "Valid_Name", "", SHEET_IDENTIFIER_ID],
+    [
+      "sheet_identifier_value",
+      "Invalid Name",
+      "Only letters, numbers, underscores, and hyphens allowed (no spaces)",
+      SHEET_IDENTIFIER_ID,
+    ],
+  ].forEach(([name, value, errorMessage, identifierType]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
       value
-    )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
+    )}, identifierType=${identifierType} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm();
+      
+      const radio = wrapper.find(`input[name="sheet_identifier_type"][value="${identifierType}"]`);
+      radio.simulate("change", { target: { name: "sheet_identifier_type", value: identifierType } });
+  
       const input = wrapper.find(`textarea[name="${name}"]`);
       input.simulate("change", { persist: () => {}, target: { name, value } });
       input.simulate("blur");
       await wait();
       wrapper.update();
+
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
         errorMessage
