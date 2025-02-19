@@ -2475,3 +2475,27 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
 
     assert for_teams_page.title != b2b_page_wo_platform.title
     assert for_teams_page.title == b2b_page.title
+
+
+def test_external_course_page_with_same_course_run_in_internal_course_page():
+    """
+    Tests that a CoursePage with the same course run as another CoursePage.
+    """
+    course_page = CoursePageFactory.create()
+
+    with pytest.raises(ValidationError) as context:
+        ExternalCoursePageFactory.create(course=course_page.course)
+
+    assert str(context.value) == "{'__all__': ['There is already an internal course page associated with this course.']}"
+
+
+def test_internal_course_page_with_same_course_run_in_external_course_page():
+    """
+    Tests that an ExternalCoursePage with the same course run as another ExternalCoursePage.
+    """
+    external_course_page = ExternalCoursePageFactory.create()
+
+    with pytest.raises(ValidationError) as context:
+        CoursePageFactory.create(course=external_course_page.course)
+
+    assert str(context.value) == "{'__all__': ['There is already an external course page associated with this course.']}"
