@@ -13,11 +13,17 @@ type CouponSheetProcessFormProps = {
 const couponValidations = yup.object().shape({
   sheet_identifier_value: yup
     .string()
-    .required("Sheet ID or Title is required")
-    .matches(
-      /^[\w\n\s-]+$/,
-      "Only letters, numbers, spaces, underscores, and hyphens allowed"
-    ),
+    .when("sheet_identifier_type", {
+      is: SHEET_IDENTIFIER_ID,
+      then: () => yup
+        .string()
+        .required("Sheet ID is required")
+        .matches(/^[\w-]+$/, "Only letters, numbers, underscores, and hyphens allowed (no spaces)"),
+      otherwise: () => yup
+        .string()
+        .required("Sheet Title is required")
+        .matches(/^[\w\s-]+$/, "Only letters, numbers, spaces, underscores, and hyphens allowed"),
+    }),
 });
 
 export const CouponSheetProcessForm = ({ onSubmit }: CouponSheetProcessFormProps) => {
