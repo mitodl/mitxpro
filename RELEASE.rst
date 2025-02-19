@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.174.0 (Released February 19, 2025)
+---------------
+
+- config: changed default backend to ol-oauth (#3393)
+- feat: deactivate external course runs based on API data (#3386)
+- fix: install lxml and xmlsec without binary (#3392)
+- fix(deps): update dependency wagtail to v5.2.8 (#3396)
+- fix(deps): update dependency boto3 to v1.36.16 (#3395)
+
 Version 0.173.0 (Released February 11, 2025)
 ---------------
 
