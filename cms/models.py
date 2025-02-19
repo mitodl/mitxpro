@@ -46,9 +46,6 @@ from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
 from wagtail.api import APIField
 
-from .wagtail_api_serializers import ProductChildPageSerializer
-from courses.serializers import CourseSerializer
-
 from blog.api import fetch_blog
 from cms.api import filter_and_sort_catalog_pages
 from cms.blocks import (
@@ -102,6 +99,8 @@ from mitol.olposthog.features import is_enabled
 from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
+from courses.serializers import CourseSerializer
+from .wagtail_api_serializers import ProductChildPageSerializer
 
 
 class DisableSitemapURLMixin:
