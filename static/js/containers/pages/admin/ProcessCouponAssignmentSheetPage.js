@@ -2,7 +2,7 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { DEACTIVATE_COUPONS_PAGE_TITLE } from "../../../constants";
+import { PROCESS_COUPON_ASSIGNMENT_SHEET_PAGE_TITLE } from "../../../constants";
 import { mutateAsync } from "redux-query";
 import { compose } from "redux";
 import { connect } from "react-redux";
@@ -30,14 +30,17 @@ type Props = {|
   ...DispatchProps,
 |};
 
-export class ProcessCouponAssignmentSheetPage extends React.Component<Props, State> {
+export class ProcessCouponAssignmentSheetPage extends React.Component<
+  Props,
+  State,
+> {
   constructor(props: Props) {
     super(props);
     this.state = {
       submitting: false,
       isProcessed: false,
       responseMsg: "",
-      errorMsg: ""
+      errorMsg: "",
     };
   }
 
@@ -50,7 +53,7 @@ export class ProcessCouponAssignmentSheetPage extends React.Component<Props, Sta
       isProcessed: true,
       responseMsg: result.body.message,
       errorMsg: result.body.error,
-    })
+    });
     setSubmitting(false);
   };
 
@@ -64,14 +67,10 @@ export class ProcessCouponAssignmentSheetPage extends React.Component<Props, Sta
   };
 
   render() {
-    const {
-      isProcessed,
-      responseMsg,
-      errorMsg
-    } = this.state;
+    const { isProcessed, responseMsg, errorMsg } = this.state;
     return (
       <DocumentTitle
-        title={`${SETTINGS.site_name} | ${DEACTIVATE_COUPONS_PAGE_TITLE}`}
+        title={`${SETTINGS.site_name} | ${PROCESS_COUPON_ASSIGNMENT_SHEET_PAGE_TITLE}`}
       >
         <div className="ecommerce-admin-body">
           <p>
@@ -83,15 +82,14 @@ export class ProcessCouponAssignmentSheetPage extends React.Component<Props, Sta
           {isProcessed ? (
             <div className="coupon-result-div">
               {responseMsg ? (
-                  <div className="form-message form-success">
-                      <p className="message-text">{responseMsg}</p>
-                  </div>
-
-              ):(
-              <div className="form-message form-warning">
-                <p className="message-text">{errorMsg}</p>
-              </div>
-            )}
+                <div className="form-message form-success">
+                  <p className="message-text">{responseMsg}</p>
+                </div>
+              ) : (
+                <div className="form-message form-warning">
+                  <p className="message-text">{errorMsg}</p>
+                </div>
+              )}
 
               <div>
                 <input

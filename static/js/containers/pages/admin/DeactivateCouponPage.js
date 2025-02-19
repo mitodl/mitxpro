@@ -130,9 +130,12 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
           {isDeactivated ? (
             <div className="coupon-success-div">
               {numOfCouponsDeactivated > 0 && (
-              <div className="form-message form-success">
-                <p className="message-text">Coupon(s) successfully deactivated.</p>
-              </div>)}
+                <div className="form-message form-success">
+                  <p className="message-text">
+                    Coupon(s) successfully deactivated.
+                  </p>
+                </div>
+              )}
               {skippedCodes.length > 0 && (
                 <div className="form-message form-warning">
                   <div className="message-div">
