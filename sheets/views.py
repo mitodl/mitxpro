@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from google.auth.exceptions import GoogleAuthError
 from google_auth_oauthlib.flow import Flow
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -25,10 +26,11 @@ from sheets.constants import (
     SHEET_TYPE_COUPON_REQUEST,
     SHEET_TYPE_ENROLL_CHANGE,
 )
+from sheets.exceptions import CouponAssignmentError
 from sheets.models import GoogleApiAuth, GoogleFileWatch
 from sheets.utils import generate_google_client_config
 from sheets.management.utils import assign_coupons_from_spreadsheet
-from sheets.exceptions import CouponAssignmentError
+from sheets.permissions import HasCouponProductAssignmentPermission
 
 log = logging.getLogger(__name__)
 
@@ -158,6 +160,12 @@ def handle_watched_sheet_update(request):
 
 
 class ProcessCouponSheetAssignmentView(APIView):
+    """
+    API view to handle the assignment of coupons from a sheet (by ID or Title).
+    """
+    permission_classes = (HasCouponProductAssignmentPermission,)
+    authentication_classes = (SessionAuthentication,)
+    
     def post(self, request):
         """Handles the assignment of coupons from a sheet (by ID or Title)."""
         sheet_identifier_type = request.data.get("sheet_identifier_type")
@@ -190,8 +198,8 @@ class ProcessCouponSheetAssignmentView(APIView):
         except CouponAssignmentError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # except Exception as e:
-        #     return Response(
-        #         {"error": "An error occurred while processing the coupon sheet."},
-        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     )
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while processing the coupon sheet."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

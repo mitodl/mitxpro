@@ -35,6 +35,14 @@ from ecommerce.api import (
     make_receipt_url,
     validate_basket_for_checkout,
 )
+from ecommerce.constants import (
+    COUPON_ADD_PERMISSION,
+    COUPON_UPDATE_PERMISSION,
+)
+from sheets.constants import (
+    COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION,
+    COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION,
+)
 from ecommerce.exceptions import ParseException
 from ecommerce.filters import ProductFilter
 from ecommerce.mail_api import send_ecommerce_order_receipt
@@ -49,8 +57,6 @@ from ecommerce.models import (
     Receipt,
 )
 from ecommerce.permissions import (
-    COUPON_ADD_PERMISSION,
-    COUPON_UPDATE_PERMISSION,
     HasCouponPermission,
     IsSignedByCyberSource,
 )
@@ -380,8 +386,12 @@ def ecommerce_restricted(request):
     """
     has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
     has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
+    has_coupon_product_assignment_permission = (
+        request.user.has_perm(COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION) and 
+        request.user.has_perm(COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION)
+    )
 
-    if not (has_coupon_add_permission or has_coupon_update_permission):
+    if not (has_coupon_add_permission or has_coupon_update_permission or has_coupon_product_assignment_permission):
         raise PermissionDenied
 
     if (
@@ -390,6 +400,9 @@ def ecommerce_restricted(request):
     ) or (
         request.path.startswith("/ecommerce/admin/deactivate-coupons")
         and not has_coupon_update_permission
+    ) or (
+        request.path.startswith("/ecommerce/admin/process-coupon-assignment-sheets")
+        and not has_coupon_product_assignment_permission
     ):
         raise PermissionDenied
 
@@ -398,6 +411,7 @@ def ecommerce_restricted(request):
         {
             "has_coupon_create_permission": has_coupon_add_permission,
             "has_coupon_update_permission": has_coupon_update_permission,
+            "has_coupon_product_assignment_permission": has_coupon_product_assignment_permission,
         }
     )
     return render(request, "index.html", context=context)
