@@ -1281,7 +1281,7 @@ def test_enroll_user_in_order_items(mocker, user, has_redemption):
     """
     patched_enroll = mocker.patch("courses.api.enroll_in_edx_course_runs")
     patched_send_email = mocker.patch(
-        "ecommerce.mail_api.send_course_run_enrollment_email"
+        "ecommerce.mail_api.send_course_run_enrollment_welcome_email"
     )
     program = ProgramFactory.create()
     runs = CourseRunFactory.create_batch(2, course__program=program)

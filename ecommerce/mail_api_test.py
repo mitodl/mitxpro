@@ -31,7 +31,6 @@ from ecommerce.mail_api import (
     ENROLL_ERROR_EMAIL_SUBJECT,
     send_b2b_receipt_email,
     send_bulk_enroll_emails,
-    send_course_run_enrollment_email,
     send_course_run_enrollment_welcome_email,
     send_ecommerce_order_receipt,
     send_enrollment_failure_message,
@@ -41,7 +40,6 @@ from mail.api import EmailMetadata, UserMessageProps
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
     EMAIL_BULK_ENROLL,
-    EMAIL_COURSE_RUN_ENROLLMENT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
 )
@@ -112,40 +110,6 @@ def test_send_bulk_enroll_emails(mocker, settings):
                 product_type_str: assignment.product_coupon.product.content_object.text_id,
             },
         )
-
-
-def test_send_course_run_enrollment_email(mocker):
-    """send_course_run_enrollment_email should send an email for the given enrollment"""
-    patched_mail_api = mocker.patch("ecommerce.mail_api.api")
-    enrollment = CourseRunEnrollmentFactory.create()
-
-    send_course_run_enrollment_email(enrollment)
-
-    patched_mail_api.context_for_user.assert_called_once_with(
-        user=enrollment.user, extra_context={"enrollment": enrollment}
-    )
-    patched_mail_api.message_for_recipient.assert_called_once_with(
-        enrollment.user.email,
-        patched_mail_api.context_for_user.return_value,
-        EMAIL_COURSE_RUN_ENROLLMENT,
-    )
-    patched_mail_api.send_message.assert_called_once_with(
-        patched_mail_api.message_for_recipient.return_value
-    )
-
-
-def test_send_course_run_enrollment_email_error(mocker):
-    """send_course_run_enrollment_email handle and log errors"""
-    patched_mail_api = mocker.patch("ecommerce.mail_api.api")
-    patched_log = mocker.patch("ecommerce.mail_api.log")
-    patched_mail_api.send_message.side_effect = Exception("error")
-    enrollment = CourseRunEnrollmentFactory.create()
-
-    send_course_run_enrollment_email(enrollment)
-
-    patched_log.exception.assert_called_once_with(
-        "Error sending enrollment success email"
-    )
 
 
 @pytest.mark.parametrize("enabled", [True, False])

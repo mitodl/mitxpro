@@ -138,15 +138,15 @@ def test_create_run_enrollments(mocker, user):
         active=False,
     )
     patched_edx_enroll = mocker.patch("courses.api.enroll_in_edx_course_runs")
-    patched_send_enrollment_email = mocker.patch(
-        "courses.api.mail_api.send_course_run_enrollment_email"
+    patched_send_enrollment_welcome_email = mocker.patch(
+        "courses.api.mail_api.send_course_run_enrollment_welcome_email"
     )
 
     successful_enrollments, edx_request_success = create_run_enrollments(
         user, runs, order=order, company=company
     )
     patched_edx_enroll.assert_called_once_with(user, runs)
-    assert patched_send_enrollment_email.call_count == num_runs
+    assert patched_send_enrollment_welcome_email.call_count == num_runs
     assert edx_request_success is True
     assert len(successful_enrollments) == num_runs
     enrollments = CourseRunEnrollment.objects.order_by("run__id").all()
@@ -155,7 +155,7 @@ def test_create_run_enrollments(mocker, user):
         assert enrollment.active is True
         assert enrollment.edx_enrolled is True
         assert enrollment.run == run
-        patched_send_enrollment_email.assert_any_call(enrollment)
+        patched_send_enrollment_welcome_email.assert_any_call(enrollment)
 
 
 @pytest.mark.django_db
@@ -172,8 +172,8 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
         "courses.api.enroll_in_edx_course_runs", side_effect=exception_cls
     )
     patched_log_exception = mocker.patch("courses.api.log.exception")
-    patched_send_enrollment_email = mocker.patch(
-        "courses.api.mail_api.send_course_run_enrollment_email"
+    patched_send_enrollment_welcome_email = mocker.patch(
+        "courses.api.mail_api.send_course_run_enrollment_welcome_email"
     )
     run = CourseRunFactory.create()
     successful_enrollments, edx_request_success = create_run_enrollments(
@@ -185,7 +185,7 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
     )
     patched_edx_enroll.assert_called_once_with(user, [run])
     patched_log_exception.assert_called_once()
-    patched_send_enrollment_email.assert_not_called()
+    patched_send_enrollment_welcome_email.assert_not_called()
     assert len(successful_enrollments) == 1
     assert edx_request_success is False
 
@@ -217,8 +217,8 @@ def test_create_run_enrollments_enroll_api_fail(
         side_effect=exception_cls(user, runs[2], inner_exception),
     )
     patched_log_exception = mocker.patch("courses.api.log.exception")
-    patched_send_enrollment_email = mocker.patch(
-        "courses.api.mail_api.send_course_run_enrollment_email"
+    patched_send_enrollment_welcome_email = mocker.patch(
+        "courses.api.mail_api.send_course_run_enrollment_welcome_email"
     )
     successful_enrollments = []
     edx_request_success = False
@@ -240,7 +240,7 @@ def test_create_run_enrollments_enroll_api_fail(
         patched_log_exception.assert_called_once()
     else:
         patched_log_exception.assert_not_called()
-    patched_send_enrollment_email.assert_not_called()
+    patched_send_enrollment_welcome_email.assert_not_called()
     expected_enrollments = 0 if not keep_failed_enrollments else num_runs
     assert len(successful_enrollments) == expected_enrollments
     assert edx_request_success is False
@@ -267,7 +267,7 @@ def test_create_run_enrollments_creation_fail(mocker, user):
     )
     patched_edx_enroll.assert_called_once_with(user, runs)
     patched_log_exception.assert_called_once()
-    patched_mail_api.send_course_run_enrollment_email.assert_not_called()
+    patched_mail_api.send_course_run_enrollment_welcome_email.assert_not_called()
     patched_mail_api.send_enrollment_failure_message.assert_called_once()
     assert successful_enrollments == [enrollment]
     assert edx_request_success is True
