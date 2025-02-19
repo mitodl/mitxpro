@@ -124,7 +124,11 @@ def test_handle_coupon_request_sheet_update(mocker, settings):
     [
         # Valid request
         (
-            {"sheet_identifier_type": "id", "sheet_identifier_value": "valid_sheet", "force": False},
+            {
+                "sheet_identifier_type": "id",
+                "sheet_identifier_value": "valid_sheet",
+                "force": False,
+            },
             ("Spreadsheet1", 10, 5, "bulk_id_123"),
             status.HTTP_200_OK,
             {
@@ -157,13 +161,24 @@ def test_handle_coupon_request_sheet_update(mocker, settings):
         ),
     ],
 )
-def test_process_coupon_sheet_assignment(mocker, admin_drf_client, request_data, mock_return, expected_status, expected_response):
+def test_process_coupon_sheet_assignment(
+    mocker,
+    admin_drf_client,
+    request_data,
+    mock_return,
+    expected_status,
+    expected_response,
+):
     """Test the ProcessCouponSheetAssignmentView post method"""
     url = reverse("process-coupon-sheet-assignment")
     if isinstance(mock_return, Exception):
-        mocker.patch("sheets.views.assign_coupons_from_spreadsheet", side_effect=mock_return)
+        mocker.patch(
+            "sheets.views.assign_coupons_from_spreadsheet", side_effect=mock_return
+        )
     else:
-        mocker.patch("sheets.views.assign_coupons_from_spreadsheet", return_value=mock_return)
+        mocker.patch(
+            "sheets.views.assign_coupons_from_spreadsheet", return_value=mock_return
+        )
     response = admin_drf_client.post(url, request_data, format="json")
     assert response.status_code == expected_status
     assert response.json() == expected_response
