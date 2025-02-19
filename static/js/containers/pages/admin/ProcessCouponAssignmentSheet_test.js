@@ -38,26 +38,26 @@ describe("ProcessCouponAssignmentSheetPage", () => {
     const successMsg = `Successfully processed coupon assignment sheet.`;
     await inner
       .instance()
-      .setState({ isProcessed: true, responseMsg : successMsg });
+      .setState({ isProcessed: true, responseMsg: successMsg });
     assert.equal(inner.find(".coupon-result-div").text(), successMsg);
 
     // Error Case
     const errorMsg = "Error processing coupon assignment sheet.";
     inner
       .instance()
-      .setState({ isProcessed: true, responseMsg :"", errorMsg: errorMsg });
+      .setState({ isProcessed: true, responseMsg: "", errorMsg: errorMsg });
     assert.equal(inner.find(".coupon-result-div").text(), errorMsg);
-
   });
 
   it("sets state.isProcessed if submission is successful", async () => {
     const testPayloadData = {
-      sheet_identifier_type : "id",
-      sheet_identifier_value : "123",
+      sheet_identifier_type: "id",
+      sheet_identifier_value: "123",
     };
     helper.handleRequestStub.returns({
       body: {
-        message: "Successfully processed coupon assignment sheet  ('abc', id: 123).",
+        message:
+          "Successfully processed coupon assignment sheet  ('abc', id: 123).",
       },
     });
     const { inner } = await renderProcessCouponAssignmentSheetPage();
@@ -68,13 +68,18 @@ describe("ProcessCouponAssignmentSheetPage", () => {
     sinon.assert.calledWith(setSubmittingStub, false);
 
     await wait;
-    sinon.assert.calledWith(helper.handleRequestStub, "/api/sheets/process_coupon_sheet_assignment/", "POST", {
-      body: testPayloadData,
-      headers: {
-        "X-CSRFTOKEN": null,
+    sinon.assert.calledWith(
+      helper.handleRequestStub,
+      "/api/sheets/process_coupon_sheet_assignment/",
+      "POST",
+      {
+        body: testPayloadData,
+        headers: {
+          "X-CSRFTOKEN": null,
+        },
+        credentials: undefined,
       },
-      credentials: undefined,
-    });
+    );
   });
 
   it("clearSuccess() changes state.isProcessed", async () => {

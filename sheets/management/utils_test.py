@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from django.core.management import CommandError
 from datetime import timedelta
 
 from sheets.management import utils
@@ -87,11 +86,9 @@ def test_assign_coupons_from_spreadsheet(
 ):
     """Test assign_coupons_from_spreadsheet with different conditions."""
 
-    # Mock authorized pygsheets client
     mock_pygsheets_client = MagicMock()
     mock_get_authorized_pygsheets_client.return_value = mock_pygsheets_client
 
-    # Mock spreadsheet
     mock_spreadsheet = MagicMock()
 
     # Title and ID should be assigned to assert the returning value of assign_coupons_from_spreadsheet
@@ -103,7 +100,6 @@ def test_assign_coupons_from_spreadsheet(
     else:
         mock_get_assignment_sheet_by_title.return_value = mock_spreadsheet
 
-    # Mock modification time
     sheet_last_modified = now_in_utc() + sheet_modified_offset if sheet_modified_offset else None
     mock_google_date_string_to_datetime.return_value = sheet_last_modified
 

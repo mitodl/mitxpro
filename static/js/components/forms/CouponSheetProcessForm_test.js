@@ -39,7 +39,12 @@ describe("CouponSheetProcessForm", () => {
 
   [
     // Sheet Title validation (allows spaces)
-    ["sheet_identifier_value", "", "Sheet Title is required", SHEET_IDENTIFIER_TITLE],
+    [
+      "sheet_identifier_value",
+      "",
+      "Sheet Title is required",
+      SHEET_IDENTIFIER_TITLE,
+    ],
     ["sheet_identifier_value", "Valid Name", "", SHEET_IDENTIFIER_TITLE],
     [
       "sheet_identifier_value",
@@ -47,7 +52,7 @@ describe("CouponSheetProcessForm", () => {
       "Only letters, numbers, spaces, underscores, and hyphens allowed",
       SHEET_IDENTIFIER_TITLE,
     ],
-  
+
     // Sheet ID validation (no spaces allowed)
     ["sheet_identifier_value", "", "Sheet ID is required", SHEET_IDENTIFIER_ID],
     ["sheet_identifier_value", "Valid_Name", "", SHEET_IDENTIFIER_ID],
@@ -59,13 +64,17 @@ describe("CouponSheetProcessForm", () => {
     ],
   ].forEach(([name, value, errorMessage, identifierType]) => {
     it(`validates the field name=${name}, value=${JSON.stringify(
-      value
+      value,
     )}, identifierType=${identifierType} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm();
-      
-      const radio = wrapper.find(`input[name="sheet_identifier_type"][value="${identifierType}"]`);
-      radio.simulate("change", { target: { name: "sheet_identifier_type", value: identifierType } });
-  
+
+      const radio = wrapper.find(
+        `input[name="sheet_identifier_type"][value="${identifierType}"]`,
+      );
+      radio.simulate("change", {
+        target: { name: "sheet_identifier_type", value: identifierType },
+      });
+
       const input = wrapper.find(`textarea[name="${name}"]`);
       input.simulate("change", { persist: () => {}, target: { name, value } });
       input.simulate("blur");
@@ -74,7 +83,7 @@ describe("CouponSheetProcessForm", () => {
 
       assert.deepEqual(
         findFormikErrorByName(wrapper, name).text(),
-        errorMessage
+        errorMessage,
       );
     });
   });
@@ -82,18 +91,23 @@ describe("CouponSheetProcessForm", () => {
   it("changes label text based on selected identifier type", async () => {
     const wrapper = renderForm();
 
-    const getLabelText = () => wrapper.find("label[htmlFor='sheet_identifier_value']").text();
-    
+    const getLabelText = () =>
+      wrapper.find("label[htmlFor='sheet_identifier_value']").text();
+
     assert.equal(getLabelText(), "Sheet ID*");
-    
-    const sheetTitleRadio = wrapper.find(`input[name='sheet_identifier_type'][value='${SHEET_IDENTIFIER_TITLE}']`);
+
+    const sheetTitleRadio = wrapper.find(
+      `input[name='sheet_identifier_type'][value='${SHEET_IDENTIFIER_TITLE}']`,
+    );
     sheetTitleRadio.simulate("click");
     await wait();
     wrapper.update();
 
     assert.equal(getLabelText(), "Sheet Title*");
-    
-    const sheetIdRadio = wrapper.find(`input[name='sheet_identifier_type'][value='${SHEET_IDENTIFIER_ID}']`);
+
+    const sheetIdRadio = wrapper.find(
+      `input[name='sheet_identifier_type'][value='${SHEET_IDENTIFIER_ID}']`,
+    );
     sheetIdRadio.simulate("click");
     await wait();
     wrapper.update();
