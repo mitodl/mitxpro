@@ -2486,7 +2486,10 @@ def test_external_course_page_with_same_course_run_in_internal_course_page():
     with pytest.raises(ValidationError) as context:
         ExternalCoursePageFactory.create(course=course_page.course)
 
-    assert str(context.value) == "{'__all__': ['There is already an internal course page associated with this course.']}"
+    assert (
+        str(context.value)
+        == "{'__all__': ['There is already an internal course page associated with this course.']}"
+    )
 
 
 def test_internal_course_page_with_same_course_run_in_external_course_page():
@@ -2498,4 +2501,7 @@ def test_internal_course_page_with_same_course_run_in_external_course_page():
     with pytest.raises(ValidationError) as context:
         CoursePageFactory.create(course=external_course_page.course)
 
-    assert str(context.value) == "{'__all__': ['There is already an external course page associated with this course.']}"
+    assert (
+        str(context.value)
+        == "{'__all__': ['There is already an external course page associated with this course.']}"
+    )
