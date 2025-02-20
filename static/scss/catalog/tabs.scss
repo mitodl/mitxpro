@@ -108,6 +108,16 @@
     @include media-breakpoint-down(md) {
       padding-left: 20px;
     }
+
+    .empty-catalog-message {
+      display: flex;
+      flex-direction: column;
+      margin-top: 90px;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      text-align: center;
+    }
   }
 }
 

@@ -261,6 +261,9 @@
                       aria-labelledby="all-tab"
                     >
                       {% endif %}
+                      {% if not all_pages%}
+                      {% include "partials/catalog_empty.html" %}
+                      {% else %}
                       {% for page in all_pages %}
                       {% if page.program or page.is_external_program_page %}
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="program" tab="all" %}
@@ -268,6 +271,7 @@
                       {% include "partials/catalog_card.html" with courseware_page=page object_type="course" tab="all"%}
                       {% endif %}
                       {% endfor %}
+                      {% endif %}
                     </div>
 
                     {% if active_tab == "programs-tab" %}
@@ -286,9 +290,13 @@
                       >
                         {% endif %}
                         <h1>PROGRAMS</h1>
+                        {% if not program_pages %}
+                        {% include "partials/catalog_empty.html" %}
+                        {% else %}
                         {% for program_page in program_pages %}
                         {% include "partials/catalog_card.html" with courseware_page=program_page object_type="program" tab="program" %}
                         {% endfor %}
+                        {% endif %}
                       </div>
 
                       {% if active_tab == "courses-tab" %}
@@ -307,9 +315,13 @@
                         >
                           {% endif %}
                           <h1>COURSES</h1>
+                          {% if not course_pages %}
+                          {% include "partials/catalog_empty.html" %}
+                          {% else %}
                           {% for course_page in course_pages %}
                           {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}
                           {% endfor %}
+                          {% endif %}
                         </div>
                       </div>
                     </div>
