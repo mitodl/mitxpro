@@ -99,7 +99,7 @@ from mitol.olposthog.features import is_enabled
 from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
-from courses.serializers import CourseSerializer
+from courses.serializers import CourseSerializer, ProgramSerializer
 from .wagtail_api_serializers import ProductChildPageSerializer
 
 
@@ -1146,7 +1146,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     api_fields = [
-        APIField("product", serializer=CourseSerializer()),
         APIField("child_pages", serializer=ProductChildPageSerializer()),
     ]
 
@@ -1311,6 +1310,11 @@ class ProgramProductPage(ProductPage):
         help_text="The program for this page",
     )
 
+    api_fields = [
+        APIField("program", serializer=ProgramSerializer()),
+        *ProductPage.api_fields,
+    ]
+
     @property
     def course_pages(self):
         """
@@ -1447,6 +1451,11 @@ class CourseProductPage(ProductPage):
         ),
     ]
     base_form_class = CoursewareForm
+
+    api_fields = [
+        APIField("course", serializer=CourseSerializer()),
+        *ProductPage.api_fields,
+    ]
 
     @cached_property
     def course_with_related_objects(self):
