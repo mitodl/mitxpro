@@ -44,6 +44,7 @@ from wagtail.images.models import Image
 from wagtail.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
+from wagtail.api import APIField
 
 from blog.api import fetch_blog
 from cms.api import filter_and_sort_catalog_pages
@@ -98,6 +99,8 @@ from mitol.olposthog.features import is_enabled
 from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
+from courses.serializers import CourseSerializer, ProgramSerializer
+from .wagtail_api_serializers import ProductChildPageSerializer
 
 
 class DisableSitemapURLMixin:
@@ -1142,6 +1145,10 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
                 child_class.objects.filter(featured=True).update(featured=False)
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
+    api_fields = [
+        APIField("child_pages", serializer=ProductChildPageSerializer()),
+    ]
+
     @property
     def product(self):
         """Returns the courseware object (Course, Program) associated with this page"""
@@ -1303,6 +1310,11 @@ class ProgramProductPage(ProductPage):
         help_text="The program for this page",
     )
 
+    api_fields = [
+        APIField("program", serializer=ProgramSerializer()),
+        *ProductPage.api_fields,
+    ]
+
     @property
     def course_pages(self):
         """
@@ -1439,6 +1451,11 @@ class CourseProductPage(ProductPage):
         ),
     ]
     base_form_class = CoursewareForm
+
+    api_fields = [
+        APIField("course", serializer=CourseSerializer()),
+        *ProductPage.api_fields,
+    ]
 
     @cached_property
     def course_with_related_objects(self):
