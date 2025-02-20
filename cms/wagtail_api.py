@@ -28,6 +28,8 @@ class CustomPagesAPIViewSet(AdminOnlyViewSetMixin, PagesAPIViewSet):
         model_type = self.request.GET.get("type", None)
         if model_type == "cms.CoursePage":
             queryset = queryset.annotate(readable_id=F("course__readable_id"))
+        elif model_type == "cms.ProgramPage":
+            queryset = queryset.annotate(readable_id=F("program__readable_id"))
         return queryset
 
 
