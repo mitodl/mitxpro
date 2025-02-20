@@ -1146,10 +1146,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     ]
 
     @property
-    def child_pages(self):
-        return self.get_children().public().live()
-
-    @property
     def product(self):
         """Returns the courseware object (Course, Program) associated with this page"""
         raise NotImplementedError
