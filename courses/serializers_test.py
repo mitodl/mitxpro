@@ -299,7 +299,7 @@ def test_serialize_course(  # noqa: PLR0913
         course=course, enrollment_end=now - timedelta(1), live=True, clean_disabled=True
     )
     CourseRunFactory.create(
-        course=course, enrollment_start=now + timedelta(1), live=True
+        course=course, enrollment_start=now + timedelta(1), live=True, clean_disabled=True
     )
     enrolled_run = CourseRunFactory.create(course=course, live=True)
     unexpired_runs = [enrolled_run, course_run]

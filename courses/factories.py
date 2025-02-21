@@ -133,7 +133,8 @@ class CourseRunFactory(DjangoModelFactory):
             start_date=factory.Faker("past_datetime", tzinfo=UTC)
         )
         past_enrollment_end = factory.Trait(
-            enrollment_end=factory.Faker("past_datetime", tzinfo=UTC)
+            enrollment_end=factory.Faker("past_datetime", tzinfo=UTC),
+            enrollment_start=factory.LazyAttribute(lambda obj: obj.enrollment_end - timedelta(days=1))
         )
 
     @classmethod
