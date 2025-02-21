@@ -28,7 +28,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.images.views.serve import ServeView
 from wagtail.utils.urlpatterns import decorate_urlpatterns
 
-from cms.wagtail_api import api_router
+from cms.urls import api_router
 
 from mitxpro.views import (
     AppContextView,
