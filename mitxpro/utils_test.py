@@ -92,6 +92,7 @@ def test_webpack_dev_server_url(settings, rf):
 
 def test_now_in_utc():
     """now_in_utc() should return the current time set to the UTC time zone"""
+    now = now_in_utc()
     assert is_near_now(now)
     assert now.tzinfo == datetime.UTC
 
