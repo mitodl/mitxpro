@@ -10,7 +10,6 @@ from enum import Enum
 from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Prefetch
 from wagtail.images.models import Image
@@ -32,7 +31,12 @@ from courses.sync_external_courses.external_course_sync_api_client import (
     ExternalCourseSyncAPIClient,
 )
 from ecommerce.models import Product, ProductVersion
-from mitxpro.utils import clean_url, now_in_utc, strip_datetime
+from mitxpro.utils import (
+    clean_url,
+    now_in_utc,
+    strip_datetime,
+    get_courserun_date_errors,
+)
 
 log = logging.getLogger(__name__)
 
@@ -206,11 +210,15 @@ class ExternalCourse:
             return False
         return True
 
-    def validate_end_date(self):
+    def validate_dates(self):
         """
-        Validates that the course end date is in the future.
+        Validates that the course run dates are valid.
         """
-        return self.end_date and now_in_utc() < self.end_date
+        return not bool(
+            get_courserun_date_errors(
+                self.start_date, self.end_date, self.enrollment_end
+            )
+        )
 
 
 def fetch_external_courses(keymap):
@@ -301,7 +309,7 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
         "course_pages_created": set(),
         "course_pages_updated": set(),
         "course_runs_skipped": set(),
-        "course_runs_expired": set(),
+        "course_runs_with_invalid_dates": set(),
         "products_created": set(),
         "product_versions_created": set(),
         "course_runs_without_prices": set(),
@@ -340,11 +348,11 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             stats["course_runs_skipped"].add(external_course.course_run_code)
             continue
 
-        if not external_course.validate_end_date():
+        if not external_course.validate_dates():
             log.info(
-                f"Course run is expired, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
+                f"Course run has invalid dates, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )
-            stats["course_runs_expired"].add(external_course.course_run_code)
+            stats["course_runs_with_invalid_dates"].add(external_course.course_run_code)
             continue
 
         with transaction.atomic():
@@ -377,46 +385,46 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             course_run, course_run_created, course_run_updated = (
                 create_or_update_external_course_run(course, external_course)
             )
-            if course_run:
-                if course_run_created:
-                    stats["course_runs_created"].add(course_run.external_course_run_id)
-                    log.info(
-                        f"Created Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
-                    )
-                elif course_run_updated:
-                    stats["course_runs_updated"].add(course_run.external_course_run_id)
-                    log.info(
-                        f"Updated Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
-                    )
 
+            if course_run_created:
+                stats["course_runs_created"].add(course_run.external_course_run_id)
                 log.info(
-                    f"Creating or Updating Product and Product Version, course run courseware_id: {course_run.external_course_run_id}, Price: {external_course.price}"  # noqa: G004
+                    f"Created Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
+                )
+            elif course_run_updated:
+                stats["course_runs_updated"].add(course_run.external_course_run_id)
+                log.info(
+                    f"Updated Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
                 )
 
-                if external_course.price:
-                    product_created, product_version_created = (
-                        create_or_update_product_and_product_version(
-                            external_course, course_run
-                        )
-                    )
-                    if product_created:
-                        stats["products_created"].add(course_run.external_course_run_id)
-                        log.info(
-                            f"Created Product for course run: {course_run.courseware_id}"  # noqa: G004
-                        )
+            log.info(
+                f"Creating or Updating Product and Product Version, course run courseware_id: {course_run.external_course_run_id}, Price: {external_course.price}"  # noqa: G004
+            )
 
-                    if product_version_created:
-                        stats["product_versions_created"].add(
-                            course_run.external_course_run_id
-                        )
-                        log.info(
-                            f"Created Product Version for course run: {course_run.courseware_id}, Price: {external_course.price}"  # noqa: G004
-                        )
-                else:
-                    log.info(
-                        f"Price is Null for course run code: {external_course.course_run_code}"  # noqa: G004
+            if external_course.price:
+                product_created, product_version_created = (
+                    create_or_update_product_and_product_version(
+                        external_course, course_run
                     )
-                    stats["course_runs_without_prices"].add(external_course.course_run_code)
+                )
+                if product_created:
+                    stats["products_created"].add(course_run.external_course_run_id)
+                    log.info(
+                        f"Created Product for course run: {course_run.courseware_id}"  # noqa: G004
+                    )
+
+                if product_version_created:
+                    stats["product_versions_created"].add(
+                        course_run.external_course_run_id
+                    )
+                    log.info(
+                        f"Created Product Version for course run: {course_run.courseware_id}, Price: {external_course.price}"  # noqa: G004
+                    )
+            else:
+                log.info(
+                    f"Price is Null for course run code: {external_course.course_run_code}"  # noqa: G004
+                )
+                stats["course_runs_without_prices"].add(external_course.course_run_code)
 
             log.info(
                 f"Creating or Updating course page, title: {external_course.course_title}, course_code: {external_course.course_run_code}"  # noqa: G004
@@ -679,23 +687,18 @@ def create_or_update_external_course_run(course, external_course):
     is_created = is_updated = False
 
     if not course_run:
-        try:
-            course_run = CourseRun.objects.create(
-                external_course_run_id=external_course.course_run_code,
-                course=course,
-                title=external_course.course_title,
-                courseware_id=course_run_courseware_id,
-                run_tag=external_course.course_run_tag,
-                start_date=external_course.start_date,
-                end_date=external_course.end_date,
-                enrollment_end=external_course.enrollment_end,
-                live=True,
-            )
-            is_created = True
-        except ValidationError as e:
-            log.error(
-                f"Error creating course run for course: {course.readable_id}, course run code: {external_course.course_run_code}, error: {e}"  # noqa: G004
-            )
+        course_run = CourseRun.objects.create(
+            external_course_run_id=external_course.course_run_code,
+            course=course,
+            title=external_course.course_title,
+            courseware_id=course_run_courseware_id,
+            run_tag=external_course.course_run_tag,
+            start_date=external_course.start_date,
+            end_date=external_course.end_date,
+            enrollment_end=external_course.enrollment_end,
+            live=True,
+        )
+        is_created = True
     elif (
         (not course_run.start_date and external_course.start_date)
         or (
@@ -718,17 +721,12 @@ def create_or_update_external_course_run(course, external_course):
         )
         or course_run.live is False
     ):
-        try:
-            course_run.start_date = external_course.start_date
-            course_run.end_date = external_course.end_date
-            course_run.enrollment_end = external_course.enrollment_end
-            course_run.live = True
-            course_run.save()
-            is_updated = True
-        except ValidationError as e:
-            log.error(
-                f"Error updating course run for course: {course.readable_id}, course run code: {external_course.course_run_code}, error: {e}"  # noqa: G004
-            )
+        course_run.start_date = external_course.start_date
+        course_run.end_date = external_course.end_date
+        course_run.enrollment_end = external_course.enrollment_end
+        course_run.live = True
+        course_run.save()
+        is_updated = True
 
     return course_run, is_created, is_updated
 

@@ -30,6 +30,7 @@ from mitxpro.utils import (
     first_matching_item,
     now_in_utc,
     serialize_model_object,
+    get_courserun_date_errors,
 )
 
 User = get_user_model()
@@ -749,30 +750,25 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
 
     def clean(self):
         """
-        If expiration_date is not set:
-        1. If end_date is provided: set expiration_date to default end_date + 90 days.
-        2. If end_date is None, don't do anything.
+        Validate that the course run dates follow these rules:
+        - start_date or enrollment_end must be provided.
+        - start_date and enrollment_end (if provided) must be in the future.
+        - end_date must be later than start_date.
+        - enrollment_end must be later than enrollment_start.
+        - expiration_date must be later than start_date and end_date (if provided).
 
-        Validate that the expiration date is:
-        1. Later than end_date if end_date is set
-        2. Later than start_date if start_date is set
+        Raises:
+            ValidationError: If any of the date rules are violated.
         """
-        now = now_in_utc()
-
-        if not self.start_date and not self.enrollment_end:
-            raise ValidationError("Either start_date or enrollment_end must be provided.")  # noqa: EM101
-
-        if (not self.start_date or self.start_date < now) and (not self.enrollment_end or self.enrollment_end < now):
-            raise ValidationError("Either start_date or enrollment_end must be in the future.")  # noqa: EM101
-
-        if self.start_date and self.end_date and self.start_date > self.end_date:
-            raise ValidationError("End date must be later than start date.")  # noqa: EM101
-
-        if self.expiration_date:
-            if self.start_date and self.expiration_date < self.start_date:
-                raise ValidationError("Expiration date must be later than start date.")  # noqa: EM101
-            if self.end_date and self.expiration_date < self.end_date:
-                raise ValidationError("Expiration date must be later than end date.")  # noqa: EM101
+        errorMsg = get_courserun_date_errors(
+            self.start_date,
+            self.end_date,
+            self.enrollment_end,
+            self.enrollment_start,
+            self.expiration_date,
+        )
+        if errorMsg:
+            raise ValidationError(errorMsg)  # noqa: EM101
 
     def save(
         self,

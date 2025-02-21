@@ -111,7 +111,9 @@ class CourseRunFactory(DjangoModelFactory):
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
     )
-    end_date = factory.LazyAttribute(lambda obj: obj.start_date + timedelta(days=30) if obj.start_date else None)
+    end_date = factory.LazyAttribute(
+        lambda obj: obj.start_date + timedelta(days=30) if obj.start_date else None
+    )
     enrollment_start = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
     )
@@ -148,6 +150,7 @@ class CourseRunFactory(DjangoModelFactory):
             model_class.objects.bulk_create([obj])
 
         return obj
+
 
 class CourseRunCertificateFactory(DjangoModelFactory):
     """Factory for CourseRunCertificate"""

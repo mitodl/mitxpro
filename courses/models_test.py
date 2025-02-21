@@ -40,6 +40,7 @@ from users.factories import UserFactory
 pytestmark = [pytest.mark.django_db]
 now = now_in_utc()
 
+
 def test_program_course_auto_position():
     """
     If a course is added to a program with no position specified, it should be given the last position
@@ -108,7 +109,11 @@ def test_program_is_catalog_visible():
     """
     program = ProgramFactory.create()
     runs = CourseRunFactory.create_batch(
-        2, course__program=program, past_start=True, past_enrollment_end=True, clean_disabled=True
+        2,
+        course__program=program,
+        past_start=True,
+        past_enrollment_end=True,
+        clean_disabled=True,
     )
     assert program.is_catalog_visible is False
 
@@ -226,31 +231,29 @@ def test_courseware_url(settings):
     assert course_run_no_path.courseware_url is None
 
 
-@pytest.mark.parametrize(
-    "start_date, enrollment_end, end_date, expiration_date, expected_error",
-    [
-        (None, None, None, None, "Either start_date or enrollment_end must be provided."),
-        (now - timedelta(days=2), now - timedelta(days=2), None, None, "Either start_date or enrollment_end must be in the future."),
-        (now + timedelta(days=2), now + timedelta(days=3), now + timedelta(days=4), now + timedelta(days=5), None),
-        (now + timedelta(days=4), now + timedelta(days=3), now + timedelta(days=2), now + timedelta(days=5), "End date must be later than start date."),
-        (now + timedelta(days=2), now + timedelta(days=3), now + timedelta(days=4), now - timedelta(days=2), "Expiration date must be later than start date."),
-        (now + timedelta(days=2), now + timedelta(days=3), now + timedelta(days=4), now + timedelta(days=3), "Expiration date must be later than end date."),
-    ]
-)
-def test_course_run_clean(start_date, enrollment_end, end_date, expiration_date, expected_error):
-    course_run = CourseRunFactory.build(
-        start_date=start_date,
-        enrollment_end=enrollment_end,
-        end_date=end_date,
-        expiration_date=expiration_date,
+def test_clean_calls_get_courserun_date_errors(mocker):
+    """
+    Test that the `clean` method calls `get_courserun_date_errors` with the correct arguments.
+    """
+    course_run = CourseRunFactory.create(
+        start_date=now + timedelta(-2),
+        enrollment_start=now + timedelta(-2),
+        enrollment_end=now + timedelta(2),
+        end_date=now + timedelta(2),
+        expiration_date=now + timedelta(2),
     )
-    
-    if expected_error:
-        with pytest.raises(ValidationError) as exc_info:
-            course_run.clean()
-        assert expected_error in str(exc_info.value)
-    else:
-        course_run.clean()  # Should not raise any error
+
+    mock_validate = mocker.patch(
+        "courses.models.get_courserun_date_errors", return_value=None
+    )
+    course_run.clean()
+    mock_validate.assert_called_once_with(
+        course_run.start_date,
+        course_run.end_date,
+        course_run.enrollment_end,
+        course_run.enrollment_start,
+        course_run.expiration_date,
+    )
 
 
 @pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])  # noqa: PT006, PT007
@@ -347,7 +350,9 @@ def test_course_run_unexpired(end_days, enroll_days, expected):
     enr_end_date = now + timedelta(days=enroll_days)
     assert (
         CourseRunFactory.create(
-            end_date=end_date, enrollment_end=enr_end_date, clean_disabled=True,
+            end_date=end_date,
+            enrollment_end=enr_end_date,
+            clean_disabled=True,
         ).is_unexpired
         is expected
     )
@@ -553,7 +558,11 @@ def test_course_is_catalog_visible():
     """
     course = CourseFactory.create()
     runs = CourseRunFactory.create_batch(
-        2, course=course, past_start=True, past_enrollment_end=True, clean_disabled=True,
+        2,
+        course=course,
+        past_start=True,
+        past_enrollment_end=True,
+        clean_disabled=True,
     )
     assert course.is_catalog_visible is False
 
@@ -798,7 +807,11 @@ def test_enrollment_is_ended():
     past_course = CourseFactory.create()
 
     past_course_runs = CourseRunFactory.create_batch(
-        3, end_date=past_date, course=past_course, course__program=past_program, clean_disabled=True,
+        3,
+        end_date=past_date,
+        course=past_course,
+        course__program=past_program,
+        clean_disabled=True,
     )
 
     program_enrollment = ProgramEnrollmentFactory.create(program=past_program)
