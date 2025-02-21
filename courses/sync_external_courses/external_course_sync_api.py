@@ -344,11 +344,16 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             stats["course_runs_skipped"].add(external_course.course_run_code)
             continue
 
-        if not (external_course.validate_end_date() and not bool(
-            get_courserun_date_errors(
-                external_course.start_date, external_course.end_date, external_course.enrollment_end
+        if not (
+            external_course.validate_end_date()
+            and not bool(
+                get_courserun_date_errors(
+                    external_course.start_date,
+                    external_course.end_date,
+                    external_course.enrollment_end,
+                )
             )
-        )):
+        ):
             log.info(
                 f"Course run has invalid dates, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )
