@@ -20,7 +20,7 @@ from cms.factories import (
 )
 from cms.models import CertificatePage
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
-from courses.models import Course
+from courses.models import Course, CourseRun
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
     GLOBAL_ALUMNI_PLATFORM_NAME,
@@ -471,12 +471,10 @@ def test_create_or_update_external_course_run(
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
-            live=is_live,
+            clean_disabled=True,
         )
         if empty_dates:
-            run.start_date = None
-            run.end_date = None
-            run.save()
+            CourseRun.objects.filter(id=run.id).update(start_date=None, end_date=None)
 
     run, run_created, run_updated = create_or_update_external_course_run(
         course, external_course
@@ -553,6 +551,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
                 enrollment_start=None,
                 enrollment_end=None,
                 expiration_date=None,
+                clean_disabled=True,
             )
 
             home_page = HomePageFactory.create(
@@ -590,7 +589,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     num_product_versions_created = 2 if create_existing_data else 4
     assert len(courses) == 4
     assert len(stats["course_runs_skipped"]) == 2
-    assert len(stats["course_runs_expired"]) == 1
+    assert len(stats["course_runs_with_invalid_dates"]) == 1
     assert len(stats["courses_created"]) == num_courses_created
     assert len(stats["existing_courses"]) == num_existing_courses
     assert len(stats["course_runs_created"]) == num_course_runs_created
@@ -604,7 +603,8 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     for external_course_run in external_course_runs:
         if (
             external_course_run["course_run_code"] in stats["course_runs_skipped"]
-            or external_course_run["course_run_code"] in stats["course_runs_expired"]
+            or external_course_run["course_run_code"]
+            in stats["course_runs_with_invalid_dates"]
         ):
             continue
 

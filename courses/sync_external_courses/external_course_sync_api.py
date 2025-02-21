@@ -31,7 +31,12 @@ from courses.sync_external_courses.external_course_sync_api_client import (
     ExternalCourseSyncAPIClient,
 )
 from ecommerce.models import Product, ProductVersion
-from mitxpro.utils import clean_url, now_in_utc, strip_datetime
+from mitxpro.utils import (
+    clean_url,
+    now_in_utc,
+    strip_datetime,
+    get_courserun_date_errors,
+)
 
 log = logging.getLogger(__name__)
 
@@ -300,7 +305,7 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
         "course_pages_created": set(),
         "course_pages_updated": set(),
         "course_runs_skipped": set(),
-        "course_runs_expired": set(),
+        "course_runs_with_invalid_dates": set(),
         "products_created": set(),
         "product_versions_created": set(),
         "course_runs_without_prices": set(),
@@ -339,11 +344,20 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             stats["course_runs_skipped"].add(external_course.course_run_code)
             continue
 
-        if not external_course.validate_end_date():
-            log.info(
-                f"Course run is expired, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
+        if not (
+            external_course.validate_end_date()
+            and not bool(
+                get_courserun_date_errors(
+                    external_course.start_date,
+                    external_course.end_date,
+                    external_course.enrollment_end,
+                )
             )
-            stats["course_runs_expired"].add(external_course.course_run_code)
+        ):
+            log.info(
+                f"Course run has invalid dates, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
+            )
+            stats["course_runs_with_invalid_dates"].add(external_course.course_run_code)
             continue
 
         with transaction.atomic():
