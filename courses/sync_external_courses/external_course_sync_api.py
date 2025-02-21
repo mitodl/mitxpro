@@ -210,15 +210,11 @@ class ExternalCourse:
             return False
         return True
 
-    def validate_dates(self):
+    def validate_end_date(self):
         """
-        Validates that the course run dates are valid.
+        Validates that the course end date is in the future.
         """
-        return not bool(
-            get_courserun_date_errors(
-                self.start_date, self.end_date, self.enrollment_end
-            )
-        )
+        return self.end_date and now_in_utc() < self.end_date
 
 
 def fetch_external_courses(keymap):
@@ -348,7 +344,11 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             stats["course_runs_skipped"].add(external_course.course_run_code)
             continue
 
-        if not external_course.validate_dates():
+        if not (external_course.validate_end_date() and not bool(
+            get_courserun_date_errors(
+                external_course.start_date, external_course.end_date, external_course.enrollment_end
+            )
+        )):
             log.info(
                 f"Course run has invalid dates, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )

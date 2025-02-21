@@ -43,7 +43,7 @@ from courses.sync_external_courses.external_course_sync_api import (
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
-from mitxpro.utils import clean_url
+from mitxpro.utils import clean_url, now_in_utc
 
 
 @pytest.fixture
@@ -957,24 +957,21 @@ def test_external_course_validate_list_currency(
     [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
     indirect=True,
 )
-def test_external_course_validate_dates(mocker, external_course_data):
+@pytest.mark.parametrize(
+    ("end_date", "is_valid"),
+    [
+        (now_in_utc() + timedelta(days=1), True),
+        (now_in_utc() - timedelta(days=1), False),
+    ],
+)
+def test_external_course_validate_end_date(external_course_data, end_date, is_valid):
     """
-    Tests that the new external course run dates are valid.
+    Tests that the valid end date is in the future for External courses.
     """
     keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
-    mock_validate = mocker.patch(
-        "courses.sync_external_courses.external_course_sync_api.get_courserun_date_errors"
-    )
-    mock_validate.return_value = None
-    assert external_course.validate_dates() is True
-    mock_validate.assert_called_with(
-        external_course.start_date,
-        external_course.end_date,
-        external_course.enrollment_end,
-    )
-    mock_validate.return_value = "Some error message"
-    assert external_course.validate_dates() is False
+    external_course.end_date = end_date
+    assert external_course.validate_end_date() == is_valid
 
 
 @pytest.mark.parametrize(
