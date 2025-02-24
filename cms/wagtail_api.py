@@ -22,7 +22,8 @@ class AdminOnlyViewSetMixin:
 
 class CustomPagesAPIViewSet(AdminOnlyViewSetMixin, PagesAPIViewSet):
     """
-    Custom API viewset for Wagtail pages with additional filtering and metadata fields.
+    Custom API viewset for Wagtail pages with
+    additional filtering and metadata fields.
     """
 
     filter_backends = [ReadableIDFilter] + PagesAPIViewSet.filter_backends
