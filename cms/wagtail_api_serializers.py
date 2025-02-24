@@ -1,3 +1,7 @@
+"""
+Custom serializers for Wagtail API to handle product child pages.
+"""
+
 from rest_framework.fields import Field
 
 from wagtail.models import Page
@@ -6,7 +10,15 @@ from wagtail.api.v2.views import PagesAPIViewSet
 
 
 class ProductChildPageSerializer(Field):
+    """
+    Serializer Field fo related ChildPage objects
+    """
+
     def to_representation(self, value):
+        """
+        Serializes a queryset of page instances.
+        Returns a list of serialized page instances.
+        """
         if hasattr(value, "all"):
             base_context = {"view": PagesAPIViewSet()}
             context = {**base_context, **getattr(self, "context", {})}
@@ -14,6 +26,9 @@ class ProductChildPageSerializer(Field):
         return self.serialize_page(value, self.context)
 
     def serialize_page(self, page, context):
+        """
+        Serializes a single page instance.
+        """
         if not isinstance(page, Page):
             return None
 
