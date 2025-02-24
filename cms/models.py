@@ -1142,6 +1142,25 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
 
     api_fields = [
         APIField("child_pages", serializer=ProductChildPageSerializer()),
+        APIField("language"),
+        APIField("description"),
+        APIField("external_marketing_url"),
+        APIField("marketing_hubspot_form_id"),
+        APIField("subhead"),
+        APIField("video_title"),
+        APIField("video_url"),
+        APIField("duration"),
+        APIField("min_weeks"),
+        APIField("max_weeks"),
+        APIField("format"),
+        APIField("time_commitment"),
+        APIField("min_weekly_hours"),
+        APIField("max_weekly_hours"),
+        APIField("thumbnail_image"),
+        APIField("background_image"),
+        APIField("background_video_url"),
+        APIField("featured"),
+        APIField("content"),
     ]
 
     @property
