@@ -262,7 +262,8 @@ def test_course_run_past(end_days, expected):
     Test that CourseRun.is_past returns the expected boolean value
     """
     end_date = None if end_days is None else (now + timedelta(days=end_days))
-    assert CourseRunFactory.create(end_date=end_date).is_past is expected
+    start_date = None if end_days is None else (end_date - timedelta(2))
+    assert CourseRunFactory.create(start_date=start_date, end_date=end_date).is_past is expected
 
 
 @pytest.mark.parametrize(
@@ -320,6 +321,7 @@ def test_course_run_not_beyond_enrollment(
     Test that CourseRun.is_beyond_enrollment returns the expected boolean value
     """
     end_date = None if end_days is None else now + timedelta(days=end_days)
+    start_date = None if end_date is None else end_date - timedelta(days=2)
     enr_end_date = (
         None if enroll_end_days is None else now + timedelta(days=enroll_end_days)
     )
@@ -329,6 +331,7 @@ def test_course_run_not_beyond_enrollment(
 
     assert (
         CourseRunFactory.create(
+            start_date=start_date,
             end_date=end_date,
             enrollment_end=enr_end_date,
             enrollment_start=enr_start_date,
@@ -347,9 +350,11 @@ def test_course_run_unexpired(end_days, enroll_days, expected):
     Test that CourseRun.is_unexpired returns the expected boolean value
     """
     end_date = now + timedelta(days=end_days)
+    start_date = end_date - timedelta(days=2)
     enr_end_date = now + timedelta(days=enroll_days)
     assert (
         CourseRunFactory.create(
+            start_date=start_date,
             end_date=end_date,
             enrollment_end=enr_end_date,
             clean_disabled=True,

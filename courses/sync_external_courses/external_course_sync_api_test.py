@@ -471,6 +471,7 @@ def test_create_or_update_external_course_run(
             enrollment_start=None,
             enrollment_end=None,
             expiration_date=None,
+            live=is_live,
             clean_disabled=True,
         )
         if empty_dates:
