@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
+from .wagtail_api_serializers import ImageSerializer
+
 
 class LearningTechniqueBlock(blocks.StructBlock):
     """
@@ -71,13 +73,18 @@ class NewsAndEventsBlock(blocks.StructBlock):
     )
 
 
+class APIImageChooserBlock(ImageChooserBlock):
+    def get_api_representation(self, value, context=None):
+        return ImageSerializer(context=context).to_representation(value)
+
+
 class FacultyBlock(blocks.StructBlock):
     """
     Block class that defines a faculty member
     """
 
     name = blocks.CharBlock(max_length=100, help_text="Name of the faculty member.")
-    image = ImageChooserBlock(
+    image = APIImageChooserBlock(
         help_text="Profile image size must be at least 300x300 pixels."
     )
     description = blocks.RichTextBlock(
