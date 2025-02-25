@@ -1161,6 +1161,8 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         APIField("background_video_url"),
         APIField("featured"),
         APIField("content"),
+        APIField("is_external_course_page"),
+        APIField("is_external_program_page"),
     ]
 
     @property
@@ -1685,6 +1687,12 @@ class UserTestimonialsPage(CourseProgramChildPage):
         FieldPanel("items"),
     ]
 
+    api_fields = [
+        APIField("heading"),
+        APIField("subhead"),
+        APIField("items"),
+    ]
+
     class Meta:
         verbose_name = "Testimonials Section"
 
@@ -1715,6 +1723,11 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         use_json_field=True,
     )
     content_panels = [FieldPanel("heading"), FieldPanel("items")]
+
+    api_fields = [
+        APIField("heading"),
+        APIField("items"),
+    ]
 
     class Meta:
         verbose_name = "News and Events"
@@ -1774,6 +1787,12 @@ class LearningOutcomesPage(CourseProgramChildPage):
         FieldPanel("outcome_items"),
     ]
 
+    api_fields = [
+        APIField("heading"),
+        APIField("sub_heading"),
+        APIField("outcome_items"),
+    ]
+
 
 class LearningTechniquesPage(CourseProgramChildPage):
     """
@@ -1787,6 +1806,10 @@ class LearningTechniquesPage(CourseProgramChildPage):
         help_text="Enter detail about how you'll learn.",
         use_json_field=True,
     )
+
+    api_fields = [
+        APIField("technique_items"),
+    ]
 
     class Meta:
         verbose_name = "Icon Grid"
@@ -1831,13 +1854,17 @@ class ForTeamsPage(CourseProgramChildPage):
         verbose_name = "Text-Image Section"
 
     content_panels = [
-        FieldPanel("title"),
-        FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
         FieldPanel("switch_layout"),
-        FieldPanel("image"),
+    ]
+
+    api_fields = [
+        APIField("action_title"),
+        APIField("action_url"),
+        APIField("dark_theme"),
+        APIField("switch_layout"),
     ]
 
 
@@ -1870,6 +1897,14 @@ class TextSection(CourseProgramChildPage):
         FieldPanel("action_title"),
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
+    ]
+
+    api_fields = [
+        APIField("title"),
+        APIField("content"),
+        APIField("action_title"),
+        APIField("action_url"),
+        APIField("dark_theme"),
     ]
 
 
@@ -1962,6 +1997,12 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         FieldPanel("switch_layout"),
     ]
 
+    api_fields = [
+        APIField("heading"),
+        APIField("content"),
+        APIField("switch_layout"),
+    ]
+
 
 class CoursesInProgramPage(CourseProgramChildPage):
     """
@@ -2048,6 +2089,12 @@ class FacultyMembersPage(CourseProgramChildPage):
         FieldPanel("members"),
     ]
 
+    api_fields = [
+        APIField("heading"),
+        APIField("subhead"),
+        APIField("members"),
+    ]
+
 
 class AbstractImageCarousel(Page):
     """
@@ -2098,6 +2145,11 @@ class FrequentlyAskedQuestion(DisableSitemapURLMixin, Orderable):
     faqs_page = ParentalKey(FrequentlyAskedQuestionPage, related_name="faqs", null=True)
     question = models.TextField()
     answer = RichTextField()
+
+    api_fields = [
+        APIField("question"),
+        APIField("answer"),
+    ]
 
 
 class ResourcePage(Page):
@@ -2292,6 +2344,15 @@ class CertificatePage(CourseProgramChildPage):
         FieldPanel("partner_logo_placement", widget=forms.Select),
         FieldPanel("overrides"),
         FieldPanel("signatories"),
+    ]
+
+    api_fields = [
+        APIField("product_name"),
+        APIField("institute_text"),
+        APIField("CEUs"),
+        APIField("partner_logo_placement"),
+        APIField("overrides"),
+        APIField("signatories"),
     ]
 
     base_form_class = CertificatePageForm
@@ -2755,6 +2816,11 @@ class CourseOverviewPage(CourseProgramChildPage):
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("overview"),
+    ]
+
+    api_fields = [
+        APIField("heading"),
+        APIField("overview"),
     ]
 
     class Meta:

@@ -34,10 +34,14 @@ class ProductChildPageSerializer(Field):
 
         model = page.specific.__class__
 
+        body_fields = PagesAPIViewSet.get_body_fields_names(model)
+        meta_fields = PagesAPIViewSet.get_meta_fields_names(model)
+        all_fields = body_fields + meta_fields
+
         serializer = get_serializer_class(
             model,
-            PagesAPIViewSet.body_fields + PagesAPIViewSet.meta_fields,
-            PagesAPIViewSet.meta_fields,
+            all_fields,
+            meta_fields,
             base=PagesAPIViewSet.base_serializer_class,
         )
 
