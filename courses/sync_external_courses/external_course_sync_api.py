@@ -854,17 +854,17 @@ def deactivate_missing_course_runs(external_course_run_codes, platform):
             Prefetch("product", queryset=Product.all_objects.filter(is_active=True))
         )
     )
-
     for course_run in course_runs:
         if course_run.is_unexpired:
             course_run.live = False
+            course_run.updated_on = now_in_utc()
             deactivated_runs_list.append(course_run.external_course_run_id)
             related_product = course_run.product.first()
             if related_product:
                 related_product.is_active = False
                 updated_products.append(related_product)
 
-    CourseRun.objects.bulk_update(course_runs, ["live"])
+    CourseRun.objects.bulk_update(course_runs, ["live", "updated_on"])
     Product.objects.bulk_update(updated_products, ["is_active"])
     log.info(
         f"Deactivated {len(deactivated_runs_list)} course runs for platform {platform.name}."
