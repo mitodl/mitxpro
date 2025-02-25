@@ -1854,17 +1854,22 @@ class ForTeamsPage(CourseProgramChildPage):
         verbose_name = "Text-Image Section"
 
     content_panels = [
+        FieldPanel("title"),
+        FieldPanel("content"),
         FieldPanel("action_title"),
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
         FieldPanel("switch_layout"),
+        FieldPanel("image"),
     ]
 
     api_fields = [
+        APIField("content"),
         APIField("action_title"),
         APIField("action_url"),
         APIField("dark_theme"),
         APIField("switch_layout"),
+        APIField("image"),
     ]
 
 
@@ -2135,6 +2140,10 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
         self.title = "Frequently Asked Questions"
         self.slug = slugify(f"{self.get_parent().id}-{self.title}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
+
+    api_fields = [
+        APIField("faqs"),
+    ]
 
 
 class FrequentlyAskedQuestion(DisableSitemapURLMixin, Orderable):
