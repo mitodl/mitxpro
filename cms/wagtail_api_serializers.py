@@ -77,13 +77,15 @@ class ProductChildPageSerializer(Field):
         meta_fields = PagesAPIViewSet.get_meta_fields_names(model)
         all_fields = body_fields + meta_fields
 
+        image_fields = {"image", "partner_logo"}
+
         serializer = get_serializer_class(
             model,
             all_fields,
             meta_fields,
             base=PagesAPIViewSet.base_serializer_class,
             child_serializer_classes={
-                "image": ImageSerializer,
+                **{field: ImageSerializer for field in image_fields},
                 "faqs": FrequentlyAskedQuestionSerializer,
             },
         )

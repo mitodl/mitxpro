@@ -1688,6 +1688,7 @@ class UserTestimonialsPage(CourseProgramChildPage):
     ]
 
     api_fields = [
+        APIField("title"),
         APIField("heading"),
         APIField("subhead"),
         APIField("items"),
@@ -1725,6 +1726,7 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
     content_panels = [FieldPanel("heading"), FieldPanel("items")]
 
     api_fields = [
+        APIField("title"),
         APIField("heading"),
         APIField("items"),
     ]
@@ -1788,6 +1790,7 @@ class LearningOutcomesPage(CourseProgramChildPage):
     ]
 
     api_fields = [
+        APIField("title"),
         APIField("heading"),
         APIField("sub_heading"),
         APIField("outcome_items"),
@@ -1808,6 +1811,7 @@ class LearningTechniquesPage(CourseProgramChildPage):
     )
 
     api_fields = [
+        APIField("title"),
         APIField("technique_items"),
     ]
 
@@ -1864,6 +1868,7 @@ class ForTeamsPage(CourseProgramChildPage):
     ]
 
     api_fields = [
+        APIField("title"),
         APIField("content"),
         APIField("action_title"),
         APIField("action_url"),
@@ -2005,6 +2010,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
     api_fields = [
         APIField("heading"),
         APIField("content"),
+        APIField("image"),
         APIField("switch_layout"),
     ]
 
@@ -2095,6 +2101,7 @@ class FacultyMembersPage(CourseProgramChildPage):
     ]
 
     api_fields = [
+        APIField("title"),
         APIField("heading"),
         APIField("subhead"),
         APIField("members"),
@@ -2142,6 +2149,7 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     api_fields = [
+        APIField("title"),
         APIField("faqs"),
     ]
 
@@ -2356,9 +2364,11 @@ class CertificatePage(CourseProgramChildPage):
     ]
 
     api_fields = [
+        APIField("title"),
         APIField("product_name"),
         APIField("institute_text"),
         APIField("CEUs"),
+        APIField("partner_logo"),
         APIField("partner_logo_placement"),
         APIField("overrides"),
         APIField("signatories"),
@@ -2828,6 +2838,7 @@ class CourseOverviewPage(CourseProgramChildPage):
     ]
 
     api_fields = [
+        APIField("title"),
         APIField("heading"),
         APIField("overview"),
     ]
