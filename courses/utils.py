@@ -361,7 +361,7 @@ def get_catalog_languages():
             | Q(get_catalog_course_filter("externalcoursepage__"))
             | Q(
                 get_catalog_course_filter(
-                    "externalprogrampage__program__courses__coursepage__"
+                    "externalprogrampage__program__courses__externalcoursepage__"
                 )
             ),
             is_active=True,
