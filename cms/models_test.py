@@ -92,6 +92,7 @@ from courses.factories import (
 )
 from courses.models import CourseLanguage
 from ecommerce.factories import ProductFactory, ProductVersionFactory
+from mitxpro.utils import now_in_utc
 
 pytestmark = [pytest.mark.django_db]
 
@@ -266,10 +267,16 @@ def test_catalog_page_language_context(
     mocker.patch("cms.models.is_enabled", return_value=True)
     CourseLanguage.objects.all().delete()
     catalog_page = CatalogPageFactory.create()
+    now = now_in_utc()
+
     if languages:
-        CourseLanguageFactory.create_batch(
-            len(languages), name=factory.Iterator(languages)
-        )
+        for language in languages:
+            created_language = CourseLanguageFactory.create(name=language)
+            CourseRunFactory.create(
+                start_date=now + timedelta(days=1),
+                course__page__language=created_language,
+                course__program__page__language=created_language,
+            )
 
     rf = RequestFactory()
     request = rf.get(f"/?language={selected_language}")
@@ -299,6 +306,13 @@ def test_catalog_page_language_feature_flag(mocker, staff_user, is_enabled):
     CourseLanguage.objects.all().delete()
     catalog_page = CatalogPageFactory.create()
     languages = CourseLanguageFactory.create_batch(2)
+    now = now_in_utc()
+    CourseRunFactory.create_batch(
+        2,
+        start_date=now + timedelta(days=1),
+        course__page__language=factory.Iterator(languages),
+        course__program__page__language=factory.Iterator(languages),
+    )
 
     rf = RequestFactory()
     request = rf.get("/")

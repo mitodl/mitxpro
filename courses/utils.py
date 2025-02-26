@@ -18,6 +18,7 @@ from courses.models import (
     Program,
     ProgramCertificate,
     ProgramEnrollment,
+    CourseLanguage,
 )
 from courseware.api import get_edx_api_course_detail_client
 from mitxpro.utils import has_equal_properties, now_in_utc
@@ -344,3 +345,30 @@ def get_catalog_course_filter(relative_filter=""):
         Q(**courseware_live_filter)
         & Q(Q(**courserun_start_date_filter) | Q(**courserun_enrollment_end_filter))
     )
+
+
+def get_catalog_languages():
+    """
+    Returns the languages that are associated with courses or programs visible in the catalog
+    """
+
+    course_languages = (
+        CourseLanguage.objects.filter(
+            Q(get_catalog_course_filter("coursepage__"))
+            | Q(
+                get_catalog_course_filter("programpage__program__courses__coursepage__")
+            )
+            | Q(get_catalog_course_filter("externalcoursepage__"))
+            | Q(
+                get_catalog_course_filter(
+                    "externalprogrampage__program__courses__externalcoursepage__"
+                )
+            ),
+            is_active=True,
+        )
+        .distinct()
+        .order_by("priority")
+        .values_list("name", flat=True)
+    )
+
+    return list(course_languages)

@@ -91,8 +91,8 @@ from courses.models import (
     Program,
     ProgramCertificate,
     ProgramRun,
-    CourseLanguage,
 )
+from courses.utils import get_catalog_languages
 from ecommerce.models import Product
 from mitol.olposthog.features import is_enabled
 from mitxpro.features import CATALOG_LANGUAGE_FILTER
@@ -547,6 +547,7 @@ class CatalogPage(Page):
         )
         external_program_qset = (
             ExternalProgramPage.objects.live()
+            .filter(program__live=True)
             .select_related("program", "language")
             .order_by("title")
         )
@@ -559,6 +560,7 @@ class CatalogPage(Page):
         )
         external_course_qset = (
             ExternalCoursePage.objects.live()
+            .filter(course__live=True)
             .select_related("course", "language")
             .order_by("title")
         )
@@ -572,7 +574,6 @@ class CatalogPage(Page):
             external_course_qset = external_course_qset.filter(
                 language__name=language_filter
             )
-
         if topic_filter != ALL_TOPICS:
             program_page_qset = program_page_qset.related_pages(topic_filter)
             external_program_qset = external_program_qset.related_pages(topic_filter)
@@ -665,13 +666,7 @@ class CatalogPage(Page):
             ],
             show_language_filter=is_language_filter_enabled,
             selected_language=language_filter,
-            language_options=[
-                ALL_LANGUAGES,
-                *[
-                    course_language.name
-                    for course_language in CourseLanguage.objects.filter(is_active=True)
-                ],
-            ]
+            language_options=[ALL_LANGUAGES, *get_catalog_languages()]
             if is_language_filter_enabled
             else [],
         )
