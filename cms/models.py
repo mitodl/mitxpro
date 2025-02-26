@@ -1050,6 +1050,25 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         help_text="The content of this tab on the program page",
         use_json_field=True,
     )
+
+    @property
+    def page_content(self):
+        content_dict = {}
+
+        for block in self.content:
+            key = block.block_type
+            value = block.value.file.url if key == "image" else str(block.value)
+
+            if key in content_dict:
+                if isinstance(content_dict[key], list):
+                    content_dict[key].append(value)
+                else:
+                    content_dict[key] = [content_dict[key], value]
+            else:
+                content_dict[key] = value
+
+        return content_dict
+
     content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("language"),
         FieldPanel("external_marketing_url"),
@@ -1160,7 +1179,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         APIField("background_image"),
         APIField("background_video_url"),
         APIField("featured"),
-        APIField("content"),
+        APIField("page_content"),
         APIField("is_external_course_page"),
         APIField("is_external_program_page"),
     ]
@@ -1687,11 +1706,23 @@ class UserTestimonialsPage(CourseProgramChildPage):
         FieldPanel("items"),
     ]
 
+    @property
+    def testimonials(self):
+        return [
+            {
+                "name": item.value["title"],
+                "title": item.value["title"],
+                "image": item.value["image"].file.url,
+                "quote": item.value["quote"],
+            }
+            for item in self.items
+        ]
+
     api_fields = [
         APIField("title"),
         APIField("heading"),
         APIField("subhead"),
-        APIField("items"),
+        APIField("testimonials"),
     ]
 
     class Meta:
@@ -1725,10 +1756,24 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
     )
     content_panels = [FieldPanel("heading"), FieldPanel("items")]
 
+    @property
+    def news_and_events(self):
+        return [
+            {
+                "content_type": item.value["content_type"],
+                "title": item.value["title"],
+                "image": item.value["image"].file.url,
+                "content": item.value["content"],
+                "call_to_action": item.value["call_to_action"],
+                "action_url": item.value["action_url"],
+            }
+            for item in self.items
+        ]
+
     api_fields = [
         APIField("title"),
         APIField("heading"),
-        APIField("items"),
+        APIField("news_and_events"),
     ]
 
     class Meta:
@@ -1789,11 +1834,15 @@ class LearningOutcomesPage(CourseProgramChildPage):
         FieldPanel("outcome_items"),
     ]
 
+    @property
+    def outcomes(self):
+        return [str(item.value) for item in self.outcome_items]
+
     api_fields = [
         APIField("title"),
         APIField("heading"),
         APIField("sub_heading"),
-        APIField("outcome_items"),
+        APIField("outcomes"),
     ]
 
 
@@ -1810,9 +1859,20 @@ class LearningTechniquesPage(CourseProgramChildPage):
         use_json_field=True,
     )
 
+    @property
+    def techniques(self):
+        return [
+            {
+                "heading": technique.value["heading"],
+                "sub_heading": technique.value["sub_heading"],
+                "image": technique.value["image"].file.url,
+            }
+            for technique in self.technique_items
+        ]
+
     api_fields = [
         APIField("title"),
-        APIField("technique_items"),
+        APIField("techniques"),
     ]
 
     class Meta:
@@ -2000,6 +2060,10 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         help_text="Switch image to the left and content to the right",
     )
 
+    @property
+    def page_content(self):
+        return [str(content_item.value) for content_item in self.content]
+
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("content"),
@@ -2009,7 +2073,7 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
 
     api_fields = [
         APIField("heading"),
-        APIField("content"),
+        APIField("page_content"),
         APIField("image"),
         APIField("switch_layout"),
     ]
@@ -2063,6 +2127,18 @@ class CoursesInProgramPage(CourseProgramChildPage):
         """
         return [block.value.specific for block in self.contents if block.value]
 
+    @property
+    def course_pages(self):
+        [print(page.title) for page in self.content_pages]
+
+        return [
+            {
+                "id": page.id,
+                "title": page.title,
+            }
+            for page in self.content_pages
+        ]
+
     class Meta:
         verbose_name = "Courseware Carousel"
 
@@ -2071,6 +2147,14 @@ class CoursesInProgramPage(CourseProgramChildPage):
         FieldPanel("body"),
         FieldPanel("override_contents"),
         FieldPanel("contents"),
+    ]
+
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("body"),
+        APIField("override_contents"),
+        APIField("course_pages"),
     ]
 
 
@@ -2100,11 +2184,22 @@ class FacultyMembersPage(CourseProgramChildPage):
         FieldPanel("members"),
     ]
 
+    @property
+    def faculty(self):
+        return [
+            {
+                "name": member.value["name"],
+                "image": member.value["image"].file.url,
+                "description": str(member.value["description"]),
+            }
+            for member in self.members
+        ]
+
     api_fields = [
         APIField("title"),
         APIField("heading"),
         APIField("subhead"),
-        APIField("members"),
+        APIField("faculty"),
     ]
 
 
