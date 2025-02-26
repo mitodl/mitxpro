@@ -55,12 +55,8 @@ class CustomImagesAPIViewSet(AllowAnyViewSetMixin, ImagesAPIViewSet):
     Custom API viewset for Wagtail images, publicly available.
     """
 
-    pass
-
 
 class CustomDocumentsAPIViewSet(AllowAnyViewSetMixin, DocumentsAPIViewSet):
     """
     Custom API viewset for Wagtail documents, publicly available.
     """
-
-    pass
