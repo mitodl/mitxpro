@@ -1053,6 +1053,9 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
 
     @property
     def page_content(self):
+        """
+        Serialize the content field to return useful information
+        """
         content_dict = {}
 
         for block in self.content:
@@ -1708,6 +1711,9 @@ class UserTestimonialsPage(CourseProgramChildPage):
 
     @property
     def testimonials(self):
+        """
+        Serialize the testimonial items to return useful information
+        """
         return [
             {
                 "name": item.value["title"],
@@ -1758,6 +1764,9 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
 
     @property
     def news_and_events(self):
+        """
+        Serialize the items fields to return useful information
+        """
         return [
             {
                 "content_type": item.value["content_type"],
@@ -1836,6 +1845,9 @@ class LearningOutcomesPage(CourseProgramChildPage):
 
     @property
     def outcomes(self):
+        """
+        Serialize the outcome_items
+        """
         return [str(item.value) for item in self.outcome_items]
 
     api_fields = [
@@ -1861,6 +1873,9 @@ class LearningTechniquesPage(CourseProgramChildPage):
 
     @property
     def techniques(self):
+        """
+        Serialize the technique_items to return useful information
+        """
         return [
             {
                 "heading": technique.value["heading"],
@@ -2062,6 +2077,9 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
 
     @property
     def page_content(self):
+        """
+        Serialize the page's content into a list
+        """
         return [str(content_item.value) for content_item in self.content]
 
     content_panels = [
@@ -2129,8 +2147,9 @@ class CoursesInProgramPage(CourseProgramChildPage):
 
     @property
     def course_pages(self):
-        [print(page.title) for page in self.content_pages]
-
+        """
+        Serializes the course pages to give useful information
+        """
         return [
             {
                 "id": page.id,
@@ -2186,6 +2205,9 @@ class FacultyMembersPage(CourseProgramChildPage):
 
     @property
     def faculty(self):
+        """
+        Serialize the faculty members information
+        """
         return [
             {
                 "name": member.value["name"],
@@ -2466,7 +2488,7 @@ class CertificatePage(CourseProgramChildPage):
         APIField("partner_logo"),
         APIField("partner_logo_placement"),
         APIField("overrides"),
-        APIField("signatories"),
+        APIField("signatory_pages_data"),
     ]
 
     base_form_class = CertificatePageForm
@@ -2501,6 +2523,19 @@ class CertificatePage(CourseProgramChildPage):
         Extracts all the pages out of the `signatories` stream into a list
         """
         return [block.value.specific for block in self.signatories if block.value]
+
+    @property
+    def signatory_pages_data(self):
+        """
+        Serializes the signatory pages to give meaningful data
+        """
+        return [
+            {
+                "id": page.id,
+                "title": page.title,
+            }
+            for page in self.signatory_pages
+        ]
 
     @property
     def parent(self):
