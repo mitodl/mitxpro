@@ -25,7 +25,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         if obj:
-            return obj.get_rendition("fill-500x500").url
+            return obj.file.url
         return None
 
 
