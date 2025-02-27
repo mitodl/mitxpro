@@ -1598,19 +1598,21 @@ class CourseProductPage(ProductPage):
         return self.course
 
     def clean(self):
+        """Validates that there is only one internal or external course page per course"""
         if (
             isinstance(self, CoursePage)
             and ExternalCoursePage.objects.filter(course=self.course).exists()
         ):
             raise ValidationError(
-                "There is already an external course page associated with this course."
+                {"course": "There is already an external course page associated with this course."}
+
             )
         elif (
             isinstance(self, ExternalCoursePage)
             and CoursePage.objects.filter(course=self.course).exists()
         ):
             raise ValidationError(
-                "There is already an internal course page associated with this course."
+                {"course": "There is already an internal course page associated with this course."}
             )
 
         super().clean()

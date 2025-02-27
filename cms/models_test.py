@@ -2477,31 +2477,22 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
     assert for_teams_page.title == b2b_page.title
 
 
-def test_external_course_page_with_same_course_run_in_internal_course_page():
+@pytest.mark.parametrize(
+    "existing_course_factory, new_course_factory, expected_error",
+    [
+        (CoursePageFactory, ExternalCoursePageFactory,
+         "{'course': ['There is already an internal course page associated with this course.']}"),
+        (ExternalCoursePageFactory, CoursePageFactory,
+         "{'course': ['There is already an external course page associated with this course.']}"),
+    ]
+)
+def test_prevent_duplicate_pages_with_same_course(existing_course_factory, new_course_factory, expected_error):
     """
-    Tests that a CoursePage with the same course run as another CoursePage.
+    Tests that an error is raised when trying to create a duplicate course page.
     """
-    course_page = CoursePageFactory.create()
+    course_page = existing_course_factory.create()
 
     with pytest.raises(ValidationError) as context:
-        ExternalCoursePageFactory.create(course=course_page.course)
+        new_course_factory.create(course=course_page.course)
 
-    assert (
-        str(context.value)
-        == "{'__all__': ['There is already an internal course page associated with this course.']}"
-    )
-
-
-def test_internal_course_page_with_same_course_run_in_external_course_page():
-    """
-    Tests that an ExternalCoursePage with the same course run as another ExternalCoursePage.
-    """
-    external_course_page = ExternalCoursePageFactory.create()
-
-    with pytest.raises(ValidationError) as context:
-        CoursePageFactory.create(course=external_course_page.course)
-
-    assert (
-        str(context.value)
-        == "{'__all__': ['There is already an external course page associated with this course.']}"
-    )
+    assert (str(context.value) == expected_error)
