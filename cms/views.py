@@ -40,14 +40,24 @@ class CustomPagesAPIViewSet(AllowAnyViewSetMixin, PagesAPIViewSet):
     def get_queryset(self):
         """
         Returns the queryset for the API viewset, with additional annotations
-        for readable_id based on the page type.
+        for annotation_key based on the page type.
         """
         queryset = super().get_queryset()
-        model_type = self.request.GET.get("type", None)
-        if model_type == "cms.CoursePage":
-            queryset = queryset.annotate(readable_id=F("course__readable_id"))
-        elif model_type == "cms.ProgramPage":
-            queryset = queryset.annotate(readable_id=F("program__readable_id"))
+        annotation_map = {
+            "cms.CoursePage": "course",
+            "cms.ExternalCoursePage": "course",
+            "cms.ProgramPage": "program",
+            "cms.ExternalProgramPage": "program",
+        }
+
+        model_type = self.request.GET.get("type")
+        annotation_key = self.request.GET.get("annotation", "readable_id")
+
+        if model_type in annotation_map:
+            queryset = queryset.annotate(
+                **{annotation_key: F(f"{annotation_map[model_type]}__{annotation_key}")}
+            )
+
         return queryset
 
 

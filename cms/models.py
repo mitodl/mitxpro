@@ -2146,7 +2146,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         return [block.value.specific for block in self.contents if block.value]
 
     @property
-    def course_pages(self):
+    def content_page_list(self):
         """
         Serializes the course pages to give useful information
         """
@@ -2173,7 +2173,7 @@ class CoursesInProgramPage(CourseProgramChildPage):
         APIField("heading"),
         APIField("body"),
         APIField("override_contents"),
-        APIField("course_pages"),
+        APIField("content_page_list"),
     ]
 
 
@@ -2265,9 +2265,22 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
         self.slug = slugify(f"{self.get_parent().id}-{self.title}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
+    @property
+    def faq_content(self):
+        """
+        Serializes the FAQs information
+        """
+        return [
+            {
+                "question": faq.question,
+                "answer": str(faq.answer),
+            }
+            for faq in self.faqs.all()
+        ]
+
     api_fields = [
         APIField("title"),
-        APIField("faqs"),
+        APIField("faq_content"),
     ]
 
 
