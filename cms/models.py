@@ -1074,7 +1074,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     ]
 
     api_fields = [
-        APIField("child_pages", serializer=ProductChildPageSerializer()),
+        # APIField("child_pages", serializer=ProductChildPageSerializer()),
         APIField("language"),
         APIField("description"),
         APIField("external_marketing_url"),
@@ -1096,6 +1096,17 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         APIField("page_content"),
         APIField("is_external_course_page"),
         APIField("is_external_program_page"),
+        APIField("faqs_json"),
+        APIField("outcomes", serializer=ProductChildPageSerializer()),
+        APIField("who_should_enroll", serializer=ProductChildPageSerializer()),
+        APIField("techniques", serializer=ProductChildPageSerializer()),
+        APIField("testimonials", serializer=ProductChildPageSerializer()),
+        APIField("faculty", serializer=ProductChildPageSerializer()),
+        APIField("for_teams", serializer=ProductChildPageSerializer()),
+        APIField("propel_career", serializer=ProductChildPageSerializer()),
+        APIField("certificate_page", serializer=ProductChildPageSerializer()),
+        APIField("course_overview", serializer=ProductChildPageSerializer()),
+        APIField("news_and_events", serializer=ProductChildPageSerializer()),
     ]
 
     subpage_types = [
@@ -1263,6 +1274,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         Gets the news and events section subpage
         """
         return self._get_child_page_of_type(NewsAndEventsPage)
+
+    @property
+    def faqs_json(self):
+        """Serializes FAQs"""
+        return self.faqs.values()
 
     @property
     def page_content(self):
