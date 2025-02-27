@@ -1074,7 +1074,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     ]
 
     api_fields = [
-        # APIField("child_pages", serializer=ProductChildPageSerializer()),
         APIField("language_json"),
         APIField("description"),
         APIField("external_marketing_url"),
@@ -1283,7 +1282,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     @property
     def language_json(self):
         """Serializes FAQs"""
-        return self.language.values()
+        return self.language.name
 
     @property
     def page_content(self):
