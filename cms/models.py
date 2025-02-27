@@ -1095,7 +1095,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         APIField("page_content"),
         APIField("is_external_course_page"),
         APIField("is_external_program_page"),
-        APIField("faqs_json"),
+        APIField("faqs_list"),
         APIField("outcomes", serializer=ProductChildPageSerializer()),
         APIField("who_should_enroll", serializer=ProductChildPageSerializer()),
         APIField("techniques", serializer=ProductChildPageSerializer()),
@@ -1275,13 +1275,13 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return self._get_child_page_of_type(NewsAndEventsPage)
 
     @property
-    def faqs_json(self):
+    def faqs_list(self):
         """Serializes FAQs"""
         return self.faqs.values()
 
     @property
     def language_name(self):
-        """Serializes FAQs"""
+        """Serializes language"""
         return self.language.name
 
     @property
@@ -2201,29 +2201,12 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
     """
 
     content_panels = [InlinePanel("faqs", label="Frequently Asked Questions")]
-    api_fields = [
-        APIField("title"),
-        APIField("faqs_list"),
-    ]
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
         self.title = "Frequently Asked Questions"
         self.slug = slugify(f"{self.get_parent().id}-{self.title}")
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
-
-    @property
-    def faqs_list(self):
-        """
-        Serializes the FAQs information
-        """
-        return [
-            {
-                "question": faq.question,
-                "answer": str(faq.answer),
-            }
-            for faq in self.faqs.all()
-        ]
 
 
 class FrequentlyAskedQuestion(DisableSitemapURLMixin, Orderable):
@@ -2234,11 +2217,6 @@ class FrequentlyAskedQuestion(DisableSitemapURLMixin, Orderable):
     faqs_page = ParentalKey(FrequentlyAskedQuestionPage, related_name="faqs", null=True)
     question = models.TextField()
     answer = RichTextField()
-
-    api_fields = [
-        APIField("question"),
-        APIField("answer"),
-    ]
 
 
 class ResourcePage(Page):
