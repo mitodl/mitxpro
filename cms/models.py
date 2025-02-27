@@ -1339,6 +1339,12 @@ class ProgramProductPage(ProductPage):
             help_text="Price is not changed when a page is saved as draft.",
         ),
     ]
+
+    api_fields = [
+        *ProductPage.api_fields,
+        APIField("program", serializer=ProgramSerializer()),
+    ]
+
     base_form_class = CoursewareForm
 
     program = models.OneToOneField(
@@ -1347,11 +1353,6 @@ class ProgramProductPage(ProductPage):
         on_delete=models.SET_NULL,
         help_text="The program for this page",
     )
-
-    api_fields = [
-        APIField("program", serializer=ProgramSerializer()),
-        *ProductPage.api_fields,
-    ]
 
     @property
     def course_pages(self):
@@ -1488,12 +1489,13 @@ class CourseProductPage(ProductPage):
             help_text="Price is not changed when a page is saved as draft.",
         ),
     ]
-    base_form_class = CoursewareForm
 
     api_fields = [
-        APIField("course", serializer=CourseSerializer()),
         *ProductPage.api_fields,
+        APIField("course", serializer=CourseSerializer()),
     ]
+
+    base_form_class = CoursewareForm
 
     @cached_property
     def course_with_related_objects(self):
