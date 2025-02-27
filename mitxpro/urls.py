@@ -27,9 +27,13 @@ from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.images.views.serve import ServeView
 from wagtail.utils.urlpatterns import decorate_urlpatterns
+from wagtail.api.v2.router import WagtailAPIRouter
 
-from cms.urls import api_router
-
+from cms.views import (
+    CustomPagesAPIViewSet,
+    CustomImagesAPIViewSet,
+    CustomDocumentsAPIViewSet,
+)
 from mitxpro.views import (
     AppContextView,
     cms_signin_redirect_to_site_signin,
@@ -41,6 +45,11 @@ from mitxpro.views import (
 from mitxpro.views import (
     handler500 as server_error_handler,
 )
+
+api_router = WagtailAPIRouter("wagtailapi")
+api_router.register_endpoint("pages", CustomPagesAPIViewSet)
+api_router.register_endpoint("images", CustomImagesAPIViewSet)
+api_router.register_endpoint("documents", CustomDocumentsAPIViewSet)
 
 WAGTAIL_IMG_CACHE_AGE = 31_536_000  # 1 year
 

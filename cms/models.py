@@ -100,7 +100,7 @@ from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 from courses.serializers import CourseSerializer, ProgramSerializer
-from .wagtail_api_serializers import ProductChildPageSerializer
+from .serializers import ProductChildPageSerializer
 
 
 class DisableSitemapURLMixin:
