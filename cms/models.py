@@ -1074,7 +1074,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     ]
 
     api_fields = [
-        APIField("language_json"),
+        APIField("language_name"),
         APIField("description"),
         APIField("external_marketing_url"),
         APIField("marketing_hubspot_form_id"),
@@ -1280,7 +1280,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         return self.faqs.values()
 
     @property
-    def language_json(self):
+    def language_name(self):
         """Serializes FAQs"""
         return self.language.name
 
