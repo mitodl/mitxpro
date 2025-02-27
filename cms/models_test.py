@@ -2480,13 +2480,21 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
 @pytest.mark.parametrize(
     "existing_course_factory, new_course_factory, expected_error",
     [
-        (CoursePageFactory, ExternalCoursePageFactory,
-         "{'course': ['There is already an internal course page associated with this course.']}"),
-        (ExternalCoursePageFactory, CoursePageFactory,
-         "{'course': ['There is already an external course page associated with this course.']}"),
-    ]
+        (
+            CoursePageFactory,
+            ExternalCoursePageFactory,
+            "{'course': ['There is already an internal course page associated with this course.']}",
+        ),
+        (
+            ExternalCoursePageFactory,
+            CoursePageFactory,
+            "{'course': ['There is already an external course page associated with this course.']}",
+        ),
+    ],
 )
-def test_prevent_duplicate_pages_with_same_course(existing_course_factory, new_course_factory, expected_error):
+def test_prevent_duplicate_pages_with_same_course(
+    existing_course_factory, new_course_factory, expected_error
+):
     """
     Tests that an error is raised when trying to create a duplicate course page.
     """
@@ -2495,4 +2503,4 @@ def test_prevent_duplicate_pages_with_same_course(existing_course_factory, new_c
     with pytest.raises(ValidationError) as context:
         new_course_factory.create(course=course_page.course)
 
-    assert (str(context.value) == expected_error)
+    assert str(context.value) == expected_error

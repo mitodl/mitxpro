@@ -1604,15 +1604,18 @@ class CourseProductPage(ProductPage):
             and ExternalCoursePage.objects.filter(course=self.course).exists()
         ):
             raise ValidationError(
-                {"course": "There is already an external course page associated with this course."}
-
+                {
+                    "course": "There is already an external course page associated with this course."
+                }
             )
         elif (
             isinstance(self, ExternalCoursePage)
             and CoursePage.objects.filter(course=self.course).exists()
         ):
             raise ValidationError(
-                {"course": "There is already an internal course page associated with this course."}
+                {
+                    "course": "There is already an internal course page associated with this course."
+                }
             )
 
         super().clean()
