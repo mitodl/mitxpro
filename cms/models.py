@@ -1051,27 +1051,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         use_json_field=True,
     )
 
-    @property
-    def page_content(self):
-        """
-        Serialize the content field to return useful information
-        """
-        content_dict = {}
-
-        for block in self.content:
-            key = block.block_type
-            value = block.value.file.url if key == "image" else str(block.value)
-
-            if key in content_dict:
-                if isinstance(content_dict[key], list):
-                    content_dict[key].append(value)
-                else:
-                    content_dict[key] = [content_dict[key], value]
-            else:
-                content_dict[key] = value
-
-        return content_dict
-
     content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("language"),
         FieldPanel("external_marketing_url"),
@@ -1092,6 +1071,31 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         FieldPanel("thumbnail_image"),
         FieldPanel("featured"),
         FieldPanel("content"),
+    ]
+
+    api_fields = [
+        APIField("child_pages", serializer=ProductChildPageSerializer()),
+        APIField("language"),
+        APIField("description"),
+        APIField("external_marketing_url"),
+        APIField("marketing_hubspot_form_id"),
+        APIField("subhead"),
+        APIField("video_title"),
+        APIField("video_url"),
+        APIField("duration"),
+        APIField("min_weeks"),
+        APIField("max_weeks"),
+        APIField("format"),
+        APIField("time_commitment"),
+        APIField("min_weekly_hours"),
+        APIField("max_weekly_hours"),
+        APIField("thumbnail_image"),
+        APIField("background_image"),
+        APIField("background_video_url"),
+        APIField("featured"),
+        APIField("page_content"),
+        APIField("is_external_course_page"),
+        APIField("is_external_program_page"),
     ]
 
     subpage_types = [
@@ -1161,31 +1165,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
             for child_class in courseware_subclasses:
                 child_class.objects.filter(featured=True).update(featured=False)
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
-
-    api_fields = [
-        APIField("child_pages", serializer=ProductChildPageSerializer()),
-        APIField("language"),
-        APIField("description"),
-        APIField("external_marketing_url"),
-        APIField("marketing_hubspot_form_id"),
-        APIField("subhead"),
-        APIField("video_title"),
-        APIField("video_url"),
-        APIField("duration"),
-        APIField("min_weeks"),
-        APIField("max_weeks"),
-        APIField("format"),
-        APIField("time_commitment"),
-        APIField("min_weekly_hours"),
-        APIField("max_weekly_hours"),
-        APIField("thumbnail_image"),
-        APIField("background_image"),
-        APIField("background_video_url"),
-        APIField("featured"),
-        APIField("page_content"),
-        APIField("is_external_course_page"),
-        APIField("is_external_program_page"),
-    ]
 
     @property
     def product(self):
@@ -1284,6 +1263,27 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         Gets the news and events section subpage
         """
         return self._get_child_page_of_type(NewsAndEventsPage)
+
+    @property
+    def page_content(self):
+        """
+        Serialize the content field to return useful information
+        """
+        content_dict = {}
+
+        for block in self.content:
+            key = block.block_type
+            value = block.value.file.url if key == "image" else str(block.value)
+
+            if key in content_dict:
+                if isinstance(content_dict[key], list):
+                    content_dict[key].append(value)
+                else:
+                    content_dict[key] = [content_dict[key], value]
+            else:
+                content_dict[key] = value
+
+        return content_dict
 
 
 class ProgramProductPageQuerySet(PageQuerySet):
@@ -1708,27 +1708,11 @@ class UserTestimonialsPage(CourseProgramChildPage):
         FieldPanel("subhead"),
         FieldPanel("items"),
     ]
-
-    @property
-    def testimonials(self):
-        """
-        Serialize the testimonial items to return useful information
-        """
-        return [
-            {
-                "name": item.value["title"],
-                "title": item.value["title"],
-                "image": item.value["image"].file.url,
-                "quote": item.value["quote"],
-            }
-            for item in self.items
-        ]
-
     api_fields = [
         APIField("title"),
         APIField("heading"),
         APIField("subhead"),
-        APIField("testimonials"),
+        APIField("items"),
     ]
 
     class Meta:
@@ -1761,28 +1745,10 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         use_json_field=True,
     )
     content_panels = [FieldPanel("heading"), FieldPanel("items")]
-
-    @property
-    def news_and_events(self):
-        """
-        Serialize the items fields to return useful information
-        """
-        return [
-            {
-                "content_type": item.value["content_type"],
-                "title": item.value["title"],
-                "image": item.value["image"].file.url,
-                "content": item.value["content"],
-                "call_to_action": item.value["call_to_action"],
-                "action_url": item.value["action_url"],
-            }
-            for item in self.items
-        ]
-
     api_fields = [
         APIField("title"),
         APIField("heading"),
-        APIField("news_and_events"),
+        APIField("items"),
     ]
 
     class Meta:
@@ -1842,19 +1808,11 @@ class LearningOutcomesPage(CourseProgramChildPage):
         FieldPanel("sub_heading"),
         FieldPanel("outcome_items"),
     ]
-
-    @property
-    def outcomes(self):
-        """
-        Serialize the outcome_items
-        """
-        return [str(item.value) for item in self.outcome_items]
-
     api_fields = [
         APIField("title"),
         APIField("heading"),
         APIField("sub_heading"),
-        APIField("outcomes"),
+        APIField("outcome_items"),
     ]
 
 
@@ -1871,29 +1829,14 @@ class LearningTechniquesPage(CourseProgramChildPage):
         use_json_field=True,
     )
 
-    @property
-    def techniques(self):
-        """
-        Serialize the technique_items to return useful information
-        """
-        return [
-            {
-                "heading": technique.value["heading"],
-                "sub_heading": technique.value["sub_heading"],
-                "image": technique.value["image"].file.url,
-            }
-            for technique in self.technique_items
-        ]
-
+    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
     api_fields = [
         APIField("title"),
-        APIField("techniques"),
+        APIField("technique_items"),
     ]
 
     class Meta:
         verbose_name = "Icon Grid"
-
-    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -2075,23 +2018,15 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         help_text="Switch image to the left and content to the right",
     )
 
-    @property
-    def page_content(self):
-        """
-        Serialize the page's content into a list
-        """
-        return [str(content_item.value) for content_item in self.content]
-
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("content"),
         FieldPanel("image"),
         FieldPanel("switch_layout"),
     ]
-
     api_fields = [
         APIField("heading"),
-        APIField("page_content"),
+        APIField("content"),
         APIField("image"),
         APIField("switch_layout"),
     ]
@@ -2203,25 +2138,11 @@ class FacultyMembersPage(CourseProgramChildPage):
         FieldPanel("members"),
     ]
 
-    @property
-    def faculty(self):
-        """
-        Serialize the faculty members information
-        """
-        return [
-            {
-                "name": member.value["name"],
-                "image": member.value["image"].file.url,
-                "description": str(member.value["description"]),
-            }
-            for member in self.members
-        ]
-
     api_fields = [
         APIField("title"),
         APIField("heading"),
         APIField("subhead"),
-        APIField("faculty"),
+        APIField("members"),
     ]
 
 
@@ -2501,7 +2422,7 @@ class CertificatePage(CourseProgramChildPage):
         APIField("partner_logo"),
         APIField("partner_logo_placement"),
         APIField("overrides"),
-        APIField("signatory_pages_data"),
+        APIField("signatory_items"),
     ]
 
     base_form_class = CertificatePageForm
@@ -2538,7 +2459,7 @@ class CertificatePage(CourseProgramChildPage):
         return [block.value.specific for block in self.signatories if block.value]
 
     @property
-    def signatory_pages_data(self):
+    def signatory_items(self):
         """
         Serializes the signatory pages to give meaningful data
         """

@@ -9,7 +9,28 @@ from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
 
-class LearningTechniqueBlock(blocks.StructBlock):
+class ImageAPIRepresentationMixin:
+    def get_api_representation(self, value, context=None):
+        """
+        Add the image title and URL to the API representation.
+        """
+        api_representation = super().get_api_representation(value, context)
+        image = value["image"]
+        if image:
+            api_representation.update(
+                {
+                    "image": {
+                        "title": image.title,
+                        "url": image.file.url,
+                        "height": image.height,
+                        "width": image.width,
+                    }
+                }
+            )
+        return api_representation
+
+
+class LearningTechniqueBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     """
     A custom block for Learning techniques.
     """
@@ -32,7 +53,7 @@ class ResourceBlock(blocks.StructBlock):
 
 
 # Cannot name TestimonialBlock otherwise pytest will try to pick up as a test
-class UserTestimonialBlock(blocks.StructBlock):
+class UserTestimonialBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     """
     Custom block to represent a testimonial
     """
@@ -47,7 +68,7 @@ class UserTestimonialBlock(blocks.StructBlock):
     quote = blocks.TextBlock(help_text="The quote that appears on the testimonial.")
 
 
-class NewsAndEventsBlock(blocks.StructBlock):
+class NewsAndEventsBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     """
     Custom block to represent a news or event
     """
@@ -71,7 +92,7 @@ class NewsAndEventsBlock(blocks.StructBlock):
     )
 
 
-class FacultyBlock(blocks.StructBlock):
+class FacultyBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     """
     Block class that defines a faculty member
     """
@@ -131,7 +152,7 @@ class BannerHeadingBlock(blocks.StructBlock):
         label = "Banner Headings"
 
 
-class SuccessStoriesBlock(blocks.StructBlock):
+class SuccessStoriesBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     """
     A custom block designed to represent an individual success story.
     """
