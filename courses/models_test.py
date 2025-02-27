@@ -113,7 +113,7 @@ def test_program_is_catalog_visible():
         course__program=program,
         past_start=True,
         past_enrollment_end=True,
-        clean_disabled=True,
+        force_insert=True,
     )
     assert program.is_catalog_visible is False
 
@@ -161,6 +161,7 @@ def test_program_first_course_unexpired_runs():
         start_date=factory.Iterator(past_start_dates),
         end_date=factory.Iterator(past_end_dates),
         live=True,
+        force_insert=True,
     )
     CourseRunFactory.create_batch(
         3,
@@ -262,9 +263,8 @@ def test_course_run_past(end_days, expected):
     Test that CourseRun.is_past returns the expected boolean value
     """
     end_date = None if end_days is None else (now + timedelta(days=end_days))
-    start_date = None if end_days is None else (end_date - timedelta(2))
     assert (
-        CourseRunFactory.create(start_date=start_date, end_date=end_date).is_past
+        CourseRunFactory.create(end_date=end_date, force_insert=True).is_past
         is expected
     )
 
@@ -338,7 +338,7 @@ def test_course_run_not_beyond_enrollment(
             end_date=end_date,
             enrollment_end=enr_end_date,
             enrollment_start=enr_start_date,
-            clean_disabled=True,
+            force_insert=True,
         ).is_not_beyond_enrollment
         is expected
     )
@@ -360,7 +360,7 @@ def test_course_run_unexpired(end_days, enroll_days, expected):
             start_date=start_date,
             end_date=end_date,
             enrollment_end=enr_end_date,
-            clean_disabled=True,
+            force_insert=True,
         ).is_unexpired
         is expected
     )
@@ -570,7 +570,7 @@ def test_course_is_catalog_visible():
         course=course,
         past_start=True,
         past_enrollment_end=True,
-        clean_disabled=True,
+        force_insert=True,
     )
     assert course.is_catalog_visible is False
 
@@ -606,6 +606,7 @@ def test_course_unexpired_runs():
         start_date=factory.Iterator(start_dates),
         end_date=factory.Iterator(end_dates),
         live=True,
+        force_insert=True,
     )
 
     # Add a run that is not live and shouldn't show up in unexpired list
@@ -819,7 +820,7 @@ def test_enrollment_is_ended():
         end_date=past_date,
         course=past_course,
         course__program=past_program,
-        clean_disabled=True,
+        force_insert=True,
     )
 
     program_enrollment = ProgramEnrollmentFactory.create(program=past_program)

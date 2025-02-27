@@ -588,12 +588,20 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
 
 
 @pytest.mark.parametrize(
-    "start_date, enrollment_end, end_date, expiration_date, expected_error",
+    "start_date, enrollment_end, end_date, enrollment_start, expiration_date, expected_error",
     [
-        (None, None, None, None, "start_date or enrollment_end must be provided."),
+        (
+            None,
+            None,
+            None,
+            None,
+            None,
+            "start_date or enrollment_end must be provided.",
+        ),
         (
             now - timedelta(days=2),
             now - timedelta(days=2),
+            None,
             None,
             None,
             "start_date or enrollment_end must be in the future.",
@@ -602,12 +610,22 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=2),
             now + timedelta(days=3),
             now + timedelta(days=4),
+            now + timedelta(days=2),
             now + timedelta(days=5),
             None,
         ),
         (
+            now - timedelta(days=4),
+            now + timedelta(days=3),
+            now - timedelta(days=2),
+            now + timedelta(days=2),
+            now - timedelta(days=5),
+            "end_date must be in the future.",
+        ),
+        (
             now + timedelta(days=4),
             now + timedelta(days=3),
+            now + timedelta(days=2),
             now + timedelta(days=2),
             now + timedelta(days=5),
             "end_date must be later than start_date.",
@@ -616,6 +634,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=2),
             now + timedelta(days=3),
             now + timedelta(days=4),
+            now + timedelta(days=2),
             now - timedelta(days=2),
             "expiration_date must be later than start_date.",
         ),
@@ -623,19 +642,33 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=2),
             now + timedelta(days=3),
             now + timedelta(days=4),
+            now + timedelta(days=2),
             now + timedelta(days=3),
             "expiration_date must be later than end_date.",
+        ),
+        (
+            now + timedelta(days=2),
+            now + timedelta(days=3),
+            now + timedelta(days=4),
+            now + timedelta(days=5),
+            now + timedelta(days=5),
+            "enrollment_end must be later than enrollment_start.",
         ),
     ],
 )
 def test_validate_courserun_dates(
-    start_date, enrollment_end, end_date, expiration_date, expected_error
+    start_date,
+    enrollment_end,
+    end_date,
+    enrollment_start,
+    expiration_date,
+    expected_error,
 ):
     """
     Test that `validate_courserun_dates` returns the expected error messages for invalid dates
     and None for valid cases.
     """
     error_msg = validate_courserun_dates(
-        start_date, end_date, None, enrollment_end, expiration_date
+        start_date, end_date, enrollment_end, enrollment_start, expiration_date
     )
     assert error_msg == expected_error

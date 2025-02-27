@@ -754,6 +754,7 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         - start_date or enrollment_end must be provided.
         - start_date and enrollment_end (if provided) must be in the future.
         - end_date must be later than start_date.
+        - end_date must be in future.
         - enrollment_end must be later than enrollment_start.
         - expiration_date must be later than start_date and end_date (if provided).
 

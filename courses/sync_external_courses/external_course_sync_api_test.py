@@ -40,10 +40,11 @@ from courses.sync_external_courses.external_course_sync_api import (
     save_page_revision,
     update_external_course_runs,
     deactivate_missing_course_runs,
+    validate_courserun_dates,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
-from mitxpro.utils import clean_url, now_in_utc
+from mitxpro.utils import clean_url, strip_datetime
 
 
 @pytest.fixture
@@ -472,7 +473,7 @@ def test_create_or_update_external_course_run(
             enrollment_end=None,
             expiration_date=None,
             live=is_live,
-            clean_disabled=True,
+            force_insert=True,
         )
         if empty_dates:
             CourseRun.objects.filter(id=run.id).update(start_date=None, end_date=None)
@@ -520,6 +521,7 @@ def test_create_or_update_external_course_run(
 @pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
 def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
+    mocker,
     external_course_data,
     create_existing_data,
     external_expired_course_data,
@@ -552,7 +554,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
                 enrollment_start=None,
                 enrollment_end=None,
                 expiration_date=None,
-                clean_disabled=True,
+                force_insert=True,
             )
 
             home_page = HomePageFactory.create(
@@ -577,9 +579,22 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     external_course_runs.append(external_course_data_with_null_price)
     external_course_runs.append(external_course_data_with_non_usd_price)
     keymap = get_keymap(external_course_data["course_run_code"])
+    mock_validate_courserun_dates = mocker.patch(
+        "courses.sync_external_courses.external_course_sync_api.validate_courserun_dates",
+        side_effect=validate_courserun_dates,
+    )
     stats = update_external_course_runs(external_course_runs, keymap=keymap)
     courses = Course.objects.filter(platform=platform)
 
+    start_date = strip_datetime(external_course_data["start_date"], keymap.date_format)
+    end_date = strip_datetime(
+        external_course_data["end_date"], keymap.date_format
+    ).replace(hour=23, minute=59)
+    mock_validate_courserun_dates.assert_called_with(
+        start_date,
+        end_date,
+        start_date,  # enrollment_end = start_date for external courses
+    )
     num_courses_created = 2 if create_existing_data else 4
     num_existing_courses = 2 if create_existing_data else 0
     num_course_runs_created = 3 if create_existing_data else 5
@@ -951,28 +966,6 @@ def test_external_course_validate_list_currency(
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.list_currency = list_currency
     assert external_course.validate_list_currency() == is_valid
-
-
-@pytest.mark.parametrize(
-    "external_course_data",
-    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
-    indirect=True,
-)
-@pytest.mark.parametrize(
-    ("end_date", "is_valid"),
-    [
-        (now_in_utc() + timedelta(days=1), True),
-        (now_in_utc() - timedelta(days=1), False),
-    ],
-)
-def test_external_course_validate_end_date(external_course_data, end_date, is_valid):
-    """
-    Tests that the valid end date is in the future for External courses.
-    """
-    keymap = get_keymap(external_course_data["course_run_code"])
-    external_course = ExternalCourse(external_course_data, keymap=keymap)
-    external_course.end_date = end_date
-    assert external_course.validate_end_date() == is_valid
 
 
 @pytest.mark.parametrize(

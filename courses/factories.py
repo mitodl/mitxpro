@@ -142,10 +142,10 @@ class CourseRunFactory(DjangoModelFactory):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         """Allow creating test objects without validation."""
-        clean_disabled = kwargs.pop("clean_disabled", False)
+        force_insert = kwargs.pop("force_insert", False)
         obj = model_class(*args, **kwargs)
 
-        if not clean_disabled:
+        if not force_insert:
             obj.clean()
             obj.save()
         else:

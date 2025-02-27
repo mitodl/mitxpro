@@ -67,7 +67,7 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
         past_start=True,
         past_enrollment_end=True,
         course__no_program=True,
-        clean_disabled=True,
+        force_insert=True,
     )
     all_runs = [
         past_run,

@@ -658,6 +658,7 @@ def validate_courserun_dates(
     - start_date or enrollment_end must be provided.
     - start_date and enrollment_end (if provided) must be in the future.
     - end_date must be later than start_date.
+    - end_date must be in future.
     - enrollment_end must be later than enrollment_start.
     - expiration_date must be later than start_date and end_date (if provided).
 
@@ -677,7 +678,9 @@ def validate_courserun_dates(
     if not (start_date or enrollment_end):
         error_msg = "start_date or enrollment_end must be provided."
 
-    elif (start_date and start_date < now) or (enrollment_end and enrollment_end < now):
+    elif (not start_date or start_date < now) and (
+        not enrollment_end or enrollment_end < now
+    ):
         error_msg = "start_date or enrollment_end must be in the future."
 
     elif start_date and end_date and start_date > end_date:
@@ -685,6 +688,9 @@ def validate_courserun_dates(
 
     elif enrollment_start and enrollment_end and enrollment_start > enrollment_end:
         error_msg = "enrollment_end must be later than enrollment_start."
+
+    elif end_date and end_date < now:
+        error_msg = "end_date must be in the future."
 
     elif expiration_date:
         if start_date and expiration_date < start_date:
