@@ -20,7 +20,12 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Image
-        fields = ["title", "image_url"]
+        fields = [
+            "title",
+            "image_url",
+            "height",
+            "width",
+        ]
 
     def get_image_url(self, obj):
         if obj:

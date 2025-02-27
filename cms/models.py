@@ -1075,7 +1075,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
 
     api_fields = [
         # APIField("child_pages", serializer=ProductChildPageSerializer()),
-        APIField("language"),
+        APIField("language_json"),
         APIField("description"),
         APIField("external_marketing_url"),
         APIField("marketing_hubspot_form_id"),
@@ -1279,6 +1279,11 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     def faqs_json(self):
         """Serializes FAQs"""
         return self.faqs.values()
+
+    @property
+    def language_json(self):
+        """Serializes FAQs"""
+        return self.language.values()
 
     @property
     def page_content(self):
@@ -2197,6 +2202,10 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
     """
 
     content_panels = [InlinePanel("faqs", label="Frequently Asked Questions")]
+    api_fields = [
+        APIField("title"),
+        APIField("faqs_list"),
+    ]
 
     def save(self, clean=True, user=None, log_action=False, **kwargs):  # noqa: FBT002
         # autogenerate a unique slug so we don't hit a ValidationError
@@ -2205,7 +2214,7 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
         super().save(clean=clean, user=user, log_action=log_action, **kwargs)
 
     @property
-    def faq_content(self):
+    def faqs_list(self):
         """
         Serializes the FAQs information
         """
@@ -2216,11 +2225,6 @@ class FrequentlyAskedQuestionPage(CourseProgramChildPage):
             }
             for faq in self.faqs.all()
         ]
-
-    api_fields = [
-        APIField("title"),
-        APIField("faq_content"),
-    ]
 
 
 class FrequentlyAskedQuestion(DisableSitemapURLMixin, Orderable):
@@ -2483,8 +2487,10 @@ class CertificatePage(CourseProgramChildPage):
         """
         return [
             {
-                "id": page.id,
-                "title": page.title,
+                "name": page.name,
+                "title_1": page.title_1,
+                "title_2": page.title_2,
+                "organization": page.organization,
             }
             for page in self.signatory_pages
         ]

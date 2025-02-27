@@ -9,7 +9,7 @@ from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
 
-class ImageAPIRepresentationMixin:
+class BlockAPIRepresentationMixin:
     def get_api_representation(self, value, context=None):
         """
         Add the image title and URL to the API representation.
@@ -30,7 +30,7 @@ class ImageAPIRepresentationMixin:
         return api_representation
 
 
-class LearningTechniqueBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
+class LearningTechniqueBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     A custom block for Learning techniques.
     """
@@ -53,7 +53,7 @@ class ResourceBlock(blocks.StructBlock):
 
 
 # Cannot name TestimonialBlock otherwise pytest will try to pick up as a test
-class UserTestimonialBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
+class UserTestimonialBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     Custom block to represent a testimonial
     """
@@ -68,7 +68,7 @@ class UserTestimonialBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     quote = blocks.TextBlock(help_text="The quote that appears on the testimonial.")
 
 
-class NewsAndEventsBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
+class NewsAndEventsBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     Custom block to represent a news or event
     """
@@ -92,7 +92,7 @@ class NewsAndEventsBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
     )
 
 
-class FacultyBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
+class FacultyBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     Block class that defines a faculty member
     """
@@ -152,7 +152,7 @@ class BannerHeadingBlock(blocks.StructBlock):
         label = "Banner Headings"
 
 
-class SuccessStoriesBlock(ImageAPIRepresentationMixin, blocks.StructBlock):
+class SuccessStoriesBlock(blocks.StructBlock):
     """
     A custom block designed to represent an individual success story.
     """
