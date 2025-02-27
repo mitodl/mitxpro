@@ -26,7 +26,7 @@ from mitxpro.utils import (
     first_or_none,
     format_datetime_for_filename,
     format_price,
-    get_courserun_date_errors,
+    validate_courserun_dates,
     get_error_response_summary,
     get_field_names,
     get_js_settings,
@@ -628,14 +628,14 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
         ),
     ],
 )
-def test_get_courserun_date_errors(
+def test_validate_courserun_dates(
     start_date, enrollment_end, end_date, expiration_date, expected_error
 ):
     """
     Test that `validate_courserun_dates` returns the expected error messages for invalid dates
     and None for valid cases.
     """
-    error_msg = get_courserun_date_errors(
+    error_msg = validate_courserun_dates(
         start_date, end_date, None, enrollment_end, expiration_date
     )
     assert error_msg == expected_error

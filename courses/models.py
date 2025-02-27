@@ -30,7 +30,7 @@ from mitxpro.utils import (
     first_matching_item,
     now_in_utc,
     serialize_model_object,
-    get_courserun_date_errors,
+    validate_courserun_dates,
 )
 
 User = get_user_model()
@@ -760,15 +760,15 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         Raises:
             ValidationError: If any of the date rules are violated.
         """
-        errorMsg = get_courserun_date_errors(
+        error_msg = validate_courserun_dates(
             self.start_date,
             self.end_date,
             self.enrollment_end,
             self.enrollment_start,
             self.expiration_date,
         )
-        if errorMsg:
-            raise ValidationError(errorMsg)  # noqa: EM101
+        if error_msg:
+            raise ValidationError(error_msg)  # noqa: EM101
 
     def save(
         self,

@@ -648,7 +648,7 @@ def strip_datetime(date_str, date_format, date_timezone=None):
     return datetime.datetime.strptime(date_str, date_format).astimezone(date_timezone)
 
 
-def get_courserun_date_errors(
+def validate_courserun_dates(
     start_date, end_date, enrollment_end, enrollment_start=None, expiration_date=None
 ):
     """
@@ -674,12 +674,10 @@ def get_courserun_date_errors(
     now = now_in_utc()
     error_msg = None
 
-    if not start_date and not enrollment_end:
+    if not (start_date or enrollment_end):
         error_msg = "start_date or enrollment_end must be provided."
 
-    elif (not start_date or start_date < now) and (
-        not enrollment_end or enrollment_end < now
-    ):
+    elif (start_date and start_date < now) or (enrollment_end and enrollment_end < now):
         error_msg = "start_date or enrollment_end must be in the future."
 
     elif start_date and end_date and start_date > end_date:

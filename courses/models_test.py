@@ -231,9 +231,9 @@ def test_courseware_url(settings):
     assert course_run_no_path.courseware_url is None
 
 
-def test_clean_calls_get_courserun_date_errors(mocker):
+def test_clean_calls_validate_courserun_dates(mocker):
     """
-    Test that the `clean` method calls `get_courserun_date_errors` with the correct arguments.
+    Test that the `clean` method calls `validate_courserun_dates` with the correct arguments.
     """
     course_run = CourseRunFactory.create(
         start_date=now + timedelta(-2),
@@ -244,7 +244,7 @@ def test_clean_calls_get_courserun_date_errors(mocker):
     )
 
     mock_validate = mocker.patch(
-        "courses.models.get_courserun_date_errors", return_value=None
+        "courses.models.validate_courserun_dates", return_value=None
     )
     course_run.clean()
     mock_validate.assert_called_once_with(
@@ -263,7 +263,10 @@ def test_course_run_past(end_days, expected):
     """
     end_date = None if end_days is None else (now + timedelta(days=end_days))
     start_date = None if end_days is None else (end_date - timedelta(2))
-    assert CourseRunFactory.create(start_date=start_date, end_date=end_date).is_past is expected
+    assert (
+        CourseRunFactory.create(start_date=start_date, end_date=end_date).is_past
+        is expected
+    )
 
 
 @pytest.mark.parametrize(
