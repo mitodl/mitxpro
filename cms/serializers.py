@@ -1,6 +1,5 @@
 """
-Custom serializers for Wagtail API to handle product child pages,
-Images and FAQ pages.
+Custom serializers for Wagtail API to handle product child pages and Images
 """
 
 from rest_framework import serializers

@@ -8,25 +8,18 @@ from django.core.exceptions import ValidationError
 from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
+from cms.serializers import ImageSerializer
+
 
 class BlockAPIRepresentationMixin:
     def get_api_representation(self, value, context=None):
         """
-        Add the image title and URL to the API representation.
+        Updates serialized data for images.
         """
         api_representation = super().get_api_representation(value, context)
         image = value["image"]
         if image:
-            api_representation.update(
-                {
-                    "image": {
-                        "title": image.title,
-                        "url": image.file.url,
-                        "height": image.height,
-                        "width": image.width,
-                    }
-                }
-            )
+            api_representation.update({"image": ImageSerializer(instance=image).data})
         return api_representation
 
 
