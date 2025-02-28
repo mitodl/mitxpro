@@ -84,6 +84,7 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm, CoursewareForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
+from cms.serializers import ImageSerializer
 from courses.models import (
     Course,
     CourseRunCertificate,
@@ -1088,8 +1089,8 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         APIField("time_commitment"),
         APIField("min_weekly_hours"),
         APIField("max_weekly_hours"),
-        APIField("thumbnail_image"),
-        APIField("background_image"),
+        APIField("thumbnail_image", serializer=ImageSerializer()),
+        APIField("background_image", serializer=ImageSerializer()),
         APIField("background_video_url"),
         APIField("featured"),
         APIField("page_content"),
