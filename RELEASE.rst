@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.174.1 (Released March 03, 2025)
+---------------
+
+- feat: replace enrollment email with welcome email (#3394)
+- [pre-commit.ci] pre-commit autoupdate (#3398)
+- fix(deps): update dependency boto3 to v1.36.21 (#3403)
+- chore(deps): update actions/setup-python digest to 4237552 (#3402)
+- fix(deps): update dependency django to v4.2.19 (#3404)
+
 Version 0.174.0 (Released February 19, 2025)
 ---------------
 
