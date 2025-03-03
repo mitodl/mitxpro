@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.174.1
+Version 0.174.1 (Released March 03, 2025)
 ---------------
 
 - feat: replace enrollment email with welcome email (#3394)
