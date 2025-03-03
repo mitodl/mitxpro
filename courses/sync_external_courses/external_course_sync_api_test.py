@@ -602,10 +602,11 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     assert len(stats["course_runs_without_prices"]) == 1
 
     for external_course_run in external_course_runs:
-        if (
-            external_course_run["course_run_code"] in stats["course_runs_skipped"]
-            or external_course_run["course_run_code"] in stats["course_runs_expired"]
-        ):
+        if external_course_run["course_run_code"] in {
+            code for code, _, _ in stats["course_runs_skipped"]
+        } or external_course_run["course_run_code"] in {
+            code for code, _ in stats["course_runs_expired"]
+        }:
             continue
 
         course = Course.objects.filter(
@@ -861,58 +862,124 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("title", "course_code", "course_run_code", "is_valid"),
+    ("title", "course_code", "course_run_code", "is_valid", "reason"),
     [
         (
             "Internet of Things (IoT): Design and Applications     ",
             "MO-DBIP",
             "MO-DBIP.ELE-99-07#1",
             True,
+            None,
         ),
         (
             "Internet of Things (IoT): Design and Applications     ",
             "MXP-DBIP",
             "MXP-DBIP.ELE-99-07#1",
             True,
+            None,
         ),
-        ("", "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
-        ("", "MXP-DBIP", "MXP-DBIP.ELE-99-07#1", False),
-        (None, "MO-DBIP", "MO-DBIP.ELE-99-07#1", False),
-        (None, "MXP-DBIP", "MXP-DBIP.ELE-99-07#1", False),
+        (
+            "",
+            "MO-DBIP",
+            "MO-DBIP.ELE-99-07#1",
+            False,
+            "Missing required field course_title",
+        ),
+        (
+            "",
+            "MXP-DBIP",
+            "MXP-DBIP.ELE-99-07#1",
+            False,
+            "Missing required field course_title",
+        ),
+        (
+            None,
+            "MO-DBIP",
+            "MO-DBIP.ELE-99-07#1",
+            False,
+            "Missing required field course_title",
+        ),
+        (
+            None,
+            "MXP-DBIP",
+            "MXP-DBIP.ELE-99-07#1",
+            False,
+            "Missing required field course_title",
+        ),
         (
             "    Internet of Things (IoT): Design and Applications   ",
             "",
             "MO-DBIP.ELE-99-07#1",
             False,
+            "Missing required field course_code",
         ),
         (
             "    Internet of Things (IoT): Design and Applications   ",
             "",
             "MXP-DBIP.ELE-99-07#1",
             False,
+            "Missing required field course_code",
         ),
         (
             "    Internet of Things (IoT): Design and Applications",
             None,
             "MO-DBIP.ELE-99-07#1",
             False,
+            "Missing required field course_code",
         ),
         (
             "    Internet of Things (IoT): Design and Applications",
             None,
             "MXP-DBIP.ELE-99-07#1",
             False,
+            "Missing required field course_code",
         ),
-        ("Internet of Things (IoT): Design and Applications", "MO-DBIP", "", False),
-        ("Internet of Things (IoT): Design and Applications", "MXP-DBIP", "", False),
-        ("Internet of Things (IoT): Design and Applications", "MO-DBIP", None, False),
-        ("Internet of Things (IoT): Design and Applications", "MXP-DBIP", None, False),
-        ("", "", "", False),
-        (None, None, None, False),
+        (
+            "Internet of Things (IoT): Design and Applications",
+            "MO-DBIP",
+            "",
+            False,
+            "Missing required field course_run_code",
+        ),
+        (
+            "Internet of Things (IoT): Design and Applications",
+            "MXP-DBIP",
+            "",
+            False,
+            "Missing required field course_run_code",
+        ),
+        (
+            "Internet of Things (IoT): Design and Applications",
+            "MO-DBIP",
+            None,
+            False,
+            "Missing required field course_run_code",
+        ),
+        (
+            "Internet of Things (IoT): Design and Applications",
+            "MXP-DBIP",
+            None,
+            False,
+            "Missing required field course_run_code",
+        ),
+        (
+            "",
+            "",
+            "",
+            False,
+            "Missing required field course_title",
+        ),
+        (
+            None,
+            None,
+            None,
+            False,
+            "Missing required field course_title",
+        ),
     ],
 )
 def test_external_course_validate_required_fields(
-    external_course_data, title, course_code, course_run_code, is_valid
+    external_course_data, title, course_code, course_run_code, is_valid, reason
 ):
     """
     Tests that ExternalCourse.validate_required_fields validates required fields.
@@ -922,7 +989,11 @@ def test_external_course_validate_required_fields(
     external_course.course_title = title.strip() if title else title
     external_course.course_code = course_code
     external_course.course_run_code = course_run_code
-    assert external_course.validate_required_fields(keymap=keymap) == is_valid
+    fields_valid, fields_reason = external_course.validate_required_fields(
+        keymap=keymap
+    )
+    assert fields_valid == is_valid
+    assert fields_reason == reason
 
 
 @pytest.mark.parametrize(
@@ -931,17 +1002,17 @@ def test_external_course_validate_required_fields(
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("list_currency", "is_valid"),
+    ("list_currency", "is_valid", "reason"),
     [
-        ("USD", True),
-        ("INR", False),
-        ("EUR", False),
-        ("GBP", False),
-        ("PKR", False),
+        ("USD", True, None),
+        ("INR", False, "Invalid currency: INR."),
+        ("EUR", False, "Invalid currency: EUR."),
+        ("GBP", False, "Invalid currency: GBP."),
+        ("PKR", False, "Invalid currency: PKR."),
     ],
 )
 def test_external_course_validate_list_currency(
-    external_course_data, list_currency, is_valid
+    external_course_data, list_currency, is_valid, reason
 ):
     """
     Tests that the `USD` is the only valid currency for the External courses.
@@ -949,7 +1020,9 @@ def test_external_course_validate_list_currency(
     keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.list_currency = list_currency
-    assert external_course.validate_list_currency() == is_valid
+    currency_valid, currency_reason = external_course.validate_list_currency()
+    assert currency_valid == is_valid
+    assert currency_reason == reason
 
 
 @pytest.mark.parametrize(

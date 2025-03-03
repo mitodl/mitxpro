@@ -190,9 +190,10 @@ class ExternalCourse:
         """
         for field in keymap.required_fields:
             if not getattr(self, field, None):
-                log.info(f"Missing required field {field}")  # noqa: G004
-                return False
-        return True
+                reason = f"Missing required field {field}"
+                log.info(reason)  # noqa: G004
+                return False, reason
+        return True, None
 
     def validate_list_currency(self):
         """
@@ -201,9 +202,10 @@ class ExternalCourse:
         We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
         """
         if self.list_currency != "USD":
-            log.info(f"Invalid currency: {self.list_currency}.")  # noqa: G004
-            return False
-        return True
+            reason = f"Invalid currency: {self.list_currency}."
+            log.info(reason)  # noqa: G004
+            return False, reason
+        return True, None
 
     def validate_end_date(self):
         """
@@ -329,21 +331,30 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                 external_course.course_run_code,
             )
         )
-        if (
-            not external_course.validate_required_fields(keymap)
-            or not external_course.validate_list_currency()
-        ):
+
+        fields_valid, fields_reason = external_course.validate_required_fields(keymap)
+        currency_valid, currency_reason = external_course.validate_list_currency()
+        if not fields_valid or not currency_valid:
+            failure_reason = fields_reason or currency_reason
             log.info(
                 f"Skipping due to bad data... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )
-            stats["course_runs_skipped"].add(external_course.course_run_code)
+            stats["course_runs_skipped"].add(
+                (
+                    external_course.course_run_code,
+                    external_course.course_title,
+                    failure_reason,
+                )
+            )
             continue
 
         if not external_course.validate_end_date():
             log.info(
                 f"Course run is expired, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )
-            stats["course_runs_expired"].add(external_course.course_run_code)
+            stats["course_runs_expired"].add(
+                (external_course.course_run_code, external_course.course_title)
+            )
             continue
 
         with transaction.atomic():
@@ -360,12 +371,16 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             )
 
             if course_created:
-                stats["courses_created"].add(external_course.course_code)
+                stats["courses_created"].add(
+                    (external_course.course_code, external_course.course_title)
+                )
                 log.info(
                     f"Created course, title: {external_course.course_title}, readable_id: {external_course.course_readable_id}"  # noqa: G004
                 )
             else:
-                stats["existing_courses"].add(external_course.course_code)
+                stats["existing_courses"].add(
+                    (external_course.course_code, external_course.course_title)
+                )
                 log.info(
                     f"Course already exists, title: {external_course.course_title}, readable_id: {external_course.course_readable_id}"  # noqa: G004
                 )
@@ -378,12 +393,16 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             )
 
             if course_run_created:
-                stats["course_runs_created"].add(course_run.external_course_run_id)
+                stats["course_runs_created"].add(
+                    (course_run.external_course_run_id, course_run.title)
+                )
                 log.info(
                     f"Created Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
                 )
             elif course_run_updated:
-                stats["course_runs_updated"].add(course_run.external_course_run_id)
+                stats["course_runs_updated"].add(
+                    (course_run.external_course_run_id, course_run.title)
+                )
                 log.info(
                     f"Updated Course Run, title: {external_course.course_title}, external_course_run_id: {course_run.external_course_run_id}"  # noqa: G004
                 )
@@ -399,14 +418,16 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                     )
                 )
                 if product_created:
-                    stats["products_created"].add(course_run.external_course_run_id)
+                    stats["products_created"].add(
+                        (course_run.external_course_run_id, course_run.title)
+                    )
                     log.info(
                         f"Created Product for course run: {course_run.courseware_id}"  # noqa: G004
                     )
 
                 if product_version_created:
                     stats["product_versions_created"].add(
-                        course_run.external_course_run_id
+                        (course_run.external_course_run_id, course_run.title)
                     )
                     log.info(
                         f"Created Product Version for course run: {course_run.courseware_id}, Price: {external_course.price}"  # noqa: G004
@@ -415,7 +436,9 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                 log.info(
                     f"Price is Null for course run code: {external_course.course_run_code}"  # noqa: G004
                 )
-                stats["course_runs_without_prices"].add(external_course.course_run_code)
+                stats["course_runs_without_prices"].add(
+                    (external_course.course_run_code, external_course.course_title)
+                )
 
             log.info(
                 f"Creating or Updating course page, title: {external_course.course_title}, course_code: {external_course.course_run_code}"  # noqa: G004
@@ -427,12 +450,16 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             )
 
             if course_page_created:
-                stats["course_pages_created"].add(external_course.course_code)
+                stats["course_pages_created"].add(
+                    (external_course.course_code, external_course.course_title)
+                )
                 log.info(
                     f"Created external course page for course title: {external_course.course_title}"  # noqa: G004
                 )
             elif course_page_updated:
-                stats["course_pages_updated"].add(external_course.course_code)
+                stats["course_pages_updated"].add(
+                    (external_course.course_code, external_course.course_title)
+                )
                 log.info(
                     f"Updated external course page for course title: {external_course.course_title}"  # noqa: G004
                 )
@@ -476,9 +503,9 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
 
                 if is_certificatepage_created:
                     log.info("Certificate Page Created")
-                    stats["certificates_created"].add(course.readable_id)
+                    stats["certificates_created"].add((course.readable_id,))
                 elif is_certificatepage_updated:
-                    stats["certificates_updated"].add(course.readable_id)
+                    stats["certificates_updated"].add((course.readable_id,))
                     log.info("Certificate Page Updated")
 
             overview_page = course_page.get_child_page_of_type_including_draft(
