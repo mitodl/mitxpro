@@ -44,6 +44,7 @@ from wagtail.images.models import Image
 from wagtail.models import Orderable, Page, PageManager, PageQuerySet
 from wagtail.snippets.models import register_snippet
 from wagtailmetadata.models import MetadataPageMixin
+from wagtail.api import APIField
 
 from blog.api import fetch_blog
 from cms.api import filter_and_sort_catalog_pages
@@ -83,6 +84,7 @@ from cms.constants import (
 )
 from cms.forms import CertificatePageForm, CoursewareForm
 from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
+from cms.serializers import ImageSerializer
 from courses.models import (
     Course,
     CourseRunCertificate,
@@ -98,6 +100,8 @@ from mitol.olposthog.features import is_enabled
 from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
+from courses.serializers import CourseSerializer, ProgramSerializer
+from .serializers import ProductChildPageSerializer
 
 
 class DisableSitemapURLMixin:
@@ -1047,6 +1051,7 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         help_text="The content of this tab on the program page",
         use_json_field=True,
     )
+
     content_panels = Page.content_panels + [  # noqa: RUF005
         FieldPanel("language"),
         FieldPanel("external_marketing_url"),
@@ -1067,6 +1072,41 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         FieldPanel("thumbnail_image"),
         FieldPanel("featured"),
         FieldPanel("content"),
+    ]
+
+    api_fields = [
+        APIField("language_name"),
+        APIField("description"),
+        APIField("external_marketing_url"),
+        APIField("marketing_hubspot_form_id"),
+        APIField("subhead"),
+        APIField("video_title"),
+        APIField("video_url"),
+        APIField("duration"),
+        APIField("min_weeks"),
+        APIField("max_weeks"),
+        APIField("format"),
+        APIField("time_commitment"),
+        APIField("min_weekly_hours"),
+        APIField("max_weekly_hours"),
+        APIField("thumbnail_image", serializer=ImageSerializer()),
+        APIField("background_image", serializer=ImageSerializer()),
+        APIField("background_video_url"),
+        APIField("featured"),
+        APIField("page_content"),
+        APIField("is_external_course_page"),
+        APIField("is_external_program_page"),
+        APIField("faqs_list"),
+        APIField("outcomes", serializer=ProductChildPageSerializer()),
+        APIField("who_should_enroll", serializer=ProductChildPageSerializer()),
+        APIField("techniques", serializer=ProductChildPageSerializer()),
+        APIField("testimonials", serializer=ProductChildPageSerializer()),
+        APIField("faculty", serializer=ProductChildPageSerializer()),
+        APIField("for_teams", serializer=ProductChildPageSerializer()),
+        APIField("propel_career", serializer=ProductChildPageSerializer()),
+        APIField("certificate_page", serializer=ProductChildPageSerializer()),
+        APIField("course_overview", serializer=ProductChildPageSerializer()),
+        APIField("news_and_events", serializer=ProductChildPageSerializer()),
     ]
 
     subpage_types = [
@@ -1235,6 +1275,37 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         """
         return self._get_child_page_of_type(NewsAndEventsPage)
 
+    @property
+    def faqs_list(self):
+        """Serializes FAQs"""
+        return self.faqs.values()
+
+    @property
+    def language_name(self):
+        """Serializes language"""
+        return self.language.name
+
+    @property
+    def page_content(self):
+        """
+        Serialize the content field to return useful information
+        """
+        content_dict = {}
+
+        for block in self.content:
+            key = block.block_type
+            value = block.value.file.url if key == "image" else str(block.value)
+
+            if key in content_dict:
+                if isinstance(content_dict[key], list):
+                    content_dict[key].append(value)
+                else:
+                    content_dict[key] = [content_dict[key], value]
+            else:
+                content_dict[key] = value
+
+        return content_dict
+
 
 class ProgramProductPageQuerySet(PageQuerySet):
     """QuerySet for ProgramProductPage"""
@@ -1289,6 +1360,12 @@ class ProgramProductPage(ProductPage):
             help_text="Price is not changed when a page is saved as draft.",
         ),
     ]
+
+    api_fields = [
+        *ProductPage.api_fields,
+        APIField("program", serializer=ProgramSerializer()),
+    ]
+
     base_form_class = CoursewareForm
 
     program = models.OneToOneField(
@@ -1433,6 +1510,12 @@ class CourseProductPage(ProductPage):
             help_text="Price is not changed when a page is saved as draft.",
         ),
     ]
+
+    api_fields = [
+        *ProductPage.api_fields,
+        APIField("course", serializer=CourseSerializer()),
+    ]
+
     base_form_class = CoursewareForm
 
     @cached_property
@@ -1648,6 +1731,12 @@ class UserTestimonialsPage(CourseProgramChildPage):
         FieldPanel("subhead"),
         FieldPanel("items"),
     ]
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("subhead"),
+        APIField("items"),
+    ]
 
     class Meta:
         verbose_name = "Testimonials Section"
@@ -1679,6 +1768,11 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         use_json_field=True,
     )
     content_panels = [FieldPanel("heading"), FieldPanel("items")]
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("items"),
+    ]
 
     class Meta:
         verbose_name = "News and Events"
@@ -1737,6 +1831,12 @@ class LearningOutcomesPage(CourseProgramChildPage):
         FieldPanel("sub_heading"),
         FieldPanel("outcome_items"),
     ]
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("sub_heading"),
+        APIField("outcome_items"),
+    ]
 
 
 class LearningTechniquesPage(CourseProgramChildPage):
@@ -1752,10 +1852,14 @@ class LearningTechniquesPage(CourseProgramChildPage):
         use_json_field=True,
     )
 
+    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
+    api_fields = [
+        APIField("title"),
+        APIField("technique_items"),
+    ]
+
     class Meta:
         verbose_name = "Icon Grid"
-
-    content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
 
 
 class ForTeamsPage(CourseProgramChildPage):
@@ -1804,6 +1908,16 @@ class ForTeamsPage(CourseProgramChildPage):
         FieldPanel("image"),
     ]
 
+    api_fields = [
+        APIField("title"),
+        APIField("content"),
+        APIField("action_title"),
+        APIField("action_url"),
+        APIField("dark_theme"),
+        APIField("switch_layout"),
+        APIField("image"),
+    ]
+
 
 class TextSection(CourseProgramChildPage):
     """
@@ -1834,6 +1948,14 @@ class TextSection(CourseProgramChildPage):
         FieldPanel("action_title"),
         FieldPanel("action_url"),
         FieldPanel("dark_theme"),
+    ]
+
+    api_fields = [
+        APIField("title"),
+        APIField("content"),
+        APIField("action_title"),
+        APIField("action_url"),
+        APIField("dark_theme"),
     ]
 
 
@@ -1925,6 +2047,12 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         FieldPanel("image"),
         FieldPanel("switch_layout"),
     ]
+    api_fields = [
+        APIField("heading"),
+        APIField("content"),
+        APIField("image"),
+        APIField("switch_layout"),
+    ]
 
 
 class CoursesInProgramPage(CourseProgramChildPage):
@@ -1975,6 +2103,19 @@ class CoursesInProgramPage(CourseProgramChildPage):
         """
         return [block.value.specific for block in self.contents if block.value]
 
+    @property
+    def content_page_list(self):
+        """
+        Serializes the course pages to give useful information
+        """
+        return [
+            {
+                "id": page.id,
+                "title": page.title,
+            }
+            for page in self.content_pages
+        ]
+
     class Meta:
         verbose_name = "Courseware Carousel"
 
@@ -1983,6 +2124,14 @@ class CoursesInProgramPage(CourseProgramChildPage):
         FieldPanel("body"),
         FieldPanel("override_contents"),
         FieldPanel("contents"),
+    ]
+
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("body"),
+        APIField("override_contents"),
+        APIField("content_page_list"),
     ]
 
 
@@ -2010,6 +2159,13 @@ class FacultyMembersPage(CourseProgramChildPage):
         FieldPanel("heading"),
         FieldPanel("subhead"),
         FieldPanel("members"),
+    ]
+
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("subhead"),
+        APIField("members"),
     ]
 
 
@@ -2258,6 +2414,17 @@ class CertificatePage(CourseProgramChildPage):
         FieldPanel("signatories"),
     ]
 
+    api_fields = [
+        APIField("title"),
+        APIField("product_name"),
+        APIField("institute_text"),
+        APIField("CEUs"),
+        APIField("partner_logo"),
+        APIField("partner_logo_placement"),
+        APIField("overrides"),
+        APIField("signatory_items"),
+    ]
+
     base_form_class = CertificatePageForm
 
     class Meta:
@@ -2290,6 +2457,21 @@ class CertificatePage(CourseProgramChildPage):
         Extracts all the pages out of the `signatories` stream into a list
         """
         return [block.value.specific for block in self.signatories if block.value]
+
+    @property
+    def signatory_items(self):
+        """
+        Serializes the signatory pages to give meaningful data
+        """
+        return [
+            {
+                "name": page.name,
+                "title_1": page.title_1,
+                "title_2": page.title_2,
+                "organization": page.organization,
+            }
+            for page in self.signatory_pages
+        ]
 
     @property
     def parent(self):
@@ -2719,6 +2901,12 @@ class CourseOverviewPage(CourseProgramChildPage):
     content_panels = [
         FieldPanel("heading"),
         FieldPanel("overview"),
+    ]
+
+    api_fields = [
+        APIField("title"),
+        APIField("heading"),
+        APIField("overview"),
     ]
 
     class Meta:
