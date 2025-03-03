@@ -190,9 +190,10 @@ class ExternalCourse:
         """
         for field in keymap.required_fields:
             if not getattr(self, field, None):
-                log.info(f"Missing required field {field}")  # noqa: G004
-                return False
-        return True
+                reason = f"Missing required field {field}"
+                log.info(reason)  # noqa: G004
+                return False, reason
+        return True, None
 
     def validate_list_currency(self):
         """
@@ -201,9 +202,10 @@ class ExternalCourse:
         We only support `USD`. To support any other currency, we will have to manage the conversion to `USD`.
         """
         if self.list_currency != "USD":
-            log.info(f"Invalid currency: {self.list_currency}.")  # noqa: G004
-            return False
-        return True
+            reason = f"Invalid currency: {self.list_currency}."
+            log.info(reason)  # noqa: G004
+            return False, reason
+        return True, None
 
     def validate_end_date(self):
         """
@@ -329,15 +331,20 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                 external_course.course_run_code,
             )
         )
-        if (
-            not external_course.validate_required_fields(keymap)
-            or not external_course.validate_list_currency()
-        ):
+
+        fields_valid, fields_reason = external_course.validate_required_fields(keymap)
+        currency_valid, currency_reason = external_course.validate_list_currency()
+        if not fields_valid or not currency_valid:
+            failure_reason = fields_reason or currency_reason
             log.info(
                 f"Skipping due to bad data... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )
             stats["course_runs_skipped"].add(
-                (external_course.course_run_code, external_course.course_title)
+                (
+                    external_course.course_run_code,
+                    external_course.course_title,
+                    failure_reason,
+                )
             )
             continue
 
