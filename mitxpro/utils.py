@@ -652,7 +652,7 @@ def validate_courserun_dates(
     start_date, end_date, enrollment_end, enrollment_start=None, expiration_date=None
 ):
     """
-    Check course run dates for validity and return an error message if invalid.
+    Validates course run dates
 
     Rules:
     - start_date or enrollment_end must be provided.

@@ -245,6 +245,7 @@ def test_catalog_visible_languages():
         enrollment_end=now - timedelta(days=2),
         course__page__language=factory.Iterator(catalog_invisble_languages),
         course__program__page__language=factory.Iterator(catalog_invisble_languages),
+        force_insert=True,
     )
 
     # The expected languages are the ones that are associated with unexpuired/catalog visible courses

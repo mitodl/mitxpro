@@ -236,6 +236,10 @@ def test_clean_calls_validate_courserun_dates(mocker):
     """
     Test that the `clean` method calls `validate_courserun_dates` with the correct arguments.
     """
+    mock_validate = mocker.patch(
+        "courses.models.validate_courserun_dates", return_value=None
+    )
+
     course_run = CourseRunFactory.create(
         start_date=now + timedelta(-2),
         enrollment_start=now + timedelta(-2),
@@ -244,17 +248,18 @@ def test_clean_calls_validate_courserun_dates(mocker):
         expiration_date=now + timedelta(2),
     )
 
-    mock_validate = mocker.patch(
-        "courses.models.validate_courserun_dates", return_value=None
-    )
-    course_run.clean()
-    mock_validate.assert_called_once_with(
+    assert mock_validate.call_count == 2  # clean() is called twice. One in the save() method and the other in super.save() 
+    call_args = mock_validate.call_args_list[0].args
+
+    expected_args = (
         course_run.start_date,
         course_run.end_date,
         course_run.enrollment_end,
         course_run.enrollment_start,
         course_run.expiration_date,
     )
+
+    assert call_args == expected_args
 
 
 @pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])  # noqa: PT006, PT007

@@ -146,7 +146,6 @@ class CourseRunFactory(DjangoModelFactory):
         obj = model_class(*args, **kwargs)
 
         if not force_insert:
-            obj.clean()
             obj.save()
         else:
             # Directly insert into DB without triggering save()
