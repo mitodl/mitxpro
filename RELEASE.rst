@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.175.0
+---------------
+
+- feat: Enable Wagtail API (#3399)
+- fix: don't show language without any catalog visible course (#3405)
+
 Version 0.174.1 (Released March 03, 2025)
 ---------------
 
