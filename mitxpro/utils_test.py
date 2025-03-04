@@ -4,6 +4,7 @@ import datetime
 import operator as op
 import os
 from decimal import Decimal
+from datetime import timedelta
 from types import SimpleNamespace
 
 import pytest
@@ -25,6 +26,7 @@ from mitxpro.utils import (
     first_or_none,
     format_datetime_for_filename,
     format_price,
+    validate_courserun_dates,
     get_error_response_summary,
     get_field_names,
     get_js_settings,
@@ -50,6 +52,8 @@ from mitxpro.utils import (
     webpack_dev_server_host,
     webpack_dev_server_url,
 )
+
+now = now_in_utc()
 
 
 def test_ensure_trailing_slash():
@@ -581,3 +585,91 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
     Tests that `strip_datetime` strips the datetime and sets the timezone.
     """
     assert strip_datetime(date_str, date_format, date_timezone) == expected_date
+
+
+@pytest.mark.parametrize(
+    "start_date, enrollment_end, end_date, enrollment_start, expiration_date, expected_error",
+    [
+        (
+            None,
+            None,
+            None,
+            None,
+            None,
+            "start_date or enrollment_end must be provided.",
+        ),
+        (
+            now - timedelta(days=2),
+            now - timedelta(days=2),
+            None,
+            None,
+            None,
+            "start_date or enrollment_end must be in the future.",
+        ),
+        (
+            now + timedelta(days=2),
+            now + timedelta(days=3),
+            now + timedelta(days=4),
+            now + timedelta(days=2),
+            now + timedelta(days=5),
+            None,
+        ),
+        (
+            now - timedelta(days=4),
+            now + timedelta(days=3),
+            now - timedelta(days=2),
+            now + timedelta(days=2),
+            now - timedelta(days=5),
+            "end_date must be in the future.",
+        ),
+        (
+            now + timedelta(days=4),
+            now + timedelta(days=3),
+            now + timedelta(days=2),
+            now + timedelta(days=2),
+            now + timedelta(days=5),
+            "end_date must be later than start_date.",
+        ),
+        (
+            now + timedelta(days=2),
+            now + timedelta(days=3),
+            now + timedelta(days=4),
+            now + timedelta(days=2),
+            now - timedelta(days=2),
+            "expiration_date must be later than start_date.",
+        ),
+        (
+            now + timedelta(days=2),
+            now + timedelta(days=3),
+            now + timedelta(days=4),
+            now + timedelta(days=2),
+            now + timedelta(days=3),
+            "expiration_date must be later than end_date.",
+        ),
+        (
+            now + timedelta(days=2),
+            now + timedelta(days=3),
+            now + timedelta(days=4),
+            now + timedelta(days=5),
+            now + timedelta(days=5),
+            "enrollment_end must be later than enrollment_start.",
+        ),
+    ],
+)
+def test_validate_courserun_dates(
+    start_date,
+    enrollment_end,
+    end_date,
+    enrollment_start,
+    expiration_date,
+    expected_error,
+):
+    """
+    Test that `validate_courserun_dates` returns the expected error messages for invalid dates
+    and None for valid cases.
+    """
+    is_valid, error_msg = validate_courserun_dates(
+        start_date, end_date, enrollment_end, enrollment_start, expiration_date
+    )
+    assert is_valid == (expected_error is None)
+    assert error_msg == expected_error
