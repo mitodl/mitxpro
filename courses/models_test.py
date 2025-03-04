@@ -34,7 +34,7 @@ from courses.sync_external_courses.external_course_sync_api import (
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import format_as_iso8601
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, validate_courserun_dates
 from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
@@ -237,7 +237,8 @@ def test_clean_calls_validate_courserun_dates(mocker):
     Test that the `clean` method calls `validate_courserun_dates` with the correct arguments.
     """
     mock_validate = mocker.patch(
-        "courses.models.validate_courserun_dates", return_value=None
+        "courses.models.validate_courserun_dates",
+        side_effect=validate_courserun_dates,
     )
 
     course_run = CourseRunFactory.create(
