@@ -5156,19 +5156,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-mitodl@npm:^0.0.7":
-  version: 0.0.7
-  resolution: "eslint-config-mitodl@npm:0.0.7"
+"eslint-config-mitodl@npm:^0.2.0":
+  version: 0.2.1
+  resolution: "eslint-config-mitodl@npm:0.2.1"
   peerDependencies:
-    babel-eslint: 10.x
-    eslint: 6.x
+    eslint: 7.x
     eslint-config-google: 0.x
-    eslint-plugin-babel: 5.x
-    eslint-plugin-flowtype: 4.x
     eslint-plugin-mocha: 6.x
     eslint-plugin-react: 7.x
+    eslint-plugin-react-hooks: 4.x
     prettier-eslint-cli: 5.x
-  checksum: f9e885b527264ccd9a09f5458dce40195161456ab6a56f76d33c05810b3d4d947abbf249cfb9ba7eeed66aa04814d284340784d77a582aa1fe374c112a0107a3
+  checksum: 9bcf826a794a6d0f91b34c449bb265edf0570af415328dd694cf8fc333a83b6cff0ed4216d3521e4de7ff6d224cd7c01749eff40cbe9bd04918f5881c13579d7
   languageName: node
   linkType: hard
 
@@ -8738,7 +8736,7 @@ __metadata:
     enzyme-adapter-react-16: ^1.12.1
     eslint: ^7.0.0
     eslint-config-google: ^0.14.0
-    eslint-config-mitodl: ^0.0.7
+    eslint-config-mitodl: ^0.2.0
     eslint-config-prettier: ^9.0.0
     eslint-plugin-babel: ^5.3.0
     eslint-plugin-flow-vars: ^0.5.0
