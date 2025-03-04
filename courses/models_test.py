@@ -249,7 +249,9 @@ def test_clean_calls_validate_courserun_dates(mocker):
         expiration_date=now + timedelta(2),
     )
 
-    assert mock_validate.call_count == 2  # clean() is called twice. One in the save() method and the other in super.save() 
+    assert (
+        mock_validate.call_count == 2
+    )  # clean() is called twice. One in the save() method and the other in super.save()
     call_args = mock_validate.call_args_list[0].args
 
     expected_args = (
