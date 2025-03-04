@@ -502,7 +502,9 @@ def test_catalog_page_languages(  # noqa: PLR0913
     resp = client.get(f"{catalog_page.get_url()}?language={selected_language}")
 
     assert resp.status_code == status.HTTP_200_OK
-    assert resp.context_data["language_options"] == [ALL_LANGUAGES] + language_options
+    assert resp.context_data["language_options"] == [ALL_LANGUAGES] + [
+        assign_language.name
+    ]
     assert resp.context_data["selected_language"] == selected_language
     assert len(resp.context_data["course_pages"]) == expected_courses_count
     assert len(resp.context_data["program_pages"]) == expected_program_count

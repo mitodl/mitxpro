@@ -2,8 +2,11 @@
 Tests for signals
 """
 
+from datetime import timedelta
+
 from unittest.mock import Mock
 
+import factory
 import pytest
 from edx_api.course_detail import CourseDetail, CourseDetails
 from requests.exceptions import HTTPError
@@ -16,13 +19,16 @@ from courses.factories import (
     ProgramCertificateFactory,
     ProgramFactory,
     UserFactory,
+    CourseLanguageFactory,
 )
 from courses.models import ProgramCertificate
 from courses.utils import (
     generate_program_certificate,
     process_course_run_grade_certificate,
     sync_course_runs,
+    get_catalog_languages,
 )
+from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
 
@@ -208,3 +214,41 @@ def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success)
     else:
         assert success_count == 0
         assert failure_count == 1
+
+
+def test_catalog_visible_languages():
+    """Test that get_catalog_languages returns the expected languages"""
+
+    catalog_visible_languages = CourseLanguageFactory.create_batch(
+        2, name=factory.Iterator(["Language1", "Language2"])
+    )
+    catalog_invisble_languages = CourseLanguageFactory.create_batch(
+        2, name=factory.Iterator(["Language3", "Language4"])
+    )
+    catalog_visible_inactive_languages = CourseLanguageFactory.create_batch(
+        2, name=factory.Iterator(["Language5", "Language6"]), is_active=False
+    )
+    now = now_in_utc()
+    # Creates active courses (Course runs will create underlying course and page objects)
+    CourseRunFactory.create_batch(
+        4,
+        start_date=now + timedelta(days=1),
+        enrollment_end=now + timedelta(days=2),
+        course__page__language=factory.Iterator(catalog_visible_languages),
+        course__program__page__language=factory.Iterator(
+            catalog_visible_languages + catalog_visible_inactive_languages
+        ),
+    )
+    # Creates expired courses (Course runs will create underlying course and page objects)
+    CourseRunFactory.create_batch(
+        2,
+        start_date=now - timedelta(days=1),
+        enrollment_end=now - timedelta(days=2),
+        course__page__language=factory.Iterator(catalog_invisble_languages),
+        course__program__page__language=factory.Iterator(catalog_invisble_languages),
+    )
+
+    # The expected languages are the ones that are associated with unexpuired/catalog visible courses
+    assert get_catalog_languages() == [
+        catalog_language.name for catalog_language in catalog_visible_languages
+    ]

@@ -8,8 +8,22 @@ from django.core.exceptions import ValidationError
 from wagtail import blocks
 from wagtail.images.blocks import ImageChooserBlock
 
+from cms.serializers import ImageSerializer
 
-class LearningTechniqueBlock(blocks.StructBlock):
+
+class BlockAPIRepresentationMixin:
+    def get_api_representation(self, value, context=None):
+        """
+        Updates serialized data for images.
+        """
+        api_representation = super().get_api_representation(value, context)
+        image = value["image"]
+        if image:
+            api_representation.update({"image": ImageSerializer(instance=image).data})
+        return api_representation
+
+
+class LearningTechniqueBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     A custom block for Learning techniques.
     """
@@ -32,7 +46,7 @@ class ResourceBlock(blocks.StructBlock):
 
 
 # Cannot name TestimonialBlock otherwise pytest will try to pick up as a test
-class UserTestimonialBlock(blocks.StructBlock):
+class UserTestimonialBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     Custom block to represent a testimonial
     """
@@ -47,7 +61,7 @@ class UserTestimonialBlock(blocks.StructBlock):
     quote = blocks.TextBlock(help_text="The quote that appears on the testimonial.")
 
 
-class NewsAndEventsBlock(blocks.StructBlock):
+class NewsAndEventsBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     Custom block to represent a news or event
     """
@@ -71,7 +85,7 @@ class NewsAndEventsBlock(blocks.StructBlock):
     )
 
 
-class FacultyBlock(blocks.StructBlock):
+class FacultyBlock(BlockAPIRepresentationMixin, blocks.StructBlock):
     """
     Block class that defines a faculty member
     """

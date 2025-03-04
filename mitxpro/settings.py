@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.174.1"
+VERSION = "0.175.0"
 
 env.reset()
 
@@ -175,6 +175,7 @@ INSTALLED_APPS = (
     "wagtailmetadata",
     "modelcluster",
     "taggit",
+    "wagtail.api.v2",
     # django-robots
     "robots",
     # Put our apps after this point
