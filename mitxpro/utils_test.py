@@ -668,7 +668,8 @@ def test_validate_courserun_dates(
     Test that `validate_courserun_dates` returns the expected error messages for invalid dates
     and None for valid cases.
     """
-    error_msg = validate_courserun_dates(
+    is_valid, error_msg = validate_courserun_dates(
         start_date, end_date, enrollment_end, enrollment_start, expiration_date
     )
+    assert is_valid == (expected_error is None)
     assert error_msg == expected_error

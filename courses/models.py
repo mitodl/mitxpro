@@ -755,14 +755,14 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         Raises:
             ValidationError: If any of the date rules are violated.
         """
-        error_msg = validate_courserun_dates(
+        is_valid, error_msg = validate_courserun_dates(
             self.start_date,
             self.end_date,
             self.enrollment_end,
             self.enrollment_start,
             self.expiration_date,
         )
-        if error_msg:
+        if not is_valid:
             raise ValidationError(error_msg)  # noqa: EM101
 
     def save(

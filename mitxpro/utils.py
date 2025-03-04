@@ -670,6 +670,7 @@ def validate_courserun_dates(
         expiration_date (datetime or None): The expiration date of the course run.
 
     Returns:
+        bool: False if validation fails, otherwise True.
         str or None: An error message if validation fails, otherwise None.
     """
     now = now_in_utc()
@@ -698,4 +699,4 @@ def validate_courserun_dates(
         elif end_date and expiration_date < end_date:
             error_msg = "expiration_date must be later than end_date."
 
-    return error_msg
+    return not bool(error_msg), error_msg

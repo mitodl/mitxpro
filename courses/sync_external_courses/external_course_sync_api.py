@@ -337,12 +337,12 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             )
             stats["course_runs_skipped"].add(external_course.course_run_code)
             continue
-        error_msg = validate_courserun_dates(
+        is_valid, error_msg = validate_courserun_dates(
             external_course.start_date,
             external_course.end_date,
             external_course.enrollment_end,
         )
-        if error_msg:
+        if not is_valid:
             log.info(
                 f"Course run has invalid dates, Skipping... Course data: {json.dumps(external_course_json)} Error message: {error_msg}"  # noqa: G004
             )
