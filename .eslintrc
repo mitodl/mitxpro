@@ -1,5 +1,12 @@
 {
-  "extends": ["eslint-config-mitodl", "prettier"],
+  "extends": ["eslint-config-mitodl", "eslint-config-mitodl/flow", "eslint-config-mitodl/mocha", "prettier"],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": {
+      "presets": ["@babel/preset-env", "@babel/preset-react", "@babel/preset-flow"]
+    }
+  },
   "settings": {
     "react": {
       "pragma": "React",
