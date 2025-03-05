@@ -1028,7 +1028,10 @@ def test_deactivate_missing_course_runs(
         return_value=is_unexpired,
     )
     mock_now = now_in_utc()
-    mocker.patch("courses.sync_external_courses.external_course_sync_api.now_in_utc", return_value=mock_now)
+    mocker.patch(
+        "courses.sync_external_courses.external_course_sync_api.now_in_utc",
+        return_value=mock_now,
+    )
     deactivated_runs_list = deactivate_missing_course_runs(
         api_course_run_codes, platform
     )
