@@ -1027,7 +1027,7 @@ def test_deactivate_missing_course_runs(
         new_callable=mocker.PropertyMock,
         return_value=is_unexpired,
     )
-    mock_now = now_in_utc() + timedelta(1) # By default the course run is created with updated_on set to now therefore adding timedelta
+    mock_now = now_in_utc() + timedelta(1) # By default, the course run is created with updated_on set to the current time, so we add a timedelta to adjust it accordingly.
     mocker.patch("courses.sync_external_courses.external_course_sync_api.now_in_utc", return_value=mock_now)
     deactivated_runs_list = deactivate_missing_course_runs(
         api_course_run_codes, platform
@@ -1038,3 +1038,4 @@ def test_deactivate_missing_course_runs(
     assert course_run.live == expected_is_live
     assert product.is_active == expected_is_live
     assert (course_run.updated_on.replace(microsecond=0) == mock_now.replace(microsecond=0)) == (not expected_is_live)
+    assert (product.updated_on.replace(microsecond=0) == mock_now.replace(microsecond=0)) == (not expected_is_live)

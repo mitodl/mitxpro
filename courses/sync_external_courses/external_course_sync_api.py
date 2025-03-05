@@ -862,10 +862,11 @@ def deactivate_missing_course_runs(external_course_run_codes, platform):
             related_product = course_run.product.first()
             if related_product:
                 related_product.is_active = False
+                related_product.updated_on = now_in_utc()
                 updated_products.append(related_product)
 
     CourseRun.objects.bulk_update(course_runs, ["live", "updated_on"])
-    Product.objects.bulk_update(updated_products, ["is_active"])
+    Product.objects.bulk_update(updated_products, ["is_active", "updated_on"])
     log.info(
         f"Deactivated {len(deactivated_runs_list)} course runs for platform {platform.name}."
     )
