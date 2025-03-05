@@ -50,11 +50,22 @@ class CoursewareForm(WagtailAdminPageForm):
 
     def __init__(self, data=None, files=None, parent_page=None, *args, **kwargs):
         """
-        Adds choices for course_run field.
+        1. Adds choices for course_run field.
+        2. Update course field queryset based on the page type.
         """
+        from cms.models import Course
         super().__init__(data, files, parent_page, *args, **kwargs)
 
         instance = kwargs.get("instance")
+        if instance:
+            course_qs = Course.objects.all()
+            if instance.is_course_page:
+                course_qs = Course.objects.filter(is_external=False)
+            elif instance.is_external_course_page:
+                course_qs = Course.objects.filter(is_external=True)
+
+            self.fields['course'].queryset = course_qs
+
         if instance and instance.id:
             if instance.is_internal_or_external_course_page and instance.course:
                 course_runs = instance.course.courseruns.all()
