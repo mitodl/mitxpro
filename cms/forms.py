@@ -54,17 +54,18 @@ class CoursewareForm(WagtailAdminPageForm):
         2. Update course field queryset based on the page type.
         """
         from cms.models import Course
+
         super().__init__(data, files, parent_page, *args, **kwargs)
 
         instance = kwargs.get("instance")
-        if instance:
+        if instance and instance.is_internal_or_external_course_page:
             course_qs = Course.objects.all()
             if instance.is_course_page:
                 course_qs = Course.objects.filter(is_external=False)
             elif instance.is_external_course_page:
                 course_qs = Course.objects.filter(is_external=True)
 
-            self.fields['course'].queryset = course_qs
+            self.fields["course"].queryset = course_qs
 
         if instance and instance.id:
             if instance.is_internal_or_external_course_page and instance.course:
