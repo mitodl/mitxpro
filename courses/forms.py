@@ -14,14 +14,22 @@ class CourseForm(forms.ModelForm):
         """
         Ensures that is_external field is not changed if course is associated with CoursePage or ExternalCoursePage
         """
-        if 'is_external' in self.changed_data:
+        if "is_external" in self.changed_data:
             if getattr(self.instance, "coursepage", None):
                 raise ValidationError(
-                    {'is_external': _('Course is associated with CoursePage, cannot change is_external value')}
+                    {
+                        "is_external": _(
+                            "Course is associated with CoursePage, cannot change is_external value"
+                        )
+                    }
                 )
             elif getattr(self.instance, "externalcoursepage", None):
                 raise ValidationError(
-                    {'is_external': _('Course is associated with ExternalCoursePage, cannot change is_external value')}
+                    {
+                        "is_external": _(
+                            "Course is associated with ExternalCoursePage, cannot change is_external value"
+                        )
+                    }
                 )
 
         return super().clean()

@@ -2415,7 +2415,7 @@ def test_common_child_pages_uniqueness():
 def test_common_child_page_wo_static_page(superuser_client):
     """Tests that an ExternalCoursePage is created without static child pages."""
     external_course_page_slug = "external_course_page"
-    course = CourseFactory.create(page=None)
+    course = CourseFactory.create(page=None, is_external=True)
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
     external_course_page = ExternalCoursePage.objects.get(
         slug=external_course_page_slug
@@ -2434,7 +2434,7 @@ def test_common_child_page_wo_static_page(superuser_client):
 def test_child_page_with_static_pages(superuser_client, with_platform):
     """Tests the creation of an ExternalCoursePage with static child pages."""
     platform = PlatformFactory.create()
-    course = CourseFactory.create(platform=platform, page=None)
+    course = CourseFactory.create(platform=platform, page=None, is_external=True)
     learning_tech_page, b2b_page = _create_common_child_pages(
         platform if with_platform else None
     )
@@ -2458,7 +2458,7 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
     platform = PlatformFactory.create()
     learning_tech_page_wo_platform, b2b_page_wo_platform = _create_common_child_pages()
     learning_tech_page, b2b_page = _create_common_child_pages(platform)
-    course = CourseFactory.create(platform=platform, page=None)
+    course = CourseFactory.create(platform=platform, page=None, is_external=True)
     external_course_page_slug = "external_course_page"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
     learning_technical_page, for_teams_page = _is_common_child_pages_created(
