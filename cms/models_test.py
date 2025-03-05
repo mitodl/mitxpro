@@ -266,12 +266,16 @@ def test_catalog_page_language_context(
     """
     mocker.patch("cms.models.is_enabled", return_value=True)
     CourseLanguage.objects.all().delete()
+    # Verify that all the languages are deleted. This will help us understand and debug the failures in future.
+    assert CourseLanguage.objects.all().count() == 0
+
     catalog_page = CatalogPageFactory.create()
     now = now_in_utc()
 
     if languages:
-        for language in languages:
-            created_language = CourseLanguageFactory.create(name=language)
+        # The index will serve as the priority of languages. Starting it with 1 because the priority can not be 0
+        for idx, language in enumerate(languages, start=1):
+            created_language = CourseLanguageFactory.create(name=language, priority=idx)
             CourseRunFactory.create(
                 start_date=now + timedelta(days=1),
                 course__page__language=created_language,
@@ -304,8 +308,12 @@ def test_catalog_page_language_feature_flag(mocker, staff_user, is_enabled):
     """
     mocker.patch("cms.models.is_enabled", return_value=is_enabled)
     CourseLanguage.objects.all().delete()
+    # Verify that all the languages are deleted. This will help us understand and debug the failures in future.
+    assert CourseLanguage.objects.all().count() == 0
+
     catalog_page = CatalogPageFactory.create()
-    languages = CourseLanguageFactory.create_batch(2)
+    # The priority of the languages matters and we want them in order. Here 1 means top priority
+    languages = CourseLanguageFactory.create_batch(2, priority=factory.Iterator([1, 2]))
     now = now_in_utc()
     CourseRunFactory.create_batch(
         2,
