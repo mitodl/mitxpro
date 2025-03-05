@@ -1598,7 +1598,9 @@ class CourseProductPage(ProductPage):
         return self.course
 
     def clean(self):
-        """Validates that there is only one internal or external course page per course"""
+        """
+        Ensures that a course has either an internal or an external course page, but not both.
+        """
         if (
             isinstance(self, CoursePage)
             and ExternalCoursePage.objects.filter(course=self.course).exists()
