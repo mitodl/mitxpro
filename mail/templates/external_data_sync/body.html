@@ -30,7 +30,9 @@
           <p style="margin: 0 0 10px"><strong>Courses:</strong></p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              <span style="color: #008000">Courses Created:</span>
+              <span style="color: #008000"
+                >Courses Created ({{ stats.courses_created|length }}):</span
+              >
               {% if stats.courses_created %}
               <ul>
                 {% for course in stats.courses_created %}
@@ -43,7 +45,9 @@
               {% else %}No courses created during this sync.{% endif %}
             </li>
             <li>
-              <span style="color: #008000">Existing Courses:</span>
+              <span style="color: #008000"
+                >Existing Courses ({{ stats.existing_courses|length }}):</span
+              >
               {% if stats.existing_courses %}
               <ul>
                 {% for course in stats.existing_courses %}
@@ -60,7 +64,9 @@
           <p style="margin: 0 0 10px"><strong>Course Runs:</strong></p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              <span style="color: #008000">Course Runs Created:</span>
+              <span style="color: #008000"
+                >Course Runs Created ({{ stats.course_runs_created|length }}):</span
+              >
               {% if stats.course_runs_created %}
               <ul>
                 {% for run in stats.course_runs_created %}
@@ -73,7 +79,9 @@
               {% else %}No course runs created during this sync.{% endif %}
             </li>
             <li>
-              <span style="color: #008000">Course Runs Updated:</span>
+              <span style="color: #008000"
+                >Course Runs Updated ({{ stats.course_runs_updated|length }}):</span
+              >
               {% if stats.course_runs_updated %}
               <ul>
                 {% for run in stats.course_runs_updated %}
@@ -86,7 +94,9 @@
               {% else %}No course runs updated during this sync.{% endif %}
             </li>
             <li>
-              <span style="color: #ff0000">Course Runs Without Prices:</span>
+              <span style="color: #ff0000"
+                >Course Runs Without Prices ({{ stats.course_runs_without_prices|length }}):</span
+              >
               {% if stats.course_runs_without_prices %}
               <ul>
                 {% for run in stats.course_runs_without_prices %}
@@ -100,7 +110,7 @@
             </li>
             <li>
               <span style="color: #ff0000"
-                >Course Runs Skipped (Bad Data):</span
+                >Course Runs Skipped (Bad Data) ({{ stats.course_runs_skipped|length }}):</span
               >
               {% if stats.course_runs_skipped %}
               <ul>
@@ -115,7 +125,9 @@
               {% else %}No course runs skipped.{% endif %}
             </li>
             <li>
-              <span style="color: #ff0000">Course Runs Expired:</span>
+              <span style="color: #ff0000"
+                >Course Runs Expired ({{ stats.course_runs_expired|length }}):</span
+              >
               {% if stats.course_runs_expired %}
               <ul>
                 {% for run in stats.course_runs_expired %}
@@ -128,7 +140,9 @@
               {% else %}No course runs expired.{% endif %}
             </li>
             <li>
-              <span style="color: #ff0000">Course Runs Deactivated:</span>
+              <span style="color: #ff0000"
+                >Course Runs Deactivated ({{ stats.course_runs_deactivated|length }}):</span
+              >
               {% if stats.course_runs_deactivated %}
               <ul>
                 {% for run in stats.course_runs_deactivated %}
@@ -145,7 +159,9 @@
           <p style="margin: 0 0 10px"><strong>Course Pages:</strong></p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              <span style="color: #008000">Course Pages Created:</span>
+              <span style="color: #008000"
+                >Course Pages Created ({{ stats.course_pages_created|length }}):</span
+              >
               {% if stats.course_pages_created %}
               <ul>
                 {% for page in stats.course_pages_created %}
@@ -158,7 +174,9 @@
               {% else %}No course pages created during this sync.{% endif %}
             </li>
             <li>
-              <span style="color: #008000">Course Pages Updated:</span>
+              <span style="color: #008000"
+                >Course Pages Updated ({{ stats.course_pages_updated|length }}):</span
+              >
               {% if stats.course_pages_updated %}
               <ul>
                 {% for page in stats.course_pages_updated %}
@@ -175,7 +193,9 @@
           <p style="margin: 0 0 10px"><strong>Products:</strong></p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              <span style="color: #008000">Products Created:</span>
+              <span style="color: #008000"
+                >Products Created ({{ stats.products_created|length }}):</span
+              >
               {% if stats.products_created %}
               <ul>
                 {% for product in stats.products_created %}
@@ -188,7 +208,9 @@
               {% else %}No products created during this sync.{% endif %}
             </li>
             <li>
-              <span style="color: #008000">Products Versions Created:</span>
+              <span style="color: #008000"
+                >Products Versions Created ({{ stats.products_versions_created|length }}):</span
+              >
               {% if stats.products_versions_created %}
               <ul>
                 {% for product in stats.products_versions_created %}
@@ -205,7 +227,9 @@
           <p style="margin: 0 0 10px"><strong>Certificate Pages:</strong></p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              <span style="color: #008000">Certificates Pages Created:</span>
+              <span style="color: #008000"
+                >Certificates Pages Created ({{ stats.certificates_created|length }}):</span
+              >
               {% if stats.certificates_created %}
               <ul>
                 {% for cert in stats.certificates_created %}
@@ -215,7 +239,9 @@
               {% else %}No certificates pages created during this sync.{% endif %}
             </li>
             <li>
-              <span style="color: #008000">Certificates Pages Updated:</span>
+              <span style="color: #008000"
+                >Certificates Pages Updated ({{ stats.certificates_updated|length }}):</span
+              >
               {% if stats.certificates_updated %}
               <ul>
                 {% for cert in stats.certificates_updated %}
