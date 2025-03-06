@@ -250,6 +250,10 @@
       "description": "API request timeout for external course sync APIs in seconds",
       "required": false
     },
+    "EXTERNAL_DATA_SYNC_RECIPIENTS": {
+      "description": "Comma-separated list of email addresses to receive notifications about external data syncs",
+      "required": false
+    },
     "GA_TRACKING_ID": {
       "description": "Google analytics tracking ID",
       "required": false
