@@ -8,7 +8,10 @@ from datetime import timedelta
 from sheets.management import utils
 from mitxpro.utils import now_in_utc
 
-from sheets.management.utils import assign_coupons_from_spreadsheet, CouponAssignmentError
+from sheets.management.utils import (
+    assign_coupons_from_spreadsheet,
+    CouponAssignmentError,
+)
 from ecommerce.factories import BulkCouponAssignmentFactory
 
 
@@ -61,10 +64,42 @@ def test_get_assignment_sheet_by_title_multiple():
 @pytest.mark.parametrize(
     "use_sheet_id, value, force, sheet_modified_offset, existing_modified_offset, expect_error, force_processing",
     [
-        (True, "sheet-id-123", False, timedelta(days=-1), timedelta(days=-2), False, True),  # Valid, modified after last
-        (False, "fake-title", False, timedelta(days=-2), timedelta(days=-1), True, False),  # No modification
-        (True, "sheet-id-123", True, timedelta(days=-2), timedelta(days=-1), False, True),  # Forced processing
-        (False, "", False, None, None, True, False),  # Missing value should raise an error
+        (
+            True,
+            "sheet-id-123",
+            False,
+            timedelta(days=-1),
+            timedelta(days=-2),
+            False,
+            True,
+        ),  # Valid, modified after last
+        (
+            False,
+            "fake-title",
+            False,
+            timedelta(days=-2),
+            timedelta(days=-1),
+            True,
+            False,
+        ),  # No modification
+        (
+            True,
+            "sheet-id-123",
+            True,
+            timedelta(days=-2),
+            timedelta(days=-1),
+            False,
+            True,
+        ),  # Forced processing
+        (
+            False,
+            "",
+            False,
+            None,
+            None,
+            True,
+            False,
+        ),  # Missing value should raise an error
     ],
 )
 @patch("sheets.management.utils.get_authorized_pygsheets_client")
@@ -92,7 +127,7 @@ def test_assign_coupons_from_spreadsheet(
     mock_spreadsheet = MagicMock()
 
     # Title and ID should be assigned to assert the returning value of assign_coupons_from_spreadsheet
-    mock_spreadsheet.title = "fake-title" 
+    mock_spreadsheet.title = "fake-title"
     mock_spreadsheet.id = "sheet-id-123"
 
     if use_sheet_id:
@@ -100,24 +135,35 @@ def test_assign_coupons_from_spreadsheet(
     else:
         mock_get_assignment_sheet_by_title.return_value = mock_spreadsheet
 
-    sheet_last_modified = now_in_utc() + sheet_modified_offset if sheet_modified_offset else None
+    sheet_last_modified = (
+        now_in_utc() + sheet_modified_offset if sheet_modified_offset else None
+    )
     mock_google_date_string_to_datetime.return_value = sheet_last_modified
 
     bulk_assignment = BulkCouponAssignmentFactory.create(
         assignment_sheet_id="sheet-id-123",
-        sheet_last_modified_date = now_in_utc() + existing_modified_offset if existing_modified_offset else None
+        sheet_last_modified_date=now_in_utc() + existing_modified_offset
+        if existing_modified_offset
+        else None,
     )
 
     if expect_error:
         with pytest.raises(CouponAssignmentError):
             assign_coupons_from_spreadsheet(use_sheet_id, value, force)
     else:
-        mock_process_assignment = mock_coupon_assignment_handler.return_value.process_assignment_spreadsheet
+        mock_process_assignment = (
+            mock_coupon_assignment_handler.return_value.process_assignment_spreadsheet
+        )
         mock_process_assignment.return_value = (bulk_assignment, 5, 2)
 
         result = assign_coupons_from_spreadsheet(use_sheet_id, value, force)
         if force_processing:
-            assert result == ("'fake-title', id: sheet-id-123", 5, 2, bulk_assignment.id)
+            assert result == (
+                "'fake-title', id: sheet-id-123",
+                5,
+                2,
+                bulk_assignment.id,
+            )
             mock_process_assignment.assert_called_once()
         else:
             mock_process_assignment.assert_not_called()

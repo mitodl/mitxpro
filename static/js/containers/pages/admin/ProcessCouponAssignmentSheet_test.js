@@ -7,7 +7,6 @@ import ProcessCouponAssignmentSheetPage, {
 } from "./ProcessCouponAssignmentSheetPage";
 
 import IntegrationTestHelper from "../../../util/integration_test_helper";
-import { Modal } from "reactstrap";
 import wait from "waait";
 
 describe("ProcessCouponAssignmentSheetPage", () => {

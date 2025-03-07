@@ -6,6 +6,7 @@ from sheets.api import ExpandedSheetsClient, get_authorized_pygsheets_client
 from sheets.utils import google_date_string_to_datetime, spreadsheet_repr
 from ecommerce.models import BulkCouponAssignment
 
+
 def get_assignment_spreadsheet_by_title(pygsheets_client, title):
     """
     Fetches a coupon assignment spreadsheet object that matches the full or partial title provided.
@@ -32,7 +33,9 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
     return matching_spreadsheets[0]
 
 
-def assign_coupons_from_spreadsheet(use_sheet_id: bool, value: str, force: bool = False):
+def assign_coupons_from_spreadsheet(
+    use_sheet_id: bool, value: str, force: bool = False
+):
     """
     Fetches and processes a coupon assignment spreadsheet using either the sheet ID or title.
 
@@ -46,7 +49,7 @@ def assign_coupons_from_spreadsheet(use_sheet_id: bool, value: str, force: bool 
 
     if not value:
         raise CouponAssignmentError("Spreadsheet identifier (ID or Title) is required.")
-    
+
     pygsheets_client = get_authorized_pygsheets_client()
 
     # Fetch the correct spreadsheet
@@ -78,7 +81,9 @@ def assign_coupons_from_spreadsheet(use_sheet_id: bool, value: str, force: bool 
         spreadsheet_id=spreadsheet.id, bulk_assignment=bulk_assignment
     )
 
-    bulk_assignment, num_created, num_removed = coupon_assignment_handler.process_assignment_spreadsheet()
+    bulk_assignment, num_created, num_removed = (
+        coupon_assignment_handler.process_assignment_spreadsheet()
+    )
     bulk_assignment.sheet_last_modified_date = sheet_last_modified
     bulk_assignment.save()
 

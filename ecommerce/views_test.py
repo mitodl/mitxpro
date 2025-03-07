@@ -1272,8 +1272,12 @@ def test_ecommerce_restricted_view(
     if change_coupon:
         user.user_permissions.add(Permission.objects.get(codename="change_coupon"))
     if add_and_update_product_assignment:
-        user.user_permissions.add(Permission.objects.get(codename="add_productcouponassignment"))
-        user.user_permissions.add(Permission.objects.get(codename="change_productcouponassignment"))
+        user.user_permissions.add(
+            Permission.objects.get(codename="add_productcouponassignment")
+        )
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_productcouponassignment")
+        )
 
     client = Client()
     client.force_login(user)
@@ -1286,7 +1290,11 @@ def test_ecommerce_restricted_view(
     assert client.get(ecommerce_admin_url).status_code == expected_admin_status
     assert client.get(add_coupons_url).status_code == expected_coupons_status
     assert client.get(deactivate_coupons_url).status_code == expected_deactivate_status
-    assert client.get(product_assignment_url).status_code == expected_product_assignment_status
+    assert (
+        client.get(product_assignment_url).status_code
+        == expected_product_assignment_status
+    )
+
 
 def test_deactivate_coupons(mocker, admin_drf_client):
     """Test that the API successfully deactivates coupons based on coupon codes or payment names"""

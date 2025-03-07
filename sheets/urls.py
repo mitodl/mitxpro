@@ -23,5 +23,5 @@ urlpatterns = [
         r"^api/sheets/process_coupon_sheet_assignment/",
         views.ProcessCouponSheetAssignmentView.as_view(),
         name="process-coupon-sheet-assignment",
-)
+    ),
 ]
