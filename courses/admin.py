@@ -9,6 +9,7 @@ from django.db import models
 from django.forms import TextInput
 
 from mitxpro.admin import AuditableModelAdmin, TimestampedModelAdmin
+from courses.forms import CourseForm
 from mitxpro.utils import get_field_names, now_in_utc
 
 from .models import (
@@ -60,6 +61,8 @@ class CourseAdmin(admin.ModelAdmin):
     formfield_overrides = {
         models.CharField: {"widget": TextInput(attrs={"size": "80"})}
     }
+
+    form = CourseForm
 
     @admin.display(
         description="Program",
