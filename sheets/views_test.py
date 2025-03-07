@@ -7,6 +7,7 @@ from pytest_lazy_fixtures import lf as lazy
 from rest_framework import status
 
 from mitxpro.test_utils import set_request_session
+from sheets.exceptions import CouponAssignmentError
 from sheets.factories import GoogleApiAuthFactory, GoogleFileWatchFactory
 from sheets.models import GoogleApiAuth
 from sheets.views import complete_google_auth
@@ -116,3 +117,68 @@ def test_handle_coupon_request_sheet_update(mocker, settings):
         HTTP_X_GOOG_CHANNEL_ID="file-watch-channel",
     )
     patched_tasks.handle_unprocessed_coupon_requests.delay.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "request_data, mock_return, expected_status, expected_response",
+    [
+        # Valid request
+        (
+            {
+                "sheet_identifier_type": "id",
+                "sheet_identifier_value": "valid_sheet",
+                "force": False,
+            },
+            ("Spreadsheet1", 10, 5, "bulk_id_123"),
+            status.HTTP_200_OK,
+            {
+                "message": "Successfully processed coupon assignment sheet (Spreadsheet1).",
+                "num_created": 10,
+                "num_removed": 5,
+                "bulk_assignment_id": "bulk_id_123",
+            },
+        ),
+        # Missing required fields
+        (
+            {"sheet_identifier_type": "id"},
+            None,
+            status.HTTP_400_BAD_REQUEST,
+            {"error": "Both 'sheet_identifier_type' and 'sheet_value' are required."},
+        ),
+        # CouponAssignmentError exception
+        (
+            {"sheet_identifier_type": "id", "sheet_identifier_value": "invalid_sheet"},
+            CouponAssignmentError("Invalid sheet"),
+            status.HTTP_400_BAD_REQUEST,
+            {"error": "Invalid sheet"},
+        ),
+        # Unexpected exception
+        (
+            {"sheet_identifier_type": "id", "sheet_identifier_value": "error_sheet"},
+            Exception("Unexpected error"),
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            {"error": "An error occurred while processing the coupon sheet."},
+        ),
+    ],
+)
+def test_process_coupon_sheet_assignment(
+    mocker,
+    admin_drf_client,
+    request_data,
+    mock_return,
+    expected_status,
+    expected_response,
+):
+    """Test the ProcessCouponSheetAssignmentView post method"""
+    url = reverse("process-coupon-sheet-assignment")
+    if isinstance(mock_return, Exception):
+        mocker.patch(
+            "sheets.views.assign_coupons_from_spreadsheet", side_effect=mock_return
+        )
+    else:
+        mocker.patch(
+            "sheets.views.assign_coupons_from_spreadsheet", return_value=mock_return
+        )
+    response = admin_drf_client.post(url, request_data, format="json")
+    assert response.status_code == expected_status
+    assert response.json() == expected_response
