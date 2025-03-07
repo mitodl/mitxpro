@@ -22,6 +22,19 @@ from mitxpro import features
 log = logging.getLogger(__name__)
 
 
+ERROR_START_OR_ENROLLMENT_END_REQUIRED = (
+    "start_date or enrollment_end must be provided."
+)
+ERROR_START_OR_ENROLLMENT_END_FUTURE = (
+    "start_date or enrollment_end must be in the future."
+)
+ERROR_END_AFTER_START = "end_date must be later than start_date."
+ERROR_ENROLLMENT_ORDER = "enrollment_end must be later than enrollment_start."
+ERROR_END_IN_FUTURE = "end_date must be in the future."
+ERROR_EXPIRATION_AFTER_START = "expiration_date must be later than start_date."
+ERROR_EXPIRATION_AFTER_END = "expiration_date must be later than end_date."
+
+
 class FeatureFlag(Flag):
     """
     FeatureFlag enum
@@ -657,8 +670,7 @@ def validate_courserun_dates(
     Rules:
     - start_date or enrollment_end must be provided.
     - start_date and enrollment_end (if provided) must be in the future.
-    - end_date must be later than start_date.
-    - end_date must be in future.
+    - end_date must be later than start_date and in future.
     - enrollment_end must be later than enrollment_start.
     - expiration_date must be later than start_date and end_date (if provided).
 
@@ -670,33 +682,34 @@ def validate_courserun_dates(
         expiration_date (datetime or None): The expiration date of the course run.
 
     Returns:
-        bool: False if validation fails, otherwise True.
-        str or None: An error message if validation fails, otherwise None.
+        tuple:
+            bool: False if validation fails, otherwise True.
+            str or None: An error message if validation fails, otherwise None.
     """
     now = now_in_utc()
     error_msg = None
 
     if not (start_date or enrollment_end):
-        error_msg = "start_date or enrollment_end must be provided."
+        error_msg = ERROR_START_OR_ENROLLMENT_END_REQUIRED
 
     elif (not start_date or start_date < now) and (
         not enrollment_end or enrollment_end < now
     ):
-        error_msg = "start_date or enrollment_end must be in the future."
+        error_msg = ERROR_START_OR_ENROLLMENT_END_FUTURE
 
     elif start_date and end_date and start_date > end_date:
-        error_msg = "end_date must be later than start_date."
+        error_msg = ERROR_END_AFTER_START
 
     elif enrollment_start and enrollment_end and enrollment_start > enrollment_end:
-        error_msg = "enrollment_end must be later than enrollment_start."
+        error_msg = ERROR_ENROLLMENT_ORDER
 
     elif end_date and end_date < now:
-        error_msg = "end_date must be in the future."
+        error_msg = ERROR_END_IN_FUTURE
 
     elif expiration_date:
         if start_date and expiration_date < start_date:
-            error_msg = "expiration_date must be later than start_date."
+            error_msg = ERROR_EXPIRATION_AFTER_START
         elif end_date and expiration_date < end_date:
-            error_msg = "expiration_date must be later than end_date."
+            error_msg = ERROR_EXPIRATION_AFTER_END
 
     return not bool(error_msg), error_msg

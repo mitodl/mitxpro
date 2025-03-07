@@ -51,6 +51,13 @@ from mitxpro.utils import (
     unique_ignore_case,
     webpack_dev_server_host,
     webpack_dev_server_url,
+    ERROR_START_OR_ENROLLMENT_END_REQUIRED,
+    ERROR_START_OR_ENROLLMENT_END_FUTURE,
+    ERROR_END_AFTER_START,
+    ERROR_ENROLLMENT_ORDER,
+    ERROR_END_IN_FUTURE,
+    ERROR_EXPIRATION_AFTER_START,
+    ERROR_EXPIRATION_AFTER_END,
 )
 
 now = now_in_utc()
@@ -596,7 +603,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             None,
             None,
             None,
-            "start_date or enrollment_end must be provided.",
+            ERROR_START_OR_ENROLLMENT_END_REQUIRED,
         ),
         (
             now - timedelta(days=2),
@@ -604,7 +611,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             None,
             None,
             None,
-            "start_date or enrollment_end must be in the future.",
+            ERROR_START_OR_ENROLLMENT_END_FUTURE,
         ),
         (
             now + timedelta(days=2),
@@ -620,7 +627,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now - timedelta(days=2),
             now + timedelta(days=2),
             now - timedelta(days=5),
-            "end_date must be in the future.",
+            ERROR_END_IN_FUTURE,
         ),
         (
             now + timedelta(days=4),
@@ -628,7 +635,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=2),
             now + timedelta(days=2),
             now + timedelta(days=5),
-            "end_date must be later than start_date.",
+            ERROR_END_AFTER_START,
         ),
         (
             now + timedelta(days=2),
@@ -636,7 +643,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=4),
             now + timedelta(days=2),
             now - timedelta(days=2),
-            "expiration_date must be later than start_date.",
+            ERROR_EXPIRATION_AFTER_START,
         ),
         (
             now + timedelta(days=2),
@@ -644,7 +651,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=4),
             now + timedelta(days=2),
             now + timedelta(days=3),
-            "expiration_date must be later than end_date.",
+            ERROR_EXPIRATION_AFTER_END,
         ),
         (
             now + timedelta(days=2),
@@ -652,7 +659,7 @@ def test_strip_datetime(date_str, date_format, date_timezone, expected_date):
             now + timedelta(days=4),
             now + timedelta(days=5),
             now + timedelta(days=5),
-            "enrollment_end must be later than enrollment_start.",
+            ERROR_ENROLLMENT_ORDER,
         ),
     ],
 )
