@@ -141,10 +141,10 @@ class Command(BaseCommand):
             f"External Course Run Codes: {stats.get('course_runs_skipped') or 0}.\n"
         )
         self.log_style_success(
-            f"Number of Expired Course Runs {len(stats['course_runs_expired'])}."
+            f"Number of Expired Course Runs {len(stats['course_runs_with_invalid_dates'])}."
         )
         self.log_style_success(
-            f"External Course Run Codes: {stats.get('course_runs_expired') or 0}.\n"
+            f"External Course Run Codes: {stats.get('course_runs_with_invalid_dates') or 0}.\n"
         )
         self.log_style_success(
             f"Number of Course Runs Deactivated {len(stats['course_runs_deactivated'])}."
