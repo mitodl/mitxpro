@@ -52,8 +52,10 @@ class Command(BaseCommand):
         value = sheet_id if use_sheet_id else title
 
         try:
-            spreadsheet, num_created, num_removed, bulk_assignment_id = assign_coupons_from_spreadsheet(
-                use_sheet_id=use_sheet_id, value=value, force=options.get("force")
+            spreadsheet, num_created, num_removed, bulk_assignment_id = (
+                assign_coupons_from_spreadsheet(
+                    use_sheet_id=use_sheet_id, value=value, force=options.get("force")
+                )
             )
 
             self.stdout.write(
@@ -65,7 +67,7 @@ class Command(BaseCommand):
             )
 
         except CouponAssignmentError as e:
-            raise  CommandError(str(e))
+            raise CommandError(str(e))
 
         except Exception as e:
             raise CommandError(f"An unexpected error occurred: {e}")

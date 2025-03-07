@@ -163,9 +163,10 @@ class ProcessCouponSheetAssignmentView(APIView):
     """
     API view to handle the assignment of coupons from a sheet (by ID or Title).
     """
+
     permission_classes = (HasCouponProductAssignmentPermission,)
     authentication_classes = (SessionAuthentication,)
-    
+
     def post(self, request):
         """Handles the assignment of coupons from a sheet (by ID or Title)."""
         sheet_identifier_type = request.data.get("sheet_identifier_type")
@@ -174,14 +175,18 @@ class ProcessCouponSheetAssignmentView(APIView):
 
         if sheet_identifier_type is None or not sheet_identifier_value:
             return Response(
-                {"error": "Both 'sheet_identifier_type' and 'sheet_value' are required."},
+                {
+                    "error": "Both 'sheet_identifier_type' and 'sheet_value' are required."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
             # Call the updated utility function for coupon assignment
-            spreadsheet_repr, num_created, num_removed, bulk_assignment_id = assign_coupons_from_spreadsheet(
-                sheet_identifier_type=="id", sheet_identifier_value, force
+            spreadsheet_repr, num_created, num_removed, bulk_assignment_id = (
+                assign_coupons_from_spreadsheet(
+                    sheet_identifier_type == "id", sheet_identifier_value, force
+                )
             )
 
             # Return success response with relevant data
@@ -198,7 +203,7 @@ class ProcessCouponSheetAssignmentView(APIView):
         except CouponAssignmentError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
+        except Exception:
             return Response(
                 {"error": "An error occurred while processing the coupon sheet."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
