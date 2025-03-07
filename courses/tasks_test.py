@@ -17,7 +17,10 @@ def test_sync_courseruns_data(mocker):
     """Test sync_courseruns_data calls the right api functionality from courses"""
     sync_course_runs = mocker.patch("courses.tasks.sync_course_runs")
 
-    course_runs = CourseRunFactory.create_batch(size=3)
+    course_runs_with_live_courses = CourseRunFactory.create_batch(
+        size=3, course__live=True
+    )
+    CourseRunFactory.create_batch(size=3, course__live=False)
     CourseRunFactory.create_batch(size=3, course__is_external=True)
 
     sync_courseruns_data.delay()
@@ -25,7 +28,7 @@ def test_sync_courseruns_data(mocker):
 
     called_args, _ = sync_course_runs.call_args
     actual_course_runs = called_args[0]
-    assert Counter(actual_course_runs) == Counter(course_runs)
+    assert Counter(actual_course_runs) == Counter(course_runs_with_live_courses)
 
 
 def test_task_sync_external_course_runs(mocker, settings):
