@@ -1585,6 +1585,31 @@ class CourseProductPage(ProductPage):
         """Gets the product associated with this page"""
         return self.course
 
+    def clean(self):
+        """
+        Ensures that a course has either an internal or an external course page, but not both.
+        """
+        if (
+            isinstance(self, CoursePage)
+            and ExternalCoursePage.objects.filter(course=self.course).exists()
+        ):
+            raise ValidationError(
+                {
+                    "course": "There is already an external course page associated with this course."
+                }
+            )
+        elif (
+            isinstance(self, ExternalCoursePage)
+            and CoursePage.objects.filter(course=self.course).exists()
+        ):
+            raise ValidationError(
+                {
+                    "course": "There is already an internal course page associated with this course."
+                }
+            )
+
+        super().clean()
+
 
 class CoursePage(CourseProductPage):
     """
