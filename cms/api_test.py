@@ -64,7 +64,10 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
     )
     # Create course run with past start_date and enrollment_end, which should NOT appear in the catalog
     past_run = CourseRunFactory.create(
-        past_start=True, past_enrollment_end=True, course__no_program=True
+        past_start=True,
+        past_enrollment_end=True,
+        course__no_program=True,
+        force_insert=True,
     )
     all_runs = [
         past_run,
