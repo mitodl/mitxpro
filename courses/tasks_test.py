@@ -101,6 +101,6 @@ def test_task_generate_course_certificates(mocker):
     mock_ensure_grades.assert_called()
     mock_process_grades.assert_called()
 
-    called_args, _ = mock_get_edx_grades.call_args
-    actual_course_run = called_args[0]
-    assert actual_course_run in course_runs
+    assert mock_get_edx_grades.call_count == len(course_runs)
+    for run in course_runs:
+        mock_get_edx_grades.assert_any_call(run)
