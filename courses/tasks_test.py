@@ -74,19 +74,19 @@ def test_task_generate_course_certificates(mocker):
 
     mock_grades = [(MockEdxGrade(), user1), (MockEdxGrade(), user2)]
 
-    get_edx_grades_mock = mocker.patch(
+    mock_get_edx_grades = mocker.patch(
         "courses.tasks.get_edx_grades_with_users", return_value=mock_grades
     )
-
     mock_course_run_grade = mocker.Mock(name="course_run_grade")
-    ensure_grades_mock = mocker.patch(
+    mock_ensure_grades = mocker.patch(
         "courses.tasks.ensure_course_run_grade",
         return_value=(mock_course_run_grade, True, False),
     )
-    process_grades_mock = mocker.patch(
+    mock_process_grades = mocker.patch(
         "courses.tasks.process_course_run_grade_certificate",
         return_value=(mocker.Mock(), True, False),
     )
+
     mocker.patch("courses.tasks.exception_logging_generator", side_effect=lambda x: x)
     course_runs = CourseRunFactory.create_batch(
         size=3, end_date=now() - timedelta(days=2)
@@ -97,10 +97,10 @@ def test_task_generate_course_certificates(mocker):
 
     generate_course_certificates.delay()
 
-    get_edx_grades_mock.assert_called()
-    ensure_grades_mock.assert_called()
-    process_grades_mock.assert_called()
+    mock_get_edx_grades.assert_called()
+    mock_ensure_grades.assert_called()
+    mock_process_grades.assert_called()
 
-    called_args, _ = get_edx_grades_mock.call_args
+    called_args, _ = mock_get_edx_grades.call_args
     actual_course_run = called_args[0]
     assert actual_course_run in course_runs
