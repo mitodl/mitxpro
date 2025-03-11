@@ -60,7 +60,9 @@ class CoursewareForm(WagtailAdminPageForm):
 
         instance = kwargs.get("instance")
         if instance and instance.is_internal_or_external_course_page:
-            course_qs = Course.objects.filter(is_external=instance.is_external_course_page)
+            course_qs = Course.objects.filter(
+                is_external=instance.is_external_course_page
+            )
             self.fields["course"].queryset = course_qs
 
         if instance and instance.id:
