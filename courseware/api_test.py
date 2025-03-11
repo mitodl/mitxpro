@@ -620,9 +620,14 @@ def test_retry_failed_edx_enrollments_exists(
     is_valid_mode = mode in [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE]
     with freeze_time(now_in_utc() - timedelta(days=1)):
         failed_enrollment = CourseRunEnrollmentFactory.create(
-            edx_enrolled=False, user__is_active=True
+            edx_enrolled=False, user__is_active=True, run__live=True
         )
-        CourseRunEnrollmentFactory.create(edx_enrolled=False, user__is_active=False)
+        CourseRunEnrollmentFactory.create(
+            edx_enrolled=False, user__is_active=False, run__live=True
+        )
+        CourseRunEnrollmentFactory.create(
+            edx_enrolled=False, user__is_active=True, run__live=False
+        )
     patched_enroll_in_edx = mocker.patch(
         "courseware.api.enroll_in_edx_course_runs",
         side_effect=EdxApiEnrollErrorException(
