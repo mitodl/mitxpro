@@ -39,6 +39,7 @@ class CoursewareForm(WagtailAdminPageForm):
     Admin form for the Courseware Pages.
 
     This form introduces price and course_run fields to manage product pricing in CMS.
+    And update course dropdown based on the page type.
     """
 
     course_run = forms.ChoiceField(
@@ -59,12 +60,7 @@ class CoursewareForm(WagtailAdminPageForm):
 
         instance = kwargs.get("instance")
         if instance and instance.is_internal_or_external_course_page:
-            course_qs = Course.objects.all()
-            if instance.is_course_page:
-                course_qs = Course.objects.filter(is_external=False)
-            elif instance.is_external_course_page:
-                course_qs = Course.objects.filter(is_external=True)
-
+            course_qs = Course.objects.filter(is_external=instance.is_external_course_page)
             self.fields["course"].queryset = course_qs
 
         if instance and instance.id:

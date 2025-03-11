@@ -33,7 +33,7 @@ def basket_and_coupons():
     """
     Sample basket and coupon
     """
-    basket_item = BasketItemFactory()
+    basket_item = BasketItemFactory(product__content_object__course__page=None)
 
     # Some prices for the basket item product
     ProductVersionFactory(product=basket_item.product, price=Decimal("15.00"))
