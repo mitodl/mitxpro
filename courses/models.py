@@ -619,6 +619,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """
         Ensures that is_external field is not changed if course is associated with CoursePage or ExternalCoursePage
         """
+        super().clean()
 
         if not self.pk:
             return
@@ -643,8 +644,6 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                     )
                 }
             )
-
-        return super().clean()
 
     def save(self, *args, **kwargs):  # noqa: DJ012
         """Overridden save method"""

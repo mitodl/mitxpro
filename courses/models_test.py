@@ -892,7 +892,7 @@ def test_course_language_prevent_delete():
     ("is_external", "page_factory"),
     [(True, ExternalCoursePageFactory), (False, CoursePageFactory)],
 )
-def test_is_external_field_update_after_course_is_attached_with_course_page(
+def test_prevent_is_external_update_after_course_page_attachment(
     is_external, page_factory
 ):
     """
@@ -906,11 +906,11 @@ def test_is_external_field_update_after_course_is_attached_with_course_page(
 
 
 @pytest.mark.parametrize(("is_external"), [True, False])
-def test_is_external_field_update_before_course_is_attached_with_course_page(
+def test_allow_is_external_update_before_course_page_attachment(
     is_external,
 ):
     """
-    Tests that is_external field is updated bnefore a course is attached with a course page.
+    Tests that is_external field is updated before a course is attached with a course page.
     """
     course = CourseFactory.create(is_external=is_external, page=None)
     course.is_external = not is_external
