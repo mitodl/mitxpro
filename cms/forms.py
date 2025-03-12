@@ -54,7 +54,7 @@ class CoursewareForm(WagtailAdminPageForm):
         1. Adds choices for course_run field.
         2. Update course field queryset based on the page type.
         """
-        from cms.models import Course
+        from courses.models import Course
 
         super().__init__(data, files, parent_page, *args, **kwargs)
 
