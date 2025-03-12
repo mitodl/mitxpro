@@ -862,7 +862,7 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("title", "course_code", "course_run_code", "is_valid", "reason"),
+    ("title", "course_code", "course_run_code", "is_valid", "msg"),
     [
         (
             "Internet of Things (IoT): Design and Applications     ",
@@ -979,7 +979,7 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
     ],
 )
 def test_external_course_validate_required_fields(
-    external_course_data, title, course_code, course_run_code, is_valid, reason
+    external_course_data, title, course_code, course_run_code, is_valid, msg
 ):
     """
     Tests that ExternalCourse.validate_required_fields validates required fields.
@@ -989,11 +989,9 @@ def test_external_course_validate_required_fields(
     external_course.course_title = title.strip() if title else title
     external_course.course_code = course_code
     external_course.course_run_code = course_run_code
-    fields_valid, fields_reason = external_course.validate_required_fields(
-        keymap=keymap
-    )
+    fields_valid, fields_msg = external_course.validate_required_fields(keymap=keymap)
     assert fields_valid == is_valid
-    assert fields_reason == reason
+    assert fields_msg == msg
 
 
 @pytest.mark.parametrize(
@@ -1002,7 +1000,7 @@ def test_external_course_validate_required_fields(
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("list_currency", "is_valid", "reason"),
+    ("list_currency", "is_valid", "msg"),
     [
         ("USD", True, None),
         ("INR", False, "Invalid currency: INR."),
@@ -1012,7 +1010,7 @@ def test_external_course_validate_required_fields(
     ],
 )
 def test_external_course_validate_list_currency(
-    external_course_data, list_currency, is_valid, reason
+    external_course_data, list_currency, is_valid, msg
 ):
     """
     Tests that the `USD` is the only valid currency for the External courses.
@@ -1020,9 +1018,9 @@ def test_external_course_validate_list_currency(
     keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.list_currency = list_currency
-    currency_valid, currency_reason = external_course.validate_list_currency()
+    currency_valid, currency_msg = external_course.validate_list_currency()
     assert currency_valid == is_valid
-    assert currency_reason == reason
+    assert currency_msg == msg
 
 
 @pytest.mark.parametrize(
