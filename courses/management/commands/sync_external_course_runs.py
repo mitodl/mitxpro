@@ -9,6 +9,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     update_external_course_runs,
 )
 from ecommerce.mail_api import send_external_data_sync_email
+from courses.management.utils import StatsCollector
 
 
 class Command(BaseCommand):
@@ -56,78 +57,22 @@ class Command(BaseCommand):
             )
             return
 
+        stats_collector = StatsCollector()
+
         self.stdout.write(f"Starting course sync for {vendor_name}.")
         keymap = keymap()
         external_course_runs = fetch_external_courses(keymap)
-        stats = update_external_course_runs(external_course_runs, keymap)
+        update_external_course_runs(external_course_runs, keymap, stats_collector)
+
+        email_stats = stats_collector.email_stats()
+
         send_external_data_sync_email(
             vendor_name=vendor_name,
-            stats=stats,
+            stats=email_stats,
         )
-        self.log_stats(stats)
+        stats_collector.log_stats(self)
         self.stdout.write(
             self.style.SUCCESS(f"External course sync successful for {vendor_name}.")
-        )
-
-    def log_stats(self, stats):
-        """
-        Logs the stats for the external course sync.
-
-        Args:
-            stats(dict): Dict containing results for the objects created/updated.
-        """
-
-        def extract_first_item(data_set):
-            return {item[0] for item in data_set} if data_set else set()
-
-        def log_stat(category, key, label):
-            items = extract_first_item(stats.get(key, set()))
-            self.log_style_success(f"Number of {category}: {len(items)}.")
-            self.log_style_success(f"{label}: {items or 0}\n")
-
-        log_stat("Courses Created", "courses_created", "External Course Codes")
-        log_stat("Existing Courses", "existing_courses", "External Course Codes")
-        log_stat(
-            "Course Runs Created", "course_runs_created", "External Course Run Codes"
-        )
-        log_stat(
-            "Course Runs Updated", "course_runs_updated", "External Course Run Codes"
-        )
-        log_stat("Products Created", "products_created", "Course Run courseware_ids")
-        log_stat(
-            "Product Versions Created",
-            "product_versions_created",
-            "Course Run courseware_ids",
-        )
-        log_stat(
-            "Course Runs without prices",
-            "course_runs_without_prices",
-            "External Course Codes",
-        )
-        log_stat(
-            "Course Pages Created", "course_pages_created", "External Course Codes"
-        )
-        log_stat(
-            "Course Pages Updated", "course_pages_updated", "External Course Codes"
-        )
-        log_stat(
-            "Certificate Pages Created", "certificates_created", "Course Readable IDs"
-        )
-        log_stat(
-            "Certificate Pages Updated", "certificates_updated", "Course Readable IDs"
-        )
-        log_stat(
-            "Course Runs Skipped due to bad data",
-            "course_runs_skipped",
-            "External Course Run Codes",
-        )
-        log_stat(
-            "Expired Course Runs", "course_runs_expired", "External Course Run Codes"
-        )
-        log_stat(
-            "Course Runs Deactivated",
-            "course_runs_deactivated",
-            "External Course Run Codes",
         )
 
     def log_style_success(self, log_msg):

@@ -37,8 +37,8 @@
               <ul>
                 {% for course in stats.courses_created %}
                 <li>
-                  {{ course.0 }}
-                  ({{ course.1 }})
+                  {{ course.code }}
+                  ({{ course.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -52,8 +52,8 @@
               <ul>
                 {% for course in stats.existing_courses %}
                 <li>
-                  {{ course.0 }}
-                  ({{ course.1 }})
+                  {{ course.code }}
+                  ({{ course.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -71,8 +71,8 @@
               <ul>
                 {% for run in stats.course_runs_created %}
                 <li>
-                  {{ run.0 }}
-                  ({{ run.1 }})
+                  {{ run.code }}
+                  ({{ run.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -86,8 +86,8 @@
               <ul>
                 {% for run in stats.course_runs_updated %}
                 <li>
-                  {{ run.0 }}
-                  ({{ run.1 }})
+                  {{ run.code }}
+                  ({{ run.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -101,8 +101,8 @@
               <ul>
                 {% for run in stats.course_runs_without_prices %}
                 <li>
-                  {{ run.0 }}
-                  ({{ run.1 }})
+                  {{ run.code }}
+                  ({{ run.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -116,9 +116,9 @@
               <ul>
                 {% for run in stats.course_runs_skipped %}
                 <li>
-                  {{ run.0 }}
-                  ({{ run.1 }}) -
-                  {{ run.2 }}
+                  {{ run.code }}
+                  ({{ run.title }}) -
+                  {{ run.msg }}
                 </li>
                 {% endfor %}
               </ul>
@@ -132,8 +132,8 @@
               <ul>
                 {% for run in stats.course_runs_expired %}
                 <li>
-                  {{ run.0 }}
-                  ({{ run.1 }})
+                  {{ run.code }}
+                  ({{ run.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -147,8 +147,8 @@
               <ul>
                 {% for run in stats.course_runs_deactivated %}
                 <li>
-                  {{ run.0 }}
-                  ({{ run.1 }})
+                  {{ run.code }}
+                  ({{ run.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -166,8 +166,8 @@
               <ul>
                 {% for page in stats.course_pages_created %}
                 <li>
-                  {{ page.0 }}
-                  ({{ page.1 }})
+                  {{ page.code }}
+                  ({{ page.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -181,8 +181,8 @@
               <ul>
                 {% for page in stats.course_pages_updated %}
                 <li>
-                  {{ page.0 }}
-                  ({{ page.1 }})
+                  {{ page.code }}
+                  ({{ page.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -200,8 +200,8 @@
               <ul>
                 {% for product in stats.products_created %}
                 <li>
-                  {{ product.0 }}
-                  ({{ product.1 }})
+                  {{ product.code }}
+                  ({{ product.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -215,8 +215,8 @@
               <ul>
                 {% for product in stats.products_versions_created %}
                 <li>
-                  {{ product.0 }}
-                  ({{ product.1 }})
+                  {{ product.code }}
+                  ({{ product.title }})
                 </li>
                 {% endfor %}
               </ul>
@@ -233,7 +233,7 @@
               {% if stats.certificates_created %}
               <ul>
                 {% for cert in stats.certificates_created %}
-                <li>{{ cert.0 }}</li>
+                <li>{{ cert.code }}</li>
                 {% endfor %}
               </ul>
               {% else %}No certificates pages created during this sync.{% endif %}
@@ -245,7 +245,7 @@
               {% if stats.certificates_updated %}
               <ul>
                 {% for cert in stats.certificates_updated %}
-                <li>{{ cert.0 }}</li>
+                <li>{{ cert.code }}</li>
                 {% endfor %}
               </ul>
               {% else %}No certificates pages updated during this sync.{% endif %}
