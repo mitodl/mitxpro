@@ -34,7 +34,7 @@ Creates the course based on the external course data. **Note:** We do not update
 Creates or Updates the course run based on the external course data.
 
 - If the course run does not exist, it is created.
-  - `start_date` and `end_date` are present in the external data but `enrollment_end` is not present, then enrollment end date is set to the start date. The reason behind that is that course runs with past start dates are not displayed on the external course site.
+  - `start_date` and `end_date` are present in the external data but `enrollment_end` is not present, then enrollment end date is set to the start date. This is done because external courses do not allow enrollments after the start date, and setting the enrollment end date to the start date hides the course run from the course details page.
 - If the course run exists, it is updated with new data if necessary.
 - Updated Fields:
   - `start_date`
@@ -62,7 +62,7 @@ Creates or updates the product and product version for the course run **if price
   - background_image
   - thumbnail_image
   - language
-- Background and thumbnail images are fetched from the existing images based on the image title that we get in the external course data.
+- Background and thumbnail images are fetched from the existing images based on the image title that we get in the external course data. The image titles are expected to match the `title` field of the Wagtail Image model.
 
 ### Course Topic association
 
