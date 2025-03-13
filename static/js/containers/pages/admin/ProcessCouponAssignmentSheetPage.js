@@ -19,6 +19,8 @@ type State = {
   submitting: ?boolean,
   isProcessed: ?boolean,
   responseMsg: string,
+  numCreated: number,
+  numRemoved: number,
   errorMsg: string,
 };
 
@@ -40,18 +42,20 @@ export class ProcessCouponAssignmentSheetPage extends React.Component<
       submitting: false,
       isProcessed: false,
       responseMsg: "",
+      numCreated: 0,
+      numRemoved: 0,
       errorMsg: "",
     };
   }
 
   onSubmit = async (formData: Object, { setSubmitting }: Object) => {
-    console.log("formData", formData);
-    // await this.setState({ ...this.state, formData: formData });
     const result = await this.props.assignSheetCoupons(formData);
     await this.setState({
       submitting: false,
       isProcessed: true,
       responseMsg: result.body.message,
+      numCreated: result.body.num_created,
+      numRemoved: result.body.num_removed,
       errorMsg: result.body.error,
     });
     setSubmitting(false);
@@ -62,12 +66,15 @@ export class ProcessCouponAssignmentSheetPage extends React.Component<
       submitting: false,
       isProcessed: false,
       responseMsg: "",
+      numCreated: 0,
+      numRemoved: 0,
       errorMsg: "",
     });
   };
 
   render() {
-    const { isProcessed, responseMsg, errorMsg } = this.state;
+    const { isProcessed, responseMsg, numCreated, numRemoved, errorMsg } =
+      this.state;
     return (
       <DocumentTitle
         title={`${SETTINGS.site_name} | ${PROCESS_COUPON_ASSIGNMENT_SHEET_PAGE_TITLE}`}
@@ -84,6 +91,14 @@ export class ProcessCouponAssignmentSheetPage extends React.Component<
               {responseMsg ? (
                 <div className="form-message form-success">
                   <p className="message-text">{responseMsg}</p>
+                  <p className="message-text">
+                    Number of Coupon Assignment created:{" "}
+                    <strong>{numCreated}</strong>
+                  </p>
+                  <p className="message-text">
+                    Number of Coupon Assignment removed:{" "}
+                    <strong>{numRemoved}</strong>
+                  </p>
                 </div>
               ) : (
                 <div className="form-message form-warning">

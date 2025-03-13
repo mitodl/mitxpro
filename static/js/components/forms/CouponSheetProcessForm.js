@@ -31,6 +31,7 @@ const couponValidations = yup.object().shape({
           "Only letters, numbers, spaces, underscores, and hyphens allowed",
         ),
   }),
+  force: yup.boolean(),
 });
 
 export const CouponSheetProcessForm = ({
@@ -42,6 +43,7 @@ export const CouponSheetProcessForm = ({
     initialValues={{
       sheet_identifier_value: "",
       sheet_identifier_type: SHEET_IDENTIFIER_ID,
+      force: false,
     }}
     render={({ isSubmitting, setFieldValue, values }) => (
       <Form className="coupon-form">
@@ -88,6 +90,20 @@ export const CouponSheetProcessForm = ({
               />
             </label>
             <ErrorMessage name="sheet_identifier_value" component={FormError} />
+          </div>
+
+          <div className="checkbox-div">
+            <Field
+              type="checkbox"
+              name="force"
+              value={values.force}
+              onClick={() => setFieldValue("force", !values.force)}
+            />
+            <label htmlFor="force">Force</label>
+            <p className="small-text">
+              Check to force processing the sheet even if unchanged since the
+              last process.
+            </p>
           </div>
         </div>
 
