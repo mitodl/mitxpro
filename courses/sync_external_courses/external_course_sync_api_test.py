@@ -41,6 +41,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     update_external_course_runs,
     deactivate_missing_course_runs,
 )
+from courses.management.utils import StatsCollector
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import clean_url, now_in_utc
@@ -577,7 +578,12 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     external_course_runs.append(external_course_data_with_null_price)
     external_course_runs.append(external_course_data_with_non_usd_price)
     keymap = get_keymap(external_course_data["course_run_code"])
-    stats = update_external_course_runs(external_course_runs, keymap=keymap)
+    stats_collector = StatsCollector()
+
+    update_external_course_runs(
+        external_course_runs, keymap=keymap, stats_collector=stats_collector
+    )
+    stats = stats_collector.email_stats()
     courses = Course.objects.filter(platform=platform)
 
     num_courses_created = 2 if create_existing_data else 4
@@ -601,12 +607,14 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     assert len(stats["product_versions_created"]) == num_product_versions_created
     assert len(stats["course_runs_without_prices"]) == 1
 
+    skipped_codes = {item.code for item in stats["course_runs_skipped"]}
+    expired_codes = {item.code for item in stats["course_runs_expired"]}
+
     for external_course_run in external_course_runs:
-        if external_course_run["course_run_code"] in {
-            code for code, _, _ in stats["course_runs_skipped"]
-        } or external_course_run["course_run_code"] in {
-            code for code, _ in stats["course_runs_expired"]
-        }:
+        if (
+            external_course_run["course_run_code"] in skipped_codes
+            or external_course_run["course_run_code"] in expired_codes
+        ):
             continue
 
         course = Course.objects.filter(

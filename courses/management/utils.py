@@ -341,7 +341,11 @@ class StatsCollector:
         Add an item to a specific stat category
         """
         if key in self.categories:
-            self.categories[key].add(code, title, msg)
+            existing_item = [
+                item for item in self.categories[key].items if item.code == code
+            ]
+            if not existing_item:
+                self.categories[key].add(code, title, msg)
 
     def add_bulk(self, key, codes):
         """

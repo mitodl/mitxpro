@@ -423,7 +423,7 @@ def update_external_course_runs(external_courses, keymap, stats_collector):  # n
 
                 if product_version_created:
                     stats_collector.add_stat(
-                        "product_version_created",
+                        "product_versions_created",
                         course_run.external_course_run_id,
                         course_run.title,
                     )
