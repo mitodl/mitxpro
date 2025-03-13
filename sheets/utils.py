@@ -9,6 +9,7 @@ from urllib.parse import quote_plus, urljoin
 from django.conf import settings
 from django.urls import reverse
 
+from ecommerce.models import BulkCouponAssignment
 from mitxpro.utils import matching_item_index
 from sheets.constants import (
     ASSIGNMENT_SHEET_PREFIX,
@@ -24,6 +25,7 @@ from sheets.constants import (
     WORKSHEET_TYPE_DEFERRAL,
     WORKSHEET_TYPE_REFUND,
 )
+from sheets.exceptions import CouponAssignmentError
 
 
 def generate_google_client_config():
@@ -630,3 +632,63 @@ def build_drive_file_email_share_request(file_id, email_to_share):
         supportsTeamDrives=True,
         **added_kwargs,
     )
+
+
+def assign_coupons_from_spreadsheet(
+    use_sheet_id: bool, value: str, force: bool = False
+):
+    """
+    Fetches and processes a coupon assignment spreadsheet using either the sheet ID or title.
+
+    Args:
+        use_sheet_id (bool): If True, 'value' represents the spreadsheet ID; otherwise, it represents the title.
+        value (str): The spreadsheet ID or title.
+
+    Returns:
+        dict: A dictionary containing the result of the processing.
+    """
+    from sheets.api import ExpandedSheetsClient, get_authorized_pygsheets_client
+    from sheets.coupon_assign_api import CouponAssignmentHandler
+    from sheets.management.utils import get_assignment_spreadsheet_by_title
+
+    if not value:
+        raise CouponAssignmentError("Spreadsheet identifier (ID or Title) is required.")
+
+    pygsheets_client = get_authorized_pygsheets_client()
+
+    # Fetch the correct spreadsheet
+    if use_sheet_id:
+        spreadsheet = pygsheets_client.open_by_key(value)
+    else:
+        spreadsheet = get_assignment_spreadsheet_by_title(pygsheets_client, value)
+
+    expanded_sheets_client = ExpandedSheetsClient(pygsheets_client)
+    metadata = expanded_sheets_client.get_drive_file_metadata(
+        file_id=spreadsheet.id, fields="modifiedTime"
+    )
+    sheet_last_modified = google_date_string_to_datetime(metadata["modifiedTime"])
+
+    bulk_assignment, created = BulkCouponAssignment.objects.get_or_create(
+        assignment_sheet_id=spreadsheet.id
+    )
+
+    if (
+        bulk_assignment.sheet_last_modified_date
+        and sheet_last_modified <= bulk_assignment.sheet_last_modified_date
+        and not force
+    ):
+        raise CouponAssignmentError(
+            f"Spreadsheet is unchanged since last processed ({spreadsheet_repr(spreadsheet)}, last modified: {sheet_last_modified.isoformat()})."
+        )
+
+    coupon_assignment_handler = CouponAssignmentHandler(
+        spreadsheet_id=spreadsheet.id, bulk_assignment=bulk_assignment
+    )
+
+    bulk_assignment, num_created, num_removed = (
+        coupon_assignment_handler.process_assignment_spreadsheet()
+    )
+    bulk_assignment.sheet_last_modified_date = sheet_last_modified
+    bulk_assignment.save()
+
+    return spreadsheet_repr(spreadsheet), num_created, num_removed, bulk_assignment.id

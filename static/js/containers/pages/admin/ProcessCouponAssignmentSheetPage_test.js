@@ -35,10 +35,16 @@ describe("ProcessCouponAssignmentSheetPage", () => {
 
     // Success Case
     const successMsg = `Successfully processed coupon assignment sheet.`;
-    await inner
-      .instance()
-      .setState({ isProcessed: true, responseMsg: successMsg });
-    assert.equal(inner.find(".coupon-result-div").text(), successMsg);
+    await inner.instance().setState({
+      isProcessed: true,
+      responseMsg: successMsg,
+      numCreated: 4,
+      numRemoved: 2,
+    });
+    assert.equal(
+      inner.find(".coupon-result-div").text(),
+      `${successMsg}Number of Coupon Assignment created: 4Number of Coupon Assignment removed: 2`,
+    );
 
     // Error Case
     const errorMsg = "Error processing coupon assignment sheet.";

@@ -114,4 +114,32 @@ describe("CouponSheetProcessForm", () => {
 
     assert.equal(getLabelText(), "Sheet ID*");
   });
+
+  it("toggles the force checkbox", async () => {
+    const wrapper = renderForm();
+
+    const checkbox = wrapper.find("input[name='force']");
+    assert.isFalse(
+      checkbox.props().value,
+      "Checkbox should be unchecked initially",
+    );
+
+    checkbox.simulate("click");
+    await wait();
+    wrapper.update();
+
+    assert.isTrue(
+      wrapper.find("input[name='force']").props().value,
+      "Checkbox should be checked after change",
+    );
+
+    checkbox.simulate("click");
+    await wait();
+    wrapper.update();
+
+    assert.isFalse(
+      wrapper.find("input[name='force']").props().value,
+      "Checkbox should be unchecked after change",
+    );
+  });
 });

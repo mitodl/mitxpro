@@ -28,8 +28,7 @@ from sheets.constants import (
 )
 from sheets.exceptions import CouponAssignmentError
 from sheets.models import GoogleApiAuth, GoogleFileWatch
-from sheets.utils import generate_google_client_config
-from sheets.management.utils import assign_coupons_from_spreadsheet
+from sheets.utils import generate_google_client_config, assign_coupons_from_spreadsheet
 from sheets.permissions import HasCouponProductAssignmentPermission
 
 log = logging.getLogger(__name__)
@@ -171,7 +170,7 @@ class ProcessCouponSheetAssignmentView(APIView):
         """Handles the assignment of coupons from a sheet (by ID or Title)."""
         sheet_identifier_type = request.data.get("sheet_identifier_type")
         sheet_identifier_value = request.data.get("sheet_identifier_value")
-        force = request.data.get("force", True)
+        force = request.data.get("force", False)
 
         if sheet_identifier_type is None or not sheet_identifier_value:
             return Response(
