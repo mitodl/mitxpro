@@ -20,6 +20,22 @@ class CoursewareInfo:
     title: Optional[str] = None
     msg: Optional[str] = None
 
+    def __eq__(self, other):
+        """
+        Equality based solely on the code field.
+        This allows sets to consider objects with the same code as equal.
+        """
+        if not isinstance(other, CoursewareInfo):
+            return False
+        return self.code == other.code
+
+    def __hash__(self):
+        """
+        Hash based solely on the code field.
+        This is needed for set operations and dictionary keys.
+        """
+        return hash(self.code)
+
 
 class StatItemsCollection:
     """
@@ -42,7 +58,7 @@ class StatItemsCollection:
         self.key = key
         self.label = label
         self.display_name = display_name or self._generate_display_name(key)
-        self.items = []
+        self.items = set()
 
     def _generate_display_name(self, key):
         """Generate a display name from the key"""
@@ -50,11 +66,30 @@ class StatItemsCollection:
 
     def add(self, code, title=None, msg=None):
         """Add an item to this stat category"""
-        self.items.append(CoursewareInfo(code=code, title=title, msg=msg))
+        self.items.add(CoursewareInfo(code=code, title=title, msg=msg))
 
     def get_codes(self):
-        """Get the set of unique codes in this category"""
+        """Get the set of unique codes in this stat category"""
         return {item.code for item in self.items if item.code is not None}
+
+    def remove_items_with_codes(self, codes_to_remove):
+        """
+        Remove items with codes found in the provided set
+
+        Args:
+            codes_to_remove: Set of codes to exclude
+        """
+        self.items = {item for item in self.items if item.code not in codes_to_remove}
+
+    def difference_update(self, other_collection):
+        """
+        Remove items whose codes exist in another collection
+
+        Args:
+            other_collection: Another StatItemsCollection to compare against
+        """
+        codes_to_remove = other_collection.get_codes()
+        self.remove_items_with_codes(codes_to_remove)
 
     def __len__(self):
         """Return the number of items in this category"""
@@ -65,7 +100,7 @@ class StatsCollector:
     """Collector for external course sync statistics with named properties"""
 
     def __init__(self):
-        self.categories = {
+        self.stats = {
             "courses_created": StatItemsCollection(
                 "courses_created", "External Course Codes"
             ),
@@ -129,56 +164,39 @@ class StatsCollector:
 
     def add_stat(self, key, code, title=None, msg=None):
         """
-        Add an item to a specific stat category
+        Add an item to a specific stat
         """
-        if key in self.categories:
-            existing_item = [
-                item for item in self.categories[key].items if item.code == code
-            ]
-            if not existing_item:
-                self.categories[key].add(code, title, msg)
+        if key in self.stats:
+            self.stats[key].add(code, title, msg)
 
     def add_bulk(self, key, codes):
         """
-        Add multiple items within the same category
+        Add multiple items within the same stat
         """
-        if key in self.categories:
+        if key in self.stats:
             for code in codes:
                 self.add_stat(key, code)
 
-    def remove_duplicates(self, source_key, items_to_remove_key):
+    def remove_duplicates(self, target_stat_key, reference_stat_key):
         """
-        Filters out items from source_key category whose codes exist in items_to_remove_key category.
+        Filters out items from target stat category whose codes exist in reference stat category.
         """
-        if (
-            source_key not in self.categories
-            or items_to_remove_key not in self.categories
-        ):
+        if target_stat_key not in self.stats or reference_stat_key not in self.stats:
             return
 
-        codes_to_remove = {
-            item.code for item in self.categories[items_to_remove_key].items
-        }
-
-        self.categories[source_key].items = [
-            item
-            for item in self.categories[source_key].items
-            if item.code not in codes_to_remove
-        ]
+        self.stats[target_stat_key].difference_update(self.stats[reference_stat_key])
 
     def log_stats(self, logger):
         """
         Log all collected statistics
         """
-        for category in self.categories.values():
-            codes = category.get_codes()
-            logger.log_style_success(
-                f"Number of {category.display_name}: {len(codes)}."
-            )
-            logger.log_style_success(f"{category.label}: {codes or 0}\n")
+        for stat in self.stats.values():
+            codes = stat.get_codes()
+            logger.log_style_success(f"Number of {stat.display_name}: {len(codes)}.")
+            logger.log_style_success(f"{stat.label}: {codes or 0}\n")
 
-    def email_stats(self):
+    def get_email_stats(self):
         """
         Return statistics formatted for email template"
         """
-        return {key: category.items for key, category in self.categories.items()}
+        return {key: list(stat.items) for key, stat in self.stats.items()}

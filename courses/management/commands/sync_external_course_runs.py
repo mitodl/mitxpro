@@ -61,7 +61,7 @@ class Command(BaseCommand):
         external_course_runs = fetch_external_courses(keymap)
         stats_collector = update_external_course_runs(external_course_runs, keymap)
 
-        email_stats = stats_collector.email_stats()
+        email_stats = stats_collector.get_email_stats()
 
         send_external_data_sync_email(
             vendor_name=vendor_name,
