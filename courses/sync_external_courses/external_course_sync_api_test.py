@@ -41,7 +41,6 @@ from courses.sync_external_courses.external_course_sync_api import (
     update_external_course_runs,
     deactivate_missing_course_runs,
 )
-from courses.management.utils import StatsCollector
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import clean_url, now_in_utc
@@ -578,11 +577,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     external_course_runs.append(external_course_data_with_null_price)
     external_course_runs.append(external_course_data_with_non_usd_price)
     keymap = get_keymap(external_course_data["course_run_code"])
-    stats_collector = StatsCollector()
-
-    update_external_course_runs(
-        external_course_runs, keymap=keymap, stats_collector=stats_collector
-    )
+    stats_collector = update_external_course_runs(external_course_runs, keymap=keymap)
     stats = stats_collector.email_stats()
     courses = Course.objects.filter(platform=platform)
 
