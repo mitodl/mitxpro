@@ -578,7 +578,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     external_course_runs.append(external_course_data_with_non_usd_price)
     keymap = get_keymap(external_course_data["course_run_code"])
     stats_collector = update_external_course_runs(external_course_runs, keymap=keymap)
-    stats = stats_collector.email_stats()
+    stats = stats_collector.get_email_stats()
     courses = Course.objects.filter(platform=platform)
 
     num_courses_created = 2 if create_existing_data else 4
