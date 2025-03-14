@@ -27,6 +27,7 @@ from cms.models import (
 from cms.wagtail_hooks import create_common_child_pages_for_external_courses
 from courses.api import generate_course_readable_id
 from courses.models import Course, CourseLanguage, CourseRun, CourseTopic, Platform
+from courses.sync_external_courses.utils import StatsCollector
 from courses.sync_external_courses.external_course_sync_api_client import (
     ExternalCourseSyncAPIClient,
 )
@@ -278,7 +279,7 @@ def fetch_external_courses(keymap):
         log.error("Something unexpected happened!")
 
 
-def update_external_course_runs(external_courses, keymap, stats_collector):  # noqa: C901, PLR0915
+def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR0915
     """
     Updates or creates the required course data i.e. Course, CourseRun,
     ExternalCoursePage, CourseTopic, WhoShouldEnrollPage, and LearningOutcomesPage
@@ -290,6 +291,7 @@ def update_external_course_runs(external_courses, keymap, stats_collector):  # n
     Returns:
         None
     """
+    stats_collector = StatsCollector()
     platform, _ = Platform.objects.get_or_create(
         name__iexact=keymap.platform_name,
         defaults={"name": keymap.platform_name},
@@ -527,6 +529,8 @@ def update_external_course_runs(external_courses, keymap, stats_collector):  # n
     # so, we are removing the courses created from the updated courses list.
     stats_collector.remove_duplicates("existing_courses", "courses_created")
     stats_collector.remove_duplicates("course_pages_updated", "course_pages_created")
+
+    return stats_collector
 
 
 def create_or_update_product_and_product_version(external_course, course_run):

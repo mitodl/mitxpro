@@ -9,7 +9,6 @@ from courses.sync_external_courses.external_course_sync_api import (
     update_external_course_runs,
 )
 from ecommerce.mail_api import send_external_data_sync_email
-from courses.sync_external_courses.utils import StatsCollector
 
 
 class Command(BaseCommand):
@@ -57,12 +56,10 @@ class Command(BaseCommand):
             )
             return
 
-        stats_collector = StatsCollector()
-
         self.stdout.write(f"Starting course sync for {vendor_name}.")
         keymap = keymap()
         external_course_runs = fetch_external_courses(keymap)
-        update_external_course_runs(external_course_runs, keymap, stats_collector)
+        stats_collector = update_external_course_runs(external_course_runs, keymap)
 
         email_stats = stats_collector.email_stats()
 

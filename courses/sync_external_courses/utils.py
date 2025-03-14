@@ -3,7 +3,7 @@ from typing import Optional
 
 
 @dataclass
-class CourseInfo:
+class CoursewareInfo:
     """
     Data class for course information with named fields
     """
@@ -13,10 +13,10 @@ class CourseInfo:
     msg: Optional[str] = None
 
 
-class StatCategory:
+class StatItemsCollection:
     """Represents a category of statistics with its display information"""
 
-    def __init__(self, key, display_name=None, label=None):
+    def __init__(self, key, label, display_name=None):
         """
         Initialize a stat category
 
@@ -26,30 +26,17 @@ class StatCategory:
             label: Description of the items
         """
         self.key = key
+        self.label = label
         self.display_name = display_name or self._generate_display_name(key)
-        self.label = label or self._generate_label(key)
         self.items = []
 
     def _generate_display_name(self, key):
         """Generate a display name from the key"""
         return " ".join(word.capitalize() for word in key.split("_"))
 
-    def _generate_label(self, key):
-        """Generate a label based on the key"""
-        if "course" in key and "run" not in key:
-            return "External Course Codes"
-        elif "run" in key:
-            return "External Course Run Codes"
-        elif "product" in key:
-            return "Course Run courseware_ids"
-        elif "certificate" in key:
-            return "Course Readable IDs"
-        else:
-            return "Items"
-
     def add(self, code, title=None, msg=None):
         """Add an item to this stat category"""
-        self.items.append(CourseInfo(code=code, title=title, msg=msg))
+        self.items.append(CoursewareInfo(code=code, title=title, msg=msg))
 
     def get_codes(self):
         """Get the set of unique codes in this category"""
@@ -65,28 +52,64 @@ class StatsCollector:
 
     def __init__(self):
         self.categories = {
-            "courses_created": StatCategory("courses_created"),
-            "existing_courses": StatCategory("existing_courses"),
-            "course_runs_created": StatCategory("course_runs_created"),
-            "course_runs_updated": StatCategory("course_runs_updated"),
-            "course_runs_without_prices": StatCategory("course_runs_without_prices"),
-            "course_runs_skipped": StatCategory(
+            "courses_created": StatItemsCollection(
+                "courses_created", "External Course Codes"
+            ),
+            "existing_courses": StatItemsCollection(
+                "existing_courses",
+                "External Course Codes",
+            ),
+            "course_runs_created": StatItemsCollection(
+                "course_runs_created",
+                "External Course Run Codes",
+            ),
+            "course_runs_updated": StatItemsCollection(
+                "course_runs_updated",
+                "External Course Run Codes",
+            ),
+            "course_runs_without_prices": StatItemsCollection(
+                "course_runs_without_prices",
+                "External Course Run Codes",
+            ),
+            "course_runs_skipped": StatItemsCollection(
                 "course_runs_skipped",
+                "External Course Run Codes",
                 display_name="Course Runs Skipped due to bad data",
             ),
-            "course_runs_expired": StatCategory(
-                "course_runs_deactivated", display_name="Expired Course Runs"
+            "course_runs_expired": StatItemsCollection(
+                "course_runs_expired",
+                "External Course Run Codes",
+                display_name="Expired Course Runs",
             ),
-            "course_runs_deactivated": StatCategory("course_runs_deactivated"),
-            "course_pages_created": StatCategory("course_pages_created"),
-            "course_pages_updated": StatCategory("course_pages_updated"),
-            "products_created": StatCategory("products_created"),
-            "product_versions_created": StatCategory("product_versions_created"),
-            "certificates_created": StatCategory(
-                "certificates_created", display_name="Certificate Pages Created"
+            "course_runs_deactivated": StatItemsCollection(
+                "course_runs_deactivated",
+                "External Course Run Codes",
             ),
-            "certificates_updated": StatCategory(
-                "certificates_updated", display_name="Certificate Pages Updated"
+            "course_pages_created": StatItemsCollection(
+                "course_pages_created",
+                "External Course Codes",
+            ),
+            "course_pages_updated": StatItemsCollection(
+                "course_pages_updated",
+                "External Course Codes",
+            ),
+            "products_created": StatItemsCollection(
+                "products_created",
+                "Course Run courseware_ids",
+            ),
+            "product_versions_created": StatItemsCollection(
+                "product_versions_created",
+                "Course Run courseware_ids",
+            ),
+            "certificates_created": StatItemsCollection(
+                "certificates_created",
+                "Course Readable IDs",
+                display_name="Certificate Pages Created",
+            ),
+            "certificates_updated": StatItemsCollection(
+                "certificates_updated",
+                "Course Readable IDs",
+                display_name="Certificate Pages Updated",
             ),
         }
 
