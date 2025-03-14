@@ -317,10 +317,12 @@ def update_external_course_runs(external_courses, keymap, stats_collector):  # n
             )
         )
 
-        fields_valid, fields_msg = external_course.validate_required_fields(keymap)
-        currency_valid, currency_msg = external_course.validate_list_currency()
-        if not fields_valid or not currency_valid:
-            failure_msg = fields_msg or currency_msg
+        valid_required_fields, required_fields_msg = (
+            external_course.validate_required_fields(keymap)
+        )
+        valid_currency, currency_msg = external_course.validate_list_currency()
+        if not valid_required_fields or not valid_currency:
+            failure_msg = required_fields_msg or currency_msg
             log.info(
                 f"Skipping due to bad data... Course data: {json.dumps(external_course_json)}"  # noqa: G004
             )

@@ -397,7 +397,7 @@ def send_enrollment_failure_message(order, obj, details):
 
 
 def send_external_data_sync_email(stats, vendor_name):
-    recipients = settings.EXTERNAL_DATA_SYNC_RECIPIENTS
+    recipients = settings.EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS
     if not recipients:
         log.warning("No recipients configured for external data sync email.")
         return

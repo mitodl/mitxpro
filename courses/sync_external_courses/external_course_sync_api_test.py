@@ -997,9 +997,11 @@ def test_external_course_validate_required_fields(
     external_course.course_title = title.strip() if title else title
     external_course.course_code = course_code
     external_course.course_run_code = course_run_code
-    fields_valid, fields_msg = external_course.validate_required_fields(keymap=keymap)
-    assert fields_valid == is_valid
-    assert fields_msg == msg
+    valid_required_fields, required_fields_msg = (
+        external_course.validate_required_fields(keymap=keymap)
+    )
+    assert valid_required_fields == is_valid
+    assert required_fields_msg == msg
 
 
 @pytest.mark.parametrize(
@@ -1026,8 +1028,8 @@ def test_external_course_validate_list_currency(
     keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
     external_course.list_currency = list_currency
-    currency_valid, currency_msg = external_course.validate_list_currency()
-    assert currency_valid == is_valid
+    valid_currency, currency_msg = external_course.validate_list_currency()
+    assert valid_currency == is_valid
     assert currency_msg == msg
 
 
