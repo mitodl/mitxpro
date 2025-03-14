@@ -1,3 +1,11 @@
+"""
+Statistics collection and reporting for external course synchronization.
+
+This module provides classes for collecting, organizing, and reporting
+statistics about external course synchronization operations, with a focus
+on named properties for better readability and maintenance.
+"""
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -5,7 +13,7 @@ from typing import Optional
 @dataclass
 class CoursewareInfo:
     """
-    Data class for course information with named fields
+    Data class for courseware information with named fields
     """
 
     code: str
@@ -14,7 +22,13 @@ class CoursewareInfo:
 
 
 class StatItemsCollection:
-    """Represents a category of statistics with its display information"""
+    """
+    Manages a collection of statistical items within a specific category.
+
+    This class serves as both a container for items in a statistics category
+    and a metadata handler that provides display information about the category
+    itself.
+    """
 
     def __init__(self, key, label, display_name=None):
         """
@@ -134,7 +148,7 @@ class StatsCollector:
 
     def remove_duplicates(self, source_key, items_to_remove_key):
         """
-        Remove items from one category that exist in another category
+        Filters out items from source_key category whose codes exist in items_to_remove_key category.
         """
         if (
             source_key not in self.categories
