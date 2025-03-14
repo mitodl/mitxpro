@@ -1561,3 +1561,9 @@ ECOMMERCE_FORCE_PROFILE_COUNTRY = get_bool(
     default=False,
     description="Force the country determination to be done with the user profile only",
 )
+
+EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS = get_delimited_list(
+    name="EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS",
+    default=[],
+    description="Comma-separated list of email addresses to receive notifications about external data syncs",
+)
