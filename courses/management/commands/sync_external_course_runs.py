@@ -9,7 +9,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     update_external_course_runs,
 )
 from ecommerce.mail_api import send_external_data_sync_email
-from courses.management.utils import StatsCollector
+from courses.sync_external_courses.utils import StatsCollector
 
 
 class Command(BaseCommand):
