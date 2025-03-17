@@ -165,25 +165,29 @@ class StatsCollector:
     def add_stat(self, key, code, title=None, msg=None):
         """
         Add an item to a specific stat
+
+        Raises:
+            KeyError: If the provided key doesn't exist in the stats dictionary
         """
-        if key in self.stats:
-            self.stats[key].add(code, title, msg)
+        self.stats[key].add(code, title, msg)
 
     def add_bulk(self, key, codes):
         """
         Add multiple items within the same stat
+
+        Raises:
+            KeyError: If the provided key doesn't exist in the stats dictionary
         """
-        if key in self.stats:
-            for code in codes:
-                self.add_stat(key, code)
+        for code in codes:
+            self.add_stat(key, code)
 
     def remove_duplicates(self, target_stat_key, reference_stat_key):
         """
         Filters out items from target stat category whose codes exist in reference stat category.
-        """
-        if target_stat_key not in self.stats or reference_stat_key not in self.stats:
-            return
 
+        Raises:
+            KeyError: If either the target_stat_key or reference_stat_key doesn't exist in the stats dictionary
+        """
         self.stats[target_stat_key].difference_update(self.stats[reference_stat_key])
 
     def log_stats(self, log_func):
