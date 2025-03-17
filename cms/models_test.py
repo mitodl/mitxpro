@@ -25,6 +25,7 @@ from cms.constants import (
     UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_HEADER_BANNER,
     ALL_LANGUAGES,
+    ALL_TAB,
 )
 from cms.factories import (
     CatalogPageFactory,
@@ -258,8 +259,9 @@ def test_webinar_detail_page_button_title():
         (["Language1", "Language2", "Language3"], "Language1"),
     ],
 )
+@pytest.mark.parametrize("selected_language_disabled", [True, False])
 def test_catalog_page_language_context(
-    mocker, staff_user, languages, selected_language
+    mocker, staff_user, languages, selected_language, selected_language_disabled
 ):
     """
     Verify the language context is properly passed to the catalog_page.html
@@ -271,16 +273,28 @@ def test_catalog_page_language_context(
 
     catalog_page = CatalogPageFactory.create()
     now = now_in_utc()
-
+    filtered_courseware_pages = []
+    all_courseware_pages = []
     if languages:
         # The index will serve as the priority of languages. Starting it with 1 because the priority can not be 0
         for idx, language in enumerate(languages, start=1):
-            created_language = CourseLanguageFactory.create(name=language, priority=idx)
-            CourseRunFactory.create(
+            created_language = CourseLanguageFactory.create(
+                name=language,
+                priority=idx,
+                is_active=not (
+                    selected_language_disabled and language == selected_language
+                ),
+            )
+            course_run = CourseRunFactory.create(
                 start_date=now + timedelta(days=1),
                 course__page__language=created_language,
                 course__program__page__language=created_language,
             )
+            all_courseware_pages.append(course_run.course.page)
+            all_courseware_pages.append(course_run.course.program.page)
+            if language == selected_language:
+                filtered_courseware_pages.append(course_run.course.page)
+                filtered_courseware_pages.append(course_run.course.program.page)
 
     rf = RequestFactory()
     request = rf.get(f"/?language={selected_language}")
@@ -290,12 +304,29 @@ def test_catalog_page_language_context(
     assert context.get("self") == catalog_page
     assert context.get("page") == catalog_page
     assert context.get("request") == request
-    assert context.get("selected_language") == selected_language
-    assert (
-        context.get("language_options") == [ALL_LANGUAGES] + languages
-        if languages
-        else ALL_LANGUAGES
-    )
+    assert context.get("request") == request
+    if selected_language_disabled:
+        languages.remove(selected_language) if (
+            languages and selected_language != ALL_LANGUAGES
+        ) else None
+
+        assert (
+            context.get("language_options") == [ALL_LANGUAGES] + languages
+            if languages
+            else ALL_LANGUAGES
+        )
+        assert context.get("all_pages") == all_courseware_pages
+        assert context.get("active_tab") == ALL_TAB
+        assert context.get("selected_language") == ALL_LANGUAGES
+
+    else:
+        assert (
+            context.get("language_options") == [ALL_LANGUAGES] + languages
+            if languages
+            else ALL_LANGUAGES
+        )
+        assert context.get("all_pages") == filtered_courseware_pages
+        assert context.get("selected_language") == selected_language
 
 
 @pytest.mark.parametrize(
