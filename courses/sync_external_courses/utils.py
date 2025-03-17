@@ -72,15 +72,6 @@ class StatItemsCollection:
         """Get the set of unique codes in this stat category"""
         return {item.code for item in self.items if item.code is not None}
 
-    def remove_items_with_codes(self, codes_to_remove):
-        """
-        Remove items with codes found in the provided set
-
-        Args:
-            codes_to_remove: Set of codes to exclude
-        """
-        self.items = {item for item in self.items if item.code not in codes_to_remove}
-
     def difference_update(self, other_collection):
         """
         Remove items whose codes exist in another collection
@@ -88,8 +79,7 @@ class StatItemsCollection:
         Args:
             other_collection: Another StatItemsCollection to compare against
         """
-        codes_to_remove = other_collection.get_codes()
-        self.remove_items_with_codes(codes_to_remove)
+        self.items.difference_update(other_collection.items)
 
     def __len__(self):
         """Return the number of items in this category"""
