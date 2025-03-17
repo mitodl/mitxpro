@@ -288,7 +288,7 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
         external_courses(list[dict]): A list of External Courses as a dict.
         keymap(ExternalCourseVendorBaseKeyMap): An ExternalCourseVendorBaseKeyMap object
     Returns:
-        stats_collector(StatsCollector): A StatsCollector object to collect the stats
+        StatsCollector: A StatsCollector object with collected stats
     """
     stats_collector = StatsCollector()
     platform, _ = Platform.objects.get_or_create(

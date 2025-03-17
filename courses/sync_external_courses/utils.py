@@ -1,8 +1,8 @@
 """
-Statistics collection and reporting for external course synchronization.
+Statistics collection and reporting for external course sync.
 
 This module provides classes for collecting, organizing, and reporting
-statistics about external course synchronization operations, with a focus
+statistics about external course sync operations, with a focus
 on named properties for better readability and maintenance.
 """
 
@@ -39,9 +39,9 @@ class CoursewareInfo:
 
 class StatItemsCollection:
     """
-    Manages a collection of statistical items within a specific category.
+    Manages a collection of stat items within a specific category.
 
-    This class serves as both a container for items in a statistics category
+    This class serves as both a container for items in a stat category
     and a metadata handler that provides display information about the category
     itself.
     """
@@ -97,7 +97,7 @@ class StatItemsCollection:
 
 
 class StatsCollector:
-    """Collector for external course sync statistics with named properties"""
+    """Collector for external course sync stats with named properties"""
 
     def __init__(self):
         self.stats = {
