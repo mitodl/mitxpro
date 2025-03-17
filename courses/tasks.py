@@ -131,10 +131,11 @@ def task_sync_external_course_runs():
         try:
             keymap = keymap()
             external_course_runs = fetch_external_courses(keymap)
-            stats = update_external_course_runs(external_course_runs, keymap)
+            stats_collector = update_external_course_runs(external_course_runs, keymap)
+            email_stats = stats_collector.get_email_stats()
             send_external_data_sync_email(
                 vendor_name=platform.name.lower(),
-                stats=stats,
+                stats=email_stats,
             )
         except Exception:
             log.exception("Some error occurred")
