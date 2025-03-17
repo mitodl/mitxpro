@@ -188,7 +188,7 @@ class StatsCollector:
         """
         log_func = log_func or self.logger.info
 
-        for category in self.categories.values():
+        for category in self.stats.values():
             codes = category.get_codes()
             log_func(f"Number of {category.display_name}: {len(codes)}.")
             log_func(f"{category.label}: {codes or 0}")
