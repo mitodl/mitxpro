@@ -93,6 +93,7 @@ from courses.models import (
     Program,
     ProgramCertificate,
     ProgramRun,
+    CourseLanguage,
 )
 from courses.utils import get_catalog_languages
 from ecommerce.models import Product
@@ -569,14 +570,25 @@ class CatalogPage(Page):
             .order_by("title")
         )
 
+        active_tab = request.GET.get("active-tab", ALL_TAB)
+        if not CourseLanguage.objects.filter(
+            name=language_filter, is_active=True
+        ).exists():
+            language_filter = ALL_LANGUAGES
+            active_tab = ALL_TAB
+
         if language_filter != ALL_LANGUAGES:
-            program_page_qset = program_page_qset.filter(language__name=language_filter)
+            language_catalog_filter = {
+                "language__name": language_filter,
+                "language__is_active": True,
+            }
+            program_page_qset = program_page_qset.filter(**language_catalog_filter)
             external_program_qset = external_program_qset.filter(
-                language__name=language_filter
+                **language_catalog_filter
             )
-            course_page_qset = course_page_qset.filter(language__name=language_filter)
+            course_page_qset = course_page_qset.filter(**language_catalog_filter)
             external_course_qset = external_course_qset.filter(
-                language__name=language_filter
+                **language_catalog_filter
             )
         if topic_filter != ALL_TOPICS:
             program_page_qset = program_page_qset.related_pages(topic_filter)
@@ -659,7 +671,7 @@ class CatalogPage(Page):
                 *[topic.name for topic in CourseTopic.parent_topics_with_courses()],
             ],
             selected_topic=topic_filter,
-            active_tab=request.GET.get("active-tab", ALL_TAB),
+            active_tab=active_tab,
             active_sorting_title=CatalogSorting[sort_by.upper()].sorting_title,
             sort_by_options=[
                 {
