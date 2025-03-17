@@ -186,14 +186,16 @@ class StatsCollector:
 
         self.stats[target_stat_key].difference_update(self.stats[reference_stat_key])
 
-    def log_stats(self, logger):
+    def log_stats(self, log_func):
         """
         Log all collected statistics
         """
-        for stat in self.stats.values():
-            codes = stat.get_codes()
-            logger.log_style_success(f"Number of {stat.display_name}: {len(codes)}.")
-            logger.log_style_success(f"{stat.label}: {codes or 0}\n")
+        log_func = log_func or self.logger.info
+
+        for category in self.categories.values():
+            codes = category.get_codes()
+            log_func(f"Number of {category.display_name}: {len(codes)}.")
+            log_func(f"{category.label}: {codes or 0}")
 
     def get_email_stats(self):
         """
