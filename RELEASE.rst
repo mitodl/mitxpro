@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+Version 0.175.0
+---------------
+
+- fix: Language filter with Manual URL manipulation (#3432)
+- [pre-commit.ci] pre-commit autoupdate (#3429)
+- chore(deps): update postgres docker tag to v17.4 (#3426)
+- fix(deps): update dependency django-storages to v1.14.5 (#3425)
+- chore(deps): update node.js to v20.18.3 (#3424)
+- chore(deps): update nginx docker tag to v1.27.4 (#3423)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8.17.3 (#3422)
+- chore(deps): update dependency factory-boy to v3.3.3 (#3421)
+- fix: non-live courses shouldn't sync (#3417)
+- fix(deps): replace dependency babel-eslint with @babel/eslint-parser ^7.11.0 (#2718)
+- fix(deps): update dependency django to v4.2.20 [security] (#3420)
+- fix(deps): update dependency ipython to v9 (#3419)
+- fix(deps): update dependency reselect to v5 (#3349)
+- fix: flaky tests (#3418)
+- [pre-commit.ci] pre-commit autoupdate (#3410)
+- feat: Enable Wagtail API (#3399)
+- fix: don't show language without any catalog visible course (#3405)
+
 Version 0.174.1 (Released March 03, 2025)
 ---------------
 
