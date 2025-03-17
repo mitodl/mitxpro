@@ -66,9 +66,7 @@ class StatItemsCollection:
 
     def add(self, code, title=None, msg=None):
         """Add an item to this stat category"""
-        self.items.add(
-            CoursewareInfo(code=code.replace(".", "." + "\u200b"), title=title, msg=msg)
-        )
+        self.items.add(CoursewareInfo(code=code, title=title, msg=msg))
 
     def get_codes(self):
         """Get the set of unique codes in this stat category"""
@@ -184,7 +182,7 @@ class StatsCollector:
 
     def log_stats(self, log_func):
         """
-        Log all collected statistics
+        Log all collected stats
         """
         log_func = log_func or self.logger.info
 
@@ -193,8 +191,29 @@ class StatsCollector:
             log_func(f"Number of {category.display_name}: {len(codes)}.")
             log_func(f"{category.label}: {codes or 0}")
 
-    def get_email_stats(self):
+    def get_unformatted_stats(self):
         """
-        Return statistics formatted for email template"
+        Return stats as a dictionary of stat items"
         """
         return {key: list(stat.items) for key, stat in self.stats.items()}
+
+    def get_email_stats(self):
+        """
+        Return stats formatted for email template with link prevention
+        """
+        email_stats = {}
+
+        for key, stat in self.stats.items():
+            email_stats[key] = []
+
+            for item in stat.items:
+                modified_code = item.code
+
+                if item.code and "." in item.code:
+                    modified_code = item.code.replace(".", "." + "\u200b")
+
+                email_stats[key].append(
+                    CoursewareInfo(code=modified_code, title=item.title, msg=item.msg)
+                )
+
+        return email_stats
