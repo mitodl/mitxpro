@@ -66,7 +66,9 @@ class StatItemsCollection:
 
     def add(self, code, title=None, msg=None):
         """Add an item to this stat category"""
-        self.items.add(CoursewareInfo(code=code, title=title, msg=msg))
+        self.items.add(
+            CoursewareInfo(code=code.replace(".", "." + "\u200b"), title=title, msg=msg)
+        )
 
     def get_codes(self):
         """Get the set of unique codes in this stat category"""
