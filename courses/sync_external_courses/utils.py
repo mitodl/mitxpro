@@ -209,6 +209,7 @@ class StatsCollector:
             for item in stat.items:
                 modified_code = item.code
 
+                # add zero-width space to prevent link detection
                 if item.code and "." in item.code:
                     modified_code = item.code.replace(".", "." + "\u200b")
 

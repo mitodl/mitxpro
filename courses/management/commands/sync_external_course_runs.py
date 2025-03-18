@@ -68,9 +68,7 @@ class Command(BaseCommand):
             stats=email_stats,
         )
         stats_collector.log_stats(log_func=self.log_style_success)
-        self.stdout.write(
-            self.style.SUCCESS(f"External course sync successful for {vendor_name}.")
-        )
+        self.log_style_success(f"External course sync successful for {vendor_name}.")
 
     def log_style_success(self, log_msg):
         """
