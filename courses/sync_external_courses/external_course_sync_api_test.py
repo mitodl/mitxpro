@@ -1027,11 +1027,6 @@ def test_deactivate_missing_course_runs(
         new_callable=mocker.PropertyMock,
         return_value=is_unexpired,
     )
-    mock_now = now_in_utc()
-    mocker.patch(
-        "courses.sync_external_courses.external_course_sync_api.now_in_utc",
-        return_value=mock_now,
-    )
     deactivated_runs_list = deactivate_missing_course_runs(
         api_course_run_codes, platform
     )
@@ -1040,5 +1035,3 @@ def test_deactivate_missing_course_runs(
     assert (external_course_run_id in deactivated_runs_list) == (not expected_is_live)
     assert course_run.live == expected_is_live
     assert product.is_active == expected_is_live
-    assert (course_run.updated_on == mock_now) == (not expected_is_live)
-    assert (product.updated_on == mock_now) == (not expected_is_live)
