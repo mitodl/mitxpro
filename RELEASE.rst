@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.175.0
+Version 0.175.0 (Released March 19, 2025)
 ---------------
 
 - fix: Language filter with Manual URL manipulation (#3432)
