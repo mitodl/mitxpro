@@ -578,6 +578,7 @@ def test_course_topics_api(client, django_assert_num_queries):
         end_date=past_end_date,
         enrollment_end=None,
         live=True,
+        force_insert=True,
     )
 
     live_external_course_pages = ExternalCoursePageFactory.create_batch(2, live=True)
@@ -597,6 +598,7 @@ def test_course_topics_api(client, django_assert_num_queries):
             end_date=past_end_date,
             enrollment_end=None,
             live=True,
+            force_insert=True,
         )
 
     for run, topic in zip(future_runs, [parent_topic, child_topic]):

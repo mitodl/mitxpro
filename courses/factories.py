@@ -1,6 +1,6 @@
 """Factories for creating course data in tests"""
 
-from datetime import UTC
+from datetime import UTC, timedelta
 
 import factory
 import faker
@@ -111,8 +111,8 @@ class CourseRunFactory(DjangoModelFactory):
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
     )
-    end_date = factory.Faker(
-        "date_time_this_year", before_now=False, after_now=True, tzinfo=UTC
+    end_date = factory.LazyAttribute(
+        lambda obj: obj.start_date + timedelta(days=30) if obj.start_date else None
     )
     enrollment_start = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
@@ -133,8 +133,25 @@ class CourseRunFactory(DjangoModelFactory):
             start_date=factory.Faker("past_datetime", tzinfo=UTC)
         )
         past_enrollment_end = factory.Trait(
-            enrollment_end=factory.Faker("past_datetime", tzinfo=UTC)
+            enrollment_end=factory.Faker("past_datetime", tzinfo=UTC),
+            enrollment_start=factory.LazyAttribute(
+                lambda obj: obj.enrollment_end - timedelta(days=1)
+            ),
         )
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Allow creating test objects without validation."""
+        force_insert = kwargs.pop("force_insert", False)
+        obj = model_class(*args, **kwargs)
+
+        if not force_insert:
+            obj.save()
+        else:
+            # Directly insert into DB without triggering save()
+            model_class.objects.bulk_create([obj])
+
+        return obj
 
 
 class CourseRunCertificateFactory(DjangoModelFactory):

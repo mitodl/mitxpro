@@ -34,10 +34,11 @@ from courses.sync_external_courses.external_course_sync_api import (
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import format_as_iso8601
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import now_in_utc, validate_courserun_dates
 from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
+now = now_in_utc()
 
 
 def test_program_course_auto_position():
@@ -79,7 +80,6 @@ def test_program_next_run_date():
     )
     assert program.next_run_date is None
 
-    now = now_in_utc()
     second_course_future_dates = [now + timedelta(hours=1), now + timedelta(hours=3)]
     CourseRunFactory.create_batch(
         2,
@@ -109,11 +109,14 @@ def test_program_is_catalog_visible():
     """
     program = ProgramFactory.create()
     runs = CourseRunFactory.create_batch(
-        2, course__program=program, past_start=True, past_enrollment_end=True
+        2,
+        course__program=program,
+        past_start=True,
+        past_enrollment_end=True,
+        force_insert=True,
     )
     assert program.is_catalog_visible is False
 
-    now = now_in_utc()
     run = runs[0]
     run.start_date = now + timedelta(hours=1)
     run.save()
@@ -132,7 +135,6 @@ def test_program_first_course_unexpired_runs():
     """
     program = ProgramFactory.create()
 
-    now = now_in_utc()
     past_start_dates = [
         now + timedelta(days=-10),
         now + timedelta(days=-11),
@@ -159,6 +161,7 @@ def test_program_first_course_unexpired_runs():
         start_date=factory.Iterator(past_start_dates),
         end_date=factory.Iterator(past_end_dates),
         live=True,
+        force_insert=True,
     )
     CourseRunFactory.create_batch(
         3,
@@ -197,14 +200,14 @@ def test_external_courseware_marketing_url():
 
     course_runs = CourseRunFactory.create_batch(2, course=course)
     # Create multiple runs, Check the url returned by course is from the latest one starting
-    course_runs[0].start_date = now_in_utc() + timedelta(hours=2)
-    course_runs[1].start_date = now_in_utc() + timedelta(hours=1)
+    course_runs[0].start_date = now + timedelta(hours=2)
+    course_runs[1].start_date = now + timedelta(hours=1)
 
     course_runs[0].save()
     course_runs[1].save()
 
     program_runs = ProgramRunFactory.create_batch(2, program=program)
-    program_runs[1].start_date = now_in_utc() + timedelta(hours=1)
+    program_runs[1].start_date = now + timedelta(hours=1)
 
     assert course.page.external_marketing_url == "http://www.testexternalcourse.com"
     assert program.page.external_marketing_url == "http://www.testexternalprogram.com"
@@ -229,14 +232,49 @@ def test_courseware_url(settings):
     assert course_run_no_path.courseware_url is None
 
 
+def test_clean_calls_validate_courserun_dates(mocker):
+    """
+    Test that the `clean` method calls `validate_courserun_dates` with the correct arguments.
+    """
+    mock_validate = mocker.patch(
+        "courses.models.validate_courserun_dates",
+        side_effect=validate_courserun_dates,
+    )
+
+    course_run = CourseRunFactory.create(
+        start_date=now + timedelta(-2),
+        enrollment_start=now + timedelta(-2),
+        enrollment_end=now + timedelta(2),
+        end_date=now + timedelta(2),
+        expiration_date=now + timedelta(2),
+    )
+
+    assert (
+        mock_validate.call_count == 2
+    )  # clean() is called twice. One in the save() method and the other in super.save()
+    call_args = mock_validate.call_args_list[0].args
+
+    expected_args = (
+        course_run.start_date,
+        course_run.end_date,
+        course_run.enrollment_end,
+        course_run.enrollment_start,
+        course_run.expiration_date,
+    )
+
+    assert call_args == expected_args
+
+
 @pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])  # noqa: PT006, PT007
 def test_course_run_past(end_days, expected):
     """
     Test that CourseRun.is_past returns the expected boolean value
     """
-    now = now_in_utc()
     end_date = None if end_days is None else (now + timedelta(days=end_days))
-    assert CourseRunFactory.create(end_date=end_date).is_past is expected
+    assert (
+        CourseRunFactory.create(end_date=end_date, force_insert=True).is_past
+        is expected
+    )
 
 
 @pytest.mark.parametrize(
@@ -247,7 +285,6 @@ def test_course_run_expiration_date(start_delta, end_delta, expiration_delta):
     """
     Test that CourseRun.expiration_date returns the expected value
     """
-    now = now_in_utc()
     expiration_date = now + timedelta(days=expiration_delta)
     assert (
         CourseRunFactory.create(
@@ -267,7 +304,6 @@ def test_course_run_invalid_expiration_date(start_delta, end_delta, expiration_d
     """
     Test that CourseRun.expiration_date raises ValidationError if expiration_date is before start_date or end_date
     """
-    now = now_in_utc()
     with pytest.raises(ValidationError):
         CourseRunFactory.create(
             start_date=now + timedelta(days=start_delta),
@@ -295,8 +331,8 @@ def test_course_run_not_beyond_enrollment(
     """
     Test that CourseRun.is_beyond_enrollment returns the expected boolean value
     """
-    now = now_in_utc()
     end_date = None if end_days is None else now + timedelta(days=end_days)
+    start_date = None if end_date is None else end_date - timedelta(days=2)
     enr_end_date = (
         None if enroll_end_days is None else now + timedelta(days=enroll_end_days)
     )
@@ -306,9 +342,11 @@ def test_course_run_not_beyond_enrollment(
 
     assert (
         CourseRunFactory.create(
+            start_date=start_date,
             end_date=end_date,
             enrollment_end=enr_end_date,
             enrollment_start=enr_start_date,
+            force_insert=True,
         ).is_not_beyond_enrollment
         is expected
     )
@@ -322,12 +360,15 @@ def test_course_run_unexpired(end_days, enroll_days, expected):
     """
     Test that CourseRun.is_unexpired returns the expected boolean value
     """
-    now = now_in_utc()
     end_date = now + timedelta(days=end_days)
+    start_date = end_date - timedelta(days=2)
     enr_end_date = now + timedelta(days=enroll_days)
     assert (
         CourseRunFactory.create(
-            end_date=end_date, enrollment_end=enr_end_date
+            start_date=start_date,
+            end_date=end_date,
+            enrollment_end=enr_end_date,
+            force_insert=True,
         ).is_unexpired
         is expected
     )
@@ -363,7 +404,6 @@ def test_course_first_unexpired_run():
     Test that the first unexpired run of a course is returned
     """
     course = CourseFactory.create()
-    now = now_in_utc()
     end_date = now + timedelta(days=100)
     enr_end_date = now + timedelta(days=100)
     first_run = CourseRunFactory.create(
@@ -455,7 +495,6 @@ def test_program_certificate_start_end_dates(user):
     """
     Test that the ProgramCertificate start_end_dates property works properly
     """
-    now = now_in_utc()
     start_date = now + timedelta(days=1)
     end_date = now + timedelta(days=100)
     program = ProgramFactory.create()
@@ -486,7 +525,6 @@ def test_program_first_unexpired_run():
     """
     program = ProgramFactory()
     course = CourseFactory.create(program=program)
-    now = now_in_utc()
     end_date = now + timedelta(days=100)
     enr_end_date = now + timedelta(days=100)
     first_run = CourseRunFactory.create(
@@ -518,7 +556,6 @@ def test_course_next_run_date():
     CourseRunFactory.create_batch(2, course=course, past_start=True, live=True)
     assert course.next_run_date is None
 
-    now = now_in_utc()
     future_dates = [now + timedelta(hours=1), now + timedelta(hours=2)]
     CourseRunFactory.create_batch(
         2, course=course, start_date=factory.Iterator(future_dates), live=True
@@ -537,11 +574,14 @@ def test_course_is_catalog_visible():
     """
     course = CourseFactory.create()
     runs = CourseRunFactory.create_batch(
-        2, course=course, past_start=True, past_enrollment_end=True
+        2,
+        course=course,
+        past_start=True,
+        past_enrollment_end=True,
+        force_insert=True,
     )
     assert course.is_catalog_visible is False
 
-    now = now_in_utc()
     run = runs[0]
     run.start_date = now + timedelta(hours=1)
     run.save()
@@ -566,7 +606,6 @@ def test_course_page():
 def test_course_unexpired_runs():
     """unexpired_runs should return expected value"""
     course = CourseFactory.create()
-    now = now_in_utc()
     start_dates = [now, now + timedelta(days=-3)]
     end_dates = [now + timedelta(hours=1), now + timedelta(days=-2)]
     CourseRunFactory.create_batch(
@@ -575,6 +614,7 @@ def test_course_unexpired_runs():
         start_date=factory.Iterator(start_dates),
         end_date=factory.Iterator(end_dates),
         live=True,
+        force_insert=True,
     )
 
     # Add a run that is not live and shouldn't show up in unexpired list
@@ -784,7 +824,11 @@ def test_enrollment_is_ended():
     past_course = CourseFactory.create()
 
     past_course_runs = CourseRunFactory.create_batch(
-        3, end_date=past_date, course=past_course, course__program=past_program
+        3,
+        end_date=past_date,
+        course=past_course,
+        course__program=past_program,
+        force_insert=True,
     )
 
     program_enrollment = ProgramEnrollmentFactory.create(program=past_program)
