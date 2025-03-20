@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.175.1
+---------------
+
+- fix: display empty revision and reduce catalog queries (#3435)
+- fix: course run updated_on updation when deactivating external course run (#3411)
+
 Version 0.175.0 (Released March 19, 2025)
 ---------------
 
