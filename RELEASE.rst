@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.175.1
+Version 0.175.1 (Released March 20, 2025)
 ---------------
 
 - fix: display empty revision and reduce catalog queries (#3435)
