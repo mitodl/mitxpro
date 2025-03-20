@@ -289,10 +289,10 @@
                         aria-labelledby="programs-tab"
                       >
                         {% endif %}
-                        <h1>PROGRAMS</h1>
                         {% if not program_pages %}
                         {% include "partials/catalog_empty.html" %}
                         {% else %}
+                        <h1>PROGRAMS</h1>
                         {% for program_page in program_pages %}
                         {% include "partials/catalog_card.html" with courseware_page=program_page object_type="program" tab="program" %}
                         {% endfor %}
@@ -314,10 +314,10 @@
                           aria-labelledby="courses-tab"
                         >
                           {% endif %}
-                          <h1>COURSES</h1>
                           {% if not course_pages %}
                           {% include "partials/catalog_empty.html" %}
                           {% else %}
+                          <h1>COURSES</h1>
                           {% for course_page in course_pages %}
                           {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}
                           {% endfor %}

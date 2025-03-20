@@ -351,19 +351,13 @@ def get_catalog_languages():
     """
     Returns the languages that are associated with courses or programs visible in the catalog
     """
-
+    # We will not add any filters for programs here because the visibility of the programs on catalog
+    # page depends on the visibility of the courses in the program. Also, We expect the program and
+    # course languages to be the same. So, we will only consider the course languages here.
     course_languages = (
         CourseLanguage.objects.filter(
             Q(get_catalog_course_filter("coursepage__"))
-            | Q(
-                get_catalog_course_filter("programpage__program__courses__coursepage__")
-            )
-            | Q(get_catalog_course_filter("externalcoursepage__"))
-            | Q(
-                get_catalog_course_filter(
-                    "externalprogrampage__program__courses__externalcoursepage__"
-                )
-            ),
+            | Q(get_catalog_course_filter("externalcoursepage__")),
             is_active=True,
         )
         .distinct()
