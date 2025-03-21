@@ -38,7 +38,8 @@ def generate_course_certificates():
         CourseRun.objects.live()
         .filter(
             end_date__lt=now
-            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
+            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS),
+            course__is_external=False,
         )
         .exclude(
             id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
