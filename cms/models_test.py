@@ -2415,7 +2415,7 @@ def test_common_child_pages_uniqueness():
 def test_common_child_page_wo_static_page(superuser_client):
     """Tests that an ExternalCoursePage is created without static child pages."""
     external_course_page_slug = "external_course_page"
-    course = CourseFactory.create()
+    course = CourseFactory.create(page=None, is_external=True)
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
     external_course_page = ExternalCoursePage.objects.get(
         slug=external_course_page_slug
@@ -2434,7 +2434,7 @@ def test_common_child_page_wo_static_page(superuser_client):
 def test_child_page_with_static_pages(superuser_client, with_platform):
     """Tests the creation of an ExternalCoursePage with static child pages."""
     platform = PlatformFactory.create()
-    course = CourseFactory.create(platform=platform)
+    course = CourseFactory.create(platform=platform, page=None, is_external=True)
     learning_tech_page, b2b_page = _create_common_child_pages(
         platform if with_platform else None
     )
@@ -2458,7 +2458,7 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
     platform = PlatformFactory.create()
     learning_tech_page_wo_platform, b2b_page_wo_platform = _create_common_child_pages()
     learning_tech_page, b2b_page = _create_common_child_pages(platform)
-    course = CourseFactory.create(platform=platform)
+    course = CourseFactory.create(platform=platform, page=None, is_external=True)
     external_course_page_slug = "external_course_page"
     _create_external_course_page(superuser_client, course.id, external_course_page_slug)
     learning_technical_page, for_teams_page = _is_common_child_pages_created(
@@ -2475,3 +2475,32 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
 
     assert for_teams_page.title != b2b_page_wo_platform.title
     assert for_teams_page.title == b2b_page.title
+
+
+@pytest.mark.parametrize(
+    "existing_course_factory, new_course_factory, expected_error",
+    [
+        (
+            CoursePageFactory,
+            ExternalCoursePageFactory,
+            "{'course': ['There is already an internal course page associated with this course.']}",
+        ),
+        (
+            ExternalCoursePageFactory,
+            CoursePageFactory,
+            "{'course': ['There is already an external course page associated with this course.']}",
+        ),
+    ],
+)
+def test_prevent_duplicate_pages_with_same_course(
+    existing_course_factory, new_course_factory, expected_error
+):
+    """
+    Tests that an error is raised when trying to create a duplicate course page.
+    """
+    course_page = existing_course_factory.create()
+
+    with pytest.raises(ValidationError) as context:
+        new_course_factory.create(course=course_page.course)
+
+    assert str(context.value) == expected_error
