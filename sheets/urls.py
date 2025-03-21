@@ -19,4 +19,9 @@ urlpatterns = [
         views.handle_watched_sheet_update,
         name="handle-watched-sheet-update",
     ),
+    re_path(
+        r"^api/sheets/process_coupon_sheet_assignment/",
+        views.ProcessCouponSheetAssignmentView.as_view(),
+        name="process-coupon-sheet-assignment",
+    ),
 ]

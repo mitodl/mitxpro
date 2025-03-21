@@ -35,6 +35,14 @@ from ecommerce.api import (
     make_receipt_url,
     validate_basket_for_checkout,
 )
+from ecommerce.constants import (
+    COUPON_ADD_PERMISSION,
+    COUPON_UPDATE_PERMISSION,
+)
+from sheets.constants import (
+    COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION,
+    COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION,
+)
 from ecommerce.exceptions import ParseException
 from ecommerce.filters import ProductFilter
 from ecommerce.mail_api import send_ecommerce_order_receipt
@@ -49,8 +57,6 @@ from ecommerce.models import (
     Receipt,
 )
 from ecommerce.permissions import (
-    COUPON_ADD_PERMISSION,
-    COUPON_UPDATE_PERMISSION,
     HasCouponPermission,
     IsSignedByCyberSource,
 )
@@ -378,28 +384,34 @@ def ecommerce_restricted(request):
     """
     Views accessible only to users with permissions to create or modify coupons.
     """
-    has_coupon_add_permission = request.user.has_perm(COUPON_ADD_PERMISSION)
-    has_coupon_update_permission = request.user.has_perm(COUPON_UPDATE_PERMISSION)
+    user = request.user
+    permissions = {
+        "has_coupon_create_permission": user.has_perm(COUPON_ADD_PERMISSION),
+        "has_coupon_update_permission": user.has_perm(COUPON_UPDATE_PERMISSION),
+        "has_coupon_product_assignment_permission": (
+            user.has_perm(COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION)
+            and user.has_perm(COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION)
+        ),
+    }
 
-    if not (has_coupon_add_permission or has_coupon_update_permission):
+    # Deny access if the user lacks all relevant permissions
+    if not any(permissions.values()):
         raise PermissionDenied
 
-    if (
-        request.path.startswith("/ecommerce/admin/coupons")
-        and not has_coupon_add_permission
-    ) or (
-        request.path.startswith("/ecommerce/admin/deactivate-coupons")
-        and not has_coupon_update_permission
-    ):
-        raise PermissionDenied
+    # Define path-based permission checks
+    restricted_paths = {
+        "/ecommerce/admin/coupons": "has_coupon_create_permission",
+        "/ecommerce/admin/deactivate-coupons": "has_coupon_update_permission",
+        "/ecommerce/admin/process-coupon-assignment-sheets": "has_coupon_product_assignment_permission",
+    }
+
+    for path, perm in restricted_paths.items():
+        if request.path.startswith(path) and not permissions[perm]:
+            raise PermissionDenied
 
     context = get_base_context(request)
-    context["user_permissions"] = json.dumps(
-        {
-            "has_coupon_create_permission": has_coupon_add_permission,
-            "has_coupon_update_permission": has_coupon_update_permission,
-        }
-    )
+    context["user_permissions"] = json.dumps(permissions)
+
     return render(request, "index.html", context=context)
 
 
