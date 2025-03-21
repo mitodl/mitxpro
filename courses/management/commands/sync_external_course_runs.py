@@ -8,6 +8,7 @@ from courses.sync_external_courses.external_course_sync_api import (
     fetch_external_courses,
     update_external_course_runs,
 )
+from ecommerce.mail_api import send_external_data_sync_email
 
 
 class Command(BaseCommand):
@@ -58,100 +59,16 @@ class Command(BaseCommand):
         self.stdout.write(f"Starting course sync for {vendor_name}.")
         keymap = keymap()
         external_course_runs = fetch_external_courses(keymap)
-        stats = update_external_course_runs(external_course_runs, keymap)
-        self.log_stats(stats)
-        self.stdout.write(
-            self.style.SUCCESS(f"External course sync successful for {vendor_name}.")
-        )
+        stats_collector = update_external_course_runs(external_course_runs, keymap)
 
-    def log_stats(self, stats):
-        """
-        Logs the stats for the external course sync.
+        email_stats = stats_collector.get_email_stats()
 
-        Args:
-            stats(dict): Dict containing results for the objects created/updated.
-        """
-        self.log_style_success(
-            f"Number of Courses Created {len(stats['courses_created'])}."
+        send_external_data_sync_email(
+            vendor_name=vendor_name,
+            stats=email_stats,
         )
-        self.log_style_success(
-            f"External Course Codes: {stats.get('courses_created') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of existing Courses {len(stats['existing_courses'])}."
-        )
-        self.log_style_success(
-            f"External Course Codes: {stats.get('existing_courses') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Course Runs Created {len(stats['course_runs_created'])}."
-        )
-        self.log_style_success(
-            f"External Course Run Codes: {stats.get('course_runs_created') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Course Runs Updated {len(stats['course_runs_updated'])}."
-        )
-        self.log_style_success(
-            f"External Course Run Codes: {stats.get('course_runs_updated') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Products Created {len(stats['products_created'])}."
-        )
-        self.log_style_success(
-            f"Course Run courseware_ids: {stats.get('products_created') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Product Versions Created {len(stats['product_versions_created'])}."
-        )
-        self.log_style_success(
-            f"Course Run courseware_ids: {stats.get('product_versions_created') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Course Runs without prices: {stats.get('course_runs_without_prices') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Course Pages Created {len(stats['course_pages_created'])}."
-        )
-        self.log_style_success(
-            f"External Course Codes: {stats.get('course_pages_created') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Course Pages Updated {len(stats['course_pages_updated'])}."
-        )
-        self.log_style_success(
-            f"External Course Codes: {stats.get('course_pages_updated') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Certificate Pages Created {len(stats['certificates_created'])}."
-        )
-        self.log_style_success(
-            f"Course Readable IDs: {stats.get('certificates_created') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Certificate Pages Updated {len(stats['certificates_updated'])}."
-        )
-        self.log_style_success(
-            f"Course Readable IDs: {stats.get('certificates_updated') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Course Runs Skipped due to bad data {len(stats['course_runs_skipped'])}."
-        )
-        self.log_style_success(
-            f"External Course Run Codes: {stats.get('course_runs_skipped') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Expired Course Runs {len(stats['course_runs_expired'])}."
-        )
-        self.log_style_success(
-            f"External Course Run Codes: {stats.get('course_runs_expired') or 0}.\n"
-        )
-        self.log_style_success(
-            f"Number of Course Runs Deactivated {len(stats['course_runs_deactivated'])}."
-        )
-        self.log_style_success(
-            f"External Course Run Codes: {stats.get('course_runs_deactivated') or 0}.\n"
-        )
+        stats_collector.log_stats(log_func=self.log_style_success)
+        self.log_style_success(f"External course sync successful for {vendor_name}.")
 
     def log_style_success(self, log_msg):
         """

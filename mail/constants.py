@@ -8,6 +8,7 @@ EMAIL_B2B_RECEIPT = "b2b_receipt"
 EMAIL_PRODUCT_ORDER_RECEIPT = "product_order_receipt"
 EMAIL_CHANGE_EMAIL = "change_email"
 EMAIL_WELCOME_COURSE_RUN_ENROLLMENT = "welcome_course_run_enrollment"
+EMAIL_EXTERNAL_DATA_SYNC = "external_data_sync"
 
 EMAIL_TYPE_DESCRIPTIONS = {
     EMAIL_VERIFICATION: "Verify Email",
@@ -16,6 +17,7 @@ EMAIL_TYPE_DESCRIPTIONS = {
     EMAIL_B2B_RECEIPT: "Enrollment Code Purchase Receipt",
     EMAIL_CHANGE_EMAIL: "Change Email",
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT: "Welcome Course Run Enrollment",
+    EMAIL_EXTERNAL_DATA_SYNC: "External Data Sync",
 }
 
 MAILGUN_API_DOMAIN = "api.mailgun.net"
