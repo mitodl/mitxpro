@@ -89,10 +89,7 @@ def test_task_generate_course_certificates(mocker):
 
     mocker.patch("courses.tasks.exception_logging_generator", side_effect=lambda x: x)
     course_runs = CourseRunFactory.create_batch(
-        size=3, end_date=now() - timedelta(days=2)
-    )
-    CourseRunFactory.create_batch(
-        size=3, course__is_external=True, end_date=now() - timedelta(days=2)
+        size=3, end_date=now() - timedelta(days=2), force_insert=True
     )
 
     generate_course_certificates.delay()
