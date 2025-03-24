@@ -21,6 +21,7 @@ from courses.utils import (
     sync_course_runs,
 )
 from courseware.api import get_edx_grades_with_users
+from ecommerce.mail_api import send_external_data_sync_email
 from mitxpro.celery import app
 from mitxpro.utils import now_in_utc
 
@@ -37,7 +38,8 @@ def generate_course_certificates():
         CourseRun.objects.live()
         .filter(
             end_date__lt=now
-            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS)
+            - timedelta(hours=settings.CERTIFICATE_CREATION_DELAY_IN_HOURS),
+            course__is_external=False,
         )
         .exclude(
             id__in=CourseRunCertificate.objects.values_list("course_run__id", flat=True)
@@ -130,6 +132,11 @@ def task_sync_external_course_runs():
         try:
             keymap = keymap()
             external_course_runs = fetch_external_courses(keymap)
-            update_external_course_runs(external_course_runs, keymap)
+            stats_collector = update_external_course_runs(external_course_runs, keymap)
+            email_stats = stats_collector.get_email_stats()
+            send_external_data_sync_email(
+                vendor_name=platform.name.lower(),
+                stats=email_stats,
+            )
         except Exception:
             log.exception("Some error occurred")

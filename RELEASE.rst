@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.176.0
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3434)
+- feat: check for live courses for failed edx enrollments (#3430)
+- fix: check for non-external courses before generating edx certificates (#3428)
+- feat: generate stats email on external course sync (#3412)
+
 Version 0.175.1 (Released March 20, 2025)
 ---------------
 

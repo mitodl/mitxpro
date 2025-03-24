@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.175.1"
+VERSION = "0.176.0"
 
 env.reset()
 
@@ -1560,4 +1560,10 @@ ECOMMERCE_FORCE_PROFILE_COUNTRY = get_bool(
     name="ECOMMERCE_FORCE_PROFILE_COUNTRY",
     default=False,
     description="Force the country determination to be done with the user profile only",
+)
+
+EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS = get_delimited_list(
+    name="EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS",
+    default=[],
+    description="Comma-separated list of email addresses to receive notifications about external data syncs",
 )

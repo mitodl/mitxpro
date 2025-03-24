@@ -19,6 +19,7 @@ from mail.constants import (
     EMAIL_COURSE_RUN_UNENROLLMENT,
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
+    EMAIL_EXTERNAL_DATA_SYNC,
 )
 from mitxpro import features
 from mitxpro.utils import format_price
@@ -393,3 +394,31 @@ def send_enrollment_failure_message(order, obj, details):
         details=details,
     )
     send_support_email(ENROLL_ERROR_EMAIL_SUBJECT, message)
+
+
+def send_external_data_sync_email(stats, vendor_name):
+    """
+    Send an email report with the results of external course data synchronization.
+
+    Args:
+        stats: Dictionary of statistics collected during sync operation
+        vendor_name: Name of the external vendor
+
+    Returns:
+        None
+    """
+    recipients = settings.EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS
+    if not recipients:
+        log.warning("No recipients configured for external data sync email.")
+        return
+
+    try:
+        api.send_messages(
+            api.build_messages(
+                EMAIL_EXTERNAL_DATA_SYNC,
+                recipients,
+                extra_context={"stats": stats, "vendor_name": vendor_name},
+            )
+        )
+    except Exception as exp:
+        log.exception("Error sending external data sync email: %s", exp)  # noqa: TRY401

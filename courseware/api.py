@@ -704,6 +704,7 @@ def retry_failed_edx_enrollments():
         user__is_active=True,
         edx_enrolled=False,
         created_on__lt=now - timedelta(minutes=COURSEWARE_REPAIR_GRACE_PERIOD_MINS),
+        run__live=True,
     )
     succeeded = []
     for enrollment in failed_run_enrollments:
