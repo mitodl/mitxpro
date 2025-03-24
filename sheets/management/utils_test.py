@@ -1,11 +1,11 @@
 """Tests for sheets.management.utils"""
 
+import pytest
+
 from unittest.mock import MagicMock
 
-import pytest
-from django.core.management import CommandError
-
 from sheets.management import utils
+from sheets.management.utils import CouponAssignmentError
 
 
 @pytest.fixture(name="valid_enum_rows")
@@ -49,5 +49,5 @@ def test_get_assignment_sheet_by_title_multiple():
     mock_pygsheets_client = MagicMock(
         open_all=MagicMock(return_value=["mock-sheet-obj", "mock-second-sheet-obj"])
     )
-    with pytest.raises(CommandError):
+    with pytest.raises(CouponAssignmentError):
         utils.get_assignment_spreadsheet_by_title(mock_pygsheets_client, "fake")

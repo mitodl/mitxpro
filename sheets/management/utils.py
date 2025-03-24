@@ -1,8 +1,7 @@
 """Sheets app management command utils"""
 
-from django.core.management import CommandError
-
 from sheets.coupon_assign_api import CouponAssignmentHandler
+from sheets.exceptions import CouponAssignmentError
 
 
 def get_assignment_spreadsheet_by_title(pygsheets_client, title):
@@ -24,7 +23,7 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
         )
     )
     if len(matching_spreadsheets) != 1:
-        raise CommandError(
+        raise CouponAssignmentError(
             f"There should be 1 coupon assignment sheet that matches the given title ('{title}'). "  # noqa: EM102
             f"{len(matching_spreadsheets)} were found."
         )

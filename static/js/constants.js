@@ -10,6 +10,9 @@ export const ENROLLABLE_ITEM_ID_SEPARATOR = "+";
 export const PRODUCT_TYPE_PROGRAM = "program";
 export const PRODUCT_TYPE_COURSERUN = "courserun";
 
+export const SHEET_IDENTIFIER_ID = "id";
+export const SHEET_IDENTIFIER_TITLE = "title";
+
 export const GENDER_CHOICES = [
   ["m", "Male"],
   ["f", "Female"],
@@ -116,6 +119,8 @@ export const CHECKOUT_PAGE_TITLE = "Checkout";
 export const DASHBOARD_PAGE_TITLE = "Dashboard";
 export const CREATE_COUPON_PAGE_TITLE = "Create Coupon";
 export const DEACTIVATE_COUPONS_PAGE_TITLE = "Deactivate Coupons";
+export const PROCESS_COUPON_ASSIGNMENT_SHEET_PAGE_TITLE =
+  "Process Coupon Assignment Sheet";
 
 export const LOGIN_EMAIL_PAGE_TITLE = "Sign In";
 export const LOGIN_PASSWORD_PAGE_TITLE = LOGIN_EMAIL_PAGE_TITLE;

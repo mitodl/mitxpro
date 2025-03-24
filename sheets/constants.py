@@ -64,3 +64,5 @@ UNSENT_EMAIL_STATUSES = {
     MAILGUN_FAILED,
     UNKNOWN_EMAIL_ERROR_STATUS,
 }
+COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION = "ecommerce.add_productcouponassignment"
+COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION = "ecommerce.change_productcouponassignment"

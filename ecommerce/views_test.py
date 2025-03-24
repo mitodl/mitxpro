@@ -1237,24 +1237,32 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     (
         "add_coupon",
         "change_coupon",
+        "add_and_update_product_assignment",
         "expected_admin_status",
         "expected_coupons_status",
         "expected_deactivate_status",
+        "expected_product_assignment_status",
     ),
     [
-        (True, False, 200, 200, 403),
-        (False, True, 200, 403, 200),
-        (False, False, 403, 403, 403),
-        (True, True, 200, 200, 200),
+        (True, False, False, 200, 200, 403, 403),
+        (False, True, False, 200, 403, 200, 403),
+        (False, False, False, 403, 403, 403, 403),
+        (True, True, False, 200, 200, 200, 403),
+        (False, False, True, 200, 403, 403, 200),  # Product assignment only
+        (True, False, True, 200, 200, 403, 200),  # Coupon + Product assignment
+        (False, True, True, 200, 403, 200, 200),  # Change Coupon + Product assignment
+        (True, True, True, 200, 200, 200, 200),  # All permissions
     ],
 )
-def test_ecommerce_restricted_view(  # noqa: PLR0913
+def test_ecommerce_restricted_view(
     user,
     add_coupon,
     change_coupon,
+    add_and_update_product_assignment,
     expected_admin_status,
     expected_coupons_status,
     expected_deactivate_status,
+    expected_product_assignment_status,
 ):
     """Test that the ecommerce restricted view is only accessible with the right permissions."""
 
@@ -1263,6 +1271,13 @@ def test_ecommerce_restricted_view(  # noqa: PLR0913
         user.user_permissions.add(Permission.objects.get(codename="add_coupon"))
     if change_coupon:
         user.user_permissions.add(Permission.objects.get(codename="change_coupon"))
+    if add_and_update_product_assignment:
+        user.user_permissions.add(
+            Permission.objects.get(codename="add_productcouponassignment")
+        )
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_productcouponassignment")
+        )
 
     client = Client()
     client.force_login(user)
@@ -1270,10 +1285,15 @@ def test_ecommerce_restricted_view(  # noqa: PLR0913
     ecommerce_admin_url = reverse("ecommerce-admin")
     add_coupons_url = ecommerce_admin_url + "coupons"
     deactivate_coupons_url = ecommerce_admin_url + "deactivate-coupons"
+    product_assignment_url = ecommerce_admin_url + "process-coupon-assignment-sheets"
 
     assert client.get(ecommerce_admin_url).status_code == expected_admin_status
     assert client.get(add_coupons_url).status_code == expected_coupons_status
     assert client.get(deactivate_coupons_url).status_code == expected_deactivate_status
+    assert (
+        client.get(product_assignment_url).status_code
+        == expected_product_assignment_status
+    )
 
 
 def test_deactivate_coupons(mocker, admin_drf_client):

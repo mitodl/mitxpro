@@ -2,6 +2,7 @@
 declare var USER_PERMISSIONS: {
   has_coupon_create_permission: boolean,
   has_coupon_update_permission: boolean,
+  has_coupon_product_assignment_permission: boolean,
 };
 import React from "react";
 import { Redirect, Route, Switch, Link } from "react-router-dom";
@@ -10,6 +11,7 @@ import { routes } from "../../../lib/urls";
 
 import CouponCreationPage from "./CreateCouponPage";
 import DeactivateCouponPage from "./DeactivateCouponPage";
+import ProcessCouponAssignmentSheetPage from "./ProcessCouponAssignmentSheetPage";
 
 const EcommerceAdminIndexPage = () => (
   <div className="ecommerce-admin-body">
@@ -24,6 +26,13 @@ const EcommerceAdminIndexPage = () => (
         <li>
           <Link to={routes.ecommerceAdmin.deactivate}>
             Deactivate Coupon(s)
+          </Link>
+        </li>
+      )}
+      {USER_PERMISSIONS.has_coupon_product_assignment_permission && (
+        <li>
+          <Link to={routes.ecommerceAdmin.processSheets}>
+            Process Coupon Assignment Sheet
           </Link>
         </li>
       )}
@@ -48,6 +57,11 @@ const EcommerceAdminPages = () => (
         exact
         path={routes.ecommerceAdmin.deactivate}
         component={DeactivateCouponPage}
+      />
+      <Route
+        exact
+        path={routes.ecommerceAdmin.processSheets}
+        component={ProcessCouponAssignmentSheetPage}
       />
       <Redirect to={routes.ecommerceAdmin.index} />
     </Switch>

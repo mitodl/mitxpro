@@ -48,6 +48,7 @@ export const routes = {
     index: "",
     coupons: "coupons/",
     deactivate: "deactivate-coupons/",
+    processSheets: "process-coupon-assignment-sheets/",
   }),
 
   ecommerceBulk: include("/ecommerce/bulk/", {
