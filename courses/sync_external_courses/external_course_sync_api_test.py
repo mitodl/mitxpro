@@ -618,7 +618,9 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     assert len(stats["course_runs_without_prices"]) == 1
 
     skipped_codes = {item.code for item in stats["course_runs_skipped"]}
-    invalid_dates_codes = {item.code for item in stats["course_runs_with_invalid_dates"]}
+    invalid_dates_codes = {
+        item.code for item in stats["course_runs_with_invalid_dates"]
+    }
 
     for external_course_run in external_course_runs:
         if (
