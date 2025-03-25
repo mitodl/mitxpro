@@ -115,10 +115,10 @@ class StatsCollector:
                 "External Course Run Codes",
                 display_name="Course Runs Skipped due to bad data",
             ),
-            "course_runs_expired": StatItemsCollection(
-                "course_runs_expired",
+            "course_runs_with_invalid_dates": StatItemsCollection(
+                "course_runs_with_invalid_dates",
                 "External Course Run Codes",
-                display_name="Expired Course Runs",
+                display_name="Course Runs with Invalid Dates",
             ),
             "course_runs_deactivated": StatItemsCollection(
                 "course_runs_deactivated",

@@ -43,7 +43,7 @@
           "courseware_id": "course-v1:edX+DemoX+Demo_Course",
           "run_tag": "DEMO",
           "courseware_url_path": "/courses/course-v1:edX+DemoX+Demo_Course/course/",
-          "start_date": "2013-02-05T00:00:00+00:00",
+          "start_date": "2098-02-05T00:00:00+00:00",
           "_product": {
             "price": 321
           }
@@ -65,9 +65,9 @@
           "courseware_id": "course-v1:TestX+SysEngxB1+R1",
           "run_tag": "R1",
           "courseware_url_path": "/courses/course-v1:TestX+SysEngxB1+R1/course/",
-          "start_date": "2019-08-15T00:00:00+00:00",
-          "end_date": "2019-12-15T00:00:00+00:00",
-          "enrollment_end": "2019-08-29T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00",
           "_product": {
             "price": 846
           }
@@ -89,9 +89,9 @@
           "courseware_id": "course-v1:TestX+SysEngxB2+R1",
           "run_tag": "R1",
           "courseware_url_path": "/courses/course-v1:TestX+SysEngxB2+R1/course/",
-          "end_date": "2020-05-15T00:00:00+00:00",
-          "start_date": "2020-01-15T00:00:00+00:00",
-          "enrollment_end": "2020-01-29T00:00:00+00:00",
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00",
           "_product": {
             "price": 848
           }
@@ -113,9 +113,9 @@
           "courseware_id": "course-v1:TestX+SysEngxB3+R1",
           "run_tag": "R1",
           "courseware_url_path": "/courses/course-v1:TestX+SysEngxB3+R1/course/",
-          "start_date": "2020-08-15T00:00:00+00:00",
-          "end_date": "2020-12-15T00:00:00+00:00",
-          "enrollment_end": "2020-08-29T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00",
           "_product": {
             "price": 849
           }
@@ -138,9 +138,9 @@
           "run_tag": "R1",
           "courseware_url_path": "/courses/course-v1:TestX+SysEngxB4+R1/course/",
           "enrollment_start": "2019-08-15T00:00:00+00:00",
-          "end_date": "2019-12-15T00:00:00+00:00",
-          "start_date": "2019-08-15T00:00:00+00:00",
-          "enrollment_end": "2019-08-29T00:00:00+00:00",
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00",
           "_product": {
             "price": 847
           }
@@ -161,33 +161,33 @@
           "title": "Digital Learning 100 - August 2021",
           "courseware_id": "course-v1:MITx+Digital-Learning-100+R4",
           "run_tag": "R4",
-          "start_date": "2021-08-15T00:00:00+00:00",
-          "end_date": "2021-12-15T00:00:00+00:00",
-          "enrollment_end": "2021-08-29T00:00:00+00:00"
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 100 - August 2020",
           "courseware_id": "course-v1:MITx+Digital-Learning-100+R3",
           "run_tag": "R3",
-          "start_date": "2020-08-15T00:00:00+00:00",
-          "end_date": "2020-12-15T00:00:00+00:00",
-          "enrollment_end": "2020-08-29T00:00:00+00:00"
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 100 - January 2016",
           "courseware_id": "course-v1:MITx+Digital-Learning-100+R2",
           "run_tag": "R2",
-          "end_date": "2016-05-15T00:00:00+00:00",
-          "start_date": "2016-01-15T00:00:00+00:00",
-          "enrollment_end": "2016-01-29T00:00:00+00:00"
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 100 - August 2015",
           "courseware_id": "course-v1:MITx+Digital-Learning-100+R1",
           "run_tag": "R1",
-          "end_date": "2015-12-15T00:00:00+00:00",
-          "start_date": "2015-08-15T00:00:00+00:00",
-          "enrollment_end": "2015-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "digital" }]
@@ -205,25 +205,25 @@
           "title": "Digital Learning 200 - August 2016",
           "courseware_id": "course-v1:MITx+Digital-Learning-200+R3",
           "run_tag": "R3",
-          "end_date": "2016-12-15T00:00:00+00:00",
-          "start_date": "2016-08-15T00:00:00+00:00",
-          "enrollment_end": "2016-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 200 - January 2016",
           "courseware_id": "course-v1:MITx+Digital-Learning-200+R2",
           "run_tag": "R2",
-          "end_date": "2016-05-15T00:00:00+00:00",
-          "start_date": "2016-01-15T00:00:00+00:00",
-          "enrollment_end": "2016-01-29T00:00:00+00:00"
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 200 - August 2015",
           "courseware_id": "course-v1:MITx+Digital-Learning-200+R1",
           "run_tag": "R1",
-          "end_date": "2015-12-15T00:00:00+00:00",
-          "start_date": "2015-08-15T00:00:00+00:00",
-          "enrollment_end": "2015-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "digital" }]
@@ -242,27 +242,27 @@
           "courseware_id": "course-v1:MITx+Digital-Learning-300+R3",
           "run_tag": "R3",
           "enrollment_start": "2016-08-15T00:00:00+00:00",
-          "end_date": "2016-12-15T00:00:00+00:00",
-          "start_date": "2016-08-15T00:00:00+00:00",
-          "enrollment_end": "2016-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 300 - January 2016",
           "courseware_id": "course-v1:MITx+Digital-Learning-300+R2",
           "run_tag": "R2",
           "enrollment_start": "2016-01-15T00:00:00+00:00",
-          "end_date": "2016-05-15T00:00:00+00:00",
-          "start_date": "2016-01-15T00:00:00+00:00",
-          "enrollment_end": "2016-01-29T00:00:00+00:00"
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00"
         },
         {
           "title": "Digital Learning 300 - August 2015",
           "courseware_id": "course-v1:MITx+Digital-Learning-300+R1",
           "run_tag": "R1",
           "enrollment_start": "2015-08-15T00:00:00+00:00",
-          "end_date": "2015-12-15T00:00:00+00:00",
-          "start_date": "2015-08-15T00:00:00+00:00",
-          "enrollment_end": "2015-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "digital" }]
@@ -281,27 +281,27 @@
           "courseware_id": "course-v1:MITx+Analog-Learning-100+R3",
           "run_tag": "R3",
           "enrollment_start": "2016-08-15T00:00:00+00:00",
-          "end_date": "2016-12-15T00:00:00+00:00",
-          "start_date": "2016-08-15T00:00:00+00:00",
-          "enrollment_end": "2016-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         },
         {
           "title": "Analog Learning 100 - January 2016",
           "courseware_id": "course-v1:MITx+Analog-Learning-100+R2",
           "run_tag": "R2",
           "enrollment_start": "2016-01-15T00:00:00+00:00",
-          "end_date": "2016-05-15T00:00:00+00:00",
-          "start_date": "2016-01-15T00:00:00+00:00",
-          "enrollment_end": "2016-01-29T00:00:00+00:00"
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00"
         },
         {
           "title": "Analog Learning 100 - August 2015",
           "courseware_id": "course-v1:MITx+Analog-Learning-100+R1",
           "run_tag": "R1",
           "enrollment_start": "2015-08-15T00:00:00+00:00",
-          "end_date": "2015-12-15T00:00:00+00:00",
-          "start_date": "2015-08-15T00:00:00+00:00",
-          "enrollment_end": "2015-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "analog" }]
@@ -320,27 +320,27 @@
           "courseware_id": "course-v1:MITx+Analog-Learning-200+R3",
           "run_tag": "R3",
           "enrollment_start": "2016-08-15T00:00:00+00:00",
-          "end_date": "2016-12-15T00:00:00+00:00",
-          "start_date": "2016-08-15T00:00:00+00:00",
-          "enrollment_end": "2016-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         },
         {
           "title": "Analog Learning 200 - January 2016",
           "courseware_id": "course-v1:MITx+Analog-Learning-200+R2",
           "run_tag": "R2",
           "enrollment_start": "2016-01-15T00:00:00+00:00",
-          "end_date": "2016-05-15T00:00:00+00:00",
-          "start_date": "2016-01-15T00:00:00+00:00",
-          "enrollment_end": "2016-01-29T00:00:00+00:00"
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00"
         },
         {
           "title": "Analog Learning 200 - August 2015",
           "courseware_id": "course-v1:MITx+Analog-Learning-200+R1",
           "run_tag": "R1",
           "enrollment_start": "2015-08-15T00:00:00+00:00",
-          "end_date": "2015-12-15T00:00:00+00:00",
-          "start_date": "2015-08-15T00:00:00+00:00",
-          "enrollment_end": "2015-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "analog" }]
@@ -359,9 +359,9 @@
           "courseware_id": "course-v1:MITx+Analog-Learning-300+R3",
           "run_tag": "R3",
           "enrollment_start": "2016-08-15T00:00:00+00:00",
-          "end_date": "2016-12-15T00:00:00+00:00",
-          "start_date": "2016-08-15T00:00:00+00:00",
-          "enrollment_end": "2016-08-29T00:00:00+00:00",
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00",
           "_product": {
             "price": 350
           }
@@ -371,18 +371,18 @@
           "courseware_id": "course-v1:MITx+Analog-Learning-300+R2",
           "run_tag": "R2",
           "enrollment_start": "2016-01-15T00:00:00+00:00",
-          "end_date": "2016-05-15T00:00:00+00:00",
-          "start_date": "2016-01-15T00:00:00+00:00",
-          "enrollment_end": "2016-01-29T00:00:00+00:00"
+          "end_date": "2098-05-15T00:00:00+00:00",
+          "start_date": "2098-01-15T00:00:00+00:00",
+          "enrollment_end": "2099-01-29T00:00:00+00:00"
         },
         {
           "title": "Analog Learning 300 - August 2015",
           "courseware_id": "course-v1:MITx+Analog-Learning-300+R1",
           "run_tag": "R1",
           "enrollment_start": "2015-08-15T00:00:00+00:00",
-          "end_date": "2015-12-15T00:00:00+00:00",
-          "start_date": "2015-08-15T00:00:00+00:00",
-          "enrollment_end": "2015-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "analog" }]
@@ -400,9 +400,9 @@
           "run_tag": "R1",
           "courseware_url_path": "/courses/course-v1:MITxPRO+QCx1+2T2019/about",
           "enrollment_start": "2019-08-15T00:00:00+00:00",
-          "end_date": "2019-12-15T00:00:00+00:00",
-          "start_date": "2019-08-15T00:00:00+00:00",
-          "enrollment_end": "2019-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "computing" }, { "name": "quantum computing" }]
@@ -420,9 +420,9 @@
           "courseware_id": "course-v1:MITxPRO+notlive+R1",
           "run_tag": "R1",
           "enrollment_start": "2019-08-15T00:00:00+00:00",
-          "end_date": "2019-12-15T00:00:00+00:00",
-          "start_date": "2019-08-15T00:00:00+00:00",
-          "enrollment_end": "2019-08-29T00:00:00+00:00"
+          "end_date": "2098-12-15T00:00:00+00:00",
+          "start_date": "2098-08-15T00:00:00+00:00",
+          "enrollment_end": "2099-08-29T00:00:00+00:00"
         }
       ],
       "topics": [{ "name": "dead courses" }]
@@ -439,9 +439,9 @@
           "courseware_id": "course-v1:SEED+AMx+R3",
           "run_tag": "R3",
           "enrollment_start": "2018-04-15T00:00:00+00:00",
-          "end_date": "2018-07-02T00:00:00+00:00",
-          "start_date": "2018-04-30T00:00:00+00:00",
-          "enrollment_end": "2018-04-29T00:00:00+00:00",
+          "end_date": "2098-07-02T00:00:00+00:00",
+          "start_date": "2098-04-30T00:00:00+00:00",
+          "enrollment_end": "2099-04-29T00:00:00+00:00",
           "_product": {
             "price": 100
           }
@@ -451,9 +451,9 @@
           "courseware_id": "course-v1:SEED+AMx+R4",
           "run_tag": "R4",
           "enrollment_start": "2019-04-15T00:00:00+00:00",
-          "end_date": "2019-07-02T00:00:00+00:00",
-          "start_date": "2019-04-30T00:00:00+00:00",
-          "enrollment_end": "2019-04-29T00:00:00+00:00",
+          "end_date": "2098-07-02T00:00:00+00:00",
+          "start_date": "2098-04-30T00:00:00+00:00",
+          "enrollment_end": "2099-04-29T00:00:00+00:00",
           "_product": {
             "price": 100
           }
@@ -473,9 +473,9 @@
           "courseware_id": "course-v1:SEED+SysEngBx3+R7",
           "run_tag": "R7",
           "enrollment_start": "2018-04-01T00:00:00+00:00",
-          "end_date": "2018-05-07T00:00:00+00:00",
-          "start_date": "2018-04-09T00:00:00+00:00",
-          "enrollment_end": "2018-04-08T00:00:00+00:00",
+          "end_date": "2098-05-07T00:00:00+00:00",
+          "start_date": "2098-04-09T00:00:00+00:00",
+          "enrollment_end": "2099-04-08T00:00:00+00:00",
           "_product": {
             "price": 150
           }
@@ -485,9 +485,9 @@
           "courseware_id": "course-v1:SEED+SysEngBx3+R8",
           "run_tag": "R8",
           "enrollment_start": "2019-04-01T00:00:00+00:00",
-          "end_date": "2019-05-07T00:00:00+00:00",
-          "start_date": "2019-04-09T00:00:00+00:00",
-          "enrollment_end": "2019-04-08T00:00:00+00:00",
+          "end_date": "2098-05-07T00:00:00+00:00",
+          "start_date": "2098-04-09T00:00:00+00:00",
+          "enrollment_end": "2099-04-08T00:00:00+00:00",
           "_product": {
             "price": 150
           }
