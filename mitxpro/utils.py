@@ -675,11 +675,11 @@ def validate_courserun_dates(
     - expiration_date must be later than start_date and end_date (if provided).
 
     Args:
-        start_date (datetime or None): The start date of the course run.
-        end_date (datetime or None): The end date of the course run.
-        enrollment_start (datetime or None): The enrollment start date.
-        enrollment_end (datetime or None): The enrollment end date.
-        expiration_date (datetime or None): The expiration date of the course run.
+        start_date (datetime.datetime or None): The start date of the course run.
+        end_date (datetime.datetime or None): The end date of the course run.
+        enrollment_start (datetime.datetime or None): The enrollment start date.
+        enrollment_end (datetime.datetime or None): The enrollment end date.
+        expiration_date (datetime.datetime or None): The expiration date of the course run.
 
     Returns:
         tuple:

@@ -30,9 +30,12 @@ These fields are required for creating a course, course run, product, and produc
 
 Ensures the listing currency is `USD` (because the system only supports USD). If not, the external course is skipped.
 
-### End Date Validation
+### Course Run Dates Validation
 
-Ensures that the course `end_date` is in the future. If not, the external course is skipped.
+Ensures that the course run dates are valid. If not, the external course is skipped.
+
+- `start_date` must be provided and in the future.
+- `end_date` must be later than `start_date` and in the future.
 
 ### Course Creation
 
