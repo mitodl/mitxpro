@@ -2,6 +2,10 @@
 
 This document outlines the checks performed during the synchronization of external courses with our system.
 
+### Setup Guide
+
+The sync will not work if the platform doesn't exist in Django admin or enable sync checkbox is unchecked.
+
 ### External Course APIs
 
 Below is a list of external vendor APIs which sync with our system:
@@ -13,6 +17,7 @@ Below is a list of external vendor APIs which sync with our system:
 
 Ensures that all required fields are present in the external course data.
 If any required field is missing, that external course is skipped.
+These fields are required for creating a course, course run, product, and product version.
 
 **Required Fields:**
 
