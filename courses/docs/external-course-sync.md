@@ -41,7 +41,7 @@ Creates the course based on the external course data.
 
 Creates or Updates the course run based on the external course data.
 
-#### Course Run Creation
+#### Creation
 
 - If the course run does not exist, it is created.
   - If `start_date` and `end_date` are present in the external data but `enrollment_end` is not present,
@@ -49,7 +49,7 @@ Creates or Updates the course run based on the external course data.
     allow enrollments after the start date, and setting the enrollment end date to the start date will hide
     the course run from the course details page.
 
-#### Course Run Update
+#### Update
 
 - If the course run exists, it is updated with new data if necessary.
   - Fields Updated:
@@ -68,22 +68,22 @@ Creates or updates the product and product version for the course run
 
 ### External Course Page Creation or Update (CMS)
 
-#### External Course Page Creation
+#### Creation
 
 - If the external course page does not exist, it is created.
 
-#### External Course Page Update
+#### Update
 
 - If the external course page exists, it is updated with new data if necessary.
-- **Fields updated**:
-  - `external_marketing_url`
-  - `duration`
-  - `min_weeks`
-  - `max_weeks`
-  - `description`
-  - `background_image`
-  - `thumbnail_image`
-  - `language`
+  - **Fields updated**:
+    - `external_marketing_url`
+    - `duration`
+    - `min_weeks`
+    - `max_weeks`
+    - `description`
+    - `background_image`
+    - `thumbnail_image`
+    - `language`
 - Background and thumbnail images are fetched from the existing images based on the image title
   that we get in the external course data. The image titles are expected to match the `title` field of the Wagtail Image model.
 
@@ -109,10 +109,15 @@ If who should enroll page does not exist and there are who should enroll items, 
 
 Creates or updates the certificate page for the course if CEUs are available in the external course data.
 
+#### Creation
+
 - If the certificate page does not exist, it is created.
+
+#### Update
+
 - If the certificate page exists, it is updated with new data if necessary.
-- Updated Fields:
-  - CEUs
+  - Updated Fields:
+    - CEUs
 
 ### Course Overview Page Creation
 
