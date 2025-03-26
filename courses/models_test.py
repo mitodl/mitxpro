@@ -890,7 +890,7 @@ def test_course_language_prevent_delete():
 
 @pytest.mark.parametrize(
     ("is_external", "page_factory"),
-    [(True, ExternalCoursePageFactory), (False, CoursePageFactory)],
+    [(False, ExternalCoursePageFactory), (True, CoursePageFactory)],
 )
 def test_prevent_is_external_update_after_course_page_attachment(
     is_external, page_factory
@@ -899,19 +899,11 @@ def test_prevent_is_external_update_after_course_page_attachment(
     Tests that is_external field is not updated after a course is attached with a course page.
     """
     course = CourseFactory.create(is_external=is_external, page=None)
-    page_factory.create(course=course)
-    course.is_external = not is_external
-    with pytest.raises(ValidationError):
-        course.save()
-
-
-@pytest.mark.parametrize(("is_external"), [True, False])
-def test_allow_is_external_update_before_course_page_attachment(
-    is_external,
-):
-    """
-    Tests that is_external field is updated before a course is attached with a course page.
-    """
-    course = CourseFactory.create(is_external=is_external, page=None)
+    # It should update before the course is attached with a course page
     course.is_external = not is_external
     course.save()
+
+    page_factory.create(course=course)
+    course.is_external = not course.is_external
+    with pytest.raises(ValidationError):
+        course.save()

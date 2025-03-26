@@ -617,7 +617,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
 
     def clean(self):
         """
-        Ensures that is_external field is not changed if course is associated with CoursePage or ExternalCoursePage
+        Ensures that the is_external field can not be changed if there is an associated course page.
         """
         super().clean()
 
@@ -632,7 +632,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             raise ValidationError(
                 {
                     "is_external": (
-                        "Course is associated with CoursePage, cannot change is_external value"
+                        "Course is associated with an internal CoursePage, cannot change is_external value"
                     )
                 }
             )
