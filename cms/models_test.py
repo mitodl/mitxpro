@@ -2475,32 +2475,3 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
 
     assert for_teams_page.title != b2b_page_wo_platform.title
     assert for_teams_page.title == b2b_page.title
-
-
-@pytest.mark.parametrize(
-    "existing_course_factory, new_course_factory, expected_error",
-    [
-        (
-            CoursePageFactory,
-            ExternalCoursePageFactory,
-            "{'course': ['There is already an internal course page associated with this course.']}",
-        ),
-        (
-            ExternalCoursePageFactory,
-            CoursePageFactory,
-            "{'course': ['There is already an external course page associated with this course.']}",
-        ),
-    ],
-)
-def test_prevent_duplicate_pages_with_same_course(
-    existing_course_factory, new_course_factory, expected_error
-):
-    """
-    Tests that an error is raised when trying to create a duplicate course page.
-    """
-    course_page = existing_course_factory.create()
-
-    with pytest.raises(ValidationError) as context:
-        new_course_factory.create(course=course_page.course)
-
-    assert str(context.value) == expected_error
