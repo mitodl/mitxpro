@@ -615,6 +615,36 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     class Meta:  # noqa: DJ012
         ordering = ("program", "title")
 
+    def clean(self):
+        """
+        Ensures that the is_external field can not be changed if there is an associated course page.
+        """
+        super().clean()
+
+        if not self.pk:
+            return
+
+        original = Course.objects.get(pk=self.pk)
+        if original.is_external == self.is_external:
+            return
+
+        if getattr(self, "coursepage", None):
+            raise ValidationError(
+                {
+                    "is_external": (
+                        "Course is associated with an internal CoursePage, cannot change is_external value"
+                    )
+                }
+            )
+        elif getattr(self, "externalcoursepage", None):
+            raise ValidationError(
+                {
+                    "is_external": (
+                        "Course is associated with ExternalCoursePage, cannot change is_external value"
+                    )
+                }
+            )
+
     def save(self, *args, **kwargs):  # noqa: DJ012
         """Overridden save method"""
         # If adding a Course to a Program without position specified, set it as the highest position + 1.

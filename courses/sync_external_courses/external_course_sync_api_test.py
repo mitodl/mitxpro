@@ -215,7 +215,7 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
     """
     home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
-    course = CourseFactory.create(is_external=True)
+    course = CourseFactory.create(is_external=True, page=None)
 
     if test_image_name_without_extension:
         external_course_data["image_name"] = external_course_data["image_name"].split(
@@ -324,7 +324,7 @@ def test_create_or_update_certificate_page(
     """
     home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
     course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
-    course = CourseFactory.create(is_external=True)
+    course = CourseFactory.create(is_external=True, page=None)
     external_course_page = ExternalCoursePageFactory.create(
         parent=course_index_page,
         course=course,
@@ -464,7 +464,7 @@ def test_create_or_update_external_course_run(
     """
     keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
-    course = CourseFactory.create()
+    course = CourseFactory.create(page=None)
     if create_existing_course_run:
         run = CourseRunFactory.create(
             course=course,
@@ -546,6 +546,7 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
                 title=run["program_name"],
                 platform=platform,
                 external_course_id=run["course_code"],
+                page=None,
                 is_external=True,
             )
             course_run = CourseRunFactory.create(
@@ -816,6 +817,7 @@ def test_create_or_update_product_and_product_version(  # noqa: PLR0913
         external_course_id=external_course.course_code,
         platform=platform,
         is_external=True,
+        page=None,
         title=external_course.course_title,
         readable_id=external_course.course_readable_id,
         live=True,
@@ -1085,7 +1087,7 @@ def test_deactivate_missing_course_runs(
     Tests that `deactivate_missing_course_runs` deactivates the missing API course runs.
     """
     platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
-    course = CourseFactory.create(platform=platform, is_external=True)
+    course = CourseFactory.create(platform=platform, is_external=True, page=None)
     course_run = CourseRunFactory.create(
         course=course,
         live=True,

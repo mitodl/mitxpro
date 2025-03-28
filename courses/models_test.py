@@ -11,6 +11,7 @@ from django.db.utils import IntegrityError
 from cms.factories import (
     CertificatePageFactory,
     CoursePageFactory,
+    ExternalCoursePageFactory,
     FacultyMembersPageFactory,
     ProgramPageFactory,
 )
@@ -885,3 +886,24 @@ def test_course_language_prevent_delete():
     course_page = CoursePageFactory.create()
     with pytest.raises(ProtectedError):
         course_page.language.delete()
+
+
+@pytest.mark.parametrize(
+    ("is_external", "page_factory"),
+    [(False, ExternalCoursePageFactory), (True, CoursePageFactory)],
+)
+def test_prevent_is_external_update_after_course_page_attachment(
+    is_external, page_factory
+):
+    """
+    Tests that is_external field is not updated after a course is attached with a course page.
+    """
+    course = CourseFactory.create(is_external=is_external, page=None)
+    # It should update before the course is attached with a course page
+    course.is_external = not is_external
+    course.save()
+
+    page_factory.create(course=course)
+    course.is_external = not course.is_external
+    with pytest.raises(ValidationError):
+        course.save()
