@@ -221,6 +221,10 @@
   margin-bottom: 32px;
   padding: 0;
 
+  @include media-breakpoint-down(md) {
+    margin-bottom: 0;
+  }
+
   &.show,
   &:hover {
     border: none;
