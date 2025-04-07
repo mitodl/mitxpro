@@ -25,105 +25,149 @@
             Dear
             {{ user.name }},
           </p>
-          <p style="margin: 0 0 10px 50px">Welcome to MIT xPRO!</p>
+          <p style="margin: 0 0 10px">Welcome to MIT xPRO!</p>
           <p style="margin: 0 0 10px">
-            We're thrilled to have you on board for our upcoming course,
-            <strong>{{ enrollment.run }}</strong>. This is a significant step
-            toward advancing your expertise.
+            You are now enrolled in <strong>{{ enrollment.run.title }}</strong>.
+            We're thrilled to have you in the upcoming course session. This is a
+            significant step toward advancing your expertise!
           </p>
           <p style="margin: 0 0 10px">
-            <strong>Here are some vital details about your course:</strong>
+            <strong
+              >Here is some important information about your course:</strong
+            >
           </p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              Course Name: <strong>{{ enrollment.run }}</strong>
+              Course Name: <strong>{{ enrollment.run.title }}</strong>
             </li>
             {% if run_start_date %}
             <li>
               Start Date: <strong>{{ run_start_date }}</strong>
             </li>
             {% endif %}
-            {% if run_date_range %}
+            {% if run_end_date %}
             <li>
-              Duration: <strong>{{ run_date_range }}</strong>
+              End Date: <strong>{{ run_end_date }}</strong>
             </li>
             {% endif %}
-            {% if run_start_time %}
+            {% if run_duration %}
             <li>
-              Start Time: <strong>{{ run_start_time }}</strong>
+              Duration: <strong>{{ run_duration }}</strong>
             </li>
             {% endif %}
           </ul>
           <p style="margin: 0 0 10px">
-            <strong><u>Course Format:</u></strong
-            ><br />
+            <strong><u>Course Format, Schedule, and Deadlines:</u></strong>
+            <br />
             All MIT xPRO courses are delivered online for maximum flexibility.
-            The course content, including pre-recorded video lectures, is
-            accessible at your convenience, with no specific log-on times.
+            Once course content is released, it will be accessible at your
+            convenience. You will not be required to log in at any specific time
+            to view it.
+            <a
+              href="https://xpro.zendesk.com/hc/en-us/articles/360056024592-How-are-courses-delivered-Are-lectures-live-at-specific-times-or-pre-recorded"
+            >
+              See this FAQ article for more details
+            </a>
           </p>
           <p style="margin: 0 0 10px">
-            <strong><u>Accessing Your Course:</u></strong
-            ><br />
-            Once you have enrolled in a course or program with MIT xPRO, you can
-            expect to gain access to the course materials and platform on the
-            scheduled start date. You will not be able to access any of the
-            course content before the start date and time. To log in and start
-            your course, visit your
-            <a href="{{ base_url }}{% url 'user-dashboard' %}"
-              >{{ site_name }}
-              account dashboard</a
+            Your course will become accessible only after its start date and
+            time, and course content will start to be released.
+          </p>
+          <p style="margin: 0 0 10px">
+            The course will have a specific schedule set by its instructors,
+            which will determine when Course Content is released (weekly, for
+            most courses). All Coursework will have a specific due date and
+            time, which is strictly enforced. Late submissions will not be
+            accepted for course credit.
+          </p>
+          <p style="margin: 0 0 10px">
+            The course session will conclude on the scheduled End Date, at which
+            point live aspects of the course, such as the discussion forums,
+            will close. Your Courseware will contain more specific details about
+            the course schedule, which you will be expected to read and
+            understand.
+          </p>
+          <p style="margin: 0 0 10px">
+            <strong><u>Accessing Your Course:</u></strong>
+            <br />
+            Once your course session starts, you will be able to open its
+            Courseware and start learning! Access
+            <a href="{{ base_url }}{% url 'user-dashboard' %}">
+              your
+              {{ site_name }}
+              Dashboard </a
+            >, locate your course, and click its name to get started!
+            <a
+              href="https://xpro.zendesk.com/hc/en-us/articles/15757684685467-How-can-I-access-and-view-my-enrolled-courses"
+            >
+              See this MIT xPRO FAQ article for details
+            </a>
+          </p>
+          <p style="margin: 0 0 10px">
+            <strong><u>Certificate of Completion:</u></strong>
+            <br />
+            When you complete the course with a passing score, you will earn a
+            digital Professional Certificate from MIT xPRO, validating your
+            accomplishment and expertise in
+            <strong>{{ enrollment.run.title }}</strong>. Certificates are
+            typically issued about 3-5 business days after the End Date of the
+            course session.
+            <a
+              href="https://xpro.zendesk.com/hc/en-us/articles/35110117468443-What-is-an-xPRO-Certificate"
+            >
+              See this FAQ article for details
+            </a>
+          </p>
+          <p style="margin: 0 0 10px">
+            <strong><u>Where to Seek Support:</u></strong>
+            <br />
+            Once your course session starts, you should familiarize yourself
+            with its Courseware—especially the first module, which typically
+            contains important information introducing you to the course, its
+            structure, schedule, and deadlines, and any special instructions or
+            considerations unique to this course.
+          </p>
+          <p style="margin: 0 0 10px">
+            Additionally, each MIT xPRO course offers in-course discussion
+            forums, hich will allow you to both engage with your fellow learners
+            and seek support from your dedicated Course Assistant (CA) Team. The
+            CA Team actively monitors these forums to offer assistance and
+            guidance to all learners.
+          </p>
+          <p style="margin: 0 0 10px">
+            Any questions you may have about in-course matters, such as course
+            content, coursework, and course logistics, should be posted to the
+            Discussion Forums for the CA Team. They are best able to provide
+            support for these inquiries.
+          </p>
+          <p style="margin: 0 0 10px">
+            Some xPRO courses may also offer other channels to interact with the
+            Course Team. Check within your Courseware for more information, once
+            your session starts.
+          </p>
+          <p style="margin: 0 0 10px">
+            For more general support questions, or questions containing
+            sensitive or personal information, reach out to the MIT xPRO Support
+            Team for assistance!
+            <a href="https://xpro.zendesk.com/hc/en-us/requests/new"
+              >Click here to submit a support ticket</a
+            >
+            and we'll be happy to help! You can also find a lot of useful
+            information in
+            <a href="https://xpro.zendesk.com/hc/en-us">MIT xPRO Help Center</a
             >.
           </p>
           <p style="margin: 0 0 10px">
-            <strong><u>In-Course Support:</u></strong
-            ><br />
-            Each course offers in-course discussion forums, allowing you to
-            engage with fellow learners and receive support. Our dedicated
-            course assistant (CA) team actively monitors these forums to offer
-            assistance and guidance.
-          </p>
-          <p style="margin: 0 0 10px">
-            <strong><u>Course Schedule and Deadlines:</u></strong
-            ><br />
-            Please be aware that each MIT xPRO course has its own schedule, with
-            content becoming available after the course start date. Content
-            releases typically adhere to a schedule determined by the course
-            instructors, often on a weekly basis. Assignment deadlines are
-            strictly enforced, and late submissions are not accepted. The course
-            will conclude on a designated end date, at which point live aspects
-            such as discussion forums will be closed.
-          </p>
-          <p style="margin: 0 0 10px">
-            <strong><u>Certificate of Completion:</u></strong
-            ><br />
-            Upon successfully completing the course, you'll receive a digital
-            Professional Certificate from MIT xPRO, validating your
-            accomplishment and expertise in
-            <strong>{{ enrollment.run }}</strong>.
-          </p>
-          <p style="margin: 0 0 10px">
-            <strong><u>Where to Seek Support:</u></strong
-            ><br />
-            For inquiries related to in-course content, we recommend reaching
-            out directly to the course team. They possess the expertise and have
-            access to the course materials, making them best equipped to provide
-            accurate and detailed responses. You can find the contact
-            information for the course team within the courseware itself,
-            typically in sections such as the Syllabus, Course Guide, or FAQ.
-          </p>
-          <p style="margin: 0 0 10px">
-            For non-sensitive course assignment questions, posting them in the
-            in-course discussion forums is another valuable option. Our course
-            assistants (CAs) actively monitor these forums, and fellow learners
-            often contribute their insights and solutions.
-          </p>
-          <p style="margin: 0 0 10px">
-            For general inquiries not specific to course content, our xPRO
-            Support Team is here to assist you. Feel free to check out the
-            <a href="https://xpro.zendesk.com/hc/en-us">MIT xPRO Help Center</a>
-            or reach out to us at
-            <a href="mailto:{{ support_email }}">{{ support_email }}</a>, and
-            we'll be happy to help.
+            <strong><u>Purchase Receipt:</u></strong>
+            <br />
+            In addition to this Welcome Letter, a payment receipt email was sent
+            to the email address used to complete your purchase. The receipt can
+            also be accessed via your xPRO Dashboard—
+            <a
+              href="https://xpro.zendesk.com/hc/en-us/articles/35109598265243-How-do-I-view-my-receipt"
+            >
+              see this FAQ article for a guide.
+            </a>
           </p>
           <p style="margin: 0 0 10px">
             We look forward to supporting you during your time with MIT xPRO. If
@@ -133,13 +177,8 @@
           <p style="margin: 0 0 10px">
             Get ready to unlock your potential and excel!
           </p>
-          <p style="margin: 0 0 10px">Best of luck with your studies,</p>
+          <p style="margin: 0 0 10px">Best wishes,</p>
           <p style="margin: 0 0 10px">MIT xPRO Team</p>
-          <p style="margin: 0 0 10px">
-            <strong>P.S.</strong> Don't forget to check out the "Getting
-            Started" section in your course dashboard for helpful tips and
-            resources to kick-start your learning experience!
-          </p>
         </td>
       </tr>
     </table>

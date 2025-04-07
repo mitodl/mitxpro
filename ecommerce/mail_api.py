@@ -183,11 +183,9 @@ def send_course_run_enrollment_welcome_email(enrollment):
     if not is_enabled(features.ENROLLMENT_WELCOME_EMAIL, default=False):
         log.info("Feature `enrollment_welcome_email` is disabled.")
         return
-    run_start_date, run_start_time = format_run_date(enrollment.run.start_date)
+    run_start_date, _ = format_run_date(enrollment.run.start_date)
     run_end_date, _ = format_run_date(enrollment.run.end_date)
-    run_duration = (
-        f"{run_start_date} - {run_end_date}" if run_start_date and run_end_date else ""
-    )
+    run_duration = enrollment.run.course.coursepage.duration
     try:
         user = enrollment.user
         api.send_message(
@@ -198,8 +196,8 @@ def send_course_run_enrollment_welcome_email(enrollment):
                     extra_context={
                         "enrollment": enrollment,
                         "run_start_date": run_start_date,
-                        "run_start_time": run_start_time,
-                        "run_date_range": run_duration,
+                        "run_end_date": run_end_date,
+                        "run_duration": run_duration,
                         "support_email": settings.EMAIL_SUPPORT,
                     },
                 ),
