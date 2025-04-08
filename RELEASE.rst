@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.177.0
+---------------
+
+- fix: Validation added to restrict multiple course page with same course (#3407)
+- [pre-commit.ci] pre-commit autoupdate (#3438)
+- docs: add external course sync documentation (#3431)
+- fix: add courserun date validation (#3400)
+- feat: added interaface for processing product coupon assignment sheets (#3406)
+
 Version 0.176.0 (Released April 08, 2025)
 ---------------
 
