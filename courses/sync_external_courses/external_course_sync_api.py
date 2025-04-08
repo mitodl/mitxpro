@@ -151,9 +151,11 @@ class ExternalCourse:
             end_datetime.replace(hour=23, minute=59) if end_datetime else None
         )
         # External Courses does not allow enrollments after start date.
-        # We set the course run enrollment_end to the start date to
+        # We fallback to set the course run enrollment_end to the start date to
         # hide the course run from the course details page.
-        self.enrollment_end = self.start_date
+        self.enrollment_end = (
+            external_course_json.get("enrollment_end_date") or self.start_date
+        )
 
         self.marketing_url = clean_url(
             external_course_json.get("landing_page_url"), remove_query_params=True
