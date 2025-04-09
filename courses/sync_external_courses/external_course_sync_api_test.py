@@ -522,7 +522,7 @@ def test_create_or_update_external_course_run(
     ("enrollment_end_date", "expected_enrollment_end"),
     [
         ("2099-10-15", "2099-10-15"),
-        (None, "2099-09-30"),
+        (None, "2099-10-07"),  # start_date + 7 days
     ],
 )
 @pytest.mark.django_db
@@ -531,7 +531,7 @@ def test_enrollment_end_logic(
 ):
     """
     Tests that `self.enrollment_end` is set correctly
-    based on the presence of `enrollment_end_date`.
+    based on the presence of `enrollment_end_date` or falls back to `start_date + 7 days`.
     """
     external_course_data["enrollment_end_date"] = enrollment_end_date
     keymap = get_keymap(external_course_data["course_run_code"])
