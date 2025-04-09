@@ -26,6 +26,6 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
     if len(exact_match_sheets) != 1:
         raise CouponAssignmentError(
             f"There should be 1 coupon assignment sheet that matches the given title ('{title}'). "  # noqa: EM102
-            f"{len(matching_spreadsheets)} were found."
+            f"{len(exact_match_sheets)} were found."
         )
     return exact_match_sheets[0]

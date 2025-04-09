@@ -36,18 +36,35 @@ def fixture_valid_enum_rows():
 
 
 def test_get_assignment_sheet_by_title():
-    """Test that the get_assignment_sheet_by_title works as expected"""
+    """Test that the get_assignment_sheet_by_title returns the exact match"""
+    mock_sheet = MagicMock()
+    mock_sheet.title = "fake"
     mock_pygsheets_client = MagicMock(
-        open_all=MagicMock(return_value=["mock-sheet-obj"])
+        open_all=MagicMock(return_value=[mock_sheet])
     )
     sheet = utils.get_assignment_spreadsheet_by_title(mock_pygsheets_client, "fake")
-    assert sheet == "mock-sheet-obj"
+    assert sheet == mock_sheet
 
 
 def test_get_assignment_sheet_by_title_multiple():
-    """Test that the get_assignment_sheet_by_title raises an error when multiple sheets are returned"""
+    """Test that get_assignment_sheet_by_title raises an error when multiple exact title matches exist"""
+    mock_sheet1 = MagicMock()
+    mock_sheet1.title = "fake"
+    mock_sheet2 = MagicMock()
+    mock_sheet2.title = "fake"
     mock_pygsheets_client = MagicMock(
-        open_all=MagicMock(return_value=["mock-sheet-obj", "mock-second-sheet-obj"])
+        open_all=MagicMock(return_value=[mock_sheet1, mock_sheet2])
     )
-    with pytest.raises(CouponAssignmentError):
+    with pytest.raises(CouponAssignmentError, match="There should be 1 coupon assignment sheet"):
+        utils.get_assignment_spreadsheet_by_title(mock_pygsheets_client, "fake")
+
+
+def test_get_assignment_sheet_by_title_no_exact_match():
+    """Test that get_assignment_sheet_by_title raises an error when no exact title match is found"""
+    mock_sheet1 = MagicMock()
+    mock_sheet1.title = "fake-not"
+    mock_pygsheets_client = MagicMock(
+        open_all=MagicMock(return_value=[mock_sheet1])
+    )
+    with pytest.raises(CouponAssignmentError, match="There should be 1 coupon assignment sheet"):
         utils.get_assignment_spreadsheet_by_title(mock_pygsheets_client, "fake")
