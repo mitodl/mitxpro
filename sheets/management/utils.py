@@ -22,7 +22,9 @@ def get_assignment_spreadsheet_by_title(pygsheets_client, title):
             base_query=CouponAssignmentHandler.ASSIGNMENT_SHEETS_QUERY, title=title
         )
     )
-    exact_match_sheets = [sheet for sheet in matching_spreadsheets if sheet.title == title]
+    exact_match_sheets = [
+        sheet for sheet in matching_spreadsheets if sheet.title == title
+    ]
     if len(exact_match_sheets) != 1:
         raise CouponAssignmentError(
             f"There should be 1 coupon assignment sheet that matches the given title ('{title}'). "  # noqa: EM102
