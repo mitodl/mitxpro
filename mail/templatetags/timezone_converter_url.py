@@ -5,15 +5,15 @@ register = template.Library()
 
 
 @register.filter
-def dateful_url(datetime_obj):
+def timezone_converter_url(datetime_obj):
     """
-    Convert a DateTimeField object to a dateful.com URL for timezone conversion
+    Convert a DateTimeField object to a URL for timezone conversion
 
     Args:
         datetime_obj (datetime): The DateTimeField object to convert.
 
     Returns:
-        str: The dateful.com URL for the given datetime object.
+        str: The timezone converter URL for the given datetime object.
     """
     if not datetime_obj:
         return ""
