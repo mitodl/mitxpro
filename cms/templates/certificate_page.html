@@ -165,7 +165,7 @@
           <span class="award-text">
             {% if page.CEUs %}
             Awarded
-            {{ CEUs|floatformat:"-2" }}
+            {{ CEUs|stringformat:"g" }}
             Continuing Education Units (CEUs) <br />
             {% endif %}
 
