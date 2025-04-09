@@ -518,6 +518,36 @@ def test_create_or_update_external_course_run(
     [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
     indirect=True,
 )
+@pytest.mark.parametrize(
+    ("enrollment_end_date", "expected_enrollment_end"),
+    [
+        ("2099-10-15", "2099-10-15"),
+        (None, "2099-09-30"),
+    ],
+)
+@pytest.mark.django_db
+def test_enrollment_end_logic(
+    external_course_data, enrollment_end_date, expected_enrollment_end
+):
+    """
+    Tests that `self.enrollment_end` is set correctly
+    based on the presence of `enrollment_end_date`.
+    """
+    external_course_data["enrollment_end_date"] = enrollment_end_date
+    keymap = get_keymap(external_course_data["course_run_code"])
+    external_course = ExternalCourse(external_course_data, keymap=keymap)
+
+    assert (
+        external_course.enrollment_end.strftime(keymap.date_format)
+        == expected_enrollment_end
+    )
+
+
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
 def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
