@@ -1,4 +1,5 @@
 {% extends "email_base.html" %}
+{% load dateful_url %}
 
 {% block content %}
 <!-- 1 Column Text + Button : BEGIN -->
@@ -38,21 +39,40 @@
           </p>
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
-              Course Name: <strong>{{ enrollment.run.title }}</strong>
+              Course Name:
+              {{ enrollment.run.title }}
             </li>
             {% if run_start_date %}
             <li>
-              Start Date: <strong>{{ run_start_date }}</strong>
+              Start Date:
+              {{ run_start_date }}
+              {% if run_start_time %}
+              at
+              {{ run_start_time }}
+              {% endif %}
+              <a href="{{ enrollment.run.start_date|dateful_url }}">
+                (convert to local time)
+              </a>
             </li>
             {% endif %}
             {% if run_end_date %}
             <li>
-              End Date: <strong>{{ run_end_date }}</strong>
+              End Date:
+              {{ run_end_date }}
+              {% if run_end_time %}
+              at
+              {{ run_end_time }}
+              {% endif %}
+              <a href="{{ enrollment.run.end_date|dateful_url }}">
+                (convert to local time)
+              </a>
             </li>
             {% endif %}
             {% if run_duration %}
             <li>
-              Duration: <strong>{{ run_duration }}</strong>
+              Duration:
+              {{ run_duration }}
+              week(s)
             </li>
             {% endif %}
           </ul>
