@@ -185,7 +185,7 @@ def send_course_run_enrollment_welcome_email(enrollment):
         return
     run_start_date, _ = format_run_date(enrollment.run.start_date)
     run_end_date, _ = format_run_date(enrollment.run.end_date)
-    run_duration = enrollment.run.course.coursepage.duration
+    run_duration = enrollment.run.course.coursepage.max_weeks
     try:
         user = enrollment.user
         api.send_message(
