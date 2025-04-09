@@ -27,6 +27,7 @@ from ecommerce.factories import (
 )
 from ecommerce.mail_api import (
     EMAIL_DATE_FORMAT,
+    EMAIL_TIME_FORMAT,
     ENROLL_ERROR_EMAIL_SUBJECT,
     send_b2b_receipt_email,
     send_bulk_enroll_emails,
@@ -120,7 +121,9 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
     enrollment = CourseRunEnrollmentFactory.create()
 
     run_start_date = enrollment.run.start_date
+    run_start_time = run_start_date.astimezone(datetime.UTC).strftime(EMAIL_TIME_FORMAT)
     run_end_date = enrollment.run.end_date
+    run_end_time = run_end_date.astimezone(datetime.UTC).strftime(EMAIL_TIME_FORMAT)
     run_duration = enrollment.run.course.coursepage.duration
     send_course_run_enrollment_welcome_email(enrollment)
 
@@ -134,7 +137,9 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
             extra_context={
                 "enrollment": enrollment,
                 "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT),
+                "run_start_time": run_start_time,
                 "run_end_date": run_end_date.strftime(EMAIL_DATE_FORMAT),
+                "run_end_time": run_end_time,
                 "run_duration": run_duration,
                 "support_email": settings.EMAIL_SUPPORT,
             },
