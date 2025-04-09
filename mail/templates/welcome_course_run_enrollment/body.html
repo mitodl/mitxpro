@@ -1,5 +1,5 @@
 {% extends "email_base.html" %}
-{% load dateful_url %}
+{% load timezone_converter_url %}
 
 {% block content %}
 <!-- 1 Column Text + Button : BEGIN -->
@@ -50,7 +50,7 @@
               at
               {{ run_start_time }}
               {% endif %}
-              <a href="{{ enrollment.run.start_date|dateful_url }}">
+              <a href="{{ enrollment.run.start_date|timezone_converter_url }}">
                 (convert to local time)
               </a>
             </li>
@@ -63,7 +63,7 @@
               at
               {{ run_end_time }}
               {% endif %}
-              <a href="{{ enrollment.run.end_date|dateful_url }}">
+              <a href="{{ enrollment.run.end_date|timezone_converter_url }}">
                 (convert to local time)
               </a>
             </li>
