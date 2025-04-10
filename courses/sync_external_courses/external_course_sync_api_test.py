@@ -625,7 +625,8 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     mock_validate_courserun_dates.assert_called_with(
         start_date,
         end_date,
-        start_date,  # enrollment_end = start_date for external courses
+        start_date
+        + timedelta(days=7),  # enrollment_end = start_date + 7 for external courses
     )
     num_courses_created = 2 if create_existing_data else 4
     num_existing_courses = 2 if create_existing_data else 0
