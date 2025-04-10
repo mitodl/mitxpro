@@ -1,3 +1,5 @@
+"""custom template tag to convert a DateTimeField object to a URL for timezone conversion"""
+
 from django import template
 from django.utils import timezone
 
