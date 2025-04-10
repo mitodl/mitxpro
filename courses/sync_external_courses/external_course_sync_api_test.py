@@ -530,7 +530,7 @@ def test_enrollment_end_logic(
     external_course_data, enrollment_end_date, expected_enrollment_end
 ):
     """
-    Tests that `self.enrollment_end` is set correctly
+    Tests that `ExternalCourse.enrollment_end` is set correctly
     based on the presence of `enrollment_end_date` or falls back to `start_date + 7 days`.
     """
     external_course_data["enrollment_end_date"] = enrollment_end_date
