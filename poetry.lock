@@ -323,12 +323,13 @@ zstd = ["zstandard (==0.23.0)"]
 
 [[package]]
 name = "celery-redbeat"
-version = "2.2.0"
+version = "2.3.2"
 description = "A Celery Beat Scheduler using Redis for persistent storage"
 optional = false
-python-versions = "*"
+python-versions = ">=3.8"
 files = [
-    {file = "celery-redbeat-2.2.0.tar.gz", hash = "sha256:71104729380d4eaefd91a9b7d270ba7851bfff9ad55a43ac8365acbb0c608b77"},
+    {file = "celery_redbeat-2.3.2-py2.py3-none-any.whl", hash = "sha256:9d61ab6e29f59d676621a846c778a347d5acad22e90fb4386343a4852d4f7ac3"},
+    {file = "celery_redbeat-2.3.2.tar.gz", hash = "sha256:7d6e41e4b807fafba5d88b98e3d3863f0df95ac3ed1692d70b134c079b936b8b"},
 ]
 
 [package.dependencies]
@@ -4224,4 +4225,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "13145c87fafd6a7129cd80a1f4489b75debbd7424cd72193e57f2241c2f831a4"
+content-hash = "4fdf964e0229abb19948b76ffe20991c77de1f1b82198d448c95b5cb4287c9a1"
