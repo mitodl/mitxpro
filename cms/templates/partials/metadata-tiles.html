@@ -94,7 +94,7 @@
       {% if ceus %}
       <li>
         <span class="title">CEUs</span>
-        <span class="text">{{ ceus|floatformat }}</span>
+        <span class="text">{{ ceus|stringformat:"g" }}</span>
       </li>
       {% endif %}
       {% if page.product.current_price %}

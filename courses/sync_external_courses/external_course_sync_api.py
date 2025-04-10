@@ -32,7 +32,12 @@ from courses.sync_external_courses.external_course_sync_api_client import (
     ExternalCourseSyncAPIClient,
 )
 from ecommerce.models import Product, ProductVersion
-from mitxpro.utils import clean_url, now_in_utc, strip_datetime
+from mitxpro.utils import (
+    clean_url,
+    now_in_utc,
+    strip_datetime,
+    validate_courserun_dates,
+)
 
 log = logging.getLogger(__name__)
 
@@ -208,12 +213,6 @@ class ExternalCourse:
             return False, msg
         return True, None
 
-    def validate_end_date(self):
-        """
-        Validates that the course end date is in the future.
-        """
-        return self.end_date and now_in_utc() < self.end_date
-
 
 def fetch_external_courses(keymap):
     """
@@ -334,13 +333,17 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                 failure_msg,
             )
             continue
-
-        if not external_course.validate_end_date():
+        is_valid, error_msg = validate_courserun_dates(
+            external_course.start_date,
+            external_course.end_date,
+            external_course.enrollment_end,
+        )
+        if not is_valid:
             log.info(
-                f"Course run is expired, Skipping... Course data: {json.dumps(external_course_json)}"  # noqa: G004
+                f"Course run has invalid dates, Skipping... Course data: {json.dumps(external_course_json)} Error message: {error_msg}"  # noqa: G004
             )
             stats_collector.add_stat(
-                "course_runs_expired",
+                "course_runs_with_invalid_dates",
                 external_course.course_run_code,
                 external_course.course_title,
             )
