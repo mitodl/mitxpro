@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+Version 0.177.0
+---------------
+
+- fix(deps): update dependency pdftotext to v3 (#3458)
+- fix(deps): update dependency shelljs to ^0.9.0 (#3454)
+- fix: spreadsheet matching (#3447)
+- fix(deps): update dependency celery-redbeat to v2.3.2 (#3453)
+- fix(deps): update dependency celery to v5.5.1 (#3452)
+- fix(deps): update dependency boto3 to v1.37.31 (#3451)
+- fix(deps): update dependency django-storages to v1.14.6 (#3450)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8.17.4 (#3449)
+- fix: Do not round CEUs in certificate and product page (#3446)
+- fix(deps): update dependency djangorestframework to v3.16.0 (#3444)
+- [pre-commit.ci] pre-commit autoupdate (#3441)
+- chore(deps): update codecov/codecov-action digest to 0565863 (#3387)
+- fix: Validation added to restrict multiple course page with same course (#3407)
+- [pre-commit.ci] pre-commit autoupdate (#3438)
+- docs: add external course sync documentation (#3431)
+- fix: add courserun date validation (#3400)
+- feat: added interaface for processing product coupon assignment sheets (#3406)
+
 Version 0.176.0 (Released April 08, 2025)
 ---------------
 
