@@ -2476,12 +2476,12 @@ testing = ["funcsigs", "pytest"]
 
 [[package]]
 name = "pdftotext"
-version = "2.2.2"
+version = "3.0.0"
 description = "Simple PDF text extraction"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pdftotext-2.2.2.tar.gz", hash = "sha256:2a9aa89bc62022408781b39d188fabf5a3ad1103b6630f32c4e27e395f7966ee"},
+    {file = "pdftotext-3.0.0.tar.gz", hash = "sha256:c3652b19154e145515a8bfa953fc6136338ed92337bdccbb53fe0d88013b1aaa"},
 ]
 
 [[package]]
@@ -4225,4 +4225,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "4fdf964e0229abb19948b76ffe20991c77de1f1b82198d448c95b5cb4287c9a1"
+content-hash = "13f4063eed3130d256ca1daa214d748d2db413c0f8bc3badd0d4fb548254ad3a"
