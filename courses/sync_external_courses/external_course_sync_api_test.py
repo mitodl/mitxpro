@@ -519,21 +519,29 @@ def test_create_or_update_external_course_run(
     indirect=True,
 )
 @pytest.mark.parametrize(
-    ("enrollment_end_date", "expected_enrollment_end"),
+    ("has_enrollment_end_key", "enrollment_end_date", "expected_enrollment_end"),
     [
-        ("2099-10-15", "2099-10-15"),
-        (None, "2099-10-07"),  # start_date + 7 days
+        (True, "2099-10-15", "2099-10-15"),
+        (True, None, "2099-10-07"),  # start_date + 7 days
+        (False, None, "2099-10-07"),
     ],
 )
 @pytest.mark.django_db
 def test_enrollment_end_logic(
-    external_course_data, enrollment_end_date, expected_enrollment_end
+    external_course_data,
+    has_enrollment_end_key,
+    enrollment_end_date,
+    expected_enrollment_end,
 ):
     """
-    Tests that `ExternalCourse.enrollment_end` is set correctly
-    based on the presence of `enrollment_end_date` or falls back to `start_date + 7 days`.
+    Tests that ExternalCourse.enrollment_end is set correctly
+    based on the presence of enrollment_end_date or falls back to start_date + 7 days.
     """
-    external_course_data["enrollment_end_date"] = enrollment_end_date
+    if has_enrollment_end_key:
+        external_course_data["enrollment_end_date"] = enrollment_end_date
+    elif "enrollment_end_date" in external_course_data:
+        del external_course_data["enrollment_end_date"]
+
     keymap = get_keymap(external_course_data["course_run_code"])
     external_course = ExternalCourse(external_course_data, keymap=keymap)
 
