@@ -123,11 +123,8 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
     run_start_date = enrollment.run.start_date
     run_start_time = run_start_date.astimezone(datetime.UTC).strftime(EMAIL_TIME_FORMAT)
     run_end_date = enrollment.run.end_date
-    date_range = (
-        f"{run_start_date.strftime(EMAIL_DATE_FORMAT)} - "
-        f"{run_end_date.strftime(EMAIL_DATE_FORMAT)}"
-    )
-
+    run_end_time = run_end_date.astimezone(datetime.UTC).strftime(EMAIL_TIME_FORMAT)
+    run_duration = enrollment.run.course.coursepage.duration
     send_course_run_enrollment_welcome_email(enrollment)
 
     if not enabled:
@@ -141,7 +138,9 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
                 "enrollment": enrollment,
                 "run_start_date": run_start_date.strftime(EMAIL_DATE_FORMAT),
                 "run_start_time": run_start_time,
-                "run_date_range": date_range,
+                "run_end_date": run_end_date.strftime(EMAIL_DATE_FORMAT),
+                "run_end_time": run_end_time,
+                "run_duration": run_duration,
                 "support_email": settings.EMAIL_SUPPORT,
             },
         )
