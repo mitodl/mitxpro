@@ -53,9 +53,9 @@ Creates or Updates the course run based on the external course data.
 
 - If the course run does not exist, it is created.
   - If `start_date` and `end_date` are present in the external data but `enrollment_end` is not present,
-    then `enrollment_end` date is set to the `start_date`. This is done because external courses do not
-    allow enrollments after the start date, and setting the enrollment end date to the start date will hide
-    the course run from the course details page.
+    then `enrollment_end` date is set to `start_date + 7 days`. This is done because external courses do not
+    allow enrollments after the start date, and setting the enrollment end date to `start_date + 7 days` ensures
+    a reasonable enrollment period while hiding the course run from the course details page after the enrollment period ends.
 
 #### Update
 

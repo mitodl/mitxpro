@@ -518,6 +518,44 @@ def test_create_or_update_external_course_run(
     [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
     indirect=True,
 )
+@pytest.mark.parametrize(
+    ("has_enrollment_end_key", "enrollment_end_date", "expected_enrollment_end"),
+    [
+        (True, "2099-10-15", "2099-10-15"),
+        (True, None, "2099-10-07"),  # start_date + 7 days
+        (False, None, "2099-10-07"),
+    ],
+)
+@pytest.mark.django_db
+def test_enrollment_end_logic(
+    external_course_data,
+    has_enrollment_end_key,
+    enrollment_end_date,
+    expected_enrollment_end,
+):
+    """
+    Tests that ExternalCourse.enrollment_end is set correctly
+    based on the presence of enrollment_end_date or falls back to start_date + 7 days.
+    """
+    if has_enrollment_end_key:
+        external_course_data["enrollment_end_date"] = enrollment_end_date
+    elif "enrollment_end_date" in external_course_data:
+        del external_course_data["enrollment_end_date"]
+
+    keymap = get_keymap(external_course_data["course_run_code"])
+    external_course = ExternalCourse(external_course_data, keymap=keymap)
+
+    assert (
+        external_course.enrollment_end.strftime(keymap.date_format)
+        == expected_enrollment_end
+    )
+
+
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
 def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
@@ -595,7 +633,8 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     mock_validate_courserun_dates.assert_called_with(
         start_date,
         end_date,
-        start_date,  # enrollment_end = start_date for external courses
+        start_date
+        + timedelta(days=7),  # enrollment_end = start_date + 7 for external courses
     )
     num_courses_created = 2 if create_existing_data else 4
     num_existing_courses = 2 if create_existing_data else 0
