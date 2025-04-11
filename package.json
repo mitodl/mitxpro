@@ -60,7 +60,7 @@
     "hls.js": "^1.0.0",
     "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.5.1",
-    "jsdom": "^16.2.2",
+    "jsdom": "^26.0.0",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^0.12.0",
     "minimist": "^1.2.6",
