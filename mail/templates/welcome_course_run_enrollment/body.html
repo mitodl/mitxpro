@@ -52,16 +52,18 @@
           <ul style="margin: 0 0 10px; padding-left: 20px">
             <li>
               Course Name:
-              {{ enrollment.run.title }}
+              <strong>{{ enrollment.run.title }}</strong>
             </li>
             {% if run_start_date %}
             <li>
               Start Date:
-              {{ run_start_date }}
-              {% if run_start_time %}
-              at
-              {{ run_start_time }}
-              {% endif %}
+              <strong>
+                {{ run_start_date }}
+                {% if run_start_time %}
+                at
+                {{ run_start_time }}
+                {% endif %}
+              </strong>
               <a href="{{ enrollment.run.start_date|timezone_converter_url }}">
                 (convert to local time)
               </a>
@@ -70,11 +72,13 @@
             {% if run_end_date %}
             <li>
               End Date:
-              {{ run_end_date }}
-              {% if run_end_time %}
-              at
-              {{ run_end_time }}
-              {% endif %}
+              <strong>
+                {{ run_end_date }}
+                {% if run_end_time %}
+                at
+                {{ run_end_time }}
+                {% endif %}
+              </strong>
               <a href="{{ enrollment.run.end_date|timezone_converter_url }}">
                 (convert to local time)
               </a>
@@ -83,8 +87,10 @@
             {% if run_duration %}
             <li>
               Duration:
-              {{ run_duration }}
-              week(s)
+              <strong>
+                {{ run_duration }}
+                week(s)
+              </strong>
             </li>
             {% endif %}
           </ul>
