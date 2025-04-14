@@ -20,6 +20,7 @@ from courses.models import (
     ProgramEnrollment,
     CourseLanguage,
 )
+from courses.exceptions import CourseRunDateValidationError
 from courseware.api import get_edx_api_course_detail_client
 from mitxpro.utils import has_equal_properties, now_in_utc
 
@@ -302,9 +303,12 @@ def sync_course_runs(runs):
                 run.save()
                 success_count += 1
                 log.info("Updated course run: %s", run.courseware_id)
+            except CourseRunDateValidationError as e:
+                log.warning("Skipping update for %s: %s", str(e), run.courseware_id)
+                failure_count += 1
             except Exception as e:  # noqa: BLE001
-                # Report any validation or otherwise model errors
-                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
+                # Report any other model errors as errors
+                log.error("%s: %s", str(e), run.courseware_id)
                 failure_count += 1
 
     return success_count, failure_count
