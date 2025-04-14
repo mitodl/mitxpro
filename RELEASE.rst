@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.177.0
+Version 0.177.0 (Released April 14, 2025)
 ---------------
 
 - fix(deps): update dependency pdftotext to v3 (#3458)
