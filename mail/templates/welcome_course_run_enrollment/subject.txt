@@ -1,1 +1,1 @@
-Welcome! {{ enrollment.run }} starts on {{ run_start_date }}
+Welcome! {{ enrollment.run.title }} starts on {{ run_start_date }}
