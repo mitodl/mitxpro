@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.177.1
+Version 0.177.1 (Released April 15, 2025)
 ---------------
 
 - config: Increase allowable header size for Nginx
