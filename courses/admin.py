@@ -383,6 +383,12 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
             "user", "course_run"
         )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "course_run":
+            kwargs["queryset"] = CourseRun.objects.filter(external_course_run_id="")
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 @admin.register(ProgramCertificate)
 class ProgramCertificateAdmin(TimestampedModelAdmin):
