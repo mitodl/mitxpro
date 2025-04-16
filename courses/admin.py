@@ -362,6 +362,7 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
         "certificate_page_revision",
     ]
     search_fields = [
+        "uuid",
         "course_run__courseware_id",
         "course_run__title",
         "user__username",
