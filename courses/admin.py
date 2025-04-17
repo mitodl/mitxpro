@@ -385,7 +385,7 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "course_run":
-            kwargs["queryset"] = CourseRun.objects.filter(external_course_run_id="")
+            kwargs["queryset"] = CourseRun.objects.filter(course__is_external=False)
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
