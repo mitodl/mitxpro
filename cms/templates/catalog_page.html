@@ -20,94 +20,100 @@
   </div>
   {% endblock %}
   <div class="catalog-content">
-    <div class="topics">
-      {% if show_language_filter %}
-      <div class="catalog-filter-dropdown dropdown" id="topicSortDropdown">
-        <span>Topic</span>
-        <div
-          class="col-2 dropdown-toggle"
-          id="dropdownMenuButton"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-          aria-label="topic-options"
-          data-display="static"
-        >
-          {{ selected_topic }}
-        </div>
-
-        <div
-          class="dropdown-menu dropdown-menu-left"
-          aria-labelledby="dropdownMenuButton"
-        >
-          {% for topic in topics %}
-          {% if topic == selected_topic %}
-          <div
-            class="dropdown-item topic-filter-option selected"
-            data-value="{{ topic }}"
-          >
-            {% else %}
-            <div
-              class="dropdown-item topic-filter-option"
-              data-value="{{ topic }}"
-            >
-              {% endif %}
-              {{ topic }}
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="catalog-filter-dropdown dropdown" id="languageSortDropdown">
-          <span>Language</span>
+    <div class="courseware-filter-container">
+      <div class="courseware-filters">
+        {% if show_language_filter %}
+        <div class="catalog-filter-dropdown dropdown" id="topicSortDropdown">
+          <span class="filter-label">Topic</span>
           <div
             class="col-2 dropdown-toggle"
             id="dropdownMenuButton"
             data-toggle="dropdown"
             aria-haspopup="true"
             aria-expanded="false"
-            aria-label="language-options"
+            aria-label="topic-options"
             data-display="static"
           >
-            {{ selected_language }}
+            {{ selected_topic }}
           </div>
 
           <div
             class="dropdown-menu dropdown-menu-left"
             aria-labelledby="dropdownMenuButton"
           >
-            {% for language in language_options %}
-            {% if language == selected_language %}
+            {% for topic in topics %}
+            {% if topic == selected_topic %}
             <div
-              class="dropdown-item language-filter-option selected"
-              data-value="{{ language }}"
+              class="dropdown-item topic-filter-option selected"
+              data-value="{{ topic }}"
             >
               {% else %}
               <div
-                class="dropdown-item language-filter-option"
-                data-value="{{ language }}"
+                class="dropdown-item topic-filter-option"
+                data-value="{{ topic }}"
               >
                 {% endif %}
-                {{ language }}
+                {{ topic }}
               </div>
               {% endfor %}
             </div>
           </div>
-        </div>
-        {% else %}
-        {% for topic in topics %}
-        {% if selected_topic == topic %}
-        <div class="topic selected">
-          {% else %}
-          <div class="topic">
-            {% endif %}
-            <a href="{% pageurl page %}?topic={{ topic | urlencode }}"
-              >{{ topic }}</a
+
+          <div
+            class="catalog-filter-dropdown dropdown"
+            id="languageSortDropdown"
+          >
+            <span class="filter-label">Course Language</span>
+            <div
+              class="col-2 dropdown-toggle"
+              id="dropdownMenuButton"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="language-options"
+              data-display="static"
             >
+              {{ selected_language }}
+            </div>
+
+            <div
+              class="dropdown-menu dropdown-menu-left"
+              aria-labelledby="dropdownMenuButton"
+            >
+              {% for language in language_options %}
+              {% if language == selected_language %}
+              <div
+                class="dropdown-item language-filter-option selected"
+                data-value="{{ language }}"
+              >
+                {% else %}
+                <div
+                  class="dropdown-item language-filter-option"
+                  data-value="{{ language }}"
+                >
+                  {% endif %}
+                  {{ language }}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
           </div>
-          {% endfor %}
+          {% else %}
+          {% for topic in topics %}
+          {% if selected_topic == topic %}
+          <div class="topic selected">
+            {% else %}
+            <div class="topic">
+              {% endif %}
+              <a href="{% pageurl page %}?topic={{ topic | urlencode }}"
+                >{{ topic }}</a
+              >
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
+
         <div class="courseware">
           <div class="tab-block">
             <div class="container">
@@ -207,7 +213,7 @@
                 >
                   <span>Sort By:</span>
                   <div
-                    class="col-2 dropdown-toggle"
+                    class="col-2 dropdown-toggle-sorting"
                     id="dropdownMenuButton"
                     data-toggle="dropdown"
                     aria-haspopup="true"
