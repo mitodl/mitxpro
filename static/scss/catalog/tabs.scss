@@ -39,6 +39,7 @@
 
     @media (width <= 1024px) {
       min-width: unset;
+      padding-right: 0;
     }
   }
 
@@ -58,11 +59,11 @@
     list-style-type: none;
     padding: 0;
     width: 100%;
-    margin: 35px 0 0;
+    margin: 40px 16px 0;
     border-bottom: unset;
 
-    @include media-breakpoint-down(sm) {
-      margin-left: 15px;
+    @include media-breakpoint-down(md) {
+      margin: 32px 0 0;
     }
 
     li {
@@ -103,20 +104,29 @@
   }
 
   .tab-content {
-    padding: 30px 0 0;
+    padding: 16px 16px 0 0;
 
     @include media-breakpoint-down(md) {
-      padding-left: 20px;
+      padding: 16px 0 0;
     }
 
     .empty-catalog-message {
       display: flex;
-      flex-direction: column;
-      margin-top: 90px;
+      height: 188px;
+      padding: 8px;
       justify-content: center;
       align-items: center;
-      height: 100%;
-      text-align: center;
+      gap: 8px;
+      border-radius: 4px;
+      background: #f3f4f8;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: normal;
+
+      @include media-breakpoint-up(lg) {
+        min-width: 746px;
+      }
     }
   }
 }
@@ -124,6 +134,10 @@
 .nav-tabs-container {
   display: inline-block;
   flex-grow: 1;
+
+  @include media-breakpoint-down(sm) {
+    display: flex;
+  }
 }
 
 .catalog-nav-head {
@@ -131,7 +145,6 @@
   justify-content: space-between;
   align-items: flex-start;
   width: 100%;
-  margin-top: 35px;
 
   @include media-breakpoint-down(sm) {
     display: block;
@@ -141,9 +154,9 @@
 .catalog-sort-by-dropdown {
   margin-left: 20px;
   display: inline-flex;
-  padding: 10px;
+  padding: 8px 0;
   white-space: nowrap;
-  margin-top: 25px;
+  margin-top: 30px;
   border: 2px solid transparent;
 
   &.show,
@@ -154,29 +167,44 @@
   }
 
   @include media-breakpoint-down(md) {
-    margin-left: 20px;
+    margin-left: 16px;
+    margin-top: 21px;
+  }
+
+  @include media-breakpoint-up(lg) {
+    margin-right: 16px;
   }
 
   @include media-breakpoint-down(sm) {
-    margin-left: 23px;
+    margin-left: 16px;
+    margin-top: 16px;
   }
 
   .dropdown-toggle {
-    color: #626a73;
+    color: #212326;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: space-between;
 
     &::after {
       content: "chevron_right";
       font-family: "Material Icons";
       transform: rotate(90deg);
-      line-height: 18px;
+      line-height: 1;
       display: inline-block;
       margin-left: unset;
-      vertical-align: -3px;
       border-top: unset;
       border-right: unset;
       border-bottom: unset;
       border-left: unset;
     }
+  }
+
+  .dropdown-toggle-sorting {
+    @extend .dropdown-toggle;
+
+    color: #626a73;
   }
 
   .dropdown-menu {
@@ -219,11 +247,32 @@
   margin-left: 0;
   border: none;
   margin-bottom: 32px;
+  margin-top: 30px;
   padding: 0;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 18px;
+
+  @include media-breakpoint-down(md) {
+    margin-bottom: 0;
+    flex: 1;
+    margin-left: 0;
+    margin-top: 0;
+  }
 
   &.show,
   &:hover {
     border: none;
+  }
+
+  .filter-label {
+    color: #626a73;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 18px;
+    display: block;
   }
 
   .dropdown-toggle {
@@ -232,6 +281,11 @@
     width: 220px;
     border-radius: 4px;
     text-wrap-mode: wrap;
+    margin-top: 4px;
+
+    @include media-breakpoint-down(md) {
+      width: 100%;
+    }
 
     &::after {
       float: right;
