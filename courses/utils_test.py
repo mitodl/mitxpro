@@ -198,13 +198,14 @@ def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success)
     """
     settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
     mocker.patch.object(CourseDetails, "get_detail", side_effect=[mocked_api_response])
-    course_run = CourseRunFactory.create()
-    success_count, failure_count = sync_course_runs([course_run])
+    course_run = CourseRunFactory.create(expiration_date=None)
+    success_count, failure_count, unchanged_count = sync_course_runs([course_run])
 
     if expect_success:
         course_run.refresh_from_db()
         assert success_count == 1
         assert failure_count == 0
+        assert unchanged_count == 0
         assert course_run.title == mocked_api_response.name
         assert course_run.start_date == mocked_api_response.start
         assert course_run.end_date == mocked_api_response.end
@@ -213,6 +214,7 @@ def test_sync_course_runs(settings, mocker, mocked_api_response, expect_success)
     else:
         assert success_count == 0
         assert failure_count == 1
+        assert unchanged_count == 0
 
 
 def test_catalog_visible_languages():

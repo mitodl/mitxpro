@@ -22,7 +22,6 @@ from courses.constants import (
     ENROLL_CHANGE_STATUS_CHOICES,
     ENROLLABLE_ITEM_ID_SEPARATOR,
 )
-from courses.exceptions import CourseRunDateValidationError
 from courseware.utils import edx_redirect_url
 from ecommerce.models import Product
 from mitxpro.models import AuditableModel, AuditModel, TimestampedModel
@@ -794,7 +793,7 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
             self.expiration_date,
         )
         if not is_valid:
-            raise CourseRunDateValidationError(error_msg)
+            raise ValidationError(error_msg)  # noqa: EM101
 
     def save(
         self,
