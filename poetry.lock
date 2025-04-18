@@ -1066,6 +1066,44 @@ s3 = ["boto3 (>=1.4.4)"]
 sftp = ["paramiko (>=1.15)"]
 
 [[package]]
+name = "django-stubs"
+version = "5.1.3"
+description = "Mypy stubs for Django"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "django_stubs-5.1.3-py3-none-any.whl", hash = "sha256:716758ced158b439213062e52de6df3cff7c586f9f9ad7ab59210efbea5dfe78"},
+    {file = "django_stubs-5.1.3.tar.gz", hash = "sha256:8c230bc5bebee6da282ba8a27ad1503c84a0c4cd2f46e63d149e76d2a63e639a"},
+]
+
+[package.dependencies]
+asgiref = "*"
+django = "*"
+django-stubs-ext = ">=5.1.3"
+types-PyYAML = "*"
+typing-extensions = ">=4.11.0"
+
+[package.extras]
+compatible-mypy = ["mypy (>=1.12,<1.16)"]
+oracle = ["oracledb"]
+redis = ["redis"]
+
+[[package]]
+name = "django-stubs-ext"
+version = "5.1.3"
+description = "Monkey-patching and extensions for django-stubs"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "django_stubs_ext-5.1.3-py3-none-any.whl", hash = "sha256:64561fbc53e963cc1eed2c8eb27e18b8e48dcb90771205180fe29fc8a59e55fd"},
+    {file = "django_stubs_ext-5.1.3.tar.gz", hash = "sha256:3e60f82337f0d40a362f349bf15539144b96e4ceb4dbd0239be1cd71f6a74ad0"},
+]
+
+[package.dependencies]
+django = "*"
+typing-extensions = "*"
+
+[[package]]
 name = "django-taggit"
 version = "4.0.0"
 description = "django-taggit is a reusable Django application for simple tagging."
@@ -1078,17 +1116,6 @@ files = [
 
 [package.dependencies]
 Django = ">=3.2"
-
-[[package]]
-name = "django-templated-mail"
-version = "1.1.1"
-description = "Send emails using Django template system."
-optional = false
-python-versions = "*"
-files = [
-    {file = "django-templated-mail-1.1.1.tar.gz", hash = "sha256:8db807effebb42a532622e2d142dfd453dafcd0d7794c4c3332acb90656315f9"},
-    {file = "django_templated_mail-1.1.1-py3-none-any.whl", hash = "sha256:f7127e1e31d7cad4e6c4b4801d25814d4b8782627ead76f4a75b3b7650687556"},
-]
 
 [[package]]
 name = "django-treebeard"
@@ -1170,18 +1197,17 @@ test = ["cryptography", "freezegun", "pytest", "pytest-cov", "pytest-django", "p
 
 [[package]]
 name = "djoser"
-version = "2.2.2"
+version = "2.3.1"
 description = "REST implementation of Django authentication system."
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "djoser-2.2.2-py3-none-any.whl", hash = "sha256:efb91ad61e4d5b8d664db029b5947df9d34078289ef2680a1ab665e047144b74"},
-    {file = "djoser-2.2.2.tar.gz", hash = "sha256:9deb831a1c8781ceff325699e1407b4e1be8b4588e87071621d88ba31c09349f"},
+    {file = "djoser-2.3.1-py3-none-any.whl", hash = "sha256:386f337b9e05cb82354525fe2b6fec19fb1743e93e53b5b4b9dfaffccc38789f"},
+    {file = "djoser-2.3.1.tar.gz", hash = "sha256:4e7e2716b5b961f1289b5e49b2216ba5c18eb2a3b4b597dd6430638716ff5107"},
 ]
 
 [package.dependencies]
 django = ">=3.0.0"
-django-templated-mail = ">=1.1.1,<2.0.0"
 djangorestframework-simplejwt = ">=5.0,<6.0"
 social-auth-app-django = ">=5.0.0,<6.0.0"
 
@@ -2200,23 +2226,27 @@ files = [
 
 [[package]]
 name = "mitol-django-authentication"
-version = "2023.12.19"
+version = "2025.3.17"
 description = "MIT Open Learning django app extensions for oauth toolkit"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 files = [
-    {file = "mitol-django-authentication-2023.12.19.tar.gz", hash = "sha256:67502ec0ec91f5be36affed52e872726d1d9f528a35f8c9fce2179409e516cb7"},
-    {file = "mitol_django_authentication-2023.12.19-py3-none-any.whl", hash = "sha256:f925ff2e76cfd93e7610168fcb3cd6b2d0ece1772f0f3af0217c1417b8bd4f84"},
+    {file = "mitol_django_authentication-2025.3.17-py3-none-any.whl", hash = "sha256:f3849bc2469bcbe78fed9b0e999dfed2bf6c9d2923c4e2420d6d54a71f8a99bb"},
+    {file = "mitol_django_authentication-2025.3.17.tar.gz", hash = "sha256:296f3f4ef03722560da5435fc16d5844fc6bbbb8685fdce325dbc95044354952"},
 ]
 
 [package.dependencies]
 django = ">=3.0"
 django-anymail = ">=6.0"
+django-stubs = ">=1.13.1"
 djangorestframework = ">=3.0.0"
-djoser = "2.2.2"
+djoser = "2.3.1"
 mitol-django-common = "*"
 mitol-django-mail = "*"
 social-auth-app-django = ">=5.4.0"
+
+[package.extras]
+touchstone = ["python3-saml (>=1.10.1)"]
 
 [[package]]
 name = "mitol-django-common"
@@ -3920,6 +3950,17 @@ shellingham = ">=1.3.0"
 typing-extensions = ">=3.7.4.3"
 
 [[package]]
+name = "types-pyyaml"
+version = "6.0.12.20250402"
+description = "Typing stubs for PyYAML"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "types_pyyaml-6.0.12.20250402-py3-none-any.whl", hash = "sha256:652348fa9e7a203d4b0d21066dfb00760d3cbd5a15ebb7cf8d33c88a49546681"},
+    {file = "types_pyyaml-6.0.12.20250402.tar.gz", hash = "sha256:d7c13c3e6d335b6af4b0122a01ff1d270aba84ab96d1a1a1063ecba3e13ec075"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -4226,4 +4267,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "907326ac3658058619e45af1125b1b4e8144f47aee1f5fc9016a4e454ef8bf70"
+content-hash = "7253095282129ff5e2884b455093eb01e27855262508df69d2fa65c82a7ac046"
