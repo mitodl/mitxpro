@@ -45,10 +45,10 @@ class Command(BaseCommand):
                 Q(expiration_date__isnull=True) | Q(expiration_date__gt=now)
             )
 
-        success_count, error_count = sync_course_runs(runs)
+        success_count, error_count, unchanged_count = sync_course_runs(runs)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sync complete: {success_count} updated, {error_count} failures"
+                f"Sync complete: {success_count} updated, {error_count} failures, {unchanged_count} unchanged."
             )
         )

@@ -258,7 +258,8 @@ def sync_course_runs(runs):
         runs ([CourseRun]): list of CourseRun objects.
 
     Returns:
-        [str], [str]: Lists of success and error logs respectively
+        (int, int, int): A tuple containing the number of successful updates,
+        failed updates, and unchanged course runs.
     """
     api_client = get_edx_api_course_detail_client()
 
@@ -297,21 +298,17 @@ def sync_course_runs(runs):
 
             for api_field, model_field in field_mapping.items():
                 api_value = getattr(course_detail, api_field)
-                current_value = getattr(run, model_field)
+                model_value = getattr(run, model_field)
 
-                if api_value != current_value:
+                if api_value != model_value:
                     has_changes = True
                     setattr(run, model_field, api_value)
 
-            # Reset the expiration_date so it is calculated automatically and
-            # does not raise a validation error now that the start or end date
-            # has changed.
-            if (
-                run.start_date != course_detail.start
-                or run.end_date != course_detail.end
-            ):
-                run.expiration_date = None
-                has_changes = True
+                    # Reset the expiration_date so it is calculated automatically and
+                    # does not raise a validation error now that the start or end date
+                    # has changed.
+                    if model_field in ("start_date", "end_date"):
+                        run.expiration_date = None
 
             if not has_changes:
                 log.info(
