@@ -4,8 +4,11 @@ Utilities for courses/certificates
 
 import logging
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
+from requests.exceptions import HTTPError
+from rest_framework.status import HTTP_404_NOT_FOUND
 
 from courses.constants import PROGRAM_TEXT_ID_PREFIX
 from courses.models import (
@@ -17,7 +20,7 @@ from courses.models import (
     ProgramEnrollment,
     CourseLanguage,
 )
-from courseware.api import get_edx_api_course_list_client
+from courseware.api import get_edx_api_course_detail_client
 from mitxpro.utils import has_equal_properties, now_in_utc
 
 log = logging.getLogger(__name__)
@@ -258,7 +261,7 @@ def sync_course_runs(runs):
         (int, int, int): A tuple containing the number of successful updates,
         failed updates, and unchanged course runs.
     """
-    api_client = get_edx_api_course_list_client()
+    api_client = get_edx_api_course_detail_client()
 
     success_count = 0
     failure_count = 0
@@ -272,64 +275,56 @@ def sync_course_runs(runs):
         "enrollment_end": "enrollment_end",
     }
 
-    try:
-        course_list = api_client.get_courses()
-
-        for run in runs:
-            try:
-                course_detail = course_list.courses.get(run.courseware_id)
-
-                if not course_detail:
-                    failure_count += 1
-                    log.error(
-                        "Course not found on edX for readable id: %s", run.courseware_id
-                    )
-                    continue
-
-                has_changes = False
-
-                for api_field, model_field in field_mapping.items():
-                    api_value = getattr(course_detail, api_field)
-                    model_value = getattr(run, model_field)
-
-                    if api_value != model_value:
-                        has_changes = True
-                        setattr(run, model_field, api_value)
-
-                        # Reset the expiration_date so it is calculated automatically and
-                        # does not raise a validation error now that the start or end date
-                        # has changed.
-                        if model_field in ("start_date", "end_date"):
-                            run.expiration_date = None
-
-                if not has_changes:
-                    log.info(
-                        "No changes detected for %s, skipping update", run.courseware_id
-                    )
-                    unchanged_count += 1
-                    continue
-
-                try:
-                    run.save()
-                    success_count += 1
-                    log.info("Updated course run: %s", run.courseware_id)
-                except Exception as e:  # noqa: BLE001
-                    # Report any other model errors as errors
-                    log.error("%s: %s", str(e), run.courseware_id)
-                    failure_count += 1
-
-            except KeyError:
-                failure_count += 1
-                log.error(
+    # Iterate all eligible runs and sync if possible
+    for run in runs:
+        try:
+            course_detail = api_client.get_detail(
+                course_id=run.courseware_id,
+                username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
+            )
+        except HTTPError as e:
+            failure_count += 1
+            if e.response.status_code == HTTP_404_NOT_FOUND:
+                log.error(  # noqa: TRY400
                     "Course not found on edX for readable id: %s", run.courseware_id
                 )
-            except Exception as e:  # noqa: BLE001
-                failure_count += 1
-                log.error("%s: %s", str(e), run.courseware_id)
+            else:
+                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
+        except Exception as e:  # noqa: BLE001
+            failure_count += 1
+            log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
+        else:
+            has_changes = False
 
-    except Exception as e:  # noqa: BLE001
-        log.error("Error fetching course list: %s", str(e))
-        failure_count += len(runs)
+            for api_field, model_field in field_mapping.items():
+                api_value = getattr(course_detail, api_field)
+                model_value = getattr(run, model_field)
+
+                if api_value != model_value:
+                    has_changes = True
+                    setattr(run, model_field, api_value)
+
+                    # Reset the expiration_date so it is calculated automatically and
+                    # does not raise a validation error now that the start or end date
+                    # has changed.
+                    if model_field in ("start_date", "end_date"):
+                        run.expiration_date = None
+
+            if not has_changes:
+                log.info(
+                    "No changes detected for %s, skipping update", run.courseware_id
+                )
+                unchanged_count += 1
+                continue
+
+            try:
+                run.save()
+                success_count += 1
+                log.info("Updated course run: %s", run.courseware_id)
+            except Exception as e:  # noqa: BLE001
+                # Report any other model errors as errors
+                log.error("%s: %s", str(e), run.courseware_id)
+                failure_count += 1
 
     return success_count, failure_count, unchanged_count
 
