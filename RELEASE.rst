@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.177.2
+---------------
+
+- chore(deps): update actions/setup-python digest to 8d9ed9a (#3448)
+- [pre-commit.ci] pre-commit autoupdate (#3466)
+- Areeb/7122 certificate django admin enhancements (#3465)
+- fix(deps): update dependency django-anymail to v13 (#3455)
+- [pre-commit.ci] pre-commit autoupdate (#3462)
+- fix: welcome email revisions (#3440)
+
 Version 0.177.1 (Released April 15, 2025)
 ---------------
 
