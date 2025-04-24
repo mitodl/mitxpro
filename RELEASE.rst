@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.177.2
+Version 0.177.2 (Released April 24, 2025)
 ---------------
 
 - chore(deps): update actions/setup-python digest to 8d9ed9a (#3448)
