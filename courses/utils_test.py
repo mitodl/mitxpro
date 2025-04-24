@@ -8,7 +8,6 @@ from unittest.mock import Mock
 
 import factory
 import pytest
-from django.utils.dateparse import parse_datetime
 from edx_api.course_detail import CourseDetail, CourseDetails
 from requests.exceptions import HTTPError
 
@@ -221,11 +220,11 @@ def test_sync_course_runs(
     if expect_unchanged:
         course_run = CourseRunFactory.create(
             expiration_date=None,
-            title="Existing Course Name",
-            start_date=parse_datetime("2098-01-01T00:00:00Z"),
-            end_date=parse_datetime("2099-02-01T00:00:00Z"),
-            enrollment_start=parse_datetime("2098-01-01T00:00:00Z"),
-            enrollment_end=parse_datetime("2099-02-01T00:00:00Z"),
+            title=mocked_api_response.name,
+            start_date=mocked_api_response.start,
+            end_date=mocked_api_response.end,
+            enrollment_start=mocked_api_response.enrollment_start,
+            enrollment_end=mocked_api_response.enrollment_end,
         )
     else:
         course_run = CourseRunFactory.create(expiration_date=None)
@@ -250,6 +249,67 @@ def test_sync_course_runs(
         assert success_count == 0
         assert failure_count == 1
         assert unchanged_count == 0
+
+
+@pytest.mark.parametrize(
+    "mocked_api_responses, expected_counts",  # noqa: PT006
+    [
+        [  # noqa: PT007
+            [
+                CourseDetail(
+                    {
+                        "id": "course-v1:edX+Success+2020",
+                        "start": "2098-01-01T00:00:00Z",
+                        "end": "2099-02-01T00:00:00Z",
+                        "enrollment_start": "2098-01-01T00:00:00Z",
+                        "enrollment_end": "2099-02-01T00:00:00Z",
+                        "name": "Success Course",
+                    }
+                ),
+                HTTPError(response=Mock(status_code=404)),
+                CourseDetail(
+                    {
+                        "id": "course-v1:edX+Unchanged+2020",
+                        "start": "2098-01-01T00:00:00Z",
+                        "end": "2099-02-01T00:00:00Z",
+                        "enrollment_start": "2098-01-01T00:00:00Z",
+                        "enrollment_end": "2099-02-01T00:00:00Z",
+                        "name": "Unchanged Course",
+                    }
+                ),
+            ],
+            {"success": 1, "failure": 1, "unchanged": 1},
+        ],
+    ],
+)
+def test_sync_course_runs_combined(
+    settings, mocker, mocked_api_responses, expected_counts
+):
+    """
+    Test that sync_course_runs correctly handles a mix of success,
+    failure, and unchanged course runs
+    """
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
+    mocker.patch.object(CourseDetails, "get_detail", side_effect=mocked_api_responses)
+
+    course_runs = [
+        CourseRunFactory.create(expiration_date=None),
+        CourseRunFactory.create(expiration_date=None),
+        CourseRunFactory.create(
+            expiration_date=None,
+            title=mocked_api_responses[2].name,
+            start_date=mocked_api_responses[2].start,
+            end_date=mocked_api_responses[2].end,
+            enrollment_start=mocked_api_responses[2].enrollment_start,
+            enrollment_end=mocked_api_responses[2].enrollment_end,
+        ),
+    ]
+
+    success_count, failure_count, unchanged_count = sync_course_runs(course_runs)
+
+    assert success_count == expected_counts["success"]
+    assert failure_count == expected_counts["failure"]
+    assert unchanged_count == expected_counts["unchanged"]
 
 
 def test_catalog_visible_languages():
