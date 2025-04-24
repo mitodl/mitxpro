@@ -277,6 +277,9 @@ def sync_course_runs(runs):
 
     # Iterate all eligible runs and sync if possible
     for run in runs:
+        if run.course.is_external:
+            continue
+
         try:
             course_detail = api_client.get_detail(
                 course_id=run.courseware_id,
