@@ -28,7 +28,6 @@ def test_sync_courseruns_data(mocker):
         size=3, course__live=True
     )
     CourseRunFactory.create_batch(size=3, course__live=False)
-    CourseRunFactory.create_batch(size=3, course__is_external=True)
 
     sync_courseruns_data.delay()
     sync_course_runs.assert_called_once()
