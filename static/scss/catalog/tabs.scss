@@ -199,6 +199,14 @@
       border-bottom: unset;
       border-left: unset;
     }
+
+    .selected-dropdown-text {
+      @include media-breakpoint-down(md) {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
   }
 
   .dropdown-toggle-sorting {
@@ -284,7 +292,11 @@
     margin-top: 4px;
 
     @include media-breakpoint-down(md) {
-      width: 100%;
+      width: 352px;
+    }
+
+    @include media-breakpoint-down(sm) {
+      width: 393px;
     }
 
     &::after {

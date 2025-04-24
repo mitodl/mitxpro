@@ -34,7 +34,9 @@
             aria-label="topic-options"
             data-display="static"
           >
-            {{ selected_topic }}
+            <div class="selected-dropdown-text">
+              {{ selected_topic }}
+            </div>
           </div>
 
           <div
@@ -73,7 +75,9 @@
               aria-label="language-options"
               data-display="static"
             >
-              {{ selected_language }}
+              <div class="selected-dropdown-text">
+                {{ selected_language }}
+              </div>
             </div>
 
             <div
@@ -298,7 +302,6 @@
                         {% if not program_pages %}
                         {% include "partials/catalog_empty.html" %}
                         {% else %}
-                        <h1>PROGRAMS</h1>
                         {% for program_page in program_pages %}
                         {% include "partials/catalog_card.html" with courseware_page=program_page object_type="program" tab="program" %}
                         {% endfor %}
@@ -323,7 +326,6 @@
                           {% if not course_pages %}
                           {% include "partials/catalog_empty.html" %}
                           {% else %}
-                          <h1>COURSES</h1>
                           {% for course_page in course_pages %}
                           {% include "partials/catalog_card.html" with courseware_page=course_page object_type="course" tab="course" %}
                           {% endfor %}
