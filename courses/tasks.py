@@ -108,6 +108,7 @@ def sync_courseruns_data():
     runs = list(
         CourseRun.objects.live().filter(
             Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
+            course__is_external=False,
             course__live=True,
         )
     )

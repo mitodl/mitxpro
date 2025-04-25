@@ -42,7 +42,9 @@ class Command(BaseCommand):
             # course run id.
             now = now_in_utc()
             runs = CourseRun.objects.live().filter(
-                Q(expiration_date__isnull=True) | Q(expiration_date__gt=now)
+                Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
+                course__is_external=False,
+                course__live=True,
             )
 
         success_count, error_count, unchanged_count = sync_course_runs(runs)
