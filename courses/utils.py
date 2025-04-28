@@ -258,12 +258,22 @@ def sync_course_runs(runs):
         runs ([CourseRun]): list of CourseRun objects.
 
     Returns:
-        [str], [str]: Lists of success and error logs respectively
+        (int, int, int): A tuple containing the number of successful updates,
+        failed updates, and unchanged course runs.
     """
     api_client = get_edx_api_course_detail_client()
 
     success_count = 0
     failure_count = 0
+    unchanged_count = 0
+
+    field_mapping = {
+        "name": "title",
+        "start": "start_date",
+        "end": "end_date",
+        "enrollment_start": "enrollment_start",
+        "enrollment_end": "enrollment_end",
+    }
 
     # Iterate all eligible runs and sync if possible
     for run in runs:
@@ -284,30 +294,39 @@ def sync_course_runs(runs):
             failure_count += 1
             log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
         else:
-            # Reset the expiration_date so it is calculated automatically and
-            # does not raise a validation error now that the start or end date
-            # has changed.
-            if (
-                run.start_date != course_detail.start
-                or run.end_date != course_detail.end
-            ):
-                run.expiration_date = None
+            has_changes = False
 
-            run.title = course_detail.name
-            run.start_date = course_detail.start
-            run.end_date = course_detail.end
-            run.enrollment_start = course_detail.enrollment_start
-            run.enrollment_end = course_detail.enrollment_end
+            for api_field, model_field in field_mapping.items():
+                api_value = getattr(course_detail, api_field)
+                model_value = getattr(run, model_field)
+
+                if api_value != model_value:
+                    has_changes = True
+                    setattr(run, model_field, api_value)
+
+                    # Reset the expiration_date so it is calculated automatically and
+                    # does not raise a validation error now that the start or end date
+                    # has changed.
+                    if model_field in ("start_date", "end_date"):
+                        run.expiration_date = None
+
+            if not has_changes:
+                log.info(
+                    "No changes detected for %s, skipping update", run.courseware_id
+                )
+                unchanged_count += 1
+                continue
+
             try:
                 run.save()
                 success_count += 1
                 log.info("Updated course run: %s", run.courseware_id)
             except Exception as e:  # noqa: BLE001
                 # Report any validation or otherwise model errors
-                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
+                log.error("%s: %s", str(e), run.courseware_id)
                 failure_count += 1
 
-    return success_count, failure_count
+    return success_count, failure_count, unchanged_count
 
 
 def is_program_text_id(item_text_id):

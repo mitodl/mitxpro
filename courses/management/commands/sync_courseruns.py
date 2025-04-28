@@ -42,13 +42,14 @@ class Command(BaseCommand):
             # course run id.
             now = now_in_utc()
             runs = CourseRun.objects.live().filter(
-                Q(expiration_date__isnull=True) | Q(expiration_date__gt=now)
+                Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
+                course__is_external=False,
             )
 
-        success_count, error_count = sync_course_runs(runs)
+        success_count, error_count, unchanged_count = sync_course_runs(runs)
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sync complete: {success_count} updated, {error_count} failures"
+                f"Sync complete: {success_count} updated, {error_count} failures, {unchanged_count} unchanged."
             )
         )
