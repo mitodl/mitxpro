@@ -44,7 +44,6 @@ class Command(BaseCommand):
             runs = CourseRun.objects.live().filter(
                 Q(expiration_date__isnull=True) | Q(expiration_date__gt=now),
                 course__is_external=False,
-                course__live=True,
             )
 
         success_count, error_count, unchanged_count = sync_course_runs(runs)
