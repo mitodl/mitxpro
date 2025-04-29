@@ -14,3 +14,6 @@
 [libs]
 ./static/js/flow/declarations.js
 ./flow-typed/npm/
+
+[options]
+module.file_ext=.cjs
