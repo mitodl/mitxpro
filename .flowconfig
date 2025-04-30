@@ -17,3 +17,6 @@
 
 [options]
 module.file_ext=.cjs
+
+[lints]
+libdef-override=off
