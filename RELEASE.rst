@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.178.0
+Version 0.178.0 (Released April 30, 2025)
 ---------------
 
 - style: improve the styling of filters on the catalog page (#3439)
