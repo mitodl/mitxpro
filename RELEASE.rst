@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.178.1 (Released May 08, 2025)
+---------------
+
+- chore(deps): lock file maintenance (#3459)
+- fix: only update changed courseruns (#3464)
+
 Version 0.178.0 (Released April 30, 2025)
 ---------------
 
