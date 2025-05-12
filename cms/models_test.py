@@ -266,7 +266,6 @@ def test_catalog_page_language_context(
     """
     Verify the language context is properly passed to the catalog_page.html
     """
-    mocker.patch("cms.models.is_enabled", return_value=True)
     CourseLanguage.objects.all().delete()
     # Verify that all the languages are deleted. This will help us understand and debug the failures in future.
     assert CourseLanguage.objects.all().count() == 0
