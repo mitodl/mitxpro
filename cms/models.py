@@ -97,8 +97,6 @@ from courses.models import (
 )
 from courses.utils import get_catalog_languages
 from ecommerce.models import Product
-from mitol.olposthog.features import is_enabled
-from mitxpro.features import CATALOG_LANGUAGE_FILTER
 from mitxpro.utils import now_in_utc
 from mitxpro.views import get_base_context
 from courses.serializers import CourseSerializer, ProgramSerializer
@@ -527,8 +525,6 @@ class CatalogPage(Page):
         topic_filter = request.GET.get("topic", ALL_TOPICS)
         language_filter = request.GET.get("language", ALL_LANGUAGES)
 
-        is_language_filter_enabled = is_enabled(CATALOG_LANGUAGE_FILTER, default=False)
-
         # Best Match is the default sorting.
         sort_by = request.GET.get("sort-by", CatalogSorting.BEST_MATCH.sorting_value)
         try:
@@ -680,11 +676,8 @@ class CatalogPage(Page):
                 }
                 for sorting_option in CatalogSorting
             ],
-            show_language_filter=is_language_filter_enabled,
             selected_language=language_filter,
-            language_options=[ALL_LANGUAGES, *get_catalog_languages()]
-            if is_language_filter_enabled
-            else [],
+            language_options=[ALL_LANGUAGES, *get_catalog_languages()],
         )
 
 

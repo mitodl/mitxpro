@@ -153,8 +153,8 @@ def create_run_enrollments(
             )
         else:
             successful_enrollments.append(enrollment)
-            if enrollment.edx_enrolled:
-                mail_api.send_course_run_enrollment_welcome_email(enrollment)
+            # if enrollment.edx_enrolled:
+            mail_api.send_course_run_enrollment_welcome_email(enrollment)
     return successful_enrollments, edx_request_success
 
 
