@@ -186,7 +186,7 @@ def send_course_run_enrollment_welcome_email(enrollment):
     run_start_date, run_start_time = format_run_date(enrollment.run.start_date)
     run_end_date, run_end_time = format_run_date(enrollment.run.end_date)
     coursepage = getattr(enrollment.run.course, "coursepage", None)
-    run_duration = getattr(coursepage, "max_weeks", None) if coursepage else None
+    run_duration = getattr(coursepage, "max_weeks", None)
 
     try:
         user = enrollment.user
