@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.178.2
+---------------
+
+- fix: check for coursepage before getting max_weeks (#3477)
+- fix(deps): update dependency django to v4.2.21 [security] (#3478)
+- chore(deps): update codecov/codecov-action digest to ad3126e (#3473)
+- chore(deps): update actions/setup-python digest to a26af69 (#3472)
+- fix(deps): update dependency uwsgi to v2.0.29 (#3476)
+- fix(deps): update dependency celery to v5.5.2 (#3475)
+- chore(deps): update redis docker tag to v7.4.3 (#3474)
+
 Version 0.178.1 (Released May 08, 2025)
 ---------------
 
