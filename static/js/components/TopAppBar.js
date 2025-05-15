@@ -1,6 +1,6 @@
 // @flow
 /* global SETTINGS: false */
-import React from "react";
+import React, { useState } from "react";
 
 import { routes } from "../lib/urls";
 import MixedLink from "./MixedLink";
@@ -30,97 +30,135 @@ const TopAppBar = ({
   location,
   errorPageHeader,
   courseTopics,
-}: Props) => (
-  <header className="header-holder">
-    <div className="container">
-      <nav className="sub-nav navbar navbar-expand-md link-section">
-        <a href={routes.root} className="xpro-link">
-          <img
-            src="/static/images/mit-xpro-logo.svg"
-            className="site-logo"
-            alt={SETTINGS.site_name}
-          />
+}: Props) => {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const toggleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
+    document.body.style.overflow = !drawerOpen ? "hidden" : "";
+  };
+
+  const navigationItems = (
+    <>
+      <li>
+        <CatalogMenu courseTopics={courseTopics} />
+      </li>
+      {SETTINGS.enable_enterprise ? (
+        <li>
+          <a
+            href={routes.enterprise}
+            className="enterprise-link"
+            aria-label="enterprise"
+          >
+            Enterprise
+          </a>
+        </li>
+      ) : null}
+      <li>
+        <a
+          href={routes.webinars}
+          className="webinar-link"
+          aria-label="webinars"
+        >
+          Webinars
         </a>
-        {errorPageHeader ? null : (
-          <button
-            className="navbar-toggler nav-opener"
-            type="button"
-            data-toggle="collapse"
-            data-target="#nav"
-            aria-controls="nav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span className="navbar-toggler-icon" />
-            Menu
-          </button>
-        )}
-        {errorPageHeader ? null : (
-          <ul
-            id="nav"
-            className="collapse navbar-collapse px-0 justify-content-end"
-          >
+      </li>
+      <li>
+        <a href={routes.blog} className="blog-link" aria-label="blog">
+          Blog
+        </a>
+      </li>
+      {shouldShowLoginSignup(location) ? (
+        currentUser && currentUser.is_authenticated ? (
+          <li>
+            <UserMenu currentUser={currentUser} />
+          </li>
+        ) : (
+          <React.Fragment>
             <li>
-              <CatalogMenu courseTopics={courseTopics} />
-            </li>
-            {SETTINGS.enable_enterprise ? (
-              <li>
-                <a
-                  href={routes.enterprise}
-                  className="enterprise-link"
-                  aria-label="enterprise"
-                >
-                  Enterprise
-                </a>
-              </li>
-            ) : null}
-            <li>
-              <a
-                href={routes.webinars}
-                className="webinar-link"
-                aria-label="webinars"
+              <MixedLink
+                dest={routes.login.begin}
+                className="button"
+                aria-label="Login"
               >
-                Webinars
-              </a>
+                Sign In
+              </MixedLink>
             </li>
             <li>
-              <a href={routes.blog} className="blog-link" aria-label="blog">
-                Blog
-              </a>
+              <MixedLink
+                dest={routes.register.begin}
+                className="button"
+                aria-label="Login"
+              >
+                Create Account
+              </MixedLink>
             </li>
-            {shouldShowLoginSignup(location) ? (
-              currentUser && currentUser.is_authenticated ? (
-                <li>
-                  <UserMenu currentUser={currentUser} />
-                </li>
-              ) : (
-                <React.Fragment>
-                  <li>
-                    <MixedLink
-                      dest={routes.login.begin}
-                      className="button"
-                      aria-label="Login"
-                    >
-                      Sign In
-                    </MixedLink>
-                  </li>
-                  <li>
-                    <MixedLink
-                      dest={routes.register.begin}
-                      className="button"
-                      aria-label="Login"
-                    >
-                      Create Account
-                    </MixedLink>
-                  </li>
-                </React.Fragment>
-              )
-            ) : null}
-          </ul>
-        )}
-      </nav>
-    </div>
-  </header>
-);
+          </React.Fragment>
+        )
+      ) : null}
+    </>
+  );
+
+  return (
+    <header className="header-holder">
+      <div className="container">
+        <nav className="sub-nav navbar navbar-expand-md link-section">
+          <a href={routes.root} className="xpro-link">
+            <img
+              src="/static/images/mit-xpro-logo.svg"
+              className="site-logo"
+              alt={SETTINGS.site_name}
+            />
+          </a>
+          {errorPageHeader ? null : (
+            <button
+              className="navbar-toggler nav-opener"
+              type="button"
+              data-toggle="collapse"
+              data-target="#nav"
+              aria-controls="nav"
+              aria-expanded="false"
+              aria-label="Toggle navigation"
+            >
+              <span className="navbar-toggler-icon" />
+              Menu
+            </button>
+          )}
+          {errorPageHeader ? null : (
+            <>
+              <ul
+                id="nav"
+                className="navbar-collapse d-none d-md-flex px-0 justify-content-end"
+              >
+                {navigationItems}
+              </ul>
+              <div
+                className={`mobile-drawer d-md-none ${drawerOpen ? "open" : ""}`}
+              >
+                <div className="drawer-header">
+                  <button
+                    onClick={toggleDrawer}
+                    className="close-drawer"
+                    aria-label="Close menu"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <ul className="drawer-nav">{navigationItems}</ul>
+              </div>
+
+              {drawerOpen && (
+                <div
+                  className="drawer-overlay d-md-none"
+                  onClick={toggleDrawer}
+                />
+              )}
+            </>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+};
 
 export default TopAppBar;
