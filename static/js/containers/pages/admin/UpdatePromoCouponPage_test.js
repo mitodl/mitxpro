@@ -14,6 +14,10 @@ import {
   makeCourseRunProduct,
   makeProgramProduct,
 } from "../../../factories/ecommerce";
+import {
+  UPDATE_PROMO_COUPON_MODAL_BODY,
+  UPDATE_PROMO_COUPON_MODAL_HEADER,
+} from "../../../constants";
 
 describe("UpdatePromoCouponPage", () => {
   let helper, renderUpdatePromoCouponPage, setSubmittingStub;
@@ -62,11 +66,8 @@ describe("UpdatePromoCouponPage", () => {
     const { inner } = await renderUpdatePromoCouponPage();
     const modal = inner.find(ConfirmUpdateModal);
     assert.isTrue(modal.exists());
-    assert.equal(modal.props().headerMessage, "Update Promo Coupon");
-    assert.equal(
-      modal.props().bodyText,
-      "Update this promo coupon? This will overwrite existing product eligibility settings.",
-    );
+    assert.equal(modal.props().headerMessage, UPDATE_PROMO_COUPON_MODAL_HEADER);
+    assert.equal(modal.props().bodyText, UPDATE_PROMO_COUPON_MODAL_BODY);
   });
 
   it("filters private products from being passed to the form", async () => {
@@ -156,9 +157,7 @@ describe("UpdatePromoCouponPage", () => {
       },
     });
 
-    const { inner } = await renderUpdatePromoCouponPage({
-      updatePromoCoupon: updatePromoCouponStub,
-    });
+    const { inner } = await renderUpdatePromoCouponPage();
 
     // Set modal to open and coupon data
     await inner.instance().setState({

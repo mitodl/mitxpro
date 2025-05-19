@@ -2,7 +2,11 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { UPDATE_PROMO_COUPON_PAGE_TITLE } from "../../../constants";
+import {
+  UPDATE_PROMO_COUPON_MODAL_BODY,
+  UPDATE_PROMO_COUPON_MODAL_HEADER,
+  UPDATE_PROMO_COUPON_PAGE_TITLE,
+} from "../../../constants";
 import { connectRequest, mutateAsync } from "redux-query";
 import { compose } from "redux";
 import { connect } from "react-redux";
@@ -70,7 +74,7 @@ export class UpdatePromoCouponPage extends React.Component<Props, State> {
   };
 
   onModalSubmit = async () => {
-    const { updatePromoCoupon, forceRequest } = this.props;
+    const { updatePromoCoupon } = this.props;
     const { couponData } = this.state;
 
     couponData.product_ids = couponData.products.map((product) => product.id);
@@ -118,8 +122,8 @@ export class UpdatePromoCouponPage extends React.Component<Props, State> {
             toggle={this.toggleOpenConfirmModal}
             onConfirm={this.onModalSubmit}
             submitting={this.state.submitting}
-            headerMessage="Update Promo Coupon"
-            bodyText="Update this promo coupon? This will overwrite existing product eligibility settings."
+            headerMessage={UPDATE_PROMO_COUPON_MODAL_HEADER}
+            bodyText={UPDATE_PROMO_COUPON_MODAL_BODY}
           />
           <p>
             <Link to={routes.ecommerceAdmin.index}>

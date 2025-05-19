@@ -63,26 +63,26 @@ describe("DeactivateCouponPage", () => {
     const testCouponsData = {
       coupons: "abc\nbcd",
     };
-  
+
     helper.handleRequestStub.returns({
       body: {
         skipped_codes: ["xyz", "pqr"],
         num_of_coupons_deactivated: 1,
       },
     });
-  
+
     const { inner } = await renderDeactivateCouponPage();
-  
+
     await inner.instance().onSubmit(testCouponsData, {
       setSubmitting: setSubmittingStub,
     });
-  
+
     // Instead of simulating a button click, invoke the onConfirm directly
     const modal = inner.find(ConfirmUpdateModal);
     await modal.prop("onConfirm")();
-  
+
     await wait;
-  
+
     sinon.assert.calledWith(setSubmittingStub, false);
     sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "PUT", {
       body: testCouponsData,
@@ -91,9 +91,9 @@ describe("DeactivateCouponPage", () => {
       },
       credentials: undefined,
     });
-  
+
     assert.equal(inner.state().isDeactivated, true);
-  });  
+  });
 
   it("clearSuccess() changes state.isDeactivated", async () => {
     const { inner } = await renderDeactivateCouponPage();

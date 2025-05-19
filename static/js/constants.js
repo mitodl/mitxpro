@@ -143,3 +143,9 @@ export const ACCOUNT_SETTINGS_PAGE_TITLE = "Account Settings";
 export const EMAIL_CONFIRM_PAGE_TITLE = "Confirm Email Change";
 
 export const RECEIPT_PAGE_TITLE = "Receipt";
+export const DEACTIVATE_COUPONS_MODAL_HEADER = "Deactivate Coupon(s)";
+export const DEACTIVATE_COUPONS_MODAL_BODY =
+  "Are you sure you want to deactivate coupon(s)?";
+export const UPDATE_PROMO_COUPON_MODAL_HEADER = "Update Promo Coupon";
+export const UPDATE_PROMO_COUPON_MODAL_BODY =
+  "Update this promo coupon? This will overwrite existing product eligibility settings.";

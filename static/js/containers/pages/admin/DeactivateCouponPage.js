@@ -2,7 +2,11 @@
 /* global SETTINGS: false */
 import React from "react";
 import DocumentTitle from "react-document-title";
-import { DEACTIVATE_COUPONS_PAGE_TITLE } from "../../../constants";
+import {
+  DEACTIVATE_COUPONS_MODAL_BODY,
+  DEACTIVATE_COUPONS_MODAL_HEADER,
+  DEACTIVATE_COUPONS_PAGE_TITLE,
+} from "../../../constants";
 import { mutateAsync } from "redux-query";
 import { compose } from "redux";
 import { connect } from "react-redux";
@@ -102,8 +106,8 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
             toggle={this.toggleOpenConfirmModal}
             onConfirm={this.onModalSubmit}
             submitting={this.state.submitting}
-            headerMessage="Confirm Coupon Deactivation"
-            bodyText="Are you sure you want to deactivate coupon(s)?"
+            headerMessage={DEACTIVATE_COUPONS_MODAL_HEADER}
+            bodyText={DEACTIVATE_COUPONS_MODAL_BODY}
           />
           <p>
             <Link to={routes.ecommerceAdmin.index}>
