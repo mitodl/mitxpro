@@ -246,7 +246,7 @@ export const PromoCouponUpdateForm = ({
             />
             All products
           </div>
-          {values.product_type != "" && (
+          {values.product_type !== "" && (
             <p className="small-text warning">
               {" "}
               Switch to All Products to select both course runs and
