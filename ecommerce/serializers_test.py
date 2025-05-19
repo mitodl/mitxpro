@@ -3,7 +3,7 @@ Tests for ecommerce serializers
 """
 
 from decimal import Decimal
-
+from datetime import timedelta
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -19,6 +19,7 @@ from courses.serializers import CourseSerializer
 from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
+    CouponEligibilityFactory,
     CompanyFactory,
     CouponFactory,
     CouponPaymentFactory,
@@ -43,8 +44,10 @@ from ecommerce.serializers import (
     OrderReceiptSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
+    PromoCouponGetSerializer,
     SingleUseCouponSerializer,
 )
+from mitxpro.utils import now_in_utc
 from mitxpro.test_utils import any_instance_of
 
 pytestmark = [pytest.mark.django_db]
@@ -585,3 +588,32 @@ def test_serialize_program_run():
         "start_date": program_run.start_date,
         "end_date": program_run.end_date,
     }
+
+
+def test_promo_coupon_get_serializer():
+    """Test PromoCouponGetSerializer with different product visibility"""
+    payment = CouponPaymentFactory(name="Test Payment")
+    version = CouponPaymentVersionFactory.create(
+        payment=payment,
+        activation_date=now_in_utc(),
+        expiration_date=now_in_utc() + timedelta(days=30),
+    )
+    coupon = CouponFactory.create(coupon_code="TESTCODE123", payment=payment)
+    public_product = ProductFactory.create(is_private=False)
+    private_product = ProductFactory.create(is_private=True)
+    CouponEligibilityFactory.create(coupon=coupon, product=public_product)
+    CouponEligibilityFactory.create(coupon=coupon, product=private_product)
+    serializer = PromoCouponGetSerializer(coupon, context={"is_private": False})
+    data = serializer.data
+
+    assert data["coupon_code"] == "TESTCODE123"
+    assert data["name"] == "Test Payment"
+    assert data["activation_date"] == version.activation_date
+    assert data["expiration_date"] == version.expiration_date
+    assert len(data["eligibility"]) == 1
+    assert data["eligibility"][0]["product_id"] == public_product.id
+
+    # If is_private is not provided, it returns all eligibilities
+    serializer = PromoCouponGetSerializer(coupon)
+    data = serializer.data
+    assert len(data["eligibility"]) == 2

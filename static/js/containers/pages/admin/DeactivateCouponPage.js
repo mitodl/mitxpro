@@ -14,8 +14,7 @@ import { routes } from "../../../lib/urls";
 
 import type { Response } from "redux-query";
 import { createStructuredSelector } from "reselect";
-import { Modal, ModalHeader, ModalBody } from "reactstrap";
-
+import ConfirmUpdateModal from "../../../components/ConfirmUpdateModal";
 type State = {
   submitting: ?boolean,
   isDeactivated: ?boolean,
@@ -98,29 +97,14 @@ export class DeactivateCouponPage extends React.Component<Props, State> {
         title={`${SETTINGS.site_name} | ${DEACTIVATE_COUPONS_PAGE_TITLE}`}
       >
         <div className="ecommerce-admin-body">
-          <Modal isOpen={openConfirmModal} toggle={this.toggleOpenConfirmModal}>
-            <ModalHeader toggle={this.toggleOpenConfirmModal}>
-              Confirm Coupon Deactivation
-            </ModalHeader>
-            <ModalBody>
-              <div> Are you sure you want to deactivate coupon(s)?</div>
-              <div className="float-container">
-                <button
-                  className="btn btn-gradient-white-to-blue"
-                  onClick={() => this.toggleOpenConfirmModal()}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-gradient-red-to-blue"
-                  onClick={() => this.onModalSubmit()}
-                  disabled={this.state.submitting}
-                >
-                  Deactivate
-                </button>
-              </div>
-            </ModalBody>
-          </Modal>
+          <ConfirmUpdateModal
+            isOpen={openConfirmModal}
+            toggle={this.toggleOpenConfirmModal}
+            onConfirm={this.onModalSubmit}
+            submitting={this.state.submitting}
+            headerMessage="Confirm Coupon Deactivation"
+            bodyText="Are you sure you want to deactivate coupon(s)?"
+          />
           <p>
             <Link to={routes.ecommerceAdmin.index}>
               Back to Ecommerce Admin

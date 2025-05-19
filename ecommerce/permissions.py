@@ -41,7 +41,7 @@ class HasCouponPermission(BasePermission):
         if request.method == "POST":
             return request.user.has_perm(COUPON_ADD_PERMISSION)
 
-        if request.method == "PUT":
+        if request.method in ["PUT", "GET"]:
             return request.user.has_perm(COUPON_UPDATE_PERMISSION)
 
         return False
