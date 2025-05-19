@@ -217,5 +217,40 @@ describe("TopAppBar component", () => {
       assert.isOk(wrapper.find("CatalogMenu").exists());
       assert.isNotOk(wrapper.find("MixedLink").exists());
     });
+
+    it("passes isMobile prop to CatalogMenu in mobile drawer", () => {
+      const wrapper = shallow(
+        <TopAppBar
+          currentUser={user}
+          location={null}
+          errorPageHeader={null}
+          courseTopics={courseTopics}
+        />,
+      );
+
+      const mobileCatalogMenu = wrapper
+        .find(".mobile-drawer-section")
+        .find("CatalogMenu");
+      assert.isOk(mobileCatalogMenu.exists());
+      assert.isTrue(mobileCatalogMenu.prop("isMobile"));
+    });
+
+    it("toggles mobile drawer when menu button is clicked", () => {
+      const wrapper = shallow(
+        <TopAppBar
+          currentUser={user}
+          location={null}
+          errorPageHeader={null}
+          courseTopics={courseTopics}
+        />,
+      );
+
+      const initialDrawerOpen = wrapper.find(".mobile-drawer").hasClass("open");
+      wrapper.find(".navbar-toggler").simulate("click");
+      assert.notEqual(
+        initialDrawerOpen,
+        wrapper.find(".mobile-drawer").hasClass("open"),
+      );
+    });
   });
 });
