@@ -271,3 +271,18 @@ export type EnrollmentCode = {
   thumbnail_url: string,
   start_date: Date,
 };
+
+export type Eligibility = {
+  coupon_code: string,
+  product_id: number,
+  program_run_id: ?number,
+}
+
+export type PromoCoupon = {
+  id: number,
+  name: string,
+  coupon_code: string,
+  expiration_date: Date,
+  activation_date: Date,
+  eligibility: Array<Eligibility>,
+};
