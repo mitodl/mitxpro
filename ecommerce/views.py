@@ -394,9 +394,12 @@ class PromoCouponView(APIView):
                         )
 
         except Exception as e:
+            log.error(
+                "Failed to update promo coupon: %s", str(e)
+            )
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={"error": f"Failed to update promo coupon: {str(e)}"},
+                data={"error": f"Sorry, something went wrong. Failed to update promo coupon"},
             )
 
         return Response(
