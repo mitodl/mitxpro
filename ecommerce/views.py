@@ -6,7 +6,8 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q
+from django.db import transaction
+from django.db.models import Count, Q, OuterRef, Subquery
 from django.http import Http404
 from django.shortcuts import render
 from django_filters import rest_framework as filters
@@ -51,6 +52,7 @@ from ecommerce.models import (
     BulkCouponAssignment,
     Company,
     Coupon,
+    CouponEligibility,
     CouponPaymentVersion,
     Order,
     Product,
@@ -68,6 +70,7 @@ from ecommerce.serializers import (
     ProductSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
+    PromoCouponGetSerializer,
     SingleUseCouponSerializer,
 )
 from ecommerce.utils import deactivate_coupons, make_checkout_url
@@ -319,6 +322,91 @@ class BasketView(RetrieveUpdateAPIView):
         return basket
 
 
+class PromoCouponView(APIView):
+    """
+    View for promo coupon creation and management
+    """
+
+    permission_classes = (HasCouponPermission,)
+    authentication_classes = (SessionAuthentication,)
+
+    def get(self, request, *args, **kwargs):
+        """Get all latest promo coupon versions"""
+
+        latest_coupon_type_subquery = Subquery(
+            CouponPaymentVersion.objects.filter(payment=OuterRef("payment_id"))
+            .order_by("-created_on")
+            .values("coupon_type")[:1]
+        )
+
+        # Get coupons where the latest coupon_type is 'promo'
+        promo_coupons = Coupon.objects.annotate(
+            latest_coupon_type=latest_coupon_type_subquery
+        ).filter(latest_coupon_type=CouponPaymentVersion.PROMO)
+
+        serializer = PromoCouponGetSerializer(
+            promo_coupons, many=True, context={"is_private": False}
+        )
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        """Update promo coupon dates and eligibilities"""
+        coupon = Coupon.objects.filter(id=request.data.get("promo_coupon")).first()
+        if not coupon:
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+                data={"error": "Coupon not found."},
+            )
+
+        try:
+            with transaction.atomic():
+                previous_version_data = {
+                    field.name: getattr(coupon.payment.latest_version, field.name)
+                    for field in CouponPaymentVersion._meta.fields
+                    if field.name
+                    not in (
+                        "id",
+                        "activation_date",
+                        "expiration_date",
+                        "created_on",
+                        "updated_on",
+                    )
+                }
+                previous_version_data.update(
+                    {
+                        "activation_date": request.data.get("activation_date"),
+                        "expiration_date": request.data.get("expiration_date"),
+                    }
+                )
+
+                CouponPaymentVersion.objects.create(**previous_version_data)
+
+                # Delete existing eligibilities
+                coupon.couponeligibility_set.all().delete()
+
+                # Create new eligibilities
+                for product_id in request.data.get("product_ids", []):
+                    product = Product.objects.filter(id=product_id).first()
+                    if product:
+                        CouponEligibility.objects.create(
+                            product=product,
+                            coupon=coupon,
+                        )
+
+        except Exception as e:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": f"Failed to update promo coupon: {str(e)}"},
+            )
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "message": f"Promo coupon {coupon.coupon_code} updated successfully.",
+            },
+        )
+
+
 class CouponListView(APIView):
     """
     Admin view for CRUD operations on coupons
@@ -403,6 +491,7 @@ def ecommerce_restricted(request):
         "/ecommerce/admin/coupons": "has_coupon_create_permission",
         "/ecommerce/admin/deactivate-coupons": "has_coupon_update_permission",
         "/ecommerce/admin/process-coupon-assignment-sheets": "has_coupon_product_assignment_permission",
+        "/ecommerce/admin/update-promo-code": "has_coupon_update_permission",
     }
 
     for path, perm in restricted_paths.items():
