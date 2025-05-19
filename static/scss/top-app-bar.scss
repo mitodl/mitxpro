@@ -162,7 +162,7 @@
   gap: 12px;
 }
 
-.mobile-auth-button {
+a.mobile-auth-button {
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -171,8 +171,11 @@
   color: white;
   padding: 6px 10px;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background: black;
+    color: white;
+    text-decoration: none;
   }
 }
 
