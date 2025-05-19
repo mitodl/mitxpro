@@ -122,8 +122,8 @@
 .mobile-drawer {
   position: fixed;
   top: 0;
-  right: -280px;
-  width: 280px;
+  right: -70vw;
+  width: 70vw;
   height: 100vh;
   background-color: white;
   transition: right 0.3s ease;
@@ -170,4 +170,40 @@
 
 .drawer-nav li {
   margin-bottom: 1.25rem;
+}
+
+.mobile-auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.mobile-auth-button {
+  flex: 1;
+  text-align: center;
+  background: $primary;
+  color: white;
+
+  &:hover {
+    background: black;
+  }
+}
+
+.mobile-catalog-item {
+  display: block;
+  padding: 0.5rem 0;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+
+  &:hover,
+  &:focus {
+    color: $primary;
+    text-decoration: none;
+  }
+
+  &.all-topics,
+  &.programs {
+    font-weight: 600;
+  }
 }

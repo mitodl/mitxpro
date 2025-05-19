@@ -6,9 +6,43 @@ import type { CourseTopic } from "../flow/courseTypes";
 
 type Props = {
   courseTopics: Array<CourseTopic>,
+  isMobile?: boolean,
 };
 
-const CatalogMenu = ({ courseTopics }: Props) => {
+const CatalogMenu = ({ courseTopics, isMobile = false }: Props) => {
+  if (isMobile) {
+    return (
+      <div className="mobile-catalog-menu">
+        <a
+          className="mobile-catalog-item all-topics"
+          href="/catalog/"
+          aria-label="All Topics"
+        >
+          All Topics
+        </a>
+        {courseTopics
+          ? courseTopics.map((courseTopic, index) => (
+              <a
+                className="mobile-catalog-item"
+                key={index}
+                href={`/catalog/?topic=${encodeURIComponent(courseTopic.name)}`}
+                aria-label={courseTopic.name}
+              >
+                {courseTopic.name} ({courseTopic.course_count || 0})
+              </a>
+            ))
+          : null}
+        <a
+          className="mobile-catalog-item programs"
+          href="/catalog/?active-tab=programs-tab"
+          aria-label="Programs"
+        >
+          Programs
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="catalog-menu dropdown">
       <a
