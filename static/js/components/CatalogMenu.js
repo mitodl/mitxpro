@@ -12,33 +12,35 @@ type Props = {
 const CatalogMenu = ({ courseTopics, isMobile = false }: Props) => {
   if (isMobile) {
     return (
-      <div className="mobile-catalog-menu">
+      <div className="mobile-drawer-section">
         <a
-          className="mobile-catalog-item all-topics"
+          className="mobile-drawer-heading"
           href="/catalog/"
-          aria-label="All Topics"
+          aria-label="Courses"
         >
-          All Topics
+          Courses
         </a>
-        {courseTopics
-          ? courseTopics.map((courseTopic, index) => (
-              <a
-                className="mobile-catalog-item"
-                key={index}
-                href={`/catalog/?topic=${encodeURIComponent(courseTopic.name)}`}
-                aria-label={courseTopic.name}
-              >
-                {courseTopic.name} ({courseTopic.course_count || 0})
-              </a>
-            ))
-          : null}
-        <a
-          className="mobile-catalog-item programs"
-          href="/catalog/?active-tab=programs-tab"
-          aria-label="Programs"
-        >
-          Programs
-        </a>
+        <div className="mobile-catalog-menu">
+          <a
+            className="mobile-catalog-item all-topics"
+            href="/catalog/"
+            aria-label="All Topics"
+          >
+            All Topics
+          </a>
+          {courseTopics
+            ? courseTopics.map((courseTopic, index) => (
+                <a
+                  className="mobile-catalog-item"
+                  key={index}
+                  href={`/catalog/?topic=${encodeURIComponent(courseTopic.name)}`}
+                  aria-label={courseTopic.name}
+                >
+                  {courseTopic.name} ({courseTopic.course_count || 0})
+                </a>
+              ))
+            : null}
+        </div>
       </div>
     );
   }
