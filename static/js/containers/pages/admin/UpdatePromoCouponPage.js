@@ -52,6 +52,7 @@ type Props = {|
 export class UpdatePromoCouponPage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
+    props.forceRequest(queries.ecommerce.promoCouponsQuery());
     this.state = {
       couponData: {},
       openConfirmModal: false,
@@ -76,8 +77,6 @@ export class UpdatePromoCouponPage extends React.Component<Props, State> {
     await this.setState({ ...this.state, submitting: true });
 
     const result = await updatePromoCoupon(couponData);
-    // Refetch promo coupons from server
-    forceRequest(queries.ecommerce.promoCouponsQuery());
 
     this.setState({
       couponData: couponData,

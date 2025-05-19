@@ -21,12 +21,12 @@ import {
 describe("PromoCouponUpdateForm", () => {
   let sandbox, onSubmitStub;
   // Mock data setup
-  let mockProducts = [
+  const mockProducts = [
     makeCourseRunProduct(),
     makeProgramProduct(),
     makeCourseRunProduct(),
   ];
-  let mockPromoCoupons = [
+  const mockPromoCoupons = [
     {
       id: "1",
       coupon_code: "TEST-COUPON-1",
