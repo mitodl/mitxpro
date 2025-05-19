@@ -165,42 +165,31 @@ const TopAppBar = ({
                   )}
 
                 <div className="mobile-drawer-section">
-                  <h3 className="mobile-drawer-heading">Courses</h3>
-                  <div className="mobile-drawer-content">
-                    <CatalogMenu courseTopics={courseTopics} isMobile={true} />
-                  </div>
+                  <CatalogMenu courseTopics={courseTopics} isMobile={true} />
                 </div>
 
                 <div className="mobile-drawer-section">
-                  <ul className="mobile-drawer-list">
-                    <li>
-                      <a href={routes.webinars} className="mobile-drawer-link">
-                        Webinars
-                      </a>
-                    </li>
-                    <li>
-                      <a href={routes.blog} className="mobile-drawer-link">
-                        Blog
-                      </a>
-                    </li>
-                    {SETTINGS.enable_enterprise && (
-                      <li>
-                        <a
-                          href={routes.enterprise}
-                          className="mobile-drawer-link"
-                        >
-                          Enterprise
-                        </a>
-                      </li>
-                    )}
-                    {shouldShowLoginSignup(location) &&
-                      currentUser &&
-                      currentUser.is_authenticated && (
-                        <li className="mobile-user-menu">
-                          <UserMenu currentUser={currentUser} />
-                        </li>
-                      )}
-                  </ul>
+                  <a
+                    className="mobile-drawer-heading"
+                    href="/catalog/?active-tab=programs-tab"
+                    aria-label="Programs"
+                  >
+                    Programs
+                  </a>
+                  <a href={routes.webinars} className="mobile-drawer-heading">
+                    Webinars
+                  </a>
+                  <a href={routes.blog} className="mobile-drawer-heading">
+                    Blog
+                  </a>
+                  {SETTINGS.enable_enterprise && (
+                    <a
+                      href={routes.enterprise}
+                      className="mobile-drawer-heading"
+                    >
+                      Enterprise
+                    </a>
+                  )}
                 </div>
               </div>
 
