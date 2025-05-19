@@ -115,10 +115,10 @@
 
 .mobile-drawer {
   position: fixed;
-  top: 0;
+  top: 98px;
   right: -366px;
   width: 366px;
-  height: 100vh;
+  height: calc(100vh - 98px);
   background-color: white;
   transition: right 0.3s ease;
   z-index: 1050;
@@ -133,10 +133,10 @@
 
 .drawer-overlay {
   position: fixed;
-  top: 0;
+  top: 98px;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 98px);
   background-color: rgb(0 0 0 / 50%);
   z-index: 1040;
 }
