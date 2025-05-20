@@ -111,7 +111,7 @@ const TopAppBar = ({
           </a>
           {errorPageHeader ? null : (
             <button
-              className="navbar-toggler nav-opener"
+              className="navbar-toggler nav-opener d-flex align-items-center"
               type="button"
               onClick={toggleDrawer}
               aria-controls="nav"
