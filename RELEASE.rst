@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.178.2
+Version 0.178.2 (Released May 20, 2025)
 ---------------
 
 - fix: check for coursepage before getting max_weeks (#3477)
