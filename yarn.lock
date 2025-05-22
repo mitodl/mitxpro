@@ -5378,14 +5378,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^9.0.0":
-  version: 9.1.0
-  resolution: "eslint-config-prettier@npm:9.1.0"
+"eslint-config-prettier@npm:^10.0.0":
+  version: 10.1.5
+  resolution: "eslint-config-prettier@npm:10.1.5"
   peerDependencies:
     eslint: ">=7.0.0"
   bin:
     eslint-config-prettier: bin/cli.js
-  checksum: 9229b768c879f500ee54ca05925f31b0c0bafff3d9f5521f98ff05127356de78c81deb9365c86a5ec4efa990cb72b74df8612ae15965b14136044c73e1f6a907
+  checksum: 6d8eb41c716fc2b073bfd9daede0c87c4c2b29055f15c94618eec00a19c5499024ddb89902d6793b5ac9102075e4739d7cc2d4d58c7e7ed4cc2dcf79e3fbcacc
   languageName: node
   linkType: hard
 
@@ -8992,7 +8992,7 @@ __metadata:
     eslint: 8.57.1
     eslint-config-google: ^0.14.0
     eslint-config-mitodl: ^2.1.0
-    eslint-config-prettier: ^9.0.0
+    eslint-config-prettier: ^10.0.0
     eslint-plugin-babel: ^5.3.0
     eslint-plugin-flow-vars: ^0.5.0
     eslint-plugin-flowtype: ^8.0.3
