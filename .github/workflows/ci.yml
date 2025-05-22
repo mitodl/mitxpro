@@ -6,7 +6,7 @@ jobs:
 
     services:
       db:
-        image: postgres:17.4
+        image: postgres:17.5
         # Health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
