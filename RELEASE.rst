@@ -1,6 +1,29 @@
 Release Notes
 =============
 
+Version 0.178.3
+---------------
+
+- fix(deps): update dependency mitol-django-mail to v2025 (#3504)
+- chore(deps): update redis docker tag to v8 (#3502)
+- fix(deps): update dependency shelljs to ^0.10.0 (#3500)
+- fix(deps): update dependency babel-loader to v10 (#3486)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9 (#3501)
+- chore(deps): update postgres docker tag to v17.5 (#3499)
+- chore(deps): update nginx docker tag to v1.28.0 (#3497)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v8.18.1 (#3496)
+- fix(deps): update dependency django-hijack to v3.7.2 (#3495)
+- fix(deps): update dependency boto3 to v1.38.21 (#3494)
+- fix(deps): update dependency eslint-config-prettier to v10 (#3487)
+- fix(deps): update dependency sinon to v20 (#3489)
+- [pre-commit.ci] pre-commit autoupdate (#3492)
+- chore: remove catalog language filter feature flag (#3479)
+- chore(deps): update dependency faker to v37 (#3482)
+- fix(deps): update dependency mocha to v11 (#3483)
+- fix(deps): update dependency boto3 to v1.38.15 (#3481)
+- fix(deps): update dependency eslint to v8.57.1 (#3484)
+- [pre-commit.ci] pre-commit autoupdate (#3469)
+
 Version 0.178.2 (Released May 20, 2025)
 ---------------
 

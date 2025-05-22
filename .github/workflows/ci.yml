@@ -6,7 +6,7 @@ jobs:
 
     services:
       db:
-        image: postgres:17.4
+        image: postgres:17.5
         # Health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -21,12 +21,12 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:7.4.3
+        image: redis:8.0.1
         ports:
           - 6379:6379
 
       elastic:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4
+        image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
         env:
           network.host: "0.0.0.0"
           http.cors.enabled: "true"

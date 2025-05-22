@@ -467,7 +467,6 @@ def test_catalog_page_languages(  # noqa: PLR0913
     """
     Test that language filters are working fine.
     """
-    mocker.patch("cms.models.is_enabled", return_value=True)
     CourseLanguage.objects.all().delete()
     homepage = wagtail_basics.root
     catalog_page = CatalogPageFactory.create(parent=homepage)

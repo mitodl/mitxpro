@@ -21,19 +21,19 @@ x-extra-hosts: &default-extra-hosts
 
 services:
   db:
-    image: postgres:17.4
+    image: postgres:17.5
     environment:
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
     ports:
       - "5432"
 
   redis:
-    image: redis:7.4.3
+    image: redis:8.0.1
     ports:
       - "6379"
 
   nginx:
-    image: nginx:1.27.4
+    image: nginx:1.28.0
     ports:
       - "8053:8053"
     links:

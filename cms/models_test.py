@@ -266,7 +266,6 @@ def test_catalog_page_language_context(
     """
     Verify the language context is properly passed to the catalog_page.html
     """
-    mocker.patch("cms.models.is_enabled", return_value=True)
     CourseLanguage.objects.all().delete()
     # Verify that all the languages are deleted. This will help us understand and debug the failures in future.
     assert CourseLanguage.objects.all().count() == 0
@@ -327,45 +326,6 @@ def test_catalog_page_language_context(
         )
         assert context.get("all_pages") == filtered_courseware_pages
         assert context.get("selected_language") == selected_language
-
-
-@pytest.mark.parametrize(
-    "is_enabled",
-    [True, False],
-)
-def test_catalog_page_language_feature_flag(mocker, staff_user, is_enabled):
-    """
-    Verify the language context is properly passed to the catalog_page.html if CATALOG_LANGUAGE_FILTER is enabled
-    """
-    mocker.patch("cms.models.is_enabled", return_value=is_enabled)
-    CourseLanguage.objects.all().delete()
-    # Verify that all the languages are deleted. This will help us understand and debug the failures in future.
-    assert CourseLanguage.objects.all().count() == 0
-
-    catalog_page = CatalogPageFactory.create()
-    # The priority of the languages matters and we want them in order. Here 1 means top priority
-    languages = CourseLanguageFactory.create_batch(2, priority=factory.Iterator([1, 2]))
-    now = now_in_utc()
-    CourseRunFactory.create_batch(
-        2,
-        start_date=now + timedelta(days=1),
-        course__page__language=factory.Iterator(languages),
-        course__program__page__language=factory.Iterator(languages),
-    )
-
-    rf = RequestFactory()
-    request = rf.get("/")
-    request.user = staff_user
-    context = catalog_page.get_context(request=request)
-
-    assert context.get("selected_language") == ALL_LANGUAGES
-    assert context.get("show_language_filter") == is_enabled
-    expected_languages = (
-        [ALL_LANGUAGES] + [language.name for language in languages]
-        if is_enabled
-        else []
-    )
-    assert context.get("language_options") == expected_languages
 
 
 def test_course_page_program_page():

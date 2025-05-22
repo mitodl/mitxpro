@@ -22,7 +22,6 @@
   <div class="catalog-content">
     <div class="courseware-filter-container">
       <div class="courseware-filters">
-        {% if show_language_filter %}
         <div class="catalog-filter-dropdown dropdown" id="topicSortDropdown">
           <span class="filter-label">Topic</span>
           <div
@@ -102,20 +101,6 @@
               </div>
             </div>
           </div>
-          {% else %}
-          {% for topic in topics %}
-          {% if selected_topic == topic %}
-          <div class="topic selected">
-            {% else %}
-            <div class="topic">
-              {% endif %}
-              <a href="{% pageurl page %}?topic={{ topic | urlencode }}"
-                >{{ topic }}</a
-              >
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
         </div>
 
         <div class="courseware">
