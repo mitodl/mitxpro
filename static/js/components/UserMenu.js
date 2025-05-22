@@ -1,7 +1,6 @@
 // @flow
 /* global SETTINGS:false */
-import React from "react";
-
+import React, { useState, useRef, useEffect } from "react";
 import MixedLink from "./MixedLink";
 import { routes } from "../lib/urls";
 
@@ -13,25 +12,58 @@ type Props = {
 };
 
 const UserMenu = ({ currentUser }: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<?HTMLDivElement>(null);
+
+  const toggleDropdown = () => setIsOpen((prev) => !prev);
+
+  const handleKeyDown = (e: SyntheticKeyboardEvent<>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleDropdown();
+    } else if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(e.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="user-menu dropdown">
+    <div className="user-menu dropdown" ref={menuRef}>
       <div
         className="col-2 dropdown-toggle"
         id="dropdownMenuButton"
-        data-toggle="dropdown"
         aria-haspopup="true"
-        aria-expanded="false"
+        aria-expanded={isOpen}
+        aria-label="User menu"
+        tabIndex="0"
+        onClick={toggleDropdown}
+        onKeyDown={handleKeyDown}
       >
         <img
           /* Use default profile avatar for now */
           src="/static/images/avatar_default.png"
           alt={`Profile image for ${currentUser.name}`}
-          className={`profile-image`}
+          className="profile-image"
           width={34}
           height={34}
         />
       </div>
-      <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <div
+        className={`dropdown-menu ${isOpen ? "show" : ""}`}
+        aria-labelledby="dropdownMenuButton"
+      >
         <MixedLink
           className="dropdown-item"
           dest={routes.profile.view}
@@ -48,16 +80,14 @@ const UserMenu = ({ currentUser }: Props) => {
           <div className="dropdown-icon icon-dashboard" />
           Dashboard
         </MixedLink>
-
         <MixedLink
           className="dropdown-item"
           dest={routes.accountSettings}
-          aria-label="settings"
+          aria-label="Settings"
         >
           <div className="dropdown-icon icon-21 icon-settings" />
           Settings
         </MixedLink>
-
         <div className="dropdown-divider" />
         <a className="dropdown-item" href={routes.logout} aria-label="Sign Out">
           <div className="dropdown-icon icon-logout" />
