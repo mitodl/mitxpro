@@ -110,7 +110,7 @@ const TopAppBar = ({
             />
           </a>
           {errorPageHeader ? null : (
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center d-md-none">
               <button
                 className="navbar-toggler nav-opener d-flex align-items-center"
                 type="button"
@@ -123,7 +123,7 @@ const TopAppBar = ({
                 Menu
               </button>
               {currentUser && currentUser.is_authenticated && (
-                <div className="mobile-user-menu d-md-none">
+                <div className="mobile-user-menu">
                   <UserMenu currentUser={currentUser} />
                 </div>
               )}
