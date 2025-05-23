@@ -225,4 +225,4 @@ const TopAppBar = ({
   );
 };
 
-export default TopAppBar;
+export { TopAppBar as default, AuthButtons };
