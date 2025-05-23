@@ -1,6 +1,6 @@
 // @flow
 /* global SETTINGS: false */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { routes } from "../lib/urls";
 import MixedLink from "./MixedLink";
@@ -33,9 +33,19 @@ const TopAppBar = ({
 }: Props) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-    document.body.style.overflow = !drawerOpen ? "hidden" : "";
+    setDrawerOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
 
   const navigationItems = (
     <>
