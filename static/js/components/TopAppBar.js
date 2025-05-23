@@ -122,11 +122,13 @@ const TopAppBar = ({
                 <span className="navbar-toggler-icon" />
                 Menu
               </button>
-              {currentUser && currentUser.is_authenticated && (
-                <div className="mobile-user-menu">
-                  <UserMenu currentUser={currentUser} />
-                </div>
-              )}
+              {shouldShowLoginSignup(location) &&
+                currentUser &&
+                currentUser.is_authenticated && (
+                  <div className="mobile-user-menu">
+                    <UserMenu currentUser={currentUser} />
+                  </div>
+                )}
             </div>
           )}
           {errorPageHeader ? null : (
