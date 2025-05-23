@@ -25,6 +25,39 @@ const shouldShowLoginSignup = (location) =>
     location.pathname === routes.ecommerceBulk.receipt
   );
 
+const AuthButtons = ({ isMobile = false }) => {
+  const buttonElements = [
+    <MixedLink
+      key="login"
+      dest={routes.login.begin}
+      className={isMobile ? "mobile-auth-button" : "button"}
+      aria-label="Login"
+    >
+      Sign In
+    </MixedLink>,
+    <MixedLink
+      key="create-account"
+      dest={routes.register.begin}
+      className={isMobile ? "mobile-auth-button" : "button"}
+      aria-label="Create Account"
+    >
+      Create Account
+    </MixedLink>,
+  ];
+
+  if (isMobile) {
+    return <div className="mobile-auth-buttons">{buttonElements}</div>;
+  }
+
+  return (
+    <>
+      {buttonElements.map((button, index) => (
+        <li key={index}>{button}</li>
+      ))}
+    </>
+  );
+};
+
 const TopAppBar = ({
   currentUser,
   location,
@@ -83,26 +116,7 @@ const TopAppBar = ({
             <UserMenu currentUser={currentUser} />
           </li>
         ) : (
-          <React.Fragment>
-            <li>
-              <MixedLink
-                dest={routes.login.begin}
-                className="button"
-                aria-label="Login"
-              >
-                Sign In
-              </MixedLink>
-            </li>
-            <li>
-              <MixedLink
-                dest={routes.register.begin}
-                className="button"
-                aria-label="Create Account"
-              >
-                Create Account
-              </MixedLink>
-            </li>
-          </React.Fragment>
+          <AuthButtons />
         )
       ) : null}
     </>
@@ -165,22 +179,7 @@ const TopAppBar = ({
 
                 {shouldShowLoginSignup(location) &&
                   !(currentUser && currentUser.is_authenticated) && (
-                    <div className="mobile-auth-buttons">
-                      <MixedLink
-                        dest={routes.login.begin}
-                        className="mobile-auth-button"
-                        aria-label="Login"
-                      >
-                        Sign In
-                      </MixedLink>
-                      <MixedLink
-                        dest={routes.register.begin}
-                        className="mobile-auth-button"
-                        aria-label="Create Account"
-                      >
-                        Create Account
-                      </MixedLink>
-                    </div>
+                    <AuthButtons isMobile={true} />
                   )}
 
                 <div className="mobile-drawer-section">
