@@ -110,17 +110,24 @@ const TopAppBar = ({
             />
           </a>
           {errorPageHeader ? null : (
-            <button
-              className="navbar-toggler nav-opener d-flex align-items-center"
-              type="button"
-              onClick={toggleDrawer}
-              aria-controls="nav"
-              aria-expanded={drawerOpen}
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon" />
-              Menu
-            </button>
+            <div className="d-flex align-items-center">
+              <button
+                className="navbar-toggler nav-opener d-flex align-items-center"
+                type="button"
+                onClick={toggleDrawer}
+                aria-controls="nav"
+                aria-expanded={drawerOpen}
+                aria-label="Toggle navigation"
+              >
+                <span className="navbar-toggler-icon" />
+                Menu
+              </button>
+              {currentUser && currentUser.is_authenticated && (
+                <div className="mobile-user-menu d-md-none">
+                  <UserMenu currentUser={currentUser} />
+                </div>
+              )}
+            </div>
           )}
           {errorPageHeader ? null : (
             <>
