@@ -97,7 +97,7 @@ const TopAppBar = ({
               <MixedLink
                 dest={routes.register.begin}
                 className="button"
-                aria-label="Login"
+                aria-label="Create Account"
               >
                 Create Account
               </MixedLink>
