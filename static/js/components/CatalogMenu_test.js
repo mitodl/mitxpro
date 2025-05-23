@@ -50,4 +50,40 @@ describe("CatalogMenu component", () => {
       "/catalog/?active-tab=programs-tab",
     );
   });
+
+  describe("when isMobile is true", () => {
+    it("renders mobile-drawer-section instead of dropdown", () => {
+      const wrapper = shallow(
+        <CatalogMenu courseTopics={courseTopics} isMobile={true} />,
+      );
+
+      assert.isTrue(wrapper.find(".mobile-drawer-section").exists());
+      assert.isFalse(wrapper.find(".catalog-menu.dropdown").exists());
+    });
+
+    it("renders course topics with mobile-specific classes", () => {
+      const wrapper = shallow(
+        <CatalogMenu courseTopics={courseTopics} isMobile={true} />,
+      );
+
+      const allTopicsLink = wrapper.find(".mobile-catalog-item.all-topics");
+      assert.isTrue(allTopicsLink.exists());
+      assert.equal(allTopicsLink.text(), "All Topics");
+
+      const topicLinks = wrapper
+        .find(".mobile-catalog-item")
+        .not(".all-topics");
+      assert.equal(topicLinks.length, courseTopics.length);
+    });
+
+    it("does not render dropdown elements when in mobile mode", () => {
+      const wrapper = shallow(
+        <CatalogMenu courseTopics={courseTopics} isMobile={true} />,
+      );
+
+      assert.isFalse(wrapper.find(".dropdown-toggle").exists());
+      assert.isFalse(wrapper.find(".dropdown-menu").exists());
+      assert.isFalse(wrapper.find(".dropdown-divider").exists());
+    });
+  });
 });

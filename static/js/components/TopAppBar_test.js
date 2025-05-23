@@ -4,47 +4,49 @@ import React from "react";
 import { assert } from "chai";
 import { shallow } from "enzyme";
 
-import TopAppBar from "./TopAppBar";
+import TopAppBar, { AuthButtons } from "./TopAppBar";
 
 import { routes } from "../lib/urls";
 import { makeUser, makeAnonymousUser } from "../factories/user";
 import { makeCourseTopics } from "../factories/course";
 
+describe("AuthButtons component", () => {
+  it("has a link to login", () => {
+    assert.equal(
+      shallow(<AuthButtons isMobile={false} />)
+        .find("MixedLink")
+        .at(0)
+        .prop("dest"),
+      routes.login.begin,
+    );
+  });
+
+  it("has a link to register", () => {
+    assert.equal(
+      shallow(<AuthButtons isMobile={false} />)
+        .find("MixedLink")
+        .at(1)
+        .prop("dest"),
+      routes.register.begin,
+    );
+  });
+});
+
 describe("TopAppBar component", () => {
   describe("for anonymous users", () => {
     const user = makeAnonymousUser();
-    it("has a link to login", () => {
-      assert.equal(
-        shallow(
-          <TopAppBar
-            currentUser={user}
-            location={null}
-            errorPageHeader={null}
-            courseTopics={[]}
-          />,
-        )
-          .find("MixedLink")
-          .at(0)
-          .prop("dest"),
-        routes.login,
-      );
-    });
 
-    it("has a link to register", () => {
-      assert.equal(
-        shallow(
-          <TopAppBar
-            currentUser={user}
-            location={null}
-            errorPageHeader={null}
-            courseTopics={[]}
-          />,
-        )
-          .find("MixedLink")
-          .at(1)
-          .prop("dest"),
-        routes.register.begin,
+    it("has a link to login and register", () => {
+      const wrapper = shallow(
+        <TopAppBar
+          currentUser={null}
+          location={null}
+          errorPageHeader={null}
+          courseTopics={[]}
+        />,
       );
+
+      assert.isTrue(wrapper.find("AuthButtons").exists());
     });
 
     it("has a button to collapse the menu", () => {
@@ -216,6 +218,41 @@ describe("TopAppBar component", () => {
       assert.isNotOk(wrapper.find("UserMenu").exists());
       assert.isOk(wrapper.find("CatalogMenu").exists());
       assert.isNotOk(wrapper.find("MixedLink").exists());
+    });
+
+    it("passes isMobile prop to CatalogMenu in mobile drawer", () => {
+      const wrapper = shallow(
+        <TopAppBar
+          currentUser={user}
+          location={null}
+          errorPageHeader={null}
+          courseTopics={courseTopics}
+        />,
+      );
+
+      const mobileCatalogMenu = wrapper
+        .find(".mobile-drawer-section")
+        .find("CatalogMenu");
+      assert.isOk(mobileCatalogMenu.exists());
+      assert.isTrue(mobileCatalogMenu.prop("isMobile"));
+    });
+
+    it("toggles mobile drawer when menu button is clicked", () => {
+      const wrapper = shallow(
+        <TopAppBar
+          currentUser={user}
+          location={null}
+          errorPageHeader={null}
+          courseTopics={courseTopics}
+        />,
+      );
+
+      const initialDrawerOpen = wrapper.find(".mobile-drawer").hasClass("open");
+      wrapper.find(".navbar-toggler").simulate("click");
+      assert.notEqual(
+        initialDrawerOpen,
+        wrapper.find(".mobile-drawer").hasClass("open"),
+      );
     });
   });
 });
