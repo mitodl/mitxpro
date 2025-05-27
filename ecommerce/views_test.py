@@ -8,6 +8,7 @@ from urllib.parse import quote_plus, urljoin
 import factory
 import faker
 import pytest
+from unittest.mock import patch
 from django.contrib.auth.models import Permission
 from django.db.models import Count, Q
 from django.test import Client
@@ -1765,6 +1766,7 @@ def test_program_runs_api():
 
 
 def test_promocoupon_get_view_returns_only_latest_promo_versions(admin_drf_client):
+    """Test that the promo coupon API returns only the latest version of each promo coupon"""
     payment = CouponPaymentFactory()
     CouponPaymentVersionFactory(
         payment=payment,
@@ -1789,40 +1791,43 @@ def test_promocoupon_get_view_returns_only_latest_promo_versions(admin_drf_clien
     assert response.data[0]["activation_date"] == payment_version.activation_date
 
 
-@pytest.mark.django_db
-def test_promocoupon_put_view_updates_dates_and_eligibility(admin_drf_client):
+@pytest.mark.parametrize(
+    "should_raise_exception,expected_status_code,expected_response_part",
+    [
+        (False, 200, "message"),  # Success case
+        (True, 400, "error"),  # update_coupon raises an error
+    ],
+)
+def test_put_calls_update_coupon_and_handles_errors(
+    admin_drf_client,
+    should_raise_exception,
+    expected_status_code,
+    expected_response_part,
+):
+    """Test that the update_coupon method is called and handles exceptions correctly"""
+    coupon = CouponFactory()
+    product = ProductFactory()
     payment = CouponPaymentFactory()
-    CouponPaymentVersionFactory(payment=payment)  # Old version
-    coupon = CouponFactory(payment=payment)
-    old_product = ProductFactory()
-    CouponEligibilityFactory(coupon=coupon, product=old_product)
+    CouponPaymentVersionFactory(payment=payment)
+    coupon.payment = payment
+    coupon.save()
 
-    new_product = ProductFactory()
-    new_activation = now_in_utc()
-    new_expiration = now_in_utc() + timedelta(days=10)
+    url = reverse("promo_coupons_api")
+    data = {
+        "promo_coupon": coupon.id,
+        "activation_date": now_in_utc().isoformat(),
+        "expiration_date": (now_in_utc() + timedelta(days=10)).isoformat(),
+        "product_ids": [product.id],
+    }
 
-    assert coupon.couponeligibility_set.first().product == old_product
-
-    response = admin_drf_client.put(
-        reverse("promo_coupons_api"),
-        data={
-            "promo_coupon": coupon.id,
-            "activation_date": new_activation.isoformat(),
-            "expiration_date": new_expiration.isoformat(),
-            "product_ids": [new_product.id],
-        },
-        format="json",
+    patch_path = (
+        "ecommerce.views.PromoCouponUpdateSerializer.update_coupon"  # Replace correctly
     )
+    with patch(patch_path) as mocked_update:
+        if should_raise_exception:
+            mocked_update.side_effect = Exception("Simulated failure")
 
-    assert response.status_code == 200
-    assert "updated successfully" in response.data["message"]
+        response = admin_drf_client.put(url, data, format="json")
 
-    # Check new version was created
-    assert payment.versions.count() == 2
-    latest_version = payment.versions.order_by("-created_on").first()
-    assert latest_version.activation_date == new_activation
-    assert latest_version.expiration_date == new_expiration
-
-    # Check eligibilities were updated
-    assert coupon.couponeligibility_set.count() == 1
-    assert coupon.couponeligibility_set.first().product == new_product
+        assert response.status_code == expected_status_code
+        assert expected_response_part in response.data

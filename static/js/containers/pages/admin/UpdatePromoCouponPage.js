@@ -106,6 +106,7 @@ export class UpdatePromoCouponPage extends React.Component<Props, State> {
       errorMsg: "",
       responseMsg: "",
     });
+    this.props.forceRequest(queries.ecommerce.promoCouponsQuery());
   };
 
   render() {

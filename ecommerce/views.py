@@ -52,7 +52,6 @@ from ecommerce.models import (
     BulkCouponAssignment,
     Company,
     Coupon,
-    CouponEligibility,
     CouponPaymentVersion,
     Order,
     Product,
@@ -70,7 +69,8 @@ from ecommerce.serializers import (
     ProductSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
-    PromoCouponGetSerializer,
+    PromoCouponDetailSerializer,
+    PromoCouponUpdateSerializer,
     SingleUseCouponSerializer,
 )
 from ecommerce.utils import deactivate_coupons, make_checkout_url
@@ -332,7 +332,6 @@ class PromoCouponView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Get all latest promo coupon versions"""
-
         latest_coupon_type_subquery = Subquery(
             CouponPaymentVersion.objects.filter(payment=OuterRef("payment_id"))
             .order_by("-created_on")
@@ -344,68 +343,43 @@ class PromoCouponView(APIView):
             latest_coupon_type=latest_coupon_type_subquery
         ).filter(latest_coupon_type=CouponPaymentVersion.PROMO)
 
-        serializer = PromoCouponGetSerializer(
+        serializer = PromoCouponDetailSerializer(
             promo_coupons, many=True, context={"is_private": False}
         )
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
-        """Update promo coupon dates and eligibilities"""
-        coupon = Coupon.objects.filter(id=request.data.get("promo_coupon")).first()
-        if not coupon:
-            return Response(
-                status=status.HTTP_404_NOT_FOUND,
-                data={"error": "Coupon not found."},
-            )
+        """Update the dates and eligibilities of existing promo coupon"""
+        serializer = PromoCouponUpdateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        coupon = serializer.validated_data["promo_coupon"]
+        activation_date = serializer.validated_data["activation_date"]
+        expiration_date = serializer.validated_data["expiration_date"]
+        products = serializer.validated_data["product_ids"]
 
         try:
             with transaction.atomic():
-                previous_version_data = {
-                    field.name: getattr(coupon.payment.latest_version, field.name)
-                    for field in CouponPaymentVersion._meta.fields
-                    if field.name
-                    not in (
-                        "id",
-                        "activation_date",
-                        "expiration_date",
-                        "created_on",
-                        "updated_on",
-                    )
-                }
-                previous_version_data.update(
-                    {
-                        "activation_date": request.data.get("activation_date"),
-                        "expiration_date": request.data.get("expiration_date"),
-                    }
+                serializer.update_coupon(
+                    coupon=coupon,
+                    activation_date=activation_date,
+                    expiration_date=expiration_date,
+                    products=products,
                 )
-
-                CouponPaymentVersion.objects.create(**previous_version_data)
-
-                # Delete existing eligibilities
-                coupon.couponeligibility_set.all().delete()
-
-                # Create new eligibilities
-                for product_id in request.data.get("product_ids", []):
-                    product = Product.objects.filter(id=product_id).first()
-                    if product:
-                        CouponEligibility.objects.create(
-                            product=product,
-                            coupon=coupon,
-                        )
-
         except Exception as e:
-            log.error(
-                "Failed to update promo coupon: %s", str(e)
-            )
+            log.error("Failed to update promo coupon: %s", str(e))
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data={"error": f"Sorry, something went wrong. Failed to update promo coupon"},
+                data={
+                    "error": "Sorry, something went wrong. Failed to update promo coupon"
+                },
             )
 
         return Response(
             status=status.HTTP_200_OK,
             data={
-                "message": f"Promo coupon {coupon.coupon_code} updated successfully.",
+                "message": f"Promo coupon {coupon.coupon_code} updated successfully."
             },
         )
 

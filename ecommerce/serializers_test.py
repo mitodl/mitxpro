@@ -44,7 +44,8 @@ from ecommerce.serializers import (
     OrderReceiptSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
-    PromoCouponGetSerializer,
+    PromoCouponDetailSerializer,
+    PromoCouponUpdateSerializer,
     SingleUseCouponSerializer,
 )
 from mitxpro.utils import now_in_utc
@@ -591,7 +592,7 @@ def test_serialize_program_run():
 
 
 def test_promo_coupon_get_serializer():
-    """Test PromoCouponGetSerializer with different product visibility"""
+    """Test PromoCouponDetailSerializer with different product visibility"""
     payment = CouponPaymentFactory(name="Test Payment")
     version = CouponPaymentVersionFactory.create(
         payment=payment,
@@ -603,7 +604,7 @@ def test_promo_coupon_get_serializer():
     private_product = ProductFactory.create(is_private=True)
     CouponEligibilityFactory.create(coupon=coupon, product=public_product)
     CouponEligibilityFactory.create(coupon=coupon, product=private_product)
-    serializer = PromoCouponGetSerializer(coupon, context={"is_private": False})
+    serializer = PromoCouponDetailSerializer(coupon, context={"is_private": False})
     data = serializer.data
 
     assert data["coupon_code"] == "TESTCODE123"
@@ -614,6 +615,48 @@ def test_promo_coupon_get_serializer():
     assert data["eligibility"][0]["product_id"] == public_product.id
 
     # If is_private is not provided, it returns all eligibilities
-    serializer = PromoCouponGetSerializer(coupon)
+    serializer = PromoCouponDetailSerializer(coupon)
     data = serializer.data
     assert len(data["eligibility"]) == 2
+
+
+def test_promo_coupon_update_serializer():
+    """Test PromoCouponDetailSerializer with update functionality"""
+    payment = CouponPaymentFactory()
+    CouponPaymentVersionFactory(payment=payment)  # Old version
+    coupon = CouponFactory(payment=payment)
+    old_product = ProductFactory()
+    CouponEligibilityFactory(coupon=coupon, product=old_product)
+
+    new_product = ProductFactory()
+    new_activation = now_in_utc()
+    new_expiration = now_in_utc() + timedelta(days=10)
+
+    assert coupon.couponeligibility_set.first().product == old_product
+
+    data = {
+        "promo_coupon": coupon.id,
+        "activation_date": new_activation,
+        "expiration_date": new_expiration,
+        "product_ids": [new_product.id],
+    }
+
+    serializer = PromoCouponUpdateSerializer(data=data, context={"coupon": coupon})
+    assert serializer.is_valid(), serializer.errors
+
+    serializer.update_coupon(
+        coupon=coupon,
+        activation_date=new_activation,
+        expiration_date=new_expiration,
+        products=[new_product],
+    )
+
+    # Check new version was created
+    assert payment.versions.count() == 2
+    latest_version = payment.versions.order_by("-created_on").first()
+    assert latest_version.activation_date == new_activation
+    assert latest_version.expiration_date == new_expiration
+
+    # Check eligibilities were updated
+    assert coupon.couponeligibility_set.count() == 1
+    assert coupon.couponeligibility_set.first().product == new_product

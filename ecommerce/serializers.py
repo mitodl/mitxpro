@@ -892,17 +892,30 @@ class PromoCouponSerializer(BaseCouponSerializer):
     )
 
 
-class PromoCouponGetSerializer(serializers.ModelSerializer):
+class PromoCouponDetailSerializer(serializers.ModelSerializer):
+    """Serializer for getting promo coupons with eligibility information"""
+
     eligibility = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     activation_date = serializers.SerializerMethodField()
     expiration_date = serializers.SerializerMethodField()
 
+    class Meta:
+        model = models.Coupon
+        fields = [
+            "id",
+            "coupon_code",
+            "name",
+            "activation_date",
+            "expiration_date",
+            "eligibility",
+        ]
+
     def get_eligibility(self, instance):
         """
         Get all CouponEligibility records related to the coupons created by this CouponPayment.
         """
-        eligibility_qs = models.CouponEligibility.objects.filter(coupon=instance)
+        eligibility_qs = instance.couponeligibility_set.all()
 
         # Only apply the filter if is_private is explicitly False
         if self.context.get("is_private") is False:
@@ -931,16 +944,60 @@ class PromoCouponGetSerializer(serializers.ModelSerializer):
         """Get the expiration date of the associated CouponPayment"""
         return instance.payment.latest_version.expiration_date
 
-    class Meta:
-        model = models.Coupon
-        fields = [
-            "id",
-            "coupon_code",
-            "name",
-            "activation_date",
-            "expiration_date",
-            "eligibility",
-        ]
+
+class PromoCouponUpdateSerializer(serializers.Serializer):
+    """Serializer for updating promo coupons"""
+
+    promo_coupon = serializers.IntegerField()
+    activation_date = serializers.DateTimeField()
+    expiration_date = serializers.DateTimeField()
+    product_ids = serializers.ListField(child=serializers.IntegerField())
+
+    def validate_promo_coupon(self, value):
+        """Validate that the promo coupon exists"""
+        try:
+            return models.Coupon.objects.get(id=value)
+        except models.Coupon.DoesNotExist:
+            raise serializers.ValidationError("Coupon not found.")
+
+    def validate_product_ids(self, value):
+        """Validate that the product ids exist"""
+        products = list(models.Product.objects.filter(id__in=value))
+        if len(products) != len(set(value)):
+            raise serializers.ValidationError("Some products not found.")
+        return products
+
+    def update_coupon(self, *, coupon, activation_date, expiration_date, products):
+        """Update the coupon with new activation and expiration dates, and replace eligibilities."""
+        previous_data = {
+            field.name: getattr(coupon.payment.latest_version, field.name)
+            for field in models.CouponPaymentVersion._meta.fields
+            if field.name
+            not in (
+                "id",
+                "activation_date",
+                "expiration_date",
+                "created_on",
+                "updated_on",
+            )
+        }
+        previous_data.update(
+            {
+                "activation_date": activation_date,
+                "expiration_date": expiration_date,
+            }
+        )
+
+        models.CouponPaymentVersion.objects.create(**previous_data)
+
+        # Replace eligibilities
+        coupon.couponeligibility_set.all().delete()
+        models.CouponEligibility.objects.bulk_create(
+            [
+                models.CouponEligibility(product=product, coupon=coupon)
+                for product in products
+            ]
+        )
 
 
 class DataConsentUserSerializer(serializers.ModelSerializer):
