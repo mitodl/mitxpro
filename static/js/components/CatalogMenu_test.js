@@ -1,7 +1,7 @@
 // @flow
 import React from "react";
 import { assert } from "chai";
-import { shallow } from "enzyme";
+import { mount, shallow } from "enzyme";
 
 import CatalogMenu from "./CatalogMenu";
 import { routes } from "../lib/urls";
@@ -14,7 +14,7 @@ describe("CatalogMenu component", () => {
     assert.equal(
       shallow(<CatalogMenu courseTopics={courseTopics} />)
         .find("a")
-        .at(0)
+        .at(1)
         .prop("href"),
       routes.catalog,
     );
@@ -27,14 +27,14 @@ describe("CatalogMenu component", () => {
       assert.equal(
         wrapper
           .find("a")
-          .at(index + 1)
+          .at(index + 2)
           .text(),
         `${topic.name} (${topic.course_count})`,
       );
       assert.equal(
         wrapper
           .find("a")
-          .at(index + 1)
+          .at(index + 2)
           .prop("href"),
         `/catalog/?topic=${topic.name}`,
       );
@@ -45,7 +45,7 @@ describe("CatalogMenu component", () => {
     assert.equal(
       shallow(<CatalogMenu courseTopics={courseTopics} />)
         .find("a")
-        .at(4)
+        .at(5)
         .prop("href"),
       "/catalog/?active-tab=programs-tab",
     );
