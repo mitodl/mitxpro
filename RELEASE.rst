@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.178.3
+Version 0.178.3 (Released May 29, 2025)
 ---------------
 
 - fix(deps): update dependency mitol-django-mail to v2025 (#3504)
