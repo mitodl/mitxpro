@@ -4,33 +4,11 @@ import React from "react";
 import { assert } from "chai";
 import { shallow } from "enzyme";
 
-import TopAppBar, { AuthButtons } from "./TopAppBar";
+import TopAppBar from "./TopAppBar";
 
 import { routes } from "../lib/urls";
 import { makeUser, makeAnonymousUser } from "../factories/user";
 import { makeCourseTopics } from "../factories/course";
-
-describe("AuthButtons component", () => {
-  it("has a link to login", () => {
-    assert.equal(
-      shallow(<AuthButtons isMobile={false} />)
-        .find("MixedLink")
-        .at(0)
-        .prop("dest"),
-      routes.login.begin,
-    );
-  });
-
-  it("has a link to register", () => {
-    assert.equal(
-      shallow(<AuthButtons isMobile={false} />)
-        .find("MixedLink")
-        .at(1)
-        .prop("dest"),
-      routes.register.begin,
-    );
-  });
-});
 
 describe("TopAppBar component", () => {
   describe("for anonymous users", () => {
