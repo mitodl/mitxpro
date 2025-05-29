@@ -34,7 +34,7 @@ describe("UserMenu component", () => {
     assert.equal(
       shallow(<UserMenu currentUser={user} />)
         .find("a")
-        .at(0)
+        .at(1)
         .prop("href"),
       routes.logout,
     );

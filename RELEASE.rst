@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.179.0
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3518)
+- fix: dropdown accessibility issue (#3493)
+- fix: use host-gateway for local.openedx.io to fix Open edX API auth session creation (#3470)
+- chore(deps): update akhileshns/heroku-deploy digest to e3eb99d (#3309)
+- fix(deps): update dependency nyc to v17 (#3516)
+- fix(deps): update dependency stylelint to v16 (#3507)
+
 Version 0.178.3 (Released May 29, 2025)
 ---------------
 

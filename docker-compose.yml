@@ -16,8 +16,8 @@ x-environment: &py-environment
   WEBPACK_DEV_SERVER_HOST: ${WEBPACK_DEV_SERVER_HOST:-localhost}
 
 x-extra-hosts: &default-extra-hosts
-  - "edx.odl.local:${OPENEDX_IP:-172.22.0.1}"
   - "host.docker.internal:host-gateway"
+  - "local.openedx.io:host-gateway"
 
 services:
   db:

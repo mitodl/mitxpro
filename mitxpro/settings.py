@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.178.3"
+VERSION = "0.179.0"
 
 env.reset()
 
@@ -1092,7 +1092,7 @@ OPENEDX_OAUTH_APP_NAME = get_string(
 )
 OPENEDX_API_BASE_URL = get_string(
     name="OPENEDX_API_BASE_URL",
-    default="http://edx.odl.local:18000",
+    default="http://local.openedx.io:8000",
     description="The base URL for the Open edX API",
     required=True,
 )
