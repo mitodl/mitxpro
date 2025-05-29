@@ -47,7 +47,7 @@ const TopAppBar = ({
   const isAuthenticated = currentUser?.is_authenticated;
   const showLoginSignup = shouldShowLoginSignup(location);
 
-  const MobileControls = () => (
+  const renderMobileControls = () => (
     <div className="d-flex align-items-center d-md-none">
       <button
         className="navbar-toggler nav-opener d-flex align-items-center"
@@ -69,7 +69,7 @@ const TopAppBar = ({
     </div>
   );
 
-  const DesktopNav = () => (
+  const renderDesktopNav = () => (
     <ul
       id="nav"
       className="navbar-collapse d-none d-md-flex px-0 justify-content-end"
@@ -113,7 +113,7 @@ const TopAppBar = ({
     </ul>
   );
 
-  const MobileDrawer = () => (
+  const renderMobileDrawer = () => (
     <div className={`mobile-drawer d-md-none ${drawerOpen ? "open" : ""}`}>
       <div className="drawer-header">
         <button
@@ -167,9 +167,9 @@ const TopAppBar = ({
           </a>
           {!errorPageHeader && (
             <>
-              <MobileControls />
-              <DesktopNav />
-              <MobileDrawer />
+              {renderMobileControls()}
+              {renderDesktopNav()}
+              {renderMobileDrawer()}
               {drawerOpen && (
                 <div
                   className="drawer-overlay d-md-none"

@@ -6,7 +6,7 @@ import { shallow } from "enzyme";
 
 import AuthButtons from "./AuthButtons";
 
-import { routes } from "../lib/urls";
+import { routes } from "../../lib/urls";
 
 describe("AuthButtons component", () => {
   it("has a link to login", () => {
