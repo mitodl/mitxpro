@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 
 import { routes } from "../lib/urls";
-import MixedLink from "./MixedLink";
 import UserMenu from "./UserMenu";
 import CatalogMenu from "./CatalogMenu";
+import AuthButtons from "./input/AuthButtons";
 import type { Location } from "react-router";
 
 import type { CurrentUser } from "../flow/authTypes";
@@ -24,39 +24,6 @@ const shouldShowLoginSignup = (location) =>
     location.pathname === routes.ecommerceBulk.bulkPurchase ||
     location.pathname === routes.ecommerceBulk.receipt
   );
-
-const AuthButtons = ({ isMobile = false }) => {
-  const buttonElements = [
-    <MixedLink
-      key="login"
-      dest={routes.login.begin}
-      className={isMobile ? "mobile-auth-button" : "button"}
-      aria-label="Login"
-    >
-      Sign In
-    </MixedLink>,
-    <MixedLink
-      key="create-account"
-      dest={routes.register.begin}
-      className={isMobile ? "mobile-auth-button" : "button"}
-      aria-label="Create Account"
-    >
-      Create Account
-    </MixedLink>,
-  ];
-
-  if (isMobile) {
-    return <div className="mobile-auth-buttons">{buttonElements}</div>;
-  }
-
-  return (
-    <>
-      {buttonElements.map((button, index) => (
-        <li key={index}>{button}</li>
-      ))}
-    </>
-  );
-};
 
 const TopAppBar = ({
   currentUser,
@@ -225,4 +192,4 @@ const TopAppBar = ({
   );
 };
 
-export { TopAppBar as default, AuthButtons };
+export default TopAppBar;
