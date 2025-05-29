@@ -25,6 +25,8 @@ function copyProps(src, target) {
   });
 }
 
+// Proxy window.location assignments to use jsdom.reconfigure()
+// instead of direct assignment, which is no longer allowed in v26
 const windowProxy = new Proxy(window, {
   set: function (target, prop, value) {
     if (prop === "location") {
