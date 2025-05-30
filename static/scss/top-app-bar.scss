@@ -73,6 +73,12 @@
   }
 }
 
+.navbar-collapse.collapsing,
+.navbar-collapse.show {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .site-logo {
   width: 125px;
   height: 35px;
