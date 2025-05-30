@@ -6,9 +6,10 @@ import MixedLink from "../MixedLink";
 
 type Props = {
   isMobile?: boolean,
+  onClick?: () => void,
 };
 
-const AuthButtons = ({ isMobile = false }: Props) => {
+const AuthButtons = ({ isMobile = false, onClick }: Props) => {
   const authLinks = [
     {
       key: "login",
@@ -32,6 +33,7 @@ const AuthButtons = ({ isMobile = false }: Props) => {
       dest={dest}
       className={className}
       aria-label={ariaLabel}
+      onClick={onClick}
     >
       {label}
     </MixedLink>

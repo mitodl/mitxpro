@@ -125,7 +125,9 @@ const TopAppBar = ({
         </button>
       </div>
 
-      {showLoginSignup && !isAuthenticated && <AuthButtons isMobile />}
+      {showLoginSignup && !isAuthenticated && (
+        <AuthButtons isMobile onClick={() => drawerOpen && toggleDrawer()} />
+      )}
 
       <div className="mobile-drawer-section">
         <CatalogMenu courseTopics={courseTopics} isMobile={true} />
