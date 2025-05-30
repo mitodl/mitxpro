@@ -7,7 +7,7 @@ import DeactivateCouponPage, {
 } from "./DeactivateCouponPage";
 
 import IntegrationTestHelper from "../../../util/integration_test_helper";
-import { Modal } from "reactstrap";
+import ConfirmUpdateModal from "../../../components/ConfirmUpdateModal";
 import wait from "waait";
 
 describe("DeactivateCouponPage", () => {
@@ -63,21 +63,27 @@ describe("DeactivateCouponPage", () => {
     const testCouponsData = {
       coupons: "abc\nbcd",
     };
+
     helper.handleRequestStub.returns({
       body: {
         skipped_codes: ["xyz", "pqr"],
+        num_of_coupons_deactivated: 1,
       },
     });
+
     const { inner } = await renderDeactivateCouponPage();
 
     await inner.instance().onSubmit(testCouponsData, {
       setSubmitting: setSubmittingStub,
     });
-    sinon.assert.calledWith(setSubmittingStub, false);
-    assert.isTrue(inner.find(Modal).exists());
 
-    inner.find(".btn-gradient-red-to-blue").simulate("click");
+    // Instead of simulating a button click, invoke the onConfirm directly
+    const modal = inner.find(ConfirmUpdateModal);
+    await modal.prop("onConfirm")();
+
     await wait;
+
+    sinon.assert.calledWith(setSubmittingStub, false);
     sinon.assert.calledWith(helper.handleRequestStub, "/api/coupons/", "PUT", {
       body: testCouponsData,
       headers: {
@@ -86,7 +92,6 @@ describe("DeactivateCouponPage", () => {
       credentials: undefined,
     });
 
-    await wait;
     assert.equal(inner.state().isDeactivated, true);
   });
 

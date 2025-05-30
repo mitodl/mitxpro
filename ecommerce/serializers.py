@@ -892,6 +892,114 @@ class PromoCouponSerializer(BaseCouponSerializer):
     )
 
 
+class PromoCouponDetailSerializer(serializers.ModelSerializer):
+    """Serializer for getting promo coupons with eligibility information"""
+
+    eligibility = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    activation_date = serializers.SerializerMethodField()
+    expiration_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Coupon
+        fields = [
+            "id",
+            "coupon_code",
+            "name",
+            "activation_date",
+            "expiration_date",
+            "eligibility",
+        ]
+
+    def get_eligibility(self, instance):
+        """
+        Get all CouponEligibility records related to the coupons created by this CouponPayment.
+        """
+        eligibility_qs = instance.couponeligibility_set.all()
+
+        # Only apply the filter if is_private is explicitly False
+        if self.context.get("is_private") is False:
+            eligibility_qs = eligibility_qs.filter(product__is_private=False)
+
+        return [
+            {
+                "coupon_code": eligibility.coupon.coupon_code,
+                "product_id": eligibility.product.id,
+                "program_run_id": eligibility.program_run.id
+                if eligibility.program_run
+                else None,
+            }
+            for eligibility in eligibility_qs
+        ]
+
+    def get_name(self, instance):
+        """Get the 'name' property of the associated CouponPayment"""
+        return instance.payment.name
+
+    def get_activation_date(self, instance):
+        """Get the activation date of the associated CouponPayment"""
+        return instance.payment.latest_version.activation_date
+
+    def get_expiration_date(self, instance):
+        """Get the expiration date of the associated CouponPayment"""
+        return instance.payment.latest_version.expiration_date
+
+
+class PromoCouponUpdateSerializer(serializers.Serializer):
+    """Serializer for updating promo coupons"""
+
+    promo_coupon = serializers.IntegerField()
+    activation_date = serializers.DateTimeField()
+    expiration_date = serializers.DateTimeField()
+    product_ids = serializers.ListField(child=serializers.IntegerField())
+
+    def validate_promo_coupon(self, value):
+        """Validate that the promo coupon exists"""
+        try:
+            return models.Coupon.objects.get(id=value)
+        except models.Coupon.DoesNotExist:
+            raise serializers.ValidationError("Coupon not found.")
+
+    def validate_product_ids(self, value):
+        """Validate that the product ids exist"""
+        products = list(models.Product.objects.filter(id__in=value))
+        if len(products) != len(set(value)):
+            raise serializers.ValidationError("Some products not found.")
+        return products
+
+    def update_coupon(self, *, coupon, activation_date, expiration_date, products):
+        """Update the coupon with new activation and expiration dates, and replace eligibilities."""
+        previous_data = {
+            field.name: getattr(coupon.payment.latest_version, field.name)
+            for field in models.CouponPaymentVersion._meta.fields
+            if field.name
+            not in (
+                "id",
+                "activation_date",
+                "expiration_date",
+                "created_on",
+                "updated_on",
+            )
+        }
+        previous_data.update(
+            {
+                "activation_date": activation_date,
+                "expiration_date": expiration_date,
+            }
+        )
+
+        models.CouponPaymentVersion.objects.create(**previous_data)
+
+        # Replace eligibilities
+        coupon.couponeligibility_set.all().delete()
+        models.CouponEligibility.objects.bulk_create(
+            [
+                models.CouponEligibility(product=product, coupon=coupon)
+                for product in products
+            ]
+        )
+
+
 class DataConsentUserSerializer(serializers.ModelSerializer):
     """Serializer for DataConsentUsers"""
 

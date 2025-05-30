@@ -121,7 +121,7 @@ export const CREATE_COUPON_PAGE_TITLE = "Create Coupon";
 export const DEACTIVATE_COUPONS_PAGE_TITLE = "Deactivate Coupons";
 export const PROCESS_COUPON_ASSIGNMENT_SHEET_PAGE_TITLE =
   "Process Coupon Assignment Sheet";
-
+export const UPDATE_PROMO_COUPON_PAGE_TITLE = "Update Promo Coupon";
 export const LOGIN_EMAIL_PAGE_TITLE = "Sign In";
 export const LOGIN_PASSWORD_PAGE_TITLE = LOGIN_EMAIL_PAGE_TITLE;
 
@@ -143,3 +143,9 @@ export const ACCOUNT_SETTINGS_PAGE_TITLE = "Account Settings";
 export const EMAIL_CONFIRM_PAGE_TITLE = "Confirm Email Change";
 
 export const RECEIPT_PAGE_TITLE = "Receipt";
+export const DEACTIVATE_COUPONS_MODAL_HEADER = "Deactivate Coupon(s)";
+export const DEACTIVATE_COUPONS_MODAL_BODY =
+  "Are you sure you want to deactivate coupon(s)?";
+export const UPDATE_PROMO_COUPON_MODAL_HEADER = "Update Promo Coupon";
+export const UPDATE_PROMO_COUPON_MODAL_BODY =
+  "Update this promo coupon? This will overwrite existing product eligibility settings.";
