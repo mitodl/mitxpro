@@ -113,7 +113,7 @@
     "stylelint": "^16.1.0",
     "stylelint-config-standard-scss": "^12.0.0",
     "unzipper": "^0.12.0",
-    "url-join": "^4.0.0",
+    "url-join": "^5.0.0",
     "url-loader": "^4.1.1",
     "waait": "^1.0.4",
     "webpack": "^5.76.0",
