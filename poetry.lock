@@ -2274,25 +2274,28 @@ social-auth-app-django = ">=5.4.0"
 
 [[package]]
 name = "mitol-django-common"
-version = "2023.12.19"
+version = "2025.5.23"
 description = "MIT Open Learning django app extensions for common utilities"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 files = [
-    {file = "mitol-django-common-2023.12.19.tar.gz", hash = "sha256:b7df5f57fcc06d822e7465470e2279ff4ee5c3b9a108513dc10a6979dd92fdda"},
-    {file = "mitol_django_common-2023.12.19-py3-none-any.whl", hash = "sha256:5dd54a632dfdb5391287ac573758e19fa55e73e2c853eaaf60e5c8a4143e7776"},
+    {file = "mitol_django_common-2025.5.23-py3-none-any.whl", hash = "sha256:3ec46487146473293e3918c29ef92412ffd9f3ca1ce442ddc06c4a80ae0afe09"},
+    {file = "mitol_django_common-2025.5.23.tar.gz", hash = "sha256:5b56dfc1b5ad6d843bf19c2a3b529a1e8f69f466a8c548f796f0ab193882b2e9"},
 ]
 
 [package.dependencies]
 django = ">=3.0"
-django-redis = ">=5.0.0,<5.1.0"
+django-redis = ">=5.0,<6.0"
+django-stubs = ">=1.13.1"
 django-webpack-loader = ">=0.7.0"
 factory-boy = ">=3.2,<4.0"
-pytest = ">=7.0.0"
+pytest = ">=7,<9"
 pytz = ">=2020.4"
 requests = ">=2.20.0"
-setuptools = "*"
 typing-extensions = "*"
+
+[package.extras]
+celery = ["celery (>=5.5.0)"]
 
 [[package]]
 name = "mitol-django-digital-credentials"
@@ -4454,4 +4457,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "1af62c89bf680484c927c77f1f51609c0cf78f30a0f38f797932df7a6ed47439"
+content-hash = "e2a3174ea32eeb781f85624547e281394b64144e63bb450d8c03cd35d3b27c75"
