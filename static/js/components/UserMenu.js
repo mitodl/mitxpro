@@ -25,7 +25,6 @@ const UserMenu = ({ currentUser, onMouseDown }: Props) => {
         aria-label="user menu"
         href="#"
         role="button"
-        data-bs-toggle="dropdown"
         onMouseDown={onMouseDown}
         onKeyDown={(e) => {
           if (e.key === " ") {

@@ -60,7 +60,6 @@ const CatalogMenu = ({ courseTopics, isMobile = false }: Props) => {
         aria-label="courses"
         href="#"
         role="button"
-        data-bs-toggle="dropdown"
         onKeyDown={(e) => {
           if (e.key === " ") {
             e.preventDefault();
