@@ -63,7 +63,10 @@ const TopAppBar = ({
 
       {showLoginSignup && isAuthenticated && (
         <div className="mobile-user-menu">
-          <UserMenu currentUser={currentUser} />
+          <UserMenu
+            currentUser={currentUser}
+            onMouseDown={() => drawerOpen && toggleDrawer()}
+          />
         </div>
       )}
     </div>
