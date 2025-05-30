@@ -25,8 +25,25 @@ function copyProps(src, target) {
   });
 }
 
-global.window = window;
-global.document = window.document;
+// Proxy window.location assignments to use jsdom.reconfigure()
+// instead of direct assignment, which is no longer allowed in v26
+const windowProxy = new Proxy(window, {
+  set: function (target, prop, value) {
+    if (prop === "location") {
+      let url = value;
+      if (!url.startsWith("http")) {
+        url = `http://fake${url}`;
+      }
+      jsdom.reconfigure({ url });
+      return true;
+    }
+
+    return Reflect.set(target, prop, value);
+  },
+});
+
+global.window = windowProxy;
+global.document = windowProxy.document;
 global.navigator = {
   userAgent: "node.js",
 };
@@ -37,14 +54,5 @@ global.cancelAnimationFrame = function (id) {
   clearTimeout(id);
 };
 copyProps(window, global);
-
-Object.defineProperty(window, "location", {
-  set: (value) => {
-    if (!value.startsWith("http")) {
-      value = `http://fake${value}`;
-    }
-    jsdom.reconfigure({ url: value });
-  },
-});
 
 require("@babel/register")(babelSharedLoader.options);
