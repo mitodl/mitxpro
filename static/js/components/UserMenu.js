@@ -10,9 +10,10 @@ import type { User } from "../flow/authTypes";
 type Props = {
   /* This is here for future use when we have custom profile avatars */
   currentUser: User,
+  onMouseDown?: () => void,
 };
 
-const UserMenu = ({ currentUser }: Props) => {
+const UserMenu = ({ currentUser, onMouseDown }: Props) => {
   return (
     <div className="user-menu dropdown">
       <a
@@ -25,6 +26,7 @@ const UserMenu = ({ currentUser }: Props) => {
         href="#"
         role="button"
         data-bs-toggle="dropdown"
+        onMouseDown={onMouseDown}
         onKeyDown={(e) => {
           if (e.key === " ") {
             e.preventDefault();
