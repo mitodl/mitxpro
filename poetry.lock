@@ -2382,17 +2382,18 @@ requests = ">=2.20.0"
 
 [[package]]
 name = "mitol-django-olposthog"
-version = "2024.5.14"
+version = "2025.3.17"
 description = "MIT Open Learning django app extensions for Posthog."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 files = [
-    {file = "mitol-django-olposthog-2024.5.14.tar.gz", hash = "sha256:089b31d4606b1ef4484f999cf29229f8f0988df41531dd165a7706fc000f4140"},
-    {file = "mitol_django_olposthog-2024.5.14-py3-none-any.whl", hash = "sha256:e3637eb695816e17a8ff1af18c623a21866ecfe8733d9d4d73303ea3391023c1"},
+    {file = "mitol_django_olposthog-2025.3.17-py3-none-any.whl", hash = "sha256:b1d510fd045e2cae1f9ff91a2e9fae3c27e0a5a88dd88c4e6f2e1973df0b713d"},
+    {file = "mitol_django_olposthog-2025.3.17.tar.gz", hash = "sha256:758ebad5aea581dcbd1b61a8e7db8e1fccafeb424079a39d375239f25f6d0a31"},
 ]
 
 [package.dependencies]
 django = ">=3.0"
+django-stubs = ">=1.13.1"
 mitol-django-common = "*"
 posthog = ">=3.5.0"
 
@@ -4460,4 +4461,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "5e920f1b36b51bdecb8a451ff1c992e30ed5e9eed93481698f70f42c31167513"
+content-hash = "3b25aa92de58748c2879f616980b6a8171d797c1b7a18db6c4ec723c4ca012f4"
