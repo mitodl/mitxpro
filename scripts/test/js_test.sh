@@ -13,7 +13,7 @@ else
 fi
 
 export FILE_PATTERN=${1:-'"static/**/*/*_test.js"'}
-CMD_ARGS="--loader ./static/js/babelhook.js static/js/global_init.js $FILE_PATTERN --exit"
+CMD_ARGS="--require ./static/js/babelhook.js static/js/global_init.js $FILE_PATTERN --exit"
 
 # Second argument (if specified) should be a string that will match specific test case descriptions
 #
