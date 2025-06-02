@@ -36,6 +36,7 @@ describe("PromoCouponUpdateForm", () => {
         { product_id: mockProducts[0].id },
         { product_id: mockProducts[1].id },
       ],
+      is_global: false,
     },
     {
       id: "2",
@@ -43,6 +44,7 @@ describe("PromoCouponUpdateForm", () => {
       activation_date: "2025-02-01T00:00:00.000Z",
       expiration_date: "2025-11-30T23:59:59.999Z",
       eligibility: [{ product_id: mockProducts[2].id }],
+      is_global: false,
     },
   ];
 
@@ -74,6 +76,7 @@ describe("PromoCouponUpdateForm", () => {
     const form = wrapper.find("Formik");
     // Check for required form elements
     assert.ok(findFormikFieldByName(form, "promo_coupon").exists());
+    assert.ok(findFormikFieldByName(form, "is_global").exists());
     assert.ok(form.find('DayPickerInput[name="activation_date"]').exists());
     assert.ok(form.find('DayPickerInput[name="expiration_date"]').exists());
     assert.ok(form.find('input[name="product_type"]').exists());

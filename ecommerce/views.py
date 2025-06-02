@@ -6,7 +6,6 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db import transaction
 from django.db.models import Count, Q, OuterRef, Subquery
 from django.http import Http404
 from django.shortcuts import render
@@ -339,9 +338,11 @@ class PromoCouponView(APIView):
         )
 
         # Get coupons where the latest coupon_type is 'promo'
-        promo_coupons = Coupon.objects.annotate(
-            latest_coupon_type=latest_coupon_type_subquery
-        ).filter(latest_coupon_type=CouponPaymentVersion.PROMO)
+        promo_coupons = (
+            Coupon.objects.annotate(latest_coupon_type=latest_coupon_type_subquery)
+            .filter(latest_coupon_type=CouponPaymentVersion.PROMO)
+            .order_by("id")
+        )
 
         serializer = PromoCouponDetailSerializer(
             promo_coupons, many=True, context={"is_private": False}
@@ -354,19 +355,8 @@ class PromoCouponView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        coupon = serializer.validated_data["promo_coupon"]
-        activation_date = serializer.validated_data["activation_date"]
-        expiration_date = serializer.validated_data["expiration_date"]
-        products = serializer.validated_data["product_ids"]
-
         try:
-            with transaction.atomic():
-                serializer.update_coupon(
-                    coupon=coupon,
-                    activation_date=activation_date,
-                    expiration_date=expiration_date,
-                    products=products,
-                )
+            coupon = serializer.save()
         except Exception as e:
             log.error("Failed to update promo coupon: %s", str(e))
             return Response(

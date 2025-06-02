@@ -9,7 +9,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as yup from "yup";
 
 import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants";
-import { getProductSelectLabel } from "../../lib/util";
+import { zeroHour, finalHour, getProductSelectLabel } from "../../lib/util";
 import FormError from "./elements/FormError";
 
 import type { Company, Product } from "../../flow/ecommerceTypes";
@@ -30,7 +30,11 @@ const couponValidations = yup.object().shape({
       "Expiration date must be after today/activation date",
     )
     .required("Valid expiration date required"),
-  products: yup.array().min(1, "${min} or more products must be selected"),
+  products: yup.array().when("is_global", {
+    is: false,
+    then: (schema) => schema.min(1, "${min} or more products must be selected"),
+  }),
+  is_global: yup.boolean(),
 });
 
 const selectProducts = (coupon, products) => {
@@ -42,18 +46,6 @@ const selectProducts = (coupon, products) => {
       label: getProductSelectLabel(product),
     }));
   return selectedProducts;
-};
-
-const zeroHour = (value) => {
-  if (value instanceof Date) {
-    value.setHours(0, 0, 0, 0);
-  }
-};
-
-const finalHour = (value) => {
-  if (value instanceof Date) {
-    value.setHours(23, 59, 59, 999);
-  }
 };
 
 export const PromoCouponUpdateForm = ({
@@ -76,6 +68,7 @@ export const PromoCouponUpdateForm = ({
           [PRODUCT_TYPE_PROGRAM]: [],
           "": [],
         },
+        is_global: false,
       }}
       render={({
         isSubmitting,
@@ -84,6 +77,7 @@ export const PromoCouponUpdateForm = ({
         errors,
         touched,
         values,
+        resetForm,
       }) => (
         <Form className="coupon-form">
           <div className="block">
@@ -94,6 +88,11 @@ export const PromoCouponUpdateForm = ({
                 name="promo_coupon"
                 onChange={(e) => {
                   const selectedId = e.target.value;
+                  if (!selectedId) {
+                    // Reset form to initial values
+                    resetForm();
+                    return;
+                  }
                   setFieldValue("promo_coupon", selectedId);
                   const selectedCoupon = promoCoupons?.find(
                     (coupon) => String(coupon.id) === selectedId,
@@ -115,7 +114,8 @@ export const PromoCouponUpdateForm = ({
 
                     setFieldValue("activation_date", activationDate);
                     setFieldValue("expiration_date", expirationDate);
-                    // setFieldValue("products", selectedProducts);
+                    setFieldValue("is_global", selectedCoupon.is_global);
+
                     // Save selected products by product_type
                     const grouped = {
                       [PRODUCT_TYPE_COURSERUN]: [],
@@ -188,7 +188,28 @@ export const PromoCouponUpdateForm = ({
               <ErrorMessage name="expiration_date" component={FormError} />
             </div>
           </div>
-          <div className="flex">
+          <div
+            className={values.include_future_runs ? "flex disabled" : "flex"}
+          >
+            <label htmlFor="is_global">
+              <Field
+                type="checkbox"
+                name="is_global"
+                checked={values.is_global}
+                onChange={() => {
+                  values.is_global = !values.is_global;
+                  setFieldValue("is_global", values.is_global);
+                  if (values.is_global) {
+                    setFieldValue("products", []);
+                    setFieldTouched("products");
+                  }
+                }}
+                disabled={values.include_future_runs}
+              />
+              Global coupon (applies to all products)
+            </label>
+          </div>
+          <div className="flex" hidden={values.is_global}>
             <Field
               type="radio"
               name="product_type"
@@ -254,7 +275,7 @@ export const PromoCouponUpdateForm = ({
             </p>
           )}
           <ErrorMessage name="products" component={FormError} />
-          <div className="product-selection">
+          <div className="product-selection" hidden={values.is_global}>
             <Picky
               name="products"
               valueKey="id"

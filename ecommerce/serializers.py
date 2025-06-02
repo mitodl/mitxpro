@@ -909,6 +909,7 @@ class PromoCouponDetailSerializer(serializers.ModelSerializer):
             "activation_date",
             "expiration_date",
             "eligibility",
+            "is_global",
         ]
 
     def get_eligibility(self, instance):
@@ -949,6 +950,7 @@ class PromoCouponUpdateSerializer(serializers.Serializer):
     """Serializer for updating promo coupons"""
 
     promo_coupon = serializers.IntegerField()
+    is_global = serializers.BooleanField(default=False)
     activation_date = serializers.DateTimeField()
     expiration_date = serializers.DateTimeField()
     product_ids = serializers.ListField(child=serializers.IntegerField())
@@ -967,8 +969,29 @@ class PromoCouponUpdateSerializer(serializers.Serializer):
             raise serializers.ValidationError("Some products not found.")
         return products
 
-    def update_coupon(self, *, coupon, activation_date, expiration_date, products):
-        """Update the coupon with new activation and expiration dates, and replace eligibilities."""
+    def validate(self, data):
+        """Validate the product_ids are empty when is_global is True"""
+        is_global = data.get("is_global", False)
+        product_ids = data.get("product_ids", [])
+
+        if is_global and product_ids:
+            raise serializers.ValidationError(
+                {"product_ids": "Must be empty when is_global is true."}
+            )
+        if not is_global and not product_ids:
+            raise serializers.ValidationError(
+                {"product_ids": "This field is required when is_global is false."}
+            )
+        return data
+
+    @transaction.atomic
+    def save(self):
+        coupon = self.validated_data["promo_coupon"]
+        is_global = self.validated_data["is_global"]
+        activation_date = self.validated_data["activation_date"]
+        expiration_date = self.validated_data["expiration_date"]
+        products = self.validated_data["product_ids"]
+
         previous_data = {
             field.name: getattr(coupon.payment.latest_version, field.name)
             for field in models.CouponPaymentVersion._meta.fields
@@ -998,6 +1021,12 @@ class PromoCouponUpdateSerializer(serializers.Serializer):
                 for product in products
             ]
         )
+
+        # Update coupon is_global
+        coupon.is_global = is_global
+        coupon.save()
+
+        return coupon
 
 
 class DataConsentUserSerializer(serializers.ModelSerializer):
