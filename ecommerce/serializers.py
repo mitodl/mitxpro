@@ -986,6 +986,7 @@ class PromoCouponUpdateSerializer(serializers.Serializer):
 
     @transaction.atomic
     def save(self):
+        """Save the updated promo coupon data."""
         coupon = self.validated_data["promo_coupon"]
         is_global = self.validated_data["is_global"]
         activation_date = self.validated_data["activation_date"]
