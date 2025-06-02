@@ -644,12 +644,7 @@ def test_promo_coupon_update_serializer():
     serializer = PromoCouponUpdateSerializer(data=data, context={"coupon": coupon})
     assert serializer.is_valid(), serializer.errors
 
-    serializer.update_coupon(
-        coupon=coupon,
-        activation_date=new_activation,
-        expiration_date=new_expiration,
-        products=[new_product],
-    )
+    serializer.save()
 
     # Check new version was created
     assert payment.versions.count() == 2
@@ -660,3 +655,104 @@ def test_promo_coupon_update_serializer():
     # Check eligibilities were updated
     assert coupon.couponeligibility_set.count() == 1
     assert coupon.couponeligibility_set.first().product == new_product
+
+
+@pytest.mark.parametrize(
+    "setup_data, input_data, expected_valid, expected_error_field",
+    [
+        # Valid: is_global=False, valid product_ids
+        (
+            lambda: {
+                "coupon": CouponFactory(),
+                "products": [ProductFactory(), ProductFactory()],
+            },
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": False,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [p.id for p in d["products"]],
+            },
+            True,
+            None,
+        ),
+        # Valid: is_global=True, product_ids = []
+        (
+            lambda: {"coupon": CouponFactory()},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": True,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [],
+            },
+            True,
+            None,
+        ),
+        # Invalid: promo_coupon does not exist
+        (
+            lambda: {},
+            lambda _: {
+                "promo_coupon": 999999,
+                "is_global": True,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [],
+            },
+            False,
+            "promo_coupon",
+        ),
+        # Invalid: one product_id is invalid
+        (
+            lambda: {"coupon": CouponFactory(), "products": [ProductFactory()]},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": False,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [d["products"][0].id, 999999],
+            },
+            False,
+            "product_ids",
+        ),
+        # Invalid: is_global=True, but product_ids is not empty
+        (
+            lambda: {"coupon": CouponFactory(), "products": [ProductFactory()]},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": True,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [d["products"][0].id],
+            },
+            False,
+            "product_ids",
+        ),
+        # Invalid: is_global=False, but product_ids is empty
+        (
+            lambda: {"coupon": CouponFactory()},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": False,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [],
+            },
+            False,
+            "product_ids",
+        ),
+    ],
+)
+def test_promo_coupon_update_serializer_validation(
+    setup_data, input_data, expected_valid, expected_error_field
+):
+    """Test PromoCouponUpdateSerializer validation logic"""
+    context = setup_data()
+    data = input_data(context)
+
+    serializer = PromoCouponUpdateSerializer(data=data)
+    is_valid = serializer.is_valid()
+
+    assert is_valid == expected_valid
+    if not expected_valid:
+        assert expected_error_field in serializer.errors

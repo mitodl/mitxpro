@@ -1795,7 +1795,7 @@ def test_promocoupon_get_view_returns_only_latest_promo_versions(admin_drf_clien
     "should_raise_exception,expected_status_code,expected_response_part",
     [
         (False, 200, "message"),  # Success case
-        (True, 400, "error"),  # update_coupon raises an error
+        (True, 400, "error"),  # Save raises an error
     ],
 )
 def test_put_calls_update_coupon_and_handles_errors(
@@ -1820,9 +1820,7 @@ def test_put_calls_update_coupon_and_handles_errors(
         "product_ids": [product.id],
     }
 
-    patch_path = (
-        "ecommerce.views.PromoCouponUpdateSerializer.update_coupon"  # Replace correctly
-    )
+    patch_path = "ecommerce.views.PromoCouponUpdateSerializer.save"
     with patch(patch_path) as mocked_update:
         if should_raise_exception:
             mocked_update.side_effect = Exception("Simulated failure")
