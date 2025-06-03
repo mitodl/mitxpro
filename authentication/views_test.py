@@ -24,6 +24,7 @@ from hypothesis.stateful import (
     consumes,
     precondition,
     rule,
+    run_state_machine_as_test,
 )
 from rest_framework import status
 from social_core.backends.email import EmailAuth
@@ -727,6 +728,9 @@ class AuthStateMachine(RuleBasedStateMachine):
 
 class AuthStateTestCase(HTestCase, AuthStateMachine.TestCase):
     """TestCase for AuthStateMachine"""
+
+    def runTest(self):
+        run_state_machine_as_test(AuthStateMachine)
 
 
 @pytest.mark.usefixtures("mock_email_send")
