@@ -115,6 +115,13 @@ def export_check_response(response_name):
         yield
 
 
+@hypothesis_settings(
+    max_examples=100,
+    stateful_step_count=10,
+    deadline=None,
+    verbosity=Verbosity.normal,
+    suppress_health_check=[HealthCheck.filter_too_much],
+)
 class AuthStateMachine(RuleBasedStateMachine):
     """
     State machine for auth flows
@@ -716,15 +723,6 @@ class AuthStateMachine(RuleBasedStateMachine):
             },
             expect_authenticated=True,
         )
-
-
-AuthStateMachine.TestCase.settings = hypothesis_settings(
-    max_examples=100,
-    stateful_step_count=10,
-    deadline=None,
-    verbosity=Verbosity.normal,
-    suppress_health_check=[HealthCheck.filter_too_much],
-)
 
 
 class AuthStateTestCase(HTestCase, AuthStateMachine.TestCase):
