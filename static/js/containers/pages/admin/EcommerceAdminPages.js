@@ -12,6 +12,7 @@ import { routes } from "../../../lib/urls";
 import CouponCreationPage from "./CreateCouponPage";
 import DeactivateCouponPage from "./DeactivateCouponPage";
 import ProcessCouponAssignmentSheetPage from "./ProcessCouponAssignmentSheetPage";
+import UpdatePromoCodePage from "./UpdatePromoCouponPage";
 
 const EcommerceAdminIndexPage = () => (
   <div className="ecommerce-admin-body">
@@ -33,6 +34,13 @@ const EcommerceAdminIndexPage = () => (
         <li>
           <Link to={routes.ecommerceAdmin.processSheets}>
             Process Coupon Assignment Sheet
+          </Link>
+        </li>
+      )}
+      {USER_PERMISSIONS.has_coupon_update_permission && (
+        <li>
+          <Link to={routes.ecommerceAdmin.updatePromoCode}>
+            Update Promo Coupon
           </Link>
         </li>
       )}
@@ -62,6 +70,11 @@ const EcommerceAdminPages = () => (
         exact
         path={routes.ecommerceAdmin.processSheets}
         component={ProcessCouponAssignmentSheetPage}
+      />
+      <Route
+        exact
+        path={routes.ecommerceAdmin.updatePromoCode}
+        component={UpdatePromoCodePage}
       />
       <Redirect to={routes.ecommerceAdmin.index} />
     </Switch>

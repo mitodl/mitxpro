@@ -16,7 +16,7 @@ import {
   PRODUCT_TYPE_PROGRAM,
 } from "../../constants";
 import { isPromo } from "../../lib/ecommerce";
-import { getProductSelectLabel } from "../../lib/util";
+import { zeroHour, finalHour, getProductSelectLabel } from "../../lib/util";
 import FormError from "../../components/forms/elements/FormError";
 
 import type { Company, Product } from "../../flow/ecommerceTypes";
@@ -93,18 +93,6 @@ const couponValidations = yup.object().shape({
     then: (schema) => schema.required("Payment type is required"),
   }),
 });
-
-const zeroHour = (value) => {
-  if (value instanceof Date) {
-    value.setHours(0, 0, 0, 0);
-  }
-};
-
-const finalHour = (value) => {
-  if (value instanceof Date) {
-    value.setHours(23, 59, 59, 999);
-  }
-};
 
 export const CouponForm = ({
   onSubmit,

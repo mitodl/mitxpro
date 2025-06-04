@@ -8,6 +8,7 @@ from ecommerce.views import (
     CheckoutView,
     CompanyViewSet,
     CouponListView,
+    PromoCouponView,
     OrderFulfillmentView,
     OrderReceiptView,
     ProductViewSet,
@@ -41,6 +42,7 @@ urlpatterns = [
     ),
     path("api/basket/", BasketView.as_view(), name="basket_api"),
     path("api/coupons/", CouponListView.as_view(), name="coupon_api"),
+    path("api/promo_coupons/", PromoCouponView.as_view(), name="promo_coupons_api"),
     re_path(
         r"^couponcodes/(?P<version_id>[0-9]+)", coupon_code_csv_view, name="coupons_csv"
     ),

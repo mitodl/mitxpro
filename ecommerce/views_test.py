@@ -8,6 +8,7 @@ from urllib.parse import quote_plus, urljoin
 import factory
 import faker
 import pytest
+from unittest.mock import patch
 from django.contrib.auth.models import Permission
 from django.db.models import Count, Q
 from django.test import Client
@@ -34,7 +35,9 @@ from ecommerce.factories import (
     CouponEligibilityFactory,
     CouponFactory,
     CouponPaymentFactory,
+    CouponPaymentVersionFactory,
     LineFactory,
+    ProductFactory,
     ProductCouponAssignmentFactory,
     ProductVersionFactory,
 )
@@ -1242,16 +1245,17 @@ def test_create_coupon_permission(user_drf_client, promo_coupon_json):
         "expected_coupons_status",
         "expected_deactivate_status",
         "expected_product_assignment_status",
+        "expected_update_promo_status",
     ),
     [
-        (True, False, False, 200, 200, 403, 403),
-        (False, True, False, 200, 403, 200, 403),
-        (False, False, False, 403, 403, 403, 403),
-        (True, True, False, 200, 200, 200, 403),
-        (False, False, True, 200, 403, 403, 200),  # Product assignment only
-        (True, False, True, 200, 200, 403, 200),  # Coupon + Product assignment
-        (False, True, True, 200, 403, 200, 200),  # Change Coupon + Product assignment
-        (True, True, True, 200, 200, 200, 200),  # All permissions
+        (True, False, False, 200, 200, 403, 403, 403),
+        (False, True, False, 200, 403, 200, 403, 200),
+        (False, False, False, 403, 403, 403, 403, 403),
+        (True, True, False, 200, 200, 200, 403, 200),
+        (False, False, True, 200, 403, 403, 200, 403),
+        (True, False, True, 200, 200, 403, 200, 403),
+        (False, True, True, 200, 403, 200, 200, 200),
+        (True, True, True, 200, 200, 200, 200, 200),
     ],
 )
 def test_ecommerce_restricted_view(
@@ -1263,6 +1267,7 @@ def test_ecommerce_restricted_view(
     expected_coupons_status,
     expected_deactivate_status,
     expected_product_assignment_status,
+    expected_update_promo_status,
 ):
     """Test that the ecommerce restricted view is only accessible with the right permissions."""
 
@@ -1286,6 +1291,7 @@ def test_ecommerce_restricted_view(
     add_coupons_url = ecommerce_admin_url + "coupons"
     deactivate_coupons_url = ecommerce_admin_url + "deactivate-coupons"
     product_assignment_url = ecommerce_admin_url + "process-coupon-assignment-sheets"
+    update_promo_url = ecommerce_admin_url + "update-promo-code"
 
     assert client.get(ecommerce_admin_url).status_code == expected_admin_status
     assert client.get(add_coupons_url).status_code == expected_coupons_status
@@ -1294,6 +1300,7 @@ def test_ecommerce_restricted_view(
         client.get(product_assignment_url).status_code
         == expected_product_assignment_status
     )
+    assert client.get(update_promo_url).status_code == expected_update_promo_status
 
 
 def test_deactivate_coupons(mocker, admin_drf_client):
@@ -1756,3 +1763,69 @@ def test_program_runs_api():
     assert sorted(resp.data, key=lambda item: item["id"]) == sorted(
         serialized_data, key=lambda item: item["id"]
     )
+
+
+def test_promocoupon_get_view_returns_only_latest_promo_versions(admin_drf_client):
+    """Test that the promo coupon API returns only the latest version of each promo coupon"""
+    payment = CouponPaymentFactory()
+    CouponPaymentVersionFactory(
+        payment=payment,
+        coupon_type=CouponPaymentVersion.PROMO,
+        activation_date=now_in_utc() - timedelta(days=2),
+    )
+    payment_version = CouponPaymentVersionFactory(
+        payment=payment,
+        coupon_type=CouponPaymentVersion.PROMO,
+        activation_date=now_in_utc() - timedelta(days=5),
+    )
+
+    coupon = CouponFactory(payment=payment)
+    product = ProductFactory()
+    CouponEligibilityFactory(coupon=coupon, product=product)
+
+    response = admin_drf_client.get(reverse("promo_coupons_api"))
+
+    assert response.status_code == 200
+    assert len(response.data) == 1
+    assert response.data[0]["coupon_code"] == coupon.coupon_code
+    assert response.data[0]["activation_date"] == payment_version.activation_date
+
+
+@pytest.mark.parametrize(
+    "should_raise_exception,expected_status_code,expected_response_part",
+    [
+        (False, 200, "message"),  # Success case
+        (True, 400, "error"),  # Save raises an error
+    ],
+)
+def test_put_calls_update_coupon_and_handles_errors(
+    admin_drf_client,
+    should_raise_exception,
+    expected_status_code,
+    expected_response_part,
+):
+    """Test that the update_coupon method is called and handles exceptions correctly"""
+    coupon = CouponFactory()
+    product = ProductFactory()
+    payment = CouponPaymentFactory()
+    CouponPaymentVersionFactory(payment=payment)
+    coupon.payment = payment
+    coupon.save()
+
+    url = reverse("promo_coupons_api")
+    data = {
+        "promo_coupon": coupon.id,
+        "activation_date": now_in_utc().isoformat(),
+        "expiration_date": (now_in_utc() + timedelta(days=10)).isoformat(),
+        "product_ids": [product.id],
+    }
+
+    patch_path = "ecommerce.views.PromoCouponUpdateSerializer.save"
+    with patch(patch_path) as mocked_update:
+        if should_raise_exception:
+            mocked_update.side_effect = Exception("Simulated failure")
+
+        response = admin_drf_client.put(url, data, format="json")
+
+        assert response.status_code == expected_status_code
+        assert expected_response_part in response.data

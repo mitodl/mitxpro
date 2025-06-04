@@ -892,6 +892,129 @@ class PromoCouponSerializer(BaseCouponSerializer):
     )
 
 
+class PromoCouponDetailSerializer(serializers.ModelSerializer):
+    """Serializer for getting promo coupons with eligibility information"""
+
+    eligibility = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    activation_date = serializers.SerializerMethodField()
+    expiration_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Coupon
+        fields = [
+            "id",
+            "coupon_code",
+            "name",
+            "activation_date",
+            "expiration_date",
+            "eligibility",
+            "is_global",
+        ]
+
+    def get_eligibility(self, instance):
+        """
+        Get all CouponEligibility records related to the coupons created by this CouponPayment.
+        """
+        eligibility_qs = instance.couponeligibility_set.all()
+
+        # Only apply the filter if is_private is explicitly False
+        if self.context.get("is_private") is False:
+            eligibility_qs = eligibility_qs.filter(product__is_private=False)
+
+        return [
+            {
+                "coupon_code": eligibility.coupon.coupon_code,
+                "product_id": eligibility.product.id,
+                "program_run_id": eligibility.program_run.id
+                if eligibility.program_run
+                else None,
+            }
+            for eligibility in eligibility_qs
+        ]
+
+    def get_name(self, instance):
+        """Get the 'name' property of the associated CouponPayment"""
+        return instance.payment.name
+
+    def get_activation_date(self, instance):
+        """Get the activation date of the associated CouponPayment"""
+        return instance.payment.latest_version.activation_date
+
+    def get_expiration_date(self, instance):
+        """Get the expiration date of the associated CouponPayment"""
+        return instance.payment.latest_version.expiration_date
+
+
+class PromoCouponUpdateSerializer(serializers.Serializer):
+    """Serializer for updating promo coupons"""
+
+    promo_coupon = serializers.IntegerField()
+    is_global = serializers.BooleanField(default=False)
+    activation_date = serializers.DateTimeField()
+    expiration_date = serializers.DateTimeField()
+    product_ids = serializers.ListField(child=serializers.IntegerField())
+
+    def validate_promo_coupon(self, value):
+        """Validate that the promo coupon exists"""
+        try:
+            return models.Coupon.objects.get(id=value)
+        except models.Coupon.DoesNotExist:
+            raise serializers.ValidationError("Coupon not found.")
+
+    def validate_product_ids(self, value):
+        """Validate that the product ids exist"""
+        products = list(models.Product.objects.filter(id__in=value))
+        if len(products) != len(set(value)):
+            raise serializers.ValidationError("Some products not found.")
+        return products
+
+    def validate(self, data):
+        """Validate the product_ids are empty when is_global is True"""
+        is_global = data.get("is_global", False)
+        product_ids = data.get("product_ids", [])
+
+        if is_global and product_ids:
+            raise serializers.ValidationError(
+                {"product_ids": "Must be empty when is_global is true."}
+            )
+        if not is_global and not product_ids:
+            raise serializers.ValidationError(
+                {"product_ids": "This field is required when is_global is false."}
+            )
+        return data
+
+    @transaction.atomic
+    def save(self):
+        """Save the updated promo coupon data."""
+        coupon = self.validated_data["promo_coupon"]
+        is_global = self.validated_data["is_global"]
+        activation_date = self.validated_data["activation_date"]
+        expiration_date = self.validated_data["expiration_date"]
+        products = self.validated_data["product_ids"]
+
+        coupon_version = coupon.payment.latest_version
+        coupon_version.pk = None
+        coupon_version.activation_date = activation_date
+        coupon_version.expiration_date = expiration_date
+        coupon_version.save()
+
+        # Replace eligibilities
+        coupon.couponeligibility_set.all().delete()
+        models.CouponEligibility.objects.bulk_create(
+            [
+                models.CouponEligibility(product=product, coupon=coupon)
+                for product in products
+            ]
+        )
+
+        # Update coupon is_global
+        coupon.is_global = is_global
+        coupon.save()
+
+        return coupon
+
+
 class DataConsentUserSerializer(serializers.ModelSerializer):
     """Serializer for DataConsentUsers"""
 

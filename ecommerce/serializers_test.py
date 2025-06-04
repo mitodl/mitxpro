@@ -3,7 +3,7 @@ Tests for ecommerce serializers
 """
 
 from decimal import Decimal
-
+from datetime import timedelta
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -19,6 +19,7 @@ from courses.serializers import CourseSerializer
 from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
+    CouponEligibilityFactory,
     CompanyFactory,
     CouponFactory,
     CouponPaymentFactory,
@@ -43,8 +44,11 @@ from ecommerce.serializers import (
     OrderReceiptSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
+    PromoCouponDetailSerializer,
+    PromoCouponUpdateSerializer,
     SingleUseCouponSerializer,
 )
+from mitxpro.utils import now_in_utc
 from mitxpro.test_utils import any_instance_of
 
 pytestmark = [pytest.mark.django_db]
@@ -585,3 +589,170 @@ def test_serialize_program_run():
         "start_date": program_run.start_date,
         "end_date": program_run.end_date,
     }
+
+
+def test_promo_coupon_get_serializer():
+    """Test PromoCouponDetailSerializer with different product visibility"""
+    payment = CouponPaymentFactory(name="Test Payment")
+    version = CouponPaymentVersionFactory.create(
+        payment=payment,
+        activation_date=now_in_utc(),
+        expiration_date=now_in_utc() + timedelta(days=30),
+    )
+    coupon = CouponFactory.create(coupon_code="TESTCODE123", payment=payment)
+    public_product = ProductFactory.create(is_private=False)
+    private_product = ProductFactory.create(is_private=True)
+    CouponEligibilityFactory.create(coupon=coupon, product=public_product)
+    CouponEligibilityFactory.create(coupon=coupon, product=private_product)
+    serializer = PromoCouponDetailSerializer(coupon, context={"is_private": False})
+    data = serializer.data
+
+    assert data["coupon_code"] == "TESTCODE123"
+    assert data["name"] == "Test Payment"
+    assert data["activation_date"] == version.activation_date
+    assert data["expiration_date"] == version.expiration_date
+    assert len(data["eligibility"]) == 1
+    assert data["eligibility"][0]["product_id"] == public_product.id
+
+    # If is_private is not provided, it returns all eligibilities
+    serializer = PromoCouponDetailSerializer(coupon)
+    data = serializer.data
+    assert len(data["eligibility"]) == 2
+
+
+def test_promo_coupon_update_serializer():
+    """Test PromoCouponDetailSerializer with update functionality"""
+    payment = CouponPaymentFactory()
+    CouponPaymentVersionFactory(payment=payment)  # Old version
+    coupon = CouponFactory(payment=payment)
+    old_product = ProductFactory()
+    CouponEligibilityFactory(coupon=coupon, product=old_product)
+
+    new_product = ProductFactory()
+    new_activation = now_in_utc()
+    new_expiration = now_in_utc() + timedelta(days=10)
+
+    assert coupon.couponeligibility_set.first().product == old_product
+
+    data = {
+        "promo_coupon": coupon.id,
+        "activation_date": new_activation,
+        "expiration_date": new_expiration,
+        "product_ids": [new_product.id],
+    }
+
+    serializer = PromoCouponUpdateSerializer(data=data, context={"coupon": coupon})
+    assert serializer.is_valid(), serializer.errors
+
+    serializer.save()
+
+    # Check new version was created
+    assert payment.versions.count() == 2
+    latest_version = payment.versions.order_by("-created_on").first()
+    assert latest_version.activation_date == new_activation
+    assert latest_version.expiration_date == new_expiration
+
+    # Check eligibilities were updated
+    assert coupon.couponeligibility_set.count() == 1
+    assert coupon.couponeligibility_set.first().product == new_product
+
+
+@pytest.mark.parametrize(
+    "setup_data, input_data, expected_valid, expected_error_field",
+    [
+        # Valid: is_global=False, valid product_ids
+        (
+            lambda: {
+                "coupon": CouponFactory(),
+                "products": [ProductFactory(), ProductFactory()],
+            },
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": False,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [p.id for p in d["products"]],
+            },
+            True,
+            None,
+        ),
+        # Valid: is_global=True, product_ids = []
+        (
+            lambda: {"coupon": CouponFactory()},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": True,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [],
+            },
+            True,
+            None,
+        ),
+        # Invalid: promo_coupon does not exist
+        (
+            lambda: {},
+            lambda _: {
+                "promo_coupon": 999999,
+                "is_global": True,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [],
+            },
+            False,
+            "promo_coupon",
+        ),
+        # Invalid: one product_id is invalid
+        (
+            lambda: {"coupon": CouponFactory(), "products": [ProductFactory()]},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": False,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [d["products"][0].id, 999999],
+            },
+            False,
+            "product_ids",
+        ),
+        # Invalid: is_global=True, but product_ids is not empty
+        (
+            lambda: {"coupon": CouponFactory(), "products": [ProductFactory()]},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": True,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [d["products"][0].id],
+            },
+            False,
+            "product_ids",
+        ),
+        # Invalid: is_global=False, but product_ids is empty
+        (
+            lambda: {"coupon": CouponFactory()},
+            lambda d: {
+                "promo_coupon": d["coupon"].id,
+                "is_global": False,
+                "activation_date": now_in_utc() - timedelta(days=2),
+                "expiration_date": now_in_utc() + timedelta(days=30),
+                "product_ids": [],
+            },
+            False,
+            "product_ids",
+        ),
+    ],
+)
+def test_promo_coupon_update_serializer_validation(
+    setup_data, input_data, expected_valid, expected_error_field
+):
+    """Test PromoCouponUpdateSerializer validation logic"""
+    context = setup_data()
+    data = input_data(context)
+
+    serializer = PromoCouponUpdateSerializer(data=data)
+    is_valid = serializer.is_valid()
+
+    assert is_valid == expected_valid
+    if not expected_valid:
+        assert expected_error_field in serializer.errors
