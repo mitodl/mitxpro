@@ -308,7 +308,6 @@ class AuthStateMachine(RuleBasedStateMachine):
     @precondition(lambda self: not self.flow_started)
     def login_email_not_exists(self):
         """Login for an email that doesn't exist"""
-        self.flow_started = True
         assert_api_call(
             self.client,
             "psa-login-email",
