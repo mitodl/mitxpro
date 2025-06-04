@@ -1711,27 +1711,28 @@ dev = ["black", "pytest"]
 
 [[package]]
 name = "hypothesis"
-version = "4.24.6"
-description = "A library for property based testing"
+version = "4.57.1"
+description = "A library for property-based testing"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 files = [
-    {file = "hypothesis-4.24.6-py3-none-any.whl", hash = "sha256:223b7eb23f06ed00ad5227e7e5add7fecf6a8f35f36636463a9c7ad422829f3f"},
-    {file = "hypothesis-4.24.6.tar.gz", hash = "sha256:15e9d9064e826d6f693a3633a3fae116832159aba0951b8eb65a47082feda4c9"},
+    {file = "hypothesis-4.57.1-py3-none-any.whl", hash = "sha256:94f0910bc87e0ae8c098f4ada28dfdc381245e0c8079c674292b417dbde144b5"},
+    {file = "hypothesis-4.57.1.tar.gz", hash = "sha256:3c4369a4b0a1348561048bcda5f1db951a1b8e2a514ea8e8c70d36e656bf6fa0"},
 ]
 
 [package.dependencies]
-attrs = ">=16.0.0"
+attrs = ">=19.2.0"
+sortedcontainers = ">=2.1.0,<3.0.0"
 
 [package.extras]
-all = ["django (>=1.11)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "numpy (>=1.9.0)", "pandas (>=0.19)", "pytest (>=3.0)", "python-dateutil (>=1.4)", "pytz", "pytz (>=2014.1)"]
+all = ["django (>=1.11)", "dpcontracts (>=0.4)", "lark-parser (>=0.6.5)", "numpy (>=1.9.0)", "pandas (>=0.19)", "pytest (>=4.3)", "python-dateutil (>=1.4)", "pytz (>=2014.1)"]
 dateutil = ["python-dateutil (>=1.4)"]
-django = ["django (>=1.11)", "pytz"]
+django = ["django (>=1.11)", "pytz (>=2014.1)"]
 dpcontracts = ["dpcontracts (>=0.4)"]
 lark = ["lark-parser (>=0.6.5)"]
 numpy = ["numpy (>=1.9.0)"]
 pandas = ["pandas (>=0.19)"]
-pytest = ["pytest (>=3.0)"]
+pytest = ["pytest (>=4.3)"]
 pytz = ["pytz (>=2014.1)"]
 
 [[package]]
@@ -4023,6 +4024,17 @@ saml = ["lxml (>=5.2.1,<5.3.0)", "python3-saml (>=1.5.0)"]
 shopify = ["ShopifyAPI"]
 
 [[package]]
+name = "sortedcontainers"
+version = "2.4.0"
+description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
+    {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
+]
+
+[[package]]
 name = "soupsieve"
 version = "2.7"
 description = "A modern CSS selector implementation for Beautiful Soup."
@@ -4461,4 +4473,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "3b25aa92de58748c2879f616980b6a8171d797c1b7a18db6c4ec723c4ca012f4"
+content-hash = "a89e73ae4c7a330394088ac2357f5564618f608e1e297587f99571cedd5ac26c"
