@@ -278,7 +278,6 @@ class AuthStateMachine(RuleBasedStateMachine):
     @precondition(lambda self: not self.flow_started)
     def register_email_not_exists_with_recaptcha_invalid(self):
         """Yield a function for this step"""
-        self.flow_started = True
         with (
             patch(
                 "authentication.views.requests.post",
