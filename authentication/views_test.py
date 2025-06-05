@@ -488,6 +488,8 @@ class AuthStateMachine(RuleBasedStateMachine):
                 },
             )
 
+        return auth_state
+
     @rule(
         target=ConfirmationRedeemedAuthStates,
         auth_state=consumes(ConfirmationSentAuthStates),
