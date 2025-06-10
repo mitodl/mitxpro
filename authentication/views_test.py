@@ -470,7 +470,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 side_effect=Exception("register_details_export_temporary_error"),
             ),
         ):
-            assert_api_call(
+            result = assert_api_call(
                 self.client,
                 "psa-login-password",
                 {
@@ -488,7 +488,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 },
             )
 
-        return auth_state
+        return result
 
     @rule(
         target=ConfirmationRedeemedAuthStates,
