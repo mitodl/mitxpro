@@ -6,7 +6,6 @@ import { connect } from "react-redux";
 import { Switch, Route } from "react-router";
 import { connectRequest } from "redux-query";
 import { createStructuredSelector } from "reselect";
-import urljoin from "url-join";
 
 import users, { currentUserSelector } from "../lib/queries/users";
 import { routes } from "../lib/urls";
@@ -41,6 +40,22 @@ type Props = {
 };
 
 export class App extends React.Component<Props, void> {
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      urljoin: null,
+      isLoading: true,
+    };
+  }
+
+  async componentDidMount() {
+    const { default: urljoin } = await import("url-join");
+    this.setState({
+      urljoin,
+      isLoading: false,
+    });
+  }
+
   componentDidUpdate(prevProps: Props) {
     if (this.shouldShowUnusedCouponAlert(prevProps, this.props)) {
       const { currentUser, addUserNotification } = this.props;
@@ -70,6 +85,11 @@ export class App extends React.Component<Props, void> {
 
   render() {
     const { match, currentUser, location, courseTopics } = this.props;
+    const { isLoading, urljoin } = this.state;
+
+    if (isLoading || !urljoin) {
+      return <div className="app" />;
+    }
 
     if (!currentUser) {
       // application is still loading
