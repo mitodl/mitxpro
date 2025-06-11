@@ -142,6 +142,8 @@ class AuthStateMachine(RuleBasedStateMachine):
     LoginPasswordAuthStates = Bundle("login-password")
     LoginPasswordAbandonedAuthStates = Bundle("login-password-abandoned")
 
+    TempErrorAuthStates = Bundle("temp-error")
+
     recaptcha_patcher = patch(
         "authentication.views.requests.post",
         return_value=MockResponse(
@@ -460,7 +462,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 expect_authenticated=True,
             )
 
-    @rule(auth_state=consumes(LoginPasswordAuthStates))
+    @rule(target=TempErrorAuthStates, auth_state=consumes(LoginPasswordAuthStates))
     def login_password_exports_temporary_error(self, auth_state):
         """Login for a user who hasn't been OFAC verified yet"""
         with (
@@ -470,7 +472,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 side_effect=Exception("register_details_export_temporary_error"),
             ),
         ):
-            assert_api_call(
+            result = assert_api_call(
                 self.client,
                 "psa-login-password",
                 {
@@ -488,7 +490,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 },
             )
 
-        self.flow_started = False
+        return result
 
     @rule(
         target=ConfirmationRedeemedAuthStates,
