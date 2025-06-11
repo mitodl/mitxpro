@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.179.1
+Version 0.179.1 (Released June 11, 2025)
 ---------------
 
 - chore(deps): update dependency js-yaml to v4 (#3238)
