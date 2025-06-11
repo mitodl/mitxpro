@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.179.1 (Released June 11, 2025)
+---------------
+
+- chore(deps): update dependency js-yaml to v4 (#3238)
+- fix: mobile nav update (#3490)
+- fix(deps): update dependency mitol-django-olposthog to v2025 (#3506)
+- fix(deps): update dependency django-redis to v5.4.0 (#3511)
+- fix(deps): update dependency mitol-django-common to v2025 (#3488)
+- fix(deps): update dependency django-ipware to v7 (#3515)
+- fix(deps): update dependency jsdom to v26 (#3456)
+
 Version 0.179.0 (Released June 02, 2025)
 ---------------
 
