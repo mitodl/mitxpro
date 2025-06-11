@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q
+from django.db.models import Count, Q, OuterRef, Subquery
 from django.http import Http404
 from django.shortcuts import render
 from django_filters import rest_framework as filters
@@ -68,6 +68,8 @@ from ecommerce.serializers import (
     ProductSerializer,
     ProgramRunSerializer,
     PromoCouponSerializer,
+    PromoCouponDetailSerializer,
+    PromoCouponUpdateSerializer,
     SingleUseCouponSerializer,
 )
 from ecommerce.utils import deactivate_coupons, make_checkout_url
@@ -319,6 +321,59 @@ class BasketView(RetrieveUpdateAPIView):
         return basket
 
 
+class PromoCouponView(APIView):
+    """
+    View for promo coupon creation and management
+    """
+
+    permission_classes = (HasCouponPermission,)
+    authentication_classes = (SessionAuthentication,)
+
+    def get(self, request, *args, **kwargs):
+        """Get all latest promo coupon versions"""
+        latest_coupon_type_subquery = Subquery(
+            CouponPaymentVersion.objects.filter(payment=OuterRef("payment_id"))
+            .order_by("-created_on")
+            .values("coupon_type")[:1]
+        )
+
+        # Get coupons where the latest coupon_type is 'promo'
+        promo_coupons = (
+            Coupon.objects.annotate(latest_coupon_type=latest_coupon_type_subquery)
+            .filter(latest_coupon_type=CouponPaymentVersion.PROMO)
+            .order_by("id")
+        )
+
+        serializer = PromoCouponDetailSerializer(
+            promo_coupons, many=True, context={"is_private": False}
+        )
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        """Update the dates and eligibilities of existing promo coupon"""
+        serializer = PromoCouponUpdateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            coupon = serializer.save()
+        except Exception as e:
+            log.error("Failed to update promo coupon: %s", str(e))
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={
+                    "error": "Sorry, something went wrong. Failed to update promo coupon"
+                },
+            )
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                "message": f"Promo coupon {coupon.coupon_code} updated successfully."
+            },
+        )
+
+
 class CouponListView(APIView):
     """
     Admin view for CRUD operations on coupons
@@ -403,6 +458,7 @@ def ecommerce_restricted(request):
         "/ecommerce/admin/coupons": "has_coupon_create_permission",
         "/ecommerce/admin/deactivate-coupons": "has_coupon_update_permission",
         "/ecommerce/admin/process-coupon-assignment-sheets": "has_coupon_product_assignment_permission",
+        "/ecommerce/admin/update-promo-code": "has_coupon_update_permission",
     }
 
     for path, perm in restricted_paths.items():

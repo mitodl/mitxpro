@@ -285,3 +285,15 @@ export const getAppropriateInformationFragment = (state: string) => {
     </React.Fragment>
   );
 };
+
+export const zeroHour = (value) => {
+  if (value instanceof Date) {
+    value.setHours(0, 0, 0, 0);
+  }
+};
+
+export const finalHour = (value) => {
+  if (value instanceof Date) {
+    value.setHours(23, 59, 59, 999);
+  }
+};

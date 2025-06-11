@@ -27,6 +27,8 @@ import {
   isSuccessResponse,
   isErrorResponse,
   isUnauthorizedResponse,
+  zeroHour,
+  finalHour,
 } from "./util";
 import { makeUserEnrollments } from "../factories/course";
 import {
@@ -380,5 +382,39 @@ describe("utility functions", () => {
       };
       assert.equal(isUnauthorizedResponse(response), expResult);
     });
+  });
+});
+
+describe("zeroHour", () => {
+  it("sets the time to 00:00:00.000 if input is a Date", () => {
+    const date = new Date("2025-06-02T15:45:30.123Z");
+    zeroHour(date);
+
+    assert.strictEqual(date.getUTCHours(), 0);
+    assert.strictEqual(date.getUTCMinutes(), 0);
+    assert.strictEqual(date.getUTCSeconds(), 0);
+    assert.strictEqual(date.getUTCMilliseconds(), 0);
+  });
+
+  it("does nothing if value is not a Date", () => {
+    const notDate = "2025-06-02T15:45:30.123Z";
+    assert.doesNotThrow(() => zeroHour(notDate));
+  });
+});
+
+describe("finalHour", () => {
+  it("sets the time to 23:59:59.999 if input is a Date", () => {
+    const date = new Date("2025-06-02T10:20:30.123Z");
+    finalHour(date);
+
+    assert.strictEqual(date.getUTCHours(), 23);
+    assert.strictEqual(date.getUTCMinutes(), 59);
+    assert.strictEqual(date.getUTCSeconds(), 59);
+    assert.strictEqual(date.getUTCMilliseconds(), 999);
+  });
+
+  it("does nothing if value is not a Date", () => {
+    const notDate = 12345;
+    assert.doesNotThrow(() => finalHour(notDate));
   });
 });

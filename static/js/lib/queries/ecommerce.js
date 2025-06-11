@@ -85,6 +85,20 @@ export default {
       companies: (prev: Array<Company>, next: Array<Company>) => next,
     },
   }),
+  promoCouponsSelector: pathOr(null, ["entities", "promoCoupons"]),
+  promoCouponsQuery: () => ({
+    queryKey: "promoCoupons",
+    url: "/api/promo_coupons/",
+    transform: (json: Array<CouponPaymentVersion>) => ({
+      promoCoupons: json,
+    }),
+    update: {
+      promoCoupons: (
+        prev: Array<CouponPaymentVersion>,
+        next: Array<CouponPaymentVersion>,
+      ) => next,
+    },
+  }),
   couponsSelector: pathOr(null, ["entities", "coupons"]),
   couponsMutation: (coupon: Object) => ({
     queryKey: "couponsMutation",
@@ -123,6 +137,15 @@ export default {
     body: payload,
     options: {
       method: "POST",
+      ...DEFAULT_POST_OPTIONS,
+    },
+  }),
+  promoCouponUpdation: (coupon: Object) => ({
+    queryKey: "promoCouponUpdation",
+    url: `/api/promo_coupons/`,
+    body: coupon,
+    options: {
+      method: "PUT",
       ...DEFAULT_POST_OPTIONS,
     },
   }),
