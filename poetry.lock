@@ -1291,13 +1291,13 @@ testing = ["beautifulsoup4 (>=4.4.1,<5)", "coverage (>=4.1.0)", "flake8 (>=3.2.0
 
 [[package]]
 name = "edx-api-client"
-version = "1.10.0"
+version = "1.11.0"
 description = "Python interface to the edX REST APIs"
 optional = false
 python-versions = "*"
 files = [
-    {file = "edx-api-client-1.10.0.tar.gz", hash = "sha256:4ef79227182c1b9fddae9e4e494e27b9f1aa39260d274958d6597dafa186ac70"},
-    {file = "edx_api_client-1.10.0-py2.py3-none-any.whl", hash = "sha256:7922468a0bc6db9ef2d64e2449bba3cca6a3dfbd5a1262f640be491550210cb0"},
+    {file = "edx_api_client-1.11.0-py2.py3-none-any.whl", hash = "sha256:e2e2327fb40dba4cd388ffc5b0af6a3f49499f27e5fd8d88378f4af70a285a0a"},
+    {file = "edx_api_client-1.11.0.tar.gz", hash = "sha256:8ee7bce18689a0894082056b6a2b2ee2aa2dea2d0c36fe27738dfc3df2287dcc"},
 ]
 
 [package.dependencies]
@@ -4462,4 +4462,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "1c88992bba64917e295ee713f387a83190492640284d4edf52de21a1738ff449"
+content-hash = "46528c03a3a029acbf9309f768f60dfae7e4018b67f3d62ce2a9833de2fe6d1c"
