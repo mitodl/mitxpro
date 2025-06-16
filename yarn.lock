@@ -9047,7 +9047,7 @@ __metadata:
     mini-css-extract-plugin: ^0.12.0
     minimist: ^1.2.6
     mocha: ^11.0.0
-    named-urls: ^1.4.0
+    named-urls: ^2.0.0
     nyc: ^17.0.0
     object.entries: ^1.0.4
     popper.js: ^1.16.0
@@ -9210,10 +9210,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"named-urls@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "named-urls@npm:1.4.0"
-  checksum: 7d6c3654db9e88612773976da1432702f63e5bceb0e714ada6964d527d316d6e71ef434f617f7b56c1c6dd88a4d5a1c11f3aead2c16fb3e05c666952182b2272
+"named-urls@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "named-urls@npm:2.0.1"
+  dependencies:
+    path-to-regexp: ^6.1.0
+  checksum: 6ab0dad464dbe9bf0ec3ee4bf65279a88782bc234bf8f1af3a2cd215295f6932d4d1e10ededb0e9cf5a2461ba804897b871725196e72c0df671a2b83ed670436
   languageName: node
   linkType: hard
 
@@ -9868,6 +9870,13 @@ __metadata:
   dependencies:
     isarray: 0.0.1
   checksum: 5b2ac9cab2a9f82effd30a35164b20998b18d99d96608281dd2cab6e66c0e4536187970369b185ab21d3815da1ecb7dcb2d5f97a4bf0ee6e31a9612299fca147
+  languageName: node
+  linkType: hard
+
+"path-to-regexp@npm:^6.1.0":
+  version: 6.3.0
+  resolution: "path-to-regexp@npm:6.3.0"
+  checksum: eca78602e6434a1b6799d511d375ec044e8d7e28f5a48aa5c28d57d8152fb52f3fc62fb1cfc5dfa2198e1f041c2a82ed14043d75740a2fe60e91b5089a153250
   languageName: node
   linkType: hard
 
