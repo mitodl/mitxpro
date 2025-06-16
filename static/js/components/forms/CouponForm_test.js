@@ -109,8 +109,7 @@ describe("CouponForm", () => {
       value,
     )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
       const wrapper = renderForm();
-
-      const input = wrapper.find("DayPickerInput").at(idx).find("input");
+      const input = wrapper.find(`FormikDatePicker`).at(idx).find("input");
       input.simulate("click");
       input.simulate("change", { persist: () => {}, target: { name, value } });
       input.simulate("blur");
@@ -133,7 +132,7 @@ describe("CouponForm", () => {
     )} to date string ${JSON.stringify(formattedDate)}`, async () => {
       const wrapper = renderForm();
       const formik = wrapper.find("Formik").instance();
-      const input = wrapper.find("DayPickerInput").at(idx).find("input");
+      const input = wrapper.find("FormikDatePicker").at(idx).find("input");
       input.simulate("click");
       input.simulate("change", { persist: () => {}, target: { name, value } });
       input.simulate("blur");
