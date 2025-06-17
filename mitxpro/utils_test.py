@@ -486,10 +486,6 @@ def test_get_js_settings(settings, rf, user, mocker):
     settings.EMAIL_SUPPORT = "support@text.com"
     settings.WEBPACK_USE_DEV_SERVER = False
     settings.RECAPTCHA_SITE_KEY = "fake_key"
-    settings.ZENDESK_CONFIG = {
-        "HELP_WIDGET_ENABLED": False,
-        "HELP_WIDGET_KEY": "fake_key",
-    }
     settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS = "test_run1,test_run2"
     mocker.patch(
         "mitol.olposthog.features.is_enabled",
@@ -510,7 +506,6 @@ def test_get_js_settings(settings, rf, user, mocker):
         "recaptchaKey": settings.RECAPTCHA_SITE_KEY,
         "support_email": settings.EMAIL_SUPPORT,
         "site_name": settings.SITE_NAME,
-        "zendesk_config": {"help_widget_enabled": False, "help_widget_key": "fake_key"},
         "digital_credentials": True,
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "is_tax_applicable": is_tax_applicable(request),

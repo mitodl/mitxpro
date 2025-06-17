@@ -43,10 +43,6 @@ describe("CheckoutForm", () => {
     submitCouponStub = sandbox.stub();
     updateProductStub = sandbox.stub();
     isVoucherApplied = false;
-    SETTINGS.zendesk_config = {
-      help_widget_enabled: false,
-      help_widget_key: "fake_key",
-    };
   });
 
   afterEach(() => {
