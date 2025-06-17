@@ -10,11 +10,6 @@ import { AppTypeContext, SPA_APP_CONTEXT } from "../contextDefinitions";
 import * as Sentry from "@sentry/browser";
 // Object.entries polyfill
 import entries from "object.entries";
-// Zendesk react module
-import Zendesk from "react-zendesk";
-
-const ZENDESK_KEY = SETTINGS.zendesk_config.help_widget_key;
-const ZENDESK_ENABLED = SETTINGS.zendesk_config.help_widget_enabled;
 
 require("react-hot-loader/patch");
 /* global SETTINGS:false */
@@ -34,15 +29,8 @@ const store = configureStore();
 
 const rootEl = document.getElementById("container");
 
-const loadZendesk = () => {
-  return <Zendesk zendeskKey={ZENDESK_KEY} />;
-};
-
 const renderApp = (Component) => {
   const history = createBrowserHistory();
-  if (ZENDESK_ENABLED && ZENDESK_KEY) {
-    loadZendesk();
-  }
   ReactDOM.render(
     <AppContainer>
       <AppTypeContext.Provider value={SPA_APP_CONTEXT}>
