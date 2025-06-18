@@ -1378,13 +1378,13 @@ doc = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
 name = "faker"
-version = "37.3.0"
+version = "37.4.0"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "faker-37.3.0-py3-none-any.whl", hash = "sha256:48c94daa16a432f2d2bc803c7ff602509699fca228d13e97e379cd860a7e216e"},
-    {file = "faker-37.3.0.tar.gz", hash = "sha256:77b79e7a2228d57175133af0bbcdd26dc623df81db390ee52f5104d46c010f2f"},
+    {file = "faker-37.4.0-py3-none-any.whl", hash = "sha256:cb81c09ebe06c32a10971d1bbdb264bb0e22b59af59548f011ac4809556ce533"},
+    {file = "faker-37.4.0.tar.gz", hash = "sha256:7f69d579588c23d5ce671f3fa872654ede0e67047820255f43a4aa1925b89780"},
 ]
 
 [package.dependencies]
@@ -4462,4 +4462,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "15b942da1cdf37ecd1cf09f99cd8798e2f7732ea8f9c5fe7ff341835fb8f869a"
+content-hash = "da66f3893238ac9c8d09ca49557cea4bb94851693753343f05fc893bc9730f84"
