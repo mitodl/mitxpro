@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DayPicker } from "react-day-picker";
 import { ErrorMessage } from "formik";
 import { format, parse } from "date-fns";
@@ -14,12 +13,13 @@ const FormikDatePicker = ({
   setFieldTouched,
   endMonth = new Date(2099, 11),
 }) => {
+  const dateFormat = "MM/dd/yyyy";
   const fieldValue = values[name];
   const selectedDate = fieldValue ? new Date(fieldValue) : null;
   const [month, setMonth] = useState(selectedDate || new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [inputValue, setInputValue] = useState(
-    selectedDate ? format(selectedDate, "MM/dd/yyyy") : "",
+    selectedDate ? format(selectedDate, dateFormat) : "",
   );
   const pickerRef = useRef(null);
   const fieldHourHandlers = {
@@ -36,7 +36,7 @@ const FormikDatePicker = ({
       ) {
         setMonth(date);
       }
-      setInputValue(format(date, "MM/dd/yyyy"));
+      setInputValue(format(date, dateFormat));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValue]);
@@ -61,11 +61,14 @@ const FormikDatePicker = ({
     setFieldTouched(name, true);
 
     if (value.length === 10) {
-      const parsedDate = parse(value, "MM/dd/yyyy", new Date());
+      const parsedDate = parse(value, dateFormat, new Date());
       if (!isNaN(parsedDate.getTime())) {
         fieldHourHandlers[name]?.(parsedDate);
         setFieldValue(name, parsedDate);
         setMonth(parsedDate);
+      }
+      else{
+        setFieldValue(name, null); // Reset field if invalid date
       }
     }
   };
@@ -74,7 +77,9 @@ const FormikDatePicker = ({
     <div className="block" ref={pickerRef} style={{ position: "relative" }}>
       <label htmlFor={name}>
         {label && <p style={{ marginBottom: "0.5rem" }}>{label}</p>}
-        <input
+      </label>
+      <input
+          id={name}
           type="text"
           value={inputValue}
           onChange={handleInputChange}
@@ -84,7 +89,6 @@ const FormikDatePicker = ({
           }}
           onBlur={() => setFieldTouched(name, true)}
         />
-      </label>
 
       {showCalendar && (
         <div className="date-picker-container">
@@ -98,7 +102,7 @@ const FormikDatePicker = ({
               if (value) {
                 fieldHourHandlers[name]?.(value);
                 setFieldValue(name, value);
-                setInputValue(format(value, "MM/dd/yyyy"));
+                setInputValue(format(value, dateFormat));
                 setFieldTouched(name, true);
                 setShowCalendar(false);
               }
