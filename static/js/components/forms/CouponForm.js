@@ -1,6 +1,5 @@
 // @flow
 import React from "react";
-import moment from "moment";
 import { Picky } from "react-picky";
 import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda";
 import FormikDatePicker from "../input/FormikDatePicker";

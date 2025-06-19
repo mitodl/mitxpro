@@ -54,7 +54,7 @@ const FormikDatePicker = ({
     };
   }, []);
 
-  // 👇 Check and apply date when full date is typed
+  // Check and apply date when full date is typed
   const handleInputChange = (e) => {
     const { value } = e.target;
     setInputValue(value);
@@ -98,7 +98,7 @@ const FormikDatePicker = ({
               if (value) {
                 fieldHourHandlers[name]?.(value);
                 setFieldValue(name, value);
-                setInputValue(format(value, "MM/dd/yyyy")); // 👈 update input too
+                setInputValue(format(value, "MM/dd/yyyy"));
                 setFieldTouched(name, true);
                 setShowCalendar(false);
               }
