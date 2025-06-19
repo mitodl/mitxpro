@@ -38,6 +38,7 @@ const FormikDatePicker = ({
       }
       setInputValue(format(date, "MM/dd/yyyy"));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValue]);
 
   // Close calendar if clicked outside
