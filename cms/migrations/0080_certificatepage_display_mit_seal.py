@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('cms', '0079_make_language_non_nullable'),
+        ("cms", "0079_make_language_non_nullable"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='certificatepage',
-            name='display_mit_seal',
+            model_name="certificatepage",
+            name="display_mit_seal",
             field=models.BooleanField(default=False),
         ),
     ]
