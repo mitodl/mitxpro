@@ -134,8 +134,6 @@ export const CouponForm = ({
       isSubmitting,
       setFieldValue,
       setFieldTouched,
-      errors,
-      touched,
       values,
     }) => (
       <Form className="coupon-form">

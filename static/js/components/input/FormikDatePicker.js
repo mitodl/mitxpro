@@ -5,8 +5,6 @@ import { ErrorMessage } from "formik";
 import { format, parse } from "date-fns";
 import FormError from "../forms/elements/FormError";
 import { zeroHour, finalHour } from "../../lib/util";
-import { set } from "lodash";
-// import "react-day-picker/style.css";
 
 const FormikDatePicker = ({
   name,
@@ -16,7 +14,8 @@ const FormikDatePicker = ({
   setFieldTouched,
   endMonth = new Date(2099, 11),
 }) => {
-  const selectedDate = values[name] ? new Date(values[name]) : null;
+  const fieldValue = values[name];
+  const selectedDate = fieldValue ? new Date(fieldValue) : null;
   const [month, setMonth] = useState(selectedDate || new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [inputValue, setInputValue] = useState(
@@ -29,8 +28,8 @@ const FormikDatePicker = ({
   };
 
   useEffect(() => {
-    if (values[name]) {
-      const date = new Date(values[name]);
+    if (fieldValue) {
+      const date = new Date(fieldValue);
       if (
         date.getMonth() !== month.getMonth() ||
         date.getFullYear() !== month.getFullYear()
@@ -39,7 +38,7 @@ const FormikDatePicker = ({
       }
       setInputValue(format(date, "MM/dd/yyyy"));
     }
-  }, [values[name]]);
+  }, [fieldValue]);
 
   // Close calendar if clicked outside
   useEffect(() => {
