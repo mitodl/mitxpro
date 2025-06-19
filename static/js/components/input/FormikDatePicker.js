@@ -66,8 +66,7 @@ const FormikDatePicker = ({
         fieldHourHandlers[name]?.(parsedDate);
         setFieldValue(name, parsedDate);
         setMonth(parsedDate);
-      }
-      else{
+      } else {
         setFieldValue(name, null); // Reset field if invalid date
       }
     }
@@ -79,16 +78,16 @@ const FormikDatePicker = ({
         {label && <p style={{ marginBottom: "0.5rem" }}>{label}</p>}
       </label>
       <input
-          id={name}
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onClick={() => {
-            setShowCalendar(!showCalendar);
-            setFieldTouched(name, true);
-          }}
-          onBlur={() => setFieldTouched(name, true)}
-        />
+        id={name}
+        type="text"
+        value={inputValue}
+        onChange={handleInputChange}
+        onClick={() => {
+          setShowCalendar(!showCalendar);
+          setFieldTouched(name, true);
+        }}
+        onBlur={() => setFieldTouched(name, true)}
+      />
 
       {showCalendar && (
         <div className="date-picker-container">
