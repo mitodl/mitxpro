@@ -2409,12 +2409,15 @@ class CertificatePage(CourseProgramChildPage):
         use_json_field=True,
     )
 
+    display_mit_seal = models.BooleanField(default=False)
+
     content_panels = [
         FieldPanel("product_name"),
         FieldPanel("institute_text"),
         FieldPanel("CEUs"),
         FieldPanel("partner_logo"),
         FieldPanel("partner_logo_placement", widget=forms.Select),
+        FieldPanel("display_mit_seal"),
         FieldPanel("overrides"),
         FieldPanel("signatories"),
     ]
@@ -2426,6 +2429,7 @@ class CertificatePage(CourseProgramChildPage):
         APIField("CEUs"),
         APIField("partner_logo"),
         APIField("partner_logo_placement"),
+        APIField("display_mit_seal"),
         APIField("overrides"),
         APIField("signatory_items"),
     ]
