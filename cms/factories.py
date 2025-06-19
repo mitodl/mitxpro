@@ -483,7 +483,7 @@ class CertificatePageFactory(wagtail_factories.PageFactory):
     signatories = wagtail_factories.StreamFieldFactory(
         {"signatory": factory.SubFactory(SignatoryChooserBlockFactory)}
     )
-    display_seal = factory.Faker("pybool")  # randomly True or False
+    display_mit_seal = factory.Faker("pybool")  # randomly True or False
 
     class Meta:
         model = CertificatePage

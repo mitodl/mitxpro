@@ -1473,13 +1473,13 @@ def test_certificate_for_course_page():
         CEUs=Decimal("1.8"),
         partner_logo__image__title="Partner Logo",
         signatories__0__signatory__page=signatory,
-        display_seal=True,
+        display_mit_seal=True,
     )
     assert certificate_page.get_parent() == course_page
     assert certificate_page.CEUs == Decimal("1.8")
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
-    assert certificate_page.display_seal is True
+    assert certificate_page.display_mit_seal is True
     for signatory in certificate_page.signatories:
         assert signatory.value.name == "Name"
         assert signatory.value.title_1 == "Title_1"
@@ -1510,14 +1510,14 @@ def test_certificate_for_program_page():
         CEUs=Decimal("2.8"),
         partner_logo__image__title="Partner Logo",
         signatories__0__signatory__page=signatory,
-        display_seal=True,
+        display_mit_seal=True,
     )
 
     assert certificate_page.get_parent() == program_page
     assert certificate_page.CEUs == Decimal("2.8")
     assert certificate_page.product_name == "product_name"
     assert certificate_page.partner_logo.title == "Partner Logo"
-    assert certificate_page.display_seal is True
+    assert certificate_page.display_mit_seal is True
     for signatory in certificate_page.signatories:
         assert signatory.value.name == "Name"
         assert signatory.value.title_1 == "Title_1"
