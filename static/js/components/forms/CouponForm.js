@@ -130,12 +130,7 @@ export const CouponForm = ({
       include_future_runs: false,
       is_global: false,
     }}
-    render={({
-      isSubmitting,
-      setFieldValue,
-      setFieldTouched,
-      values,
-    }) => (
+    render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form className="coupon-form">
         <div className="flex">
           <div>
