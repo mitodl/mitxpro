@@ -171,6 +171,6 @@ describe("RegisterDetailsPage", () => {
     const link = confirmationMessage.find("Link");
     assert.isNotNull(link);
     assert.equal(link.prop("to"), routes.login);
-    assert.equal(link.text(), "click here to sign in.");
+    assert.equal(link.text(), "click here to sign in");
   });
 });
