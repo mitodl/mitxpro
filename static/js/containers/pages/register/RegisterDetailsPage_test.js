@@ -164,9 +164,13 @@ describe("RegisterDetailsPage", () => {
     });
     const confirmationMessage = inner.find(".confirmation-message");
     assert.isNotNull(confirmationMessage);
-    assert.equal(
-      confirmationMessage.text().replace("<Link />", ""),
-      "You already have an xPRO account. Please .",
+    assert.include(
+      confirmationMessage.text(),
+      "You already have an xPRO account. Please"
     );
+    const link = confirmationMessage.find("Link");
+    assert.isNotNull(link);
+    assert.equal(link.prop("to"), routes.login);
+    assert.equal(link.text(), "click here to sign in.");
   });
 });
