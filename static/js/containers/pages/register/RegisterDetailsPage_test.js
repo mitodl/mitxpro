@@ -166,7 +166,7 @@ describe("RegisterDetailsPage", () => {
     assert.isNotNull(confirmationMessage);
     assert.include(
       confirmationMessage.text(),
-      "You already have an xPRO account. Please"
+      "You already have an xPRO account. Please",
     );
     const link = confirmationMessage.find("Link");
     assert.isNotNull(link);
