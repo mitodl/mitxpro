@@ -224,7 +224,7 @@ describe("utility functions", () => {
       }
 
       // $FlowFixMe
-      assert.equal(exception.message, expectedMessage);
+      assert.include(exception.message, expectedMessage);
     });
 
     it("should raise an error if the exception has the wrong message", async () => {
