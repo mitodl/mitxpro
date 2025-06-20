@@ -89,7 +89,7 @@ describe("RegisterConfirmPage", () => {
     const link = confirmationErrorText.find("Link");
     assert.isNotNull(link);
     assert.equal(link.prop("to"), routes.register);
-    assert.equal(link.text(), "click here to register again.");
+    assert.equal(link.text(), "click here to register again");
   });
 
   it("Shows a login link with existing account message", async () => {
@@ -113,7 +113,7 @@ describe("RegisterConfirmPage", () => {
     const link = confirmationErrorText.find("Link");
     assert.isNotNull(link);
     assert.equal(link.prop("to"), routes.login);
-    assert.equal(link.text(), "click here to sign in.");
+    assert.equal(link.text(), "click here to sign in");
   });
 
   it("Shows a register link with invalid or no confirmation code", async () => {
@@ -137,6 +137,6 @@ describe("RegisterConfirmPage", () => {
     const link = confirmationErrorText.find("Link");
     assert.isNotNull(link);
     assert.equal(link.prop("to"), routes.register);
-    assert.equal(link.text(), "click here to register again.");
+    assert.equal(link.text(), "click here to register again");
   });
 });
