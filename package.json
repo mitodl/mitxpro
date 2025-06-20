@@ -51,7 +51,7 @@
     "eslint-plugin-react": "^7.19.0",
     "expose-loader": "^5.0.0",
     "express": "^5.0.0",
-    "fetch-mock": "^5.12.1",
+    "fetch-mock": "^12.0.0",
     "flow": "^0.2.3",
     "flow-bin": "^0.95.1",
     "flow-typed": "^3.2.1",
