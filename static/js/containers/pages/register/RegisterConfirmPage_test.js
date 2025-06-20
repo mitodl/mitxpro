@@ -84,7 +84,7 @@ describe("RegisterConfirmPage", () => {
     assert.isNotNull(confirmationErrorText);
     assert.include(
       confirmationErrorText.text(),
-      "This invitation is invalid or has expired. Please"
+      "This invitation is invalid or has expired. Please",
     );
     const link = confirmationErrorText.find("Link");
     assert.isNotNull(link);
@@ -108,7 +108,7 @@ describe("RegisterConfirmPage", () => {
     assert.isNotNull(confirmationErrorText);
     assert.include(
       confirmationErrorText.text(),
-      "You already have an xPRO account. Please"
+      "You already have an xPRO account. Please",
     );
     const link = confirmationErrorText.find("Link");
     assert.isNotNull(link);
@@ -132,7 +132,7 @@ describe("RegisterConfirmPage", () => {
     assert.isNotNull(confirmationErrorText);
     assert.include(
       confirmationErrorText.text(),
-      "No confirmation code was provided or it has expired."
+      "No confirmation code was provided or it has expired.",
     );
     const link = confirmationErrorText.find("Link");
     assert.isNotNull(link);
