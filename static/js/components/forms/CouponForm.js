@@ -1,10 +1,8 @@
 // @flow
 import React from "react";
-import moment from "moment";
 import { Picky } from "react-picky";
 import { filter, pathSatisfies, equals, always, sortBy, prop } from "ramda";
-import { formatDate, parseDate } from "react-day-picker/moment";
-import DayPickerInput from "react-day-picker/DayPickerInput";
+import FormikDatePicker from "../input/FormikDatePicker";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as yup from "yup";
 
@@ -16,7 +14,7 @@ import {
   PRODUCT_TYPE_PROGRAM,
 } from "../../constants";
 import { isPromo } from "../../lib/ecommerce";
-import { zeroHour, finalHour, getProductSelectLabel } from "../../lib/util";
+import { getProductSelectLabel } from "../../lib/util";
 import FormError from "../../components/forms/elements/FormError";
 
 import type { Company, Product } from "../../flow/ecommerceTypes";
@@ -41,10 +39,20 @@ const couponValidations = yup.object().shape({
   activation_date: yup.date().required("Valid activation date required"),
   expiration_date: yup
     .date()
-    .min(
-      moment.max(yup.ref("activation_date"), moment()),
-      "Expiration date must be after today/activation date",
-    )
+    .when("activation_date", (activationDate, schema) => {
+      let minDate;
+      if (!activationDate || isNaN(new Date(activationDate))) {
+        minDate = new Date();
+      } else {
+        const today = new Date();
+        const activation = new Date(activationDate);
+        minDate = today > activation ? today : activation;
+      }
+      return schema.min(
+        minDate,
+        "Expiration date must be after today/activation date",
+      );
+    })
     .required("Valid expiration date required"),
   discount: yup
     .number()
@@ -121,14 +129,7 @@ export const CouponForm = ({
       include_future_runs: false,
       is_global: false,
     }}
-    render={({
-      isSubmitting,
-      setFieldValue,
-      setFieldTouched,
-      errors,
-      touched,
-      values,
-    }) => (
+    render={({ isSubmitting, setFieldValue, setFieldTouched, values }) => (
       <Form className="coupon-form">
         <div className="flex">
           <div>
@@ -227,44 +228,22 @@ export const CouponForm = ({
         </div>
         <div className="flex">
           <div className="block">
-            <label htmlFor="activation_date">
-              Valid from*
-              <DayPickerInput
-                name="activation_date"
-                placeholder="MM/DD/YYYY"
-                format="L"
-                formatDate={formatDate}
-                parseDate={parseDate}
-                onDayChange={(value) => {
-                  zeroHour(value);
-                  setFieldValue("activation_date", value);
-                }}
-                onDayPickerHide={() => setFieldTouched("activation_date")}
-                error={errors.activation_date}
-                touched={touched.activation_date}
-              />
-            </label>
-            <ErrorMessage name="activation_date" component={FormError} />
+            <FormikDatePicker
+              name="activation_date"
+              label="Valid from*"
+              values={values}
+              setFieldValue={setFieldValue}
+              setFieldTouched={setFieldTouched}
+            />
           </div>
           <div className="block">
-            <label htmlFor="expiration_date">
-              Valid until*
-              <DayPickerInput
-                name="expiration_date"
-                placeholder="MM/DD/YYYY"
-                format="L"
-                formatDate={formatDate}
-                parseDate={parseDate}
-                onDayChange={(value) => {
-                  finalHour(value);
-                  setFieldValue("expiration_date", value);
-                }}
-                onDayPickerHide={() => setFieldTouched("expiration_date")}
-                error={errors.expiration_date}
-                touched={touched.expiration_date}
-              />
-            </label>
-            <ErrorMessage name="expiration_date" component={FormError} />
+            <FormikDatePicker
+              name="expiration_date"
+              label="Valid until*"
+              values={values}
+              setFieldValue={setFieldValue}
+              setFieldTouched={setFieldTouched}
+            />
           </div>
         </div>
         <div className={values.is_global ? "flex disabled" : "flex"}>

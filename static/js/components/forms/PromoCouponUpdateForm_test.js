@@ -77,8 +77,8 @@ describe("PromoCouponUpdateForm", () => {
     // Check for required form elements
     assert.ok(findFormikFieldByName(form, "promo_coupon").exists());
     assert.ok(findFormikFieldByName(form, "is_global").exists());
-    assert.ok(form.find('DayPickerInput[name="activation_date"]').exists());
-    assert.ok(form.find('DayPickerInput[name="expiration_date"]').exists());
+    assert.ok(form.find('FormikDatePicker[name="activation_date"]').exists());
+    assert.ok(form.find('FormikDatePicker[name="expiration_date"]').exists());
     assert.ok(form.find('input[name="product_type"]').exists());
     assert.ok(form.find("Picky2").exists());
     assert.ok(form.find('button[type="submit"]').exists());
@@ -120,14 +120,14 @@ describe("PromoCouponUpdateForm", () => {
     );
 
     const activationInput = wrapper.find(
-      'DayPickerInput[name="activation_date"]',
+      'FormikDatePicker[name="activation_date"]',
     );
     const expirationInput = wrapper.find(
-      'DayPickerInput[name="expiration_date"]',
+      'FormikDatePicker[name="expiration_date"]',
     );
 
     // Note: In a real test, you might need to check the internal state rather than the DOM value
-    // This is a simplified check that would need to be adjusted based on how DayPickerInput works
+    // This is a simplified check that would need to be adjusted based on how FormikDatePicker works
     assert.ok(activationInput.exists());
     assert.ok(expirationInput.exists());
   });
@@ -262,7 +262,7 @@ describe("PromoCouponUpdateForm", () => {
       )} and expects error=${JSON.stringify(errorMessage)}`, async () => {
         const wrapper = renderForm();
 
-        const input = wrapper.find("DayPickerInput").at(idx).find("input");
+        const input = wrapper.find("FormikDatePicker").at(idx).find("input");
         input.simulate("click");
         input.simulate("change", {
           persist: () => {},
