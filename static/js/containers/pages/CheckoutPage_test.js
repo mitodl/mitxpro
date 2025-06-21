@@ -24,10 +24,6 @@ describe("CheckoutPage", () => {
     calcSelectedRunIdsStub = helper.sandbox
       .stub(ecommerceApi, "calcSelectedRunIds")
       .returns({});
-    SETTINGS.zendesk_config = {
-      help_widget_enabled: false,
-      help_widget_key: "fake_key",
-    };
     renderPage = helper.configureHOCRenderer(
       CheckoutPage,
       InnerCheckoutPage,
