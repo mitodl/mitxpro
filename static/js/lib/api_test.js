@@ -1,6 +1,6 @@
 /* global SETTINGS: false */
 import { assert } from "chai";
-import fetchMock from "fetch-mock/src/server";
+import fetchMock from "fetch-mock";
 import sinon from "sinon";
 
 import {
@@ -67,9 +67,14 @@ describe("api", function () {
 
   describe("fetch functions", () => {
     const CSRF_TOKEN = "asdf";
+    let mock;
+
+    beforeEach(() => {
+      mock = fetchMock.mockGlobal();
+    });
 
     afterEach(() => {
-      fetchMock.restore();
+      mock.hardReset();
     });
 
     describe("fetchWithCSRF", () => {
@@ -78,25 +83,26 @@ describe("api", function () {
       });
 
       it("fetches and populates appropriate headers for GET", () => {
-        const body = "body";
-
-        fetchMock.mock("/url", (url, opts) => {
-          assert.deepEqual(opts, {
-            credentials: "same-origin",
-            headers: {},
-            body: body,
+        mock.route(
+          {
             method: "GET",
-          });
-
-          return {
+            matcher: "/url",
+            functionMatcher: (url, opts) => {
+              assert.deepEqual(opts, {
+                credentials: "same-origin",
+                headers: {},
+                method: "GET",
+              });
+              return true;
+            },
+          },
+          {
             status: 200,
             body: "Some text",
-          };
-        });
+          },
+        );
 
-        return fetchWithCSRF("/url", {
-          body: body,
-        }).then((responseBody) => {
+        return fetchWithCSRF("/url").then((responseBody) => {
           assert.equal(responseBody, "Some text");
         });
       });
@@ -105,21 +111,27 @@ describe("api", function () {
         it(`fetches and populates appropriate headers for ${method}`, () => {
           const body = "body";
 
-          fetchMock.mock("/url", (url, opts) => {
-            assert.deepEqual(opts, {
-              credentials: "same-origin",
-              headers: {
-                "X-CSRFToken": CSRF_TOKEN,
+          mock.route(
+            {
+              matcher: "/url",
+              method,
+              functionMatcher: (url, opts) => {
+                assert.deepEqual(opts, {
+                  credentials: "same-origin",
+                  headers: {
+                    "X-CSRFToken": CSRF_TOKEN,
+                  },
+                  body: body,
+                  method: method,
+                });
+                return true;
               },
-              body: body,
-              method: method,
-            });
-
-            return {
+            },
+            {
               status: 200,
               body: "Some text",
-            };
-          });
+            },
+          );
 
           return fetchWithCSRF("/url", {
             body,
@@ -132,137 +144,173 @@ describe("api", function () {
 
       for (const statusCode of [300, 400, 500]) {
         it(`rejects the promise if the status code is ${statusCode}`, () => {
-          fetchMock.get("/url", statusCode);
+          mock.route(
+            {
+              method: "GET",
+              matcher: "/url",
+            },
+            {
+              status: statusCode,
+            },
+          );
+
           return assert.isRejected(fetchWithCSRF("/url"));
         });
       }
-    });
 
-    describe("fetchJSONWithCSRF", () => {
-      it("fetches and populates appropriate headers for JSON", () => {
-        document.cookie = `csrftoken=${CSRF_TOKEN}`;
-        const expectedJSON = { data: true };
+      describe("fetchJSONWithCSRF", () => {
+        it("fetches and populates appropriate headers for JSON", () => {
+          document.cookie = `csrftoken=${CSRF_TOKEN}`;
+          const expectedJSON = { data: true };
 
-        fetchMock.mock("/url", (url, opts) => {
-          assert.deepEqual(opts, {
-            credentials: "same-origin",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "X-CSRFToken": CSRF_TOKEN,
+          mock.route(
+            {
+              matcher: "/url",
+              method: "PATCH",
+              functionMatcher: (url, opts) => {
+                assert.deepEqual(opts, {
+                  credentials: "same-origin",
+                  headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": CSRF_TOKEN,
+                  },
+                  body: JSON.stringify(expectedJSON),
+                  method: "PATCH",
+                });
+                return true;
+              },
             },
-            body: JSON.stringify(expectedJSON),
-            method: "PATCH",
-          });
-          return {
-            status: 200,
-            body: '{"json": "here"}',
-          };
-        });
-
-        return fetchJSONWithCSRF("/url", {
-          method: "PATCH",
-          body: JSON.stringify(expectedJSON),
-        }).then((responseBody) => {
-          assert.deepEqual(responseBody, {
-            json: "here",
-          });
-        });
-      });
-
-      it("handles responses with no data", () => {
-        document.cookie = `csrftoken=${CSRF_TOKEN}`;
-        const expectedJSON = { data: true };
-
-        fetchMock.mock("/url", (url, opts) => {
-          assert.deepEqual(opts, {
-            credentials: "same-origin",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              "X-CSRFToken": CSRF_TOKEN,
+            {
+              status: 200,
+              body: '{"json": "here"}',
             },
-            body: JSON.stringify(expectedJSON),
+          );
+
+          return fetchJSONWithCSRF("/url", {
             method: "PATCH",
+            body: JSON.stringify(expectedJSON),
+          }).then((responseBody) => {
+            assert.deepEqual(responseBody, {
+              json: "here",
+            });
           });
-          return {
-            status: 200,
-          };
         });
 
-        return fetchJSONWithCSRF("/url", {
-          method: "PATCH",
-          body: JSON.stringify(expectedJSON),
-        }).then((responseBody) => {
-          assert.deepEqual(responseBody, {});
-        });
-      });
+        it("handles responses with no data", () => {
+          document.cookie = `csrftoken=${CSRF_TOKEN}`;
+          const expectedJSON = { data: true };
 
-      for (const statusCode of [300, 400, 500]) {
-        it(`rejects the promise if the status code is ${statusCode}`, () => {
-          fetchMock.mock("/url", {
-            status: statusCode,
-            body: JSON.stringify({
-              error: "an error",
-            }),
+          mock.route(
+            {
+              matcher: "/url",
+              method: "PATCH",
+              functionMatcher: (url, opts) => {
+                assert.deepEqual(opts, {
+                  credentials: "same-origin",
+                  headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": CSRF_TOKEN,
+                  },
+                  body: JSON.stringify(expectedJSON),
+                  method: "PATCH",
+                });
+                return true;
+              },
+            },
+            {
+              status: 200,
+            },
+          );
+
+          return fetchJSONWithCSRF("/url", {
+            method: "PATCH",
+            body: JSON.stringify(expectedJSON),
+          }).then((responseBody) => {
+            assert.deepEqual(responseBody, {});
           });
+        });
 
-          return assert
-            .isRejected(fetchJSONWithCSRF("/url"))
-            .then((responseBody) => {
-              assert.deepEqual(responseBody, {
-                errorStatusCode: statusCode,
+        for (const statusCode of [300, 400, 500]) {
+          it(`rejects the promise if the status code is ${statusCode}`, () => {
+            mock.route(
+              {
+                matcher: "/url",
+                method: "GET",
+              },
+              {
+                status: statusCode,
+                body: JSON.stringify({
+                  error: "an error",
+                }),
+              },
+            );
+
+            return assert
+              .isRejected(fetchJSONWithCSRF("/url"))
+              .then((responseBody) => {
+                assert.deepEqual(responseBody, {
+                  error: "an error",
+                  errorStatusCode: statusCode,
+                });
               });
-            });
-        });
-      }
-
-      for (const statusCode of [400, 401]) {
-        it(`redirects to login if we set loginOnError and status = ${statusCode}`, () => {
-          fetchMock.mock("/url", () => {
-            return { status: statusCode };
           });
+        }
 
-          return assert
-            .isRejected(fetchJSONWithCSRF("/url", {}, true))
-            .then(() => {
-              const redirectUrl = `/logout?next=${encodeURIComponent(
-                "/login/edxorg/",
-              )}`;
-              assert.include(window.location.toString(), redirectUrl);
-            });
-        });
-      }
-    });
-  });
+        for (const statusCode of [400, 401]) {
+          it(`redirects to login if we set loginOnError and status = ${statusCode}`, () => {
+            mock.route(
+              {
+                matcher: "/url",
+                method: "GET",
+              },
+              () => {
+                return { status: statusCode };
+              },
+            );
 
-  describe("getCookie", () => {
-    it("gets a cookie", () => {
-      document.cookie = "key=cookie";
-      assert.equal("cookie", getCookie("key"));
+            return assert
+              .isRejected(fetchJSONWithCSRF("/url", {}, true))
+              .then(() => {
+                const redirectUrl = `/logout?next=${encodeURIComponent(
+                  "/login/edxorg/",
+                )}`;
+                assert.include(window.location.toString(), redirectUrl);
+              });
+          });
+        }
+      });
     });
 
-    it("handles multiple cookies correctly", () => {
-      document.cookie = "key1=cookie1";
-      document.cookie = "key2=cookie2";
-      assert.equal("cookie1", getCookie("key1"));
-      assert.equal("cookie2", getCookie("key2"));
-    });
-    it("returns null if cookie not found", () => {
-      assert.equal(null, getCookie("unknown"));
-    });
-  });
+    describe("getCookie", () => {
+      it("gets a cookie", () => {
+        document.cookie = "key=cookie";
+        assert.equal("cookie", getCookie("key"));
+      });
 
-  describe("csrfSafeMethod", () => {
-    it("knows safe methods", () => {
-      for (const method of ["GET", "HEAD", "OPTIONS", "TRACE"]) {
-        assert.ok(csrfSafeMethod(method));
-      }
+      it("handles multiple cookies correctly", () => {
+        document.cookie = "key1=cookie1";
+        document.cookie = "key2=cookie2";
+        assert.equal("cookie1", getCookie("key1"));
+        assert.equal("cookie2", getCookie("key2"));
+      });
+      it("returns null if cookie not found", () => {
+        assert.equal(null, getCookie("unknown"));
+      });
     });
-    it("knows unsafe methods", () => {
-      for (const method of ["PATCH", "PUT", "DELETE", "POST"]) {
-        assert.ok(!csrfSafeMethod(method));
-      }
+
+    describe("csrfSafeMethod", () => {
+      it("knows safe methods", () => {
+        for (const method of ["GET", "HEAD", "OPTIONS", "TRACE"]) {
+          assert.ok(csrfSafeMethod(method));
+        }
+      });
+      it("knows unsafe methods", () => {
+        for (const method of ["PATCH", "PUT", "DELETE", "POST"]) {
+          assert.ok(!csrfSafeMethod(method));
+        }
+      });
     });
   });
 });
