@@ -1,6 +1,16 @@
 Release Notes
 =============
 
+Version 0.180.0 (Released June 23, 2025)
+---------------
+
+- fix(deps): update dependency requests to v2.32.4 [security] (#3526)
+- fix(deps): update dependency django to v4.2.22 [security] (#3524)
+- fix(deps): update dependency boto3 to v1.38.32 (#3523)
+- feat: add update promo coupons self service (#3491)
+- fix(deps): update dependency mitol-django-oauth-toolkit-extensions to v2025 (#3505)
+- [pre-commit.ci] pre-commit autoupdate (#3520)
+
 Version 0.179.1 (Released June 11, 2025)
 ---------------
 
