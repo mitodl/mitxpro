@@ -43,7 +43,7 @@ describe("validation utils", () => {
     });
   });
 
-  describe("ChangePasswordFormValidation", () => {
+  (describe("ChangePasswordFormValidation", () => {
     it(`should validate with matching passwords`, async () => {
       const inputs = {
         oldPassword: "old-password",
@@ -158,5 +158,5 @@ describe("validation utils", () => {
           assert.deepEqual(result.errors, errors);
         });
       });
-    });
+    }));
 });
