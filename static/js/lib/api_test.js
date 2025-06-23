@@ -251,7 +251,7 @@ describe("api", function () {
               .isRejected(fetchJSONWithCSRF("/url"))
               .then((responseBody) => {
                 assert.deepEqual(responseBody, {
-                  // error: "an error",
+                  error: "an error",
                   errorStatusCode: statusCode,
                 });
               });
