@@ -649,7 +649,7 @@ def test_promo_coupon_update_serializer():
     serializer.save()
 
     # Check new version was created
-    assert coupon.couponversion_set.count() == 2
+    assert coupon.versions.count() == 2
     assert payment.versions.count() == 2
     latest_version = payment.versions.order_by("-created_on").first()
     assert latest_version.activation_date == new_activation
