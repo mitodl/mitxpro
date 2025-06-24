@@ -7,7 +7,11 @@ import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
-from mitol.common.utils import dict_without_keys
+from mitol.common.utils import (
+    dict_without_keys,
+    usernameify,
+    create_user_with_generated_username,
+)
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthAlreadyAssociated, AuthException
 from social_core.pipeline.partial import partial
@@ -29,7 +33,6 @@ from courseware import api as courseware_api
 from courseware import tasks as courseware_tasks
 from hubspot_xpro.task_helpers import sync_hubspot_user
 from users.serializers import ProfileSerializer, UserSerializer
-from mitol.common.utils.user import usernameify, create_user_with_generated_username
 
 log = logging.getLogger()
 
