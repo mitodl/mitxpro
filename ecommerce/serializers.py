@@ -993,11 +993,16 @@ class PromoCouponUpdateSerializer(serializers.Serializer):
         expiration_date = self.validated_data["expiration_date"]
         products = self.validated_data["product_ids"]
 
-        coupon_version = coupon.payment.latest_version
-        coupon_version.pk = None
-        coupon_version.activation_date = activation_date
-        coupon_version.expiration_date = expiration_date
-        coupon_version.save()
+        coupon_payment_version = coupon.payment.latest_version
+        coupon_payment_version.pk = None
+        coupon_payment_version.activation_date = activation_date
+        coupon_payment_version.expiration_date = expiration_date
+        coupon_payment_version.save()
+
+        models.CouponVersion.objects.create(
+            coupon=coupon,
+            payment_version=coupon_payment_version,
+        )
 
         # Replace eligibilities
         coupon.couponeligibility_set.all().delete()
