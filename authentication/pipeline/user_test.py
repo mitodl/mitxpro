@@ -267,10 +267,10 @@ def test_create_user_via_email(mocker, mock_email_backend, mock_create_user_stra
     generated_username = "testuser123"
     fake_user = UserFactory.build(username=generated_username)
     patched_usernameify = mocker.patch(
-        "mitol.common.utils.user.usernameify", return_value=generated_username
+        "authentication.pipeline.user.usernameify", return_value=generated_username
     )
     patched_create_user = mocker.patch(
-        "mitol.common.utils.user.create_user_with_generated_username",
+        "authentication.pipeline.user.create_user_with_generated_username",
         return_value=fake_user,
     )
 
@@ -392,7 +392,7 @@ def test_create_user_via_email_create_fail(
 ):
     """Tests that create_user_via_email raises an error if user creation fails"""
     patched_create_user = mocker.patch(
-        "mitol.common.utils.user.create_user_with_generated_username",
+        "authentication.pipeline.user.create_user_with_generated_username",
         return_value=create_user_return_val,
         side_effect=create_user_exception,
     )
@@ -419,7 +419,7 @@ def test_create_user_via_email_affiliate(
     affiliate = AffiliateFactory.create()
     mock_create_user_strategy.request.affiliate_code = affiliate.code
     patched_create_user = mocker.patch(
-        "mitol.common.utils.user.create_user_with_generated_username",
+        "authentication.pipeline.user.create_user_with_generated_username",
         return_value=UserFactory.build(),
     )
     user_actions.create_user_via_email(
