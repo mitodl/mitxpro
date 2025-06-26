@@ -36,7 +36,7 @@ google-api-python-client = "2.173.0"
 google-auth = "1.35.0"
 hubspot-api-client = "^6.1.0"
 ipython = "^9.0.0"
-mitol-django-authentication = "^2025.2.12"
+mitol-django-authentication = "2023.12.19"
 mitol-django-common = "2025.6.20"
 mitol-django-digital-credentials = "2023.12.19"
 mitol-django-hubspot-api = { version = "2023.12.19", extras = [] }
