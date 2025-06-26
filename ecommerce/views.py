@@ -341,7 +341,7 @@ class PromoCouponView(APIView):
         promo_coupons = (
             Coupon.objects.annotate(latest_coupon_type=latest_coupon_type_subquery)
             .filter(latest_coupon_type=CouponPaymentVersion.PROMO)
-            .order_by("id")
+            .order_by("coupon_code")
         )
 
         serializer = PromoCouponDetailSerializer(

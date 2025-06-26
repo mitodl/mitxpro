@@ -8941,7 +8941,6 @@ __metadata:
     react-router-dom: ^4.1.1
     react-select: ^3.0.4
     react-test-renderer: ^16.8.4
-    react-zendesk: ^0.1.5
     reactstrap: ^8.0.0
     redux: ^3.7.2
     redux-actions: ^2.2.1
@@ -10593,15 +10592,6 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 75602840106aa9c6545149d6d7ae1502fb7b7abadcce70a6954c4b64a438ff1cd16fc77a0a1e5197cdd72da398f39eb929ea06f9005c45b132ed34e056ebdeb1
-  languageName: node
-  linkType: hard
-
-"react-zendesk@npm:^0.1.5":
-  version: 0.1.13
-  resolution: "react-zendesk@npm:0.1.13"
-  dependencies:
-    prop-types: ^15.7.2
-  checksum: f9925da864db78fc0977dbd3e5eeaaed6a792dccc35fcf3f594f4f0f3c1d11e2fd5e939a58b02240c39b71dbf8993308e873e51248dac8263019385bada0d58b
   languageName: node
   linkType: hard
 

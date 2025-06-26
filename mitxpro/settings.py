@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.181.0"
+VERSION = "0.182.0"
 
 env.reset()
 
@@ -107,19 +107,6 @@ SECURE_SSL_HOST = get_string(
     description="Hostame to redirect non-secure requests to. "
     "Overrides value from HOST header.",
 )
-
-ZENDESK_CONFIG = {
-    "HELP_WIDGET_ENABLED": get_bool(
-        name="ZENDESK_HELP_WIDGET_ENABLED",
-        default=False,
-        description="Enabled/disable state for Zendesk web help widget.",
-    ),
-    "HELP_WIDGET_KEY": get_string(
-        name="ZENDESK_HELP_WIDGET_KEY",
-        default="8ef9ef96-3317-40a9-8ef6-de0737503caa",
-        description="Represents the key for Zendesk web help widget.",
-    ),
-}
 
 WEBPACK_LOADER = {
     "DEFAULT": {

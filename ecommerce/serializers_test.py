@@ -22,6 +22,7 @@ from ecommerce.factories import (
     CouponEligibilityFactory,
     CompanyFactory,
     CouponFactory,
+    CouponVersionFactory,
     CouponPaymentFactory,
     CouponPaymentVersionFactory,
     DataConsentUserFactory,
@@ -623,8 +624,9 @@ def test_promo_coupon_get_serializer():
 def test_promo_coupon_update_serializer():
     """Test PromoCouponDetailSerializer with update functionality"""
     payment = CouponPaymentFactory()
-    CouponPaymentVersionFactory(payment=payment)  # Old version
+    payment_version = CouponPaymentVersionFactory(payment=payment)  # Old version
     coupon = CouponFactory(payment=payment)
+    CouponVersionFactory(coupon=coupon, payment_version=payment_version)
     old_product = ProductFactory()
     CouponEligibilityFactory(coupon=coupon, product=old_product)
 
@@ -647,6 +649,7 @@ def test_promo_coupon_update_serializer():
     serializer.save()
 
     # Check new version was created
+    assert coupon.versions.count() == 2
     assert payment.versions.count() == 2
     latest_version = payment.versions.order_by("-created_on").first()
     assert latest_version.activation_date == new_activation

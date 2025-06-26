@@ -21,7 +21,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:8.0.1
+        image: redis:8.0.2
         ports:
           - 6379:6379
 
@@ -138,7 +138,7 @@ jobs:
       - name: Upload coverage to CodeCov
         uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5
         with:
-          file: ./coverage.xml
+          files: ./coverage.xml
 
   javascript-tests:
     runs-on: ubuntu-22.04
@@ -148,7 +148,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 20.18.0
+          node-version: 20.19.3
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -188,4 +188,4 @@ jobs:
       - name: Upload test coverage to CodeCov
         uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d # v5
         with:
-          file: coverage/lcov.info
+          files: coverage/lcov.info

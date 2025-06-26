@@ -28,7 +28,7 @@ services:
       - "5432"
 
   redis:
-    image: redis:8.0.1
+    image: redis:8.0.2
     ports:
       - "6379"
 
@@ -68,7 +68,7 @@ services:
     extra_hosts: *default-extra-hosts
 
   watch:
-    image: node:20.18.3
+    image: node:20.19.3
     working_dir: /src
     command: >
       /bin/bash -c './webpack_dev_server.sh --install'

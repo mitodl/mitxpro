@@ -12,10 +12,6 @@ declare type Settings = {
   recaptchaKey: ?string,
   support_email: string,
   site_name: string,
-  zendesk_config: {
-    help_widget_enabled: boolean,
-    help_widget_key: ?string,
-  },
   digital_credentials: boolean,
   digital_credentials_supported_runs: Array<string>,
   is_tax_applicable: boolean,

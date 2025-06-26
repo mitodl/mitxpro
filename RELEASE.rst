@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.182.0
+---------------
+
+- Revert "chore: upgrade mitol-django-authentication (#3409)" (#3561)
+- chore: upgrade mitol-django-authentication (#3409)
+- chore: remove zendesk chatbot widget and related components (#3537)
+- fix(deps): update dependency google-api-python-client to v2 (#3550)
+- chore(deps): update node.js to v20.19.3 (#3498)
+- fix: Codecov action error on file keyword (#3551)
+- fix: update promo coupon (#3558)
+- fix(deps): update dependency boto3 to v1.38.42 (#3553)
+- fix(deps): update dependency uwsgi to v2.0.30 (#3555)
+- chore(deps): update redis docker tag to v8.0.2 (#3552)
+
 Version 0.181.0 (Released June 26, 2025)
 ---------------
 

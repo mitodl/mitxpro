@@ -42,18 +42,7 @@
       content="{{ domain_verification_tag }}"
     />
     {% endif %}
-    <meta name="zd-site-verification" content="o0itxdfh369m1bw4cuz9" />
-    <meta name="zd-site-verification" content="7e22kzikbruclk2jjomono" />
-    {% block extrahead %}
-    {% endblock %}
     {% endspaceless %}
-    {% if zendesk_config.help_widget_enabled and not request.path|startswith:'/certificate/' %}
-    <script
-      defer
-      id="ze-snippet"
-      src="https://static.zdassets.com/ekr/snippet.js?key={{zendesk_config.help_widget_key}}"
-    ></script>
-    {% endif %}
   </head>
   <body class="{% block bodyclass %}{% endblock %}">
     <div class="main-panel">
