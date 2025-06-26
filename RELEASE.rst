@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.181.0 (Released June 26, 2025)
+---------------
+
+- fix(deps): update dependency django to v4.2.23 (#3554)
+- chore(deps): lock file maintenance (#3522)
+- fix(deps): update dependency mitol-django-common to v2025.6.20 (#3548)
+- fix(deps): update dependency boto3 to v1.38.40 (#3544)
+- chore(deps): update dependency freezegun to v1.5.2 (#3543)
+- fix(deps): update dependency react-day-picker to v9 (#3536)
+- feat: add toggle display_seal for partner logo (#3528)
+- fix(deps): update dependency celery to v5.5.3 (#3539)
+- chore(deps): update dependency faker to v37.4.0 (#3540)
+- fix(deps): update dependency boto3 to v1.38.38 (#3538)
+- fix(deps): update dependency named-urls to v2 (#3535)
+- fix(deps): update dependency edx-api-client to v1.11.0 (#3532)
+- fix(deps): update dependency user-util to v2 (#3531)
+- fix(deps): update dependency boto3 to v1.38.36 (#3529)
+- fix(deps): update dependency sinon to v21 (#3530)
+- [pre-commit.ci] pre-commit autoupdate (#3525)
+
 Version 0.180.0 (Released June 23, 2025)
 ---------------
 
