@@ -14,23 +14,29 @@ const ForgotPasswordPages = () => (
     <Route
       exact
       path={routes.login.forgot.begin}
-      component={LoginForgotPasswordPage}
+      element={<LoginForgotPasswordPage />}
     />
     <Route
       exact
       path={routes.login.forgot.confirm}
-      component={LoginForgotPasswordConfirmPage}
+      element={<LoginForgotPasswordConfirmPage />}
+    />
+    <Route
+      exact
+      path={routes.login.forgot.password}
+      element={<LoginForgotPasswordPage />}
     />
   </React.Fragment>
 );
 
 const LoginPages = () => (
   <Routes>
-    <Route exact path={routes.login.begin} component={LoginEmailPage} />
-    <Route exact path={routes.login.password} component={LoginPasswordPage} />
+    <Route exact path={routes.login.begin} element={<LoginEmailPage />} />
+    <Route exact path={routes.login.password} element={<LoginPasswordPage />} />
     <Route
-      path={routes.login.forgot.toString()}
-      component={ForgotPasswordPages}
+      exact
+      path={routes.login.forgot.begin}
+      element={<ForgotPasswordPages />}
     />
   </Routes>
 );

@@ -15,32 +15,40 @@ import RegisterErrorPage from "./RegisterErrorPage";
 const RegisterPages = () => (
   <React.Fragment>
     <Routes>
-      <Route exact path={routes.register.begin} component={RegisterEmailPage} />
+      <Route
+        exact
+        path={routes.register.begin}
+        element={<RegisterEmailPage />}
+      />
       <Route
         exact
         path={routes.register.confirmSent}
-        component={RegisterConfirmSentPage}
+        element={<RegisterConfirmSentPage />}
       />
       <Route
         exact
         path={routes.register.confirm}
-        component={RegisterConfirmPage}
+        element={<RegisterConfirmPage />}
       />
       <Route
         exact
         path={routes.register.extra}
-        component={RegisterExtraDetailsPage}
+        element={<RegisterExtraDetailsPage />}
       />
       <Route
         exact
         path={routes.register.details}
-        component={RegisterDetailsPage}
+        element={<RegisterDetailsPage />}
       />
-      <Route exact path={routes.register.error} component={RegisterErrorPage} />
+      <Route
+        exact
+        path={routes.register.error}
+        element={<RegisterErrorPage />}
+      />
       <Route
         exact
         path={routes.register.denied}
-        component={RegisterDeniedPage}
+        element={<RegisterDeniedPage />}
       />
       <Navigate to={routes.register.begin} />
     </Routes>

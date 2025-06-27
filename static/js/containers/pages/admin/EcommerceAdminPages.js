@@ -54,27 +54,27 @@ const EcommerceAdminPages = () => (
       <Route
         exact
         path={routes.ecommerceAdmin.index}
-        component={EcommerceAdminIndexPage}
+        element={<EcommerceAdminIndexPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.coupons}
-        component={CouponCreationPage}
+        path={routes.ecommerceAdmin.coupons.create}
+        element={<CouponCreationPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.deactivate}
-        component={DeactivateCouponPage}
+        path={routes.ecommerceAdmin.coupons.deactivate}
+        element={<DeactivateCouponPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.processSheets}
-        component={ProcessCouponAssignmentSheetPage}
+        path={routes.ecommerceAdmin.coupons.processAssignmentSheet}
+        element={<ProcessCouponAssignmentSheetPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.updatePromoCode}
-        component={UpdatePromoCodePage}
+        path={routes.ecommerceAdmin.coupons.updatePromoCode}
+        element={<UpdatePromoCodePage />}
       />
       <Navigate to={routes.ecommerceAdmin.index} />
     </Routes>

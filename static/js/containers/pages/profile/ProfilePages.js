@@ -9,8 +9,8 @@ import EditProfilePage from "./EditProfilePage";
 
 const ProfilePages = () => (
   <Routes>
-    <Route exact path={routes.profile.view} component={ViewProfilePage} />
-    <Route exact path={routes.profile.edit} component={EditProfilePage} />
+    <Route exact path={routes.profile.view} element={<ViewProfilePage />} />
+    <Route exact path={routes.profile.edit} element={<EditProfilePage />} />
   </Routes>
 );
 

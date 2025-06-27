@@ -10,16 +10,8 @@ import B2BReceiptPage from "./B2BReceiptPage";
 const EcommerceBulkPages = () => (
   <React.Fragment>
     <Routes>
-      <Route
-        exact
-        path={routes.ecommerceBulk.bulkPurchase}
-        component={B2BPurchasePage}
-      />
-      <Route
-        exact
-        path={routes.ecommerceBulk.receipt}
-        component={B2BReceiptPage}
-      />
+      <Route exact path={routes.b2b.purchase} element={<B2BPurchasePage />} />
+      <Route exact path={routes.b2b.receipt} element={<B2BReceiptPage />} />
     </Routes>
   </React.Fragment>
 );
