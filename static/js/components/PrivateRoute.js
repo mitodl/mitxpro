@@ -1,6 +1,6 @@
 // @flow
 import React, { type ComponentType } from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Route, Navigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { compose } from "redux";
 import { createStructuredSelector } from "reselect";
@@ -28,7 +28,7 @@ export const PrivateRoute = ({
         return currentUser && currentUser.is_authenticated ? (
           <Component {...props} />
         ) : (
-          <Redirect to={generateLoginRedirectUrl()} />
+          <Navigate to={generateLoginRedirectUrl()} />
         );
       }}
     />
