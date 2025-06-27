@@ -4,8 +4,13 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from cms.models import CertificatePage
-from courses.factories import CourseRunFactory, CourseRunCertificateFactory, ProgramFactory, ProgramCertificateFactory
-from cms.factories import CertificatePageFactory, CoursePageFactory, ProgramPageFactory
+from courses.factories import (
+    CourseRunFactory,
+    CourseRunCertificateFactory,
+    ProgramFactory,
+    ProgramCertificateFactory,
+)
+from cms.factories import CertificatePageFactory, CoursePageFactory
 
 
 @pytest.mark.django_db
@@ -27,13 +32,18 @@ def test_update_certificate_for_course_run():
     certificate_page.refresh_from_db()
     new_page_revision = certificate_page.latest_revision
     assert certificate.certificate_page_revision != new_page_revision
-    
+
     out = StringIO()
-    call_command("update_certificate_revision_to_latest", "--course_run_id", str(course_run.id), stdout=out)
+    call_command(
+        "update_certificate_revision_to_latest",
+        "--course_run_id",
+        str(course_run.id),
+        stdout=out,
+    )
 
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_page_revision
-    assert f"Successfully updated 1 course run certificate" in out.getvalue()
+    assert "Successfully updated 1 course run certificate" in out.getvalue()
 
 
 @pytest.mark.django_db
@@ -58,7 +68,12 @@ def test_update_certificate_for_program():
 
     # Run the management command
     out = StringIO()
-    call_command("update_certificate_revision_to_latest", "--program_id", str(program.id), stdout=out)
+    call_command(
+        "update_certificate_revision_to_latest",
+        "--program_id",
+        str(program.id),
+        stdout=out,
+    )
 
     # Assert it updated to the latest revision
     certificate.refresh_from_db()
@@ -82,7 +97,12 @@ def test_program_not_found_raises():
 def test_no_certificates_found_logs_warning_for_course_run():
     course_run = CourseRunFactory()
     out = StringIO()
-    call_command("update_certificate_revision_to_latest", "--course_run_id", str(course_run.id), stdout=out)
+    call_command(
+        "update_certificate_revision_to_latest",
+        "--course_run_id",
+        str(course_run.id),
+        stdout=out,
+    )
     assert "No certificates found for course run" in out.getvalue()
 
 
@@ -90,5 +110,10 @@ def test_no_certificates_found_logs_warning_for_course_run():
 def test_no_certificates_found_logs_warning_for_program():
     program = ProgramFactory()
     out = StringIO()
-    call_command("update_certificate_revision_to_latest", "--program_id", str(program.id), stdout=out)
+    call_command(
+        "update_certificate_revision_to_latest",
+        "--program_id",
+        str(program.id),
+        stdout=out,
+    )
     assert "No certificates found for program" in out.getvalue()
