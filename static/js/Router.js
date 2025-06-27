@@ -6,6 +6,8 @@ import App from "./containers/App"
 import withTracker from "./util/withTracker"
 import ScrollToTop from "./components/ScrollToTop"
 
+const TrackedApp = withTracker(App);
+
 export default class Root extends React.Component {
   props: {
     store: Store
@@ -26,4 +28,4 @@ export default class Root extends React.Component {
   }
 }
 
-export const routes = <Route url="/" element={<withTracker(App) />} />
+export const routes = <Route url="/" element={<TrackedApp />} />
