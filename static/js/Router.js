@@ -26,4 +26,4 @@ export default class Root extends React.Component {
   }
 }
 
-export const routes = <Route url="/" component={withTracker(App)} />
+export const routes = <Route url="/" element={<withTracker(App) />} />
