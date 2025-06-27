@@ -1,7 +1,7 @@
 // @flow
 import React from "react";
 import { assert } from "chai";
-import { Redirect } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import PrivateRoute, {
   PrivateRoute as InnerPrivateRoute,
@@ -56,7 +56,7 @@ describe("PrivateRoute component", () => {
       assert.equal(path, fakeRoutePath);
       const renderResult = render();
       if (isAnonymous) {
-        assert.equal(renderResult.type, Redirect);
+        assert.equal(renderResult.type, Navigate);
         assert.equal(
           renderResult.props.to,
           `${routes.login.begin}?next=%2Fprotected%2Froute`,
