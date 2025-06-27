@@ -1,6 +1,6 @@
 // @flow
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -25,14 +25,14 @@ const ForgotPasswordPages = () => (
 );
 
 const LoginPages = () => (
-  <Switch>
+  <Routes>
     <Route exact path={routes.login.begin} component={LoginEmailPage} />
     <Route exact path={routes.login.password} component={LoginPasswordPage} />
     <Route
       path={routes.login.forgot.toString()}
       component={ForgotPasswordPages}
     />
-  </Switch>
+  </Routes>
 );
 
 export default LoginPages;
