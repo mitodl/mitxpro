@@ -1,6 +1,6 @@
 // @flow
 import React from "react";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -14,7 +14,7 @@ import RegisterErrorPage from "./RegisterErrorPage";
 
 const RegisterPages = () => (
   <React.Fragment>
-    <Switch>
+    <Routes>
       <Route exact path={routes.register.begin} component={RegisterEmailPage} />
       <Route
         exact
@@ -42,8 +42,8 @@ const RegisterPages = () => (
         path={routes.register.denied}
         component={RegisterDeniedPage}
       />
-      <Redirect to={routes.register.begin} />
-    </Switch>
+      <Navigate to={routes.register.begin} />
+    </Routes>
   </React.Fragment>
 );
 

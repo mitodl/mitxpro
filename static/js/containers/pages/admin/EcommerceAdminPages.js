@@ -5,7 +5,7 @@ declare var USER_PERMISSIONS: {
   has_coupon_product_assignment_permission: boolean,
 };
 import React from "react";
-import { Redirect, Route, Switch, Link } from "react-router-dom";
+import { Redirect, Route, Routes, Link } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -50,7 +50,7 @@ const EcommerceAdminIndexPage = () => (
 
 const EcommerceAdminPages = () => (
   <React.Fragment>
-    <Switch>
+    <Routes>
       <Route
         exact
         path={routes.ecommerceAdmin.index}
@@ -77,7 +77,7 @@ const EcommerceAdminPages = () => (
         component={UpdatePromoCodePage}
       />
       <Redirect to={routes.ecommerceAdmin.index} />
-    </Switch>
+    </Routes>
   </React.Fragment>
 );
 
