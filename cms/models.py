@@ -2409,7 +2409,10 @@ class CertificatePage(CourseProgramChildPage):
         use_json_field=True,
     )
 
-    display_mit_seal = models.BooleanField(default=False)
+    display_mit_seal = models.BooleanField(
+        default=False,
+        help_text="Show the MIT seal when a Partner logo is present. If no Partner logo is set, the seal will be shown by default.",
+    )
 
     content_panels = [
         FieldPanel("product_name"),
