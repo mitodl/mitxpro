@@ -5,7 +5,7 @@ declare var USER_PERMISSIONS: {
   has_coupon_product_assignment_permission: boolean,
 };
 import React from "react";
-import { Redirect, Route, Routes, Link } from "react-router-dom";
+import { Navigate, Route, Routes, Link } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -76,7 +76,7 @@ const EcommerceAdminPages = () => (
         path={routes.ecommerceAdmin.updatePromoCode}
         component={UpdatePromoCodePage}
       />
-      <Redirect to={routes.ecommerceAdmin.index} />
+      <Navigate to={routes.ecommerceAdmin.index} />
     </Routes>
   </React.Fragment>
 );
