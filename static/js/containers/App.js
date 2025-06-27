@@ -3,7 +3,7 @@
 import React from "react";
 import { compose } from "redux";
 import { connect } from "react-redux";
-import { Switch, Route } from "react-router";
+import { Routes, Route } from "react-router-dom";
 import { connectRequest } from "redux-query";
 import { createStructuredSelector } from "reselect";
 import urljoin from "url-join";
@@ -84,49 +84,76 @@ export class App extends React.Component<Props, void> {
           errorPageHeader={null}
           courseTopics={courseTopics}
         />
-        <Switch>
-          <PrivateRoute
-            exact
+        <Routes>
+          <Route
             path={urljoin(match.url, routes.dashboard)}
-            component={DashboardPage}
+            element={
+              <PrivateRoute>
+                <DashboardPage />
+              </PrivateRoute>
+            }
           />
-          <PrivateRoute
+          <Route
             path={urljoin(match.url, routes.receipt)}
-            component={ReceiptPage}
+            element={
+              <PrivateRoute>
+                <ReceiptPage />
+              </PrivateRoute>
+            }
           />
           <Route
             path={urljoin(match.url, String(routes.login))}
-            component={LoginPages}
+            element={<LoginPages />}
           />
           <Route
             path={urljoin(match.url, String(routes.register))}
-            component={RegisterPages}
+            element={<RegisterPages />}
           />
-          <PrivateRoute
+          <Route
             path={urljoin(match.url, routes.checkout)}
-            component={CheckoutPage}
+            element={
+              <PrivateRoute>
+                <CheckoutPage />
+              </PrivateRoute>
+            }
           />
           <Route
             path={urljoin(match.url, String(routes.ecommerceAdmin))}
-            component={EcommerceAdminPages}
+            element={
+              <PrivateRoute>
+                <EcommerceAdminPages />
+              </PrivateRoute>
+            }
           />
           <Route
             path={urljoin(match.url, String(routes.profile))}
-            component={ProfilePages}
+            element={
+              <PrivateRoute>
+                <ProfilePages />
+              </PrivateRoute>
+            }
           />
           <Route
             path={urljoin(match.url, String(routes.ecommerceBulk))}
-            component={EcommerceBulkPages}
+            element={
+              <PrivateRoute>
+                <EcommerceBulkPages />
+              </PrivateRoute>
+            }
           />
-          <PrivateRoute
+          <Route
             path={urljoin(match.url, String(routes.accountSettings))}
-            component={AccountSettingsPage}
+            element={
+              <PrivateRoute>
+                <AccountSettingsPage />
+              </PrivateRoute>
+            }
           />
           <Route
             path={urljoin(match.url, String(routes.account.confirmEmail))}
-            component={EmailConfirmPage}
+            element={<EmailConfirmPage />}
           />
-        </Switch>
+        </Routes>
       </div>
     );
   }

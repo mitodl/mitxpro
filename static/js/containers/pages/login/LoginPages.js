@@ -1,6 +1,6 @@
 // @flow
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -14,25 +14,31 @@ const ForgotPasswordPages = () => (
     <Route
       exact
       path={routes.login.forgot.begin}
-      component={LoginForgotPasswordPage}
+      element={<LoginForgotPasswordPage />}
     />
     <Route
       exact
       path={routes.login.forgot.confirm}
-      component={LoginForgotPasswordConfirmPage}
+      element={<LoginForgotPasswordConfirmPage />}
+    />
+    <Route
+      exact
+      path={routes.login.forgot.password}
+      element={<LoginForgotPasswordPage />}
     />
   </React.Fragment>
 );
 
 const LoginPages = () => (
-  <Switch>
-    <Route exact path={routes.login.begin} component={LoginEmailPage} />
-    <Route exact path={routes.login.password} component={LoginPasswordPage} />
+  <Routes>
+    <Route exact path={routes.login.begin} element={<LoginEmailPage />} />
+    <Route exact path={routes.login.password} element={<LoginPasswordPage />} />
     <Route
-      path={routes.login.forgot.toString()}
-      component={ForgotPasswordPages}
+      exact
+      path={routes.login.forgot.begin}
+      element={<ForgotPasswordPages />}
     />
-  </Switch>
+  </Routes>
 );
 
 export default LoginPages;
