@@ -98,3 +98,8 @@ def create_common_child_pages_for_external_courses(request, page):  # noqa: ARG0
     platform = page.course.platform.name
     create_and_add_how_you_will_learn_section(page, platform)
     create_and_add_b2b_section(page, platform)
+
+
+@hooks.register("insert_editor_js")
+def conditional_certificate_fields():
+    return '<script src="/static/js/certificate_admin.js"></script>'
