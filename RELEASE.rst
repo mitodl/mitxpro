@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.182.0
+Version 0.182.0 (Released June 30, 2025)
 ---------------
 
 - Revert "chore: upgrade mitol-django-authentication (#3409)" (#3561)
