@@ -199,17 +199,17 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.38.42"
+version = "1.39.0"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "boto3-1.38.42-py3-none-any.whl", hash = "sha256:a9b4c7021bf5adee985523fc87db27a7200de161c094cb8f709b93a81797dc8a"},
-    {file = "boto3-1.38.42.tar.gz", hash = "sha256:2cb783c668ae4f2a86b6497b47251b9baf9a16db8fff863b57eae683276b9e1f"},
+    {file = "boto3-1.39.0-py3-none-any.whl", hash = "sha256:6257f6f7bb87b66342564eab579ce1f0f63a4c1a6f701492f959e59bd7af68e5"},
+    {file = "boto3-1.39.0.tar.gz", hash = "sha256:52a9f07fb9fa60ec6a2be07cd1586a97d8adae2be750121d4c032349cd113221"},
 ]
 
 [package.dependencies]
-botocore = ">=1.38.42,<1.39.0"
+botocore = ">=1.39.0,<1.40.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -218,13 +218,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.38.42"
+version = "1.39.0"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "botocore-1.38.42-py3-none-any.whl", hash = "sha256:fbbeac30c045b5c19f1c3bb063ea2b6315ce2d6fcb3d898e87d1c1846297961c"},
-    {file = "botocore-1.38.42.tar.gz", hash = "sha256:3a14188e48f6e26be561164373d34150fa9cb39f7ad32cc745dcd3ab05f43683"},
+    {file = "botocore-1.39.0-py3-none-any.whl", hash = "sha256:d8e72850d3450aeca355b654efb32c8370bf824c1945a61cad2395dc2688581e"},
+    {file = "botocore-1.39.0.tar.gz", hash = "sha256:2b8701e529a80241b989d83262a629d0d91fbd7a06ded63ecc1c9d529a383d57"},
 ]
 
 [package.dependencies]
@@ -871,14 +871,18 @@ files = [
 
 [[package]]
 name = "dj-database-url"
-version = "0.5.0"
+version = "3.0.0"
 description = "Use Database URLs in your Django Application."
 optional = false
 python-versions = "*"
 files = [
-    {file = "dj-database-url-0.5.0.tar.gz", hash = "sha256:4aeaeb1f573c74835b0686a2b46b85990571159ffc21aa57ecd4d1e1cb334163"},
-    {file = "dj_database_url-0.5.0-py2.py3-none-any.whl", hash = "sha256:851785365761ebe4994a921b433062309eb882fedd318e1b0fcecc607ed02da9"},
+    {file = "dj_database_url-3.0.0-py3-none-any.whl", hash = "sha256:cbb84b2e3f372460b1e43692bf9fdc0c32e78930ee101db470cba56105fca1e5"},
+    {file = "dj_database_url-3.0.0.tar.gz", hash = "sha256:749a7a42d88d6c741c1d2f4ab24c2ae0d5cd12f00f2d1d55ff9f5fadabe8a2c3"},
 ]
+
+[package.dependencies]
+Django = ">=4.2"
+typing_extensions = ">=4.0.0"
 
 [[package]]
 name = "django"
@@ -4528,4 +4532,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.12.6"
-content-hash = "7b2c71132db16d7a120c861609bcdb256116bdf05691406a96f6e77026f48bfb"
+content-hash = "1e213dd9ae55c4d06c99c485b91d52393799e7db488f7c25f0bf20b35935b9c1"

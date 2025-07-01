@@ -50,7 +50,7 @@
     "eslint-plugin-mocha": "^6.3.0",
     "eslint-plugin-react": "^7.19.0",
     "expose-loader": "^5.0.0",
-    "express": "^4.19.2",
+    "express": "^5.0.0",
     "fetch-mock": "^5.12.1",
     "flow": "^0.2.3",
     "flow-bin": "^0.95.1",
@@ -110,7 +110,7 @@
     "style-loader": "^3.2.1",
     "styled-components": "^4.2.0",
     "stylelint": "^16.1.0",
-    "stylelint-config-standard-scss": "^12.0.0",
+    "stylelint-config-standard-scss": "^15.0.0",
     "unzipper": "^0.12.0",
     "url-join": "^4.0.0",
     "url-loader": "^4.1.1",
@@ -124,7 +124,7 @@
     "yup": "^1.0.0"
   },
   "engines": {
-    "node": "20.19.3"
+    "node": "22.17.0"
   },
   "scripts": {
     "postinstall": "./webpack_if_prod.sh",
