@@ -1,3 +1,5 @@
+"""Tests for the update_certificate_revision_to_latest management command."""
+
 import pytest
 from io import StringIO
 from django.core.management import call_command
@@ -12,8 +14,9 @@ from courses.factories import (
 )
 from cms.factories import CertificatePageFactory, CoursePageFactory
 
+pytestmark = [pytest.mark.django_db]
 
-@pytest.mark.django_db
+
 def test_update_certificate_for_course_run():
     """Test updating certificate revision for a course run."""
     course_page = CoursePageFactory.create(certificate_page=None)
@@ -36,14 +39,17 @@ def test_update_certificate_for_course_run():
     out = StringIO()
     call_command(
         "update_certificate_revision_to_latest",
-        "--course_run_id",
+        "--course-run-id",
         str(course_run.id),
         stdout=out,
     )
 
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_page_revision
-    assert f"Successfully updated 1 course run {course_run.id} certificate(s) to latest revision." in out.getvalue()
+    assert (
+        f"Successfully updated 1 course run {course_run.id} certificate(s) to latest revision."
+        in out.getvalue()
+    )
 
 
 @pytest.mark.django_db
@@ -70,7 +76,7 @@ def test_update_certificate_for_program():
     out = StringIO()
     call_command(
         "update_certificate_revision_to_latest",
-        "--program_id",
+        "--program-id",
         str(program.id),
         stdout=out,
     )
@@ -78,42 +84,38 @@ def test_update_certificate_for_program():
     # Assert it updated to the latest revision
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_cert_page_revision
-    assert f"Successfully updated 1 program {program.id} certificate(s) to latest revision." in out.getvalue()
+    assert (
+        f"Successfully updated 1 program {program.id} certificate(s) to latest revision."
+        in out.getvalue()
+    )
 
 
-@pytest.mark.django_db
-def test_course_run_not_found_raises():
-    with pytest.raises(CommandError, match="CourseRun with id 9999 does not exist"):
-        call_command("update_certificate_revision_to_latest", "--course_run_id", "9999")
+@pytest.mark.parametrize(
+    "arg_name,arg_value,expected_error",
+    [
+        ("--course-run-id", "9999", "CourseRun with id 9999 does not exist"),
+        ("--program-id", "9999", "Program with id 9999 does not exist"),
+    ],
+)
+def test_missing_entities_raise_command_error(arg_name, arg_value, expected_error):
+    with pytest.raises(CommandError, match=expected_error):
+        call_command("update_certificate_revision_to_latest", arg_name, arg_value)
 
 
-@pytest.mark.django_db
-def test_program_not_found_raises():
-    with pytest.raises(CommandError, match="Program with id 9999 does not exist"):
-        call_command("update_certificate_revision_to_latest", "--program_id", "9999")
-
-
-@pytest.mark.django_db
-def test_no_certificates_found_logs_warning_for_course_run():
-    course_run = CourseRunFactory()
+@pytest.mark.parametrize(
+    "arg_name,factory,warning_msg",
+    [
+        ("--course-run-id", CourseRunFactory, "No certificates found for course run"),
+        ("--program-id", ProgramFactory, "No certificates found for program"),
+    ],
+)
+def test_no_certificates_found_logs_warning(arg_name, factory, warning_msg):
+    instance = factory()
     out = StringIO()
     call_command(
         "update_certificate_revision_to_latest",
-        "--course_run_id",
-        str(course_run.id),
+        arg_name,
+        str(instance.id),
         stdout=out,
     )
-    assert "No certificates found for course run" in out.getvalue()
-
-
-@pytest.mark.django_db
-def test_no_certificates_found_logs_warning_for_program():
-    program = ProgramFactory()
-    out = StringIO()
-    call_command(
-        "update_certificate_revision_to_latest",
-        "--program_id",
-        str(program.id),
-        stdout=out,
-    )
-    assert "No certificates found for program" in out.getvalue()
+    assert warning_msg in out.getvalue()

@@ -11,7 +11,6 @@ from courseware.exceptions import (
 )
 from ecommerce import mail_api
 from mitxpro.utils import has_equal_properties
-from cms.models import CertificatePage
 
 
 def enrollment_summary(enrollment):
@@ -244,32 +243,3 @@ class EnrollmentChangeCommand(BaseCommand):
         ) as exc:
             self.stdout.write(self.style.WARNING(str(exc)))
         return False
-
-def update_certificates(model_cls, filter_kwargs, page_getter, stdout, label):
-    certificates = list(model_cls.objects.filter(**filter_kwargs))
-    if not certificates:
-        stdout.write(
-            f"No certificates found for {label}."
-        )
-        return
-
-    parent_page = page_getter()
-    latest_revision = (
-        parent_page.get_children()
-        .type(CertificatePage)
-        .live()
-        .order_by("-last_published_at")
-        .first()
-    )
-    if not latest_revision or not latest_revision.latest_revision:
-        raise CommandError(
-            f"No live CertificatePage with a published revision found for the {label}."
-        )
-
-    for certificate in certificates:
-        certificate.certificate_page_revision = latest_revision.latest_revision
-
-    model_cls.objects.bulk_update(certificates, ["certificate_page_revision"])
-    stdout.write(
-        f"Successfully updated {len(certificates)} {label} certificate(s) to latest revision."
-    )
