@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q, OuterRef, Subquery
+from django.db.models import Count, Q, OuterRef, Subquery, Prefetch
 from django.http import Http404
 from django.shortcuts import render
 from django_filters import rest_framework as filters
@@ -55,6 +55,7 @@ from ecommerce.models import (
     Order,
     Product,
     Receipt,
+    CouponEligibility,
 )
 from ecommerce.permissions import (
     HasCouponPermission,
@@ -341,12 +342,19 @@ class PromoCouponView(APIView):
         promo_coupons = (
             Coupon.objects.annotate(latest_coupon_type=latest_coupon_type_subquery)
             .filter(latest_coupon_type=CouponPaymentVersion.PROMO)
+            .select_related("payment")
+            .prefetch_related(
+                Prefetch(
+                    "couponeligibility_set",
+                    queryset=CouponEligibility.objects.filter(
+                        product__is_private=False
+                    ).select_related("product", "program_run"),
+                )
+            )
             .order_by("coupon_code")
         )
 
-        serializer = PromoCouponDetailSerializer(
-            promo_coupons, many=True, context={"is_private": False}
-        )
+        serializer = PromoCouponDetailSerializer(promo_coupons, many=True)
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):

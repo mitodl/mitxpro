@@ -1780,8 +1780,8 @@ def test_promocoupon_get_view_returns_only_latest_promo_versions(admin_drf_clien
     )
 
     coupon = CouponFactory(payment=payment)
-    product = ProductFactory()
-    CouponEligibilityFactory(coupon=coupon, product=product)
+    CouponEligibilityFactory(coupon=coupon, product=ProductFactory(is_private=False))
+    CouponEligibilityFactory(coupon=coupon, product=ProductFactory(is_private=True))
 
     response = admin_drf_client.get(reverse("promo_coupons_api"))
 
@@ -1789,6 +1789,7 @@ def test_promocoupon_get_view_returns_only_latest_promo_versions(admin_drf_clien
     assert len(response.data) == 1
     assert response.data[0]["coupon_code"] == coupon.coupon_code
     assert response.data[0]["activation_date"] == payment_version.activation_date
+    assert len(response.data[0]["eligibility"]) == 1
 
 
 @pytest.mark.parametrize(
