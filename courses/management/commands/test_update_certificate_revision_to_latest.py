@@ -43,7 +43,7 @@ def test_update_certificate_for_course_run():
 
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_page_revision
-    assert "Successfully updated 1 course run certificate" in out.getvalue()
+    assert f"Successfully updated 1 course run {course_run.id} certificate(s) to latest revision." in out.getvalue()
 
 
 @pytest.mark.django_db
@@ -78,7 +78,7 @@ def test_update_certificate_for_program():
     # Assert it updated to the latest revision
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_cert_page_revision
-    assert "Successfully updated 1 program certificate" in out.getvalue()
+    assert f"Successfully updated 1 program {program.id} certificate(s) to latest revision." in out.getvalue()
 
 
 @pytest.mark.django_db
