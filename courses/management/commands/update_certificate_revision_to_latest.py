@@ -17,10 +17,17 @@ class Command(BaseCommand):
 
     def update_certificates(self, model_cls, filter_kwargs, parent_page, label):
         """
-        Update the certificate revisions for the specified model class and filter criteria."""
+        Update the certificate revisions for the specified model class and filter criteria.
+        
+        Args:
+            model_cls (CourseRunCertificate | ProgramCertificate): certificate model class
+            filter_kwargs (dict): filter arguments to filter the certificates
+            parent_page (Page): ProgramPage or CoursePage object
+            label (str): for logging
+        """
         certificates = list(model_cls.objects.filter(**filter_kwargs))
         if not certificates:
-            self.stdout.write(f"No certificates found for {label}.")
+            self.stdout.write(self.style.ERROR(f"No certificates found for {label}."))
             return
 
         latest_revision = (
@@ -39,9 +46,10 @@ class Command(BaseCommand):
             certificate.certificate_page_revision = latest_revision.latest_revision
 
         model_cls.objects.bulk_update(certificates, ["certificate_page_revision"])
-        self.stdout.write(
-            f"Successfully updated {len(certificates)} {label} certificate(s) to latest revision."
-        )
+        self.stdout.write(self.style.SUCCESS(
+            f"Updated {len(certificates)} certificate(s) for {label} to the latest revision."
+        ))
+
 
     def handle(self, *args, **options):
         """Handle the command."""

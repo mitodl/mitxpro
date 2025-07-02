@@ -47,7 +47,7 @@ def test_update_certificate_for_course_run():
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_page_revision
     assert (
-        f"Successfully updated 1 course run {course_run.id} certificate(s) to latest revision."
+        f"Updated 1 certificate(s) for course run {course_run.id} to the latest revision."
         in out.getvalue()
     )
 
@@ -85,7 +85,7 @@ def test_update_certificate_for_program():
     certificate.refresh_from_db()
     assert certificate.certificate_page_revision == new_cert_page_revision
     assert (
-        f"Successfully updated 1 program {program.id} certificate(s) to latest revision."
+        f"Updated 1 certificate(s) for program {program.id} to the latest revision."
         in out.getvalue()
     )
 
