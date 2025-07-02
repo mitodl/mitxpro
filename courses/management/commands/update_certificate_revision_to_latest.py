@@ -16,6 +16,8 @@ class Command(BaseCommand):
         group.add_argument("--program-id", type=int, help="ID of the program")
 
     def update_certificates(self, model_cls, filter_kwargs, parent_page, label):
+        """
+        Update the certificate revisions for the specified model class and filter criteria."""
         certificates = list(model_cls.objects.filter(**filter_kwargs))
         if not certificates:
             self.stdout.write(f"No certificates found for {label}.")
@@ -42,6 +44,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        """Handle the command."""
         course_run_id = options.get("course_run_id")
         program_id = options.get("program_id")
 

@@ -98,6 +98,7 @@ def test_update_certificate_for_program():
     ],
 )
 def test_missing_entities_raise_command_error(arg_name, arg_value, expected_error):
+    """Test that missing entities raise a CommandError."""
     with pytest.raises(CommandError, match=expected_error):
         call_command("update_certificate_revision_to_latest", arg_name, arg_value)
 
@@ -110,6 +111,7 @@ def test_missing_entities_raise_command_error(arg_name, arg_value, expected_erro
     ],
 )
 def test_no_certificates_found_logs_warning(arg_name, factory, warning_msg):
+    """Test that no certificates found logs a warning."""
     instance = factory()
     out = StringIO()
     call_command(
