@@ -28,4 +28,4 @@ export default class Root extends React.Component {
   }
 }
 
-export const routes = <Route url="/" element={<TrackedApp />} />
+export const routes = <Route path="/" element={<TrackedApp />} />

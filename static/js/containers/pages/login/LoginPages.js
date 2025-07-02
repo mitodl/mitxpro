@@ -9,35 +9,26 @@ import LoginPasswordPage from "./LoginPasswordPage";
 import LoginForgotPasswordPage from "./LoginForgotPasswordPage";
 import LoginForgotPasswordConfirmPage from "./LoginForgotPasswordConfirmPage";
 
-const ForgotPasswordPages = () => (
-  <React.Fragment>
+function getForgotPasswordRoutes() {
+  return [
     <Route
-      exact
+      key="forgot-begin"
       path={routes.login.forgot.begin}
       element={<LoginForgotPasswordPage />}
-    />
+    />,
     <Route
-      exact
+      key="forgot-confirm"
       path={routes.login.forgot.confirm}
       element={<LoginForgotPasswordConfirmPage />}
-    />
-    <Route
-      exact
-      path={routes.login.forgot.password}
-      element={<LoginForgotPasswordPage />}
-    />
-  </React.Fragment>
-);
+    />,
+  ];
+}
 
 const LoginPages = () => (
   <Routes>
-    <Route exact path={routes.login.begin} element={<LoginEmailPage />} />
-    <Route exact path={routes.login.password} element={<LoginPasswordPage />} />
-    <Route
-      exact
-      path={routes.login.forgot.begin}
-      element={<ForgotPasswordPages />}
-    />
+    <Route path={routes.login.begin} element={<LoginEmailPage />} />
+    <Route path={routes.login.password} element={<LoginPasswordPage />} />
+    {getForgotPasswordRoutes()}
   </Routes>
 );
 
