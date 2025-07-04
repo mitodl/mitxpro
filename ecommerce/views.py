@@ -353,7 +353,7 @@ class PromoCouponView(APIView):
                 Prefetch(
                     "payment__versions",
                     queryset=CouponPaymentVersion.objects.order_by("-created_on"),
-                )
+                ),
             )
             .order_by("coupon_code")
         )
