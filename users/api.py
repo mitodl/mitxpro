@@ -1,7 +1,6 @@
 """Users api"""
 
 import operator
-import re
 from functools import reduce
 
 from django.contrib.auth import get_user_model
@@ -9,8 +8,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db.models import Q
 
-from mitxpro.utils import first_or_none, max_or_none, unique, unique_ignore_case
-from users.constants import USERNAME_MAX_LEN
+from mitxpro.utils import first_or_none, unique, unique_ignore_case
 
 User = get_user_model()
 
@@ -143,65 +141,3 @@ def fetch_users(filter_values, ignore_case=True):  # noqa: FBT002
             )
         )
     return user_qset
-
-
-def find_available_username(initial_username_base):
-    """
-    Return a username with the lowest possible suffix given some base username. If the applied suffix
-    makes the username longer than the username max length, characters are removed from the
-    right of the username to make room.
-
-    EXAMPLES:
-    initial_username_base = "johndoe"
-        Existing usernames = "johndoe"
-        Return value = "johndoe1"
-    initial_username_base = "johndoe"
-        Existing usernames = "johndoe", "johndoe1" through "johndoe5"
-        Return value = "johndoe6"
-    initial_username_base = "abcdefghijklmnopqrstuvwxyz" (26 characters, assuming 26 character max)
-        Existing usernames = "abcdefghijklmnopqrstuvwxyz"
-        Return value = "abcdefghijklmnopqrstuvwxy1"
-    initial_username_base = "abcdefghijklmnopqrstuvwxy" (25 characters long, assuming 26 character max)
-        Existing usernames = "abc...y", "abc...y1" through "abc...y9"
-        Return value = "abcdefghijklmnopqrstuvwx10"
-
-    Args:
-         initial_username_base (str):
-    Returns:
-        str: An available username
-    """
-    # Keeps track of the number of characters that must be cut from the username to be less than
-    # the username max length when the suffix is applied.
-    letters_to_truncate = 0 if len(initial_username_base) < USERNAME_MAX_LEN else 1
-    # Any query for suffixed usernames could come up empty. The minimum suffix will be added to
-    # the username in that case.
-    current_min_suffix = 1
-    while letters_to_truncate < len(initial_username_base):  # noqa: RET503
-        username_base = initial_username_base[
-            0 : len(initial_username_base) - letters_to_truncate
-        ]
-        # Find usernames that match the username base and have a numerical suffix, then find the max suffix
-        existing_usernames = User.objects.filter(
-            username__regex=rf"{username_base}[0-9]+"
-        ).values_list("username", flat=True)
-        max_suffix = max_or_none(
-            int(re.search(r"\d+$", username).group()) for username in existing_usernames
-        )
-        if max_suffix is None:
-            return "".join([username_base, str(current_min_suffix)])
-        else:
-            next_suffix = max_suffix + 1
-            candidate_username = "".join([username_base, str(next_suffix)])
-            # If the next suffix adds a digit and causes the username to exceed the character limit,
-            # keep searching.
-            if len(candidate_username) <= USERNAME_MAX_LEN:
-                return candidate_username
-        # At this point, we know there are no suffixes left to add to this username base that was tried,
-        # so we will need to remove letters from the end of that username base to make room for a longer
-        # suffix.
-        letters_to_truncate = letters_to_truncate + 1
-        available_suffix_digits = USERNAME_MAX_LEN - (
-            len(initial_username_base) - letters_to_truncate
-        )
-        # If there is space for 4 digits for the suffix, the minimum value it could be is 1000, or 10^3
-        current_min_suffix = 10 ** (available_suffix_digits - 1)
