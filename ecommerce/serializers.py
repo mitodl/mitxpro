@@ -935,11 +935,11 @@ class PromoCouponDetailSerializer(serializers.ModelSerializer):
 
     def get_activation_date(self, instance):
         """Get the activation date of the associated CouponPayment"""
-        return instance.payment.latest_version.activation_date
+        return instance.payment.versions.first().activation_date
 
     def get_expiration_date(self, instance):
         """Get the expiration date of the associated CouponPayment"""
-        return instance.payment.latest_version.expiration_date
+        return instance.payment.versions.first().expiration_date
 
 
 class PromoCouponUpdateSerializer(serializers.Serializer):

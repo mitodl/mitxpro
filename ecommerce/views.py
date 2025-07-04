@@ -349,6 +349,10 @@ class PromoCouponView(APIView):
                     queryset=CouponEligibility.objects.filter(
                         product__is_private=False
                     ).select_related("product", "program_run"),
+                ),
+                Prefetch(
+                    "payment__versions",
+                    queryset=CouponPaymentVersion.objects.order_by("-created_on"),
                 )
             )
             .order_by("coupon_code")
