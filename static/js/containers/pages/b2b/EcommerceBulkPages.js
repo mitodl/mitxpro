@@ -1,6 +1,6 @@
 // @flow
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -9,18 +9,10 @@ import B2BReceiptPage from "./B2BReceiptPage";
 
 const EcommerceBulkPages = () => (
   <React.Fragment>
-    <Switch>
-      <Route
-        exact
-        path={routes.ecommerceBulk.bulkPurchase}
-        component={B2BPurchasePage}
-      />
-      <Route
-        exact
-        path={routes.ecommerceBulk.receipt}
-        component={B2BReceiptPage}
-      />
-    </Switch>
+    <Routes>
+      <Route exact path={routes.b2b.purchase} element={<B2BPurchasePage />} />
+      <Route exact path={routes.b2b.receipt} element={<B2BReceiptPage />} />
+    </Routes>
   </React.Fragment>
 );
 
