@@ -61,7 +61,6 @@ files = [
 [package.dependencies]
 idna = ">=2.8"
 sniffio = ">=1.1"
-typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
 doc = ["Sphinx (>=8.2,<9.0)", "packaging", "sphinx-autodoc-typehints (>=1.2.0)", "sphinx_rtd_theme"]
@@ -1416,10 +1415,6 @@ files = [
     {file = "fancycompleter-0.11.1-py3-none-any.whl", hash = "sha256:44243d7fab37087208ca5acacf8f74c0aa4d733d04d593857873af7513cdf8a6"},
     {file = "fancycompleter-0.11.1.tar.gz", hash = "sha256:5b4ad65d76b32b1259251516d0f1cb2d82832b1ff8506697a707284780757f69"},
 ]
-
-[package.dependencies]
-pyreadline3 = {version = "*", markers = "platform_system == \"Windows\" and python_version < \"3.13\""}
-pyrepl = {version = ">=0.11.3", markers = "python_version < \"3.13\""}
 
 [package.extras]
 dev = ["fancycompleter[tests]", "mypy", "ruff (==0.11.8)"]
@@ -3045,7 +3040,7 @@ files = [
 [package.dependencies]
 annotated-types = ">=0.6.0"
 pydantic-core = "2.23.4"
-typing-extensions = {version = ">=4.6.1", markers = "python_version < \"3.13\""}
+typing-extensions = {version = ">=4.12.2", markers = "python_version >= \"3.13\""}
 
 [package.extras]
 email = ["email-validator (>=2.0.0)"]
@@ -3242,35 +3237,6 @@ files = [
 
 [package.extras]
 diagrams = ["jinja2", "railroad-diagrams"]
-
-[[package]]
-name = "pyreadline3"
-version = "3.5.4"
-description = "A python implementation of GNU readline."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pyreadline3-3.5.4-py3-none-any.whl", hash = "sha256:eaf8e6cc3c49bcccf145fc6067ba8643d1df34d604a1ec0eccbf7a18e6d3fae6"},
-    {file = "pyreadline3-3.5.4.tar.gz", hash = "sha256:8d57d53039a1c75adba8e50dd3d992b28143480816187ea5efbd5c78e6c885b7"},
-]
-
-[package.extras]
-dev = ["build", "flake8", "mypy", "pytest", "twine"]
-
-[[package]]
-name = "pyrepl"
-version = "0.11.3.post1"
-description = "A library for building flexible command line interfaces"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pyrepl-0.11.3.post1-py3-none-any.whl", hash = "sha256:59fcd67588892731dc6e7aff106c380d303d54324ff028827804a2b056223d92"},
-    {file = "pyrepl-0.11.3.post1.tar.gz", hash = "sha256:0ca7568c8be919b69f99644d29d31738a5b1a87750d06dd36564bcfad278d402"},
-]
-
-[package.extras]
-dev = ["pyrepl[tests]", "ruff (==0.9.3)"]
-tests = ["pexpect", "pytest", "pytest-coverage", "pytest-timeout"]
 
 [[package]]
 name = "pytest"
@@ -4530,5 +4496,5 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "3.12.6"
-content-hash = "301feb7a0368103d0ee608b4814a0cd01493b55ab1aa74612123ac5f963678a7"
+python-versions = "3.13.5"
+content-hash = "429fcc010d191e36bc0168761cf1c9d2edacaae9404980303a5d1973b4d688bd"
