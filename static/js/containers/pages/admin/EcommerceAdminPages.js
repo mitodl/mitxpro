@@ -5,7 +5,7 @@ declare var USER_PERMISSIONS: {
   has_coupon_product_assignment_permission: boolean,
 };
 import React from "react";
-import { Redirect, Route, Switch, Link } from "react-router-dom";
+import { Navigate, Route, Routes, Link } from "react-router-dom";
 
 import { routes } from "../../../lib/urls";
 
@@ -50,34 +50,34 @@ const EcommerceAdminIndexPage = () => (
 
 const EcommerceAdminPages = () => (
   <React.Fragment>
-    <Switch>
+    <Routes>
       <Route
         exact
         path={routes.ecommerceAdmin.index}
-        component={EcommerceAdminIndexPage}
+        element={<EcommerceAdminIndexPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.coupons}
-        component={CouponCreationPage}
+        path={routes.ecommerceAdmin.coupons.create}
+        element={<CouponCreationPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.deactivate}
-        component={DeactivateCouponPage}
+        path={routes.ecommerceAdmin.coupons.deactivate}
+        element={<DeactivateCouponPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.processSheets}
-        component={ProcessCouponAssignmentSheetPage}
+        path={routes.ecommerceAdmin.coupons.processAssignmentSheet}
+        element={<ProcessCouponAssignmentSheetPage />}
       />
       <Route
         exact
-        path={routes.ecommerceAdmin.updatePromoCode}
-        component={UpdatePromoCodePage}
+        path={routes.ecommerceAdmin.coupons.updatePromoCode}
+        element={<UpdatePromoCodePage />}
       />
-      <Redirect to={routes.ecommerceAdmin.index} />
-    </Switch>
+      <Navigate to={routes.ecommerceAdmin.index} />
+    </Routes>
   </React.Fragment>
 );
 

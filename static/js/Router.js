@@ -1,30 +1,31 @@
 import React from "react"
-import { Route, Router as ReactRouter } from "react-router"
+import { BrowserRouter, Route } from "react-router-dom"
 import { Provider } from "react-redux"
 
 import App from "./containers/App"
 import withTracker from "./util/withTracker"
 import ScrollToTop from "./components/ScrollToTop"
 
+const TrackedApp = withTracker(App);
+
 export default class Root extends React.Component {
   props: {
-    history: Object,
     store: Store
   }
 
   render() {
-    const { children, history, store } = this.props
+    const { children, store } = this.props
 
     return (
       <div>
         <Provider store={store}>
-          <ReactRouter history={history}>
+          <BrowserRouter>
             <ScrollToTop>{children}</ScrollToTop>
-          </ReactRouter>
+          </BrowserRouter>
         </Provider>
       </div>
     )
   }
 }
 
-export const routes = <Route url="/" component={withTracker(App)} />
+export const routes = <Route path="/" element={<TrackedApp />} />
