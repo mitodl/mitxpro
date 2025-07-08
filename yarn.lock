@@ -8862,7 +8862,6 @@ __metadata:
     sass: ~1.64.2
     sass-lint: ^1.13.1
     sass-loader: ^12.1.0
-    serialize-javascript: ^3.1.0
     shelljs: ^0.10.0
     sinon: ^21.0.0
     slick-carousel: 1.8.1
@@ -11247,15 +11246,6 @@ __metadata:
     range-parser: ^1.2.1
     statuses: ^2.0.1
   checksum: 7557ee6c1c257a1c53b402b4fba8ed88c95800b08abe085fc79e0824869274f213491be2efb2df3de228c70e4d40ce2019e5f77b58c42adb97149135420c3f34
-  languageName: node
-  linkType: hard
-
-"serialize-javascript@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "serialize-javascript@npm:3.1.0"
-  dependencies:
-    randombytes: ^2.1.0
-  checksum: 0fc0131a78168d6237cfe1b21564f20a3b9b72e8ceebb21935baacf026631ed636912c20c7e9fa721a8f27a247e6f9849e705f27032d19863333c2cfab16d1c9
   languageName: node
   linkType: hard
 
