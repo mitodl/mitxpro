@@ -61,7 +61,6 @@ files = [
 [package.dependencies]
 idna = ">=2.8"
 sniffio = ">=1.1"
-typing_extensions = {version = ">=4.5", markers = "python_version < \"3.13\""}
 
 [package.extras]
 doc = ["Sphinx (>=8.2,<9.0)", "packaging", "sphinx-autodoc-typehints (>=1.2.0)", "sphinx_rtd_theme"]
@@ -199,17 +198,17 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.39.0"
+version = "1.39.2"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "boto3-1.39.0-py3-none-any.whl", hash = "sha256:6257f6f7bb87b66342564eab579ce1f0f63a4c1a6f701492f959e59bd7af68e5"},
-    {file = "boto3-1.39.0.tar.gz", hash = "sha256:52a9f07fb9fa60ec6a2be07cd1586a97d8adae2be750121d4c032349cd113221"},
+    {file = "boto3-1.39.2-py3-none-any.whl", hash = "sha256:a37f202978f11f384e3fd1f0ff8938367b527845493f9509357e1732debc390f"},
+    {file = "boto3-1.39.2.tar.gz", hash = "sha256:edad811edacb8c99f2fe59b117d9b9d8ee3972beb6c090c8aa164ddbc506d67d"},
 ]
 
 [package.dependencies]
-botocore = ">=1.39.0,<1.40.0"
+botocore = ">=1.39.2,<1.40.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -218,13 +217,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.39.0"
+version = "1.39.2"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "botocore-1.39.0-py3-none-any.whl", hash = "sha256:d8e72850d3450aeca355b654efb32c8370bf824c1945a61cad2395dc2688581e"},
-    {file = "botocore-1.39.0.tar.gz", hash = "sha256:2b8701e529a80241b989d83262a629d0d91fbd7a06ded63ecc1c9d529a383d57"},
+    {file = "botocore-1.39.2-py3-none-any.whl", hash = "sha256:921cab9aa6e1e4ceddcece5b55b57daae7722168e74409f1aafcc2c5589df676"},
+    {file = "botocore-1.39.2.tar.gz", hash = "sha256:474445fa8b281dd5db8fc62184f0f6e494d4f1efb96fe10312490583e67a9dd0"},
 ]
 
 [package.dependencies]
@@ -329,13 +328,13 @@ zstd = ["zstandard (==0.23.0)"]
 
 [[package]]
 name = "celery-redbeat"
-version = "2.3.2"
+version = "2.3.3"
 description = "A Celery Beat Scheduler using Redis for persistent storage"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "celery_redbeat-2.3.2-py2.py3-none-any.whl", hash = "sha256:9d61ab6e29f59d676621a846c778a347d5acad22e90fb4386343a4852d4f7ac3"},
-    {file = "celery_redbeat-2.3.2.tar.gz", hash = "sha256:7d6e41e4b807fafba5d88b98e3d3863f0df95ac3ed1692d70b134c079b936b8b"},
+    {file = "celery_redbeat-2.3.3-py2.py3-none-any.whl", hash = "sha256:0d6da101c46c0147b88f3ae2bfaed42548545934263a31d325a8b0e6585c3fb1"},
+    {file = "celery_redbeat-2.3.3.tar.gz", hash = "sha256:f52664b490b2923a787d9f348f291243601430bf8ec383b6e79870a1731ee92a"},
 ]
 
 [package.dependencies]
@@ -871,18 +870,17 @@ files = [
 
 [[package]]
 name = "dj-database-url"
-version = "3.0.0"
+version = "3.0.1"
 description = "Use Database URLs in your Django Application."
 optional = false
 python-versions = "*"
 files = [
-    {file = "dj_database_url-3.0.0-py3-none-any.whl", hash = "sha256:cbb84b2e3f372460b1e43692bf9fdc0c32e78930ee101db470cba56105fca1e5"},
-    {file = "dj_database_url-3.0.0.tar.gz", hash = "sha256:749a7a42d88d6c741c1d2f4ab24c2ae0d5cd12f00f2d1d55ff9f5fadabe8a2c3"},
+    {file = "dj_database_url-3.0.1-py3-none-any.whl", hash = "sha256:43950018e1eeea486bf11136384aec0fe55b29fe6fd8a44553231b85661d9383"},
+    {file = "dj_database_url-3.0.1.tar.gz", hash = "sha256:8994961efb888fc6bf8c41550870c91f6f7691ca751888ebaa71442b7f84eff8"},
 ]
 
 [package.dependencies]
 Django = ">=4.2"
-typing_extensions = ">=4.0.0"
 
 [[package]]
 name = "django"
@@ -1418,10 +1416,6 @@ files = [
     {file = "fancycompleter-0.11.1.tar.gz", hash = "sha256:5b4ad65d76b32b1259251516d0f1cb2d82832b1ff8506697a707284780757f69"},
 ]
 
-[package.dependencies]
-pyreadline3 = {version = "*", markers = "platform_system == \"Windows\" and python_version < \"3.13\""}
-pyrepl = {version = ">=0.11.3", markers = "python_version < \"3.13\""}
-
 [package.extras]
 dev = ["fancycompleter[tests]", "mypy", "ruff (==0.11.8)"]
 tests = ["pytest", "pytest-cov"]
@@ -1502,13 +1496,13 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.173.0"
+version = "2.175.0"
 description = "Google API Client Library for Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_api_python_client-2.173.0-py3-none-any.whl", hash = "sha256:16a8e81c772dd116f5c4ee47d83643149e1367dc8fb4f47cb471fbcb5c7d7ac7"},
-    {file = "google_api_python_client-2.173.0.tar.gz", hash = "sha256:b537bc689758f4be3e6f40d59a6c0cd305abafdea91af4bc66ec31d40c08c804"},
+    {file = "google_api_python_client-2.175.0-py3-none-any.whl", hash = "sha256:5f4313a914d11d2b0840d1daa336caef3f53e28e8234077c139f7b236fba9622"},
+    {file = "google_api_python_client-2.175.0.tar.gz", hash = "sha256:f6d5b5c0141194a72cebef33feb1377fa668b3f14dc90a2fae258dbbbdcdb30c"},
 ]
 
 [package.dependencies]
@@ -2408,13 +2402,13 @@ urllib3 = ">=1.26.5"
 
 [[package]]
 name = "mitol-django-mail"
-version = "2025.3.17"
+version = "2025.6.24"
 description = "MIT Open Learning django app extensions for mail"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "mitol_django_mail-2025.3.17-py3-none-any.whl", hash = "sha256:e1ac6386d2f7b16bda76e3db8ec54a06ca088b0124d30603017c069d7bb56ec1"},
-    {file = "mitol_django_mail-2025.3.17.tar.gz", hash = "sha256:5b0a1d78c61c46a71519dee4079c4e2888d1b39a7aa723aeb959a4329178437c"},
+    {file = "mitol_django_mail-2025.6.24-py3-none-any.whl", hash = "sha256:20e1830de82095fa1bc5484275c036a45b207e991f9febd65b4d9e276ffd4f57"},
+    {file = "mitol_django_mail-2025.6.24.tar.gz", hash = "sha256:7acaec76138b35bf20af8d33e55c575a829c9e7f6d28f02246da720147c1adc9"},
 ]
 
 [package.dependencies]
@@ -3046,7 +3040,7 @@ files = [
 [package.dependencies]
 annotated-types = ">=0.6.0"
 pydantic-core = "2.23.4"
-typing-extensions = {version = ">=4.6.1", markers = "python_version < \"3.13\""}
+typing-extensions = {version = ">=4.12.2", markers = "python_version >= \"3.13\""}
 
 [package.extras]
 email = ["email-validator (>=2.0.0)"]
@@ -3243,35 +3237,6 @@ files = [
 
 [package.extras]
 diagrams = ["jinja2", "railroad-diagrams"]
-
-[[package]]
-name = "pyreadline3"
-version = "3.5.4"
-description = "A python implementation of GNU readline."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pyreadline3-3.5.4-py3-none-any.whl", hash = "sha256:eaf8e6cc3c49bcccf145fc6067ba8643d1df34d604a1ec0eccbf7a18e6d3fae6"},
-    {file = "pyreadline3-3.5.4.tar.gz", hash = "sha256:8d57d53039a1c75adba8e50dd3d992b28143480816187ea5efbd5c78e6c885b7"},
-]
-
-[package.extras]
-dev = ["build", "flake8", "mypy", "pytest", "twine"]
-
-[[package]]
-name = "pyrepl"
-version = "0.11.3.post1"
-description = "A library for building flexible command line interfaces"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pyrepl-0.11.3.post1-py3-none-any.whl", hash = "sha256:59fcd67588892731dc6e7aff106c380d303d54324ff028827804a2b056223d92"},
-    {file = "pyrepl-0.11.3.post1.tar.gz", hash = "sha256:0ca7568c8be919b69f99644d29d31738a5b1a87750d06dd36564bcfad278d402"},
-]
-
-[package.extras]
-dev = ["pyrepl[tests]", "ruff (==0.9.3)"]
-tests = ["pexpect", "pytest", "pytest-coverage", "pytest-timeout"]
 
 [[package]]
 name = "pytest"
@@ -4531,5 +4496,5 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "3.12.6"
-content-hash = "1e213dd9ae55c4d06c99c485b91d52393799e7db488f7c25f0bf20b35935b9c1"
+python-versions = "3.13.5"
+content-hash = "429fcc010d191e36bc0168761cf1c9d2edacaae9404980303a5d1973b4d688bd"

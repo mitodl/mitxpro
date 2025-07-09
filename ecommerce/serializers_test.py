@@ -593,7 +593,7 @@ def test_serialize_program_run():
 
 
 def test_promo_coupon_get_serializer():
-    """Test PromoCouponDetailSerializer with different product visibility"""
+    """Test PromoCouponDetailSerializer shows correct data"""
     payment = CouponPaymentFactory(name="Test Payment")
     version = CouponPaymentVersionFactory.create(
         payment=payment,
@@ -601,11 +601,9 @@ def test_promo_coupon_get_serializer():
         expiration_date=now_in_utc() + timedelta(days=30),
     )
     coupon = CouponFactory.create(coupon_code="TESTCODE123", payment=payment)
-    public_product = ProductFactory.create(is_private=False)
-    private_product = ProductFactory.create(is_private=True)
-    CouponEligibilityFactory.create(coupon=coupon, product=public_product)
-    CouponEligibilityFactory.create(coupon=coupon, product=private_product)
-    serializer = PromoCouponDetailSerializer(coupon, context={"is_private": False})
+    product = ProductFactory.create(is_private=False)
+    CouponEligibilityFactory.create(coupon=coupon, product=product)
+    serializer = PromoCouponDetailSerializer(coupon)
     data = serializer.data
 
     assert data["coupon_code"] == "TESTCODE123"
@@ -613,12 +611,7 @@ def test_promo_coupon_get_serializer():
     assert data["activation_date"] == version.activation_date
     assert data["expiration_date"] == version.expiration_date
     assert len(data["eligibility"]) == 1
-    assert data["eligibility"][0]["product_id"] == public_product.id
-
-    # If is_private is not provided, it returns all eligibilities
-    serializer = PromoCouponDetailSerializer(coupon)
-    data = serializer.data
-    assert len(data["eligibility"]) == 2
+    assert data["eligibility"][0]["product_id"] == product.id
 
 
 def test_promo_coupon_update_serializer():

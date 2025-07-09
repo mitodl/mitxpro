@@ -918,13 +918,9 @@ class PromoCouponDetailSerializer(serializers.ModelSerializer):
         """
         eligibility_qs = instance.couponeligibility_set.all()
 
-        # Only apply the filter if is_private is explicitly False
-        if self.context.get("is_private") is False:
-            eligibility_qs = eligibility_qs.filter(product__is_private=False)
-
         return [
             {
-                "coupon_code": eligibility.coupon.coupon_code,
+                "coupon_code": instance.coupon_code,
                 "product_id": eligibility.product.id,
                 "program_run_id": eligibility.program_run.id
                 if eligibility.program_run
@@ -939,11 +935,11 @@ class PromoCouponDetailSerializer(serializers.ModelSerializer):
 
     def get_activation_date(self, instance):
         """Get the activation date of the associated CouponPayment"""
-        return instance.payment.latest_version.activation_date
+        return instance.payment.versions.first().activation_date
 
     def get_expiration_date(self, instance):
         """Get the expiration date of the associated CouponPayment"""
-        return instance.payment.latest_version.expiration_date
+        return instance.payment.versions.first().expiration_date
 
 
 class PromoCouponUpdateSerializer(serializers.Serializer):

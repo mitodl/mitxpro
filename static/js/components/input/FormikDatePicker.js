@@ -59,7 +59,10 @@ const FormikDatePicker = ({
     const { value } = e.target;
     setInputValue(value);
     setFieldTouched(name, true);
-
+    if (value.length === 0) {
+      setFieldValue(name, null); // Reset field if input is cleared
+      return;
+    }
     if (value.length === 10) {
       const parsedDate = parse(value, dateFormat, new Date());
       if (!isNaN(parsedDate.getTime())) {
