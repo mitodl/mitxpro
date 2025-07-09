@@ -34,7 +34,7 @@ import type { ProgramRunDetail } from "../../flow/ecommerceTypes";
 
 // When a component with a <Select /> is rendered with shallow(), it appears as
 // a <StateManager /> with className="select"
-const SelectComponentSelector = "StateManager.select";
+const SelectComponentSelector = ".select";
 
 describe("ProductSelector", () => {
   let defaultProps,
