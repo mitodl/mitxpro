@@ -2411,6 +2411,7 @@ class CertificatePage(CourseProgramChildPage):
 
     display_mit_seal = models.BooleanField(
         default=False,
+        verbose_name="Display MIT seal",
         help_text="Show the MIT seal when a Partner logo is present. If no Partner logo is set, the seal will be shown by default.",
     )
 
