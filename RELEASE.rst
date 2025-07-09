@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.183.0 (Released July 09, 2025)
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3566)
+- chore(deps): update codecov/codecov-action digest to 18283e0 (#3569)
+- fix(deps): update dependency express to v5 (#3568)
+- fix(deps): update dependency boto3 to v1.39.0 (#3567)
+- [pre-commit.ci] pre-commit autoupdate (#3557)
+- chore(deps): update node.js to v22 (#3565)
+- fix(deps): update dependency dj-database-url to v3 (#3546)
+- fix(deps): update dependency stylelint-config-standard-scss to v15 (#3547)
+
 Version 0.182.0 (Released June 30, 2025)
 ---------------
 
