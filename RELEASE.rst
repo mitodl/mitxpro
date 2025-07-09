@@ -1,6 +1,30 @@
 Release Notes
 =============
 
+Version 0.184.0
+---------------
+
+- fix: add verbose_name for display_mit_seal (#3593)
+- [pre-commit.ci] pre-commit autoupdate (#3590)
+- chore: remove seralize-javascript (#3592)
+- fix(deps): update dependency @sentry/browser to v9 (#3319)
+- fix: reset date field value when user deletes the input string (#3587)
+- fix(deps): update dependency react-device-detect to v2 (#3586)
+- fix(deps): update python to v3.13.5 (#3580)
+- fix(deps): update dependency google-api-python-client to v2.175.0 (#3578)
+- perf: improved update promo coupon performance by fixing N+1 issues (#3571)
+- chore(deps): update nginx docker tag to v1.29.0 (#3577)
+- fix(deps): update dependency fetch-mock to v12 (#3549)
+- fix(deps): update dependency dj-database-url to v3.0.1 (#3576)
+- fix(deps): update dependency celery-redbeat to v2.3.3 (#3575)
+- fix(deps): update dependency boto3 to v1.39.2 (#3574)
+- fix(deps): update dependency mitol-django-mail to v2025.6.24 (#3579)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9.0.3 (#3573)
+- fix(deps): update dependency chai-as-promised to v8 (#3514)
+- fix(deps): update dependency chai to v5 (#3513)
+- feat: add management command to update certificate revisions and render display_mit_seal conditionally  (#3560)
+- chore: disable gemini reviews to reduce noise (#3572)
+
 Version 0.183.0 (Released July 09, 2025)
 ---------------
 
