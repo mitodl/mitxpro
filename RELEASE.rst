@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.184.0
+Version 0.184.0 (Released July 14, 2025)
 ---------------
 
 - fix: add verbose_name for display_mit_seal (#3593)
