@@ -33,6 +33,7 @@ from courseware import api as courseware_api
 from courseware import tasks as courseware_tasks
 from hubspot_xpro.task_helpers import sync_hubspot_user
 from users.serializers import ProfileSerializer, UserSerializer
+from users.constants import USERNAME_MAX_LEN
 
 log = logging.getLogger()
 
@@ -149,7 +150,10 @@ def create_user_via_email(
 
     try:
         created_user = create_user_with_generated_username(
-            serializer, username, username_field="username", max_length=30
+            serializer,
+            username,
+            username_field=User.USERNAME_FIELD,
+            max_length=USERNAME_MAX_LEN,
         )
         if created_user is None:
             raise IntegrityError(  # noqa: TRY301
