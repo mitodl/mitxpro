@@ -121,3 +121,71 @@ def test_no_certificates_found_logs_warning(arg_name, factory, warning_msg):
         stdout=out,
     )
     assert warning_msg in out.getvalue()
+
+
+def test_update_all_certificates_multiple():
+    """Test --all flag updates all course run and program certificates to latest revisions."""
+
+    num_course_runs = 3
+    num_programs = 2
+
+    course_certificates = []
+    for _ in range(num_course_runs):
+        course_page = CoursePageFactory.create(certificate_page=None)
+        course_run = CourseRunFactory(course=course_page.course)
+        cert_page = CertificatePageFactory(parent=course_page, live=True)
+        cert_page.save_revision().publish()
+        initial_revision = cert_page.latest_revision
+
+        # Assign old revision
+        cert = CourseRunCertificateFactory(course_run=course_run)
+        assert cert.certificate_page_revision == initial_revision
+
+        # Update cert page
+        cert_page.product_name = "Updated Course Certificate"
+        cert_page.save_revision().publish()
+        course_certificates.append((cert, cert_page.latest_revision))
+
+    program_certificates = []
+    for _ in range(num_programs):
+        program = ProgramFactory()
+        cert_page = program.page.get_children().type(CertificatePage).first().specific
+        cert_page.save_revision().publish()
+        initial_revision = cert_page.latest_revision
+
+        # Assign old revision
+        cert = ProgramCertificateFactory(program=program)
+        assert cert.certificate_page_revision == initial_revision
+
+        # Update cert page
+        cert_page.product_name = "Updated Program Certificate"
+        cert_page.save_revision().publish()
+        program_certificates.append((cert, cert_page.latest_revision))
+
+    # Run the command
+    out = StringIO()
+    call_command("update_certificate_revision_to_latest", "--all", stdout=out)
+
+    # Assert course certs updated
+    for cert, expected_revision in course_certificates:
+        cert.refresh_from_db()
+        assert cert.certificate_page_revision == expected_revision
+        assert f"Updated" in out.getvalue()
+
+    # Assert program certs updated
+    for cert, expected_revision in program_certificates:
+        cert.refresh_from_db()
+        assert cert.certificate_page_revision == expected_revision
+        assert f"Updated" in out.getvalue()
+
+
+def test_update_all_skips_invalid_cert_sources():
+    """Test --all gracefully skips course runs or programs with no valid certificate pages."""
+    CourseRunFactory(course__page=None)
+    ProgramFactory(page=None)
+
+    out = StringIO()
+    call_command("update_certificate_revision_to_latest", "--all", stdout=out)
+
+    assert "Updated" not in out.getvalue()
+    assert "No certificates found" in out.getvalue()
