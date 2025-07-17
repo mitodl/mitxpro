@@ -13,7 +13,11 @@ class Command(BaseCommand):
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument("--course-run-id", type=int, help="ID of the course run")
         group.add_argument("--program-id", type=int, help="ID of the program")
-        group.add_argument("--all", action="store_true", help="Update all course run and program certificates")
+        group.add_argument(
+            "--all",
+            action="store_true",
+            help="Update all course run and program certificates",
+        )
 
     def update_certificates(self, model_cls, filter_kwargs, parent_page, label):
         """

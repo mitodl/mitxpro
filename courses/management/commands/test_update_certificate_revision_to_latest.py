@@ -170,13 +170,13 @@ def test_update_all_certificates_multiple():
     for cert, expected_revision in course_certificates:
         cert.refresh_from_db()
         assert cert.certificate_page_revision == expected_revision
-        assert f"Updated" in out.getvalue()
+        assert "Updated" in out.getvalue()
 
     # Assert program certs updated
     for cert, expected_revision in program_certificates:
         cert.refresh_from_db()
         assert cert.certificate_page_revision == expected_revision
-        assert f"Updated" in out.getvalue()
+        assert "Updated" in out.getvalue()
 
 
 def test_update_all_skips_invalid_cert_sources():
