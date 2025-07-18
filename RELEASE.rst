@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.184.1
+---------------
+
+- fix(deps): update dependency google-api-python-client to v2.176.0 (#3604)
+- fix(deps): update dependency boto3 to v1.39.7 (#3602)
+- chore(deps): update redis docker tag to v8.0.3 (#3601)
+- fix(deps): update dependency django-hijack to v3.7.3 (#3603)
+- chore(deps): update dependency freezegun to v1.5.3 (#3600)
+- chore(deps): update dependency faker to v37.4.2 (#3599)
+- fix(deps): update dependency autoprefixer to v10 (#3596)
+- [pre-commit.ci] pre-commit autoupdate (#3598)
+
 Version 0.184.0 (Released July 14, 2025)
 ---------------
 
