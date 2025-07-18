@@ -198,17 +198,17 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.39.2"
+version = "1.39.7"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "boto3-1.39.2-py3-none-any.whl", hash = "sha256:a37f202978f11f384e3fd1f0ff8938367b527845493f9509357e1732debc390f"},
-    {file = "boto3-1.39.2.tar.gz", hash = "sha256:edad811edacb8c99f2fe59b117d9b9d8ee3972beb6c090c8aa164ddbc506d67d"},
+    {file = "boto3-1.39.7-py3-none-any.whl", hash = "sha256:c8c0e11fff7bb85f903b860b6bfd4f509a4d749decf38bb6a409ffe5d6eb0c91"},
+    {file = "boto3-1.39.7.tar.gz", hash = "sha256:28daeb005e3381808e0e12995056ee8951056ddd43506c07482a15b40ae785b0"},
 ]
 
 [package.dependencies]
-botocore = ">=1.39.2,<1.40.0"
+botocore = ">=1.39.7,<1.40.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.13.0,<0.14.0"
 
@@ -217,13 +217,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.39.2"
+version = "1.39.7"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "botocore-1.39.2-py3-none-any.whl", hash = "sha256:921cab9aa6e1e4ceddcece5b55b57daae7722168e74409f1aafcc2c5589df676"},
-    {file = "botocore-1.39.2.tar.gz", hash = "sha256:474445fa8b281dd5db8fc62184f0f6e494d4f1efb96fe10312490583e67a9dd0"},
+    {file = "botocore-1.39.7-py3-none-any.whl", hash = "sha256:1d11ba9f3cb46856bb541ed010db160093201a224d21ef854249513ae3af7e77"},
+    {file = "botocore-1.39.7.tar.gz", hash = "sha256:431e342ef97ecb387cea9df1ae8c4e0edc1b0c9c50d2e121cca77699f24f8dc1"},
 ]
 
 [package.dependencies]
@@ -954,13 +954,13 @@ Django = ">=3.2"
 
 [[package]]
 name = "django-hijack"
-version = "3.7.2"
+version = "3.7.3"
 description = "Enable users to hijack (=login as) and work on behalf of another user."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "django_hijack-3.7.2-py3-none-any.whl", hash = "sha256:dc834a015082dd2d49afd13da6cf6f571ce1a16894d6070887261a37633f8d06"},
-    {file = "django_hijack-3.7.2.tar.gz", hash = "sha256:eb02d285ec1564bfa77ac2e73b9bca28848caa7b04c1e1eef3d573353eb9efaa"},
+    {file = "django_hijack-3.7.3-py3-none-any.whl", hash = "sha256:e5deb66e84f223d4d3aef38bdfb11c9cef1a8507c0e6ddb691d8a16428575ebd"},
+    {file = "django_hijack-3.7.3.tar.gz", hash = "sha256:f60186911efbab1d0e3bffab312206d1aa540360cde36025a27265655f3fffe2"},
 ]
 
 [package.dependencies]
@@ -968,7 +968,7 @@ django = ">=4.2"
 
 [package.extras]
 docs = ["mkdocs (==1.6.1)"]
-lint = ["msgcheck (==4.1.0)", "ruff (==0.11.8)"]
+lint = ["msgcheck (==4.1.0)", "ruff (==0.12.2)"]
 test = ["pytest", "pytest-cov", "pytest-django"]
 
 [[package]]
@@ -1393,13 +1393,13 @@ doc = ["Sphinx", "sphinx-rtd-theme", "sphinxcontrib-spelling"]
 
 [[package]]
 name = "faker"
-version = "37.4.0"
+version = "37.4.2"
 description = "Faker is a Python package that generates fake data for you."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "faker-37.4.0-py3-none-any.whl", hash = "sha256:cb81c09ebe06c32a10971d1bbdb264bb0e22b59af59548f011ac4809556ce533"},
-    {file = "faker-37.4.0.tar.gz", hash = "sha256:7f69d579588c23d5ce671f3fa872654ede0e67047820255f43a4aa1925b89780"},
+    {file = "faker-37.4.2-py3-none-any.whl", hash = "sha256:b70ed1af57bfe988cbcd0afd95f4768c51eaf4e1ce8a30962e127ac5c139c93f"},
+    {file = "faker-37.4.2.tar.gz", hash = "sha256:8e281bbaea30e5658895b8bea21cc50d27aaf3a43db3f2694409ca5701c56b0a"},
 ]
 
 [package.dependencies]
@@ -1460,13 +1460,13 @@ files = [
 
 [[package]]
 name = "freezegun"
-version = "1.5.2"
+version = "1.5.3"
 description = "Let your Python tests travel through time"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "freezegun-1.5.2-py3-none-any.whl", hash = "sha256:5aaf3ba229cda57afab5bd311f0108d86b6fb119ae89d2cd9c43ec8c1733c85b"},
-    {file = "freezegun-1.5.2.tar.gz", hash = "sha256:a54ae1d2f9c02dbf42e02c18a3ab95ab4295818b549a34dac55592d72a905181"},
+    {file = "freezegun-1.5.3-py3-none-any.whl", hash = "sha256:1ce20ee4be61349ba52c3af64f5eaba8d08ff51acfcf1b3ea671f03e54c818f1"},
+    {file = "freezegun-1.5.3.tar.gz", hash = "sha256:d7c6204e33a50affd7c7aa284f4f92e04e96f72d63313b89ceaaf60d9c64bc5e"},
 ]
 
 [package.dependencies]
@@ -1496,13 +1496,13 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
 
 [[package]]
 name = "google-api-python-client"
-version = "2.175.0"
+version = "2.176.0"
 description = "Google API Client Library for Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "google_api_python_client-2.175.0-py3-none-any.whl", hash = "sha256:5f4313a914d11d2b0840d1daa336caef3f53e28e8234077c139f7b236fba9622"},
-    {file = "google_api_python_client-2.175.0.tar.gz", hash = "sha256:f6d5b5c0141194a72cebef33feb1377fa668b3f14dc90a2fae258dbbbdcdb30c"},
+    {file = "google_api_python_client-2.176.0-py3-none-any.whl", hash = "sha256:e22239797f1d085341e12cd924591fc65c56d08e0af02549d7606092e6296510"},
+    {file = "google_api_python_client-2.176.0.tar.gz", hash = "sha256:2b451cdd7fd10faeb5dd20f7d992f185e1e8f4124c35f2cdcc77c843139a4cf1"},
 ]
 
 [package.dependencies]
@@ -4497,4 +4497,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.5"
-content-hash = "429fcc010d191e36bc0168761cf1c9d2edacaae9404980303a5d1973b4d688bd"
+content-hash = "39ae4b45e4c2bd26c1243851c967c4a7e46ee7c45936a31e4fbe6e2ae5d6cd86"
