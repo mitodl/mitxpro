@@ -283,7 +283,7 @@ describe("CouponForm", () => {
     ["max_redemptions", "", "Number required"],
     ["max_redemptions", "-10", "Must be at least 1"],
     ["max_redemptions", "10000", ""],
-    ["max_redemptions", "100000000000", "Must be at most 1000000000"],
+    ["max_redemptions", "100000000000", "Must be at most 2147483647"],
   ].forEach(([name, value, errorMessage]) => {
     it(`validates the field name=${name}, value="${value}" and expects error=${JSON.stringify(
       errorMessage,
