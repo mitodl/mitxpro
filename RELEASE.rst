@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.184.1
+Version 0.184.1 (Released July 23, 2025)
 ---------------
 
 - fix(deps): update dependency google-api-python-client to v2.176.0 (#3604)
