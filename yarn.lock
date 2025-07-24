@@ -7665,13 +7665,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-fetch@npm:^2.1.1, isomorphic-fetch@npm:^2.2.1":
+"isomorphic-fetch@npm:^2.1.1":
   version: 2.2.1
   resolution: "isomorphic-fetch@npm:2.2.1"
   dependencies:
     node-fetch: ^1.0.1
     whatwg-fetch: ">=0.10.0"
   checksum: bb5daa7c3785d6742f4379a81e55b549a469503f7c9bf9411b48592e86632cf5e8fe8ea878dba185c0f33eb7c510c23abdeb55aebfdf5d3c70f031ced68c5424
+  languageName: node
+  linkType: hard
+
+"isomorphic-fetch@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "isomorphic-fetch@npm:3.0.0"
+  dependencies:
+    node-fetch: ^2.6.1
+    whatwg-fetch: ^3.4.1
+  checksum: e5ab79a56ce5af6ddd21265f59312ad9a4bc5a72cebc98b54797b42cb30441d5c5f8d17c5cd84a99e18101c8af6f90c081ecb8d12fd79e332be1778d58486d75
   languageName: node
   linkType: hard
 
@@ -8853,7 +8863,7 @@ __metadata:
     formik: ^1.5.1
     history: ^5.0.0
     hls.js: ^1.0.0
-    isomorphic-fetch: ^2.2.1
+    isomorphic-fetch: ^3.0.0
     jquery: ^3.5.1
     jsdom: ^26.0.0
     lodash: ^4.17.21
@@ -13139,7 +13149,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"whatwg-fetch@npm:>=0.10.0":
+"whatwg-fetch@npm:>=0.10.0, whatwg-fetch@npm:^3.4.1":
   version: 3.6.20
   resolution: "whatwg-fetch@npm:3.6.20"
   checksum: c58851ea2c4efe5c2235f13450f426824cf0253c1d45da28f45900290ae602a20aff2ab43346f16ec58917d5562e159cd691efa368354b2e82918c2146a519c5
