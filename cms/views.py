@@ -12,7 +12,7 @@ from cms.filters import ReadableIDFilter
 from cms.permissions import IsCmsStaffOrSuperuser
 
 
-class CmsPermissionViewSetMixin:
+class WagtailAPIPermissionMixin:
     """
     Mixin to require CMS-level access for API endpoints.
     """
@@ -20,7 +20,7 @@ class CmsPermissionViewSetMixin:
     permission_classes = (IsCmsStaffOrSuperuser,)
 
 
-class CustomPagesAPIViewSet(CmsPermissionViewSetMixin, PagesAPIViewSet):
+class CustomPagesAPIViewSet(WagtailAPIPermissionMixin, PagesAPIViewSet):
     """
     Custom API viewset for Wagtail pages with
     additional filtering and metadata fields.
@@ -61,13 +61,13 @@ class CustomPagesAPIViewSet(CmsPermissionViewSetMixin, PagesAPIViewSet):
         return queryset
 
 
-class CustomImagesAPIViewSet(CmsPermissionViewSetMixin, ImagesAPIViewSet):
+class CustomImagesAPIViewSet(WagtailAPIPermissionMixin, ImagesAPIViewSet):
     """
     Custom API viewset for Wagtail images, publicly available.
     """
 
 
-class CustomDocumentsAPIViewSet(CmsPermissionViewSetMixin, DocumentsAPIViewSet):
+class CustomDocumentsAPIViewSet(WagtailAPIPermissionMixin, DocumentsAPIViewSet):
     """
     Custom API viewset for Wagtail documents, publicly available.
     """
