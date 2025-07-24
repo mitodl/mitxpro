@@ -15,6 +15,9 @@ ALL_TOPICS = "All Topics"
 ALL_LANGUAGES = "All Languages"
 ALL_TAB = "all-tab"
 
+CMS_GROUP_EDITORS = "Editors"
+CMS_GROUP_MODERATORS = "Moderators"
+
 # ************** CONSTANTS FOR WEBINARS **************
 
 UPCOMING_WEBINAR = "UPCOMING"
