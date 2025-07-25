@@ -4,7 +4,7 @@ Custom permissions for the CMS app.
 
 from rest_framework.permissions import BasePermission
 
-from cms.constants import CMS_GROUP_EDITORS, CMS_GROUP_MODERATORS
+from cms.constants import EDITORS_GROUP_NAME, MODERATORS_GROUP_NAME
 
 
 class IsCmsStaffOrSuperuser(BasePermission):
@@ -20,6 +20,7 @@ class IsCmsStaffOrSuperuser(BasePermission):
         if user.is_superuser:
             return True
         if user.is_staff:
-            user_groups = set(user.groups.values_list("name", flat=True))
-            return bool({CMS_GROUP_EDITORS, CMS_GROUP_MODERATORS} & user_groups)
+            return user.groups.filter(
+                name__in=[EDITORS_GROUP_NAME, MODERATORS_GROUP_NAME]
+            ).exists()
         return False
