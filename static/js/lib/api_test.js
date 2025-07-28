@@ -242,7 +242,7 @@ describe("api", function () {
               {
                 status: statusCode,
                 body: JSON.stringify({
-                  error: "an error",
+                  errorStatusCode: statusCode,
                 }),
               },
             );

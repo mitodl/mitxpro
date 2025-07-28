@@ -2824,13 +2824,13 @@ testing = ["coverage", "pytest", "pytest-benchmark"]
 
 [[package]]
 name = "posthog"
-version = "6.3.1"
+version = "5.4.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "posthog-6.3.1-py3-none-any.whl", hash = "sha256:97ca81ac370f2ec0ba2d7a6e9b599114b03fdb87a183225c59391aeb2d90f12c"},
-    {file = "posthog-6.3.1.tar.gz", hash = "sha256:4257d2a77c9577258fb7e7aa810b9a24fb413c4dc0a480cb7cd66b88cf2305ab"},
+    {file = "posthog-5.4.0-py3-none-any.whl", hash = "sha256:284dfa302f64353484420b52d4ad81ff5c2c2d1d607c4e2db602ac72761831bd"},
+    {file = "posthog-5.4.0.tar.gz", hash = "sha256:701669261b8d07cdde0276e5bc096b87f9e200e3b9589c5ebff14df658c5893c"},
 ]
 
 [package.dependencies]
@@ -2839,7 +2839,6 @@ distro = ">=1.5.0"
 python-dateutil = ">=2.2"
 requests = ">=2.7,<3.0"
 six = ">=1.5"
-typing-extensions = ">=4.2.0"
 
 [package.extras]
 dev = ["django-stubs", "lxml", "mypy", "mypy-baseline", "packaging", "pre-commit", "pydantic", "ruff", "setuptools", "tomli", "tomli_w", "twine", "types-mock", "types-python-dateutil", "types-requests", "types-setuptools", "types-six", "wheel"]
@@ -4016,13 +4015,13 @@ dev = ["coverage (>=3.6)"]
 
 [[package]]
 name = "social-auth-core"
-version = "4.7.0"
+version = "4.6.1"
 description = "Python social authentication made simple."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "social_auth_core-4.7.0-py3-none-any.whl", hash = "sha256:9eef9b49c332d1a3265b37dcc698a7ace97c3fc59df2d874b51576d11d31f6a6"},
-    {file = "social_auth_core-4.7.0.tar.gz", hash = "sha256:2bba127c7b7166a81085ddb0c248d93751b3bc3cdab8569f62d9f70c6bc4ed40"},
+    {file = "social_auth_core-4.6.1-py3-none-any.whl", hash = "sha256:1019fe2f7fe30f9ff7d15c04a32c15324ecdbd59f62fbe829031dab74071a21a"},
+    {file = "social_auth_core-4.6.1.tar.gz", hash = "sha256:563510844ccc043a727b120fe57726860c93158d4304fafa2c1e122f2deb4fd3"},
 ]
 
 [package.dependencies]
@@ -4038,8 +4037,8 @@ requests-oauthlib = ">=0.6.1"
 all = ["social-auth-core[azuread]", "social-auth-core[google-onetap]", "social-auth-core[saml]", "social-auth-core[shopify]"]
 allpy3 = ["social-auth-core[all]"]
 azuread = ["cryptography (>=2.1.1)"]
-dev = ["coverage (>=3.6)", "flake8 (>=5.0.4)", "google-auth-stubs (==0.3.0)", "mypy (==1.16.1)", "pyright (==1.1.402)", "pytest (>=4.5)", "pytest-cov (>=2.7.1)", "pytest-xdist (>=3.6.1)", "responses (==0.25.7)", "types-defusedxml (==0.7.0.20250516)", "types-oauthlib (==3.3.0.20250622)", "types-python-jose (==3.5.0.20250531)", "types-requests (==2.32.4.20250611)", "types-requests-oauthlib (==2.0.0.20250516)"]
-google-onetap = ["google-auth (>=2.40.0,<2.41.0)"]
+dev = ["coverage (>=3.6)", "flake8 (>=5.0.4)", "google-auth-stubs (==0.3.0)", "mypy (==1.15.0)", "pyright (==1.1.400)", "pytest (>=4.5)", "pytest-cov (>=2.7.1)", "pytest-xdist (>=3.6.1)", "responses (==0.25.7)", "types-defusedxml (==0.7.0.20240218)", "types-oauthlib (==3.2.0.20250408)", "types-python-jose (==3.4.0.20250224)", "types-requests (==2.32.0.20250328)", "types-requests-oauthlib (==2.0.0.20250306)"]
+google-onetap = ["google-auth (>=2.39.0,<2.40.0)"]
 ping = ["python-jose (>=3.4.0,<4.0)"]
 saml = ["python3-saml (>=1.5.0)"]
 shopify = ["ShopifyAPI"]
@@ -4494,4 +4493,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.5"
-content-hash = "ec1c364352698a8276b253706d6c3931cafe970a5543385737d47373d0606881"
+content-hash = "22d92f0b9ea47a0650274c56d3a47833f764e1464901e9c006e30197f45a7902"
