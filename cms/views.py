@@ -4,23 +4,23 @@ and to add additional filtering and metadata fields.
 """
 
 from django.db.models import F
-from rest_framework.permissions import AllowAny
 from wagtail.api.v2.views import PagesAPIViewSet
 from wagtail.images.api.v2.views import ImagesAPIViewSet
 from wagtail.documents.api.v2.views import DocumentsAPIViewSet
 
-from .filters import ReadableIDFilter
+from cms.filters import ReadableIDFilter
+from cms.permissions import IsCmsStaffOrSuperuser
 
 
-class AllowAnyViewSetMixin:
+class WagtailAPIPermissionMixin:
     """
-    Mixin to override default permission classes to allow public access.
+    Mixin to require CMS-level access for API endpoints.
     """
 
-    permission_classes = (AllowAny,)
+    permission_classes = (IsCmsStaffOrSuperuser,)
 
 
-class CustomPagesAPIViewSet(AllowAnyViewSetMixin, PagesAPIViewSet):
+class CustomPagesAPIViewSet(WagtailAPIPermissionMixin, PagesAPIViewSet):
     """
     Custom API viewset for Wagtail pages with
     additional filtering and metadata fields.
@@ -61,13 +61,13 @@ class CustomPagesAPIViewSet(AllowAnyViewSetMixin, PagesAPIViewSet):
         return queryset
 
 
-class CustomImagesAPIViewSet(AllowAnyViewSetMixin, ImagesAPIViewSet):
+class CustomImagesAPIViewSet(WagtailAPIPermissionMixin, ImagesAPIViewSet):
     """
     Custom API viewset for Wagtail images, publicly available.
     """
 
 
-class CustomDocumentsAPIViewSet(AllowAnyViewSetMixin, DocumentsAPIViewSet):
+class CustomDocumentsAPIViewSet(WagtailAPIPermissionMixin, DocumentsAPIViewSet):
     """
     Custom API viewset for Wagtail documents, publicly available.
     """
