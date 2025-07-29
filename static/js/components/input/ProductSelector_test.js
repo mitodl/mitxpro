@@ -32,8 +32,7 @@ import { shouldIf } from "../../lib/test_utils";
 import IntegrationTestHelper from "../../util/integration_test_helper";
 import type { ProgramRunDetail } from "../../flow/ecommerceTypes";
 
-// When a component with a <Select /> is rendered with shallow(), it appears as
-// a <StateManager /> with className="select"
+// When a component with a <Select /> is rendered with shallow(), it appears with className="select"
 const SelectComponentSelector = ".select";
 
 describe("ProductSelector", () => {
@@ -85,6 +84,7 @@ describe("ProductSelector", () => {
       it("renders product type and courseware object Select widgets", () => {
         const wrapper = shallow(<InnerProductSelector {...defaultProps} />);
         wrapper.setState({ productType });
+        console.log(wrapper.debug());
         const select = wrapper.find(SelectComponentSelector).at(0);
         assert.deepEqual(select.prop("options"), [
           {
