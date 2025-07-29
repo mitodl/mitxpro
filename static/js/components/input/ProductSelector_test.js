@@ -84,7 +84,6 @@ describe("ProductSelector", () => {
       it("renders product type and courseware object Select widgets", () => {
         const wrapper = shallow(<InnerProductSelector {...defaultProps} />);
         wrapper.setState({ productType });
-        console.log(wrapper.debug());
         const select = wrapper.find(SelectComponentSelector).at(0);
         assert.deepEqual(select.prop("options"), [
           {
