@@ -70,7 +70,10 @@ const couponValidations = yup.object().shape({
   max_redemptions: yup.number().when("coupon_type", {
     is: COUPON_TYPE_PROMO,
     then: (schema) =>
-      schema.min(1, "Must be at least ${min}").required("Number required"),
+      schema
+        .min(1, "Must be at least ${min}")
+        .max(2147483647, "Must be at most ${max}") // max value for a 32-bit signed integer
+        .required("Number required"),
   }),
   coupon_code: yup.string().when("coupon_type", {
     is: COUPON_TYPE_PROMO,

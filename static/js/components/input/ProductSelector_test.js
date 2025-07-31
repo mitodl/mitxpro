@@ -32,9 +32,8 @@ import { shouldIf } from "../../lib/test_utils";
 import IntegrationTestHelper from "../../util/integration_test_helper";
 import type { ProgramRunDetail } from "../../flow/ecommerceTypes";
 
-// When a component with a <Select /> is rendered with shallow(), it appears as
-// a <StateManager /> with className="select"
-const SelectComponentSelector = "StateManager.select";
+// When a component with a <Select /> is rendered with shallow(), it appears with className="select"
+const SelectComponentSelector = ".select";
 
 describe("ProductSelector", () => {
   let defaultProps,
