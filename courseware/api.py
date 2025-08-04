@@ -560,6 +560,17 @@ def get_edx_api_course_detail_client():
     return edx_client.course_detail
 
 
+def get_edx_api_course_list_client():
+    """
+    Gets an edx api client instance for use with the course list api
+
+    Returns:
+        CourseList: edx api course list client instance
+    """
+    edx_client = get_edx_api_service_client()
+    return edx_client.course_list
+
+
 def get_edx_api_grades_client():
     """
     Gets an edx api client instance for use with the grades api
