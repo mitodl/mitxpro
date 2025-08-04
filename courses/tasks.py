@@ -18,7 +18,7 @@ from courses.sync_external_courses.external_course_sync_api import (
 from courses.utils import (
     ensure_course_run_grade,
     process_course_run_grade_certificate,
-    sync_course_runs,
+    sync_course_runs_bulk,
 )
 from courseware.api import get_edx_grades_with_users
 from ecommerce.mail_api import send_external_data_sync_email
@@ -112,8 +112,8 @@ def sync_courseruns_data():
         )
     )
 
-    # `sync_course_runs` logs internally so no need to capture/output the returned values
-    sync_course_runs(runs)
+    # `sync_course_runs_bulk` logs internally so no need to capture/output the returned values
+    sync_course_runs_bulk(runs)
 
 
 @app.task

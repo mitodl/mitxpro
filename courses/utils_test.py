@@ -26,6 +26,7 @@ from courses.utils import (
     generate_program_certificate,
     process_course_run_grade_certificate,
     sync_course_runs,
+    sync_course_runs_bulk,
     get_catalog_languages,
 )
 from mitxpro.utils import now_in_utc
@@ -302,6 +303,69 @@ def test_sync_course_runs_combined(settings, mocker):
     assert success_count == 1
     assert failure_count == 1
     assert unchanged_count == 1
+
+
+def test_sync_course_runs_bulk(settings, mocker):
+    """
+    Test that sync_course_runs_bulk uses the course list API for efficient bulk syncing
+    """
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
+
+    mocked_course_details = [
+        CourseDetail(
+            {
+                "id": "course-v1:edX+DemoX+2020_T1",
+                "start": "2098-01-01T00:00:00Z",
+                "end": "2099-02-01T00:00:00Z",
+                "enrollment_start": "2098-01-01T00:00:00Z",
+                "enrollment_end": "2099-02-01T00:00:00Z",
+                "name": "Updated Course Name",
+            }
+        ),
+        CourseDetail(
+            {
+                "id": "course-v1:edX+DemoX+2020_T2",
+                "start": "2098-01-01T00:00:00Z",
+                "end": "2099-02-01T00:00:00Z",
+                "enrollment_start": "2098-01-01T00:00:00Z",
+                "enrollment_end": "2099-02-01T00:00:00Z",
+                "name": "Another Course",
+            }
+        ),
+    ]
+
+    mock_course_list = mocker.Mock()
+    mock_course_list.get_courses.return_value = mocked_course_details
+    mocker.patch(
+        "courses.utils.get_edx_api_course_list_client",
+        return_value=mock_course_list,
+    )
+
+    course_runs = [
+        CourseRunFactory.create(
+            courseware_id="course-v1:edX+DemoX+2020_T1",
+            expiration_date=None,
+        ),
+        CourseRunFactory.create(
+            courseware_id="course-v1:edX+DemoX+2020_T2",
+            expiration_date=None,
+        ),
+    ]
+
+    success_count, failure_count, unchanged_count = sync_course_runs_bulk(course_runs)
+
+    mock_course_list.get_courses.assert_called_once_with(
+        course_keys=["course-v1:edX+DemoX+2020_T1", "course-v1:edX+DemoX+2020_T2"]
+    )
+
+    assert success_count == 2
+    assert failure_count == 0
+    assert unchanged_count == 0
+
+    course_runs[0].refresh_from_db()
+    course_runs[1].refresh_from_db()
+    assert course_runs[0].title == "Updated Course Name"
+    assert course_runs[1].title == "Another Course"
 
 
 def test_catalog_visible_languages():

@@ -20,7 +20,10 @@ from courses.models import (
     ProgramEnrollment,
     CourseLanguage,
 )
-from courseware.api import get_edx_api_course_detail_client
+from courseware.api import (
+    get_edx_api_course_detail_client,
+    get_edx_api_course_list_client,
+)
 from mitxpro.utils import has_equal_properties, now_in_utc
 
 log = logging.getLogger(__name__)
@@ -325,6 +328,89 @@ def sync_course_runs(runs):
                 # Report any validation or otherwise model errors
                 log.error("%s: %s", str(e), run.courseware_id)
                 failure_count += 1
+
+    return success_count, failure_count, unchanged_count
+
+
+def sync_course_runs_bulk(runs):
+    """
+    Sync course run dates and title from Open edX using bulk course list API
+
+    Args:
+        runs ([CourseRun]): list of CourseRun objects.
+
+    Returns:
+        (int, int, int): A tuple containing the number of successful updates,
+        failed updates, and unchanged course runs.
+    """
+    api_client = get_edx_api_course_list_client()
+
+    success_count = 0
+    failure_count = 0
+    unchanged_count = 0
+
+    field_mapping = {
+        "name": "title",
+        "start": "start_date",
+        "end": "end_date",
+        "enrollment_start": "enrollment_start",
+        "enrollment_end": "enrollment_end",
+    }
+
+    runs_by_courseware_id = {run.courseware_id: run for run in runs}
+    course_keys = list(runs_by_courseware_id.keys())
+
+    if not course_keys:
+        return success_count, failure_count, unchanged_count
+
+    try:
+        for course_detail in api_client.get_courses(course_keys=course_keys):
+            run = runs_by_courseware_id.get(course_detail.course_id)
+            if not run:
+                log.warning(
+                    "Course detail received for unknown course: %s",
+                    course_detail.course_id,
+                )
+                continue
+
+            has_changes = False
+
+            for api_field, model_field in field_mapping.items():
+                api_value = getattr(course_detail, api_field)
+                model_value = getattr(run, model_field)
+
+                if api_value != model_value:
+                    has_changes = True
+                    setattr(run, model_field, api_value)
+
+                    # Reset the expiration_date so it is calculated automatically and
+                    # does not raise a validation error now that the start or end date
+                    # has changed.
+                    if model_field in ("start_date", "end_date"):
+                        run.expiration_date = None
+
+            if not has_changes:
+                log.info(
+                    "No changes detected for %s, skipping update", run.courseware_id
+                )
+                unchanged_count += 1
+                continue
+
+            try:
+                run.save()
+                success_count += 1
+                log.info("Updated course run: %s", run.courseware_id)
+            except Exception as e:  # noqa: BLE001
+                # Report any validation or otherwise model errors
+                log.error("%s: %s", str(e), run.courseware_id)
+                failure_count += 1
+
+    except HTTPError as e:
+        failure_count = len(runs)
+        log.error("Bulk sync failed with HTTP error: %s", str(e))
+    except Exception as e:  # noqa: BLE001
+        failure_count = len(runs)
+        log.error("Bulk sync failed with unexpected error: %s", str(e))
 
     return success_count, failure_count, unchanged_count
 
