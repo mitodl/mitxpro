@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.184.2
+Version 0.184.2 (Released August 05, 2025)
 ---------------
 
 - refactor: remove legacy username generation logic and tests (#3542)
