@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.184.2 (Released August 05, 2025)
+---------------
+
+- refactor: remove legacy username generation logic and tests (#3542)
+- fix(deps): update dependency react-select to v5 (#3584)
+- [pre-commit.ci] pre-commit autoupdate (#3618)
+- fix: update wagtail API permissions (#3611)
+- fix(deps): update dependency google-api-python-client to v2.177.0 (#3617)
+- fix(deps): update dependency boto3 to v1.39.12 (#3615)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9.0.4 (#3614)
+- fix: add max-redemptions validation to avoid server error (#3597)
+- fix(deps): update dependency isomorphic-fetch to v3 (#3613)
+- [pre-commit.ci] pre-commit autoupdate (#3612)
+- fix(deps): update dependency boto3 to v1.39.9 (#3608)
+- fix(deps): update dependency newrelic to v10 (#3595)
+
 Version 0.184.1 (Released July 23, 2025)
 ---------------
 
