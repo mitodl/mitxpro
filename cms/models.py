@@ -70,7 +70,6 @@ from cms.constants import (
     ENTERPRISE_PAGE_SLUG,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
-    FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
     ON_DEMAND_WEBINAR_BUTTON_TITLE,
     PROGRAM_INDEX_SLUG,
@@ -995,7 +994,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
     FORMAT_CHOICES = [
         (FORMAT_ONLINE, FORMAT_ONLINE),
         (FORMAT_HYBRID, FORMAT_HYBRID),
-        (FORMAT_OTHER, FORMAT_OTHER),
     ]
     format = models.CharField(
         max_length=20,

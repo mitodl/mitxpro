@@ -35,7 +35,6 @@ ON_DEMAND_WEBINAR_BUTTON_TITLE = "VIEW RECORDING"
 
 FORMAT_ONLINE = "Online"
 FORMAT_HYBRID = "Hybrid"
-FORMAT_OTHER = "Other"
 
 
 class CatalogSorting(enum.Enum):
