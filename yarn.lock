@@ -2155,61 +2155,61 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry-internal/browser-utils@npm:9.35.0":
-  version: 9.35.0
-  resolution: "@sentry-internal/browser-utils@npm:9.35.0"
+"@sentry-internal/browser-utils@npm:10.2.0":
+  version: 10.2.0
+  resolution: "@sentry-internal/browser-utils@npm:10.2.0"
   dependencies:
-    "@sentry/core": 9.35.0
-  checksum: a3d255af3ee1e0647e53d19559522bfc235f25be504e4bea483c18c44ad77b3c7f2e82b7b77596521742c4cfb13e79d1720f3505a48c4cb8c0b9b037db4ef80f
+    "@sentry/core": 10.2.0
+  checksum: 18d7e7251e0508e9040c9a3ded2975554b114c2a422fb062efe0b431c6af4181ab31b1317d3d0d103294f368ef18dfbf1c305cde4af30882ac407ed66fbff113
   languageName: node
   linkType: hard
 
-"@sentry-internal/feedback@npm:9.35.0":
-  version: 9.35.0
-  resolution: "@sentry-internal/feedback@npm:9.35.0"
+"@sentry-internal/feedback@npm:10.2.0":
+  version: 10.2.0
+  resolution: "@sentry-internal/feedback@npm:10.2.0"
   dependencies:
-    "@sentry/core": 9.35.0
-  checksum: 258bd938d0a53c056b75ab9da6558c6bfec030800514bddf047ca5e1991f4977dff74a5ce0ecf68f1964f4912dcd84b03fdae575c589b158bd19bd79760f8ecd
+    "@sentry/core": 10.2.0
+  checksum: 0d98019b3f5c6388f91ff8119de2038653c251bad133acdde46f26eddd8e7a4467dc5d6fae7a7e67ba4ea66ac5677c7bffa854411bfa557e5334f4da49df95f4
   languageName: node
   linkType: hard
 
-"@sentry-internal/replay-canvas@npm:9.35.0":
-  version: 9.35.0
-  resolution: "@sentry-internal/replay-canvas@npm:9.35.0"
+"@sentry-internal/replay-canvas@npm:10.2.0":
+  version: 10.2.0
+  resolution: "@sentry-internal/replay-canvas@npm:10.2.0"
   dependencies:
-    "@sentry-internal/replay": 9.35.0
-    "@sentry/core": 9.35.0
-  checksum: 9d68a940fe51a3b8996f92a83057a451c6f2a717eca74f78f0875f9cd422e1a4da8f1c1c0d438d4b02a1cdd0de0086096463fa4fc662bd25940523fe2d0f5134
+    "@sentry-internal/replay": 10.2.0
+    "@sentry/core": 10.2.0
+  checksum: acd4714fdbc2d6a91c5ffdf5d3506821ec2b18c079a171ef752a1fe490cebf4bb4800b7543e76737756f9398a88e9a302c34c7939582919d321915533bceb137
   languageName: node
   linkType: hard
 
-"@sentry-internal/replay@npm:9.35.0":
-  version: 9.35.0
-  resolution: "@sentry-internal/replay@npm:9.35.0"
+"@sentry-internal/replay@npm:10.2.0":
+  version: 10.2.0
+  resolution: "@sentry-internal/replay@npm:10.2.0"
   dependencies:
-    "@sentry-internal/browser-utils": 9.35.0
-    "@sentry/core": 9.35.0
-  checksum: ea1a8b1e45f0d4865226f82166e4a3bdfdffa397d045cabce7a390832c9b0144bb56e2b010490ab78519185c0b1f169ecaf244ad4688116ce0c8dcd49ee2f25b
+    "@sentry-internal/browser-utils": 10.2.0
+    "@sentry/core": 10.2.0
+  checksum: 4aeeb8d23a903aabd5d0e263f27c22d151c869fdf857c1e0f1ec78bc96254a1e2694921ed4eebb0f124e8d8fabbd7ad85762b2af4a40ee34f456dbe38eaed80e
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:^9.0.0":
-  version: 9.35.0
-  resolution: "@sentry/browser@npm:9.35.0"
+"@sentry/browser@npm:^10.0.0":
+  version: 10.2.0
+  resolution: "@sentry/browser@npm:10.2.0"
   dependencies:
-    "@sentry-internal/browser-utils": 9.35.0
-    "@sentry-internal/feedback": 9.35.0
-    "@sentry-internal/replay": 9.35.0
-    "@sentry-internal/replay-canvas": 9.35.0
-    "@sentry/core": 9.35.0
-  checksum: 6d5af2d40f759a17c548bab6e941f168f2f0602132c8258070561fa3adaa01f5507fa9d8fc39e35f6b88473621a1aab3206a0524a6bf8057164bb135c45cd4a2
+    "@sentry-internal/browser-utils": 10.2.0
+    "@sentry-internal/feedback": 10.2.0
+    "@sentry-internal/replay": 10.2.0
+    "@sentry-internal/replay-canvas": 10.2.0
+    "@sentry/core": 10.2.0
+  checksum: 410ef148f56a709128f31dad7e58a284d16f23f8efa3963734089e45548d49ef0a93e416ac81f207de36f0e8f14722c679a23122ba073f88a3218b420bb4c784
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:9.35.0":
-  version: 9.35.0
-  resolution: "@sentry/core@npm:9.35.0"
-  checksum: d76c1f02e92fe67742ecae3ad43712dddc31cd056a9bae9819b23f449e575d8de2cbe829bf06aad19d9687b8c5f26c19c4f9d1277cf85b512310bbf926804016
+"@sentry/core@npm:10.2.0":
+  version: 10.2.0
+  resolution: "@sentry/core@npm:10.2.0"
+  checksum: f9dc07da2ed65c7db3ab78ff8dbee94cb3c3081d070f72a3d0531ca14408b235933501310916f972b82f9d5008e03162bc72361fb681df3a12c447ac7d0eadc7
   languageName: node
   linkType: hard
 
@@ -8856,7 +8856,7 @@ __metadata:
     "@fancyapps/fancybox": ^3.5.7
     "@material/layout-grid": ^0.41.0
     "@material/top-app-bar": ^1.1.1
-    "@sentry/browser": ^9.0.0
+    "@sentry/browser": ^10.0.0
     "@trust/webcrypto": ^0.9.2
     "@typescript-eslint/eslint-plugin": ^8.26.0
     "@typescript-eslint/parser": ^8.26.0
