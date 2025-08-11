@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 
 from courses.models import CourseRun
-from courses.utils import sync_course_runs_bulk
+from courses.utils import sync_course_runs
 from mitxpro.utils import now_in_utc
 
 
@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 course__is_external=False,
             )
 
-            success_count, error_count, unchanged_count = sync_course_runs_bulk(runs)
+        success_count, error_count, unchanged_count = sync_course_runs(runs)
 
         self.stdout.write(
             self.style.SUCCESS(

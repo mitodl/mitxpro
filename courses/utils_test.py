@@ -4,20 +4,17 @@ Tests for signals
 
 from datetime import timedelta
 
-from unittest.mock import Mock
-
 import factory
 import pytest
-from edx_api.course_detail import CourseDetail, CourseDetails
-from requests.exceptions import HTTPError
+from edx_api.course_detail import CourseDetail
 
 from courses.factories import (
     CourseFactory,
-    CourseRunCertificateFactory,
     CourseRunFactory,
+    CourseRunCertificateFactory,
     CourseRunGradeFactory,
-    ProgramCertificateFactory,
     ProgramFactory,
+    ProgramCertificateFactory,
     UserFactory,
     CourseLanguageFactory,
 )
@@ -26,7 +23,6 @@ from courses.utils import (
     generate_program_certificate,
     process_course_run_grade_certificate,
     sync_course_runs,
-    sync_course_runs_bulk,
     get_catalog_languages,
 )
 from mitxpro.utils import now_in_utc
@@ -158,156 +154,9 @@ def test_generate_program_certificate_success(user, program):
     assert len(ProgramCertificate.objects.all()) == 1
 
 
-@pytest.mark.parametrize(
-    "mocked_api_response, expect_success, expect_unchanged",  # noqa: PT006
-    [
-        [  # noqa: PT007
-            CourseDetail(
-                {
-                    "id": "course-v1:edX+DemoX+2020_T1",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                    "name": "Demonstration Course",
-                }
-            ),
-            True,
-            False,
-        ],
-        [  # noqa: PT007
-            CourseDetail(
-                {
-                    "id": "course-v1:edX+DemoX+2020_T1",
-                    "start": "2021-01-01T00:00:00Z",
-                    "end": "2020-02-01T00:00:00Z",
-                    "enrollment_start": None,
-                    "enrollment_end": None,
-                    "name": None,
-                }
-            ),
-            False,
-            False,
-        ],
-        [HTTPError(response=Mock(status_code=404)), False, False],  # noqa: PT007
-        [HTTPError(response=Mock(status_code=400)), False, False],  # noqa: PT007
-        [ConnectionError(), False, False],  # noqa: PT007
-        [  # noqa: PT007
-            CourseDetail(
-                {
-                    "id": "course-v1:edX+DemoX+2020_T1",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                    "name": "Existing Course Name",
-                }
-            ),
-            False,
-            True,
-        ],
-    ],
-)
-def test_sync_course_runs(
-    settings, mocker, mocked_api_response, expect_success, expect_unchanged
-):
+def test_sync_course_runs_course_list_api(settings, mocker):
     """
-    Test that sync_course_runs fetches data from edX API. Should fail on API responding with
-    an error, as well as trying to set the course run title to None
-    """
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
-    mocker.patch.object(CourseDetails, "get_detail", side_effect=[mocked_api_response])
-
-    if expect_unchanged:
-        course_run = CourseRunFactory.create(
-            expiration_date=None,
-            title=mocked_api_response.name,
-            start_date=mocked_api_response.start,
-            end_date=mocked_api_response.end,
-            enrollment_start=mocked_api_response.enrollment_start,
-            enrollment_end=mocked_api_response.enrollment_end,
-        )
-    else:
-        course_run = CourseRunFactory.create(expiration_date=None)
-
-    success_count, failure_count, unchanged_count = sync_course_runs([course_run])
-
-    if expect_success:
-        course_run.refresh_from_db()
-        assert success_count == 1
-        assert failure_count == 0
-        assert unchanged_count == 0
-        assert course_run.title == mocked_api_response.name
-        assert course_run.start_date == mocked_api_response.start
-        assert course_run.end_date == mocked_api_response.end
-        assert course_run.enrollment_start == mocked_api_response.enrollment_start
-        assert course_run.enrollment_end == mocked_api_response.enrollment_end
-    elif expect_unchanged:
-        assert success_count == 0
-        assert failure_count == 0
-        assert unchanged_count == 1
-    else:
-        assert success_count == 0
-        assert failure_count == 1
-        assert unchanged_count == 0
-
-
-def test_sync_course_runs_combined(settings, mocker):
-    """
-    Test that sync_course_runs correctly handles a mix of success,
-    failure, and unchanged course runs
-    """
-
-    mocked_api_responses = [
-        CourseDetail(
-            {
-                "id": "course-v1:edX+Success+2020",
-                "start": "2098-01-01T00:00:00Z",
-                "end": "2099-02-01T00:00:00Z",
-                "enrollment_start": "2098-01-01T00:00:00Z",
-                "enrollment_end": "2099-02-01T00:00:00Z",
-                "name": "Success Course",
-            }
-        ),
-        HTTPError(response=Mock(status_code=404)),
-        CourseDetail(
-            {
-                "id": "course-v1:edX+Unchanged+2020",
-                "start": "2098-01-01T00:00:00Z",
-                "end": "2099-02-01T00:00:00Z",
-                "enrollment_start": "2098-01-01T00:00:00Z",
-                "enrollment_end": "2099-02-01T00:00:00Z",
-                "name": "Unchanged Course",
-            }
-        ),
-    ]
-
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
-    mocker.patch.object(CourseDetails, "get_detail", side_effect=mocked_api_responses)
-
-    course_runs = [
-        CourseRunFactory.create(expiration_date=None),
-        CourseRunFactory.create(expiration_date=None),
-        CourseRunFactory.create(
-            expiration_date=None,
-            title=mocked_api_responses[2].name,
-            start_date=mocked_api_responses[2].start,
-            end_date=mocked_api_responses[2].end,
-            enrollment_start=mocked_api_responses[2].enrollment_start,
-            enrollment_end=mocked_api_responses[2].enrollment_end,
-        ),
-    ]
-
-    success_count, failure_count, unchanged_count = sync_course_runs(course_runs)
-
-    assert success_count == 1
-    assert failure_count == 1
-    assert unchanged_count == 1
-
-
-def test_sync_course_runs_bulk(settings, mocker):
-    """
-    Test that sync_course_runs_bulk uses the course list API for efficient bulk syncing
+    Test that sync_course_runs uses the course list API for efficient bulk syncing
     """
     settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
 
@@ -352,7 +201,7 @@ def test_sync_course_runs_bulk(settings, mocker):
         ),
     ]
 
-    success_count, failure_count, unchanged_count = sync_course_runs_bulk(course_runs)
+    success_count, failure_count, unchanged_count = sync_course_runs(course_runs)
 
     mock_course_list.get_courses.assert_called_once_with(
         course_keys=["course-v1:edX+DemoX+2020_T1", "course-v1:edX+DemoX+2020_T2"]
@@ -366,6 +215,25 @@ def test_sync_course_runs_bulk(settings, mocker):
     course_runs[1].refresh_from_db()
     assert course_runs[0].title == "Updated Course Name"
     assert course_runs[1].title == "Another Course"
+
+
+def test_sync_course_runs_empty_list(settings, mocker):
+    """Test that sync_course_runs handles empty course run list gracefully"""
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
+
+    mock_course_list = mocker.Mock()
+    mocker.patch(
+        "courses.utils.get_edx_api_course_list_client",
+        return_value=mock_course_list,
+    )
+
+    success_count, failure_count, unchanged_count = sync_course_runs([])
+
+    mock_course_list.get_courses.assert_not_called()
+
+    assert success_count == 0
+    assert failure_count == 0
+    assert unchanged_count == 0
 
 
 def test_catalog_visible_languages():
