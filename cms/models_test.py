@@ -18,7 +18,6 @@ from cms.constants import (
     COMMON_COURSEWARE_COMPONENT_INDEX_SLUG,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
-    FORMAT_OTHER,
     ON_DEMAND_WEBINAR,
     ON_DEMAND_WEBINAR_BUTTON_TITLE,
     UPCOMING_WEBINAR,
@@ -935,7 +934,7 @@ def test_external_course_page_properties():
         description="<p>desc</p>",
         catalog_details="<p>catalog desc</p>",
         duration="1 week",
-        format=FORMAT_OTHER,
+        format=FORMAT_ONLINE,
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
         background_image__title="background-image",
@@ -946,7 +945,7 @@ def test_external_course_page_properties():
     assert external_course_page.description == "<p>desc</p>"
     assert external_course_page.catalog_details == "<p>catalog desc</p>"
     assert external_course_page.duration == "1 week"
-    assert external_course_page.format == FORMAT_OTHER
+    assert external_course_page.format == FORMAT_ONLINE
     assert external_course_page.video_title == "<p>title</p>"
     assert external_course_page.video_url == "http://test.com/mock.mp4"
     assert external_course_page.background_image.title == "background-image"
@@ -965,11 +964,11 @@ def test_course_page_format_field_default_value():
     assert course_page.format == FORMAT_ONLINE
 
 
-@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
+@pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID])
 def test_course_page_format_field_choices(course_format, staff_user):
     """
     Verifies that if the "format" field in a course page contains the values
-    FORMAT_ONLINE, FORMAT_HYBRID, and FORMAT_OTHER, and they are in the same context.
+    FORMAT_ONLINE and FORMAT_HYBRID and they are in the same context.
     """
     course_page = CoursePageFactory.create(format=course_format)
 
@@ -1019,7 +1018,7 @@ def test_external_program_page_properties():
         description="<p>desc</p>",
         catalog_details="<p>catalog desc</p>",
         duration="1 week",
-        format=FORMAT_OTHER,
+        format=FORMAT_ONLINE,
         video_title="<p>title</p>",
         video_url="http://test.com/mock.mp4",
         background_image__title="background-image",
@@ -1030,7 +1029,7 @@ def test_external_program_page_properties():
     assert external_program_page.description == "<p>desc</p>"
     assert external_program_page.catalog_details == "<p>catalog desc</p>"
     assert external_program_page.duration == "1 week"
-    assert external_program_page.format == FORMAT_OTHER
+    assert external_program_page.format == FORMAT_ONLINE
     assert external_program_page.video_title == "<p>title</p>"
     assert external_program_page.video_url == "http://test.com/mock.mp4"
     assert external_program_page.background_image.title == "background-image"
@@ -1045,11 +1044,11 @@ def test_program_page_format_field_default_value():
     assert program_page.format == FORMAT_ONLINE
 
 
-@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID, FORMAT_OTHER])
+@pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID])
 def test_program_page_format_field_choices(program_format, staff_user):
     """
     Verifies that if the "format" field in a program page contains the values
-    FORMAT_ONLINE, FORMAT_HYBRID, and FORMAT_OTHER, and they are in the same context.
+    FORMAT_ONLINE and FORMAT_HYBRID and they are in the same context.
     """
     program_page = ProgramPageFactory.create(format=program_format)
 
