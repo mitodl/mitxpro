@@ -549,17 +549,6 @@ def get_edx_api_registration_validation_client():
     )
 
 
-def get_edx_api_course_detail_client():
-    """
-    Gets an edx api client instance for use with the grades api
-
-    Returns:
-        CourseDetails: edx api course client instance
-    """
-    edx_client = get_edx_api_service_client()
-    return edx_client.course_detail
-
-
 def get_edx_api_course_list_client():
     """
     Gets an edx api client instance for use with the course list api
