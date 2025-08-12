@@ -1,7 +1,7 @@
 from django.db import migrations
 
 
-def convert_other_to_online(apps, schema_editor):
+def update_product_page_format(apps, schema_editor):
     """Convert any existing 'Other' format values to 'Online'"""
     CoursePage = apps.get_model("cms", "CoursePage")
     ProgramPage = apps.get_model("cms", "ProgramPage")
@@ -21,6 +21,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(
-            convert_other_to_online, reverse_code=migrations.RunPython.noop
+            update_product_page_format, reverse_code=migrations.RunPython.noop
         ),
     ]
