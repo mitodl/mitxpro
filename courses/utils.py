@@ -252,8 +252,6 @@ def sync_course_runs(runs):
     """
     Sync course run dates and title from Open edX using course list API
 
-    Sync course run dates and title from Open edX using course list API
-
     Args:
         runs ([CourseRun]): list of CourseRun objects.
 
