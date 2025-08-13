@@ -2,13 +2,14 @@
 Tests for signals
 """
 
-from datetime import timedelta
-from datetime import datetime
+from datetime import timedelta, datetime
 import pytz
 
 import factory
 import pytest
 from edx_api.course_detail import CourseDetail
+from requests.exceptions import HTTPError
+from requests import Response
 
 from courses.factories import (
     CourseFactory,
@@ -31,6 +32,47 @@ from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
 
+START_DT = datetime(2098, 1, 1, tzinfo=pytz.UTC)
+END_DT = datetime(2099, 2, 1, tzinfo=pytz.UTC)
+
+
+def make_api_course(course_id, name):
+    """Create a mock API course response dictionary with standard test dates."""
+    return {
+        "id": course_id,
+        "name": name,
+        "start": "2098-01-01T00:00:00Z",
+        "end": "2099-02-01T00:00:00Z",
+        "enrollment_start": "2098-01-01T00:00:00Z",
+        "enrollment_end": "2099-02-01T00:00:00Z",
+    }
+
+
+def make_local_course(course_id, title):
+    """Create a local course data dictionary for test course runs."""
+    return {"courseware_id": course_id, "title": title}
+
+
+def mock_course_list_api(mocker, api_response=None, api_error=None):
+    """Mock the course list API client with configurable responses and errors."""
+    mock_course_list = mocker.Mock()
+    if api_error == "HTTPError":
+        mock_response = mocker.Mock(spec=Response)
+        mock_response.status_code = 500
+        mock_response.reason = "Internal Server Error"
+        mock_course_list.get_courses.side_effect = HTTPError(response=mock_response)
+    elif api_error:
+        mock_course_list.get_courses.side_effect = api_error
+    else:
+        mock_course_list.get_courses.return_value = [
+            CourseDetail(course_data) for course_data in api_response or []
+        ]
+    mocker.patch(
+        "courses.utils.get_edx_api_course_list_client",
+        return_value=mock_course_list,
+    )
+    return mock_course_list
+
 
 @pytest.fixture
 def user():
@@ -48,6 +90,29 @@ def program():
 def course():
     """Course object fixture"""
     return CourseFactory.create()
+
+
+@pytest.fixture
+def create_course_runs():
+    """Factory fixture to create course runs from test data dictionaries."""
+
+    def _create(course_runs_data):
+        runs = []
+        for data in course_runs_data:
+            runs.append(
+                CourseRunFactory.create(
+                    courseware_id=data["courseware_id"],
+                    title=data["title"],
+                    start_date=START_DT,
+                    end_date=END_DT,
+                    enrollment_start=START_DT,
+                    enrollment_end=END_DT,
+                    expiration_date=None,
+                )
+            )
+        return runs
+
+    return _create
 
 
 @pytest.mark.parametrize(
@@ -157,47 +222,18 @@ def test_generate_program_certificate_success(user, program):
 
 
 @pytest.mark.parametrize(
-    "test_scenario, api_response, course_runs_data, expected_success, expected_failure, expected_unchanged, api_error, save_error_index",
+    "test_scenario, api_response, local_data, expected_success, expected_failure, expected_unchanged, api_error, save_error_index",
     [
-        (
-            "empty_list",
-            [],
-            [],
-            0,
-            0,
-            0,
-            None,
-            None,
-        ),
+        ("empty_list", [], [], 0, 0, 0, None, None),
         (
             "all_successful",
             [
-                {
-                    "id": "course-v1:edX+DemoX+2020_T1",
-                    "name": "Updated Course 1",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                },
-                {
-                    "id": "course-v1:edX+DemoX+2020_T2",
-                    "name": "Updated Course 2",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                },
+                make_api_course("course-v1:edX+DemoX+2020_T1", "Updated Course 1"),
+                make_api_course("course-v1:edX+DemoX+2020_T2", "Updated Course 2"),
             ],
             [
-                {
-                    "courseware_id": "course-v1:edX+DemoX+2020_T1",
-                    "title": "Old Course 1",
-                },
-                {
-                    "courseware_id": "course-v1:edX+DemoX+2020_T2",
-                    "title": "Old Course 2",
-                },
+                make_local_course("course-v1:edX+DemoX+2020_T1", "Old Course 1"),
+                make_local_course("course-v1:edX+DemoX+2020_T2", "Old Course 2"),
             ],
             2,
             0,
@@ -208,32 +244,12 @@ def test_generate_program_certificate_success(user, program):
         (
             "all_unchanged",
             [
-                {
-                    "id": "course-v1:edX+DemoX+2020_T1",
-                    "name": "Existing Course 1",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                },
-                {
-                    "id": "course-v1:edX+DemoX+2020_T2",
-                    "name": "Existing Course 2",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                },
+                make_api_course("course-v1:edX+DemoX+2020_T1", "Existing Course 1"),
+                make_api_course("course-v1:edX+DemoX+2020_T2", "Existing Course 2"),
             ],
             [
-                {
-                    "courseware_id": "course-v1:edX+DemoX+2020_T1",
-                    "title": "Existing Course 1",
-                },
-                {
-                    "courseware_id": "course-v1:edX+DemoX+2020_T2",
-                    "title": "Existing Course 2",
-                },
+                make_local_course("course-v1:edX+DemoX+2020_T1", "Existing Course 1"),
+                make_local_course("course-v1:edX+DemoX+2020_T2", "Existing Course 2"),
             ],
             0,
             0,
@@ -245,8 +261,8 @@ def test_generate_program_certificate_success(user, program):
             "api_failure",
             [],
             [
-                {"courseware_id": "course-v1:edX+DemoX+2020_T1", "title": "Course 1"},
-                {"courseware_id": "course-v1:edX+DemoX+2020_T2", "title": "Course 2"},
+                make_local_course("course-v1:edX+DemoX+2020_T1", "Course 1"),
+                make_local_course("course-v1:edX+DemoX+2020_T2", "Course 2"),
             ],
             0,
             2,
@@ -258,8 +274,8 @@ def test_generate_program_certificate_success(user, program):
             "http_error",
             [],
             [
-                {"courseware_id": "course-v1:edX+DemoX+2020_T1", "title": "Course 1"},
-                {"courseware_id": "course-v1:edX+DemoX+2020_T2", "title": "Course 2"},
+                make_local_course("course-v1:edX+DemoX+2020_T1", "Course 1"),
+                make_local_course("course-v1:edX+DemoX+2020_T2", "Course 2"),
             ],
             0,
             2,
@@ -269,22 +285,8 @@ def test_generate_program_certificate_success(user, program):
         ),
         (
             "unknown_course",
-            [
-                {
-                    "id": "course-v1:edX+DemoX+UNKNOWN",
-                    "name": "Unknown Course",
-                    "start": "2098-01-01T00:00:00Z",
-                    "end": "2099-02-01T00:00:00Z",
-                    "enrollment_start": "2098-01-01T00:00:00Z",
-                    "enrollment_end": "2099-02-01T00:00:00Z",
-                },
-            ],
-            [
-                {
-                    "courseware_id": "course-v1:edX+DemoX+2020_T1",
-                    "title": "Existing Course",
-                },
-            ],
+            [make_api_course("course-v1:edX+DemoX+UNKNOWN", "Unknown Course")],
+            [make_local_course("course-v1:edX+DemoX+2020_T1", "Existing Course")],
             0,
             0,
             0,
@@ -296,9 +298,10 @@ def test_generate_program_certificate_success(user, program):
 def test_sync_course_runs(
     settings,
     mocker,
+    create_course_runs,
     test_scenario,
     api_response,
-    course_runs_data,
+    local_data,
     expected_success,
     expected_failure,
     expected_unchanged,
@@ -308,50 +311,8 @@ def test_sync_course_runs(
     """Test sync_course_runs with various scenarios using parameterization"""
     settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
 
-    mock_course_list = mocker.Mock()
-
-    if api_error == "HTTPError":
-        from requests.exceptions import HTTPError
-        from requests import Response
-
-        mock_response = mocker.Mock(spec=Response)
-        mock_response.status_code = 500
-        mock_response.reason = "Internal Server Error"
-        mock_course_list.get_courses.side_effect = HTTPError(response=mock_response)
-    elif api_error:
-        mock_course_list.get_courses.side_effect = api_error
-    else:
-        mocked_course_details = [
-            CourseDetail(course_data) for course_data in api_response
-        ]
-        mock_course_list.get_courses.return_value = mocked_course_details
-
-    mocker.patch(
-        "courses.utils.get_edx_api_course_list_client",
-        return_value=mock_course_list,
-    )
-
-    course_runs = []
-    if course_runs_data:
-        for course_data in course_runs_data:
-            course_run = CourseRunFactory.create(
-                courseware_id=course_data["courseware_id"],
-                title=course_data["title"],
-                start_date=datetime.strptime(
-                    "2098-01-01T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC),
-                end_date=datetime.strptime(
-                    "2099-02-01T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC),
-                enrollment_start=datetime.strptime(
-                    "2098-01-01T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC),
-                enrollment_end=datetime.strptime(
-                    "2099-02-01T00:00:00Z", "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC),
-                expiration_date=None,
-            )
-            course_runs.append(course_run)
+    mock_course_list = mock_course_list_api(mocker, api_response, api_error)
+    course_runs = create_course_runs(local_data)
 
     if save_error_index is not None:
         mocker.patch.object(
@@ -365,43 +326,31 @@ def test_sync_course_runs(
     if test_scenario == "empty_list":
         mock_course_list.get_courses.assert_not_called()
     elif not api_error:
-        expected_course_keys = [
-            course_data["courseware_id"] for course_data in course_runs_data
-        ]
         mock_course_list.get_courses.assert_called_once_with(
-            course_keys=expected_course_keys
+            course_keys=[c["courseware_id"] for c in local_data]
         )
     else:
         mock_course_list.get_courses.assert_called_once()
 
-    assert success_count == expected_success
-    assert failure_count == expected_failure
-    assert unchanged_count == expected_unchanged
+    assert (success_count, failure_count, unchanged_count) == (
+        expected_success,
+        expected_failure,
+        expected_unchanged,
+    )
 
     if expected_success > 0 and not api_error:
-        for i, course_data in enumerate(course_runs_data):
-            course_runs[i].refresh_from_db()
-
-            api_course_data = None
-            for api_data in api_response:
-                if api_data["id"] == course_data["courseware_id"]:
-                    api_course_data = api_data
-                    break
-
-            if api_course_data:
-                assert course_runs[i].title == api_course_data["name"]
-                assert course_runs[i].start_date == datetime.strptime(
-                    api_course_data["start"], "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC)
-                assert course_runs[i].end_date == datetime.strptime(
-                    api_course_data["end"], "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC)
-                assert course_runs[i].enrollment_start == datetime.strptime(
-                    api_course_data["enrollment_start"], "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC)
-                assert course_runs[i].enrollment_end == datetime.strptime(
-                    api_course_data["enrollment_end"], "%Y-%m-%dT%H:%M:%SZ"
-                ).replace(tzinfo=pytz.UTC)
+        for run in course_runs:
+            run.refresh_from_db()
+        for api_course in api_response:
+            matching_run = next(
+                (r for r in course_runs if r.courseware_id == api_course["id"]), None
+            )
+            if matching_run:
+                assert matching_run.title == api_course["name"]
+                assert matching_run.start_date == START_DT
+                assert matching_run.end_date == END_DT
+                assert matching_run.enrollment_start == START_DT
+                assert matching_run.enrollment_end == END_DT
 
 
 def test_catalog_visible_languages():
