@@ -280,14 +280,18 @@ def sync_course_runs(runs):
         return success_count, failure_count, unchanged_count
 
     try:
+        received_course_ids = set()
         for course_detail in api_client.get_courses(course_keys=course_keys):
-            run = runs_by_courseware_id.get(course_detail.course_id)
-            if not run:
+            received_course_ids.add(course_detail.course_id)
+
+            if course_detail.course_id not in runs_by_courseware_id:
                 log.warning(
-                    "Course detail received for unknown course: %s",
+                    "Course detail received for unrequested course: %s",
                     course_detail.course_id,
                 )
                 continue
+
+            run = runs_by_courseware_id[course_detail.course_id]
 
             has_changes = False
 
@@ -320,6 +324,13 @@ def sync_course_runs(runs):
                 # Report any validation or otherwise model errors
                 log.error("%s: %s", str(e), run.courseware_id)
                 failure_count += 1
+
+        missing_course_ids = set(course_keys) - received_course_ids
+        if missing_course_ids:
+            log.warning(
+                "No data received for requested courses: %s",
+                list(missing_course_ids),
+            )
 
     except HTTPError as e:
         failure_count = len(runs)
