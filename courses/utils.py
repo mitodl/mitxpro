@@ -4,11 +4,9 @@ Utilities for courses/certificates
 
 import logging
 
-from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 from requests.exceptions import HTTPError
-from rest_framework.status import HTTP_404_NOT_FOUND
 
 from courses.constants import PROGRAM_TEXT_ID_PREFIX
 from courses.models import (
@@ -20,7 +18,7 @@ from courses.models import (
     ProgramEnrollment,
     CourseLanguage,
 )
-from courseware.api import get_edx_api_course_detail_client
+from courseware.api import get_edx_api_course_list_client
 from mitxpro.utils import has_equal_properties, now_in_utc
 
 log = logging.getLogger(__name__)
@@ -252,7 +250,7 @@ def revoke_course_run_certificate(user, courseware_id, revoke_state):
 
 def sync_course_runs(runs):
     """
-    Sync course run dates and title from Open edX
+    Sync course run dates and title from Open edX using course list API
 
     Args:
         runs ([CourseRun]): list of CourseRun objects.
@@ -261,7 +259,7 @@ def sync_course_runs(runs):
         (int, int, int): A tuple containing the number of successful updates,
         failed updates, and unchanged course runs.
     """
-    api_client = get_edx_api_course_detail_client()
+    api_client = get_edx_api_course_list_client()
 
     success_count = 0
     failure_count = 0
@@ -275,25 +273,26 @@ def sync_course_runs(runs):
         "enrollment_end": "enrollment_end",
     }
 
-    # Iterate all eligible runs and sync if possible
-    for run in runs:
-        try:
-            course_detail = api_client.get_detail(
-                course_id=run.courseware_id,
-                username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
-            )
-        except HTTPError as e:
-            failure_count += 1
-            if e.response.status_code == HTTP_404_NOT_FOUND:
-                log.error(  # noqa: TRY400
-                    "Course not found on edX for readable id: %s", run.courseware_id
+    runs_by_courseware_id = {run.courseware_id: run for run in runs}
+    course_keys = list(runs_by_courseware_id.keys())
+
+    if not course_keys:
+        return success_count, failure_count, unchanged_count
+
+    try:
+        received_course_ids = set()
+        for course_detail in api_client.get_courses(course_keys=course_keys):
+            received_course_ids.add(course_detail.course_id)
+
+            if course_detail.course_id not in runs_by_courseware_id:
+                log.warning(
+                    "Course detail received for unrequested course: %s",
+                    course_detail.course_id,
                 )
-            else:
-                log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
-        except Exception as e:  # noqa: BLE001
-            failure_count += 1
-            log.error("%s: %s", str(e), run.courseware_id)  # noqa: TRY400
-        else:
+                continue
+
+            run = runs_by_courseware_id[course_detail.course_id]
+
             has_changes = False
 
             for api_field, model_field in field_mapping.items():
@@ -325,6 +324,20 @@ def sync_course_runs(runs):
                 # Report any validation or otherwise model errors
                 log.error("%s: %s", str(e), run.courseware_id)
                 failure_count += 1
+
+        missing_course_ids = set(course_keys) - received_course_ids
+        if missing_course_ids:
+            log.warning(
+                "No data received for requested courses: %s",
+                list(missing_course_ids),
+            )
+
+    except HTTPError as e:
+        failure_count = len(runs)
+        log.error("Bulk sync failed with HTTP error: %s", str(e))
+    except Exception as e:  # noqa: BLE001
+        failure_count = len(runs)
+        log.error("Bulk sync failed with unexpected error: %s", str(e))
 
     return success_count, failure_count, unchanged_count
 
