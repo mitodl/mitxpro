@@ -1,0 +1,101 @@
+# Wagtail API Documentation
+
+This document describes the usage of the Wagtail-powered API for accessing course, program, and related metadata in xPRO.
+
+## Overview
+
+The Wagtail API exposes course, program, and related content as JSON.
+
+**Base URL:**
+
+- Local: `http://xpro.odl.local:8053/api/v2/`
+- Staging/RC: `https://rc.xpro.mit.edu/api/v2/`
+- Production: `https://xpro.mit.edu/api/v2/`
+
+## Course and Program Lists
+
+- **Internal Course List:**
+  - `/pages/?fields=*&type=cms.coursepage`
+- **External Course List:**
+  - `/pages/?fields=*&type=cms.externalcoursepage`
+- **Program List:**
+  - `/pages/?fields=*&type=cms.programpage`
+- **External Program List:**
+  - `/pages/?fields=*&type=cms.externalprogrampage`
+
+All list endpoints are paginated (default: 20 per page). Use `limit` and `offset` query parameters to control pagination:
+
+- `?limit=50&offset=20`
+
+## Filtering by Readable ID
+
+To fetch details for a specific course or program, filter by the `readable_id` field:
+
+```
+GET /pages/?fields=*&readable_id=<readable_id>&type=cms.CoursePage
+```
+
+Replace `<readable_id>` with the desired value, e.g.:
+
+```
+GET /pages/?fields=*&readable_id=course-v1:edX+DemoX+Demo_Course&type=cms.CoursePage
+```
+
+Supported types:
+
+- `cms.CoursePage`
+- `cms.ProgramPage`
+- `cms.ExternalCoursePage`
+- `cms.ExternalProgramPage`
+
+## Accessing Images and Documents
+
+- **Images:** `/images/`
+- **Documents:** `/documents/`
+
+## Field Selection
+
+Use the `fields=*` query parameter to include all available fields in the response.
+
+## Accessing the API (OAuth2 Authentication)
+
+Access to the Wagtail API requires staff authentication using OAuth2. To get started, you will need (ask xPRO developers):
+
+- **Client ID** and **Client Secret**
+- **Username** and **Password** for a staff user
+
+### 1. Obtain an Access Token
+
+Use the OAuth2 Resource Owner Password Credentials grant to obtain a token:
+
+```
+curl -X POST </oauth2/token/ \
+  -d "grant_type=password" \
+  -d "username=<your-username>" \
+  -d "password=<your-password>" \
+  -d "client_id=<your-client-id>" \
+  -d "client_secret=<your-client-secret>"
+```
+
+The response will include an `access_token` and `refresh_token`.
+
+### 2. Use the Access Token
+
+Include the access token in the `Authorization` header for all API requests:
+
+```
+curl -H "Authorization: Bearer <access_token>" \
+     https://<your-domain>/api/v2/pages/?fields=*&type=cms.coursepage
+```
+
+You should receive a JSON response if your credentials and token are valid.
+
+## Notes
+
+- The API is staff-only and requires OAuth2 authentication.
+- The base URL will differ depending on your environment (local, staging, production).
+- For more details on the available fields and structure, inspect the API responses or refer to the Wagtail API documentation.
+
+## References
+
+- [Wagtail API v2 Documentation](https://docs.wagtail.org/en/6.4/advanced_topics/api/v2/usage.html)
