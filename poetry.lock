@@ -1038,21 +1038,21 @@ testing = ["django-modelcluster"]
 
 [[package]]
 name = "django-redis"
-version = "5.4.0"
+version = "6.0.0"
 description = "Full featured redis cache backend for Django."
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.9"
 files = [
-    {file = "django-redis-5.4.0.tar.gz", hash = "sha256:6a02abaa34b0fea8bf9b707d2c363ab6adc7409950b2db93602e6cb292818c42"},
-    {file = "django_redis-5.4.0-py3-none-any.whl", hash = "sha256:ebc88df7da810732e2af9987f7f426c96204bf89319df4c6da6ca9a2942edd5b"},
+    {file = "django_redis-6.0.0-py3-none-any.whl", hash = "sha256:20bf0063a8abee567eb5f77f375143c32810c8700c0674ced34737f8de4e36c0"},
+    {file = "django_redis-6.0.0.tar.gz", hash = "sha256:2d9cb12a20424a4c4dde082c6122f486628bae2d9c2bee4c0126a4de7fda00dd"},
 ]
 
 [package.dependencies]
-Django = ">=3.2"
-redis = ">=3,<4.0.0 || >4.0.0,<4.0.1 || >4.0.1"
+Django = ">=4.2"
+redis = ">=4.0.2"
 
 [package.extras]
-hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
+hiredis = ["redis[hiredis] (>=4.0.2)"]
 
 [[package]]
 name = "django-robots"
@@ -2337,18 +2337,18 @@ social-auth-app-django = ">=5.4.0"
 
 [[package]]
 name = "mitol-django-common"
-version = "2025.6.20"
+version = "2025.8.1"
 description = "MIT Open Learning django app extensions for common utilities"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "mitol_django_common-2025.6.20-py3-none-any.whl", hash = "sha256:a3a1d2ed1570cf905132651ab1338cf30924904c6f4d98af62e80cf9a25d4f54"},
-    {file = "mitol_django_common-2025.6.20.tar.gz", hash = "sha256:5060a99537a571ec8e5b94a3972161a318ae60dc7df4154ebcc8cb5f29cfbdbb"},
+    {file = "mitol_django_common-2025.8.1-py3-none-any.whl", hash = "sha256:ead6f112611007420683e73f449fe801d27a76513040b43cfe53e0ae7e3fff63"},
+    {file = "mitol_django_common-2025.8.1.tar.gz", hash = "sha256:67b306ed8f9f7ebd19635c39d30200e2d03e3f321e077c6ff7a4c87a663a1bcb"},
 ]
 
 [package.dependencies]
 django = ">=3.0"
-django-redis = ">=5.0,<6.0"
+django-redis = ">=6.0,<7.0"
 django-stubs = ">=1.13.1"
 django-webpack-loader = ">=0.7.0"
 factory-boy = ">=3.2,<4.0"
@@ -4511,4 +4511,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.7"
-content-hash = "f6020c0f7dc297e5aa9ce939a4d404722a407cea0f4de90eb73b68b63ba173d6"
+content-hash = "b99557df3096566bd4f2dc1385b5e74ec76217aadc55d6025a45b4cafae29052"
