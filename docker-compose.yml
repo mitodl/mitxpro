@@ -21,7 +21,7 @@ x-extra-hosts: &default-extra-hosts
 
 services:
   db:
-    image: postgres:17.5
+    image: postgres:17.6
     environment:
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
     ports:
