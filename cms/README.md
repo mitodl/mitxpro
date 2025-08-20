@@ -59,36 +59,7 @@ Use the `fields=*` query parameter to include all available fields in the respon
 
 ## Accessing the API (OAuth2 Authentication)
 
-Access to the Wagtail API requires staff authentication using OAuth2. To get started, you will need (ask xPRO developers):
-
-- **Client ID** and **Client Secret**
-- **Username** and **Password** for a staff user
-
-### 1. Obtain an Access Token
-
-Use the OAuth2 Resource Owner Password Credentials grant to obtain a token:
-
-```
-curl -X POST </oauth2/token/ \
-  -d "grant_type=password" \
-  -d "username=<your-username>" \
-  -d "password=<your-password>" \
-  -d "client_id=<your-client-id>" \
-  -d "client_secret=<your-client-secret>"
-```
-
-The response will include an `access_token` and `refresh_token`.
-
-### 2. Use the Access Token
-
-Include the access token in the `Authorization` header for all API requests:
-
-```
-curl -H "Authorization: Bearer <access_token>" \
-     https://<your-domain>/api/v2/pages/?fields=*&type=cms.coursepage
-```
-
-You should receive a JSON response if your credentials and token are valid.
+Access to the Wagtail API requires staff authentication using OAuth2.
 
 ## Notes
 
