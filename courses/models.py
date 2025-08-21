@@ -628,7 +628,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         if original.is_external == self.is_external:
             return
 
-        if getattr(self, "coursepage", None):
+        if getattr(self, "coursepage", None) and self.is_external:
             raise ValidationError(
                 {
                     "is_external": (
@@ -636,7 +636,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                     )
                 }
             )
-        elif getattr(self, "externalcoursepage", None):
+        elif getattr(self, "externalcoursepage", None) and not self.is_external:
             raise ValidationError(
                 {
                     "is_external": (
