@@ -4,6 +4,7 @@ Tests for signals
 
 from datetime import timedelta, datetime
 import pytz
+import re
 
 import factory
 import pytest
@@ -11,6 +12,7 @@ from edx_api.course_detail import CourseDetail
 from requests.exceptions import HTTPError
 from requests import Response
 
+from courses.constants import COURSE_KEY_PATTERN
 from courses.factories import (
     CourseFactory,
     CourseRunFactory,
@@ -293,6 +295,24 @@ def test_generate_program_certificate_success(user, program):
             None,
             None,
         ),
+        (
+            "invalid_course_keys",
+            [
+                make_api_course("course-v1:edX+DemoX+2020_T1", "Updated Course 1"),
+                make_api_course("course-v1:edX+DemoX+2020_T2", "Updated Course 2"),
+            ],
+            [
+                make_local_course("course-v1:edX+DemoX+2020_T1", "Old Course 1"),
+                make_local_course("invalid-course-key", "Invalid Course 1"),
+                make_local_course("course-v1:missing+part", "Invalid Course 2"),
+                make_local_course("course-v1:edX+DemoX+2020_T2", "Old Course 2"),
+            ],
+            2,
+            0,
+            0,
+            None,
+            None,
+        ),
     ],
 )
 def test_sync_course_runs(
@@ -325,9 +345,18 @@ def test_sync_course_runs(
 
     if test_scenario == "empty_list":
         mock_course_list.get_courses.assert_not_called()
+    elif test_scenario == "invalid_course_keys":
+        valid_course_keys = [
+            data["courseware_id"]
+            for data in local_data
+            if re.match(COURSE_KEY_PATTERN, data["courseware_id"])
+        ]
+        mock_course_list.get_courses.assert_called_once_with(
+            course_keys=valid_course_keys
+        )
     elif not api_error:
         mock_course_list.get_courses.assert_called_once_with(
-            course_keys=[c["courseware_id"] for c in local_data]
+            course_keys=[data["courseware_id"] for data in local_data]
         )
     else:
         mock_course_list.get_courses.assert_called_once()

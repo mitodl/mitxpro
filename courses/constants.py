@@ -39,3 +39,5 @@ COURSE_BG_IMG_WAGTAIL_FILL = "fill-{}x{}".format(*COURSE_BG_IMG_W_H)
 
 COURSE_BG_IMG_MOBILE_W_H = (1024, 350)
 COURSE_BG_IMG_MOBILE_WAGTAIL_FILL = "fill-{}x{}".format(*COURSE_BG_IMG_MOBILE_W_H)
+
+COURSE_KEY_PATTERN = r"^course-v1:[^+]+\+[^+]+\+[^+]+$"

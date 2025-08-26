@@ -6,9 +6,10 @@ import logging
 
 from django.db import transaction
 from django.db.models import Q
+import re
 from requests.exceptions import HTTPError
 
-from courses.constants import PROGRAM_TEXT_ID_PREFIX
+from courses.constants import PROGRAM_TEXT_ID_PREFIX, COURSE_KEY_PATTERN
 from courses.models import (
     CourseRun,
     CourseRunCertificate,
@@ -273,15 +274,27 @@ def sync_course_runs(runs):
         "enrollment_end": "enrollment_end",
     }
 
-    runs_by_courseware_id = {run.courseware_id: run for run in runs}
-    course_keys = list(runs_by_courseware_id.keys())
+    runs_by_courseware_id = {}
+    invalid_course_keys = []
 
-    if not course_keys:
-        return success_count, failure_count, unchanged_count
+    for run in runs:
+        if re.match(COURSE_KEY_PATTERN, run.courseware_id):
+            runs_by_courseware_id[run.courseware_id] = run
+        else:
+            invalid_course_keys.append(run.courseware_id)
+
+    if invalid_course_keys:
+        log.warning("Skipping invalid course keys: %s", invalid_course_keys)
+
+    if not runs_by_courseware_id:
+        log.warning("No valid course keys found to sync")
+        return 0, len(runs), 0
+
+    valid_course_keys = list(runs_by_courseware_id.keys())
 
     try:
         received_course_ids = set()
-        for course_detail in api_client.get_courses(course_keys=course_keys):
+        for course_detail in api_client.get_courses(course_keys=valid_course_keys):
             received_course_ids.add(course_detail.course_id)
 
             if course_detail.course_id not in runs_by_courseware_id:
@@ -325,7 +338,7 @@ def sync_course_runs(runs):
                 log.error("%s: %s", str(e), run.courseware_id)
                 failure_count += 1
 
-        missing_course_ids = set(course_keys) - received_course_ids
+        missing_course_ids = set(valid_course_keys) - received_course_ids
         if missing_course_ids:
             log.warning(
                 "No data received for requested courses: %s",
@@ -333,10 +346,10 @@ def sync_course_runs(runs):
             )
 
     except HTTPError as e:
-        failure_count = len(runs)
+        failure_count = len(runs_by_courseware_id)
         log.error("Bulk sync failed with HTTP error: %s", str(e))
     except Exception as e:  # noqa: BLE001
-        failure_count = len(runs)
+        failure_count = len(runs_by_courseware_id)
         log.error("Bulk sync failed with unexpected error: %s", str(e))
 
     return success_count, failure_count, unchanged_count
