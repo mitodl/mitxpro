@@ -274,25 +274,23 @@ def sync_course_runs(runs):
         "enrollment_end": "enrollment_end",
     }
 
-    valid_course_keys = []
+    runs_by_courseware_id = {}
     invalid_course_keys = []
 
     for run in runs:
         if re.match(COURSE_KEY_PATTERN, run.courseware_id):
-            valid_course_keys.append(run.courseware_id)
+            runs_by_courseware_id[run.courseware_id] = run
         else:
             invalid_course_keys.append(run.courseware_id)
 
     if invalid_course_keys:
         log.warning("Skipping invalid course keys: %s", invalid_course_keys)
 
-    if not valid_course_keys:
+    if not runs_by_courseware_id:
         log.warning("No valid course keys found to sync")
         return 0, len(runs), 0
 
-    runs_by_courseware_id = {
-        run.courseware_id: run for run in runs if run.courseware_id in valid_course_keys
-    }
+    valid_course_keys = list(runs_by_courseware_id.keys())
 
     try:
         received_course_ids = set()
@@ -348,10 +346,10 @@ def sync_course_runs(runs):
             )
 
     except HTTPError as e:
-        failure_count = len(runs)
+        failure_count = len(runs_by_courseware_id)
         log.error("Bulk sync failed with HTTP error: %s", str(e))
     except Exception as e:  # noqa: BLE001
-        failure_count = len(runs)
+        failure_count = len(runs_by_courseware_id)
         log.error("Bulk sync failed with unexpected error: %s", str(e))
 
     return success_count, failure_count, unchanged_count
