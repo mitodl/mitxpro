@@ -1,6 +1,38 @@
 Release Notes
 =============
 
+Version 0.184.3
+---------------
+
+- fix: pass service worker for course sync (#3650)
+- fix: add course key validation and invalid course tracking (#3647)
+- fix: condition of is_external attribute change in course (#3646)
+- chore(deps): update redis docker tag to v8.2.1 (#3642)
+- chore(deps): update node.js to v22.18.0 (#3640)
+- fix(deps): update dependency google-api-python-client to v2.179.0 (#3643)
+- chore(deps): update actions/checkout action to v5 (#3644)
+- feat: add bulk course sync with edX course list API (#3628)
+- [pre-commit.ci] pre-commit autoupdate (#3645)
+- chore(deps): update django redis and mitol-django-common (#3632)
+- chore(deps): update postgres docker tag to v17.6 (#3641)
+- fix(deps): update python to v3.13.7 (#3639)
+- fix(deps): update dependency djangorestframework to v3.16.1 (#3638)
+- fix(deps): update dependency django-hijack to v3.7.4 (#3637)
+- fix(deps): update dependency boto3 to v1.40.12 (#3636)
+- chore(deps): update nginx docker tag to v1.29.1 (#3635)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9.1.2 (#3634)
+- chore(deps): update dependency freezegun to v1.5.5 (#3633)
+- fix: remove other format from cms (#3630)
+- [pre-commit.ci] pre-commit autoupdate (#3631)
+- fix(deps): update dependency @sentry/browser to v10 (#3627)
+- [pre-commit.ci] pre-commit autoupdate (#3629)
+- fix(deps): update dependency edx-api-client to v1.12.0 (#3625)
+- fix(deps): update dependency boto3 to v1.40.2 (#3624)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9.1.0 (#3623)
+- chore(deps): update dependency faker to v37.5.3 (#3622)
+- fix(deps): update dependency django-anymail to v13.0.1 (#3621)
+- chore(deps): update dependency freezegun to v1.5.4 (#3620)
+
 Version 0.184.2 (Released August 05, 2025)
 ---------------
 
