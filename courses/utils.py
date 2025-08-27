@@ -4,6 +4,7 @@ Utilities for courses/certificates
 
 import logging
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
 import re
@@ -294,7 +295,10 @@ def sync_course_runs(runs):
 
     try:
         received_course_ids = set()
-        for course_detail in api_client.get_courses(course_keys=valid_course_keys):
+        for course_detail in api_client.get_courses(
+            course_keys=valid_course_keys,
+            username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
+        ):
             received_course_ids.add(course_detail.course_id)
 
             if course_detail.course_id not in runs_by_courseware_id:
