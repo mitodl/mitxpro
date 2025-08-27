@@ -352,11 +352,11 @@ def test_sync_course_runs(
             if re.match(COURSE_KEY_PATTERN, data["courseware_id"])
         ]
         mock_course_list.get_courses.assert_called_once_with(
-            course_keys=valid_course_keys
+            course_keys=valid_course_keys, username=None
         )
     elif not api_error:
         mock_course_list.get_courses.assert_called_once_with(
-            course_keys=[data["courseware_id"] for data in local_data]
+            course_keys=[data["courseware_id"] for data in local_data], username=None
         )
     else:
         mock_course_list.get_courses.assert_called_once()
