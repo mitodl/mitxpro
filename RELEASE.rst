@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.184.3
+Version 0.184.3 (Released August 27, 2025)
 ---------------
 
 - fix: pass service worker for course sync (#3650)
