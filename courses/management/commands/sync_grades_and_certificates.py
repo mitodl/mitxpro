@@ -2,6 +2,8 @@
 Management command to sync grades and certificates for a course run
 """
 
+import logging
+
 from django.core.management.base import BaseCommand, CommandError
 
 from courses.models import CourseRun
@@ -9,6 +11,8 @@ from courses.utils import ensure_course_run_grade, process_course_run_grade_cert
 from courseware.api import get_edx_grades_with_users
 from mitxpro.utils import now_in_utc
 from users.api import fetch_user
+
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -91,6 +95,15 @@ class Command(BaseCommand):
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
 
+        has_certificate_page = (
+            run.course.page is not None and run.course.page.certificate_page is not None
+        )
+        if not has_certificate_page:
+            log.exception(
+                "Course run %s has no certificate page. Will skip certificate generation.",
+                run,
+            )
+
         results = []
         for edx_grade, user in edx_grade_user_iter:
             try:
@@ -112,9 +125,14 @@ class Command(BaseCommand):
                     course_run_grade.set_by_admin = True
                     course_run_grade.save_and_log(None)
 
-                _, created_cert, deleted_cert = process_course_run_grade_certificate(
-                    course_run_grade=course_run_grade
-                )
+                if has_certificate_page:
+                    _, created_cert, deleted_cert = (
+                        process_course_run_grade_certificate(
+                            course_run_grade=course_run_grade
+                        )
+                    )
+                else:
+                    created_cert, deleted_cert = False, False
             except Exception as e:  # noqa: BLE001
                 self.stdout.write(
                     self.style.ERROR(
