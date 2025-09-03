@@ -2337,13 +2337,13 @@ social-auth-app-django = ">=5.4.0"
 
 [[package]]
 name = "mitol-django-common"
-version = "2025.8.1"
+version = "2025.8.19"
 description = "MIT Open Learning django app extensions for common utilities"
 optional = false
 python-versions = ">=3.10"
 files = [
-    {file = "mitol_django_common-2025.8.1-py3-none-any.whl", hash = "sha256:ead6f112611007420683e73f449fe801d27a76513040b43cfe53e0ae7e3fff63"},
-    {file = "mitol_django_common-2025.8.1.tar.gz", hash = "sha256:67b306ed8f9f7ebd19635c39d30200e2d03e3f321e077c6ff7a4c87a663a1bcb"},
+    {file = "mitol_django_common-2025.8.19-py3-none-any.whl", hash = "sha256:c7ab243b40eac7afc43d8060bfe8993424e4a49c65d0394063ed15bf4bf40d5c"},
+    {file = "mitol_django_common-2025.8.19.tar.gz", hash = "sha256:69d52c956435180e5c0a46cc086a467d0aa20e06b64ad9253e30f4dd46fa3d62"},
 ]
 
 [package.dependencies]
@@ -4511,4 +4511,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.7"
-content-hash = "69c535b398dcf2858c2f27eaf364abf64972bc441eebdf720218c5cea438533d"
+content-hash = "48521c31b274729099e93d46de56cf281424fb87ed07828df39159c4e7473f2b"
