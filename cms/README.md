@@ -6,11 +6,9 @@ This document describes the usage of the Wagtail-powered API for accessing cours
 
 The Wagtail API exposes course, program, and related content as JSON.
 
-**Base URL:**
+**API Endpoint:**
 
-- Local: `http://xpro.odl.local:8053/api/v2/`
-- Staging/RC: `https://rc.xpro.mit.edu/api/v2/`
-- Production: `https://xpro.mit.edu/api/v2/`
+- Path: `/api/v2/`
 
 ## Course and Program Lists
 
@@ -89,12 +87,6 @@ curl -H "Authorization: Bearer <access_token>" \
 ```
 
 You should receive a JSON response if your credentials and token are valid.
-
-## Notes
-
-- The API is staff-only and requires OAuth2 authentication.
-- The base URL will differ depending on your environment (local, staging, production).
-- For more details on the available fields and structure, inspect the API responses or refer to the Wagtail API documentation.
 
 ## References
 
