@@ -57,7 +57,30 @@ Use the `fields=*` query parameter to include all available fields in the respon
 
 ## Accessing the API (OAuth2 Authentication)
 
-Access to the Wagtail API requires staff authentication using OAuth2. To get started, you will need (ask xPRO developers):
+Access to the Wagtail API requires staff authentication using OAuth2.
+
+### For Local Development
+
+#### Create a Staff User
+
+1. In Django admin, go to **Users** and create a new user with `is_staff=True` and `is_active=True`
+2. Set a password for the user
+
+#### Create an OAuth2 Application
+
+1. In Django admin, add a new **Application** (under "OAuth2 Provider")
+2. Fill in:
+   - **Name**: (e.g., "Wagtail API Test")
+   - **User**: (the staff user you just created)
+   - **Client type**: `Confidential`
+   - **Authorization grant type**: `Resource owner password-based`
+   - **Check Skip Authorization**
+   - **Redirect URIs**: (leave blank for password grant)
+3. Save and note the **Client ID** and **Client Secret**
+
+### For Production/Staging
+
+Ask xPRO developers for:
 
 - **Client ID** and **Client Secret**
 - **Username** and **Password** for a staff user
