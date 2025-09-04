@@ -1126,6 +1126,22 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
 
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
         if not self.certificate_page_revision:
+            if not self.course_run.course.page:
+                raise ValidationError(
+                    {
+                        "course_run": (
+                            "The course run's course is not associated with a course page."
+                        )
+                    }
+                )
+            elif not self.course_run.course.page.certificate_page:
+                raise ValidationError(
+                    {
+                        "course_run": (
+                            "No certificate page is associated with the course run's course."
+                        )
+                    }
+                )
             return
 
         certpage = CertificatePage.objects.filter(
@@ -1205,6 +1221,18 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
 
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
         if not self.certificate_page_revision:
+            if not self.program.page:
+                raise ValidationError(
+                    {"program": ("The program is not associated with a program page.")}
+                )
+            elif not self.program.page.certificate_page:
+                raise ValidationError(
+                    {
+                        "program": (
+                            "No certificate page is associated with the program's page."
+                        )
+                    }
+                )
             return
 
         certpage = CertificatePage.objects.filter(

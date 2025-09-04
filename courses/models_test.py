@@ -29,6 +29,7 @@ from courses.factories import (
     ProgramFactory,
     ProgramRunFactory,
 )
+from cms.models import CoursePage, CertificatePage, ProgramPage
 from courses.models import CourseRunEnrollment, limit_to_certificate_pages
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
@@ -441,45 +442,98 @@ def test_certificate_revision_choice_limits():
     assert str(program_certificate_page.id) in choices["object_id__in"]
 
 
-def test_certificate_validations():
+@pytest.mark.parametrize(
+    ("has_cms_page", "has_certificate_page"),
+    [
+        (True, True),
+        (True, False),
+        (False, False),
+    ],
+)
+def test_certificate_validations(has_cms_page, has_certificate_page):
     """
     Test that the certificate models throw a proper error if the selected revision is invalid w.r.t
     courseware run selection
     """
     course_runs = CourseRunFactory.create_batch(2)
     programs = ProgramFactory.create_batch(2)
+    if not has_certificate_page:
+        CertificatePage.objects.all().delete()
+    if not has_cms_page:
+        CoursePage.objects.all().delete()
+        ProgramPage.objects.all().delete()
+        course_runs[0].course.coursepage = None
+        programs[0].programpage = None
 
-    course_runs[0].course.page.certificate_page.save_revision()
-    course_runs[1].course.page.certificate_page.save_revision()
+    if has_certificate_page:
+        course_runs[0].course.page.certificate_page.save_revision()
+        course_runs[1].course.page.certificate_page.save_revision()
 
-    programs[0].page.certificate_page.save_revision()
-    programs[1].page.certificate_page.save_revision()
+        programs[0].page.certificate_page.save_revision()
+        programs[1].page.certificate_page.save_revision()
 
-    course_certificate = CourseRunCertificateFactory(
-        course_run=course_runs[0],
-        certificate_page_revision=course_runs[
-            1
-        ].course.page.certificate_page.get_latest_revision(),
-    )
-    program_certificate = ProgramCertificateFactory(
-        program=programs[0],
-        certificate_page_revision=programs[
-            1
-        ].page.certificate_page.get_latest_revision(),
-    )
+    if has_cms_page and has_certificate_page:
+        course_certificate = CourseRunCertificateFactory(
+            course_run=course_runs[0],
+            certificate_page_revision=course_runs[
+                1
+            ].course.page.certificate_page.get_latest_revision(),
+        )
+        program_certificate = ProgramCertificateFactory(
+            program=programs[0],
+            certificate_page_revision=programs[
+                1
+            ].page.certificate_page.get_latest_revision(),
+        )
 
-    # When the revision doesn't match the courseware
-    with pytest.raises(
-        ValidationError,
-        match=f"The selected certificate page {course_certificate} is not for this course {course_runs[0].course}.",
-    ):
-        course_certificate.clean()
+        # When the revision doesn't match the courseware
+        with pytest.raises(
+            ValidationError,
+            match=f"The selected certificate page {course_certificate} is not for this course {course_runs[0].course}.",
+        ):
+            course_certificate.clean()
 
-    with pytest.raises(
-        ValidationError,
-        match=f"The selected certificate page {program_certificate} is not for this program {programs[0]}.",
-    ):
-        program_certificate.clean()
+        with pytest.raises(
+            ValidationError,
+            match=f"The selected certificate page {program_certificate} is not for this program {programs[0]}.",
+        ):
+            program_certificate.clean()
+    elif has_cms_page and not has_certificate_page:
+        with pytest.raises(ValidationError) as exc:
+            CourseRunCertificateFactory(
+                course_run=course_runs[0],
+                certificate_page_revision=None,
+            ).clean()
+
+        assert "No certificate page is associated with the course run's course." in str(
+            exc.value
+        )
+
+        with pytest.raises(ValidationError) as exc:
+            ProgramCertificateFactory(
+                program=programs[0],
+                certificate_page_revision=None,
+            ).clean()
+        assert "No certificate page is associated with the program's page." in str(
+            exc.value
+        )
+    else:
+        with pytest.raises(ValidationError) as exc:
+            course_runs[0].refresh_from_db()
+            CourseRunCertificateFactory(
+                course_run=course_runs[0],
+                certificate_page_revision=None,
+            ).clean()
+        assert "The course run's course is not associated with a course page." in str(
+            exc.value
+        )
+
+        with pytest.raises(ValidationError) as exc:
+            ProgramCertificateFactory(
+                program=programs[0],
+                certificate_page_revision=None,
+            ).clean()
+        assert "The program is not associated with a program page." in str(exc.value)
 
 
 def test_course_run_certificate_start_end_dates():
