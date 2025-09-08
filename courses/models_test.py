@@ -961,3 +961,18 @@ def test_prevent_is_external_update_after_course_page_attachment(
     course.is_external = not course.is_external
     with pytest.raises(ValidationError):
         course.save()
+
+
+def test_course_run_has_certificate_page():
+    """
+    Tests that CourseRun.has_certificate_page return True if the related course has a course page
+    with a certificate page attached.
+    """
+    course_run = CourseRunFactory.create(course__page=None)
+    assert not course_run.has_certificate_page
+
+    CoursePageFactory.create(certificate_page=None, course=course_run.course)
+    assert not course_run.has_certificate_page
+
+    CertificatePageFactory.create(parent=course_run.course.page)
+    assert course_run.has_certificate_page

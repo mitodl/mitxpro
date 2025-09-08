@@ -774,6 +774,14 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         """List instructors for a course run if they are specified in a related CMS page"""
         return self.course.instructors
 
+    @property
+    def has_certificate_page(self):
+        """Returns True if the course run's course has a certificate page"""
+        return (
+            self.course.page is not None
+            and self.course.page.certificate_page is not None
+        )
+
     def __str__(self):
         title = f"{self.courseware_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004

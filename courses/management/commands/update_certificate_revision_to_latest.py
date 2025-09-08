@@ -71,10 +71,10 @@ class Command(BaseCommand):
         if options.get("all"):
             confirm = input(
                 self.style.WARNING(
-                    "Do you want to update all certificates?\nNOTE: It will update certificate revision to latest revision for all certificates.\nPlease confirm with Y/N: "
+                    "Do you want to update all certificates?\nNOTE: It will update certificate revision to the latest revision for all certificates.\nEnter Y/Yes to confirm: "
                 )
             )
-            if confirm.strip().lower() != "y":
+            if confirm.strip().lower() != "y" or confirm.strip().lower() != "yes":
                 self.stdout.write(self.style.ERROR("Operation cancelled."))
                 return
             filter_kwargs = {}

@@ -96,13 +96,14 @@ def test_task_generate_course_certificates(mocker, has_cert_page):
 
     generate_course_certificates.delay()
 
-    mock_get_edx_grades.assert_called()
-    mock_ensure_grades.assert_called()
     if has_cert_page:
         mock_process_grades.assert_called()
+        mock_get_edx_grades.assert_called()
+        mock_ensure_grades.assert_called()
+        assert mock_get_edx_grades.call_count == len(course_runs)
+        for run in course_runs:
+            mock_get_edx_grades.assert_any_call(run)
     else:
         mock_process_grades.assert_not_called()
-
-    assert mock_get_edx_grades.call_count == len(course_runs)
-    for run in course_runs:
-        mock_get_edx_grades.assert_any_call(run)
+        mock_get_edx_grades.assert_not_called()
+        mock_ensure_grades.assert_not_called()

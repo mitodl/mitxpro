@@ -95,11 +95,8 @@ class Command(BaseCommand):
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
 
-        has_certificate_page = (
-            run.course.page is not None and run.course.page.certificate_page is not None
-        )
-        if not has_certificate_page:
-            log.exception(
+        if not run.has_certificate_page:
+            CommandError(
                 "Course run %s has no certificate page. Will skip certificate generation.",
                 run,
             )
@@ -125,14 +122,9 @@ class Command(BaseCommand):
                     course_run_grade.set_by_admin = True
                     course_run_grade.save_and_log(None)
 
-                if has_certificate_page:
-                    _, created_cert, deleted_cert = (
-                        process_course_run_grade_certificate(
-                            course_run_grade=course_run_grade
-                        )
-                    )
-                else:
-                    created_cert, deleted_cert = False, False
+                _, created_cert, deleted_cert = process_course_run_grade_certificate(
+                    course_run_grade=course_run_grade
+                )
             except Exception as e:  # noqa: BLE001
                 self.stdout.write(
                     self.style.ERROR(
