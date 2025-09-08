@@ -62,7 +62,6 @@ def generate_course_certificates():
             0,
             0,
         )
-
         for edx_grade, user in edx_grade_user_iter:
             course_run_grade, created, updated = ensure_course_run_grade(
                 user=user, course_run=run, edx_grade=edx_grade, should_update=True

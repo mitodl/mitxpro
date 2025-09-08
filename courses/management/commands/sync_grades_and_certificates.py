@@ -96,7 +96,7 @@ class Command(BaseCommand):
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
 
         if not run.has_certificate_page:
-            CommandError(
+            raise CommandError(
                 "Course run %s has no certificate page. Will skip certificate generation.",
                 run,
             )
