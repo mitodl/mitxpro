@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.184.4
+---------------
+
+- fix(deps): update dependency django to v4.2.24 (#3654)
+- docs: add wagtail API usage guide (#3607)
+- fix(deps): update dependency mitol-django-common to v2025.8.19 (#3653)
+
 Version 0.184.3 (Released August 27, 2025)
 ---------------
 
