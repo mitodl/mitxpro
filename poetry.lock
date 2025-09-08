@@ -1160,17 +1160,6 @@ files = [
 Django = ">=3.2"
 
 [[package]]
-name = "django-templated-mail"
-version = "1.1.1"
-description = "Send emails using Django template system."
-optional = false
-python-versions = "*"
-files = [
-    {file = "django-templated-mail-1.1.1.tar.gz", hash = "sha256:8db807effebb42a532622e2d142dfd453dafcd0d7794c4c3332acb90656315f9"},
-    {file = "django_templated_mail-1.1.1-py3-none-any.whl", hash = "sha256:f7127e1e31d7cad4e6c4b4801d25814d4b8782627ead76f4a75b3b7650687556"},
-]
-
-[[package]]
 name = "django-treebeard"
 version = "4.7.1"
 description = "Efficient tree implementations for Django"
@@ -1250,18 +1239,17 @@ test = ["cryptography", "freezegun", "pytest", "pytest-cov", "pytest-django", "p
 
 [[package]]
 name = "djoser"
-version = "2.2.2"
+version = "2.3.1"
 description = "REST implementation of Django authentication system."
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "djoser-2.2.2-py3-none-any.whl", hash = "sha256:efb91ad61e4d5b8d664db029b5947df9d34078289ef2680a1ab665e047144b74"},
-    {file = "djoser-2.2.2.tar.gz", hash = "sha256:9deb831a1c8781ceff325699e1407b4e1be8b4588e87071621d88ba31c09349f"},
+    {file = "djoser-2.3.1-py3-none-any.whl", hash = "sha256:386f337b9e05cb82354525fe2b6fec19fb1743e93e53b5b4b9dfaffccc38789f"},
+    {file = "djoser-2.3.1.tar.gz", hash = "sha256:4e7e2716b5b961f1289b5e49b2216ba5c18eb2a3b4b597dd6430638716ff5107"},
 ]
 
 [package.dependencies]
 django = ">=3.0.0"
-django-templated-mail = ">=1.1.1,<2.0.0"
 djangorestframework-simplejwt = ">=5.0,<6.0"
 social-auth-app-django = ">=5.0.0,<6.0.0"
 
@@ -2318,23 +2306,27 @@ files = [
 
 [[package]]
 name = "mitol-django-authentication"
-version = "2023.12.19"
+version = "2025.3.17"
 description = "MIT Open Learning django app extensions for oauth toolkit"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 files = [
-    {file = "mitol-django-authentication-2023.12.19.tar.gz", hash = "sha256:67502ec0ec91f5be36affed52e872726d1d9f528a35f8c9fce2179409e516cb7"},
-    {file = "mitol_django_authentication-2023.12.19-py3-none-any.whl", hash = "sha256:f925ff2e76cfd93e7610168fcb3cd6b2d0ece1772f0f3af0217c1417b8bd4f84"},
+    {file = "mitol_django_authentication-2025.3.17-py3-none-any.whl", hash = "sha256:f3849bc2469bcbe78fed9b0e999dfed2bf6c9d2923c4e2420d6d54a71f8a99bb"},
+    {file = "mitol_django_authentication-2025.3.17.tar.gz", hash = "sha256:296f3f4ef03722560da5435fc16d5844fc6bbbb8685fdce325dbc95044354952"},
 ]
 
 [package.dependencies]
 django = ">=3.0"
 django-anymail = ">=6.0"
+django-stubs = ">=1.13.1"
 djangorestframework = ">=3.0.0"
-djoser = "2.2.2"
+djoser = "2.3.1"
 mitol-django-common = "*"
 mitol-django-mail = "*"
 social-auth-app-django = ">=5.4.0"
+
+[package.extras]
+touchstone = ["python3-saml (>=1.10.1)"]
 
 [[package]]
 name = "mitol-django-common"
