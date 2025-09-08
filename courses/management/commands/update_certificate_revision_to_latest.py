@@ -74,7 +74,7 @@ class Command(BaseCommand):
                     "Do you want to update all certificates?\nNOTE: It will update certificate revision to the latest revision for all certificates.\nEnter Y/Yes to confirm: "
                 )
             )
-            if confirm.strip().lower() != "y" or confirm.strip().lower() != "yes":
+            if confirm.strip().lower() not in ("y", "yes"):
                 self.stdout.write(self.style.ERROR("Operation cancelled."))
                 return
             filter_kwargs = {}

@@ -974,5 +974,10 @@ def test_course_run_has_certificate_page():
     CoursePageFactory.create(certificate_page=None, course=course_run.course)
     assert not course_run.has_certificate_page
 
-    CertificatePageFactory.create(parent=course_run.course.page)
+    # delete cached property
+    del course_run.course.page.child_pages
+    certificate_page = CertificatePageFactory.create(
+        parent=course_run.course.page, live=True
+    )
+    certificate_page.save_revision().publish()
     assert course_run.has_certificate_page
