@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.184.4
+Version 0.184.4 (Released September 08, 2025)
 ---------------
 
 - fix(deps): update dependency django to v4.2.24 (#3654)
