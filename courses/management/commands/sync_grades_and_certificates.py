@@ -97,8 +97,7 @@ class Command(BaseCommand):
 
         if not run.has_certificate_page:
             raise CommandError(
-                "Course run %s has no certificate page. Will skip certificate generation.",
-                run,
+                f"Course run {run} has no certificate page."
             )
 
         results = []
