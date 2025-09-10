@@ -389,6 +389,17 @@ class CourseRunCertificateAdmin(TimestampedModelAdmin):
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        """
+        Customize the admin form to add help text for the certificate_page_revision field.
+        """
+        form = super().get_form(request, obj, change, **kwargs)
+        if "certificate_page_revision" in form.base_fields:
+            form.base_fields[
+                "certificate_page_revision"
+            ].help_text = "If you don't select the revision, it will be associated with the latest available revision."
+        return form
+
 
 @admin.register(ProgramCertificate)
 class ProgramCertificateAdmin(TimestampedModelAdmin):

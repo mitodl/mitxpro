@@ -25,6 +25,7 @@ pytestmark = [pytest.mark.django_db]
         (True, "y", True),  # Update all with confirmation
         (True, "yes", True),  # Update all with confirmation
         (True, "n", False),  # Update all but decline confirmation
+        (True, "p", False),  # Update all but decline confirmation
         (False, None, True),  # Update only missing with confirmation
     ],
 )
@@ -102,8 +103,9 @@ def test_update_certificate_for_course_run(
     ("update_all", "confirm_input", "should_update_all"),
     [
         (True, "y", True),  # Update all with confirmation
-        (True, "y", True),  # Update all with confirmation
+        (True, "yes", True),  # Update all with confirmation
         (True, "n", False),  # Update all but decline confirmation
+        (True, "p", False),  # Update all but decline confirmation
         (False, None, True),  # Update only missing with confirmation
     ],
 )

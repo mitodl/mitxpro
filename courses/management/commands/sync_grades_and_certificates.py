@@ -6,6 +6,7 @@ import logging
 
 from django.core.management.base import BaseCommand, CommandError
 
+from cms.models import ExternalCoursePage
 from courses.models import CourseRun
 from courses.utils import ensure_course_run_grade, process_course_run_grade_certificate
 from courseware.api import get_edx_grades_with_users
@@ -73,6 +74,12 @@ class Command(BaseCommand):
             raise CommandError(  # noqa: B904
                 "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
             )
+
+        if run.course.is_external or isinstance(run.course.page, ExternalCoursePage):
+            raise CommandError(
+                f"Course run {run} is part of an external course. Grades and certificates cannot be synced for external courses."  # noqa: EM101
+            )
+
         now = now_in_utc()
         if not options.get("force") and (run.end_date is None or run.end_date > now):
             raise CommandError(

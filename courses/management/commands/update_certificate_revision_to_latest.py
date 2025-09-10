@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = """
     Updates certificate revisions to the latest for a course run or program.
     By default, only certificates without a revision are updated.
-    Use --all to update all certificates.
+    Use --all to forcefully update all certificate revisions to the latest, including the existing ones.
     NOTE: Updating all certificates may result in updating legacy/old certificates.
     """
 
@@ -71,7 +71,7 @@ class Command(BaseCommand):
         if options.get("all"):
             confirm = input(
                 self.style.WARNING(
-                    "Do you want to update all certificates?\nNOTE: It will update certificate revision to the latest revision for all certificates.\nEnter Y/Yes to confirm: "
+                    "WARNING: --all will update certificate revision to the latest revision for all certificates even those with existing revisions.\n\nDo you want to continue? Enter Y/Yes to confirm: "
                 )
             )
             if confirm.strip().lower() not in ("y", "yes"):
