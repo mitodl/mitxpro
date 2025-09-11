@@ -963,21 +963,24 @@ def test_prevent_is_external_update_after_course_page_attachment(
         course.save()
 
 
-def test_course_run_has_certificate_page():
+@pytest.mark.parametrize(
+    ("has_page", "has_certificate", "expected"),
+    [
+        (False, False, False),
+        (True, False, False),
+        (True, True, True),
+    ],
+)
+def test_course_run_has_certificate_page(has_page, has_certificate, expected):
     """
-    Tests that CourseRun.has_certificate_page return True if the related course has a course page
-    with a certificate page attached.
+    Test that CourseRun.has_certificate_page returns the expected boolean value
     """
     course_run = CourseRunFactory.create(course__page=None)
-    assert not course_run.has_certificate_page
-
-    CoursePageFactory.create(certificate_page=None, course=course_run.course)
-    assert not course_run.has_certificate_page
-
-    # delete cached property
-    del course_run.course.page.child_pages
-    certificate_page = CertificatePageFactory.create(
-        parent=course_run.course.page, live=True
-    )
-    certificate_page.save_revision().publish()
-    assert course_run.has_certificate_page
+    if has_page:
+        CoursePageFactory.create(certificate_page=None, course=course_run.course)
+        if has_certificate:
+            certificate_page = CertificatePageFactory.create(
+                parent=course_run.course.page, live=True
+            )
+            certificate_page.save_revision().publish()
+    assert course_run.has_certificate_page is expected

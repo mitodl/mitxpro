@@ -1132,6 +1132,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def clean(self):
         from cms.models import CertificatePage, CoursePage
 
+        self.clean_fields()
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
         if not self.certificate_page_revision:
             if not self.course_run.course.page:
@@ -1227,6 +1228,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     def clean(self):
         from cms.models import CertificatePage, ProgramPage
 
+        self.clean_fields()
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
         if not self.certificate_page_revision:
             if not self.program.page:
