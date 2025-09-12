@@ -10,17 +10,27 @@ class Command(BaseCommand):
     Change the certificate revision to the latest for the specified course run or program.
     """
 
+    help = """
+    Updates certificate revisions to the latest for a course run or program.
+    By default, only certificates without a revision are updated.
+    Use --all to forcefully update all certificate revisions to the latest, including the existing ones.
+    NOTE: Updating all certificates may result in updating legacy/old certificates.
+    """
+
     def add_arguments(self, parser):
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument("--course-run-id", type=int, help="ID of the course run")
         group.add_argument("--program-id", type=int, help="ID of the program")
+        parser.add_argument(
+            "--all", action="store_true", help="Update all certificates"
+        )
 
     def update_certificates(self, model_cls, filter_kwargs, parent_page, label):
         """
         Update the certificate revisions for the specified model class and filter criteria.
 
         Args:
-            model_cls (CourseRunCertificate | ProgramCertificate): certificate model class
+            model_cls (type[CourseRunCertificate] | type[ProgramCertificate]): certificate model class
             filter_kwargs (dict): filter arguments to filter the certificates
             parent_page (Page): ProgramPage or CoursePage object
             label (str): for logging
@@ -56,6 +66,18 @@ class Command(BaseCommand):
         """Handle the command."""
         course_run_id = options.get("course_run_id")
         program_id = options.get("program_id")
+        filter_kwargs = {"certificate_page_revision__isnull": True}
+
+        if options.get("all"):
+            confirm = input(
+                self.style.WARNING(
+                    "WARNING: --all will update certificate revision to the latest revision for all certificates even those with existing revisions.\n\nDo you want to continue? Enter Y/Yes to confirm: "
+                )
+            )
+            if confirm.strip().lower() not in ("y", "yes"):
+                self.stdout.write(self.style.ERROR("Operation cancelled."))
+                return
+            filter_kwargs = {}
 
         if course_run_id:
             course_run = CourseRun.objects.filter(id=course_run_id).first()
@@ -64,7 +86,7 @@ class Command(BaseCommand):
 
             self.update_certificates(
                 model_cls=CourseRunCertificate,
-                filter_kwargs={"course_run": course_run},
+                filter_kwargs={"course_run": course_run, **filter_kwargs},
                 parent_page=course_run.course.page,
                 label=f"course run {course_run_id}",
             )
@@ -76,7 +98,7 @@ class Command(BaseCommand):
 
             self.update_certificates(
                 model_cls=ProgramCertificate,
-                filter_kwargs={"program": program},
+                filter_kwargs={"program": program, **filter_kwargs},
                 parent_page=program.page,
                 label=f"program {program_id}",
             )

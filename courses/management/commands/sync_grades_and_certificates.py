@@ -2,13 +2,18 @@
 Management command to sync grades and certificates for a course run
 """
 
+import logging
+
 from django.core.management.base import BaseCommand, CommandError
 
+from cms.models import ExternalCoursePage
 from courses.models import CourseRun
 from courses.utils import ensure_course_run_grade, process_course_run_grade_certificate
 from courseware.api import get_edx_grades_with_users
 from mitxpro.utils import now_in_utc
 from users.api import fetch_user
+
+log = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -69,6 +74,12 @@ class Command(BaseCommand):
             raise CommandError(  # noqa: B904
                 "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
             )
+
+        if run.course.is_external or isinstance(run.course.page, ExternalCoursePage):
+            raise CommandError(
+                f"Course run {run} is part of an external course. Grades and certificates cannot be synced for external courses."  # noqa: EM101
+            )
+
         now = now_in_utc()
         if not options.get("force") and (run.end_date is None or run.end_date > now):
             raise CommandError(
@@ -90,6 +101,9 @@ class Command(BaseCommand):
                 raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")  # noqa: EM101
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
+
+        if not run.has_certificate_page:
+            raise CommandError(f"Course run {run} has no certificate page.")
 
         results = []
         for edx_grade, user in edx_grade_user_iter:

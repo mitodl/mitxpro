@@ -76,7 +76,7 @@ def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):  
 
 def process_course_run_grade_certificate(course_run_grade):
     """
-    Ensure that the couse run certificate is in line with the values in the course run grade
+    Ensure that the course run certificate is in line with the values in the course run grade
 
     Args:
         course_run_grade (courses.models.CourseRunGrade): The course run grade for which to generate/delete the certificate

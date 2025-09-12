@@ -774,6 +774,14 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         """List instructors for a course run if they are specified in a related CMS page"""
         return self.course.instructors
 
+    @property
+    def has_certificate_page(self):
+        """Returns True if the course run's course has a certificate page"""
+        return (
+            self.course.page is not None
+            and self.course.page.certificate_page is not None
+        )
+
     def __str__(self):
         title = f"{self.courseware_id} | {self.title}"
         return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
@@ -1124,8 +1132,25 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     def clean(self):
         from cms.models import CertificatePage, CoursePage
 
+        self.clean_fields()
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
         if not self.certificate_page_revision:
+            if not self.course_run.course.page:
+                raise ValidationError(
+                    {
+                        "course_run": (
+                            "The course run's course is not associated with a course page."
+                        )
+                    }
+                )
+            elif not self.course_run.course.page.certificate_page:
+                raise ValidationError(
+                    {
+                        "course_run": (
+                            "No certificate page is associated with the course run's course."
+                        )
+                    }
+                )
             return
 
         certpage = CertificatePage.objects.filter(
@@ -1203,8 +1228,21 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     def clean(self):
         from cms.models import CertificatePage, ProgramPage
 
+        self.clean_fields()
         # If user has not selected a revision, Let create the certificate since we have made the revision nullable
         if not self.certificate_page_revision:
+            if not self.program.page:
+                raise ValidationError(
+                    {"program": ("The program is not associated with a program page.")}
+                )
+            elif not self.program.page.certificate_page:
+                raise ValidationError(
+                    {
+                        "program": (
+                            "No certificate page is associated with the program's page."
+                        )
+                    }
+                )
             return
 
         certpage = CertificatePage.objects.filter(

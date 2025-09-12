@@ -4,6 +4,7 @@ import pytest
 from io import StringIO
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from unittest.mock import patch
 
 from cms.models import CertificatePage
 from courses.factories import (
@@ -13,11 +14,24 @@ from courses.factories import (
     ProgramCertificateFactory,
 )
 from cms.factories import CertificatePageFactory, CoursePageFactory
+from courses.models import CourseRunCertificate, ProgramCertificate
 
 pytestmark = [pytest.mark.django_db]
 
 
-def test_update_certificate_for_course_run():
+@pytest.mark.parametrize(
+    ("update_all", "confirm_input", "should_update_all"),
+    [
+        (True, "y", True),  # Update all with confirmation
+        (True, "yes", True),  # Update all with confirmation
+        (True, "n", False),  # Update all but decline confirmation
+        (True, "p", False),  # Update all but decline confirmation
+        (False, None, True),  # Update only missing with confirmation
+    ],
+)
+def test_update_certificate_for_course_run(
+    update_all, confirm_input, should_update_all
+):
     """Test updating certificate revision for a course run."""
     course_page = CoursePageFactory.create(certificate_page=None)
     course_run = CourseRunFactory(course=course_page.course)
@@ -36,24 +50,66 @@ def test_update_certificate_for_course_run():
     new_page_revision = certificate_page.latest_revision
     assert certificate.certificate_page_revision != new_page_revision
 
-    out = StringIO()
-    call_command(
-        "update_certificate_revision_to_latest",
-        "--course-run-id",
-        str(course_run.id),
-        stdout=out,
+    certificate_without_revision = CourseRunCertificateFactory(course_run=course_run)
+    CourseRunCertificate.objects.filter(id=certificate_without_revision.id).update(
+        certificate_page_revision=None
     )
+
+    out = StringIO()
+    if update_all:
+        with patch("builtins.input", return_value=confirm_input):
+            call_command(
+                "update_certificate_revision_to_latest",
+                "--course-run-id",
+                str(course_run.id),
+                "--all",
+                stdout=out,
+            )
+    else:
+        call_command(
+            "update_certificate_revision_to_latest",
+            "--course-run-id",
+            str(course_run.id),
+            stdout=out,
+        )
 
     certificate.refresh_from_db()
-    assert certificate.certificate_page_revision == new_page_revision
-    assert (
-        f"Updated 1 certificate(s) for course run {course_run.id} to the latest revision."
-        in out.getvalue()
-    )
+    certificate_without_revision.refresh_from_db()
+    if update_all and should_update_all:
+        assert certificate.certificate_page_revision == new_page_revision
+        assert (
+            certificate_without_revision.certificate_page_revision == new_page_revision
+        )
+        assert (
+            f"Updated 2 certificate(s) for course run {course_run.id} to the latest revision."
+            in out.getvalue()
+        )
+    elif update_all and not should_update_all:
+        assert certificate.certificate_page_revision != new_page_revision
+        assert certificate_without_revision.certificate_page_revision is None
+        assert "Operation cancelled." in out.getvalue()
+    else:
+        assert certificate.certificate_page_revision != new_page_revision
+        assert (
+            certificate_without_revision.certificate_page_revision == new_page_revision
+        )
+        assert (
+            f"Updated 1 certificate(s) for course run {course_run.id} to the latest revision."
+            in out.getvalue()
+        )
 
 
-@pytest.mark.django_db
-def test_update_certificate_for_program():
+@pytest.mark.parametrize(
+    ("update_all", "confirm_input", "should_update_all"),
+    [
+        (True, "y", True),  # Update all with confirmation
+        (True, "yes", True),  # Update all with confirmation
+        (True, "n", False),  # Update all but decline confirmation
+        (True, "p", False),  # Update all but decline confirmation
+        (False, None, True),  # Update only missing with confirmation
+    ],
+)
+def test_update_certificate_for_program(update_all, confirm_input, should_update_all):
     """Test updating certificate revision for a program."""
     program = ProgramFactory()
     program_page = program.page
@@ -72,22 +128,58 @@ def test_update_certificate_for_program():
     new_cert_page_revision = cert_page.latest_revision
     assert certificate.certificate_page_revision != new_cert_page_revision
 
+    certificate_without_revision = ProgramCertificateFactory(program=program)
+    ProgramCertificate.objects.filter(id=certificate_without_revision.id).update(
+        certificate_page_revision=None
+    )
+
     # Run the management command
     out = StringIO()
-    call_command(
-        "update_certificate_revision_to_latest",
-        "--program-id",
-        str(program.id),
-        stdout=out,
-    )
+
+    if update_all:
+        with patch("builtins.input", return_value=confirm_input):
+            call_command(
+                "update_certificate_revision_to_latest",
+                "--program-id",
+                str(program.id),
+                "--all",
+                stdout=out,
+            )
+    else:
+        call_command(
+            "update_certificate_revision_to_latest",
+            "--program-id",
+            str(program.id),
+            stdout=out,
+        )
 
     # Assert it updated to the latest revision
     certificate.refresh_from_db()
-    assert certificate.certificate_page_revision == new_cert_page_revision
-    assert (
-        f"Updated 1 certificate(s) for program {program.id} to the latest revision."
-        in out.getvalue()
-    )
+    certificate_without_revision.refresh_from_db()
+    if update_all and should_update_all:
+        assert certificate.certificate_page_revision == new_cert_page_revision
+        assert (
+            certificate_without_revision.certificate_page_revision
+            == new_cert_page_revision
+        )
+        assert (
+            f"Updated 2 certificate(s) for program {program.id} to the latest revision."
+            in out.getvalue()
+        )
+    elif update_all and not should_update_all:
+        assert certificate.certificate_page_revision != new_cert_page_revision
+        assert certificate_without_revision.certificate_page_revision is None
+        assert "Operation cancelled." in out.getvalue()
+    else:
+        assert (
+            certificate_without_revision.certificate_page_revision
+            == new_cert_page_revision
+        )
+        assert certificate.certificate_page_revision != new_cert_page_revision
+        assert (
+            f"Updated 1 certificate(s) for program {program.id} to the latest revision."
+            in out.getvalue()
+        )
 
 
 @pytest.mark.parametrize(

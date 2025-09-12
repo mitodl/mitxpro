@@ -47,6 +47,13 @@ def generate_course_certificates():
     )
 
     for run in course_runs:
+        if not run.has_certificate_page:
+            log.exception(
+                "Course run %s has no certificate page. Skipping grades sync and certificate generation.",
+                run,
+            )
+            continue
+
         edx_grade_user_iter = exception_logging_generator(
             get_edx_grades_with_users(run)
         )

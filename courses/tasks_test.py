@@ -6,6 +6,7 @@ from datetime import timedelta
 import pytest
 from django.utils.timezone import now
 
+from cms.models import CertificatePage
 from users.factories import UserFactory
 from courses.factories import CourseRunFactory, PlatformFactory
 from courses.sync_external_courses.external_course_sync_api import (
@@ -57,7 +58,8 @@ def test_task_sync_external_course_runs(mocker, settings):
     )
 
 
-def test_task_generate_course_certificates(mocker):
+@pytest.mark.parametrize("has_cert_page", [True, False])
+def test_task_generate_course_certificates(mocker, has_cert_page):
     """Test generate_course_certificates calls the right API functionality making sure external courses are filtered out."""
 
     class MockEdxGrade:
@@ -89,12 +91,19 @@ def test_task_generate_course_certificates(mocker):
         size=3, end_date=now() - timedelta(days=2), force_insert=True
     )
 
+    if not has_cert_page:
+        CertificatePage.objects.all().delete()
+
     generate_course_certificates.delay()
 
-    mock_get_edx_grades.assert_called()
-    mock_ensure_grades.assert_called()
-    mock_process_grades.assert_called()
-
-    assert mock_get_edx_grades.call_count == len(course_runs)
-    for run in course_runs:
-        mock_get_edx_grades.assert_any_call(run)
+    if has_cert_page:
+        mock_process_grades.assert_called()
+        mock_get_edx_grades.assert_called()
+        mock_ensure_grades.assert_called()
+        assert mock_get_edx_grades.call_count == len(course_runs)
+        for run in course_runs:
+            mock_get_edx_grades.assert_any_call(run)
+    else:
+        mock_process_grades.assert_not_called()
+        mock_get_edx_grades.assert_not_called()
+        mock_ensure_grades.assert_not_called()
