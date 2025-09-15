@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.185.0
+Version 0.185.0 (Released September 15, 2025)
 ---------------
 
 - feat: prevent certificate creation when no cms page or certificate page (#3652)
