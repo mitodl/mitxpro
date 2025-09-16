@@ -570,7 +570,6 @@ class CatalogPage(Page):
             name=language_filter, is_active=True
         ).exists():
             language_filter = ALL_LANGUAGES
-            active_tab = ALL_TAB
 
         if language_filter != ALL_LANGUAGES:
             language_catalog_filter = {
