@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.185.1
+---------------
+
+- fix: watch now video popup & catalog tabs switch (#3661)
+- fix(deps): update dependency boto3 to v1.40.30 (#3659)
+- chore(deps): update codecov/codecov-action digest to 5a10915 (#3658)
+- [pre-commit.ci] pre-commit autoupdate (#3648)
+- fix(deps): update dependency google-api-python-client to v2.181.0 (#3657)
+
 Version 0.185.0 (Released September 15, 2025)
 ---------------
 
