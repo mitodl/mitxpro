@@ -163,6 +163,11 @@ class Command(BaseCommand):
         call_command("seed_data")
         self.stdout.write(self.style.SUCCESS("Seed Data Created\n\n"))
 
+        # Step 4: create cache table
+        self.stdout.write(self.style.SUCCESS("Creating cache table..."))
+        call_command("createcachetable")
+        self.stdout.write(self.style.SUCCESS("Cache table created.\n\n"))
+
         # Print OAuth2 app details at the end of the file for user convenience
         # This allows the user to access their client ID and secret without needing to scroll up,
         # making it easily accessible after the script completes execution.
