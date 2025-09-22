@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.185.1
+Version 0.185.1 (Released September 22, 2025)
 ---------------
 
 - fix: watch now video popup & catalog tabs switch (#3661)
