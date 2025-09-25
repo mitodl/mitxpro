@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.185.2
+Version 0.185.2 (Released September 25, 2025)
 ---------------
 
 - fix(deps): update dependency mitol-django-authentication to v2025 (#3609)
