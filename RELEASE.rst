@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.185.2 (Released September 25, 2025)
+---------------
+
+- fix(deps): update dependency mitol-django-authentication to v2025 (#3609)
+- fix(deps): update dependency pynacl to v1.6.0 (#3668)
+- chore(deps): update actions/setup-python action to v6 (#3670)
+- fix(deps): update dependency xmltodict to v1 (#3671)
+- fix(deps): update dependency django-anymail to v13.1 (#3667)
+- fix(deps): update dependency boto3 to v1.40.36 (#3665)
+- fix(deps): update dependency zeep to v4.3.2 (#3666)
+- config: create cache table in configure_instance (#3663)
+- [pre-commit.ci] pre-commit autoupdate (#3660)
+
 Version 0.185.1 (Released September 22, 2025)
 ---------------
 
