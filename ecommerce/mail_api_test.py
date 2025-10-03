@@ -36,6 +36,7 @@ from ecommerce.mail_api import (
     send_enrollment_failure_message,
 )
 from ecommerce.models import Order
+from mitxpro.features import ENROLLMENT_WELCOME_EMAIL
 from mail.api import EmailMetadata, UserMessageProps
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
@@ -129,7 +130,7 @@ def test_send_course_run_enrollment_welcome_email(settings, mocker, enabled):
 
     if not enabled:
         mock_log.info.assert_called_once_with(
-            "Feature `enrollment_welcome_email` is disabled."
+            f"Feature {ENROLLMENT_WELCOME_EMAIL} is disabled."
         )
     else:
         patched_mail_api.context_for_user.assert_called_once_with(
