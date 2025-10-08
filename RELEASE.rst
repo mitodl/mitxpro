@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.186.0
+Version 0.186.0 (Released October 08, 2025)
 ---------------
 
 - chore: consolidate feat flags (#3674)
