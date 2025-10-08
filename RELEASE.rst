@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.186.0 (Released October 08, 2025)
+---------------
+
+- chore: consolidate feat flags (#3674)
+- fix(deps): update dependency django to v4.2.25 [security] (#3676)
+- [pre-commit.ci] pre-commit autoupdate (#3664)
+- security: disable yarn postinstall scripts
+
 Version 0.185.2 (Released September 25, 2025)
 ---------------
 
