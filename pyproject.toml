@@ -10,7 +10,7 @@ packages = []
 [tool.poetry.dependencies]
 python = "3.13.7"
 
-Pillow = "10.4.0"
+Pillow = "11.3.0"
 PyNaCl = "1.6.0"
 beautifulsoup4 = "4.8.2"
 boto3 = "1.40.51"
