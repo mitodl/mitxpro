@@ -304,15 +304,18 @@ def test_catalog_page_language_context(
     assert context.get("request") == request
     assert context.get("request") == request
     if selected_language_disabled:
-        languages.remove(selected_language) if (
-            languages and selected_language != ALL_LANGUAGES
-        ) else None
-
-        assert (
-            context.get("language_options") == [ALL_LANGUAGES] + languages
-            if languages
-            else ALL_LANGUAGES
+        remaining_languages = (
+            [language for language in languages if language != selected_language]
+            if languages and selected_language != ALL_LANGUAGES
+            else languages
         )
+        expected_language_options = (
+            [ALL_LANGUAGES] + remaining_languages
+            if remaining_languages
+            else [ALL_LANGUAGES]
+        )
+
+        assert context.get("language_options") == expected_language_options
         assert context.get("all_pages") == all_courseware_pages
         assert context.get("active_tab") == ALL_TAB
         assert context.get("selected_language") == ALL_LANGUAGES
