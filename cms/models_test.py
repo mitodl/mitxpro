@@ -305,11 +305,7 @@ def test_catalog_page_language_context(
     assert context.get("request") == request
     if selected_language_disabled:
         remaining_languages = (
-            [
-                language
-                for language in languages
-                if language != selected_language
-            ]
+            [language for language in languages if language != selected_language]
             if languages and selected_language != ALL_LANGUAGES
             else languages
         )
