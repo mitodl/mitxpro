@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.187.0
+Version 0.187.0 (Released October 28, 2025)
 ---------------
 
 - fix(deps): update dependency boto3 to v1.40.60 (#3687)
