@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.187.0 (Released October 28, 2025)
+---------------
+
+- fix(deps): update dependency boto3 to v1.40.60 (#3687)
+- chore(deps): update redis docker tag to v8.2.2 (#3686)
+- chore(deps): update nginx docker tag to v1.29.2 (#3685)
+- [pre-commit.ci] pre-commit autoupdate (#3684)
+- [pre-commit.ci] pre-commit autoupdate (#3675)
+- chore(deps): update dependency faker to v37.11.0 (#3683)
+- fix(deps): update dependency boto3 to v1.40.51 (#3682)
+- fix(deps): update dependency edx-api-client to v1.13.0 (#3680)
+- fix(deps): update dependency google-api-python-client to v2.184.0 (#3681)
+- chore(deps): update dependency faker to v37.8.0
+- fix(deps): update dependency boto3 to v1.40.46 (#3678)
+
 Version 0.186.0 (Released October 08, 2025)
 ---------------
 
