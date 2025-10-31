@@ -45,6 +45,7 @@ class YouTubeEmbedFinder(OEmbedFinder):
         player_iframe.attrs["loading"] = "lazy"
         player_iframe.attrs["src"] = ""
         player_iframe.attrs["data-src"] = iframe_url
+            player_iframe.attrs["referrerpolicy"] = "strict-origin-when-cross-origin"
         embed["html"] = str(embed_tag)
 
         return embed
