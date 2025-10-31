@@ -111,8 +111,8 @@ class CourseRunFactory(DjangoModelFactory):
     start_date = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
     )
-    end_date = factory.LazyAttribute(
-        lambda obj: obj.start_date + timedelta(days=30) if obj.start_date else None
+    end_date = factory.Faker(
+        "date_time_between", start_date="+30d", end_date="+60d", tzinfo=UTC
     )
     enrollment_start = factory.Faker(
         "date_time_this_month", before_now=True, after_now=False, tzinfo=UTC
