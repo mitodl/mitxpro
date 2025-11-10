@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.187.2
+---------------
+
+- fix: add explicit referrer policy on video embeds (#3693)
+- chore(deps): update dependency social-auth-app-django to v5.6.0 [security] (#3699)
+- chore(deps): lock file maintenance (#3610)
+- fix: flaky course date factory (#3694)
+- fix(deps): update dependency django to v4.2.26 [security] (#3698)
+- fix(deps): update dependency google-api-python-client to v2.186.0 (#3697)
+- fix(deps): update dependency boto3 to v1.40.65 (#3695)
+- chore(deps): update dependency faker to v37.12.0 (#3696)
+- fix(deps): update dependency uwsgi to v2.0.31 (#3689)
+
 Version 0.187.1 (Released November 10, 2025)
 ---------------
 
