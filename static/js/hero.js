@@ -6,14 +6,25 @@ const backgroundVideoSel = "#background-video";
 const promoVideoSel = "#promo-video";
 
 function openVideoLightBox() {
-  const youtubeVideoSrc = $("#tv-light-box-yt-video").attr("data-href");
+  const youtubeVideoHtml = $("#tv-light-box-yt-video").attr("data-href");
   const hlsAboutVideoEl = $("video#tv-light-box-video");
-  if (!youtubeVideoSrc && hlsAboutVideoEl.length === 0) {
+  if (!youtubeVideoHtml && hlsAboutVideoEl.length === 0) {
     console.error("We do not have any supported video elements available."); // eslint-disable-line no-console
     return;
   }
 
   let backgroundVideo = null;
+  let youtubeVideoSrc = null;
+  
+  if (youtubeVideoHtml) {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = youtubeVideoHtml;
+    const iframe = tempDiv.querySelector('iframe');
+    if (iframe) {
+      youtubeVideoSrc = iframe.getAttribute('data-src') || iframe.getAttribute('src');
+    }
+  }
+  
   const fancyBoxArgs = $.extend(
     {},
     {
@@ -25,6 +36,12 @@ function openVideoLightBox() {
       },
       afterClose: function () {
         backgroundVideo && backgroundVideo.play();
+      },
+      iframe: {
+        attr: {
+          referrerpolicy: "strict-origin-when-cross-origin",
+          allowfullscreen: "allowfullscreen",
+        },
       },
     },
     youtubeVideoSrc
