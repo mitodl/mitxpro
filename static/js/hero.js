@@ -15,16 +15,17 @@ function openVideoLightBox() {
 
   let backgroundVideo = null;
   let youtubeVideoSrc = null;
-  
+
   if (youtubeVideoHtml) {
-    const tempDiv = document.createElement('div');
+    const tempDiv = document.createElement("div");
     tempDiv.innerHTML = youtubeVideoHtml;
-    const iframe = tempDiv.querySelector('iframe');
+    const iframe = tempDiv.querySelector("iframe");
     if (iframe) {
-      youtubeVideoSrc = iframe.getAttribute('data-src') || iframe.getAttribute('src');
+      youtubeVideoSrc =
+        iframe.getAttribute("data-src") || iframe.getAttribute("src");
     }
   }
-  
+
   const fancyBoxArgs = $.extend(
     {},
     {
