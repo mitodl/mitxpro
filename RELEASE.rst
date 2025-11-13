@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.187.2
+Version 0.187.2 (Released November 13, 2025)
 ---------------
 
 - fix: add explicit referrer policy on video embeds (#3693)
