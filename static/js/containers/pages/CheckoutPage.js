@@ -245,7 +245,7 @@ export class CheckoutPage extends React.Component<Props, State> {
       coupons: couponCode
         ? [
             {
-              code: couponCode.trim(),
+              code: couponCode,
             },
           ]
         : [],
