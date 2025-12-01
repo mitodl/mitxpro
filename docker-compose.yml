@@ -28,7 +28,7 @@ services:
       - "5432"
 
   redis:
-    image: redis:8.2.2
+    image: redis:8.4.0
     ports:
       - "6379"
 
