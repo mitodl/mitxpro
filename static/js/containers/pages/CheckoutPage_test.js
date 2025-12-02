@@ -141,24 +141,19 @@ describe("CheckoutPage", () => {
     );
 
     // Ensure the coupon code is sent exactly as provided (no trimming)
-    sinon.assert.calledWith(
-      helper.handleRequestStub,
-      "/api/basket/",
-      "PATCH",
-      {
-        body: {
-          coupons: [
-            {
-              code: couponWithSpaces,
-            },
-          ],
-        },
-        credentials: undefined,
-        headers: {
-          "X-CSRFTOKEN": null,
-        },
+    sinon.assert.calledWith(helper.handleRequestStub, "/api/basket/", "PATCH", {
+      body: {
+        coupons: [
+          {
+            code: couponWithSpaces,
+          },
+        ],
       },
-    );
+      credentials: undefined,
+      headers: {
+        "X-CSRFTOKEN": null,
+      },
+    });
 
     sinon.assert.calledWith(setFieldError, "coupons", null);
   });
