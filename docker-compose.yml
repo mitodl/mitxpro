@@ -28,12 +28,12 @@ services:
       - "5432"
 
   redis:
-    image: redis:8.2.2
+    image: redis:8.4.0
     ports:
       - "6379"
 
   nginx:
-    image: nginx:1.29.2
+    image: nginx:1.29.3
     ports:
       - "8053:8053"
     links:
