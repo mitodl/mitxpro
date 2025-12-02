@@ -124,6 +124,44 @@ describe("CheckoutPage", () => {
   });
 
   it("submits the coupon code", async () => {});
+  it("submits the coupon code without trimming whitespace", async () => {
+    const { inner } = await renderPage();
+    const setFieldError = helper.sandbox.stub();
+    const couponWithSpaces = "  xyzzy  ";
+
+    // Successful response to focus purely on payload without trimming
+    helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+      status: 200,
+      body: {},
+    });
+
+    await inner.find("CheckoutForm").prop("submitCoupon")(
+      couponWithSpaces,
+      setFieldError,
+    );
+
+    // Ensure the coupon code is sent exactly as provided (no trimming)
+    sinon.assert.calledWith(
+      helper.handleRequestStub,
+      "/api/basket/",
+      "PATCH",
+      {
+        body: {
+          coupons: [
+            {
+              code: couponWithSpaces,
+            },
+          ],
+        },
+        credentials: undefined,
+        headers: {
+          "X-CSRFTOKEN": null,
+        },
+      },
+    );
+
+    sinon.assert.calledWith(setFieldError, "coupons", null);
+  });
   [true, false].forEach((hasCouponCode) => {
     [true, false].forEach((hasError) => {
       it(`tries to submit ${hasCouponCode ? "an empty " : ""}coupon code${
