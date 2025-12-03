@@ -966,13 +966,13 @@ Django = ">=4.2"
 
 [[package]]
 name = "django"
-version = "4.2.26"
+version = "4.2.27"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django-4.2.26-py3-none-any.whl", hash = "sha256:c96e64fc3c359d051a6306871bd26243db1bd02317472a62ffdbe6c3cae14280"},
-    {file = "django-4.2.26.tar.gz", hash = "sha256:9398e487bcb55e3f142cb56d19fbd9a83e15bb03a97edc31f408361ee76d9d7a"},
+    {file = "django-4.2.27-py3-none-any.whl", hash = "sha256:f393a394053713e7d213984555c5b7d3caeee78b2ccb729888a0774dff6c11a8"},
+    {file = "django-4.2.27.tar.gz", hash = "sha256:b865fbe0f4a3d1ee36594c5efa42b20db3c8bbb10dff0736face1c6e4bda5b92"},
 ]
 
 [package.dependencies]
@@ -4735,4 +4735,4 @@ xmlsec = ["xmlsec (>=0.6.1)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "3.13.7"
-content-hash = "6914f936d0e04d17fc16513d6b560de2c9eb06c22868b37ccf66fe6355c90fe4"
+content-hash = "ba7f468c5b6ceff7044c2a5d333c13bc557821998096e0e53af055f258d7bb8e"
