@@ -124,6 +124,62 @@ describe("CheckoutPage", () => {
   });
 
   it("submits the coupon code", async () => {});
+
+  it("submits the coupon code without trimming whitespace", async () => {
+    const cases = [{ code: "xyz" }, { code: "xyz  " }];
+
+    for (const { code } of cases) {
+      for (const hasError of [true, false]) {
+        const { inner } = await renderPage();
+        const setFieldError = helper.sandbox.stub();
+
+        // Stub backend response based on hasError
+        if (hasError) {
+          helper.handleRequestStub.withArgs("/api/basket/", "PATCH").returns({
+            status: 400,
+            body: { errors: { coupons: "coupon error" } },
+          });
+        } else {
+          helper.handleRequestStub
+            .withArgs("/api/basket/", "PATCH")
+            .returns({ status: 200, body: {} });
+        }
+
+        await inner.find("CheckoutForm").prop("submitCoupon")(
+          code,
+          setFieldError,
+        );
+
+        // Assert the backend received the code exactly as entered (no trimming)
+        sinon.assert.calledWith(
+          helper.handleRequestStub,
+          "/api/basket/",
+          "PATCH",
+          {
+            body: {
+              coupons: [
+                {
+                  code: code,
+                },
+              ],
+            },
+            credentials: undefined,
+            headers: {
+              "X-CSRFTOKEN": null,
+            },
+          },
+        );
+
+        // Field error should show only if backend returns an error
+        sinon.assert.calledWith(
+          setFieldError,
+          "coupons",
+          hasError ? "coupon error" : null,
+        );
+      }
+    }
+  });
+
   [true, false].forEach((hasCouponCode) => {
     [true, false].forEach((hasError) => {
       it(`tries to submit ${hasCouponCode ? "an empty " : ""}coupon code${
