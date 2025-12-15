@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.188.0 (Released December 15, 2025)
+---------------
+
+- chore(deps): update redis docker tag to v8.4.0 (#3711)
+- chore(deps): update nginx docker tag to v1.29.3 (#3710)
+- fix(deps): update dependency boto3 to v1.42.0 (#3712)
+- fix(deps): update dependency boto3 to v1.41.5 (#3709)
+- chore(deps): update actions/checkout digest to 93cb6ef (#3707)
+- chore(deps): update actions/setup-python digest to 83679a8 (#3708)
+- [pre-commit.ci] pre-commit autoupdate (#3705)
+- fix(deps): update dependency boto3 to v1.40.76 (#3703)
+- chore(deps): update dependency social-auth-app-django to v5.6.0 [security] (#3701)
+- chore(deps): update dependency js-yaml to v4.1.1 [security] (#3702)
+- [pre-commit.ci] pre-commit autoupdate (#3690)
+
 Version 0.187.2 (Released November 13, 2025)
 ---------------
 
