@@ -149,6 +149,7 @@
     "normalize-url": "^8.0.0"
   },
   "devDependencies": {
+    "baseline-browser-mapping": "latest",
     "eslint-plugin-react-hooks": "^5.2.0"
   }
 }

@@ -3531,6 +3531,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"baseline-browser-mapping@npm:latest":
+  version: 2.9.8
+  resolution: "baseline-browser-mapping@npm:2.9.8"
+  bin:
+    baseline-browser-mapping: dist/cli.js
+  checksum: 2550b4921372743ee152b5b2d0310c9bd151e93bb04c273fcb8aa3e0af7d4743674a5d46592641d3ba25baaf986e4c2639289001cf2ff364f8b2610dcce03286
+  languageName: node
+  linkType: hard
+
 "before-after-hook@npm:^2.2.0":
   version: 2.2.3
   resolution: "before-after-hook@npm:2.2.3"
@@ -8908,6 +8917,7 @@ __metadata:
     "@typescript-eslint/parser": ^8.26.0
     autoprefixer: ^10.0.0
     babel-loader: ^10.0.0
+    baseline-browser-mapping: latest
     bootstrap: ^4.4.1
     casual-browserify: ^1.5.19-2
     chai: ^5.0.0
