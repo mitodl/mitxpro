@@ -3522,21 +3522,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"baseline-browser-mapping@npm:^2.8.9":
-  version: 2.8.16
-  resolution: "baseline-browser-mapping@npm:2.8.16"
+"baseline-browser-mapping@npm:2.9.9":
+  version: 2.9.9
+  resolution: "baseline-browser-mapping@npm:2.9.9"
   bin:
     baseline-browser-mapping: dist/cli.js
-  checksum: 929b3f2b5f4beb3b9e02b660a4a8b24f62e43cc7efdc38a726ef061137f9529d3372e1c70298eacde191ac70f5defd21ae4a29ff9e470c4c2b7fd7be68320241
-  languageName: node
-  linkType: hard
-
-"baseline-browser-mapping@npm:latest":
-  version: 2.9.8
-  resolution: "baseline-browser-mapping@npm:2.9.8"
-  bin:
-    baseline-browser-mapping: dist/cli.js
-  checksum: 2550b4921372743ee152b5b2d0310c9bd151e93bb04c273fcb8aa3e0af7d4743674a5d46592641d3ba25baaf986e4c2639289001cf2ff364f8b2610dcce03286
+  checksum: c3bb28a9d6243623cdae1ee7bdd0fe3141403c877efa2410e514c512a48f0fbd02c8d338b0e19b274fb7d3d329ef95a343bad16d5332654e1b7ab9cbb2af2de6
   languageName: node
   linkType: hard
 
@@ -8917,7 +8908,6 @@ __metadata:
     "@typescript-eslint/parser": ^8.26.0
     autoprefixer: ^10.0.0
     babel-loader: ^10.0.0
-    baseline-browser-mapping: latest
     bootstrap: ^4.4.1
     casual-browserify: ^1.5.19-2
     chai: ^5.0.0

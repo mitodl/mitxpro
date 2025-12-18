@@ -146,10 +146,10 @@
     "kind-of": "6.0.3",
     "minimist": "1.2.8",
     "merge": "^2.1.1",
-    "normalize-url": "^8.0.0"
+    "normalize-url": "^8.0.0",
+    "baseline-browser-mapping": "2.9.9"
   },
   "devDependencies": {
-    "baseline-browser-mapping": "latest",
     "eslint-plugin-react-hooks": "^5.2.0"
   }
 }
