@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.189.0
+---------------
+
+- fix(deps): update dependency google-api-python-client to v2.187.0 (#3726)
+- fix(deps): update dependency edx-api-client to v1.14.0 (#3725)
+- fix(deps): update dependency boto3 to v1.42.12 (#3724)
+- chore: upgrade baseline-browser-mapping (#3729)
+- fix: Dont try to install the actual repository
+- version: Loosen Python version constraint to unblock Heroku deploys
+- fix: Remove requirements.txt to avoid conflicts with updated Heroku buildpack
+- [pre-commit.ci] pre-commit autoupdate (#3722)
+- fix: invalid coupon form issue (#3706)
+- fix(deps): update dependency django to v4.2.27 [security] (#3721)
+- [pre-commit.ci] pre-commit autoupdate (#3718)
+- chore(deps): update dependency express to v5.2.0 [security] (#3719)
+- chore(deps): update dependency faker to v38 (#3714)
+- chore(deps): update actions/checkout action to v6 (#3713)
+
 Version 0.188.0 (Released December 15, 2025)
 ---------------
 
