@@ -136,7 +136,7 @@ jobs:
           SECRET_KEY: local_unsafe_key # pragma: allowlist secret
 
       - name: Upload coverage to CodeCov
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
         with:
           files: ./coverage.xml
 
@@ -186,6 +186,6 @@ jobs:
         run: node node_modules/webpack/bin/webpack.js --config webpack.config.prod.js --bail
 
       - name: Upload test coverage to CodeCov
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
         with:
           files: coverage/lcov.info
