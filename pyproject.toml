@@ -7,6 +7,7 @@ license = "BSD-3"
 readme = "README.md"
 packages = []
 package-mode = false
+requires-poetry = ">2.2,<3"
 
 [tool.poetry.dependencies]
 python = "^3.13"
