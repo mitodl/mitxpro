@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.189.1 (Released January 06, 2026)
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3723)
+- chore(deps): update codecov/codecov-action digest to 671740a (#3731)
+- fix(deps): update dependency pynacl to v1.6.1 (#3734)
+- chore(deps): update nginx docker tag to v1.29.4 (#3732)
+- chore(deps): update dependency faker to v38.3.0 (#3735)
+- fix(deps): update dependency boto3 to v1.42.15 (#3733)
+- chore(deps): update actions/checkout digest to 8e8c483 (#3727)
+
 Version 0.189.0 (Released December 22, 2025)
 ---------------
 
