@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.189.2
+Version 0.189.2 (Released January 12, 2026)
 ---------------
 
 - fix: upgrade poetry to fix build issues (#3737)
