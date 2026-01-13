@@ -18,7 +18,7 @@ beautifulsoup4 = "4.8.2"
 boto3 = "1.42.26"
 celery = "5.6.2"
 celery-redbeat = "2.3.3"
-dj-database-url = "3.0.1"
+dj-database-url = "3.1.0"
 django = "4.2.27"
 django-anymail = { version = "13.1", extras = ["mailgun"] }
 django-filter = "^23.4"
