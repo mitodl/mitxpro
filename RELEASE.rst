@@ -1,6 +1,20 @@
 Release Notes
 =============
 
+Version 0.190.0 (Released January 15, 2026)
+---------------
+
+- fix(deps): update dependency boto3 to v1.42.25 (#3746)
+- chore(deps): update postgres docker tag to v17.7 (#3747)
+- chore(deps): update node.js to v22.21.1 (#3749)
+- chore(deps): update dependency faker to v40 (#3745)
+- chore(deps): update actions/cache action to v5 (#3744)
+- chore(deps): update docker.elastic.co/elasticsearch/elasticsearch docker tag to v9.2.3 (#3743)
+- fix(deps): update dependency django-hijack to v3.7.6 (#3742)
+- fix(deps): update dependency boto3 to v1.42.23 (#3741)
+- [pre-commit.ci] pre-commit autoupdate (#3738)
+- fix(deps): update dependency pynacl to v1.6.2 [security] (#3740)
+
 Version 0.189.2 (Released January 12, 2026)
 ---------------
 
