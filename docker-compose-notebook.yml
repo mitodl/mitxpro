@@ -9,7 +9,6 @@ x-environment: &py-environment
   MITXPRO_BASE_URL: ${MITXPRO_BASE_URL:-http://xpro.odl.local:8053}
   MITXPRO_SECURE_SSL_REDIRECT: "False"
   MITXPRO_DB_DISABLE_SSL: "True"
-  ELASTICSEARCH_URL: elastic:9200
   CELERY_TASK_ALWAYS_EAGER: "False"
   REDIS_URL: redis://redis:6379/4
   DOCKER_HOST: ${DOCKER_HOST:-missing}
