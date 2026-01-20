@@ -9,7 +9,6 @@ x-environment: &py-environment
   MITXPRO_DB_DISABLE_SSL: "True"
   MITXPRO_ADMIN_EMAIL: admin@localhost
   MITOL_DIGITAL_CREDENTIALS_AUTH_TYPE: xpro
-  ELASTICSEARCH_URL: elastic:9200
   CELERY_TASK_ALWAYS_EAGER: "False"
   REDIS_URL: redis://redis:6379/4
   DOCKER_HOST: ${DOCKER_HOST:-missing}

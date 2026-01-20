@@ -25,17 +25,6 @@ jobs:
         ports:
           - 6379:6379
 
-      elastic:
-        image: docker.elastic.co/elasticsearch/elasticsearch:9.2.3
-        env:
-          network.host: "0.0.0.0"
-          http.cors.enabled: "true"
-          http.cors.allow-origin: "*"
-          rest.action.multi.allow_explicit_index: "false"
-          ES_JAVA_OPTS: -Xms512m -Xmx512m"
-        ports:
-          - 9200:9200
-
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
@@ -73,19 +62,6 @@ jobs:
       - name: Install project
         run: poetry install --no-interaction
 
-      # Configurations required for elasticsearch.
-      - name: Configure sysctl limits
-        run: |
-          sudo swapoff -a
-          sudo sysctl -w vm.swappiness=1
-          sudo sysctl -w fs.file-max=262144
-          sudo sysctl -w vm.max_map_count=262144
-
-      - name: Runs Elasticsearch
-        uses: elastic/elastic-github-actions/elasticsearch@master
-        with:
-          stack-version: 6.7.1
-
       - name: Running Celery
         run: |
           celery -A mitxpro worker -B -l INFO &
@@ -116,7 +92,6 @@ jobs:
           CELERY_RESULT_BACKEND: redis://localhost:6379/4
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres # pragma: allowlist secret
           WEBPACK_DISABLE_LOADER_STATS: "True"
-          ELASTICSEARCH_URL: localhost:9200
           EXTERNAL_COURSE_SYNC_API_KEY: fake_external_course_sync_api_key # pragma: allowlist secret
           MAILGUN_KEY: fake_mailgun_key
           MAILGUN_SENDER_DOMAIN: other.fake.site
