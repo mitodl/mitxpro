@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.190.1
+---------------
+
+- chore: remove unused Elastic search from CI (#3755)
+- fix(deps): update dependency chai to v6 (#3754)
+- fix(deps): update dependency dj-database-url to v3.1.0 (#3753)
+- fix(deps): update dependency boto3 to v1.42.26 (#3752)
+- fix(deps): update dependency celery to v5.6.2 (#3748)
+
 Version 0.190.0 (Released January 15, 2026)
 ---------------
 
