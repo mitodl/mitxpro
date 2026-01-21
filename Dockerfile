@@ -21,6 +21,8 @@ RUN apt-get update \
         libxmlsec1-dev \
         libjpeg-dev \
         zlib1g-dev \
+        pkg-config \
+        libpoppler-cpp-dev \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f /tmp/apt.txt
 
