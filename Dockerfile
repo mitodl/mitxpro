@@ -26,9 +26,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f /tmp/apt.txt
 
-# pip
-RUN curl --silent --location https://bootstrap.pypa.io/get-pip.py | python3 -
-
 # Add, and run as, non-root user.
 RUN mkdir /src \
     && adduser --disabled-password --gecos "" --uid 1001 mitodl \
