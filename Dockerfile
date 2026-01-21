@@ -94,6 +94,7 @@ COPY --from=builder --chown=mitodl:mitodl /opt/venv /opt/venv
 COPY --chown=mitodl:mitodl . /src
 WORKDIR /src
 RUN find /src -type f -name "*.py" -exec chmod 644 {} \; \
+    && find /src -type f -name "*.sh" -exec chmod 755 {} \; \
     && find /src -type d -exec chmod 755 {} \;
 
 USER mitodl
