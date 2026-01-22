@@ -50,7 +50,7 @@ RUN curl -sSL https://install.python-poetry.org \
     | POETRY_VERSION=${POETRY_VERSION} POETRY_HOME=${POETRY_HOME} python3 -q
 WORKDIR /src
 RUN python3 -m venv $VIRTUAL_ENV \
-    && poetry install --only=main
+    && poetry install
 
 # Runtime stage
 FROM python:3.13.7-slim as runtime
