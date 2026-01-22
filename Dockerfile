@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.13.7-slim as builder
+FROM python:3.13.7-slim AS builder
 LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # Set environment variables for build
@@ -53,7 +53,7 @@ RUN python3 -m venv $VIRTUAL_ENV \
     && poetry install
 
 # Runtime stage
-FROM python:3.13.7-slim as runtime
+FROM python:3.13.7-slim AS runtime
 
 # Set environment variables for production
 ENV PYTHONUNBUFFERED=1 \
