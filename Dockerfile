@@ -77,6 +77,7 @@ RUN apt-get update \
         libmagic1 \
         net-tools \
         postgresql-client \
+        libpoppler-cpp2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Add non-root user
