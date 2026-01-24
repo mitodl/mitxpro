@@ -8927,7 +8927,7 @@ __metadata:
     prop-types: ^15.5.10
     query-string: ^6.4.0
     raf: ^3.4.1
-    ramda: ^0.30.0
+    ramda: ^0.32.0
     react: ^16.8.4
     react-addons-shallow-compare: ^15.6.0
     react-day-picker: ^9.0.0
@@ -10187,10 +10187,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ramda@npm:^0.30.0":
-  version: 0.30.1
-  resolution: "ramda@npm:0.30.1"
-  checksum: ce6f4b6b967a84a4e65c01ab1b1cdd73d46b8efe71aeccf5d1443c56c4e31a0ea82ece7df6510453dd3d83b92cabf8a6b4d50d189a1b35c08a6f44b281bebf79
+"ramda@npm:^0.32.0":
+  version: 0.32.0
+  resolution: "ramda@npm:0.32.0"
+  checksum: d26ce9796b60e89496ba3663d2e3d7f7eb0cb885c3949bc4fb0353b27b4409c25af4006c88f6970888d743ca16a0d8b616bcf8aaa353dc09b830f6f90cddb7b1
   languageName: node
   linkType: hard
 
