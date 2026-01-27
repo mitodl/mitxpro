@@ -14,7 +14,7 @@ python = "^3.13"
 
 Pillow = "10.4.0"
 PyNaCl = "1.6.2"
-beautifulsoup4 = "4.8.2"
+beautifulsoup4 = "4.14.3"
 boto3 = "1.42.35"
 celery = "5.6.2"
 celery-redbeat = "2.3.3"
