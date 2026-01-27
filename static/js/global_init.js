@@ -1,8 +1,9 @@
 // Define globals we would usually get from Django
 import ReactDOM from "react-dom";
-import { configure } from "enzyme";
+import enzyme from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 
+const { configure } = enzyme;
 configure({ adapter: new Adapter() });
 
 const _createSettings = () => ({});
