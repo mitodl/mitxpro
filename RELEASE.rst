@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.190.1
+Version 0.190.1 (Released January 29, 2026)
 ---------------
 
 - chore: remove unused Elastic search from CI (#3755)
