@@ -34,7 +34,7 @@ class NetBlockIPv4Factory(DjangoModelFactory):
 
     network = fake.unique.ipv4(network=True)
 
-    geoname_id = LazyFunction(lambda: GeonameFactory.create().id)
+    geoname_id = LazyFunction(lambda: GeonameFactory.create().geoname_id)
 
     decimal_ip_start = LazyAttribute(
         lambda obj: int(ipaddress.IPv4Network(obj.network)[0])
@@ -56,7 +56,7 @@ class NetBlockIPv6Factory(DjangoModelFactory):
 
     network = fake.unique.ipv6(network=True)
 
-    geoname_id = LazyFunction(lambda: GeonameFactory.create().id)
+    geoname_id = LazyFunction(lambda: GeonameFactory.create().geoname_id)
 
     decimal_ip_start = LazyAttribute(
         lambda obj: int(ipaddress.IPv6Network(obj.network)[0])
