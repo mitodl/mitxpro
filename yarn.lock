@@ -7860,10 +7860,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jquery@npm:^3.5.1":
-  version: 3.7.1
-  resolution: "jquery@npm:3.7.1"
-  checksum: 4370b8139d6ae82867eb6f7f21d1edccf1d1bdf41c0840920ea80d366c2cd5dbe1ceebb110ee9772aa839b04400faa1572c5c560b507c688ed7b61cea26c0e27
+"jquery@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "jquery@npm:4.0.0"
+  checksum: 5b58084962ed18f1de3b184e82edb7784623037f581108f7c228a1e881ae61c8aeca580b4313251aa0cee7e2e2bfa61d322d97236bd1b3c56fa7a726cea73731
   languageName: node
   linkType: hard
 
@@ -8910,7 +8910,7 @@ __metadata:
     history: ^5.0.0
     hls.js: ^1.0.0
     isomorphic-fetch: ^3.0.0
-    jquery: ^3.5.1
+    jquery: ^4.0.0
     jsdom: ^26.0.0
     lodash: ^4.17.21
     mini-css-extract-plugin: ^0.12.0

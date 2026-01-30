@@ -59,7 +59,7 @@
     "history": "^5.0.0",
     "hls.js": "^1.0.0",
     "isomorphic-fetch": "^3.0.0",
-    "jquery": "^3.5.1",
+    "jquery": "^4.0.0",
     "jsdom": "^26.0.0",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^0.12.0",
