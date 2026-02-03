@@ -127,10 +127,10 @@
   },
   "scripts": {
     "postinstall": "./webpack_if_prod.sh",
-    "lint-check": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint-check": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .js,.jsx,.ts,.tsx",
     "scss-lint": "stylelint '**/*.scss' --allow-empty-input",
     "scss-lint-fix": "stylelint '**/*.scss' --allow-empty-input --fix",
-    "lint-fix": "eslint --fix . --ext .js,.jsx,.ts,.tsx",
+    "lint-fix": "ESLINT_USE_FLAT_CONFIG=false eslint --fix . --ext .js,.jsx,.ts,.tsx",
     "test": "./scripts/test/js_test.sh",
     "coverage": "COVERAGE=1 ./scripts/test/js_test.sh",
     "codecov": "CODECOV=1 ./scripts/test/js_test.sh",
