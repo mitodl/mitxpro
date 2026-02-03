@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.191.0
+---------------
+
+- chore(deps): update node.js to v22.22.0 (#3771)
+- fix(deps): update dependency boto3 to v1.42.39 (#3770)
+- chore(deps): update actions/cache digest to cdf6c1f (#3769)
+- [pre-commit.ci] pre-commit autoupdate (#3751)
+- chore(deps): update dependency lodash to v4.17.23 [security] (#3763)
+- fix: flaky test (#3768)
+- chore(deps): update actions/setup-python digest to a309ff8 (#3764)
+- fix(deps): update dependency boto3 to v1.42.35 (#3765)
+- chore(deps): update actions/cache digest to 8b402f5 (#3760)
+- fix(deps): update dependency boto3 to v1.42.31 (#3759)
+- chore(deps): update dependency faker to v40.1.2 (#3758)
+
 Version 0.190.1 (Released January 29, 2026)
 ---------------
 
