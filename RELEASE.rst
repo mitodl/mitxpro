@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.191.0
+Version 0.191.0 (Released February 09, 2026)
 ---------------
 
 - chore(deps): update node.js to v22.22.0 (#3771)
