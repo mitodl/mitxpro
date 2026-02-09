@@ -416,8 +416,10 @@ class CouponRequestHandler(SheetHandler):
             )
 
         valid_data_rows = filter(
-            lambda data_row_tuple: data_row_tuple[0]  # noqa: SIM118
-            not in invalid_coupon_name_row_dict.keys(),
+            lambda data_row_tuple: (
+                data_row_tuple[0]  # noqa: SIM118
+                not in invalid_coupon_name_row_dict.keys()
+            ),
             enumerated_data_rows_2,
         )
         return valid_data_rows, invalid_rows

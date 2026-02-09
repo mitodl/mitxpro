@@ -354,7 +354,7 @@ def test_group_into_dict():
     assert grouped_cars["Jeep"] == [cars[4]]
 
     nums = [1, 2, 3, 4, 5, 6]
-    grouped_nums = group_into_dict(nums, key_fn=lambda num: (num % 2 == 0))
+    grouped_nums = group_into_dict(nums, key_fn=lambda num: num % 2 == 0)
     assert grouped_nums.keys() == {True, False}
     assert set(grouped_nums[True]) == {2, 4, 6}
     assert set(grouped_nums[False]) == {1, 3, 5}
