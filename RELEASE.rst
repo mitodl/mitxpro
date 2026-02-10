@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.191.1
+---------------
+
+- chore(deps): update dependency faker to v40.4.0 (#3784)
+- chore(deps): update actions/checkout digest to de0fac2 (#3781)
+- chore(deps): update nginx docker tag to v1.29.5 (#3782)
+- fix(deps): update dependency boto3 to v1.42.44 (#3783)
+- chore(deps): update postgres docker tag to v18 (#3772)
+- fix(deps): update dependency django to v4.2.28 [security] (#3778)
+- fix(deps): update dependency google-api-python-client to v2.188.0 (#3775)
+- fix(deps): update dependency boto3 to v1.42.40 (#3774)
+
 Version 0.191.0 (Released February 09, 2026)
 ---------------
 
