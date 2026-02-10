@@ -1,8 +1,9 @@
 // Define globals we would usually get from Django
 import ReactDOM from "react-dom";
-import { configure } from "enzyme";
+import enzyme from "enzyme";
 import Adapter from "enzyme-adapter-react-16";
 
+const { configure } = enzyme;
 configure({ adapter: new Adapter() });
 
 const _createSettings = () => ({});
@@ -31,6 +32,6 @@ afterEach(function () {
 });
 
 // enable chai-as-promised
-import chai from "chai";
+import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 chai.use(chaiAsPromised);
