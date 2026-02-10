@@ -661,7 +661,6 @@ def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     invalid_dates_codes = {
         item.code for item in stats["course_runs_with_invalid_dates"]
     }
-
     for external_course_run in external_course_runs:
         if (
             external_course_run["course_run_code"] in skipped_codes
@@ -1154,3 +1153,105 @@ def test_deactivate_missing_course_runs(
     assert product.is_active == expected_is_live
     assert (course_run.updated_on == mock_now) == (not expected_is_live)
     assert (product.updated_on == mock_now) == (not expected_is_live)
+
+
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}, {"platform": GLOBAL_ALUMNI_PLATFORM_NAME}],
+    indirect=True,
+)
+@pytest.mark.parametrize(
+    ("has_existing_values", "expected_fields_overridden"),
+    [
+        (True, False),  # Existing values should not be overridden
+        (False, True),  # Empty fields should be populated
+    ],
+)
+@pytest.mark.django_db
+def test_create_or_update_external_course_page_field_override(
+    external_course_data,
+    has_existing_values,
+    expected_fields_overridden,
+):
+    """
+    Test that `create_or_update_external_course_page` only updates empty fields,
+    except for marketing URL which is always updated.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    course = CourseFactory.create(is_external=True, page=None)
+
+    # Create image for API data
+    ImageFactory.create(title=external_course_data["image_name"])
+
+    # Set up existing values or empty values based on test parameter
+    if has_existing_values:
+        existing_duration = "12 Weeks"
+        existing_description = "Existing description that should not be overridden"
+        existing_min_weeks = 12
+        existing_max_weeks = 12
+        existing_image = ImageFactory.create(title="existing_image.jpg")
+    else:
+        existing_duration = ""
+        existing_description = ""
+        existing_min_weeks = None
+        existing_max_weeks = None
+        existing_image = None
+
+    external_course_page = ExternalCoursePageFactory.create(
+        parent=course_index_page,
+        course=course,
+        title=external_course_data["program_name"],
+        external_marketing_url="https://old-url.com",
+        duration=existing_duration,
+        min_weeks=existing_min_weeks,
+        max_weeks=existing_max_weeks,
+        description=existing_description,
+        background_image=existing_image,
+        thumbnail_image=existing_image,
+    )
+    external_course_page.save_revision().publish()
+
+    keymap = get_keymap(external_course_data["course_run_code"])
+
+    external_course_page, course_page_created, course_page_updated = (
+        create_or_update_external_course_page(
+            course_index_page,
+            course,
+            ExternalCourse(external_course_data, keymap=keymap),
+            keymap=keymap,
+        )
+    )
+
+    latest_revision = external_course_page.get_latest_revision_as_object()
+
+    # Marketing URL should always be updated
+    assert latest_revision.external_marketing_url == clean_url(
+        external_course_data["landing_page_url"], remove_query_params=True
+    )
+    assert course_page_updated is True
+    assert course_page_created is False
+
+    # Check if fields were overridden based on whether they had existing values
+    if expected_fields_overridden:
+        # Empty fields should be updated with API data
+        assert (
+            latest_revision.duration == f"{external_course_data['total_weeks']} Weeks"
+        )
+        assert latest_revision.min_weeks == external_course_data["total_weeks"]
+        assert latest_revision.max_weeks == external_course_data["total_weeks"]
+        assert latest_revision.description == external_course_data["description"]
+        assert (
+            latest_revision.background_image.title == external_course_data["image_name"]
+        )
+        assert (
+            latest_revision.thumbnail_image.title == external_course_data["image_name"]
+        )
+    else:
+        # Existing values should remain unchanged
+        assert latest_revision.duration == existing_duration
+        assert latest_revision.min_weeks == existing_min_weeks
+        assert latest_revision.max_weeks == existing_max_weeks
+        assert latest_revision.description == existing_description
+        assert latest_revision.background_image == existing_image
+        assert latest_revision.thumbnail_image == existing_image
