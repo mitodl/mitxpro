@@ -52,6 +52,15 @@ WORKDIR /src
 RUN python3 -m venv $VIRTUAL_ENV \
     && poetry install
 
+
+FROM node:22-slim AS node_builder
+COPY . /src
+WORKDIR /src
+ENV NODE_ENV=production
+RUN yarn install --immutable \
+    && node node_modules/webpack/bin/webpack.js --config webpack.config.prod.js --bail
+
+
 # Runtime stage
 FROM python:3.13.7-slim AS runtime
 
@@ -101,3 +110,9 @@ EXPOSE 8053
 ENV PORT=8053
 
 CMD ["uwsgi", "uwsgi.ini"]
+
+
+FROM runtime AS production
+
+COPY --from=node_builder --chown=mitodl:mitodl /src/static /src/static
+COPY --from=node_builder --chown=mitodl:mitodl /src/webpack-stats.json /src/webpack-stats.json
