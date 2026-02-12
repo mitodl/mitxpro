@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.191.1
+Version 0.191.1 (Released February 12, 2026)
 ---------------
 
 - chore(deps): update dependency faker to v40.4.0 (#3784)
