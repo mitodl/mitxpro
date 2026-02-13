@@ -28,7 +28,7 @@ RUN apt-get update \
 
 # Add, and run as, non-root user.
 RUN mkdir /src \
-    && adduser --disabled-password --gecos "" --uid 1001 mitodl \
+    && adduser --disabled-password --gecos "" mitodl \
     && mkdir /var/media && chown -R mitodl:mitodl /var/media
 
 # Install Python packages
@@ -90,7 +90,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Add non-root user
-RUN adduser --disabled-password --gecos "" --uid 1001 mitodl \
+RUN adduser --disabled-password --gecos "" mitodl \
     && mkdir -p /src /var/media \
     && chown -R mitodl:mitodl /src /var/media
 
