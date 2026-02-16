@@ -654,7 +654,7 @@ def create_or_update_external_course_page(  # noqa: C901
         latest_revision = course_page.get_latest_revision_as_object()
 
         # Only update course page fields with API if they are empty in the latest revision.
-        if not latest_revision.external_marketing_url and external_course.marketing_url:
+        if latest_revision.external_marketing_url != external_course.marketing_url:
             latest_revision.external_marketing_url = external_course.marketing_url
             is_updated = True
 
