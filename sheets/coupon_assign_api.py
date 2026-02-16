@@ -391,8 +391,9 @@ def find_bulk_assignment_messages(assignment_status_map, earliest_message_date=N
     # Loop through bulk coupon assignment emails from the Mailgun API and fill in the
     # delivery or failure date for any matching coupon assignments in the map.
     message_iter = filter(
-        lambda bulk_assignment_message: bulk_assignment_message.event
-        in RELEVANT_ASSIGNMENT_EMAIL_EVENTS,
+        lambda bulk_assignment_message: (
+            bulk_assignment_message.event in RELEVANT_ASSIGNMENT_EMAIL_EVENTS
+        ),
         get_bulk_assignment_messages(begin=earliest_message_date, end=now_in_utc()),
     )
     for message in message_iter:

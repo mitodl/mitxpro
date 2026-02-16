@@ -368,7 +368,7 @@ class ProgramSerializer(BaseProductSerializer):
             datetime: The ending date
         """
         filtered_end_runs = filter(
-            lambda run: (run.end_date is not None and run.live), instance.course_runs
+            lambda run: run.end_date is not None and run.live, instance.course_runs
         )
         sorted_runs = sorted(filtered_end_runs, key=lambda run: run.end_date)
 
