@@ -28,7 +28,7 @@ RUN apt-get update \
 
 # Add, and run as, non-root user.
 RUN mkdir /src \
-    && adduser --disabled-password --gecos "" --uid 1001 mitodl \
+    && adduser --disabled-password --gecos "" mitodl \
     && mkdir /var/media && chown -R mitodl:mitodl /var/media
 
 # Install Python packages
@@ -51,6 +51,15 @@ RUN curl -sSL https://install.python-poetry.org \
 WORKDIR /src
 RUN python3 -m venv $VIRTUAL_ENV \
     && poetry install
+
+
+FROM node:22-slim AS node_builder
+COPY . /src
+WORKDIR /src
+ENV NODE_ENV=production
+RUN yarn install --immutable \
+    && node node_modules/webpack/bin/webpack.js --config webpack.config.prod.js --bail
+
 
 # Runtime stage
 FROM python:3.13.7-slim AS runtime
@@ -81,7 +90,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Add non-root user
-RUN adduser --disabled-password --gecos "" --uid 1001 mitodl \
+RUN adduser --disabled-password --gecos "" mitodl \
     && mkdir -p /src /var/media \
     && chown -R mitodl:mitodl /src /var/media
 
@@ -101,3 +110,9 @@ EXPOSE 8053
 ENV PORT=8053
 
 CMD ["uwsgi", "uwsgi.ini"]
+
+
+FROM runtime AS production
+
+COPY --from=node_builder --chown=mitodl:mitodl /src/static /src/static
+COPY --from=node_builder --chown=mitodl:mitodl /src/webpack-stats.json /src/webpack-stats.json
