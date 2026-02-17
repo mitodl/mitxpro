@@ -1,6 +1,25 @@
 Release Notes
 =============
 
+Version 0.192.0
+---------------
+
+- chore(deps): update redis docker tag to v8.6.0 (#3791)
+- chore(deps): update postgres docker tag to v18.2 (#3790)
+- fix(deps): update dependency boto3 to v1.42.49 (#3789)
+- [pre-commit.ci] pre-commit autoupdate (#3785)
+- fix: enable external marketing url sync (#3779)
+- Removed uid 1001 specification.
+- chore(deps): update dependency webpack to v5.104.1 [security] (#3780)
+- Fix: adding webpack build to the docker build steps.
+- Added missing dependency.
+- fixing uppercase of as keyword.
+- Updated in line with changes needed to ocw file.
+- Update Dockerfile
+- Update Dockerfile
+- Update Dockerfile
+- Productionalize the dockerfile.
+
 Version 0.191.1 (Released February 12, 2026)
 ---------------
 
