@@ -3,12 +3,19 @@
 <div class="slide" data-url="{{ courseware_page.url }}">
   <div class="slide-holder">
     {% if courseware_page.thumbnail_image %}
-    <img src="{% image_version_url courseware_page.thumbnail_image " fill-480x275" %}"
-      alt="{{ courseware_page.title }}" />
+    <img
+      src="{% image_version_url courseware_page.thumbnail_image " fill-480x275" %}"
+      alt="{{ courseware_page.title }}"
+    />
     {% else %}
-    <img src="{% static 'images/mit-dome.png' %}" alt="{{ courseware_page.title }}" />
+    <img
+      src="{% static 'images/mit-dome.png' %}"
+      alt="{{ courseware_page.title }}"
+    />
     {% endif %}
-    <a class="title" href="{% pageurl courseware_page %}">{{ courseware_page.title }}</a>
+    <a class="title" href="{% pageurl courseware_page %}"
+      >{{ courseware_page.title }}</a
+    >
     <p>{{ courseware_page.subhead }}</p>
     {% if courseware_page.product.current_price %}
     <p class="course-price">
@@ -16,7 +23,9 @@
       ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
     </p>
     {% endif %}
-    <a href="{% pageurl courseware_page %}" class="detail-link text-uppercase">view detail</a>
+    <a href="{% pageurl courseware_page %}" class="detail-link text-uppercase"
+      >view detail</a
+    >
   </div>
 </div>
 {% endfor %}
