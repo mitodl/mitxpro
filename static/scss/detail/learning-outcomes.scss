@@ -2,7 +2,8 @@
 @import "common";
 
 .learning-outcomes-block {
-  background: white url("#{$static-path}/images/dotted-bg.png") repeat-x 0 0;
+  background: white;
+  margin-bottom: 50px;
 
   .learning-header {
     margin: 0 auto;

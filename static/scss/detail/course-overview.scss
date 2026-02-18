@@ -2,7 +2,22 @@
 @import "common";
 
 .course-overview-block {
-  background: white url("#{$static-path}/images/dotted-bg.png") repeat-x 0 0;
+  background: white;
+  position: relative;
+
+  &::after {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    content: "";
+    height: 10px;
+    background: linear-gradient(
+      to right,
+      rgb(61 189 191 / 100%) 0%,
+      rgb(241 186 70 / 100%) 100%
+    );
+  }
 
   .course-overview-heading {
     margin: 0 auto;
