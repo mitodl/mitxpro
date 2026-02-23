@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.192.0
+Version 0.192.0 (Released February 23, 2026)
 ---------------
 
 - chore(deps): update redis docker tag to v8.6.0 (#3791)
