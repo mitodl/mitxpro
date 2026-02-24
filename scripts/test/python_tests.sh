@@ -9,7 +9,7 @@ echohighlight() {
 function run_test {
 	# shellcheck disable=SC2145
 	echohighlight "[TEST SUITE] $@"
-	poetry run "$@"
+	uv run "$@"
 }
 
 run_test ./scripts/test/detect_missing_migrations.sh
