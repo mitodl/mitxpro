@@ -32,25 +32,20 @@ RUN mkdir /src \
     && mkdir /var/media && chown -R mitodl:mitodl /var/media
 
 # Install Python packages
-## Set some poetry config
-ENV POETRY_VERSION=2.2.1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_CACHE_DIR='/tmp/cache/poetry' \
-    POETRY_HOME='/home/mitodl/.local' \
-    VIRTUAL_ENV="/opt/venv"
-ENV PATH="$VIRTUAL_ENV/bin:$POETRY_HOME/bin:$PATH"
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT="/opt/venv"
+ENV PATH="/opt/venv/bin:$PATH"
 
-COPY pyproject.toml poetry.toml poetry.lock /src/
-RUN chown -R mitodl:mitodl /src \
-    && mkdir ${VIRTUAL_ENV} && chown -R mitodl:mitodl ${VIRTUAL_ENV}
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-## Install poetry itself, and pre-create a venv with predictable name
+COPY pyproject.toml uv.lock /src/
+RUN chown -R mitodl:mitodl /src
+
 USER mitodl
-RUN curl -sSL https://install.python-poetry.org \
-    | POETRY_VERSION=${POETRY_VERSION} POETRY_HOME=${POETRY_HOME} python3 -q
 WORKDIR /src
-RUN python3 -m venv $VIRTUAL_ENV \
-    && poetry install
+RUN uv sync --frozen --no-install-project
 
 
 FROM node:22-slim AS node_builder

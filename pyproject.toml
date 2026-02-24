@@ -1,90 +1,100 @@
-[tool.poetry]
-name = "MITx Pro"
+[project]
+name = "mitxpro"
 version = "0.1.0"
 description = "MITx Pro"
-authors = ["MIT ODL"]
-license = "BSD-3"
+authors = [{ name = "MIT ODL" }]
+requires-python = ">=3.13,<4"
 readme = "README.md"
-packages = []
-package-mode = false
-requires-poetry = ">2.2,<3"
+license = "BSD-3"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "Pillow==10.4.0",
+    "PyNaCl==1.6.2",
+    "beautifulsoup4==4.8.2",
+    "boto3==1.42.54",
+    "celery==5.6.2",
+    "celery-redbeat==2.3.3",
+    "dj-database-url==3.1.2",
+    "django==4.2.28",
+    "django-anymail[mailgun]==13.1",
+    "django-filter>=23.4,<24",
+    "django-hijack==3.7.6",
+    "django-ipware==7.0.1",
+    "django-oauth-toolkit==1.7.1",
+    "django-redis>=6.0.0,<7",
+    "django-robots==6.1",
+    "django-silk>=5.0.3,<6",
+    "django-storages==1.14.6",
+    "django-user-agents==0.4.0",
+    "django-webpack-loader==1.8.1",
+    "djangorestframework==3.16.1",
+    "edx-api-client==1.14.0",
+    "flaky==3.8.1",
+    "google-api-python-client==2.190.0",
+    "google-auth==1.35.0",
+    "hubspot-api-client>=6.1.0,<7",
+    "ipython>=9.0.0,<10",
+    "mitol-django-authentication==2025.3.17",
+    "mitol-django-common==2025.8.19",
+    "mitol-django-digital-credentials==2023.12.19",
+    "mitol-django-hubspot-api==2023.12.19",
+    "mitol-django-mail==2025.6.24",
+    "mitol-django-oauth-toolkit-extensions==2025.3.17",
+    "mitol-django-olposthog>=2025.0.0,<2026",
+    "newrelic>=10.0.0,<11",
+    "pdftotext>=3.0.0,<4",
+    "psycopg2==2.9.11",
+    "pycountry==26.2.16",
+    "pygsheets==2.0.2",
+    "redis==7.2.0",
+    "requests>=2.31.0,<3",
+    "sentry-sdk>=2.0.0,<3",
+    "social-auth-app-django>=5.4.0,<6",
+    "ulid-py>=1.1.0,<2",
+    "user-agents==2.2.0",
+    "user-util==2.0.0",
+    "uwsgi==2.0.31",
+    "wagtail==5.2.8",
+    "wagtail-metadata==5.0.0",
+    "xmltodict>=1.0.0,<2",
+    "zeep==4.3.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.13"
+[dependency-groups]
+dev = [
+    "bpython",
+    "django-debug-toolbar",
+    "factory-boy==3.3.3",
+    "faker==40.4.0",
+    "freezegun==1.5.5",
+    "hypothesis==4.24.6",
+    "ipdb",
+    "nplusone>=0.8.1",
+    "pdbpp",
+    "pytest>=8.0.0,<9",
+    "pytest-cov>=2.6.1",
+    "pytest-django",
+    "pytest-env",
+    "pytest-lazy-fixtures",
+    "pytest-mock",
+    "pytest-xdist",
+    "responses",
+    "safety",
+    "semantic-version",
+    "wagtail-factories",
+]
 
-Pillow = "10.4.0"
-PyNaCl = "1.6.2"
-beautifulsoup4 = "4.8.2"
-boto3 = "1.42.54"
-celery = "5.6.2"
-celery-redbeat = "2.3.3"
-dj-database-url = "3.1.2"
-django = "4.2.28"
-django-anymail = { version = "14.0", extras = ["mailgun"] }
-django-filter = "^23.4"
-django-hijack = "3.7.6"
-django-ipware = "7.0.1"
-django-oauth-toolkit = "1.7.1"
-django-redis = "^6.0.0"
-django-robots = "6.1"
-django-silk = "^5.0.3"
-django-storages = "1.14.6"
-django-user-agents = "0.4.0"
-django-webpack-loader = "1.8.1"
-djangorestframework = "3.16.1"
-edx-api-client = "1.14.0"
-flaky = "3.8.1"
-google-api-python-client = "2.190.0"
-google-auth = "1.35.0"
-hubspot-api-client = "^6.1.0"
-ipython = "^9.0.0"
-mitol-django-authentication = "2025.3.17"
-mitol-django-common = "2025.8.19"
-mitol-django-digital-credentials = "2023.12.19"
-mitol-django-hubspot-api = { version = "2023.12.19", extras = [] }
-mitol-django-mail = "2025.6.24"
-mitol-django-oauth-toolkit-extensions = "2025.3.17"
-mitol-django-olposthog = "^2025.0.0"
-newrelic = "^10.0.0"
-pdftotext = "^3.0.0"
-psycopg2 = "2.9.11"
-pycountry = "26.2.16"
-pygsheets = "2.0.2"
-redis = "4.6.0"
-requests = "^2.31.0"
-sentry-sdk = "^2.0.0"
-social-auth-app-django = "^5.4.0"
-ulid-py = "^1.1.0"
-user-agents = "2.2.0"
-user-util = "2.0.0"
-uwsgi = "2.0.31"
-wagtail = "5.2.8"
-wagtail-metadata = "5.0.0"
-xmltodict = "^1.0.0"
-zeep = "4.3.2"
+[tool.uv]
+package = false
+default-groups = "all"
 
-[tool.poetry.group.dev.dependencies]
-bpython = "*"
-django-debug-toolbar = "*"
-factory-boy = "3.3.3"
-faker = "40.4.0"
-freezegun = "1.5.5"
-hypothesis = "4.24.6"
-ipdb = "*"
-nplusone = ">=0.8.1"
-pdbpp = "*"
-pytest = "^8.0.0"
-pytest-cov = ">=2.6.1"
-pytest-django = "*"
-pytest-env = "*"
-pytest-lazy-fixtures = "*"
-pytest-mock = "*"
-pytest-xdist = "*"
-responses = "*"
-safety = "*"
-semantic-version = "*"
-wagtail-factories = "*"
+[tool.uv.build-backend]
+module-root = ""
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.10.0,<0.11.0"]
+build-backend = "uv_build"
