@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.192.1
+Version 0.192.1 (Released February 25, 2026)
 ---------------
 
 - fix(deps): update dependency webpack-cli to v6 (#3805)
