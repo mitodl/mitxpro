@@ -41,7 +41,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 COPY pyproject.toml uv.lock /src/
-RUN chown -R mitodl:mitodl /src
+RUN mkdir -p /opt/venv && chown -R mitodl:mitodl /src /opt/venv
 
 USER mitodl
 WORKDIR /src
