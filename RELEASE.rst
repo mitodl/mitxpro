@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.192.2
+---------------
+
+- feat: v1 course landing page design change (#3794)
+- [pre-commit.ci] pre-commit autoupdate (#3807)
+- fix(deps): update dependency redis to v7 (#3804)
+
 Version 0.192.1 (Released February 25, 2026)
 ---------------
 
