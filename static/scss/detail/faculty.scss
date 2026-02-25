@@ -2,12 +2,11 @@
 .faculty-block {
   width: 100%;
   padding: 100px 0 50px;
-  background: black url("#{$static-path}/images/faculty-bg.jpg") no-repeat 50% 0;
+  background: $darker-grey-bg;
   min-height: 400px;
   overflow: hidden;
   position: relative;
   color: black;
-  background-size: cover;
 
   .head {
     text-align: center;
