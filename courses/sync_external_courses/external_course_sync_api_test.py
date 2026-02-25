@@ -1227,7 +1227,7 @@ def test_create_or_update_external_course_page_field_override(
 
     # Marketing URL should always be updated
     assert latest_revision.external_marketing_url == clean_url(
-        external_course_data["landing_page_url"], remove_query_params=True
+        external_course_data["landing_page_url"]
     )
     assert course_page_updated is True
     assert course_page_created is False

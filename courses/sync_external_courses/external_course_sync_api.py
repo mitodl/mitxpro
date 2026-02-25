@@ -158,9 +158,7 @@ class ExternalCourse:
             external_course_json.get("enrollment_end_date"), keymap.date_format
         ) or (self.start_date + timedelta(days=7))
 
-        self.marketing_url = clean_url(
-            external_course_json.get("landing_page_url"), remove_query_params=True
-        )
+        self.marketing_url = clean_url(external_course_json.get("landing_page_url"))
         total_weeks = int(external_course_json.get("total_weeks"))
         self.duration = f"{total_weeks} Weeks" if total_weeks != 0 else ""
         self.min_weeks = total_weeks
