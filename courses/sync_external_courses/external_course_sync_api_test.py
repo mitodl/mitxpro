@@ -260,7 +260,7 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
     external_course_page = external_course_page.revisions.last().as_object()
 
     assert external_course_page.external_marketing_url == clean_url(
-        external_course_data["landing_page_url"], remove_query_params=True
+        external_course_data["landing_page_url"]
     )
     assert external_course_page.course == course
     assert (
