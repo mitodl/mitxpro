@@ -1,6 +1,19 @@
 Release Notes
 =============
 
+Version 0.192.1 (Released February 25, 2026)
+---------------
+
+- fix(deps): update dependency webpack-cli to v6 (#3805)
+- fix(deps): update dependency dj-database-url to v3.1.2 (#3802)
+- fix(deps): update dependency boto3 to v1.42.54 (#3801)
+- fix(deps): update dependency pycountry to v26 (#3799)
+- fix(deps): update dependency stylelint to v17 (#3800)
+- [pre-commit.ci] pre-commit autoupdate (#3792)
+- fix(deps): update dependency google-api-python-client to v2.190.0 (#3797)
+- fix(deps): update dependency dj-database-url to v3.1.1 (#3796)
+- fix(deps): update dependency boto3 to v1.42.52 (#3795)
+
 Version 0.192.0 (Released February 23, 2026)
 ---------------
 
