@@ -32,6 +32,7 @@ def test_image_version_url(settings, full_url):
     )
     assert result_url == expected_result_url
 
+
 def test_image_version_url_strips_filter_spec(settings):
     """image_version_url should strip surrounding whitespace in filter specs."""
     settings.SITE_BASE_URL = BASE_URL
