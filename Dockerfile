@@ -45,7 +45,7 @@ RUN mkdir -p /opt/venv && chown -R mitodl:mitodl /src /opt/venv
 
 USER mitodl
 WORKDIR /src
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen --no-install-project --no-dev
 
 
 FROM node:22-slim AS node_builder
@@ -91,6 +91,10 @@ RUN adduser --disabled-password --gecos "" mitodl \
 
 # Copy virtual environment from builder
 COPY --from=builder --chown=mitodl:mitodl /opt/venv /opt/venv
+
+# Copy uv binary from builder
+COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
+COPY --from=builder /usr/local/bin/uvx /usr/local/bin/uvx
 
 # Add project
 COPY --chown=mitodl:mitodl . /src
