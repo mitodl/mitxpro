@@ -2,11 +2,13 @@
 .course-in-program {
   width: 100%;
   padding: 100px 0 50px;
-  background: white;
+  background: white url("#{$static-path}/images/course-carousel-bg.jpg")
+    no-repeat 50% 50%;
   min-height: 400px;
   overflow: hidden;
   position: relative;
   color: black;
+  background-size: cover;
 
   &::after {
     position: absolute;
@@ -97,25 +99,10 @@
 
   p {
     margin: 0 0 10px;
+    min-height: 89px;
+    padding-bottom: 40px;
     padding-top: 20px;
-    padding-bottom: 70px;
     text-align: start;
-  }
-
-  .course-price {
-    position: absolute;
-    bottom: 55px;
-    left: 15px;
-    margin: 0;
-    padding: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: $primary;
-    text-align: start;
-
-    strong {
-      font-weight: 700;
-    }
   }
 
   .detail-link {
