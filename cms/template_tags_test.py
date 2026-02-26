@@ -31,3 +31,19 @@ def test_image_version_url(settings, full_url):
         relative_url if full_url is False else urljoin(BASE_URL, relative_url)
     )
     assert result_url == expected_result_url
+
+def test_image_version_url_strips_filter_spec(settings):
+    """image_version_url should strip surrounding whitespace in filter specs."""
+    settings.SITE_BASE_URL = BASE_URL
+    image_id = 2
+    file_hash = "xyz123"
+    image_filter = "fill-75x75"
+    image = ImageFactory.build(id=image_id, file_hash=file_hash)
+
+    expected_signature = generate_signature(image_id, image_filter, key=None)
+    result_url = image_version_url(image, f" {image_filter} ")
+
+    expected_result_url = (
+        f"/images/{expected_signature}/{image_id}/{image_filter}/?v={file_hash}"
+    )
+    assert result_url == expected_result_url
