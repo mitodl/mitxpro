@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.192.2
+Version 0.192.2 (Released February 26, 2026)
 ---------------
 
 - Revert "feat: v1 course landing page design change (#3794)" (#3817)
