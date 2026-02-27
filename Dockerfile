@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.13.7-slim AS builder
+FROM python:3.13-slim AS builder
 LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # Set environment variables for build
@@ -57,7 +57,7 @@ RUN yarn install --immutable \
 
 
 # Runtime stage
-FROM python:3.13.7-slim AS runtime
+FROM python:3.13-slim AS runtime
 
 # Set environment variables for production
 ENV PYTHONUNBUFFERED=1 \
@@ -115,3 +115,7 @@ FROM runtime AS production
 
 COPY --from=node_builder --chown=mitodl:mitodl /src/static /src/static
 COPY --from=node_builder --chown=mitodl:mitodl /src/webpack-stats.json /src/webpack-stats.json
+
+from builder as dev
+
+RUN uv sync --locked --dev

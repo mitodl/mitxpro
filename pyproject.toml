@@ -49,7 +49,7 @@ dependencies = [
     "psycopg2==2.9.11",
     "pycountry==26.2.16",
     "pygsheets==2.0.2",
-    "redis==7.2.0",
+    "redis==4.6.0",
     "requests>=2.31.0,<3",
     "sentry-sdk>=2.0.0,<3",
     "social-auth-app-django>=5.4.0,<6",
@@ -90,9 +90,7 @@ dev = [
 
 [tool.uv]
 package = false
-
-[tool.uv.build-backend]
-module-root = ""
+no-binary-package = ["lxml", "xmlsec"]
 
 [build-system]
 requires = ["uv_build>=0.10.0,<0.11.0"]
