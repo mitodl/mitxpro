@@ -20,7 +20,7 @@ celery = "5.6.2"
 celery-redbeat = "2.3.3"
 dj-database-url = "3.1.2"
 django = "4.2.28"
-django-anymail = { version = "13.1", extras = ["mailgun"] }
+django-anymail = { version = "14.0", extras = ["mailgun"] }
 django-filter = "^23.4"
 django-hijack = "3.7.6"
 django-ipware = "7.0.1"
