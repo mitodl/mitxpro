@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.13.7-slim AS builder
+FROM python:3.13-slim AS builder
 LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # Set environment variables for build
@@ -32,25 +32,20 @@ RUN mkdir /src \
     && mkdir /var/media && chown -R mitodl:mitodl /var/media
 
 # Install Python packages
-## Set some poetry config
-ENV POETRY_VERSION=2.2.1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_CACHE_DIR='/tmp/cache/poetry' \
-    POETRY_HOME='/home/mitodl/.local' \
-    VIRTUAL_ENV="/opt/venv"
-ENV PATH="$VIRTUAL_ENV/bin:$POETRY_HOME/bin:$PATH"
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT="/opt/venv"
+ENV PATH="/opt/venv/bin:$PATH"
 
-COPY pyproject.toml poetry.toml poetry.lock /src/
-RUN chown -R mitodl:mitodl /src \
-    && mkdir ${VIRTUAL_ENV} && chown -R mitodl:mitodl ${VIRTUAL_ENV}
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-## Install poetry itself, and pre-create a venv with predictable name
+COPY pyproject.toml uv.lock /src/
+RUN mkdir -p /opt/venv && chown -R mitodl:mitodl /src /opt/venv
+
 USER mitodl
-RUN curl -sSL https://install.python-poetry.org \
-    | POETRY_VERSION=${POETRY_VERSION} POETRY_HOME=${POETRY_HOME} python3 -q
 WORKDIR /src
-RUN python3 -m venv $VIRTUAL_ENV \
-    && poetry install
+RUN uv sync --frozen --no-install-project --no-dev
 
 
 FROM node:22-slim AS node_builder
@@ -62,7 +57,7 @@ RUN yarn install --immutable \
 
 
 # Runtime stage
-FROM python:3.13.7-slim AS runtime
+FROM python:3.13-slim AS runtime
 
 # Set environment variables for production
 ENV PYTHONUNBUFFERED=1 \
@@ -97,6 +92,10 @@ RUN adduser --disabled-password --gecos "" mitodl \
 # Copy virtual environment from builder
 COPY --from=builder --chown=mitodl:mitodl /opt/venv /opt/venv
 
+# Copy uv binary from builder
+COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
+COPY --from=builder /usr/local/bin/uvx /usr/local/bin/uvx
+
 # Add project
 COPY --chown=mitodl:mitodl . /src
 WORKDIR /src
@@ -116,3 +115,7 @@ FROM runtime AS production
 
 COPY --from=node_builder --chown=mitodl:mitodl /src/static /src/static
 COPY --from=node_builder --chown=mitodl:mitodl /src/webpack-stats.json /src/webpack-stats.json
+
+from builder as dev
+
+RUN uv sync --locked --dev

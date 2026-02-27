@@ -47,7 +47,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runtime
+      target: dev
     command: >
       /bin/bash -c '
       sleep 3 &&
@@ -85,7 +85,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runtime
+      target: dev
     environment: *py-environment
     env_file: .env
     command: >

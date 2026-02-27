@@ -115,3 +115,6 @@ localdev/google.token
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# UV
+.uv-cache
