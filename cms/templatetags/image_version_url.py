@@ -30,6 +30,7 @@ def image_version_url(
     """
     if not image:
         return ""
+    filter_spec = str(filter_spec).strip()
     generated_image_url = image_url(image, filter_spec, viewname=viewname)
     if not generated_image_url:
         return ""

@@ -1,13 +1,11 @@
 // sass-lint:disable mixins-before-declarations
 .learners-block {
   padding: 100px 0 50px;
-  background: white url("#{$static-path}/images/testimonial-carousel-bg.jpg")
-    no-repeat 50% 0;
+  background: white;
   min-height: 400px;
   overflow: hidden;
   position: relative;
   color: black;
-  background-size: cover;
 
   &::after {
     position: absolute;

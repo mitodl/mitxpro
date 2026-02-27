@@ -1,4 +1,4 @@
-{% load static wagtailcore_tags image_version_url %}
+{% load static wagtailcore_tags image_version_url humanize %}
 {% for courseware_page in pages %}
 <div class="slide" data-url="{{ courseware_page.url }}">
   <div class="slide-holder">
@@ -17,6 +17,12 @@
       >{{ courseware_page.title }}</a
     >
     <p>{{ courseware_page.subhead }}</p>
+    {% if courseware_page.product.current_price %}
+    <p class="course-price">
+      <strong>Price:</strong>
+      ${{ courseware_page.product.current_price|floatformat:"0"|intcomma }}
+    </p>
+    {% endif %}
     <a href="{% pageurl courseware_page %}" class="detail-link text-uppercase"
       >view detail</a
     >
