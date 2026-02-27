@@ -4,3 +4,4 @@ htmlcov
 .coverage
 node_modules
 staticfiles/
+.uv-cache
