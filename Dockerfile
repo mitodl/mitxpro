@@ -48,7 +48,7 @@ WORKDIR /src
 RUN uv sync --frozen --no-install-project --no-dev
 
 
-FROM node:22-slim AS node_builder
+FROM node:24-slim AS node_builder
 COPY . /src
 WORKDIR /src
 ENV NODE_ENV=production
