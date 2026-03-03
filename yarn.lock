@@ -9385,10 +9385,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"normalize-url@npm:^8.0.0":
-  version: 8.1.0
-  resolution: "normalize-url@npm:8.1.0"
-  checksum: 3800983919a973ab127c59c63706dee60b4b46649fdfb277aa571951795fecffab43e05893f621764adb15a0ed85d3fb880fdeb179e605d1afffc8d7f48d21d2
+"normalize-url@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "normalize-url@npm:9.0.0"
+  checksum: f42677fd1a0782735eecd644aa71e0414768156e371b578cca279d34ed14757d6958c6e3cd782e438fa5f45e533474239c6975a8287b2b66e7f72d9258f9db78
   languageName: node
   linkType: hard
 
