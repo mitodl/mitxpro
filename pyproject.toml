@@ -33,7 +33,7 @@ dependencies = [
     "django-webpack-loader==1.8.1",
     "djangorestframework==3.16.1",
     "edx-api-client==1.14.0",
-    "google-api-python-client==2.190.0",
+    "google-api-python-client==2.191.0",
     "google-auth==1.35.0",
     "hubspot-api-client>=6.1.0,<7",
     "ipython>=9.0.0,<10",
