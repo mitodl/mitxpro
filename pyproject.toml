@@ -48,7 +48,7 @@ dependencies = [
     "pdftotext>=3.0.0,<4",
     "psycopg2==2.9.11",
     "pycountry==26.2.16",
-    "pygsheets==2.0.2",
+    "pygsheets==2.0.6",
     "redis==7.2.1",
     "requests>=2.31.0,<3",
     "sentry-sdk>=2.0.0,<3",
