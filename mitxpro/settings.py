@@ -187,6 +187,7 @@ INSTALLED_APPS = (
     # ol-dango apps, must be after this project's apps for template precedence
     "mitol.hubspot_api.apps.HubspotApiApp",
     "mitol.common.apps.CommonApp",
+    "mitol.observability.apps.ObservabilityConfig",
     "mitol.digitalcredentials.apps.DigitalCredentialsApp",
     "mitol.mail.apps.MailApp",
     "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
@@ -545,70 +546,15 @@ DJANGO_LOG_LEVEL = get_string(
     name="DJANGO_LOG_LEVEL", default="INFO", description="The log level for django"
 )
 
-# For logging to a remote syslog host
-LOG_HOST = get_string(
-    name="MITXPRO_LOG_HOST",
-    default="localhost",
-    description="Remote syslog server hostname",
-)
-LOG_HOST_PORT = get_int(
-    name="MITXPRO_LOG_HOST_PORT", default=514, description="Remote syslog server port"
-)
-
 HOSTNAME = platform.node().split(".")[0]
 
 # nplusone profiler logger configuration
 NPLUSONE_LOGGER = logging.getLogger("nplusone")
 NPLUSONE_LOG_LEVEL = logging.ERROR
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "formatters": {
-        "verbose": {
-            "format": (  # noqa: UP032
-                "[%(asctime)s] %(levelname)s %(process)d [%(name)s] "
-                "%(filename)s:%(lineno)d - "
-                "[{hostname}] - %(message)s"
-            ).format(hostname=HOSTNAME),
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        }
-    },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-        "syslog": {
-            "level": LOG_LEVEL,
-            "class": "logging.handlers.SysLogHandler",
-            "facility": "local7",
-            "formatter": "verbose",
-            "address": (LOG_HOST, LOG_HOST_PORT),
-        },
-        "mail_admins": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
-        },
-    },
-    "loggers": {
-        "django": {
-            "propagate": True,
-            "level": DJANGO_LOG_LEVEL,
-            "handlers": ["console", "syslog"],
-        },
-        "django.request": {
-            "handlers": ["mail_admins"],
-            "level": DJANGO_LOG_LEVEL,
-            "propagate": True,
-        },
-        "nplusone": {"handlers": ["console"], "level": "ERROR"},
-    },
-    "root": {"handlers": ["console", "syslog"], "level": LOG_LEVEL},
-}
+# LOGGING is provided by mitol-django-observability (structlog-based, JSON in prod)
+# The syslog handler has been removed — Grafana Alloy collects from pod stdout.
+from mitol.observability.settings.logging import LOGGING  # noqa: E402, F401
 
 GTM_TRACKING_ID = get_string(
     name="GTM_TRACKING_ID", default="", description="Google Tag Manager container ID"
