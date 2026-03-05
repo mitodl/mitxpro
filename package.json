@@ -115,7 +115,7 @@
     "url-loader": "^4.1.1",
     "waait": "^1.0.4",
     "webpack": "^5.76.0",
-    "webpack-bundle-analyzer": "^4.6.1",
+    "webpack-bundle-analyzer": "^5.0.0",
     "webpack-bundle-tracker": "1.8.1",
     "webpack-cli": "^6.0.0",
     "webpack-dev-middleware": "^5.0.0",
