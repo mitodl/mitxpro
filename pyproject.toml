@@ -12,7 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "Pillow==10.4.0",
+    "Pillow==12.1.1",
     "PyNaCl==1.6.2",
     "beautifulsoup4==4.8.2",
     "boto3==1.42.61",
