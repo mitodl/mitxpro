@@ -1599,7 +1599,7 @@ wheels = [
 
 [[package]]
 name = "mitol-django-common"
-version = "2025.8.19"
+version = "2025.12.23.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -1612,9 +1612,9 @@ dependencies = [
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/29/140fcc6bfc4a65671aaaa5126f98fd6022a7fbcb6ef7753c546f6c87fe68/mitol_django_common-2025.8.19.tar.gz", hash = "sha256:69d52c956435180e5c0a46cc086a467d0aa20e06b64ad9253e30f4dd46fa3d62", size = 21867, upload-time = "2025-08-19T12:35:57.946Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/81/e0f7017bc26914bca5bc8905e5ccf6aff4db760c7ee386a548a4a5eb7263/mitol_django_common-2025.12.23.2.tar.gz", hash = "sha256:0c4800f7c0be1b36d9cb8a0e132e177b8d57e3108cde7ad4ea11f71886a7ac4d", size = 22164, upload-time = "2026-01-05T13:00:57.515Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/88/7b5c89a2cc97f5263418a7ca46055c74d2847e5c2d4a35f1d8983974cad5/mitol_django_common-2025.8.19-py3-none-any.whl", hash = "sha256:c7ab243b40eac7afc43d8060bfe8993424e4a49c65d0394063ed15bf4bf40d5c", size = 31698, upload-time = "2025-08-19T12:35:56.883Z" },
+    { url = "https://files.pythonhosted.org/packages/1a/d7/4b0c1770fcd48cd16766795f5ba4747608158ffade93941c367f56d10e2e/mitol_django_common-2025.12.23.2-py3-none-any.whl", hash = "sha256:3e9f4083c8f6dfdbc2aec2f4a488bb1fc5bc1d6c43aa74800a03e23628be7656", size = 31946, upload-time = "2026-01-05T13:00:56.315Z" },
 ]
 
 [[package]]
@@ -1812,7 +1812,7 @@ requires-dist = [
     { name = "hubspot-api-client", specifier = ">=6.1.0,<7" },
     { name = "ipython", specifier = ">=9.0.0,<10" },
     { name = "mitol-django-authentication", specifier = "==2025.3.17" },
-    { name = "mitol-django-common", specifier = "==2025.8.19" },
+    { name = "mitol-django-common", specifier = "==2025.12.23.2" },
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
     { name = "mitol-django-hubspot-api", specifier = "==2023.12.19" },
     { name = "mitol-django-mail", specifier = "==2025.6.24" },
@@ -1851,7 +1851,7 @@ dev = [
     { name = "ipdb" },
     { name = "nplusone", specifier = ">=0.8.1" },
     { name = "pdbpp" },
-    { name = "pytest", specifier = ">=8.0.0,<9" },
+    { name = "pytest", specifier = ">=9" },
     { name = "pytest-cov", specifier = ">=2.6.1" },
     { name = "pytest-django" },
     { name = "pytest-env" },
@@ -2314,7 +2314,7 @@ wheels = [
 
 [[package]]
 name = "pytest"
-version = "8.4.2"
+version = "9.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -2323,9 +2323,9 @@ dependencies = [
     { name = "pluggy" },
     { name = "pygments" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a3/5c/00a0e072241553e1a7496d638deababa67c5058571567b92a7eaa258397c/pytest-8.4.2.tar.gz", hash = "sha256:86c0d0b93306b961d58d62a4db4879f27fe25513d4b969df351abdddb3c30e01", size = 1519618, upload-time = "2025-09-04T14:34:22.711Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/db/7ef3487e0fb0049ddb5ce41d3a49c235bf9ad299b6a25d5780a89f19230f/pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11", size = 1568901, upload-time = "2025-12-06T21:30:51.014Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a8/a4/20da314d277121d6534b3a980b29035dcd51e6744bd79075a6ce8fa4eb8d/pytest-8.4.2-py3-none-any.whl", hash = "sha256:872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79", size = 365750, upload-time = "2025-09-04T14:34:20.226Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl", hash = "sha256:711ffd45bf766d5264d487b917733b453d917afd2b0ad65223959f59089f875b", size = 374801, upload-time = "2025-12-06T21:30:49.154Z" },
 ]
 
 [[package]]
