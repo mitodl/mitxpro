@@ -4,7 +4,6 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from django.core.management import call_command
 from django.utils import timezone
 from oauth2_provider.models import AccessToken, Application, RefreshToken
 
@@ -13,11 +12,11 @@ from users.factories import UserFactory
 
 
 def test_clear_expired_tokens(mocker):
-    """Test that clear_expired_tokens calls the cleartokens management command"""
-    patched_call_command = mocker.patch("mitxpro.tasks.call_command")
+    """Test that clear_expired_tokens calls the clear_expired function"""
+    patched_clear_expired = mocker.patch("mitxpro.tasks.clear_expired")
 
     tasks.clear_expired_tokens.delay()
-    patched_call_command.assert_called_once_with("cleartokens")
+    patched_clear_expired.assert_called_once_with()
 
 
 @pytest.mark.django_db
@@ -55,7 +54,7 @@ def test_clear_tokens_does_not_delete_unexpired_tokens(settings):
         access_token=access_token,
     )
 
-    call_command("cleartokens")
+    tasks.clear_expired_tokens()
 
     # Unexpired tokens should still exist
     assert AccessToken.objects.filter(pk=access_token.pk).exists()
@@ -101,7 +100,7 @@ def test_clear_tokens_deletes_expired_tokens(settings):
     assert AccessToken.objects.filter(pk=expired_access_token.pk).exists()
     assert RefreshToken.objects.filter(pk=expired_refresh_token.pk).exists()
 
-    call_command("cleartokens")
+    tasks.clear_expired_tokens()
 
     # Expired tokens should be deleted
     assert not AccessToken.objects.filter(pk=expired_access_token.pk).exists()

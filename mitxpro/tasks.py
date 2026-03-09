@@ -2,16 +2,15 @@
 
 import logging
 
-from django.core.management import call_command
-
-from mitxpro.celery import app
+from celery import shared_task
+from oauth2_provider.models import clear_expired
 
 log = logging.getLogger(__name__)
 
 
-@app.task(acks_late=True)
+@shared_task(acks_late=True)
 def clear_expired_tokens():
-    """Clear expired OAuth2 access, refresh, and ID tokens via the cleartokens management command."""
+    """Clear expired OAuth2 access, refresh, and ID tokens."""
     log.info("Starting clear_expired_tokens...")
-    call_command("cleartokens")
+    clear_expired()
     log.info("Finished clear_expired_tokens.")

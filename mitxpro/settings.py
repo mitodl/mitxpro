@@ -771,17 +771,6 @@ CRON_BASKET_DELETE_DAYS = get_string(
     description="'days' value for the 'delete-expired-baskets' scheduled task (defaults to everyday)",
 )
 
-CRON_CLEAR_TOKENS_HOURS = get_string(
-    name="CRON_CLEAR_TOKENS_HOURS",
-    default=0,
-    description="'hours' value for the 'clear-expired-tokens' scheduled task (defaults to midnight)",
-)
-CRON_CLEAR_TOKENS_DAYS = get_string(
-    name="CRON_CLEAR_TOKENS_DAYS",
-    default="*",
-    description="'day_of_month' value for 'clear-expired-tokens' scheduled task (default will run every day)",
-)
-
 BASKET_EXPIRY_DAYS = get_int(
     name="BASKET_EXPIRY_DAYS",
     default=15,
@@ -915,9 +904,9 @@ CELERY_BEAT_SCHEDULE = {
         "task": "mitxpro.tasks.clear_expired_tokens",
         "schedule": crontab(
             minute=0,
-            hour=CRON_CLEAR_TOKENS_HOURS,
-            day_of_week="*",
-            day_of_month=CRON_CLEAR_TOKENS_DAYS,
+            hour=0,
+            day_of_week=0,
+            day_of_month="*",
             month_of_year="*",
         ),
     },

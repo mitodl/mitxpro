@@ -79,14 +79,6 @@
       "description": "'hours' value for the 'delete-expired-baskets' scheduled task (defaults to midnight)",
       "required": false
     },
-    "CRON_CLEAR_TOKENS_DAYS": {
-      "description": "'day_of_month' value for 'clear-expired-tokens' scheduled task (default will run every day)",
-      "required": false
-    },
-    "CRON_CLEAR_TOKENS_HOURS": {
-      "description": "'hours' value for the 'clear-expired-tokens' scheduled task (defaults to midnight)",
-      "required": false
-    },
     "CRON_COURSERUN_SYNC_DAYS": {
       "description": "'day_of_week' value for 'sync-courseruns-data' scheduled task (default will run once a day).",
       "required": false
