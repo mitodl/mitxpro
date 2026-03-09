@@ -902,13 +902,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "clear-expired-tokens": {
         "task": "mitxpro.tasks.clear_expired_tokens",
-        "schedule": crontab(
-            minute=0,
-            hour=0,
-            day_of_week=0,
-            day_of_month="*",
-            month_of_year="*",
-        ),
+        "schedule": crontab(minute=0, hour=9, day_of_week=1),
     },
 }
 
