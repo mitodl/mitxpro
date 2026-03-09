@@ -76,7 +76,7 @@ dev = [
     "ipdb",
     "nplusone>=0.8.1",
     "pdbpp",
-    "pytest>=8.0.0,<9",
+    "pytest>=9.0.2,<10",
     "pytest-cov>=2.6.1",
     "pytest-django",
     "pytest-env",
