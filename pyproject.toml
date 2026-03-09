@@ -35,6 +35,7 @@ dependencies = [
     "edx-api-client==1.14.0",
     "google-api-python-client==2.192.0",
     "google-auth==1.35.0",
+    "granian>=2.7.2",
     "hubspot-api-client>=6.1.0,<7",
     "ipython>=9.0.0,<10",
     "mitol-django-authentication==2025.3.17",
