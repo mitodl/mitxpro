@@ -43,7 +43,7 @@ dependencies = [
     "mitol-django-hubspot-api==2023.12.19",
     "mitol-django-mail==2025.6.24",
     "mitol-django-oauth-toolkit-extensions==2025.3.17",
-    "mitol-django-olposthog>=2025.0.0,<2026",
+    "mitol-django-olposthog>=2026.3.6,<2027",
     "newrelic>=10.0.0,<11",
     "pdftotext>=3.0.0,<4",
     "psycopg2==2.9.11",
