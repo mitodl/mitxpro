@@ -1305,6 +1305,12 @@ POSTHOG_MAX_RETRIES = get_int(
     default=3,
     description="Number of times that requests to PostHog should be retried after failing.",
 )
+POSTHOG_POLL_INTERVAL = get_int(
+    name="POSTHOG_POLL_INTERVAL",
+    default=300,
+    description="Seconds between PostHog flag config polling."
+    "Relevant when POSTHOG_PERSONAL_API_KEY is set for local evaluation.",
+)
 
 # Hubspot sync settings
 MITOL_HUBSPOT_API_PRIVATE_TOKEN = get_string(
