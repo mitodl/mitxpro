@@ -24,6 +24,13 @@ def test_clear_expired_tokens(mocker):
     [
         pytest.param(timedelta(hours=1), None, False, id="unexpired"),
         pytest.param(timedelta(days=-60), timedelta(days=-60), True, id="expired"),
+        pytest.param(
+            timedelta(hours=1),
+            timedelta(hours=1),
+            False,
+            id="unexpired-with-future-revoked",
+        ),
+        pytest.param(timedelta(days=-60), None, True, id="expired-not-revoked"),
     ],
 )
 @pytest.mark.django_db
@@ -64,5 +71,9 @@ def test_clear_expired_tokens_deletes_correctly(
 
     tasks.clear_expired_tokens()
 
-    assert AccessToken.objects.filter(pk=access_token.pk).exists() == (not expect_deleted)
-    assert RefreshToken.objects.filter(pk=refresh_token.pk).exists() == (not expect_deleted)
+    assert AccessToken.objects.filter(pk=access_token.pk).exists() == (
+        not expect_deleted
+    )
+    assert RefreshToken.objects.filter(pk=refresh_token.pk).exists() == (
+        not expect_deleted
+    )
