@@ -265,7 +265,7 @@ class ProductCouponAssignmentFactory(DjangoModelFactory):
 class TaxRateFactory(DjangoModelFactory):
     """Factory for TaxRate"""
 
-    country_code = FAKE.country_code()
+    country_code = Faker("country_code")
     tax_rate = fuzzy.FuzzyDecimal(low=0, high=99, precision=4)
 
     class Meta:
