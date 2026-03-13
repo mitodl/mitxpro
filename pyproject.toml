@@ -20,7 +20,7 @@ dependencies = [
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
     "django==4.2.29",
-    "django-anymail[mailgun]==13.1",
+    "django-anymail[mailgun]==14.0",
     "django-filter>=23.4,<24",
     "django-hijack==3.7.6",
     "django-ipware==7.0.1",
