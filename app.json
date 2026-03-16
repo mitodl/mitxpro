@@ -525,6 +525,10 @@
       "description": "Number of times that requests to PostHog should be retried after failing.",
       "required": false
     },
+    "POSTHOG_POLL_INTERVAL": {
+      "description": "Seconds between PostHog flag config polling. Relevant when POSTHOG_PERSONAL_API_KEY is set for local evaluation.",
+      "required": false
+    },
     "POSTHOG_PROJECT_API_KEY": {
       "description": "API token to communicate with PostHog",
       "required": false
