@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.192.3
+Version 0.192.3 (Released March 18, 2026)
 ---------------
 
 - fix: v1 course landing page design change + image versioning url issue in product cards (#3819)
