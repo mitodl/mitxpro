@@ -1,6 +1,40 @@
 Release Notes
 =============
 
+Version 0.193.0
+---------------
+
+- chore(deps): update dependency faker to v40.11.0 (#3852)
+- fix(deps): update dependency boto3 to v1.42.68 (#3851)
+- fix(deps): update dependency redis to v7.3.0 (#3850)
+- chore(deps): update nginx docker tag to v1.29.6 (#3849)
+- fix(deps): update dependency django-anymail to v14 (#3848)
+- fix(deps): update dependency boto3 to v1.42.67 (#3847)
+- feat: add clear_expired_tokens task to remove oauth expired tokens (#3835)
+- [pre-commit.ci] pre-commit autoupdate (#3845)
+- fix: intermittent test_tax_country_and_ip_mismatch (#3846)
+- fix(deps): update dependency jsdom to v28 (#3842)
+- fix(deps): update dependency mitol-django-common to v2025.12.23.2 (#3828)
+- feat: Add granian for managing the application runtime
+- fix(deps): update dependency google-api-python-client to v2.192.0 (#3844)
+- fix(deps): update dependency boto3 to v1.42.63 (#3841)
+- fix(deps): update dependency nyc to v18 (#3839)
+- chore(deps): update dependency faker to v40.8.0 (#3838)
+- fix(deps): update dependency boto3 to v1.42.61 (#3837)
+- fix(deps): update dependency webpack-bundle-analyzer to v5 (#3834)
+- fix(deps): update dependency redis to v7 (#3833)
+- fix(deps): update dependency django to v4.2.29 [security] (#3836)
+- fix(deps): update dependency google-api-python-client to v2.191.0 (#3831)
+- fix(deps): update dependency boto3 to v1.42.60 (#3830)
+- chore(deps): update postgres docker tag to v18.3 (#3826)
+- chore(deps): update node.js to v24 (#3803)
+- chore(deps): update dependency normalize-url to v9 (#3829)
+- chore(deps): update redis docker tag to v8.6.1 (#3823)
+- chore(deps): update dependency faker to v40.5.1 (#3825)
+- fix(deps): update dependency boto3 to v1.42.59 (#3824)
+- [pre-commit.ci] pre-commit autoupdate (#3822)
+- chore: migrate from poetry/pip to uv for dependency management (#3809)
+
 Version 0.192.3 (Released March 18, 2026)
 ---------------
 
