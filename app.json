@@ -545,6 +545,10 @@
       "description": "Redis URL for non-production use",
       "required": false
     },
+    "REFRESH_TOKEN_EXPIRE_SECONDS": {
+      "description": "Number of seconds until a refresh token expires",
+      "required": false
+    },
     "REFUND_REQUEST_WORKSHEET_ID": {
       "description": "ID of the worksheet within the enrollment change request spreadsheet that contains enrollment refund requests",
       "required": false

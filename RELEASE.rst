@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.192.3 (Released March 18, 2026)
+---------------
+
+- fix: v1 course landing page design change + image versioning url issue in product cards (#3819)
+- fix(deps): update dependency django-anymail to v14 (#3798)
+
 Version 0.192.2 (Released February 26, 2026)
 ---------------
 
