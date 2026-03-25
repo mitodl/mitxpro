@@ -1794,7 +1794,11 @@ def test_tax_country_and_ip_mismatch(user):
     request = FakeRequest()
     request.user = user
 
-    taxable_geoname = GeonameFactory.create()
+    ip_country_code = FAKE.country_code()
+    while ip_country_code == user.legal_address.country:
+        ip_country_code = FAKE.country_code()
+
+    taxable_geoname = GeonameFactory.create(country_iso_code=ip_country_code)
     taxable_netblock = NetBlockIPv4Factory.create()
     taxable_netblock.geoname_id = taxable_geoname.geoname_id
     taxable_netblock.save()

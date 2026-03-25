@@ -20,19 +20,19 @@ x-extra-hosts: &default-extra-hosts
 
 services:
   db:
-    image: postgres:18.2
+    image: postgres:18.3
     environment:
       POSTGRES_PASSWORD: postgres # pragma: allowlist secret
     ports:
       - "5432"
 
   redis:
-    image: redis:8.6.0
+    image: redis:8.6.1
     ports:
       - "6379"
 
   nginx:
-    image: nginx:1.29.5
+    image: nginx:1.29.6
     ports:
       - "8053:8053"
     links:
@@ -47,7 +47,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runtime
+      target: dev
     command: >
       /bin/bash -c '
       sleep 3 &&
@@ -68,7 +68,7 @@ services:
     extra_hosts: *default-extra-hosts
 
   watch:
-    image: node:22.22.0
+    image: node:24.14.0
     working_dir: /src
     command: >
       /bin/bash -c './webpack_dev_server.sh --install'
@@ -85,7 +85,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: runtime
+      target: dev
     environment: *py-environment
     env_file: .env
     command: >

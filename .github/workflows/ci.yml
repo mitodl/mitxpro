@@ -6,7 +6,7 @@ jobs:
 
     services:
       db:
-        image: postgres:18.2
+        image: postgres:18.3
         # Health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -21,7 +21,7 @@ jobs:
           - 5432:5432
 
       redis:
-        image: redis:8.6.0
+        image: redis:8.6.1
         ports:
           - 6379:6379
 
@@ -34,33 +34,16 @@ jobs:
       - name: Apt install
         run: cat Aptfile | sudo xargs apt-get install
 
-      - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.13.7"
+          enable-cache: true
 
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 2.2.1
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          virtualenvs-path: .venv
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install Python
+        run: uv python install 3.13
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
-
-      - name: Install project
-        run: poetry install --no-interaction
+        run: uv sync --locked
 
       - name: Running Celery
         run: |
@@ -81,9 +64,8 @@ jobs:
 
       - name: Tests
         run: |
-          source .venv/bin/activate
           export MEDIA_ROOT="$(mktemp -d)"
-          poetry run ./scripts/test/python_tests.sh
+          uv run ./scripts/test/python_tests.sh
         env:
           DEBUG: False
           NODE_ENV: "production"
@@ -123,7 +105,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 22.22.0
+          node-version: 24.14.0
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path

@@ -8,9 +8,6 @@
       "url": "https://github.com/heroku/heroku-buildpack-nodejs"
     },
     {
-      "url": "https://github.com/moneymeets/python-poetry-buildpack"
-    },
-    {
       "url": "https://github.com/heroku/heroku-buildpack-python"
     },
     {
@@ -546,6 +543,10 @@
     },
     "REDIS_URL": {
       "description": "Redis URL for non-production use",
+      "required": false
+    },
+    "REFRESH_TOKEN_EXPIRE_SECONDS": {
+      "description": "Number of seconds until a refresh token expires",
       "required": false
     },
     "REFUND_REQUEST_WORKSHEET_ID": {

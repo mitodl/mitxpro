@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.192.3"
+VERSION = "0.192.4"
 
 env.reset()
 
@@ -900,6 +900,10 @@ CELERY_BEAT_SCHEDULE = {
         )
         * 60,
     },
+    "clear-expired-tokens": {
+        "task": "mitxpro.tasks.clear_expired_tokens",
+        "schedule": crontab(minute=0, hour=9, day_of_week=1),
+    },
 }
 
 alt_sheets_processing = FEATURES.get("COUPON_SHEETS_ALT_PROCESSING")
@@ -1014,6 +1018,11 @@ OAUTH2_PROVIDER = {
         name="OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES",
         default=["http", "https"],
         description="List of schemes allowed for oauth2 redirect URIs",
+    ),
+    "REFRESH_TOKEN_EXPIRE_SECONDS": get_int(
+        name="REFRESH_TOKEN_EXPIRE_SECONDS",
+        default=60 * 60 * 24 * 30,  # 30 days
+        description="Number of seconds until a refresh token expires",
     ),
 }
 

@@ -4,7 +4,6 @@ Factories for ecommerce models
 
 from datetime import UTC
 
-import faker
 from factory import Faker, LazyAttribute, SubFactory, Trait, fuzzy, post_generation
 from factory.django import DjangoModelFactory
 
@@ -14,8 +13,6 @@ from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.test_utils import gen_fake_receipt_data
 from mitxpro.utils import now_in_utc
 from users.factories import UserFactory
-
-FAKE = faker.Factory.create()
 
 
 class CompanyFactory(DjangoModelFactory):
@@ -265,7 +262,7 @@ class ProductCouponAssignmentFactory(DjangoModelFactory):
 class TaxRateFactory(DjangoModelFactory):
     """Factory for TaxRate"""
 
-    country_code = FAKE.country_code()
+    country_code = Faker("country_code")
     tax_rate = fuzzy.FuzzyDecimal(low=0, high=99, precision=4)
 
     class Meta:
