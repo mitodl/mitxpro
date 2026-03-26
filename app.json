@@ -415,14 +415,6 @@
       "description": "E-mail to use for the from field",
       "required": false
     },
-    "MITXPRO_LOG_HOST": {
-      "description": "Remote syslog server hostname",
-      "required": false
-    },
-    "MITXPRO_LOG_HOST_PORT": {
-      "description": "Remote syslog server port",
-      "required": false
-    },
     "MITXPRO_LOG_LEVEL": {
       "description": "The log level default",
       "required": false
