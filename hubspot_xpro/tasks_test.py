@@ -9,7 +9,11 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectBatchInput, BatchInputSimplePublicObjectBatchInputForCreate
+from hubspot.crm.objects import (
+    ApiException,
+    BatchInputSimplePublicObjectBatchInput,
+    BatchInputSimplePublicObjectBatchInputForCreate,
+)
 from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
 from mitol.hubspot_api.exceptions import TooManyRequestsException
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory

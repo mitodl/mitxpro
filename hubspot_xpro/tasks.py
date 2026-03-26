@@ -10,7 +10,11 @@ import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectBatchInput, BatchInputSimplePublicObjectBatchInputForCreate
+from hubspot.crm.objects import (
+    ApiException,
+    BatchInputSimplePublicObjectBatchInput,
+    BatchInputSimplePublicObjectBatchInputForCreate,
+)
 from mitol.common.decorators import single_task
 from mitol.common.utils import chunks
 from mitol.hubspot_api.api import HubspotApi, HubspotAssociationType, HubspotObjectType
