@@ -10,7 +10,11 @@ import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
+from hubspot.crm.objects import (
+    ApiException,
+    BatchInputSimplePublicObjectBatchInput,
+    BatchInputSimplePublicObjectBatchInputForCreate,
+)
 from mitol.common.decorators import single_task
 from mitol.common.utils import chunks
 from mitol.hubspot_api.api import HubspotApi, HubspotAssociationType, HubspotObjectType
@@ -347,7 +351,7 @@ def batch_create_hubspot_objects_chunked(
         try:
             response = HubspotApi().crm.objects.batch_api.create(
                 hubspot_type,
-                BatchInputSimplePublicObjectInput(
+                BatchInputSimplePublicObjectBatchInputForCreate(
                     inputs=[
                         api.MODEL_FUNCTION_MAPPING[ct_model_name](obj_id)
                         for obj_id in chunk
@@ -420,7 +424,7 @@ def batch_update_hubspot_objects_chunked(
                 for obj_id in chunk
             ]
             response = HubspotApi().crm.objects.batch_api.update(
-                hubspot_type, BatchInputSimplePublicObjectInput(inputs=inputs)
+                hubspot_type, BatchInputSimplePublicObjectBatchInput(inputs=inputs)
             )
             updated_ids.extend([result.id for result in response.results])
         except ApiException as ae:

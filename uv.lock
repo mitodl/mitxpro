@@ -1316,17 +1316,18 @@ wheels = [
 
 [[package]]
 name = "hubspot-api-client"
-version = "6.1.0"
+version = "12.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "python-dateutil" },
+    { name = "requests" },
     { name = "six" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/81/c2/517545b940d8f406a475d2d53e8fa82a0ce047d9e6d66f4242667744ddaa/hubspot-api-client-6.1.0.tar.gz", hash = "sha256:eb5a59a56900a1c57291d3b939469174307d2fd9cfabfc61568650a990582f80", size = 1180301, upload-time = "2022-10-18T12:49:23.403Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/33/b4/8bfa11b523586108eb526abeca6a214eed3b3534ab10c8a3314fa7e488d5/hubspot_api_client-12.0.0.tar.gz", hash = "sha256:ddfc60f3a80565dd5bf7fc7554d0d2dabad37926f547436158258772f1a04e69", size = 1882105, upload-time = "2025-05-07T12:56:15.686Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c5/85/379179d5c4ed41a763b4235a8b81bfec501ffc15011c1e3e3ac99aa55579/hubspot_api_client-6.1.0-py3-none-any.whl", hash = "sha256:c90414a45559fc12aef294995e6001c2b007cb98a74879208d5abe07d90a6144", size = 2632969, upload-time = "2022-10-18T12:49:19.412Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/bf/b417bcf30d6fc4f473f3c1ab13cbffc3a809caa464d5aa2ae43de96416d9/hubspot_api_client-12.0.0-py3-none-any.whl", hash = "sha256:5426627ff808fdf259d5b5e4791667a323a2a82d36a834e7e43ec8e8f021aa08", size = 4295367, upload-time = "2025-05-07T12:56:12.203Z" },
 ]
 
 [[package]]
@@ -1735,21 +1736,21 @@ wheels = [
 
 [[package]]
 name = "mitol-django-hubspot-api"
-version = "2023.12.19"
+version = "2025.12.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
+    { name = "django-stubs" },
     { name = "djangorestframework" },
     { name = "factory-boy" },
     { name = "hubspot-api-client" },
     { name = "mitol-django-common" },
     { name = "requests" },
-    { name = "setuptools" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/d2/dbd852dea16bf07d6fe3e7cfa4fe2fe18b9917d668daeac47950724c91fd/mitol-django-hubspot-api-2023.12.19.tar.gz", hash = "sha256:cdec5eb5ddd20dccdd6dca9a1bfee7cb04f70874367691da24017556f9b4bb58", size = 11148, upload-time = "2023-12-19T18:00:12.399Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/64/b6/cf6eebe4819db7278b30f27d37202eea329469aaaf09f5a412e78c4cc1b4/mitol_django_hubspot_api-2025.12.18.tar.gz", hash = "sha256:3d67d3f64bc6b49c14548d712460321d7a1da1dbcfc61f77ba0c3023457969cb", size = 9407, upload-time = "2025-12-18T13:35:11.189Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/f6/1a48bd2dd9027ad0784a84c4650d10dd3cb13f0a53632bff0ba6d2f805fc/mitol_django_hubspot_api-2023.12.19-py3-none-any.whl", hash = "sha256:5a761a238474bd5e2c20b4d72a31f7298b6196e453f6e2047cc67590d995068b", size = 14617, upload-time = "2023-12-19T18:00:10.288Z" },
+    { url = "https://files.pythonhosted.org/packages/22/03/97446dd46de978d27dda229d2ea7208ca9729dde15e5e50d7dc311d0001b/mitol_django_hubspot_api-2025.12.18-py3-none-any.whl", hash = "sha256:ee062a5f1194f120f810bedad93f19a0f47c3e42c45eb94ced01296b8522bfe0", size = 13585, upload-time = "2025-12-18T13:35:10.182Z" },
 ]
 
 [[package]]
@@ -1931,12 +1932,12 @@ requires-dist = [
     { name = "google-api-python-client", specifier = "==2.192.0" },
     { name = "google-auth", specifier = "==1.35.0" },
     { name = "granian", specifier = ">=2.7.2" },
-    { name = "hubspot-api-client", specifier = ">=6.1.0,<7" },
+    { name = "hubspot-api-client", specifier = "==12.0.0" },
     { name = "ipython", specifier = ">=9.0.0,<10" },
     { name = "mitol-django-authentication", specifier = "==2025.3.17" },
     { name = "mitol-django-common", specifier = "==2025.12.23.2" },
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
-    { name = "mitol-django-hubspot-api", specifier = "==2023.12.19" },
+    { name = "mitol-django-hubspot-api", specifier = "==2025.12.18" },
     { name = "mitol-django-mail", specifier = "==2025.6.24" },
     { name = "mitol-django-oauth-toolkit-extensions", specifier = "==2025.3.17" },
     { name = "mitol-django-observability", specifier = ">=2026.1.0" },
