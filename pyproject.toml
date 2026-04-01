@@ -76,6 +76,7 @@ dev = [
     "freezegun==1.5.5",
     "hypothesis==4.24.6",
     "ipdb",
+    "mitol-drf-lint==2026.4.2",
     "nplusone>=0.8.1",
     "pdbpp",
     "pytest>=9",
