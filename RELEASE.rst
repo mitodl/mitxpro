@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.192.4
+Version 0.192.4 (Released April 06, 2026)
 ---------------
 
 - Set UV tools to an older version.
