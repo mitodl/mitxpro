@@ -159,7 +159,7 @@ def test_sync_contact_with_hubspot(mock_hubspot_api):
         == FAKE_HUBSPOT_ID
     )
     mock_hubspot_api.return_value.crm.objects.basic_api.create.assert_called_once_with(
-        simple_public_object_input=api.make_contact_sync_message(user.id),
+        simple_public_object_input_for_create=api.make_contact_sync_message(user.id),
         object_type=api.HubspotObjectType.CONTACTS.value,
     )
 
@@ -175,7 +175,7 @@ def test_sync_product_with_hubspot(mock_hubspot_api):
         == FAKE_HUBSPOT_ID
     )
     mock_hubspot_api.return_value.crm.objects.basic_api.create.assert_called_once_with(
-        simple_public_object_input=api.make_product_sync_message(product.id),
+        simple_public_object_input_for_create=api.make_product_sync_message(product.id),
         object_type=api.HubspotObjectType.PRODUCTS.value,
     )
 
@@ -188,7 +188,9 @@ def test_sync_deal_with_hubspot(mocker, mock_hubspot_api, hubspot_order):
     api.sync_deal_with_hubspot(hubspot_order.id)
 
     mock_hubspot_api.return_value.crm.objects.basic_api.create.assert_called_once_with(
-        simple_public_object_input=api.make_deal_sync_message(hubspot_order.id),
+        simple_public_object_input_for_create=api.make_deal_sync_message(
+            hubspot_order.id
+        ),
         object_type=api.HubspotObjectType.DEALS.value,
     )
 
@@ -212,12 +214,11 @@ def test_sync_line_item_with_hubspot(mock_hubspot_api, hubspot_order, hubspot_or
         ).hubspot_id
         == FAKE_HUBSPOT_ID
     )
-    mock_hubspot_api.return_value.crm.objects.associations_api.create.assert_called_once_with(
-        api.HubspotObjectType.LINES.value,
-        FAKE_HUBSPOT_ID,
-        api.HubspotObjectType.DEALS.value,
-        hubspot_order_id,
-        api.HubspotAssociationType.LINE_DEAL.value,
+    mock_hubspot_api.return_value.crm.associations.v4.basic_api.create_default.assert_called_once_with(
+        from_object_type=api.HubspotObjectType.LINES.value,
+        from_object_id=FAKE_HUBSPOT_ID,
+        to_object_type=api.HubspotObjectType.DEALS.value,
+        to_object_id=hubspot_order_id,
     )
 
 
@@ -234,7 +235,9 @@ def test_b2b_sync_deal_with_hubspot(mocker, mock_hubspot_api, hubspot_b2b_order)
     mock_sync_contact.assert_called_once()
 
     mock_hubspot_api.return_value.crm.objects.basic_api.create.assert_called_once_with(
-        simple_public_object_input=api.make_b2b_deal_sync_message(hubspot_b2b_order.id),
+        simple_public_object_input_for_create=api.make_b2b_deal_sync_message(
+            hubspot_b2b_order.id
+        ),
         object_type=api.HubspotObjectType.DEALS.value,
     )
     assert (
@@ -250,12 +253,11 @@ def test_sync_b2b_line_with_hubspot(
 ):
     """Test that the hubspot CRM API is called properly for a b2b line sync"""
     api.sync_b2b_line_with_hubspot(hubspot_b2b_order.id)
-    mock_hubspot_api.return_value.crm.objects.associations_api.create.assert_called_once_with(
-        api.HubspotObjectType.LINES.value,
-        FAKE_HUBSPOT_ID,
-        api.HubspotObjectType.DEALS.value,
-        hubspot_b2b_order_id,
-        api.HubspotAssociationType.LINE_DEAL.value,
+    mock_hubspot_api.return_value.crm.associations.v4.basic_api.create_default.assert_called_once_with(
+        from_object_type=api.HubspotObjectType.LINES.value,
+        from_object_id=FAKE_HUBSPOT_ID,
+        to_object_type=api.HubspotObjectType.DEALS.value,
+        to_object_id=hubspot_b2b_order_id,
     )
     assert (
         api.HubspotObject.objects.get(
@@ -270,12 +272,11 @@ def test_sync_b2b_contact_with_hubspot(
 ):
     """Test that the hubspot CRM API is called properly for a contact sync"""
     api.sync_b2b_contact_with_hubspot(hubspot_b2b_order.id)
-    mock_hubspot_api.return_value.crm.objects.associations_api.create.assert_called_once_with(
-        api.HubspotObjectType.DEALS.value,
-        hubspot_b2b_order_id,
-        api.HubspotObjectType.CONTACTS.value,
-        FAKE_HUBSPOT_ID,
-        api.HubspotAssociationType.DEAL_CONTACT.value,
+    mock_hubspot_api.return_value.crm.associations.v4.basic_api.create_default.assert_called_once_with(
+        from_object_type=api.HubspotObjectType.DEALS.value,
+        from_object_id=hubspot_b2b_order_id,
+        to_object_type=api.HubspotObjectType.CONTACTS.value,
+        to_object_id=FAKE_HUBSPOT_ID,
     )
 
 
@@ -398,8 +399,8 @@ def test_sync_deal_hubspot_ids_to_hubspot(
     mock_hubspot_api.return_value.crm.objects.basic_api.get_page.side_effect = [
         mocker.Mock(results=deals, paging=None),  # deals
     ]
-    mock_hubspot_api.return_value.crm.deals.associations_api.get_all.side_effect = [
-        *[mocker.Mock(results=[SimplePublicObjectFactory()]) for _ in line_items],
+    mock_hubspot_api.return_value.crm.associations.v4.basic_api.get_page.side_effect = [
+        *[mocker.Mock(results=[mocker.Mock(to_object_id=li.id)]) for li in line_items],
         mocker.Mock(results=[]),
     ]  # associations
     mock_hubspot_api.return_value.crm.line_items.basic_api.get_by_id.side_effect = [

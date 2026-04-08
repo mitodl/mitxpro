@@ -9,7 +9,11 @@ import pytest
 from django.contrib.contenttypes.models import ContentType
 from faker import Faker
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
-from hubspot.crm.objects import ApiException, BatchInputSimplePublicObjectInput
+from hubspot.crm.objects import (
+    ApiException,
+    BatchInputSimplePublicObjectBatchInput,
+    BatchInputSimplePublicObjectBatchInputForCreate,
+)
 from mitol.hubspot_api.api import HubspotAssociationType, HubspotObjectType
 from mitol.hubspot_api.exceptions import TooManyRequestsException
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
@@ -228,7 +232,7 @@ def test_batch_update_hubspot_objects_chunked(mocker, id_count):
     )
     mock_hubspot_api.return_value.crm.objects.batch_api.update.assert_any_call(
         HubspotObjectType.CONTACTS.value,
-        BatchInputSimplePublicObjectInput(
+        BatchInputSimplePublicObjectBatchInput(
             inputs=[
                 {
                     "id": mock_id[1],
@@ -286,7 +290,7 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
     )
     mock_hubspot_api.return_value.crm.objects.batch_api.create.assert_any_call(
         HubspotObjectType.CONTACTS.value,
-        BatchInputSimplePublicObjectInput(
+        BatchInputSimplePublicObjectBatchInputForCreate(
             inputs=[
                 make_contact_sync_message(mock_id)
                 for mock_id in mock_ids[0 : min(id_count, 10)]
