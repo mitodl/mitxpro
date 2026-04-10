@@ -2,8 +2,7 @@
 Tests for signals
 """
 
-from datetime import timedelta, datetime
-import pytz
+from datetime import timedelta, datetime, timezone
 import re
 
 import factory
@@ -34,8 +33,8 @@ from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
 
-START_DT = datetime(2098, 1, 1, tzinfo=pytz.UTC)
-END_DT = datetime(2099, 2, 1, tzinfo=pytz.UTC)
+START_DT = datetime(2098, 1, 1, tzinfo=timezone.utc)
+END_DT = datetime(2099, 2, 1, tzinfo=timezone.utc)
 
 
 def make_api_course(course_id, name):
@@ -352,11 +351,13 @@ def test_sync_course_runs(
             if re.match(COURSE_KEY_PATTERN, data["courseware_id"])
         ]
         mock_course_list.get_courses.assert_called_once_with(
-            course_keys=valid_course_keys, username=None
+            course_keys=valid_course_keys,
+            username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
         )
     elif not api_error:
         mock_course_list.get_courses.assert_called_once_with(
-            course_keys=[data["courseware_id"] for data in local_data], username=None
+            course_keys=[data["courseware_id"] for data in local_data],
+            username=settings.OPENEDX_SERVICE_WORKER_USERNAME,
         )
     else:
         mock_course_list.get_courses.assert_called_once()
