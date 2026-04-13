@@ -954,6 +954,9 @@ OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"  # noqa: S105
 
 OAUTH2_PROVIDER = {
+    # Disable PKCE requirement to maintain backward compatibility with existing OAuth clients
+    # (PKCE_REQUIRED changed default to True in django-oauth-toolkit 2.0.0)
+    "PKCE_REQUIRED": False,
     # this is the list of available scopes
     "SCOPES": {
         "read": "Read scope",

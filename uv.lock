@@ -721,7 +721,7 @@ wheels = [
 
 [[package]]
 name = "django-oauth-toolkit"
-version = "1.7.1"
+version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -729,9 +729,9 @@ dependencies = [
     { name = "oauthlib" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/84/11/7841f88b6e200e49533307425271c356399319b35738aedb3fcb487afc3b/django-oauth-toolkit-1.7.1.tar.gz", hash = "sha256:37b690fa53f340c7391bdbc0fdbb32fd9ef8a7c012e72ee8754c331a2d7b4adb", size = 46685 }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/95/efd83b35c34b86eb2249d2b54c5eaf383c48f3f19034aa6f3807e37471b6/django_oauth_toolkit-3.2.0.tar.gz", hash = "sha256:c36761ae6810083d95a652e9c820046cde0d45a2e2a5574bbe7202656ec20bb6", size = 114211 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1b/1a/3a8332b8c507ae41491f6b049ff4521225eabca83032d2e67372d63d973b/django_oauth_toolkit-1.7.1-py3-none-any.whl", hash = "sha256:756e44421d0993f27705736b6c33a3d89018393859a31ac926296950f76e4433", size = 63199 },
+    { url = "https://files.pythonhosted.org/packages/ae/cc/f27a784c0ecd13335abd9ef85ebb80dbc04945f919da5f496f56e3562751/django_oauth_toolkit-3.2.0-py3-none-any.whl", hash = "sha256:bd2cd2719b010231a2f370f927dbcc740454fb1d0dd7e7f4138f36227363dc26", size = 87077 },
 ]
 
 [[package]]
@@ -1989,7 +1989,7 @@ requires-dist = [
     { name = "django-filter", specifier = ">=23.4,<24" },
     { name = "django-hijack", specifier = "==3.7.7" },
     { name = "django-ipware", specifier = "==7.0.1" },
-    { name = "django-oauth-toolkit", specifier = "==1.7.1" },
+    { name = "django-oauth-toolkit", specifier = "==3.2.0" },
     { name = "django-redis", specifier = ">=6.0.0,<7" },
     { name = "django-robots", specifier = "==6.1" },
     { name = "django-silk", specifier = ">=5.0.3,<6" },
