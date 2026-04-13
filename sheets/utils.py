@@ -350,7 +350,9 @@ def get_data_rows_after_start(
             **kwargs,
         )
         request_count += 1
-        yield from values
+        for row in values:
+            if any(cell.strip() for cell in row):
+                yield row
         start_row = end_row + 1
 
 
