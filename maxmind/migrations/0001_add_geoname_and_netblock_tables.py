@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="netblock",
             constraint=models.CheckConstraint(
-                check=models.Q(
+                condition=models.Q(
                     ("geoname_id__isnull", False),
                     ("registered_country_geoname_id__isnull", False),
                     ("represented_country_geoname_id__isnull", False),
