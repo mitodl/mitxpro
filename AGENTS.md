@@ -119,5 +119,6 @@ All issue and pull request templates are centralized in the [mitodl/.github](htt
 
 ## Further Reading
 
+- [docs/rfcs/](docs/rfcs/) — Architecture decision records (ecommerce, auth, course data)
 - [courses/docs/external-course-sync.md](courses/docs/external-course-sync.md) — External course sync
 - [docs/configure_digital_credentials.md](docs/configure_digital_credentials.md) — Digital credentials setup
