@@ -354,7 +354,7 @@ def get_data_rows_after_start(
         # returnas="matrix" (its include_tailing_empty_rows flag is a no-op
         # for matrix mode). Only trailing empty rows are expected here.
         for row in values:
-            if any(cell.strip() for cell in row):
+            if row[0].strip():
                 yield row
         start_row = end_row + 1
 
