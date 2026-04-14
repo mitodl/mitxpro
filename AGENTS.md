@@ -14,19 +14,19 @@ Django 4.2 + Wagtail 5.2 + React 16 monolith for MIT xPRO professional education
 
 ### Key Django Apps
 
-| App              | Purpose                                                                                                         |
-| ---------------- | --------------------------------------------------------------------------------------------------------------- |
-| `courses`        | Courses, programs, enrollments, certificates, runs                                                              |
-| `cms`            | Wagtail CMS pages + REST API — see [cms/README.md](../cms/README.md)                                            |
-| `ecommerce`      | Orders, products, coupons, CyberSource payments, tax                                                            |
-| `b2b_ecommerce`  | B2B ordering and enrollment                                                                                     |
-| `courseware`     | Open edX integration, user sync, API tokens                                                                     |
-| `sheets`         | Google Sheets automation for enrollment codes, refunds, deferrals — see [sheets/README.md](../sheets/README.md) |
-| `authentication` | OAuth2, social auth pipelines, JWT (djoser)                                                                     |
-| `users`          | Custom User model                                                                                               |
-| `compliance`     | Audit logging, data consent                                                                                     |
-| `mail`           | Email templates, Mailgun integration                                                                            |
-| `hubspot_xpro`   | HubSpot CRM sync                                                                                                |
+| App              | Purpose                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `courses`        | Courses, programs, enrollments, certificates, runs                                                           |
+| `cms`            | Wagtail CMS pages + REST API — see [cms/README.md](cms/README.md)                                            |
+| `ecommerce`      | Orders, products, coupons, CyberSource payments, tax                                                         |
+| `b2b_ecommerce`  | B2B ordering and enrollment                                                                                  |
+| `courseware`     | Open edX integration, user sync, API tokens                                                                  |
+| `sheets`         | Google Sheets automation for enrollment codes, refunds, deferrals — see [sheets/README.md](sheets/README.md) |
+| `authentication` | OAuth2, social auth pipelines, JWT (djoser)                                                                  |
+| `users`          | Custom User model                                                                                            |
+| `compliance`     | Audit logging, data consent                                                                                  |
+| `mail`           | Email templates, Mailgun integration                                                                         |
+| `hubspot_xpro`   | HubSpot CRM sync                                                                                             |
 
 ## Build and Test
 
@@ -119,6 +119,5 @@ All issue and pull request templates are centralized in the [mitodl/.github](htt
 
 ## Further Reading
 
-- [docs/rfcs/](../docs/rfcs/) — Architecture decision records (ecommerce, auth, course data)
-- [courses/docs/external-course-sync.md](../courses/docs/external-course-sync.md) — External course sync
-- [docs/configure_digital_credentials.md](../docs/configure_digital_credentials.md) — Digital credentials setup
+- [courses/docs/external-course-sync.md](courses/docs/external-course-sync.md) — External course sync
+- [docs/configure_digital_credentials.md](docs/configure_digital_credentials.md) — Digital credentials setup
