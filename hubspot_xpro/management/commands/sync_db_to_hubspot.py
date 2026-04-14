@@ -41,6 +41,7 @@ class Command(BaseCommand):
             ContentType.objects.get_for_model(User).model,
             User._meta.app_label,  # noqa: SLF001
             create=self.create,
+            object_ids=self.object_ids,
         )
         self.stdout.write(f"  Task id is {task.id}")
         start = now_in_utc()
@@ -60,6 +61,7 @@ class Command(BaseCommand):
             ContentType.objects.get_for_model(Product).model,
             Product._meta.app_label,  # noqa: SLF001
             create=self.create,
+            object_ids=self.object_ids,
         )
         self.stdout.write(f"  Task id is {task.id}")
         start = now_in_utc()
