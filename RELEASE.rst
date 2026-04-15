@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.193.0 (Released April 15, 2026)
+---------------
+
+- fix(deps): update dependency django to v4.2.30 [security] (#3873)
+- Upgrade hubspot-api-client to 12.0.0 to fix ModuleNotFoundError: pkg_resources (#3860)
+- chore(deps): update actions/cache digest to 6682284 (#3863)
+- chore: add drf-lint pre-commit hook with baseline (#3861)
+- chore(deps): update codecov/codecov-action digest to 75cd116 (#3864)
+- fix(deps): update dependency boto3 to v1.42.73 (#3871)
+- chore(deps): update dependency lodash to v4.18.1 [security] (#3862)
+- fix(deps): update dependency ramda to ^0.32.0 (#3853)
+- [pre-commit.ci] pre-commit autoupdate (#3854)
+- chore(deps): update dependency requests to v2.33.0 [security] (#3858)
+- fix: apply prettier formatting to app.json
+- fix: regenerate app.json to remove MITXPRO_LOG_HOST/LOG_HOST_PORT
+- fix: Updcate uv lock
+- feat: migrate to mitol-django-observability plugin
+
 Version 0.192.4 (Released April 06, 2026)
 ---------------
 
