@@ -51,6 +51,34 @@ def test_get_data_rows(mocker):
     assert data_rows == non_header_rows
 
 
+def test_get_data_rows_after_start_filters_empty_rows(mocker):
+    """get_data_rows_after_start should filter out empty trailing rows returned by the API"""
+    page_size = 2
+    data_rows = [
+        ["1", "data1"],
+        ["2", "data2"],
+    ]
+    empty_row = ["", ""]
+    mock_worksheet = mocker.MagicMock(spec=Worksheet)
+    mock_worksheet.get_values.side_effect = [
+        # First page: full page of data rows
+        data_rows,
+        # Second page: one empty row (pagination boundary triggers extra fetch)
+        [empty_row],
+    ]
+    result = list(
+        utils.get_data_rows_after_start(
+            mock_worksheet,
+            start_row=1,
+            start_col=1,
+            end_col=2,
+            page_size=page_size,
+        )
+    )
+    assert result == data_rows
+    assert mock_worksheet.get_values.call_count == 2
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "use_sheet_id, value, force, sheet_modified_offset, existing_modified_offset, expect_error, force_processing",

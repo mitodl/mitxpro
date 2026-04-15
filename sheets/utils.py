@@ -350,7 +350,12 @@ def get_data_rows_after_start(
             **kwargs,
         )
         request_count += 1
-        yield from values
+        # Filter out empty trailing rows that pygsheets fails to strip when
+        # returnas="matrix" (its include_tailing_empty_rows flag is a no-op
+        # for matrix mode). Only trailing empty rows are expected here.
+        for row in values:
+            if row[0].strip():
+                yield row
         start_row = end_row + 1
 
 
