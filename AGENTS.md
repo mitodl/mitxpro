@@ -1,6 +1,6 @@
 # MIT xPRO - Agent Instructions
 
-Django 4.2 + Wagtail 5.2 + React 16 monolith for MIT xPRO professional education. Integrates with Open edX, HubSpot, Google Sheets, and CyberSource/Stripe payments.
+Django + Wagtail + React monolith for MIT xPRO professional education. Integrates with Open edX, HubSpot, Google Sheets, and CyberSource/Stripe payments.
 
 ## Architecture
 
