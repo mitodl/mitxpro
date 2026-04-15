@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.193.0
+Version 0.193.0 (Released April 15, 2026)
 ---------------
 
 - fix(deps): update dependency django to v4.2.30 [security] (#3873)
