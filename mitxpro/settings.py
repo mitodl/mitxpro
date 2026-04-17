@@ -204,6 +204,7 @@ if not WEBPACK_DISABLE_LOADER_STATS:  # noqa: F821
 
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
+    "mitxpro.middleware.HostnameRedirectMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "affiliate.middleware.AffiliateMiddleware",
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
