@@ -17,7 +17,13 @@ def middleware(mocker):
 
 
 @pytest.mark.parametrize(
-    ("site_base_url", "server_name", "feature_enabled", "expect_redirect", "expected_location"),
+    (
+        "site_base_url",
+        "server_name",
+        "feature_enabled",
+        "expect_redirect",
+        "expected_location",
+    ),
     [
         # Matching host → passes through
         (CANONICAL_URL, CANONICAL_HOST, True, False, None),
