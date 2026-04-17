@@ -33,7 +33,7 @@ def test_b2b_order_audit():
             **serialize_model_object(order.product_version),
             "product_info": {
                 **serialize_model_object(order.product_version.product),
-                "content_type_string": str(order.product_version.product.content_type),
+                "content_type_string": f"{order.product_version.product.content_type.app_label} | {order.product_version.product.content_type.name}",
                 "content_object": serialize_model_object(
                     order.product_version.product.content_object
                 ),

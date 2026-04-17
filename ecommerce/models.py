@@ -409,8 +409,9 @@ class Order(OrderAbstract, AuditableModel):
                         **serialize_model_object(line.product_version),
                         "product_info": {
                             **serialize_model_object(line.product_version.product),
-                            "content_type_string": str(
-                                line.product_version.product.content_type
+                            "content_type_string": "{} | {}".format(
+                                line.product_version.product.content_type.app_label,
+                                line.product_version.product.content_type.name,
                             ),
                             "content_object": serialize_model_object(
                                 line.product_version.product.content_object
