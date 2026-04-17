@@ -1051,7 +1051,6 @@ class ProductPage(MetadataPageMixin, WagtailCachedPageMixin, Page):
         ],
         blank=True,
         help_text="The content of this tab on the program page",
-        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [  # noqa: RUF005
@@ -1726,7 +1725,6 @@ class UserTestimonialsPage(CourseProgramChildPage):
         [("testimonial", UserTestimonialBlock())],
         blank=False,
         help_text="Add testimonials to display in this section.",
-        use_json_field=True,
     )
     content_panels = [
         FieldPanel("heading"),
@@ -1767,7 +1765,6 @@ class NewsAndEventsPage(DisableSitemapURLMixin, Page):
         [("news_and_events", NewsAndEventsBlock())],
         blank=False,
         help_text="Add news and events updates to display in this section.",
-        use_json_field=True,
     )
     content_panels = [FieldPanel("heading"), FieldPanel("items")]
     api_fields = [
@@ -1825,7 +1822,6 @@ class LearningOutcomesPage(CourseProgramChildPage):
         [("outcome", TextBlock(icon="plus"))],
         blank=False,
         help_text="Detail about What you'll learn as learning outcome.",
-        use_json_field=True,
     )
 
     content_panels = [
@@ -1851,7 +1847,6 @@ class LearningTechniquesPage(CourseProgramChildPage):
         [("techniques", LearningTechniqueBlock())],
         blank=False,
         help_text="Enter detail about how you'll learn.",
-        use_json_field=True,
     )
 
     content_panels = [FieldPanel("title"), FieldPanel("technique_items")]
@@ -2035,7 +2030,6 @@ class WhoShouldEnrollPage(CourseProgramChildPage):
         ],
         blank=False,
         help_text='Contents of the "Who Should Enroll" section.',
-        use_json_field=True,
     )
     switch_layout = models.BooleanField(
         blank=True,
@@ -2095,7 +2089,6 @@ class CoursesInProgramPage(CourseProgramChildPage):
         ],
         help_text="The courseware to display in this carousel",
         blank=True,
-        use_json_field=True,
     )
 
     @property
@@ -2155,7 +2148,6 @@ class FacultyMembersPage(CourseProgramChildPage):
     members = StreamField(
         [("member", FacultyBlock())],
         help_text="The faculty members to display on this page",
-        use_json_field=True,
     )
     content_panels = [
         FieldPanel("heading"),
@@ -2180,7 +2172,6 @@ class AbstractImageCarousel(Page):
         [("image", ImageChooserBlock(help_text="Choose an image to upload."))],
         blank=False,
         help_text="Add images for this section.",
-        use_json_field=True,
     )
 
     content_panels = [FieldPanel("title"), FieldPanel("images")]
@@ -2240,7 +2231,6 @@ class ResourcePage(Page):
         [("content", ResourceBlock())],
         blank=False,
         help_text="Enter details of content.",
-        use_json_field=True,
     )
 
     content_panels = Page.content_panels + [  # noqa: RUF005
@@ -2395,7 +2385,6 @@ class CertificatePage(CourseProgramChildPage):
         ),
         blank=True,
         help_text="You can choose upto 5 signatories.",
-        use_json_field=True,
     )
 
     overrides = StreamField(
@@ -2403,7 +2392,6 @@ class CertificatePage(CourseProgramChildPage):
         blank=True,
         help_text="Overrides for specific runs of this Course/Program",
         validators=[validate_unique_readable_ids],
-        use_json_field=True,
     )
 
     display_mit_seal = models.BooleanField(
@@ -2659,7 +2647,6 @@ class LearningJourneySection(EnterpriseChildPage):
         [("journey", TextBlock(icon="plus"))],
         blank=False,
         help_text="Enter the text for this learning journey item.",
-        use_json_field=True,
     )
     call_to_action = models.CharField(
         max_length=30,
@@ -2735,7 +2722,6 @@ class SuccessStoriesSection(EnterpriseChildPage):
         [("success_story", SuccessStoriesBlock())],
         blank=False,
         help_text="Manage the individual success stories. Each story is a separate block.",
-        use_json_field=True,
     )
 
     content_panels = [
@@ -2794,7 +2780,6 @@ class EnterprisePage(WagtailCachedPageMixin, Page):
     headings = StreamField(
         [("heading", BannerHeadingBlock())],
         help_text="Add banner headings for this page.",
-        use_json_field=True,
     )
     background_image = models.ForeignKey(
         Image,
