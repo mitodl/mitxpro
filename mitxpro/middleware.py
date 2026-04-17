@@ -29,17 +29,18 @@ class HostnameRedirectMiddleware:
         canonical_host = parsed.netloc
         canonical_scheme = parsed.scheme
 
-        request_host = request.get_host()
+        # Use the actual HTTP_HOST header to avoid following USE_X_FORWARDED_HOST
+        # when determining if a redirect is needed. This prevents infinite redirects
+        # in cases where X-Forwarded-Host points to the wrong domain through a proxy.
+        request_host = request.META.get("HTTP_HOST", request.get_host())
+
         if request_host == canonical_host:
             return self.get_response(request)
 
-        if not is_enabled(features.HOSTNAME_REDIRECT, default=False):
+        if not is_enabled(features.HOSTNAME_REDIRECT, default=True):
             return self.get_response(request)
 
-        if request_host != canonical_host:
-            redirect_url = "{}://{}{}".format(
-                canonical_scheme, canonical_host, request.get_full_path()
-            )
-            return HttpResponseRedirect(redirect_url)
-
-        return self.get_response(request)
+        redirect_url = "{}://{}{}".format(
+            canonical_scheme, canonical_host, request.get_full_path()
+        )
+        return HttpResponseRedirect(redirect_url)
