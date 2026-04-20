@@ -4507,26 +4507,26 @@ __metadata:
   linkType: hard
 
 "css-loader@npm:^7.0.0":
-  version: 7.1.2
-  resolution: "css-loader@npm:7.1.2"
+  version: 7.1.4
+  resolution: "css-loader@npm:7.1.4"
   dependencies:
     icss-utils: ^5.1.0
-    postcss: ^8.4.33
+    postcss: ^8.4.40
     postcss-modules-extract-imports: ^3.1.0
     postcss-modules-local-by-default: ^4.0.5
     postcss-modules-scope: ^3.2.0
     postcss-modules-values: ^4.0.0
     postcss-value-parser: ^4.2.0
-    semver: ^7.5.4
+    semver: ^7.6.3
   peerDependencies:
-    "@rspack/core": 0.x || 1.x
+    "@rspack/core": 0.x || ^1.0.0 || ^2.0.0-0
     webpack: ^5.27.0
   peerDependenciesMeta:
     "@rspack/core":
       optional: true
     webpack:
       optional: true
-  checksum: 15bfd90d778ddab90ee1d04c8c8bcc13ea6c0791d01b52b09d1b1c753b3410f7a7788a510d93726a9878e70b7c1a140f21efdf5c96e1857872107551d3897822
+  checksum: 92a486a6fb224540d6fd57a7dc6877cd5fc5296414dece1da0857224492147aa71887aea0d9ff04c5a76cbd12bd4d65ed5b02f58510dc3fc7e7a426c04259162
   languageName: node
   linkType: hard
 
@@ -10186,7 +10186,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.4.33, postcss@npm:^8.5.6":
+"postcss@npm:^8.4.40":
+  version: 8.5.9
+  resolution: "postcss@npm:8.5.9"
+  dependencies:
+    nanoid: ^3.3.11
+    picocolors: ^1.1.1
+    source-map-js: ^1.2.1
+  checksum: 0dcaa32d934fe97ad7b7da0113901f619258485c1906325ad7b873010ef09b83a6c2d52fe9e818c1c90eadcc9dc05870a9e34f34341696c7a07cfbb78b80946b
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.5.6":
   version: 8.5.6
   resolution: "postcss@npm:8.5.6"
   dependencies:
@@ -11579,6 +11590,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: f013a3ee4607857bcd3503b6ac1d80165f7f8ea94f5d55e2d3e33df82fce487aa3313b987abf9b39e0793c83c9fc67b76c36c067625141a9f6f704ae0ea18db2
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.6.3":
+  version: 7.7.4
+  resolution: "semver@npm:7.7.4"
+  bin:
+    semver: bin/semver.js
+  checksum: 9b4a6a58e98b9723fafcafa393c9d4e8edefaa60b8dfbe39e30892a3604cf1f45f52df9cfb1ae1a22b44c8b3d57fec8a9bb7b3e1645431587cb272399ede152e
   languageName: node
   linkType: hard
 
