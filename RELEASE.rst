@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.193.1
+Version 0.193.1 (Released April 21, 2026)
 ---------------
 
 - chore: Create an AGENTS.md file to help give context to agentic tools (#3877)
