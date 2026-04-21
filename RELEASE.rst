@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.193.1 (Released April 21, 2026)
+---------------
+
+- chore: Create an AGENTS.md file to help give context to agentic tools (#3877)
+- fix: filter empty rows in get_data_rows_after_start to prevent ValueError on pagination boundary (#3878)
+- fix: pass the passed object Ids to the batch upsert task (#3875)
+- chore(deps): update dependency pytest to v9.0.3 [security] (#3880)
+- chore(deps): update dependency hls.js to v1.6.15 (#3868)
+- chore(deps): update dependency mocha to v11.7.5 (#3869)
+- chore(deps): update dependency sinon to v21.1.0 (#3870)
+- [pre-commit.ci] pre-commit autoupdate (#3872)
+
 Version 0.193.0 (Released April 15, 2026)
 ---------------
 
