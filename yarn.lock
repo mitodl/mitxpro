@@ -7054,9 +7054,9 @@ __metadata:
   linkType: hard
 
 "hls.js@npm:^1.0.0":
-  version: 1.6.15
-  resolution: "hls.js@npm:1.6.15"
-  checksum: 7362ff6979f7d3729757ea98f8debf4146c53a019fb68933ba811382eaa7a3220829816b46bc22a87900fb00c8d1f376022ebd9f037407f590bf2d3936fda661
+  version: 1.6.16
+  resolution: "hls.js@npm:1.6.16"
+  checksum: 4e11ffffd241cb0a853b6465a49d781abb7fa6c2294745edb0c5a978d297824decc9e8c7f8bae842694da2390ce3c6369b82a28b421164b37d864f16fda87446
   languageName: node
   linkType: hard
 
