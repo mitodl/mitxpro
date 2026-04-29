@@ -57,7 +57,7 @@ def test_hostname_redirect_middleware(
     response = middleware(request)
 
     if expect_is_enabled_called:
-        is_enabled_mock.assert_called_once_with("xpro-hostname-redirect", default=True)
+        is_enabled_mock.assert_called_once_with("xpro-hostname-redirect", default=False)
     else:
         is_enabled_mock.assert_not_called()
 
@@ -76,7 +76,7 @@ def test_redirect_preserves_query_string(rf, settings, middleware, mocker):
         "/some/path/", {"foo": "bar", "baz": "qux"}, SERVER_NAME=WRONG_HOST
     )
     response = middleware(request)
-    is_enabled_mock.assert_called_once_with("xpro-hostname-redirect", default=True)
+    is_enabled_mock.assert_called_once_with("xpro-hostname-redirect", default=False)
     assert response.status_code == status.HTTP_302_FOUND
     assert response["Location"].startswith(f"{CANONICAL_URL}/some/path/?")
     assert "foo=bar" in response["Location"]

@@ -37,7 +37,7 @@ class HostnameRedirectMiddleware:
         if request_host == canonical_host:
             return self.get_response(request)
 
-        if not is_enabled(features.HOSTNAME_REDIRECT, default=True):
+        if not is_enabled(features.HOSTNAME_REDIRECT, default=False):
             return self.get_response(request)
 
         redirect_url = "{}://{}{}".format(
