@@ -1,6 +1,21 @@
 Release Notes
 =============
 
+Version 0.193.2 (Released April 30, 2026)
+---------------
+
+- chore(deps): update dependency uv_build to >=0.11.6,<0.12.0 (#3895)
+- fix(deps): update dependency celery to v5.6.3 (#3890)
+- fix(deps): update dependency django-hijack to v3.7.7 (#3891)
+- chore(deps): update actions/cache digest to 27d5ce7 (#3886)
+- chore(deps): update dependency hls.js to v1.6.16 (#3887)
+- chore(deps): update nginx docker tag to v1.29.7 (#3888)
+- fix(deps): update dependency boto3 to v1.42.88 (#3889)
+- chore(deps): update dependency autoprefixer to v10.5.0 (#3866)
+- [pre-commit.ci] pre-commit autoupdate (#3884)
+- [pre-commit.ci] pre-commit autoupdate (#3879)
+- chore(deps): update dependency css-loader to v7.1.4 (#3867)
+
 Version 0.193.1 (Released April 21, 2026)
 ---------------
 
