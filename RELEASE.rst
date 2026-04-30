@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.193.2
+Version 0.193.2 (Released April 30, 2026)
 ---------------
 
 - chore(deps): update dependency uv_build to >=0.11.6,<0.12.0 (#3895)
