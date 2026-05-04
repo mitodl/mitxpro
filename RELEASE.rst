@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.194.0
+---------------
+
+- Wagtail and django upgrade (#3876)
+- [pre-commit.ci] pre-commit autoupdate (#3898)
+
 Version 0.193.2 (Released April 30, 2026)
 ---------------
 
