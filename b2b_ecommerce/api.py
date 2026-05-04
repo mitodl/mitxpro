@@ -75,7 +75,8 @@ def _generate_b2b_cybersource_sa_payload(*, order, receipt_url, cancel_url):
 
     product_version = order.product_version
     content_object = product_version.product.content_object
-    content_type = str(product_version.product.content_type)
+    _ct = product_version.product.content_type
+    content_type = f"{_ct.app_label} | {_ct.name}"
     price = order.total_price
 
     return {

@@ -623,10 +623,14 @@ if MITXPRO_USE_S3 and (
         "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or "
         "AWS_STORAGE_BUCKET_NAME"
     )
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 if MITXPRO_USE_S3:
     if CLOUDFRONT_DIST:
         AWS_S3_CUSTOM_DOMAIN = f"{CLOUDFRONT_DIST}.cloudfront.net"
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STORAGES["default"] = {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}
 
 FEATURES = get_features()
 
@@ -950,6 +954,9 @@ OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
 OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"  # noqa: S105
 
 OAUTH2_PROVIDER = {
+    # Disable PKCE requirement to maintain backward compatibility with existing OAuth clients
+    # (PKCE_REQUIRED changed default to True in django-oauth-toolkit 2.0.0)
+    "PKCE_REQUIRED": False,
     # this is the list of available scopes
     "SCOPES": {
         "read": "Read scope",

@@ -85,7 +85,10 @@ def test_s3_settings(settings_sandbox):
         {"MITXPRO_USE_S3": "False", "AWS_ACCESS_KEY_ID": ""}
     )
 
-    assert settings_vars.get("DEFAULT_FILE_STORAGE") is None
+    assert (
+        settings_vars["STORAGES"]["default"]["BACKEND"]
+        == "django.core.files.storage.FileSystemStorage"
+    )
 
     with pytest.raises(ImproperlyConfigured):
         settings_sandbox.patch({"MITXPRO_USE_S3": "True"})
@@ -100,7 +103,7 @@ def test_s3_settings(settings_sandbox):
         }
     )
     assert (
-        settings_vars.get("DEFAULT_FILE_STORAGE")
+        settings_vars["STORAGES"]["default"]["BACKEND"]
         == "storages.backends.s3boto3.S3Boto3Storage"
     )
 

@@ -188,8 +188,9 @@ class B2BOrder(OrderAbstract, AuditableModel):
                 **serialize_model_object(self.product_version),
                 "product_info": {
                     **serialize_model_object(self.product_version.product),
-                    "content_type_string": str(
-                        self.product_version.product.content_type
+                    "content_type_string": "{} | {}".format(
+                        self.product_version.product.content_type.app_label,
+                        self.product_version.product.content_type.name,
                     ),
                     "content_object": serialize_model_object(
                         self.product_version.product.content_object

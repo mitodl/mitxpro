@@ -91,7 +91,7 @@ class NetBlock(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=models.Q(geoname_id__isnull=False)
+                condition=models.Q(geoname_id__isnull=False)
                 | models.Q(registered_country_geoname_id__isnull=False)
                 | models.Q(represented_country_geoname_id__isnull=False),
                 name="at_least_one_geoname_id",

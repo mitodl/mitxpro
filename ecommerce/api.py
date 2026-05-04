@@ -275,7 +275,8 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
             product_version=product_version,
             tax_rate=order.tax_rate,
         )
-        line_items[f"item_{i}_code"] = str(product_version.product.content_type)
+        ct = product_version.product.content_type
+        line_items[f"item_{i}_code"] = f"{ct.app_label} | {ct.name}"
         line_items[f"item_{i}_name"] = str(product_version.description)[:254]
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
@@ -296,7 +297,7 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
     readable_id = get_readable_id(content_object)
 
     merchant_fields = {
-        "merchant_defined_data1": str(product.content_type),
+        "merchant_defined_data1": f"{product.content_type.app_label} | {product.content_type.name}",
         "merchant_defined_data2": readable_id,
         "merchant_defined_data3": "1",
     }

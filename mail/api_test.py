@@ -246,8 +246,9 @@ def test_send_message(mailoutbox):
 
     send_messages(messages)
 
+    messages_to = [m.to for m in messages]
     for message in mailoutbox:
-        assert message in messages
+        assert message.to in messages_to
 
 
 def test_send_message_failure(mocker):

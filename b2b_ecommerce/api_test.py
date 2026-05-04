@@ -88,7 +88,7 @@ def test_signed_payload(mocker, contract_number):
         "item_0_code": "enrollment_code",
         "item_0_name": f"Enrollment codes for {product_version.description}"[:254],
         "item_0_quantity": order.num_seats,
-        "item_0_sku": f"enrollment_code-{str(product.content_type)}-{product.content_object.id}",  # noqa: RUF010
+        "item_0_sku": f"enrollment_code-{product.content_type.app_label} | {product.content_type.name}-{product.content_object.id}",
         "item_0_tax_amount": "0",
         "item_0_unit_price": str(total_price),
         "line_item_count": 1,

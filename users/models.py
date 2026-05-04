@@ -195,7 +195,9 @@ class ChangeEmailRequest(TimestampedModel):
     expires_on = models.DateTimeField(default=generate_change_email_expires)
 
     class Meta:
-        index_together = ("expires_on", "confirmed", "code")
+        indexes = [
+            models.Index(fields=["expires_on", "confirmed", "code"]),
+        ]
 
 
 def validate_iso_3166_1_code(value):

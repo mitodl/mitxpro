@@ -1,5 +1,7 @@
 """custom template tag to convert a DateTimeField object to a URL for timezone conversion"""
 
+from datetime import timezone as dt_timezone
+
 from django import template
 from django.utils import timezone
 
@@ -21,7 +23,7 @@ def timezone_converter_url(datetime_obj):
         return ""
 
     if timezone.is_naive(datetime_obj):
-        datetime_obj = timezone.make_aware(datetime_obj, timezone.utc)
+        datetime_obj = timezone.make_aware(datetime_obj, dt_timezone.utc)
 
     time_param = datetime_obj.strftime("%H%M")
     date_param = datetime_obj.strftime("%Y-%m-%d")

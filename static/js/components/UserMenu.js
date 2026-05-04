@@ -4,6 +4,7 @@ import React from "react";
 
 import MixedLink from "./MixedLink";
 import { routes } from "../lib/urls";
+import { getCookie } from "../lib/api";
 
 import type { User } from "../flow/authTypes";
 
@@ -70,10 +71,21 @@ const UserMenu = ({ currentUser, onMouseDown }: Props) => {
         </MixedLink>
 
         <div className="dropdown-divider" />
-        <a className="dropdown-item" href={routes.logout} aria-label="Sign Out">
-          <div className="dropdown-icon icon-logout" />
-          Sign Out
-        </a>
+        <form
+          method="post"
+          action={routes.logout}
+          style={{ display: "contents" }}
+        >
+          <input
+            type="hidden"
+            name="csrfmiddlewaretoken"
+            value={getCookie("csrftoken") || ""}
+          />
+          <button type="submit" className="dropdown-item" aria-label="Sign Out">
+            <div className="dropdown-icon icon-logout" />
+            Sign Out
+          </button>
+        </form>
       </ul>
     </div>
   );
