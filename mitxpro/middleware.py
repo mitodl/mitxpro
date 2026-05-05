@@ -22,10 +22,10 @@ class HostnameRedirectMiddleware:
         canonical_host = parsed.netloc
         canonical_scheme = parsed.scheme
 
-        if request.get_host() == canonical_host:
-            return self.get_response(request)
-
-        if not settings.CANONICAL_HOSTNAME_REDIRECT_ENABLED:
+        if (
+            not settings.CANONICAL_HOSTNAME_REDIRECT_ENABLED
+            or request.get_host() == canonical_host
+        ):
             return self.get_response(request)
 
         redirect_url = "{}://{}{}".format(
