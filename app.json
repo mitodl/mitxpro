@@ -1,5 +1,9 @@
 {
-  "addons": ["heroku-postgresql:standard-0", "newrelic:wayne", "rediscloud:30"],
+  "addons": [
+    "heroku-postgresql:standard-0",
+    "newrelic:wayne",
+    "rediscloud:30"
+  ],
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-apt"
@@ -45,6 +49,10 @@
     },
     "BLOG_CACHE_TIMEOUT": {
       "description": "How long the blog should be cached",
+      "required": false
+    },
+    "CANONICAL_HOSTNAME_REDIRECT_ENABLED": {
+      "description": "Whether to enable redirecting to the canonical hostname defined in SITE_BASE_URL when a request comes in with a different hostname",
       "required": false
     },
     "CELERY_BROKER_URL": {
@@ -367,10 +375,6 @@
       "description": "E-mail to send 500 reports to.",
       "required": true
     },
-    "MITXPRO_BASE_URL": {
-      "description": "Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]",
-      "required": true
-    },
     "MITXPRO_DB_CONN_MAX_AGE": {
       "description": "Maximum age of connection to Postgres in seconds",
       "required": false
@@ -691,7 +695,12 @@
       "required": false
     }
   },
-  "keywords": ["Django", "Python", "MIT", "Office of Digital Learning"],
+  "keywords": [
+    "Django",
+    "Python",
+    "MIT",
+    "Office of Digital Learning"
+  ],
   "name": "mitxpro",
   "repository": "https://github.com/mitodl/mitxpro",
   "scripts": {
