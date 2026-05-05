@@ -5,10 +5,6 @@ from urllib.parse import urlparse
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
-from mitol.olposthog.features import is_enabled
-
-from mitxpro import features
-
 
 class HostnameRedirectMiddleware:
     """Middleware that redirects requests arriving at an incorrect hostname to the

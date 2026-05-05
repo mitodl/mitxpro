@@ -99,3 +99,9 @@ def django_db_setup(django_db_setup, django_db_blocker):  # noqa: ARG001
             if not index_page_class.objects.filter(**index_page_content).exists():
                 index_page = index_page_class(**index_page_content)
                 home_page.add_child(instance=index_page)
+
+
+@pytest.fixture(autouse=True)
+def canonical_hostname_redirect_disabled_by_default(settings):
+    """Disable canonical hostname redirects in tests unless explicitly enabled."""
+    settings.CANONICAL_HOSTNAME_REDIRECT_ENABLED = False
