@@ -1517,3 +1517,9 @@ EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS = get_delimited_list(
     default=[],
     description="Comma-separated list of email addresses to receive notifications about external data syncs",
 )
+
+CANONICAL_HOSTNAME_REDIRECT_ENABLED = get_bool(
+    name="CANONICAL_HOSTNAME_REDIRECT_ENABLED",
+    default=True,
+    description="Whether to enable redirecting to the canonical hostname defined in SITE_BASE_URL when a request comes in with a different hostname",
+)

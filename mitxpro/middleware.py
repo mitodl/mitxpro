@@ -18,9 +18,6 @@ class HostnameRedirectMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path.startswith("/api/"):
-            return self.get_response(request)
-
         site_base_url = getattr(settings, "SITE_BASE_URL", None)
         if not site_base_url:
             return self.get_response(request)
@@ -29,15 +26,10 @@ class HostnameRedirectMiddleware:
         canonical_host = parsed.netloc
         canonical_scheme = parsed.scheme
 
-        # Use the actual HTTP_HOST header to avoid following USE_X_FORWARDED_HOST
-        # when determining if a redirect is needed. This prevents infinite redirects
-        # in cases where X-Forwarded-Host points to the wrong domain through a proxy.
-        request_host = request.META.get("HTTP_HOST", request.get_host())
-
-        if request_host == canonical_host:
+        if request.get_host() == canonical_host:
             return self.get_response(request)
 
-        if not is_enabled(features.HOSTNAME_REDIRECT, default=False):
+        if not settings.CANONICAL_HOSTNAME_REDIRECT_ENABLED:
             return self.get_response(request)
 
         redirect_url = "{}://{}{}".format(
