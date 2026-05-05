@@ -371,6 +371,10 @@
       "description": "E-mail to send 500 reports to.",
       "required": true
     },
+    "MITXPRO_BASE_URL": {
+      "description": "Base url for the application in the format PROTOCOL://HOSTNAME[:PORT]",
+      "required": true
+    },
     "MITXPRO_DB_CONN_MAX_AGE": {
       "description": "Maximum age of connection to Postgres in seconds",
       "required": false
