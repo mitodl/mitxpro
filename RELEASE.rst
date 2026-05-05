@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.194.0
+---------------
+
+- chore(deps): update astral-sh/setup-uv action to v8 (#3896)
+- fix(deps): update dependency beautifulsoup4 to v4.14.3 (#3510)
+- Wagtail and django upgrade (#3876)
+- [pre-commit.ci] pre-commit autoupdate (#3898)
+
 Version 0.193.2 (Released April 30, 2026)
 ---------------
 
