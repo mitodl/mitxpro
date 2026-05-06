@@ -1520,6 +1520,6 @@ EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS = get_delimited_list(
 
 CANONICAL_HOSTNAME_REDIRECT_ENABLED = get_bool(
     name="CANONICAL_HOSTNAME_REDIRECT_ENABLED",
-    default=True,
+    default=False,
     description="Whether to enable redirecting to the canonical hostname defined in SITE_BASE_URL when a request comes in with a different hostname",
 )
