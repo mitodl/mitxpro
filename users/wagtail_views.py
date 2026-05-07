@@ -17,10 +17,9 @@ class UserIndexView(WagtailUserIndexView):
     """
 
     def order_queryset(self, queryset):
-        if self.ordering == "name":
-            return queryset.order_by("name")
-        if self.ordering == "-name":
-            return queryset.order_by("-name")
+        ordering = self.ordering
+        if ordering in ("name", "-name"):
+            return queryset.order_by(ordering)
         return super().order_queryset(queryset)
 
 
