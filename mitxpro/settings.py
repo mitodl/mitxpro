@@ -204,6 +204,7 @@ if not WEBPACK_DISABLE_LOADER_STATS:  # noqa: F821
 
 MIDDLEWARE = (
     "django.middleware.security.SecurityMiddleware",
+    "mitxpro.middleware.HostnameRedirectMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "affiliate.middleware.AffiliateMiddleware",
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
@@ -1515,4 +1516,10 @@ EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS = get_delimited_list(
     name="EXTERNAL_COURSE_SYNC_EMAIL_RECIPIENTS",
     default=[],
     description="Comma-separated list of email addresses to receive notifications about external data syncs",
+)
+
+CANONICAL_HOSTNAME_REDIRECT_ENABLED = get_bool(
+    name="CANONICAL_HOSTNAME_REDIRECT_ENABLED",
+    default=False,
+    description="Whether to enable redirecting to the canonical hostname defined in SITE_BASE_URL when a request comes in with a different hostname",
 )

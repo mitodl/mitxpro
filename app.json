@@ -47,6 +47,10 @@
       "description": "How long the blog should be cached",
       "required": false
     },
+    "CANONICAL_HOSTNAME_REDIRECT_ENABLED": {
+      "description": "Whether to enable redirecting to the canonical hostname defined in SITE_BASE_URL when a request comes in with a different hostname",
+      "required": false
+    },
     "CELERY_BROKER_URL": {
       "description": "Where celery should get tasks, default is Redis URL",
       "required": false
