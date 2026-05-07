@@ -52,7 +52,7 @@ class ProductReadOnlyIndexView(AbstractReadOnlyIndexView):
     """
 
     model = Product
-    queryset = Product.all_objects
+    queryset = Product.all_objects.all()
 
 
 class ProductInspectView(InspectView):
