@@ -32,6 +32,7 @@ class UserFactory(DjangoModelFactory):
 
     class Meta:
         model = User
+        skip_postgeneration_save = True
 
 
 class UserSocialAuthFactory(DjangoModelFactory):

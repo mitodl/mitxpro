@@ -69,6 +69,7 @@ class ProgramFactory(DjangoModelFactory):
 
     class Meta:
         model = Program
+        skip_postgeneration_save = True
 
 
 class ProgramRunFactory(DjangoModelFactory):
@@ -95,6 +96,7 @@ class CourseFactory(DjangoModelFactory):
 
     class Meta:
         model = Course
+        skip_postgeneration_save = True
 
     class Params:
         no_program = factory.Trait(program=None, position_in_program=None)
