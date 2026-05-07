@@ -225,6 +225,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
 
     class Meta:
         model = models.DataConsentAgreement
+        skip_postgeneration_save = True
 
 
 class DataConsentUserFactory(DjangoModelFactory):

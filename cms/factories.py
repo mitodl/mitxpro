@@ -92,6 +92,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ProgramPage
+        skip_postgeneration_save = True
 
     @factory.post_generation
     def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
@@ -123,6 +124,7 @@ class CoursePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = CoursePage
+        skip_postgeneration_save = True
 
     @factory.post_generation
     def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
@@ -153,6 +155,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ExternalCoursePage
+        skip_postgeneration_save = True
 
     @factory.post_generation
     def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
@@ -183,6 +186,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
 
     class Meta:
         model = ExternalProgramPage
+        skip_postgeneration_save = True
 
     @factory.post_generation
     def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
