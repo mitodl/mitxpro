@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.194.0
+Version 0.194.0 (Released May 07, 2026)
 ---------------
 
 - chore(deps): update astral-sh/setup-uv action to v8 (#3896)
