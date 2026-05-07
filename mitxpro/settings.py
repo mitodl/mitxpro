@@ -152,7 +152,7 @@ INSTALLED_APPS = (
     "wagtail.contrib.routable_page",
     "wagtail.embeds",
     "wagtail.sites",
-    "wagtail.users",
+    "users.apps.MitxproWagtailUsersAppConfig",
     "wagtail.snippets",
     "wagtail.documents",
     "wagtail.images",
