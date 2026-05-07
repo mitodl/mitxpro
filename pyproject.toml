@@ -99,3 +99,61 @@ no-binary-package = ["lxml", "xmlsec"]
 [build-system]
 requires = ["uv_build>=0.11.6,<0.12.0"]
 build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+addopts = "--cov . --cov-report term --cov-report html --cov-report xml --ds=mitxpro.settings --reuse-db"
+norecursedirs = [
+    "node_modules",
+    ".git",
+    ".tox",
+    "static",
+    "templates",
+    ".*",
+    "CVS",
+    "_darcs",
+    "{arch}",
+    "*.egg",
+]
+filterwarnings = [
+    "error",
+    # sentry-sdk deprecates configure_scope ahead of a future major release.
+    "ignore:sentry_sdk\\.configure_scope is deprecated and will be removed in the next major version.*:DeprecationWarning",
+    # Paramiko emits this warning when the test environment has no SSH host keys configured.
+    "ignore:Failed to load HostKeys",
+    # pytest-cov warns when coverage is disabled for targeted local runs.
+    "ignore:Coverage disabled via --no-cov switch!",
+    # Wagtail triggers Django 6.0 URLField scheme deprecations during test collection.
+    "ignore:The default scheme will be changed from 'http' to 'https' in Django 6\\.0.*:django.utils.deprecation.RemovedInDjango60Warning",
+    # pytest may import namespace-package directories while collecting tests.
+    "ignore:.*Not importing directory.*:ImportWarning",
+]
+env = [
+    "CELERY_TASK_ALWAYS_EAGER=True",
+    "DJANGO_SETTINGS_MODULE=mitxpro.settings",
+    "CYBERSOURCE_WSDL_URL=",
+    "CYBERSOURCE_MERCHANT_ID=",
+    "CYBERSOURCE_TRANSACTION_KEY=",
+    "CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY=",
+    "MITOL_DIGITAL_CREDENTIALS_VERIFY_SERVICE_BASE_URL=http://localhost:5000/",
+    "MITOL_DIGITAL_CREDENTIALS_HMAC_SECRET=test-hmac-secret",
+    "MITXPRO_EMAIL_BACKEND=django.core.mail.backends.locmem.EmailBackend",
+    "MITXPRO_NOTIFICATION_EMAIL_BACKEND=django.core.mail.backends.locmem.EmailBackend",
+    "RECAPTCHA_SITE_KEY=",
+    "RECAPTCHA_SECRET_KEY=",
+    "DEBUG=False",
+    "WEBPACK_DISABLE_LOADER_STATS=True",
+    "MAILGUN_KEY=fake_mailgun_key",
+    "MAILGUN_SENDER_DOMAIN=other.fake.site",
+    "MITXPRO_ADMIN_EMAIL=example@localhost",
+    "MITXPRO_BASE_URL=http://localhost:8053",
+    "MITXPRO_DB_DISABLE_SSL=True",
+    "MITXPRO_SECURE_SSL_REDIRECT=False",
+    "MITXPRO_USE_S3=False",
+    "OPENEDX_API_BASE_URL=http://localhost:18000",
+    "OPENEDX_API_CLIENT_ID=fake_client_id",
+    "OPENEDX_API_CLIENT_SECRET=fake_client_secret",
+    "SENTRY_DSN=",
+    "WAGTAIL_CACHE_BACKEND=django.core.cache.backends.dummy.DummyCache",
+    "WAGTAIL_CACHE_URL=",
+    "POSTHOG_ENABLED=True",
+]
