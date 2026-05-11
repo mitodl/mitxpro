@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.194.1
+Version 0.194.1 (Released May 11, 2026)
 ---------------
 
 - fix: Product and User CMS pages fixed (#3906)
