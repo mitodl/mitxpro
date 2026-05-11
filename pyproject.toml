@@ -22,7 +22,7 @@ dependencies = [
     "django==5.2.14",
     "django-anymail[mailgun]==14.0",
     "django-filter>=24",
-    "django-hijack==3.7.7",
+    "django-hijack==3.7.8",
     "django-ipware==7.0.1",
     "django-oauth-toolkit==3.2.0",
     "django-redis>=6.0.0,<7",
