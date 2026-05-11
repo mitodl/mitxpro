@@ -1,6 +1,14 @@
 Release Notes
 =============
 
+Version 0.194.1 (Released May 11, 2026)
+---------------
+
+- fix: Product and User CMS pages fixed (#3906)
+- fix(pytest): move warning filters to pyproject and fix factory postgeneration warnings (#3905)
+- chore(deps): update dependency granian to v2.7.4 [security] (#3904)
+- feat: add domain redirect middleware (#3883)
+
 Version 0.194.0 (Released May 07, 2026)
 ---------------
 
