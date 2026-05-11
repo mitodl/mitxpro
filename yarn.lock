@@ -2390,6 +2390,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tabby_ai/hijri-converter@npm:1.0.5":
+  version: 1.0.5
+  resolution: "@tabby_ai/hijri-converter@npm:1.0.5"
+  checksum: dc0d50a1a05ca0bbdb91b06ffdc565f2cdf1e0762b8ce7efafac1c6d2bdab9254588508e16ef25bb0781622c89ebbb472202d720259fe852fbe7a7f4b9ef4a92
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -4692,7 +4699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns-jalali@npm:^4.1.0-0":
+"date-fns-jalali@npm:4.1.0-0":
   version: 4.1.0-0
   resolution: "date-fns-jalali@npm:4.1.0-0"
   checksum: cde80e4a87bfd96458ff1edfd5af5fed7ed6e04dd48574ed64d376e37e7689ddee1a7c5a6685f4b93cf3432eac73c51acd786504070a6973a140c5f15163ca39
@@ -10570,15 +10577,16 @@ __metadata:
   linkType: hard
 
 "react-day-picker@npm:^9.0.0":
-  version: 9.11.1
-  resolution: "react-day-picker@npm:9.11.1"
+  version: 9.14.0
+  resolution: "react-day-picker@npm:9.14.0"
   dependencies:
     "@date-fns/tz": ^1.4.1
+    "@tabby_ai/hijri-converter": 1.0.5
     date-fns: ^4.1.0
-    date-fns-jalali: ^4.1.0-0
+    date-fns-jalali: 4.1.0-0
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 26c97c5232422c1198f016e7d55e5d85c08de4b985f45b358691770ed90cd2925c76b52f3574c720d2b5d14aeb9ef2e791bc565a7345b09e33f69ff7c5c72342
+  checksum: 231602c2fbb063af3acaacb4a99a525f96bfee5be88c0f7e62c619a4b2b461cf5ba648b9d165fdd929caf582dbb3dcb8ee157dc6225a467315a7f59589a1b85d
   languageName: node
   linkType: hard
 
