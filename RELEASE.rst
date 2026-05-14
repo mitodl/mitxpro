@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.194.2
+---------------
+
+- chore(deps): update dependency prettier to v3.8.3 (#3893)
+- chore(deps): update dependency faker to v40.15.0 (#3912)
+- fix(deps): update dependency boto3 to v1.42.97 (#3910)
+- fix(deps): update dependency django-hijack to v3.7.8 (#3911)
+- chore(deps): update redis docker tag to v8.6.2 (#3909)
+- chore(deps): update dependency @sentry/browser to v10.52.0 (#3892)
+- chore(deps): update dependency react-day-picker to v9.14.0 (#3894)
+- fix(deps): update dependency django to v5.2.14 [security] (#3908)
+
 Version 0.194.1 (Released May 11, 2026)
 ---------------
 
