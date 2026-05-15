@@ -48,11 +48,10 @@ def test_models(django_db_blocker):
 
         # we create our models "on the fly" in our test db
         with connection.schema_editor() as editor:
-            editor.create_model(SecondLevel1)
-            editor.create_model(SecondLevel2)
-            editor.create_model(FirstLevel1)
-            editor.create_model(FirstLevel2)
-            editor.create_model(Root)
+            for model in [SecondLevel1, SecondLevel2, FirstLevel1, FirstLevel2, Root]:
+                table_name = model._meta.db_table
+                if table_name not in connection.introspection.table_names():
+                    editor.create_model(model)
 
     return SimpleNamespace(
         SecondLevel1=SecondLevel1,
