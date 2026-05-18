@@ -2362,12 +2362,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sinonjs/fake-timers@npm:^15.3.2":
-  version: 15.3.2
-  resolution: "@sinonjs/fake-timers@npm:15.3.2"
+"@sinonjs/fake-timers@npm:^15.4.0":
+  version: 15.4.0
+  resolution: "@sinonjs/fake-timers@npm:15.4.0"
   dependencies:
     "@sinonjs/commons": ^3.0.1
-  checksum: f5751d10b28eb792cab19db0395789b8f5e33d36230b9e8aa7d3a2ee9c46d1b30ac21de00eeccf8861a429acbfd836c64e74f7c23575cf88fe9d70c5cc287b17
+  checksum: 89714334b84c0dd5ef84cc01ec99d7d16529297fc32a68c28e4793b89bac0de7b373310b736ed4a57697de92eca4e7cc62c2ec4fae1e651787345e2564b707f4
   languageName: node
   linkType: hard
 
@@ -4888,10 +4888,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diff@npm:^8.0.4":
-  version: 8.0.4
-  resolution: "diff@npm:8.0.4"
-  checksum: 98cdeba4d4244fd38d23fdd50f55745128f754509ecbca1281e466b62446e470e12a121f6b039d987a255abb1b8bcbe14a61818b389dc28145b34cb0c15395db
+"diff@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "diff@npm:9.0.0"
+  checksum: 8280d999e21de63cceee6cee95c3355a04e8303dd09aa1b9f6e18a4190ee9953dfc873e72df1e438a0845fbbed12138b2264fef256f2d21652dc953037f4ae3a
   languageName: node
   linkType: hard
 
@@ -9224,7 +9224,7 @@ __metadata:
     sass-lint: ^1.13.1
     sass-loader: ^12.1.0
     shelljs: ^0.10.0
-    sinon: ^21.0.0
+    sinon: ^22.0.0
     slick-carousel: 1.8.1
     style-loader: ^3.2.1
     styled-components: ^4.2.0
@@ -11859,15 +11859,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sinon@npm:^21.0.0":
-  version: 21.1.2
-  resolution: "sinon@npm:21.1.2"
+"sinon@npm:^22.0.0":
+  version: 22.0.0
+  resolution: "sinon@npm:22.0.0"
   dependencies:
     "@sinonjs/commons": ^3.0.1
-    "@sinonjs/fake-timers": ^15.3.2
+    "@sinonjs/fake-timers": ^15.4.0
     "@sinonjs/samsam": ^10.0.2
-    diff: ^8.0.4
-  checksum: fa74fb0a40415b13ee5ce82b7102f792a5635b32fc768f11cbab4a5394bae71c24d76b8a2bb1f278b5ee7463d6d34e3f53419d568699c12a0f27de8236dc8e07
+    diff: ^9.0.0
+  checksum: 891af8b7899c43ca12e816213b383a86d7f5d28d4aee377853c20bc0a1072399321cd1a04ed9361d2d30e246695c7871376c12aee1d63f5b4324193eac056b7a
   languageName: node
   linkType: hard
 
