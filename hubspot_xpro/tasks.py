@@ -378,9 +378,16 @@ def batch_create_hubspot_objects_chunked(
                 errored_chunks.append(still_failed)
         time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     if errored_chunks:
-        raise ApiException(
-            status=last_error_status,
-            reason=f"Batch hubspot create failed for the following chunks: {errored_chunks}",
+        if last_error_status == 429:  # noqa: PLR2004
+            raise ApiException(
+                status=last_error_status,
+                reason=f"Batch hubspot create failed for the following chunks: {errored_chunks}",
+            )
+        log.error(
+            "Batch hubspot create failed for type %s, chunks: %s (status %s)",
+            hubspot_type,
+            errored_chunks,
+            last_error_status,
         )
     return created_ids
 
