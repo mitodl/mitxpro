@@ -211,10 +211,14 @@ def sync_contact_hubspot_ids_to_db():
             user = User.objects.filter(alt_email_q).first()
         if user:
             # Skip if this hubspot_id is already mapped to a different user
-            existing = HubspotObject.objects.filter(
-                content_type=content_type,
-                hubspot_id=contact.id,
-            ).exclude(object_id=user.id).exists()
+            existing = (
+                HubspotObject.objects.filter(
+                    content_type=content_type,
+                    hubspot_id=contact.id,
+                )
+                .exclude(object_id=user.id)
+                .exists()
+            )
             if existing:
                 continue
             HubspotObject.objects.update_or_create(
