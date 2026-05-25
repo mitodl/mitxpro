@@ -51,7 +51,7 @@ dependencies = [
     "psycopg2==2.9.12",
     "pycountry==26.2.16",
     "pygsheets==2.0.2",
-    "redis==7.3.0",
+    "redis==7.4.0",
     "requests>=2.31.0,<3",
     "sentry-sdk>=2.0.0,<3",
     "setuptools==80.0.1",
