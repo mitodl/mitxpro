@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.194.2
+Version 0.194.2 (Released June 01, 2026)
 ---------------
 
 - chore(deps): update dependency prettier to v3.8.3 (#3893)
