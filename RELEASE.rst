@@ -1,6 +1,40 @@
 Release Notes
 =============
 
+Version 0.195.0
+---------------
+
+- config: add missing related settings from mitol-django-olposthog package (#3943)
+- [pre-commit.ci] pre-commit autoupdate (#3942)
+- chore(deps): update codecov/codecov-action digest to e79a696 (#3938)
+- fix(deps): update dependency mitol-django-olposthog to v2026 (#3843)
+- fix(deps): update dependency boto3 to v1.43.9 (#3939)
+- chore(deps): update dependency faker to v40.18.0 (#3941)
+- fix(deps): update dependency stylelint-config-standard-scss to v17 (#3920)
+- chore(deps): update dependency webpack-bundle-analyzer to v5.3.0 (#3932)
+- [pre-commit.ci] pre-commit autoupdate (#3937)
+- fix(deps): update dependency redis to v7.4.0 (#3935)
+- fix(deps): update dependency djangorestframework to v3.17.1 (#3934)
+- chore(deps): update dependency normalize-url to v9.0.1 (#3931)
+- chore(deps): update nginx docker tag to v1.30.0 (#3933)
+- chore(deps): update codecov/codecov-action action to v6 (#3936)
+- chore(deps): update dependency mocha to v11.7.6 (#3930)
+- fix(deps): update dependency boto3 to v1.43.6 (#3928)
+- chore(deps): update dependency reselect to v5.2.0 (#3929)
+- chore(deps): update dependency posthog-js to v1.374.0 (#3924)
+- chore(deps): update dependency stylelint to v17.11.1 (#3925)
+- [pre-commit.ci] pre-commit autoupdate (#3926)
+- chore(deps): update babel monorepo (#3865)
+- fix(deps): update dependency django-anymail to v15 (#3917)
+- chore(deps): update dependency @sentry/browser to v10.53.1 (#3923)
+- fix(deps): update dependency psycopg2 to v2.9.12 (#3922)
+- fix(deps): update dependency sinon to v22 (#3919)
+- chore(deps): update dependency babel-loader to v10.1.1 (#3915)
+- fix(deps): update dependency react-day-picker to v10 (#3918)
+- fix(deps): update dependency mitol-django-hubspot-api to v2026 (#3903)
+- fix(deps): update dependency boto3 to v1.43.2 (#3916)
+- chore(deps): update dependency fetch-mock to v12.6.0 (#3913)
+
 Version 0.194.2 (Released June 01, 2026)
 ---------------
 
