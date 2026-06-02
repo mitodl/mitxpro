@@ -1257,6 +1257,7 @@ POSTHOG_API_HOST = get_string(
     default="",
     description="API host for PostHog",
 )
+
 POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS = get_int(
     name="POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS",
     default=3000,
@@ -1273,6 +1274,18 @@ POSTHOG_POLL_INTERVAL = get_int(
     name="POSTHOG_POLL_INTERVAL",
     default=300,
     description="Seconds between PostHog flag config polling. Relevant when POSTHOG_PERSONAL_API_KEY is set for local evaluation.",
+)
+
+POSTHOG_CIRCUIT_BREAKER_COOLDOWN_SECONDS = get_int(
+    name="POSTHOG_CIRCUIT_BREAKER_COOLDOWN_SECONDS",
+    default=60,
+    description="Seconds to wait before retrying PostHog after a failed request.",
+)
+
+POSTHOG_CIRCUIT_BREAKER_TRIP_THRESHOLD_SECONDS = get_int(
+    name="POSTHOG_CIRCUIT_BREAKER_TRIP_THRESHOLD_SECONDS",
+    default=6,
+    description="Seconds a PostHog request can take before the circuit breaker trips.",
 )
 
 # Hubspot sync settings

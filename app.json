@@ -509,6 +509,14 @@
       "description": "API host for PostHog",
       "required": false
     },
+    "POSTHOG_CIRCUIT_BREAKER_COOLDOWN_SECONDS": {
+      "description": "Seconds to wait before retrying PostHog after a failed request.",
+      "required": false
+    },
+    "POSTHOG_CIRCUIT_BREAKER_TRIP_THRESHOLD_SECONDS": {
+      "description": "Seconds a PostHog request can take before the circuit breaker trips.",
+      "required": false
+    },
     "POSTHOG_ENABLED": {
       "description": "Whether PostHog is enabled",
       "required": false
