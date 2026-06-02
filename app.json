@@ -506,11 +506,19 @@
       "value": "50"
     },
     "POSTHOG_API_HOST": {
-      "description": "API host for PostHog",
+      "description": "Host URL for the PostHog API",
+      "required": false
+    },
+    "POSTHOG_CIRCUIT_BREAKER_COOLDOWN_SECONDS": {
+      "description": "Seconds to wait before retrying PostHog after a failed request.",
+      "required": false
+    },
+    "POSTHOG_CIRCUIT_BREAKER_TRIP_THRESHOLD_SECONDS": {
+      "description": "Seconds a PostHog request can take before the circuit breaker trips.",
       "required": false
     },
     "POSTHOG_ENABLED": {
-      "description": "Whether PostHog is enabled",
+      "description": "Whether to enable Posthog feature flags",
       "required": false
     },
     "POSTHOG_FEATURE_FLAG_REQUEST_TIMEOUT_MS": {
@@ -518,7 +526,11 @@
       "required": false
     },
     "POSTHOG_MAX_RETRIES": {
-      "description": "Number of times that requests to PostHog should be retried after failing.",
+      "description": "Numbers of time requests to PostHog should be retried after failing.",
+      "required": false
+    },
+    "POSTHOG_PERSONAL_API_KEY": {
+      "description": "Personal API key (usually phx_...) or Feature Flag API key (usually phs...) for PostHog local flag evaluation. When set, flags are evaluated locally without per-request HTTP calls.",
       "required": false
     },
     "POSTHOG_POLL_INTERVAL": {
@@ -526,7 +538,7 @@
       "required": false
     },
     "POSTHOG_PROJECT_API_KEY": {
-      "description": "API token to communicate with PostHog",
+      "description": "Public API key (usually, phc_...) to communicate with PostHog",
       "required": false
     },
     "RECAPTCHA_SECRET_KEY": {
