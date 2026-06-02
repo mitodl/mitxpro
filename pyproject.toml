@@ -101,7 +101,7 @@ requires = ["uv_build>=0.11.6,<0.12.0"]
 build-backend = "uv_build"
 
 [tool.pytest.ini_options]
-addopts = "--cov . --cov-report term --cov-report html --cov-report xml --ds=mitxpro.settings --reuse-db"
+addopts = "--cov . --cov-report term --cov-report html --cov-report xml --ds=mitxpro.settings --reuse-db --color=yes"
 norecursedirs = [
     "node_modules",
     ".git",
