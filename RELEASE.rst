@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.195.0
+Version 0.195.0 (Released June 09, 2026)
 ---------------
 
 - config: add missing related settings from mitol-django-olposthog package (#3943)
