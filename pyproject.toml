@@ -18,6 +18,7 @@ dependencies = [
     "boto3==1.43.14",
     "celery==5.6.3",
     "celery-redbeat==2.3.3",
+    "cryptography==46.0.5",
     "dj-database-url==3.1.2",
     "django==5.2.15",
     "django-anymail[mailgun]==15.0",
