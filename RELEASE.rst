@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.195.1
+---------------
+
+- Configure bump-my-version for Concourse release pipeline (#3882)
+- chore(deps): update babel monorepo to v7.29.7 (#3951)
+- chore(deps): update dependency faker to v40.19.1 (#3952)
+- fix(deps): update dependency boto3 to v1.43.14 (#3950)
+- chore(deps): update redis docker tag to v8.6.3 (#3949)
+- fix(deps): update dependency django to v5.2.15 [security] (#3946)
+- chore(deps): update dependency @sentry/browser to v10.55.0 (#3940)
+- Add color output to GH actions pytest
+
 Version 0.195.0 (Released June 09, 2026)
 ---------------
 
