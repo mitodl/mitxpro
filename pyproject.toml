@@ -1,6 +1,6 @@
 [project]
 name = "mitxpro"
-version = "0.194.2"
+version = "0.195.0"
 description = "MITx Pro"
 authors = [{ name = "MIT ODL" }]
 requires-python = ">=3.13,<4"
