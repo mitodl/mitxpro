@@ -1896,7 +1896,7 @@ wheels = [
 
 [[package]]
 name = "mitxpro"
-version = "0.195.0"
+version = "2026.6.12.1"
 source = { virtual = "." }
 dependencies = [
     { name = "beautifulsoup4" },
