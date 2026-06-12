@@ -1,6 +1,6 @@
 [project]
 name = "mitxpro"
-version = "0.1.0"
+version = "0.195.0"
 description = "MITx Pro"
 authors = [{ name = "MIT ODL" }]
 requires-python = ">=3.13,<4"
@@ -15,11 +15,11 @@ dependencies = [
     "Pillow==10.4.0",
     "PyNaCl==1.6.2",
     "beautifulsoup4==4.14.3",
-    "boto3==1.43.9",
+    "boto3==1.43.14",
     "celery==5.6.3",
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
-    "django==5.2.14",
+    "django==5.2.15",
     "django-anymail[mailgun]==15.0",
     "django-filter>=24",
     "django-hijack==3.7.8",
@@ -71,7 +71,7 @@ dev = [
     "bpython",
     "django-debug-toolbar",
     "factory-boy==3.3.3",
-    "faker==40.18.0",
+    "faker==40.19.1",
     "flaky==3.8.1",
     "freezegun==1.5.5",
     "hypothesis==4.24.6",
@@ -101,7 +101,7 @@ requires = ["uv_build>=0.11.6,<0.12.0"]
 build-backend = "uv_build"
 
 [tool.pytest.ini_options]
-addopts = "--cov . --cov-report term --cov-report html --cov-report xml --ds=mitxpro.settings --reuse-db"
+addopts = "--cov . --cov-report term --cov-report html --cov-report xml --ds=mitxpro.settings --reuse-db --color=yes"
 norecursedirs = [
     "node_modules",
     ".git",
@@ -157,3 +157,36 @@ env = [
     "WAGTAIL_CACHE_URL=",
     "POSTHOG_ENABLED=True",
 ]
+
+[tool.bumpversion]
+commit = false
+tag = false
+parse = "(?P<release>(?:[1-9][0-9]{3})\\.(?:1[0-2]|[1-9])\\.(?:3[0-1]|[12][0-9]|[1-9]))\\.(?P<build>\\d+)"
+serialize = ["{release}.{build}"]
+
+[tool.bumpversion.parts.release]
+calver_format = "{YYYY}.{MM}.{DD}"
+
+[tool.bumpversion.parts.build]
+first_value = "1"
+
+[[tool.bumpversion.files]]
+filename = "mitxpro/settings.py"
+search = 'VERSION = "{current_version}"'
+replace = 'VERSION = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
+
+[[tool.bumpversion.files]]
+filename = "uv.lock"
+search = """
+name = "mitxpro"
+version = "{current_version}"
+source = {{ virtual = "." }}"""
+replace = """
+name = "mitxpro"
+version = "{new_version}"
+source = {{ virtual = "." }}"""
