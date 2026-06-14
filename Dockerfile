@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.13-slim AS builder
+FROM python:3.13-slim@sha256:c33f0bc4364a6881bed1ec0cc2665e6c53c87a43e774aaeab88e6f17af105e4f AS builder
 LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # Set environment variables for build
@@ -38,7 +38,7 @@ ENV PYTHONUNBUFFERED=1 \
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:latest@sha256:ff07b86af50d4d9391d9daf4ff89ce427bc544f9aae87057e69a1cc0aa369946 /uv /uvx /usr/local/bin/
 
 COPY pyproject.toml uv.lock /src/
 RUN mkdir -p /opt/venv && chown -R mitodl:mitodl /src /opt/venv
@@ -48,7 +48,7 @@ WORKDIR /src
 RUN uv sync --frozen --no-install-project --no-dev
 
 
-FROM node:24-slim AS node_builder
+FROM node:24-slim@sha256:2c87ef9bd3c6a3bd4b472b4bec2ce9d16354b0c574f736c476489d09f560a203 AS node_builder
 COPY . /src
 WORKDIR /src
 ENV NODE_ENV=production
@@ -57,7 +57,7 @@ RUN yarn install --immutable \
 
 
 # Runtime stage
-FROM python:3.13-slim AS runtime
+FROM python:3.13-slim@sha256:c33f0bc4364a6881bed1ec0cc2665e6c53c87a43e774aaeab88e6f17af105e4f AS runtime
 
 # Set environment variables for production
 ENV PYTHONUNBUFFERED=1 \
