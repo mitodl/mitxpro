@@ -40,9 +40,7 @@ class HostnameRedirectMiddleware:
             )
             return self.get_response(request)
 
-        redirect_url = (
-            f"{canonical_scheme}://{canonical_host}{request.get_full_path()}"
-        )
+        redirect_url = f"{canonical_scheme}://{canonical_host}{request.get_full_path()}"
 
         log.warning(
             "Hostname redirect: %s -> %s "
