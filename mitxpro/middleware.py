@@ -43,7 +43,5 @@ class HostnameRedirectMiddleware:
             request.META.get("HTTP_X_FORWARDED_HOST"),
             request.META.get("HTTP_X_FORWARDED_PROTO"),
         )
-        redirect_url = (
-            f"{canonical_scheme}://{canonical_host}{request.get_full_path()}"
-        )
+        redirect_url = f"{canonical_scheme}://{canonical_host}{request.get_full_path()}"
         return HttpResponseRedirect(redirect_url)
