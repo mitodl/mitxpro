@@ -1,9 +1,12 @@
 """Middleware for MIT xPRO"""
 
+import logging
 from urllib.parse import urlparse
 
 from django.conf import settings
 from django.http import HttpResponseRedirect
+
+log = logging.getLogger(__name__)
 
 
 class HostnameRedirectMiddleware:
@@ -22,13 +25,34 @@ class HostnameRedirectMiddleware:
         canonical_host = parsed.netloc
         canonical_scheme = parsed.scheme
 
+        request_host = request.get_host()
+
         if (
             not settings.CANONICAL_HOSTNAME_REDIRECT_ENABLED
-            or request.get_host() == canonical_host
+            or request_host == canonical_host
         ):
+            log.debug(
+                "Hostname redirect skipped: enabled=%s request_host=%s canonical_host=%s path=%s",
+                settings.CANONICAL_HOSTNAME_REDIRECT_ENABLED,
+                request_host,
+                canonical_host,
+                request.get_full_path(),
+            )
             return self.get_response(request)
 
-        redirect_url = "{}://{}{}".format(
-            canonical_scheme, canonical_host, request.get_full_path()
+        redirect_url = (
+            f"{canonical_scheme}://{canonical_host}{request.get_full_path()}"
         )
+
+        log.warning(
+            "Hostname redirect: %s -> %s "
+            "(host=%s forwarded_host=%s proto=%s forwarded_proto=%s)",
+            request.build_absolute_uri(),
+            redirect_url,
+            request_host,
+            request.META.get("HTTP_X_FORWARDED_HOST"),
+            request.scheme,
+            request.META.get("HTTP_X_FORWARDED_PROTO"),
+        )
+
         return HttpResponseRedirect(redirect_url)
