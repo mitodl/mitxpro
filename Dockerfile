@@ -116,6 +116,9 @@ FROM runtime AS production
 COPY --from=node_builder --chown=mitodl:mitodl /src/static /src/static
 COPY --from=node_builder --chown=mitodl:mitodl /src/webpack-stats.json /src/webpack-stats.json
 
+ARG GIT_REF
+RUN echo "$GIT_REF" >> /src/static/hash.txt
+
 from builder as dev
 
 RUN uv sync --locked --dev
