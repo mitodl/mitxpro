@@ -63,7 +63,7 @@ dependencies = [
     "wagtail==6.4.2",
     "wagtail-metadata==5.0.0",
     "xmltodict>=1.0.0,<2",
-    "zeep==4.3.2",
+    "zeep==4.3.3",
 ]
 
 [dependency-groups]
