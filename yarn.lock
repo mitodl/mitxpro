@@ -2589,61 +2589,61 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry-internal/browser-utils@npm:10.56.0":
-  version: 10.56.0
-  resolution: "@sentry-internal/browser-utils@npm:10.56.0"
+"@sentry/browser-utils@npm:10.59.0":
+  version: 10.59.0
+  resolution: "@sentry/browser-utils@npm:10.59.0"
   dependencies:
-    "@sentry/core": 10.56.0
-  checksum: b1d0f197c80ef5197838f85a120a99789cc50d969ffe1fbcd3924117e6bd9b7796b8b6039e4443a4373356dde43e15fc64cf27cc24c234a72452d9742b49e7dc
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/feedback@npm:10.56.0":
-  version: 10.56.0
-  resolution: "@sentry-internal/feedback@npm:10.56.0"
-  dependencies:
-    "@sentry/core": 10.56.0
-  checksum: 24da13268c886dc2bd635c0efad8fc73715729e35238e7ee8f462de307a91a70b094098da44f24aee3163c1f1ff3bccfc353196f17c6e30ca190eb81a9b5349c
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay-canvas@npm:10.56.0":
-  version: 10.56.0
-  resolution: "@sentry-internal/replay-canvas@npm:10.56.0"
-  dependencies:
-    "@sentry-internal/replay": 10.56.0
-    "@sentry/core": 10.56.0
-  checksum: 81855f92ad81ce0e5770ae47724ba46ed2543864fa2d6a4b7795145c1ab61eace7257756fb2f645e407ced1a08610c59fa2e5cb1435b7897ad0d6190d784543b
-  languageName: node
-  linkType: hard
-
-"@sentry-internal/replay@npm:10.56.0":
-  version: 10.56.0
-  resolution: "@sentry-internal/replay@npm:10.56.0"
-  dependencies:
-    "@sentry-internal/browser-utils": 10.56.0
-    "@sentry/core": 10.56.0
-  checksum: 2d6b535d05d2f3b52d66a358bb5df563deffb6758a200ee77e0b80df8cb826e147f8394ebc6adefde02621fc2509fca4635ecfb24ecc76dadb64ae21f9be209d
+    "@sentry/core": 10.59.0
+  checksum: 0be4fe1b27925223606a29fd15c21de2bac113ade5af91ef1a70268661aff6c82f79a802d405f5a4ae89c81cb449db2e83edf858d026fa64093697b8529092a4
   languageName: node
   linkType: hard
 
 "@sentry/browser@npm:^10.0.0":
-  version: 10.56.0
-  resolution: "@sentry/browser@npm:10.56.0"
+  version: 10.59.0
+  resolution: "@sentry/browser@npm:10.59.0"
   dependencies:
-    "@sentry-internal/browser-utils": 10.56.0
-    "@sentry-internal/feedback": 10.56.0
-    "@sentry-internal/replay": 10.56.0
-    "@sentry-internal/replay-canvas": 10.56.0
-    "@sentry/core": 10.56.0
-  checksum: a706b286bd7e40bb38d0b30807c6be8374ef4d25b7fe84b857b567ea8418e07cba4c27c020a3a94b7f131af53b519321d6739f13a723e70c50874f40e552ecc5
+    "@sentry/browser-utils": 10.59.0
+    "@sentry/core": 10.59.0
+    "@sentry/feedback": 10.59.0
+    "@sentry/replay": 10.59.0
+    "@sentry/replay-canvas": 10.59.0
+  checksum: 01e8cdef3782c4c082cbf16eea83d1158059b34408d8227254a1235ebfe6cf7e26286eb8f5cafea30a910d35c8263ade790124b7e98121ad0bdef0e236c7cd1c
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:10.56.0":
-  version: 10.56.0
-  resolution: "@sentry/core@npm:10.56.0"
-  checksum: c98ae994c5fefafe283b598cdac4b9514f62e0a4b950cc1d0e359cc369c25a966e48c09f6bc0286383b704f4ca87ab7b446eddf7ea6cb46660cd16aed26df001
+"@sentry/core@npm:10.59.0":
+  version: 10.59.0
+  resolution: "@sentry/core@npm:10.59.0"
+  checksum: 3a28c17fcb21873a10f6fb8014051778768d20abcca95c7dfe8cc7d0a38a09aaaf0542cf3320244dc865dcea76db47423e214d7a6e3ba723ef61f64b55252902
+  languageName: node
+  linkType: hard
+
+"@sentry/feedback@npm:10.59.0":
+  version: 10.59.0
+  resolution: "@sentry/feedback@npm:10.59.0"
+  dependencies:
+    "@sentry/core": 10.59.0
+  checksum: 63e6126c1c64dc990231a8e7aac080ba0fd7cb474bc84a99d3ffc782cacf985a8a47b387dd920909bb97814347a4576b920871819acb5572a6235f11a63f08ee
+  languageName: node
+  linkType: hard
+
+"@sentry/replay-canvas@npm:10.59.0":
+  version: 10.59.0
+  resolution: "@sentry/replay-canvas@npm:10.59.0"
+  dependencies:
+    "@sentry/core": 10.59.0
+    "@sentry/replay": 10.59.0
+  checksum: bfe7212bfdb6adcde72c610e75422bf7e5e58c11a2902e4e8df692b8fe96dd1aa12fa371507aaffe81535542cc34b5ddfbf08a8ae4591cca1eaa7fefb78cd1c8
+  languageName: node
+  linkType: hard
+
+"@sentry/replay@npm:10.59.0":
+  version: 10.59.0
+  resolution: "@sentry/replay@npm:10.59.0"
+  dependencies:
+    "@sentry/browser-utils": 10.59.0
+    "@sentry/core": 10.59.0
+  checksum: 3020c48e5bf6640af143d2eadfe915a8f4b4dd4ffac14217320e703f8b3391abc92dbc51965c279fede44ec1da9e7c2f7f5abe566c37b0a527f2e2e6aca67949
   languageName: node
   linkType: hard
 
