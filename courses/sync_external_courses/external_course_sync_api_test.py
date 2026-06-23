@@ -1266,6 +1266,11 @@ def test_create_or_update_external_course_page_field_override(
         assert latest_revision.thumbnail_image == existing_image
 
 
+@pytest.mark.parametrize(
+    "external_course_data",
+    [{"platform": EMERITUS_PLATFORM_NAME}],
+    indirect=True,
+)
 @pytest.mark.django_db
 def test_create_or_update_external_course_page_kept_as_draft(external_course_data):
     """

@@ -484,7 +484,7 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                     external_course.course_title,
                 )
                 log.info(
-                    f"Updated external course page kept as draft (page has unpublished changes) for course title: {external_course.course_title}"  # noqa: G004
+                    "Updated external course page kept as draft (page has unpublished changes)"
                 )
 
             if external_course.category:
