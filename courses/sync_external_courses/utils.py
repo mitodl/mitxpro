@@ -131,6 +131,12 @@ class StatsCollector:
             "course_pages_updated": StatItemsCollection(
                 "course_pages_updated",
                 "External Course Codes",
+                display_name="Course Pages Updated and Published",
+            ),
+            "course_pages_kept_as_draft": StatItemsCollection(
+                "course_pages_kept_as_draft",
+                "External Course Codes",
+                display_name="Course Pages Updated but Kept as Draft (not published)",
             ),
             "products_created": StatItemsCollection(
                 "products_created",

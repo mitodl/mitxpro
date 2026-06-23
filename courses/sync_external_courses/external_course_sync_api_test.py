@@ -249,7 +249,7 @@ def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
     if not has_language:
         external_course_data.pop("language")
 
-    external_course_page, course_page_created, course_page_updated = (
+    external_course_page, course_page_created, course_page_updated, _ = (
         create_or_update_external_course_page(
             course_index_page,
             course,
@@ -908,9 +908,13 @@ def test_save_page_revision(is_draft_page, has_unpublished_changes):
 
     latest_revision = external_course_page.get_latest_revision_as_object()
     latest_revision.external_marketing_url = "https://test-external-course-sync-api.io/Internet-of-things-iot-design-and-applications"
-    save_page_revision(external_course_page, latest_revision)
+    # The revision is published only when the page had no unpublished changes
+    # before saving; otherwise it is kept as a draft.
+    expected_draft = external_course_page.has_unpublished_changes
+    published = save_page_revision(external_course_page, latest_revision)
 
     assert external_course_page.live == (not is_draft_page)
+    assert published is (not expected_draft)
 
     if has_unpublished_changes:
         assert external_course_page.has_unpublished_changes
@@ -1214,13 +1218,16 @@ def test_create_or_update_external_course_page_field_override(
 
     keymap = get_keymap(external_course_data["course_run_code"])
 
-    external_course_page, course_page_created, course_page_updated = (
-        create_or_update_external_course_page(
-            course_index_page,
-            course,
-            ExternalCourse(external_course_data, keymap=keymap),
-            keymap=keymap,
-        )
+    (
+        external_course_page,
+        course_page_created,
+        course_page_updated,
+        course_page_published,
+    ) = create_or_update_external_course_page(
+        course_index_page,
+        course,
+        ExternalCourse(external_course_data, keymap=keymap),
+        keymap=keymap,
     )
 
     latest_revision = external_course_page.get_latest_revision_as_object()
@@ -1231,6 +1238,8 @@ def test_create_or_update_external_course_page_field_override(
     )
     assert course_page_updated is True
     assert course_page_created is False
+    # The page has no unpublished changes here, so the update is published.
+    assert course_page_published is True
 
     # Check if fields were overridden based on whether they had existing values
     if expected_fields_overridden:
@@ -1255,3 +1264,50 @@ def test_create_or_update_external_course_page_field_override(
         assert latest_revision.description == existing_description
         assert latest_revision.background_image == existing_image
         assert latest_revision.thumbnail_image == existing_image
+
+
+@pytest.mark.django_db
+def test_create_or_update_external_course_page_kept_as_draft(external_course_data):
+    """
+    Test that when a course page already has unpublished (manual) changes, an API
+    update is saved as a draft and NOT published, and `is_published` is returned as False.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    course_index_page = CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    course = CourseFactory.create(is_external=True, page=None)
+    ImageFactory.create(title=external_course_data["image_name"])
+
+    external_course_page = ExternalCoursePageFactory.create(
+        parent=course_index_page,
+        course=course,
+        title=external_course_data["program_name"],
+        external_marketing_url="https://old-url.com",
+    )
+    # Publish a baseline revision, then leave an unpublished (draft) manual change on top.
+    external_course_page.save_revision().publish()
+    external_course_page.refresh_from_db()
+    external_course_page.title = "Manually edited title"
+    external_course_page.save_revision()  # draft, not published
+    external_course_page.refresh_from_db()
+    assert external_course_page.has_unpublished_changes
+
+    keymap = get_keymap(external_course_data["course_run_code"])
+
+    _, course_page_created, course_page_updated, course_page_published = (
+        create_or_update_external_course_page(
+            course_index_page,
+            course,
+            ExternalCourse(external_course_data, keymap=keymap),
+            keymap=keymap,
+        )
+    )
+
+    assert course_page_created is False
+    assert course_page_updated is True
+    # The page had unpublished changes, so the API update is kept as a draft.
+    assert course_page_published is False
+
+    external_course_page.refresh_from_db()
+    # The live (published) version still has the old marketing URL.
+    assert external_course_page.external_marketing_url == "https://old-url.com"
+    assert external_course_page.has_unpublished_changes
