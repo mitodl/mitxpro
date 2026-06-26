@@ -1946,7 +1946,6 @@ dependencies = [
     { name = "ulid-py" },
     { name = "user-agents" },
     { name = "user-util" },
-    { name = "uwsgi" },
     { name = "wagtail" },
     { name = "wagtail-metadata" },
     { name = "xmltodict" },
@@ -2028,7 +2027,6 @@ requires-dist = [
     { name = "ulid-py", specifier = ">=1.1.0,<2" },
     { name = "user-agents", specifier = "==2.2.0" },
     { name = "user-util", specifier = "==2.0.0" },
-    { name = "uwsgi", specifier = "==2.0.31" },
     { name = "wagtail", specifier = "==6.4.2" },
     { name = "wagtail-metadata", specifier = "==5.0.0" },
     { name = "xmltodict", specifier = ">=1.0.0,<2" },
@@ -3362,12 +3360,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/d9/d0/e9842ec9dc0f7dbd9
 wheels = [
     { url = "https://files.pythonhosted.org/packages/91/27/d1ea6f409aec1fa56a0698ddd635ebadf0b1e6bfe52fab6755c2f9dfbee4/user_util-2.0.0-py2.py3-none-any.whl", hash = "sha256:348d6c337ed84650b0d6ab25c9590a36c381363729440979d7a7a6c77f05493a", size = 16849, upload-time = "2025-05-12T16:54:49.407Z" },
 ]
-
-[[package]]
-name = "uwsgi"
-version = "2.0.31"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9f/49/2f57640e889ba509fd1fae10cccec1b58972a07c2724486efba94c5ea448/uwsgi-2.0.31.tar.gz", hash = "sha256:e8f8b350ccc106ff93a65247b9136f529c14bf96b936ac5b264c6ff9d0c76257", size = 822796, upload-time = "2025-10-11T19:17:28.794Z" }
 
 [[package]]
 name = "vine"
