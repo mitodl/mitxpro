@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.195.1 (Released June 29, 2026)
+---------------
+
+- fix: skip the version test to pass the release PR (#3964)
+- chore(deps): update dependency js-yaml to v4.2.0 (#3959)
+- chore(deps): update dependency stylelint to v17.13.0 (#3961)
+- chore(deps): update dependency prettier to v3.8.4 (#3957)
+- fix(deps): update dependency boto3 to v1.43.18 (#3958)
+- chore(deps): update codecov/codecov-action digest to fb8b358 (#3948)
+- [pre-commit.ci] pre-commit autoupdate (#3953)
+- fix: the version mismatch for bump-my-version (#3955)
+- Configure bump-my-version for Concourse release pipeline (#3882)
+- chore(deps): update babel monorepo to v7.29.7 (#3951)
+- chore(deps): update dependency faker to v40.19.1 (#3952)
+- fix(deps): update dependency boto3 to v1.43.14 (#3950)
+- chore(deps): update redis docker tag to v8.6.3 (#3949)
+- fix(deps): update dependency django to v5.2.15 [security] (#3946)
+- chore(deps): update dependency @sentry/browser to v10.55.0 (#3940)
+- Add color output to GH actions pytest
+
 Version 0.195.0 (Released June 09, 2026)
 ---------------
 
