@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.195.1
+Version 0.195.1 (Released June 29, 2026)
 ---------------
 
 - fix: skip the version test to pass the release PR (#3964)
