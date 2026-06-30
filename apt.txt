@@ -1,9 +1,7 @@
-# Core requirements
-git
-curl
-libjpeg-dev
-libxmlsec1-dev
-zlib1g-dev
-net-tools
-pkg-config
-libpoppler-cpp-dev
+# App-specific apt extras for mitxpro.
+# Common packages (git, curl, libjpeg-dev, zlib1g-dev, net-tools,
+# build-essential, libpq-dev, postgresql-client, pkg-config, libxmlsec1-dev)
+# are in mitodl/ol-python-base:3.13.
+# App extras installed inline in the Dockerfile:
+#   libmagic1          - python-magic file-type detection
+#   libpoppler-cpp-dev - PDF processing

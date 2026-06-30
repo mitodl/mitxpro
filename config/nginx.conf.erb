@@ -44,24 +44,6 @@ http {
         server_name _;
         root /app;
 
-        uwsgi_param QUERY_STRING $query_string;
-        uwsgi_param REQUEST_METHOD $request_method;
-        uwsgi_param CONTENT_TYPE $content_type;
-        uwsgi_param CONTENT_LENGTH $content_length;
-        uwsgi_param REQUEST_URI $request_uri;
-        uwsgi_param PATH_INFO $document_uri;
-        uwsgi_param DOCUMENT_ROOT $document_root;
-        uwsgi_param SERVER_PROTOCOL $server_protocol;
-        uwsgi_param REMOTE_ADDR $remote_addr;
-        uwsgi_param REMOTE_PORT $remote_port;
-        uwsgi_param SERVER_ADDR $server_addr;
-        uwsgi_param SERVER_PORT $server_port;
-        uwsgi_param SERVER_NAME $server_name;
-
-        uwsgi_pass_request_headers on;
-        uwsgi_pass_request_body on;
-        uwsgi_ignore_client_abort on;
-
         client_max_body_size 25M;
 
         location = /favicon.ico {
@@ -87,13 +69,13 @@ http {
             try_files /fastly_verification.html =404;
         }
 
-        location ~* /images/.*$ {
-            uwsgi_hide_header Vary;
-            uwsgi_pass unix:/tmp/nginx.socket;
-        }
-
         location / {
-            uwsgi_pass unix:/tmp/nginx.socket;
+            proxy_pass http://<%= ENV["NGINX_UPSTREAM"] || "localhost:8051" %>;
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_http_version 1.1;
         }
     }
 }

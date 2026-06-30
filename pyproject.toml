@@ -14,8 +14,8 @@ classifiers = [
 dependencies = [
     "Pillow==10.4.0",
     "PyNaCl==1.6.2",
-    "beautifulsoup4==4.14.3",
-    "boto3==1.43.18",
+    "beautifulsoup4==4.15.0",
+    "boto3==1.43.24",
     "celery==5.6.3",
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
@@ -59,11 +59,10 @@ dependencies = [
     "ulid-py>=1.1.0,<2",
     "user-agents==2.2.0",
     "user-util==2.0.0",
-    "uwsgi==2.0.31",
     "wagtail==6.4.2",
     "wagtail-metadata==5.0.0",
     "xmltodict>=1.0.0,<2",
-    "zeep==4.3.2",
+    "zeep==4.3.3",
 ]
 
 [dependency-groups]
@@ -71,7 +70,7 @@ dev = [
     "bpython",
     "django-debug-toolbar",
     "factory-boy==3.3.3",
-    "faker==40.19.1",
+    "faker==40.21.0",
     "flaky==3.8.1",
     "freezegun==1.5.5",
     "hypothesis==4.24.6",
