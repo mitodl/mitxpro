@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.195.2
+---------------
+
+- [pre-commit.ci] pre-commit autoupdate (#3973)
+- feat: adopt mitodl/ol-python-base:3.13, granian (#3975)
+- chore(deps): update nginx docker tag to v1.31.0 (#3970)
+- fix(deps): update dependency beautifulsoup4 to v4.15.0 (#3971)
+- chore(deps): update codecov/codecov-action action to v7 (#3972)
+- chore(deps): update dependency faker to v40.21.0 (#3969)
+- fix(deps): update dependency boto3 to v1.43.24 (#3968)
+- chore(deps): update sentry-javascript monorepo to v10.58.0 (#3962)
+- chore(deps): update dependency posthog-js to v1.390.2 (#3960)
+- [pre-commit.ci] pre-commit autoupdate (#3963)
+- fix(deps): update dependency zeep to v4.3.3 [security] (#3967)
+- chore: add basic logging in redirect middleware (#3966)
+
 Version 0.195.1 (Released June 29, 2026)
 ---------------
 
