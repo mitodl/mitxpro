@@ -20,6 +20,7 @@ dependencies = [
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
     "django==5.2.15",
+    "django-aqueduct[mitol]",
     "django-anymail[mailgun]==15.0",
     "django-filter>=24",
     "django-health-check[celery,redis]>=4.0.0",
@@ -95,6 +96,10 @@ dev = [
 [tool.uv]
 package = false
 no-binary-package = ["lxml", "xmlsec"]
+
+[tool.uv.sources]
+# TODO: switch to a published PyPI version once django-aqueduct is released.
+django-aqueduct = { path = "/home/tmacey/code/mit/apps/maintained/django-aqueduct/.claude/worktrees/aqueduct-integration", editable = true }
 
 [build-system]
 requires = ["uv_build>=0.11.6,<0.12.0"]
