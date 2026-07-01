@@ -662,7 +662,7 @@ wheels = [
 
 [[package]]
 name = "django-aqueduct"
-version = "0.5.0"
+version = "0.6.0"
 source = { editable = "/home/tmacey/code/mit/apps/maintained/django-aqueduct/.claude/worktrees/aqueduct-integration" }
 dependencies = [
     { name = "django" },
