@@ -56,6 +56,7 @@ We are using a couple of feature flags for xPRO. All these feature flags are lis
 # Documentation
 
 - [Wagtail API for Course and Program Metadata](cms/README.md)
+- [django-aqueduct settings (opt-in, experimental)](docs/aqueduct.md)
 
 # Optional Setup
 
