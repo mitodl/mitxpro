@@ -450,10 +450,13 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
             log.info(
                 f"Creating or Updating course page, title: {external_course.course_title}, course_code: {external_course.course_run_code}"  # noqa: G004
             )
-            course_page, course_page_created, course_page_updated = (
-                create_or_update_external_course_page(
-                    course_index_page, course, external_course, keymap
-                )
+            (
+                course_page,
+                course_page_created,
+                course_page_updated,
+                course_page_published,
+            ) = create_or_update_external_course_page(
+                course_index_page, course, external_course, keymap
             )
 
             if course_page_created:
@@ -465,7 +468,7 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                 log.info(
                     f"Created external course page for course title: {external_course.course_title}"  # noqa: G004
                 )
-            elif course_page_updated:
+            elif course_page_updated and course_page_published:
                 stats_collector.add_stat(
                     "course_pages_updated",
                     external_course.course_code,
@@ -473,6 +476,15 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
                 )
                 log.info(
                     f"Updated external course page for course title: {external_course.course_title}"  # noqa: G004
+                )
+            elif course_page_updated:
+                stats_collector.add_stat(
+                    "course_pages_kept_as_draft",
+                    external_course.course_code,
+                    external_course.course_title,
+                )
+                log.info(
+                    "Updated external course page kept as draft (page has unpublished changes)"
                 )
 
             if external_course.category:
@@ -532,6 +544,9 @@ def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR091
     # so, we are removing the courses created from the updated courses list.
     stats_collector.remove_duplicates("existing_courses", "courses_created")
     stats_collector.remove_duplicates("course_pages_updated", "course_pages_created")
+    stats_collector.remove_duplicates(
+        "course_pages_kept_as_draft", "course_pages_created"
+    )
 
     return stats_collector
 
@@ -606,7 +621,11 @@ def create_or_update_external_course_page(  # noqa: C901
         external_course(ExternalCourse): A ExternalCourse object.
 
     Returns:
-        tuple(ExternalCoursePage, is_created, is_updated): ExternalCoursePage object, is_created, is_updated
+        tuple(ExternalCoursePage, is_created, is_updated, is_published): ExternalCoursePage
+            object, is_created, is_updated, and is_published. `is_published` indicates whether
+            an update was published (True) or kept as a draft (False) because the page had
+            unpublished changes. It is only meaningful when `is_updated` is True; for created
+            pages and unchanged pages it defaults to True.
     """
     course_page = (
         ExternalCoursePage.objects.select_for_update().filter(course=course).first()
@@ -630,6 +649,7 @@ def create_or_update_external_course_page(  # noqa: C901
             )
 
     is_created = is_updated = False
+    is_published = True
     if not course_page:
         course_page = ExternalCoursePage(
             course=course,
@@ -686,9 +706,9 @@ def create_or_update_external_course_page(  # noqa: C901
             is_updated = True
 
         if is_updated:
-            save_page_revision(course_page, latest_revision)
+            is_published = save_page_revision(course_page, latest_revision)
 
-    return course_page, is_created, is_updated
+    return course_page, is_created, is_updated, is_published
 
 
 def create_or_update_external_course_run(course, external_course):

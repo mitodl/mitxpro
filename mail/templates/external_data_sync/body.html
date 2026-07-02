@@ -175,7 +175,7 @@
             </li>
             <li>
               <span style="color: #008000"
-                >Course Pages Updated ({{ stats.course_pages_updated|length }}):</span
+                >Course Pages Updated and Published ({{ stats.course_pages_updated|length }}):</span
               >
               {% if stats.course_pages_updated %}
               <ul>
@@ -186,7 +186,23 @@
                 </li>
                 {% endfor %}
               </ul>
-              {% else %}No course pages updated during this sync.{% endif %}
+              {% else %}No course pages updated and published during this sync.{% endif %}
+            </li>
+            <li>
+              <span style="color: #ff0000"
+                >Course Pages Updated but set as Draft ({{ stats.course_pages_kept_as_draft|length }}):</span
+              >
+              {% if stats.course_pages_kept_as_draft %}
+              <ul>
+                {% for page in stats.course_pages_kept_as_draft %}
+                <li>
+                  {{ page.code }}
+                  ({{ page.title }}) - API changes were saved as a draft and NOT
+                  published because the page has unpublished manual changes.
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}No course pages kept as draft during this sync.{% endif %}
             </li>
           </ul>
 

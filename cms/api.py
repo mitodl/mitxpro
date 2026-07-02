@@ -296,8 +296,13 @@ def save_page_revision(page, updated_revision):
     Args:
         page(Page): A page object.
         updated_revision(Page): Updated Page object using the `latest_revision_as_object`
+
+    Returns:
+        bool: True if the revision was published, False if it was kept as a draft
+            because the page had unpublished changes.
     """
     is_draft = page.has_unpublished_changes
     revision = updated_revision.save_revision(user=None, log_action=True)
     if not is_draft:
         revision.publish()
+    return not is_draft
