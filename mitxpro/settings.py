@@ -934,10 +934,11 @@ CACHES = {
     },
 }
 
-# the only declaration of AUTHENTICATION_BACKENDS: a duplicate earlier in this
-# file (SAML/MicroMasters backends, dead since authentication.backends.micromasters
-# was removed and no SOCIAL_AUTH_SAML_* config was ever added) silently shadowed
-# this one and has been deleted
+# the only declaration of AUTHENTICATION_BACKENDS: a dead duplicate earlier
+# in this file (SAML/MicroMasters backends, dead since
+# authentication.backends.micromasters was removed and no SOCIAL_AUTH_SAML_*
+# config was ever added), which this declaration silently shadowed, has
+# been deleted
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.email.EmailAuth",
     "oauth2_provider.backends.OAuth2Backend",
