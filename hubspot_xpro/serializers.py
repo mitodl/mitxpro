@@ -12,11 +12,17 @@ from ecommerce.constants import DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.models import CouponRedemption, CouponVersion, ProductVersion
 from hubspot_xpro.api import format_product_name, get_hubspot_id_for_object
 
+# HubSpot deal pipeline stage internal ids. HubSpot auto-generates stage ids
+# (numeric for custom stages), so they are configured per environment via
+# settings and must match the stages in the pipeline (settings.HUBSPOT_PIPELINE_ID).
+DEAL_STAGE_CHECKOUT_ABANDONED = settings.HUBSPOT_DEAL_STAGE_CHECKOUT_ABANDONED_ID
+DEAL_STAGE_PROCESSED = settings.HUBSPOT_DEAL_STAGE_PROCESSED_ID
+
 ORDER_STATUS_MAPPING = {
-    models.Order.FULFILLED: "processed",
-    models.Order.FAILED: "checkout_completed",
-    models.Order.CREATED: "checkout_completed",
-    models.Order.REFUNDED: "processed",
+    models.Order.FULFILLED: DEAL_STAGE_PROCESSED,
+    models.Order.FAILED: DEAL_STAGE_CHECKOUT_ABANDONED,
+    models.Order.CREATED: DEAL_STAGE_CHECKOUT_ABANDONED,
+    models.Order.REFUNDED: DEAL_STAGE_PROCESSED,
 }
 
 ORDER_TYPE_B2B = "B2B"

@@ -891,10 +891,19 @@ def get_order_programs(order):
     ]
 
 
-def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
+def create_or_update_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
     """
-    Create a new Order which is not fulfilled for a purchasable Product. Note that validation should
-    be done in the basket REST API so the validation is not done here (different from MicroMasters).
+    Create or update an unfulfilled Order for the Product in the user's basket.
+
+    This is idempotent per (user, product): if a `CREATED` (unfulfilled) order already
+    exists for the purchaser and the basket's product (e.g. one created when that product
+    was added to the cart) it is reused and re-synced to mirror the current validated
+    basket, rather than creating a duplicate. A different product yields a separate order
+    (and therefore a separate "Checkout Abandoned" HubSpot deal). Callers are responsible
+    for syncing the resulting order to HubSpot, so the deal isn't synced redundantly when
+    the order is immediately transitioned (e.g. a $0 order being fulfilled right after).
+    Note that validation should be done in the basket REST API so it is not done here
+    (different from MicroMasters).
 
     This now also takes the request as an argument, so that the necessary tax
     fields can be filled out and tax calculated as well.
@@ -907,9 +916,14 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
         request (HttpRequest): The current request object, for tax calculation.
 
     Returns:
-        Order: A newly created Order for the Product in the basket
+        Order: The created or updated unfulfilled Order for the Product in the basket
     """
+    basket = validated_basket.basket
     with transaction.atomic():
+        # Lock the user's basket to serialize concurrent order create/update for this
+        # user, so racing basket updates (e.g. a double-click on "Enroll now") can't
+        # both fall through the CREATE branch and produce duplicate CREATED orders/deals.
+        Basket.objects.select_for_update().filter(id=basket.id).first()
         total_price_paid = get_product_version_price_with_discount(
             coupon_version=validated_basket.coupon_version,
             product_version=validated_basket.product_version,
@@ -926,19 +940,39 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
             # not using get_or_create here because we don't want the rate to stick around
             tax_rate_info = TaxRate()
 
-        order = Order.objects.create(
-            status=Order.CREATED,
-            purchaser=validated_basket.basket.user,
-            total_price_paid=total_price_paid,
-            tax_country_code=country_code,
-            tax_rate=tax_rate_info.tax_rate,
-            tax_rate_name=tax_rate_info.tax_rate_name,
+        product = validated_basket.product_version.product
+        order = (
+            Order.objects.select_for_update(of=("self",))
+            .filter(
+                purchaser=basket.user,
+                status=Order.CREATED,
+                lines__product_version__product=product,
+            )
+            .order_by("-created_on")
+            .first()
         )
-        line = Line.objects.create(
+        if order is None:
+            order = Order(status=Order.CREATED, purchaser=basket.user)
+        order.total_price_paid = total_price_paid
+        order.tax_country_code = country_code
+        order.tax_rate = tax_rate_info.tax_rate
+        order.tax_rate_name = tax_rate_info.tax_rate_name
+        order.save()
+
+        # One Line per basket item, reused (same id) so its HubSpot line item is updated
+        # in place rather than orphaned.
+        line, _ = Line.objects.update_or_create(
             order=order,
-            product_version=validated_basket.product_version,
-            quantity=validated_basket.basket_item.quantity,
+            defaults={
+                "product_version": validated_basket.product_version,
+                "quantity": validated_basket.basket_item.quantity,
+            },
         )
+        # Run/program selections are DB-only (not HubSpot line items); rebuild them to
+        # mirror the basket.
+        ProgramRunLine.objects.filter(line=line).delete()
+        line.line_selections.all().delete()
+
         if validated_basket.basket_item.program_run:
             ProgramRunLine.objects.create(
                 line=line, program_run=validated_basket.basket_item.program_run
@@ -948,13 +982,15 @@ def create_unfulfilled_order(validated_basket, affiliate_id=None, **kwargs):
                 LineRunSelection(line=line, run_id=run_id)
                 for run_id in validated_basket.run_selection_ids
             )
+        # Mirror the basket's coupon state onto the order
         if validated_basket.coupon_version:
             redeem_coupon(coupon_version=validated_basket.coupon_version, order=order)
+        else:
+            CouponRedemption.objects.filter(order=order).delete()
         if affiliate_id is not None:
-            AffiliateReferralAction.objects.create(
-                affiliate_id=affiliate_id, created_order=order
+            AffiliateReferralAction.objects.get_or_create(
+                created_order=order, defaults={"affiliate_id": affiliate_id}
             )
-    sync_hubspot_deal(order)
     return order
 
 

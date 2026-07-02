@@ -29,7 +29,7 @@ from b2b_ecommerce.models import B2BOrder
 from courses.models import Course, CourseRun, Program, ProgramRun
 from ecommerce.api import (
     complete_order,
-    create_unfulfilled_order,
+    create_or_update_unfulfilled_order,
     fulfill_order,
     generate_cybersource_sa_payload,
     make_receipt_url,
@@ -209,7 +209,7 @@ class CheckoutView(APIView):
         """
         validated_basket = validate_basket_for_checkout(request.user)
         affiliate_id = get_affiliate_id_from_request(request)
-        order = create_unfulfilled_order(
+        order = create_or_update_unfulfilled_order(
             validated_basket, affiliate_id=affiliate_id, request=request
         )
         base_url = request.build_absolute_uri("/")

@@ -85,35 +85,47 @@ const determinePreselectRunTag = (
   return null;
 };
 
+// Builds a { courseId: runId } map by picking, for each course in the item, the first
+// course run matching the predicate.
+const runSelectionsByCourse = (
+  item: BasketItem,
+  matchRun: (run: Object) => boolean,
+): { [number]: number } => {
+  const selections = {};
+  for (const course of item.courses) {
+    const run = course.courseruns.find(matchRun);
+    if (run) {
+      selections[course.id] = run.id;
+    }
+  }
+  return selections;
+};
+
 export const calcSelectedRunIds = (
   item: BasketItem,
   preselectId: number = 0,
 ): { [number]: number } => {
+  // A course-run product IS a single run.
   if (item.type === PRODUCT_TYPE_COURSERUN) {
-    const course = item.courses[0];
-    return {
-      [course.id]: item.object_id,
-    };
+    return { [item.courses[0].id]: item.object_id };
   }
 
+  // A program: prefer a preselect= cohort that resolves a run for every course;
+  // otherwise reflect the runs already selected in the basket (e.g. auto-selected on
+  // the backend when the product was added) so the date dropdowns match the cart.
   const preselectRunTag = determinePreselectRunTag(item, preselectId);
-  if (!preselectRunTag) {
-    return {};
-  }
-
-  const numCourses = item.courses.length;
-  const courseRunSelectionMap = {};
-  for (const course of item.courses) {
-    const matchingRun = course.courseruns.find(
+  if (preselectRunTag) {
+    const preselected = runSelectionsByCourse(
+      item,
       (run) => run.run_tag === preselectRunTag,
     );
-    if (matchingRun) {
-      courseRunSelectionMap[course.id] = matchingRun.id;
+    if (Object.keys(preselected).length === item.courses.length) {
+      return preselected;
     }
   }
-  return Object.keys(courseRunSelectionMap).length === numCourses
-    ? courseRunSelectionMap
-    : {};
+
+  const selectedRunIds = new Set(item.run_ids || []);
+  return runSelectionsByCourse(item, (run) => selectedRunIds.has(run.id));
 };
 
 export const formatNumber = (
