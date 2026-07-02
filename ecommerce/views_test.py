@@ -27,7 +27,7 @@ from courses.factories import (
     ProgramRunFactory,
 )
 from courses.models import CourseRun, Program
-from ecommerce.api import create_unfulfilled_order, make_receipt_url
+from ecommerce.api import create_or_update_unfulfilled_order, make_receipt_url
 from ecommerce.constants import DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.exceptions import EcommerceException, ParseException
 from ecommerce.factories import (
@@ -127,7 +127,7 @@ def test_unauthenticated(client):
 
 def test_creates_order(basket_client, mocker, basket_and_coupons):
     """
-    An order is created using create_unfulfilled_order and a payload
+    An order is created using create_or_update_unfulfilled_order and a payload
     is generated using generate_cybersource_sa_payload
     """
     line = LineFactory.create(
@@ -136,7 +136,9 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
     order = line.order
     payload = {"a": "payload"}
     create_order_mock = mocker.patch(
-        "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
+        "ecommerce.views.create_or_update_unfulfilled_order",
+        autospec=True,
+        return_value=order,
     )
 
     fake_ip = "195.0.0.1"
@@ -197,7 +199,9 @@ def test_zero_price_checkout(  # noqa: PLR0913
     )
     order = line.order
     create_order_mock = mocker.patch(
-        "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
+        "ecommerce.views.create_or_update_unfulfilled_order",
+        autospec=True,
+        return_value=order,
     )
     enroll_user_mock = mocker.patch(
         "ecommerce.api.enroll_user_in_order_items", autospec=True
@@ -251,7 +255,7 @@ def test_order_fulfilled(  # noqa: PLR0913
     """
     settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     user = basket_and_coupons.basket_item.basket.user
-    order = create_unfulfilled_order(validated_basket)
+    order = create_or_update_unfulfilled_order(validated_basket)
 
     data = {}
     for _ in range(5):
@@ -313,7 +317,9 @@ def test_order_affiliate(basket_client, mocker, basket_and_coupons):
     order = line.order
     mocker.patch("ecommerce.api.enroll_user_in_order_items", autospec=True)
     create_order_mock = mocker.patch(
-        "ecommerce.views.create_unfulfilled_order", autospec=True, return_value=order
+        "ecommerce.views.create_or_update_unfulfilled_order",
+        autospec=True,
+        return_value=order,
     )
     affiliate = AffiliateFactory.create()
     # Make an initial request to get the affiliate code in the session
@@ -356,7 +362,7 @@ def test_not_accept(
     """
     If the decision is not ACCEPT then the order should be marked as failed
     """
-    order = create_unfulfilled_order(validated_basket)
+    order = create_or_update_unfulfilled_order(validated_basket)
 
     data = {"req_reference_number": order.reference_number, "decision": decision}
     mocker.patch(
@@ -376,7 +382,7 @@ def test_ignore_duplicate_cancel(
     """
     If the decision is CANCEL and we already have a duplicate failed order, don't change anything.
     """
-    order = create_unfulfilled_order(validated_basket)
+    order = create_or_update_unfulfilled_order(validated_basket)
     order.status = Order.FAILED
     order.save()
 
@@ -399,7 +405,7 @@ def test_error_on_duplicate_order(  # noqa: PLR0913
     mocker, validated_basket, basket_client, basket_and_coupons, order_status, decision
 ):
     """If there is a duplicate message (except for CANCEL), raise an exception"""
-    order = create_unfulfilled_order(validated_basket)
+    order = create_or_update_unfulfilled_order(validated_basket)
     order.status = order_status
     order.save()
 
@@ -519,7 +525,10 @@ def test_patch_basket_new_item_with_text_id(
 
 
 def test_patch_basket_replace_item(basket_client, basket_and_agreement):
-    """If a user changes the item in the basket it should clear away old selected runs and coupons"""
+    """
+    If a user changes the item in the basket it should clear away old selected runs and
+    coupons. Since the new product is a course-run product, its own run is auto-selected.
+    """
     new_product = ProductVersionFactory.create().product
     data = {"items": [{"product_id": new_product.id}]}
     resp = basket_client.patch(reverse("basket_api"), type="json", data=data)
@@ -527,12 +536,56 @@ def test_patch_basket_replace_item(basket_client, basket_and_agreement):
     items = resp.json()["items"]
     assert len(items) == 1
     assert items[0]["product_id"] == new_product.id
-    assert items[0]["run_ids"] == []
+    # the old run is cleared and the new course-run product's own run is auto-selected
+    assert items[0]["run_ids"] == [new_product.object_id]
     assert resp.json()["data_consents"] == []
     assert resp.json()["coupons"] == []
 
-    assert CourseRunSelection.objects.count() == 0
+    assert list(CourseRunSelection.objects.values_list("run_id", flat=True)) == [
+        new_product.object_id
+    ]
     assert CouponSelection.objects.count() == 0
+
+
+def test_patch_basket_autoselects_courserun_run(basket_client, basket_and_coupons):
+    """
+    Adding a course-run product auto-selects its run (the product *is* the run), so the
+    basket becomes checkout-valid immediately without the user picking a date.
+    """
+    product = basket_and_coupons.product_version.product
+    BasketItem.objects.all().delete()
+    CourseRunSelection.objects.all().delete()
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={"items": [{"product_id": product.id}]},
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["items"][0]["run_ids"] == [product.object_id]
+    assert list(CourseRunSelection.objects.values_list("run_id", flat=True)) == [
+        product.object_id
+    ]
+
+
+def test_patch_basket_autoselects_program_runs(basket_client, basket_and_coupons):
+    """
+    Adding a program product auto-selects the first available run for each of its
+    courses, so the basket becomes checkout-valid without the user picking dates.
+    """
+    product = basket_and_coupons.product_version.product
+    run = CourseRunFactory.create()
+    product.content_object = run.course.program
+    product.save()
+    BasketItem.objects.all().delete()
+    CourseRunSelection.objects.all().delete()
+    resp = basket_client.patch(
+        reverse("basket_api"),
+        type="json",
+        data={"items": [{"product_id": product.id}]},
+    )
+    assert resp.status_code == status.HTTP_200_OK
+    assert resp.json()["items"][0]["run_ids"] == [run.id]
+    assert list(CourseRunSelection.objects.values_list("run_id", flat=True)) == [run.id]
 
 
 def test_patch_basket_replace_item_with_same(basket_client, basket_and_agreement):
@@ -823,7 +876,11 @@ def test_patch_basket_nodata(basket_client, basket_and_coupons):
 
 @pytest.mark.parametrize("add_new_runs", [True, False])
 def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_runs):
-    """A patch request with run ids should update and replace the existing run ids for that item"""
+    """
+    A patch request with run ids updates/replaces the item's run ids. When no run ids
+    are provided, a program falls back to auto-selecting the first available run per
+    course (here run1 and run2), so the basket stays checkout-valid.
+    """
     product_version = basket_and_coupons.product_version
     product = product_version.product
     run1 = CourseRunFactory.create()
@@ -845,9 +902,7 @@ def test_patch_basket_update_runs(basket_client, basket_and_coupons, add_new_run
     )
     assert resp.status_code == status.HTTP_200_OK
     resp_data = resp.json()
-    assert sorted(resp_data["items"][0]["run_ids"]) == sorted(
-        [run1.id, run2.id] if add_new_runs else []
-    )
+    assert sorted(resp_data["items"][0]["run_ids"]) == sorted([run1.id, run2.id])
 
 
 @pytest.mark.parametrize("is_selected", [True, False])

@@ -23,6 +23,8 @@ from ecommerce.factories import (
 )
 from ecommerce.models import Order, Product
 from hubspot_xpro.serializers import (
+    DEAL_STAGE_CHECKOUT_ABANDONED,
+    DEAL_STAGE_PROCESSED,
     ORDER_STATUS_MAPPING,
     ORDER_TYPE_B2B,
     ORDER_TYPE_B2C,
@@ -33,6 +35,28 @@ from hubspot_xpro.serializers import (
     ProductSerializer,
     format_product_name,
 )
+
+
+def test_order_status_mapping_two_stage_pipeline(settings):
+    """
+    Orders/deals map onto the two-stage HubSpot pipeline: unfulfilled (created/failed)
+    orders sit in "Checkout Abandoned" and fulfilled/refunded orders in "Processed".
+    Applies to both B2C Orders and B2B orders. The stage ids themselves are
+    configurable per environment, so assert against the configured settings.
+    """
+    assert DEAL_STAGE_CHECKOUT_ABANDONED != DEAL_STAGE_PROCESSED
+    assert (
+        DEAL_STAGE_CHECKOUT_ABANDONED
+        == settings.HUBSPOT_DEAL_STAGE_CHECKOUT_ABANDONED_ID
+    )
+    assert DEAL_STAGE_PROCESSED == settings.HUBSPOT_DEAL_STAGE_PROCESSED_ID
+    assert ORDER_STATUS_MAPPING == {
+        Order.CREATED: DEAL_STAGE_CHECKOUT_ABANDONED,
+        Order.FAILED: DEAL_STAGE_CHECKOUT_ABANDONED,
+        Order.FULFILLED: DEAL_STAGE_PROCESSED,
+        Order.REFUNDED: DEAL_STAGE_PROCESSED,
+    }
+
 
 pytestmark = [pytest.mark.django_db]
 
