@@ -663,41 +663,20 @@ wheels = [
 [[package]]
 name = "django-aqueduct"
 version = "0.6.0"
-source = { editable = "/home/tmacey/code/mit/apps/maintained/django-aqueduct/.claude/worktrees/aqueduct-integration" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/b7/5b/6d360866973da2aee617f81d3c6264861bf9560eaab98043d10aa235f1de/django_aqueduct-0.6.0.tar.gz", hash = "sha256:d8c35fec4e13a65dd2c9138397910b06581e65f83fec865ac2c43ff9fd2a67ce", size = 32754, upload-time = "2026-07-01T23:22:12.6Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/85/06cf10fb81020bc545155cfb04dc419ef4e5d0be303ab8ebe594a75f859d/django_aqueduct-0.6.0-py3-none-any.whl", hash = "sha256:1936e4352e7fecfb1faebfcf6d1a495b0c22e30150a7e8564d74db7539b156f2", size = 40942, upload-time = "2026-07-01T23:22:11.335Z" },
+]
 
 [package.optional-dependencies]
 mitol = [
     { name = "mitol-django-common" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "boto3", marker = "extra == 'aws'", specifier = ">=1.26" },
-    { name = "django", specifier = ">=4.2" },
-    { name = "genson", marker = "extra == 'codegen'", specifier = ">=1.2.1,<2" },
-    { name = "hvac", marker = "extra == 'vault'", specifier = ">=2.0" },
-    { name = "mitol-django-common", marker = "extra == 'mitol'", specifier = ">=2023.1.1" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pydantic-settings", specifier = ">=2.0" },
-]
-provides-extras = ["codegen", "vault", "aws", "mitol"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "boto3", specifier = ">=1.26" },
-    { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=5.0" },
-    { name = "genson", specifier = ">=1.2.1,<2" },
-    { name = "hvac", specifier = ">=2.0" },
-    { name = "mypy", specifier = ">=1.10" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "pytest-django", specifier = ">=4.8" },
-    { name = "pytest-mock", specifier = ">=3.14" },
-    { name = "ruff", specifier = ">=0.4" },
 ]
 
 [[package]]
@@ -2028,7 +2007,7 @@ requires-dist = [
     { name = "dj-database-url", specifier = "==3.1.2" },
     { name = "django", specifier = "==5.2.15" },
     { name = "django-anymail", extras = ["mailgun"], specifier = "==15.0" },
-    { name = "django-aqueduct", extras = ["mitol"], editable = "/home/tmacey/code/mit/apps/maintained/django-aqueduct/.claude/worktrees/aqueduct-integration" },
+    { name = "django-aqueduct", extras = ["mitol"], specifier = ">=0.6.0" },
     { name = "django-filter", specifier = ">=24" },
     { name = "django-hijack", specifier = "==3.7.8" },
     { name = "django-ipware", specifier = "==7.0.1" },

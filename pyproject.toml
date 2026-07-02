@@ -96,10 +96,6 @@ dev = [
 package = false
 no-binary-package = ["lxml", "xmlsec"]
 
-[tool.uv.sources]
-# TODO: switch to a published PyPI version once django-aqueduct is released.
-django-aqueduct = { path = "/home/tmacey/code/mit/apps/maintained/django-aqueduct/.claude/worktrees/aqueduct-integration", editable = true }
-
 [build-system]
 requires = ["uv_build>=0.11.6,<0.12.0"]
 build-backend = "uv_build"
