@@ -194,6 +194,7 @@ INSTALLED_APPS = (
     "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
     "mitol.authentication.apps.TransitionalAuthenticationApp",
     "mitol.olposthog.apps.OlPosthog",
+    "health_check",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):
