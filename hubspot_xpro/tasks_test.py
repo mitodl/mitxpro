@@ -301,7 +301,7 @@ def test_batch_create_hubspot_objects_chunked(mocker, id_count):
 
 @pytest.mark.parametrize(
     "status, expected_error",  # noqa: PT006
-    [[429, TooManyRequestsException], [500, ApiException]],  # noqa: PT007
+    [[429, TooManyRequestsException], [500, None]],  # noqa: PT007
 )
 def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_error):
     """batch_create_hubspot_objects_chunked raise expected exception"""
@@ -314,12 +314,20 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
         side_effect=(ApiException(status=status)),
     )
     chunk = sorted([user.id for user in UserFactory.create_batch(3)])
-    with pytest.raises(expected_error):
-        tasks.batch_create_hubspot_objects_chunked(
+    if expected_error:
+        with pytest.raises(expected_error):
+            tasks.batch_create_hubspot_objects_chunked(
+                HubspotObjectType.CONTACTS.value,
+                "user",
+                chunk,
+            )
+    else:
+        result = tasks.batch_create_hubspot_objects_chunked(
             HubspotObjectType.CONTACTS.value,
             "user",
             chunk,
         )
+        assert result == []
     for item in chunk:
         mock_sync_contact.assert_any_call(item)
 

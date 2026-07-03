@@ -210,6 +210,24 @@ def sync_contact_hubspot_ids_to_db():
                 alt_email_q |= Q(email__iexact=alt_email)
             user = User.objects.filter(alt_email_q).first()
         if user:
+            # Skip if this hubspot_id is already mapped to a different user
+            existing = (
+                HubspotObject.objects.filter(
+                    content_type=content_type,
+                    hubspot_id=contact.id,
+                )
+                .exclude(object_id=user.id)
+                .exists()
+            )
+            if existing:
+                log.warning(
+                    "Hubspot contact id %s is already mapped to a different user "
+                    "than %s (id %s); skipping to avoid a duplicate mapping",
+                    contact.id,
+                    user.email,
+                    user.id,
+                )
+                continue
             HubspotObject.objects.update_or_create(
                 content_type=content_type,
                 object_id=user.id,
@@ -332,6 +350,8 @@ def sync_deal_line_hubspot_ids_to_db(order, hubspot_order_id) -> bool:
 
     matches = 0
     expected_matches = 1 if is_b2b else order.lines.count()
+    if not line_items:
+        return False
     if is_b2b or len(line_items) == 1:
         HubspotObject.objects.update_or_create(
             content_type=ContentType.objects.get_for_model(order_line),
