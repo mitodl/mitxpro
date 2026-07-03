@@ -220,6 +220,13 @@ def sync_contact_hubspot_ids_to_db():
                 .exists()
             )
             if existing:
+                log.warning(
+                    "Hubspot contact id %s is already mapped to a different user "
+                    "than %s (id %s); skipping to avoid a duplicate mapping",
+                    contact.id,
+                    user.email,
+                    user.id,
+                )
                 continue
             HubspotObject.objects.update_or_create(
                 content_type=content_type,
