@@ -6,11 +6,16 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
+import ecommerce.api
 from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
-from courses.models import CourseRunEnrollment, ProgramEnrollment
-from courses.utils import is_program_text_id
-from ecommerce.models import Order
+from courses.models import (
+    CourseRun,
+    CourseRunEnrollment,
+    Program,
+    ProgramEnrollment,
+)
+from ecommerce.models import Order, Product
 from mitxpro.utils import now_in_utc
 from sheets.constants import (
     GOOGLE_API_TRUE_VAL,
@@ -139,13 +144,19 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         """
         user = User.objects.get(email__iexact=refund_req_row.learner_email)
         order = Order.objects.get(id=refund_req_row.order_id, purchaser=user)
-        if is_program_text_id(refund_req_row.product_id):
+        # The product id from the sheet may be a program run readable id (e.g. one
+        # with a "+R24" run tag suffix). Resolve it to the underlying Program/CourseRun
+        # so the lookup works regardless of whether a run tag was included.
+        _, courseware_object, _ = ecommerce.api.get_product_from_text_id(
+            refund_req_row.product_id
+        )
+        if isinstance(courseware_object, Program):
             enrollment = ProgramEnrollment.all_objects.get(
-                order=order, program__readable_id=refund_req_row.product_id
+                order=order, program=courseware_object
             )
         else:
             enrollment = CourseRunEnrollment.all_objects.get(
-                order=order, run__courseware_id=refund_req_row.product_id
+                order=order, run=courseware_object
             )
         return order, enrollment
 
@@ -264,7 +275,14 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             elif isinstance(exc, Order.DoesNotExist):
                 message = f"Order with id {refund_req_row.order_id} and purchaser '{refund_req_row.learner_email}' not found"
             elif isinstance(  # noqa: UP038
-                exc, (ProgramEnrollment.DoesNotExist, CourseRunEnrollment.DoesNotExist)
+                exc,
+                (
+                    ProgramEnrollment.DoesNotExist,
+                    CourseRunEnrollment.DoesNotExist,
+                    Program.DoesNotExist,
+                    CourseRun.DoesNotExist,
+                    Product.DoesNotExist,
+                ),
             ):
                 message = f"Program/Course run enrollment does not exist for product '{refund_req_row.product_id}' and order {refund_req_row.order_id}"
             else:
