@@ -327,16 +327,6 @@ ROBOTS_CACHE_TIMEOUT = get_int(
 
 SILKY_ANALYZE_QUERIES = True
 
-# social auth
-AUTHENTICATION_BACKENDS = (
-    "authentication.backends.micromasters.MicroMastersAuth",
-    "social_core.backends.email.EmailAuth",
-    "social_core.backends.saml.SAMLAuth",
-    # the following needs to stay here to allow login of local users
-    "django.contrib.auth.backends.ModelBackend",
-    "guardian.backends.ObjectPermissionBackend",
-)
-
 SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
 SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = [urlparse(SITE_BASE_URL).netloc]
 
@@ -944,6 +934,11 @@ CACHES = {
     },
 }
 
+# the only declaration of AUTHENTICATION_BACKENDS: a dead duplicate earlier
+# in this file (SAML/MicroMasters backends, dead since
+# authentication.backends.micromasters was removed and no SOCIAL_AUTH_SAML_*
+# config was ever added), which this declaration silently shadowed, has
+# been deleted
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.email.EmailAuth",
     "oauth2_provider.backends.OAuth2Backend",
