@@ -2589,61 +2589,61 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser-utils@npm:10.59.0":
-  version: 10.59.0
-  resolution: "@sentry/browser-utils@npm:10.59.0"
+"@sentry/browser-utils@npm:10.63.0":
+  version: 10.63.0
+  resolution: "@sentry/browser-utils@npm:10.63.0"
   dependencies:
-    "@sentry/core": 10.59.0
-  checksum: 0be4fe1b27925223606a29fd15c21de2bac113ade5af91ef1a70268661aff6c82f79a802d405f5a4ae89c81cb449db2e83edf858d026fa64093697b8529092a4
+    "@sentry/core": 10.63.0
+  checksum: f213485b8d9a7469a4e3874e4f67c19a94a522af67c8bcac379e15177a9895dd4634ef31c3bc3d260f14a435295e17c6e14c83debb68fac8e5b62c438185320e
   languageName: node
   linkType: hard
 
 "@sentry/browser@npm:^10.0.0":
-  version: 10.59.0
-  resolution: "@sentry/browser@npm:10.59.0"
+  version: 10.63.0
+  resolution: "@sentry/browser@npm:10.63.0"
   dependencies:
-    "@sentry/browser-utils": 10.59.0
-    "@sentry/core": 10.59.0
-    "@sentry/feedback": 10.59.0
-    "@sentry/replay": 10.59.0
-    "@sentry/replay-canvas": 10.59.0
-  checksum: 01e8cdef3782c4c082cbf16eea83d1158059b34408d8227254a1235ebfe6cf7e26286eb8f5cafea30a910d35c8263ade790124b7e98121ad0bdef0e236c7cd1c
+    "@sentry/browser-utils": 10.63.0
+    "@sentry/core": 10.63.0
+    "@sentry/feedback": 10.63.0
+    "@sentry/replay": 10.63.0
+    "@sentry/replay-canvas": 10.63.0
+  checksum: 8ff840e80e5063918c6c77ba52e1792a7fe00bf156bd79006d66475feba74ea5ca07b408db3b568e3acf13a5e157cfd443ed8f133e1cfaaf4d84ddb26ce95a73
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:10.59.0":
-  version: 10.59.0
-  resolution: "@sentry/core@npm:10.59.0"
-  checksum: 3a28c17fcb21873a10f6fb8014051778768d20abcca95c7dfe8cc7d0a38a09aaaf0542cf3320244dc865dcea76db47423e214d7a6e3ba723ef61f64b55252902
+"@sentry/core@npm:10.63.0":
+  version: 10.63.0
+  resolution: "@sentry/core@npm:10.63.0"
+  checksum: c6265eff989046a8439a6eda781fff30a985c87c7692a35ebe6d1726537c4a613411025e17646dd7d89148f4035d313ef439ec79a1182ff8a301791ebf4183f9
   languageName: node
   linkType: hard
 
-"@sentry/feedback@npm:10.59.0":
-  version: 10.59.0
-  resolution: "@sentry/feedback@npm:10.59.0"
+"@sentry/feedback@npm:10.63.0":
+  version: 10.63.0
+  resolution: "@sentry/feedback@npm:10.63.0"
   dependencies:
-    "@sentry/core": 10.59.0
-  checksum: 63e6126c1c64dc990231a8e7aac080ba0fd7cb474bc84a99d3ffc782cacf985a8a47b387dd920909bb97814347a4576b920871819acb5572a6235f11a63f08ee
+    "@sentry/core": 10.63.0
+  checksum: a5d1d0f99bd10e25e4decb68f0740d6c71cb45096c6b01ecea7cda5cc27992a3ad99abbe9865e1e7f0efb020aaf9c953c0c17e96482fdc2a7d67a231aa40de5b
   languageName: node
   linkType: hard
 
-"@sentry/replay-canvas@npm:10.59.0":
-  version: 10.59.0
-  resolution: "@sentry/replay-canvas@npm:10.59.0"
+"@sentry/replay-canvas@npm:10.63.0":
+  version: 10.63.0
+  resolution: "@sentry/replay-canvas@npm:10.63.0"
   dependencies:
-    "@sentry/core": 10.59.0
-    "@sentry/replay": 10.59.0
-  checksum: bfe7212bfdb6adcde72c610e75422bf7e5e58c11a2902e4e8df692b8fe96dd1aa12fa371507aaffe81535542cc34b5ddfbf08a8ae4591cca1eaa7fefb78cd1c8
+    "@sentry/core": 10.63.0
+    "@sentry/replay": 10.63.0
+  checksum: 757e9c00c37c88c56709bcb8e7c56cb6c204f4276fb3d06cbcd0e5a7d5073000b1a1b9af84f5e78f8eef4c6ea68345c36c61b0b62218e84e5b0621e8a6d70900
   languageName: node
   linkType: hard
 
-"@sentry/replay@npm:10.59.0":
-  version: 10.59.0
-  resolution: "@sentry/replay@npm:10.59.0"
+"@sentry/replay@npm:10.63.0":
+  version: 10.63.0
+  resolution: "@sentry/replay@npm:10.63.0"
   dependencies:
-    "@sentry/browser-utils": 10.59.0
-    "@sentry/core": 10.59.0
-  checksum: 3020c48e5bf6640af143d2eadfe915a8f4b4dd4ffac14217320e703f8b3391abc92dbc51965c279fede44ec1da9e7c2f7f5abe566c37b0a527f2e2e6aca67949
+    "@sentry/browser-utils": 10.63.0
+    "@sentry/core": 10.63.0
+  checksum: 2c76861c8b0d8379b90ad4e265d89fb3a69495772ecf728d8f470c27493146a031edbdbd322a5ad2454f6250cb19f8f28e012f29e5dccc3173767ef8b2f12f90
   languageName: node
   linkType: hard
 
