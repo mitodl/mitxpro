@@ -1,6 +1,22 @@
 Release Notes
 =============
 
+Version 0.196.0
+---------------
+
+- fix(deps): update dependency redis to v7.4.1 (#3991)
+- fix(deps): update dependency boto3 to v1.43.34 (#3990)
+- chore(deps): update dependency @sentry/browser to v10.63.0 (#3993)
+- chore(deps): update astral-sh/setup-uv action to v8.2.0 (#3992)
+- chore(deps): update dependency faker to v40.23.0 (#3994)
+- chore(deps): update nginx docker tag to v1.31.1 (#3989)
+- fix: remove dead duplicate AUTHENTICATION_BACKENDS declaration (#3981)
+- fix: handle hubspot sync edge cases (409 conflicts, empty line items, duplicate hubspot_id mappings) (#3927)
+- Add django-health-check endpoints (#3978)
+- fix: info added about courses which are not published (#3974)
+- chore(deps): update actions/checkout digest to df4cb1c (#3947)
+- [pre-commit.ci] pre-commit autoupdate (#3976)
+
 Version 0.195.2 (Released July 07, 2026)
 ---------------
 
