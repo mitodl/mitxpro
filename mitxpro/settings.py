@@ -195,6 +195,9 @@ INSTALLED_APPS = (
     "mitol.authentication.apps.TransitionalAuthenticationApp",
     "mitol.olposthog.apps.OlPosthog",
     "health_check",
+    # django-aqueduct management commands (generate/check the typed settings
+    # model in mitxpro/aqueduct_settings.py); no models, no runtime behavior.
+    "django_aqueduct",
 )
 # Only include the seed data app if this isn't running in prod
 if ENVIRONMENT not in ("production", "prod"):

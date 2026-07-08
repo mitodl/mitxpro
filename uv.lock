@@ -662,21 +662,27 @@ wheels = [
 
 [[package]]
 name = "django-aqueduct"
-version = "0.6.0"
+version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/5b/6d360866973da2aee617f81d3c6264861bf9560eaab98043d10aa235f1de/django_aqueduct-0.6.0.tar.gz", hash = "sha256:d8c35fec4e13a65dd2c9138397910b06581e65f83fec865ac2c43ff9fd2a67ce", size = 32754, upload-time = "2026-07-01T23:22:12.6Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/8e/efe3d5ca1a19dd3ea569f8df21dc1d3e1f28289d73205546d0bb8a84effc/django_aqueduct-0.7.0.tar.gz", hash = "sha256:2d93e5d7c91ae23555f82a6367c31b5191de9e9eec232901830932d6f0deebd7", size = 54925, upload-time = "2026-07-07T20:48:03.942Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bf/85/06cf10fb81020bc545155cfb04dc419ef4e5d0be303ab8ebe594a75f859d/django_aqueduct-0.6.0-py3-none-any.whl", hash = "sha256:1936e4352e7fecfb1faebfcf6d1a495b0c22e30150a7e8564d74db7539b156f2", size = 40942, upload-time = "2026-07-01T23:22:11.335Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/55/1fc9c8fc9b694f63f8da19053e61ac018966f1aa8db0a65b5e34a9ff854a/django_aqueduct-0.7.0-py3-none-any.whl", hash = "sha256:12672306aa638b31d067c0a60fa4022ce69cedb7d1840972cb24ad0011a22e55", size = 67136, upload-time = "2026-07-07T20:48:02.618Z" },
 ]
 
 [package.optional-dependencies]
+derivations = [
+    { name = "dj-database-url" },
+]
 mitol = [
     { name = "mitol-django-common" },
+]
+vault = [
+    { name = "hvac" },
 ]
 
 [[package]]
@@ -1395,6 +1401,18 @@ wheels = [
 ]
 
 [[package]]
+name = "hvac"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/57/b46c397fb3842cfb02a44609aa834c887f38dd75f290c2fc5a34da4b2fee/hvac-2.4.0.tar.gz", hash = "sha256:e0056ad9064e7923e874e6769015b032580b639e29246f5ab1044f7959c1c7e0", size = 332543, upload-time = "2025-10-30T12:57:47.512Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/55/33/71e45a6bd6875f44a26f99da31c63b6840123e88bedf2c0b1ce429b8be12/hvac-2.4.0-py3-none-any.whl", hash = "sha256:008db5efd8c2f77bd37d2368ea5f713edceae1c65f11fd608393179478649e0f", size = 155921, upload-time = "2025-10-30T12:57:46.253Z" },
+]
+
+[[package]]
 name = "hypothesis"
 version = "4.24.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1955,7 +1973,7 @@ dependencies = [
     { name = "dj-database-url" },
     { name = "django" },
     { name = "django-anymail" },
-    { name = "django-aqueduct", extra = ["mitol"] },
+    { name = "django-aqueduct", extra = ["derivations", "mitol", "vault"] },
     { name = "django-filter" },
     { name = "django-health-check", extra = ["celery", "redis"] },
     { name = "django-hijack" },
@@ -2038,7 +2056,7 @@ requires-dist = [
     { name = "dj-database-url", specifier = "==3.1.2" },
     { name = "django", specifier = "==5.2.15" },
     { name = "django-anymail", extras = ["mailgun"], specifier = "==15.0" },
-    { name = "django-aqueduct", extras = ["mitol"], specifier = ">=0.6.0" },
+    { name = "django-aqueduct", extras = ["mitol", "vault", "derivations"], specifier = ">=0.7.0" },
     { name = "django-filter", specifier = ">=24" },
     { name = "django-health-check", extras = ["celery", "redis"], specifier = ">=4.0.0" },
     { name = "django-hijack", specifier = "==3.7.8" },
