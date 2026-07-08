@@ -20,6 +20,7 @@ dependencies = [
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
     "django==5.2.15",
+    "django-aqueduct[mitol,vault,derivations]>=0.9.0",
     "django-anymail[mailgun]==15.0",
     "django-filter>=24",
     "django-health-check[celery,redis]>=4.0.0",
@@ -190,3 +191,57 @@ replace = """
 name = "mitxpro"
 version = "{new_version}"
 source = {{ virtual = "." }}"""
+
+[tool.ruff]
+# mitxpro/aqueduct_settings.py carries machine-owned `aqueduct:generated`
+# regions; reformatting them would make `generate_aqueduct_settings --check`
+# report drift, so the generator owns that file's formatting and lint.
+extend-exclude = ["mitxpro/aqueduct_settings.py"]
+
+[tool.aqueduct]
+# Later modules override earlier ones; mitxpro.settings must come last so its
+# overrides of the mitol defaults (e.g. MITOL_AUTHENTICATION_FROM_EMAIL) win.
+modules = [
+    "mitol.authentication.settings.djoser_settings",
+    "mitol.common.settings.webpack",
+    "mitol.digitalcredentials.settings",
+    "mitol.olposthog.settings.olposthog",
+    "mitxpro.settings",
+]
+output = "mitxpro/aqueduct_settings.py"
+# The EnvParser registry keys fields by raw env-var name, which would
+# re-introduce the MITXPRO_*-vs-Django-name dual field sets that v2's
+# validation_alias recovery collapses. Static discovery of the modules above
+# covers the same settings under their Django-facing names instead.
+include_envparser = false
+class_name = "AqueductSettings"
+parity_model = "mitxpro.aqueduct_settings:AqueductSettings"
+parity_legacy = "mitxpro.settings"
+parity_ignore = [
+    # Raw env inputs the model carries as fields but the legacy module reads
+    # inline (via get_string/get_int) without ever exposing them as Django
+    # settings — so they are present in the model but absent from legacy.
+    "DATABASE_URL",
+    "REDIS_URL",
+    "HOST_IP",
+    "MITXPRO_DB_CONN_MAX_AGE",
+    "MITXPRO_DB_DISABLE_SSL",
+    "MITXPRO_DB_DISABLE_SS_CURSORS",
+    "REFRESH_TOKEN_EXPIRE_SECONDS",
+    "OAUTH2_PROVIDER_ALLOWED_REDIRECT_URI_SCHEMES",
+    "SHEETS_DATE_TIMEZONE_NAME",
+    "HUBSPOT_NEW_COURSES_FORM_GUID",
+    "HUBSPOT_FOOTER_FORM_GUID",
+    "HUBSPOT_PORTAL_ID",
+    "HUBSPOT_CREATE_USER_FORM_ID",
+    "HUBSPOT_ENTERPRISE_PAGE_FORM_ID",
+    # Only assigned in legacy when USE_S3 + CLOUDFRONT_DIST are set; unset in
+    # this parity env, so the model's always-present None field has no legacy
+    # counterpart. Same value (None) when it exists.
+    "AWS_S3_CUSTOM_DOMAIN",
+    # NOTE: DATABASES / DEFAULT_DATABASE_CONFIG are no longer ignored. As of
+    # django-aqueduct 0.9.0 check_aqueduct_settings does a one-way subset
+    # comparison for dict-valued settings, so the Django-injected
+    # ATOMIC_REQUESTS/AUTOCOMMIT/TIME_ZONE/TEST keys on the live DATABASES dict
+    # no longer read as divergences (the model dict is a subset of legacy's).
+]
