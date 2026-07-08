@@ -63,7 +63,7 @@ from mitxpro.celery_utils import OffsettingSchedule
 # Kept as a module constant (in addition to the generated VERSION field) so the
 # shims can `from mitxpro.aqueduct_settings import VERSION` to init Sentry
 # before the model is constructed, mirroring mitxpro/settings.py.
-VERSION = "0.195.1"
+VERSION = "0.195.2"
 
 # mitxpro/settings.py computes BASE_DIR as the parent of the directory that
 # contains it. This module lives in the same directory, so the same
@@ -170,6 +170,7 @@ class AqueductSettings(BaseSettings):
             "oauth2_provider.backends.OAuth2Backend",
             "django.contrib.auth.backends.ModelBackend",
         ),
+        description="the only declaration of AUTHENTICATION_BACKENDS: a dead duplicate earlier\nin this file (SAML/MicroMasters backends, dead since\nauthentication.backends.micromasters was removed and no SOCIAL_AUTH_SAML_*\nconfig was ever added), which this declaration silently shadowed, has\nbeen deleted",  # noqa: E501
     )  # TODO: refine type
     AUTH_CHANGE_EMAIL_TTL_IN_MINUTES: int = Field(
         default_factory=lambda: 60 * 24,
@@ -566,6 +567,7 @@ class AqueductSettings(BaseSettings):
             "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
             "mitol.authentication.apps.TransitionalAuthenticationApp",
             "mitol.olposthog.apps.OlPosthog",
+            "health_check",
             "django_aqueduct",
         ),
         description="Application definition",
@@ -939,7 +941,7 @@ class AqueductSettings(BaseSettings):
     USE_X_FORWARDED_HOST: bool = Field(
         default=False, validation_alias=AliasChoices("USE_X_FORWARDED_HOST")
     )
-    VERSION: str = Field(default="0.195.1")
+    VERSION: str = Field(default="0.195.2")
     VOUCHER_COMPANY_ID: int = Field(
         default="1", validation_alias=AliasChoices("VOUCHER_COMPANY_ID")
     )
@@ -1150,6 +1152,12 @@ class AqueductSettings(BaseSettings):
     # Generated as `str` (the annotation follows the default expr, not the
     # `get_int` reader); legacy `SITE_ID = MITXPRO_SITE_ID` is an int.
     SITE_ID: int = Field(default=1, validation_alias="MITXPRO_SITE_ID")
+    # Generated with a string default `"1"` (the default expr is the literal
+    # "1"); legacy `VOUCHER_COMPANY_ID = get_int(...)` is an int. Restore the
+    # int default so the field's declared type and its default agree.
+    VOUCHER_COMPANY_ID: int = Field(
+        default=1, validation_alias="VOUCHER_COMPANY_ID"
+    )
     ENVIRONMENT: str = Field(
         default="dev",
         validation_alias="MITXPRO_ENVIRONMENT",
@@ -1439,6 +1447,7 @@ class AqueductSettings(BaseSettings):
             "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
             "mitol.authentication.apps.TransitionalAuthenticationApp",
             "mitol.olposthog.apps.OlPosthog",
+            "health_check",
             "django_aqueduct",
         )
         if self.ENVIRONMENT not in ("production", "prod"):

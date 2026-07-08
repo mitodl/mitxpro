@@ -151,7 +151,7 @@ Django's settings exactly as `mitxpro/settings.py` does.
 
 ## Parity divergences (intentional)
 
-`check_aqueduct_settings` reports parity with 17 ignored keys (see
+`check_aqueduct_settings` reports parity with 15 ignored keys (see
 `[tool.aqueduct] parity_ignore` for the annotated list):
 
 - **Raw env inputs** the model carries as fields but the legacy module reads
@@ -162,10 +162,14 @@ Django's settings exactly as `mitxpro/settings.py` does.
 - **`AWS_S3_CUSTOM_DOMAIN`** — only assigned in legacy when `USE_S3` +
   `CLOUDFRONT_DIST` are set; otherwise the model's always-present `None` field
   has no legacy counterpart.
-- **`DATABASES` / `DEFAULT_DATABASE_CONFIG`** — Django's settings harness adds
-  `ATOMIC_REQUESTS`/`AUTOCOMMIT`/`TIME_ZONE`/`TEST` to the live dict after
-  load, and the model omits the SQLite `sslmode` OPTION the legacy module
-  applies unconditionally. Both are load-time/derivation artifacts, not drift.
+
+`DATABASES` / `DEFAULT_DATABASE_CONFIG` are **no longer** in `parity_ignore`:
+as of django-aqueduct 0.9.0 `check_aqueduct_settings` does a one-way subset
+comparison for dict-valued settings, so the keys Django's settings harness
+injects at load time (`ATOMIC_REQUESTS`/`AUTOCOMMIT`/`TIME_ZONE`/`TEST`) no
+longer read as divergences — the model's dict is simply a subset of the live
+one, and the SQLite `sslmode` OPTION the legacy module applies unconditionally
+is correctly omitted by `derivations.database_config`.
 
 ## Fields that still need a second look
 
