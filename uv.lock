@@ -662,16 +662,16 @@ wheels = [
 
 [[package]]
 name = "django-aqueduct"
-version = "0.7.0"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5f/8e/efe3d5ca1a19dd3ea569f8df21dc1d3e1f28289d73205546d0bb8a84effc/django_aqueduct-0.7.0.tar.gz", hash = "sha256:2d93e5d7c91ae23555f82a6367c31b5191de9e9eec232901830932d6f0deebd7", size = 54925, upload-time = "2026-07-07T20:48:03.942Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f0/a3/d054b31943ec851e9a71dcc6dfb516d0aa42ddc7c0795055ee131f70d106/django_aqueduct-0.8.0.tar.gz", hash = "sha256:17a280e7693f574bc399e3a6c6231a24c56cd2fe03e002561482d24405219fc3", size = 73939, upload-time = "2026-07-08T15:45:10.452Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/55/1fc9c8fc9b694f63f8da19053e61ac018966f1aa8db0a65b5e34a9ff854a/django_aqueduct-0.7.0-py3-none-any.whl", hash = "sha256:12672306aa638b31d067c0a60fa4022ce69cedb7d1840972cb24ad0011a22e55", size = 67136, upload-time = "2026-07-07T20:48:02.618Z" },
+    { url = "https://files.pythonhosted.org/packages/b4/b7/154f384ef68590e521e0adf11cdde4294735bbf97eda9499244b5d0844bd/django_aqueduct-0.8.0-py3-none-any.whl", hash = "sha256:98ffcbf2c194ef6d5f17a02fbdbbbfac09dd93b5adeb78b147ec74925c9036b8", size = 87610, upload-time = "2026-07-08T15:45:09.117Z" },
 ]
 
 [package.optional-dependencies]
@@ -2056,7 +2056,7 @@ requires-dist = [
     { name = "dj-database-url", specifier = "==3.1.2" },
     { name = "django", specifier = "==5.2.15" },
     { name = "django-anymail", extras = ["mailgun"], specifier = "==15.0" },
-    { name = "django-aqueduct", extras = ["mitol", "vault", "derivations"], specifier = ">=0.7.0" },
+    { name = "django-aqueduct", extras = ["mitol", "vault", "derivations"], specifier = ">=0.8.0" },
     { name = "django-filter", specifier = ">=24" },
     { name = "django-health-check", extras = ["celery", "redis"], specifier = ">=4.0.0" },
     { name = "django-hijack", specifier = "==3.7.8" },
