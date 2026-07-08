@@ -20,7 +20,7 @@ dependencies = [
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
     "django==5.2.15",
-    "django-aqueduct[mitol,vault,derivations]>=0.8.0",
+    "django-aqueduct[mitol,vault,derivations]>=0.9.0",
     "django-anymail[mailgun]==15.0",
     "django-filter>=24",
     "django-health-check[celery,redis]>=4.0.0",
@@ -239,11 +239,9 @@ parity_ignore = [
     # this parity env, so the model's always-present None field has no legacy
     # counterpart. Same value (None) when it exists.
     "AWS_S3_CUSTOM_DOMAIN",
-    # Django's settings harness adds ATOMIC_REQUESTS/AUTOCOMMIT/TIME_ZONE/TEST
-    # to the live DATABASES dict after load, and the model routes SQLite through
-    # derivations.database_config (which correctly omits the sslmode OPTIONS the
-    # legacy module applies unconditionally). Both are load-time/derivation
-    # artifacts, not configuration drift.
-    "DATABASES",
-    "DEFAULT_DATABASE_CONFIG",
+    # NOTE: DATABASES / DEFAULT_DATABASE_CONFIG are no longer ignored. As of
+    # django-aqueduct 0.9.0 check_aqueduct_settings does a one-way subset
+    # comparison for dict-valued settings, so the Django-injected
+    # ATOMIC_REQUESTS/AUTOCOMMIT/TIME_ZONE/TEST keys on the live DATABASES dict
+    # no longer read as divergences (the model dict is a subset of legacy's).
 ]
