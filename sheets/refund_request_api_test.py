@@ -37,27 +37,22 @@ def _make_refund_row(product_id, order_id, learner_email):
     )
 
 
-def _build_program_run_case():
-    """Program enrollment addressed by a product id that carries a run tag (e.g. "+R24")"""
+def _build_program_case(run_tag=None):
+    """
+    Program enrollment addressed by its readable id, optionally via a program run id
+    (i.e. the readable id plus a run tag suffix like "+R24").
+    """
     program = ProgramFactory.create()
-    program_run = ProgramRunFactory.create(program=program, run_tag="R24")
-    ProductFactory.create(content_object=program)
     enrollment = ProgramEnrollmentFactory.create(program=program)
-    return program_run.full_readable_id, enrollment
-
-
-def _build_program_case():
-    """Program enrollment addressed by a plain program readable id"""
-    program = ProgramFactory.create()
-    ProductFactory.create(content_object=program)
-    enrollment = ProgramEnrollmentFactory.create(program=program)
+    if run_tag:
+        program_run = ProgramRunFactory.create(program=program, run_tag=run_tag)
+        return program_run.full_readable_id, enrollment
     return program.readable_id, enrollment
 
 
 def _build_course_run_case():
     """Course run enrollment addressed by a course run readable id"""
     course_run = CourseRunFactory.create()
-    ProductFactory.create(content_object=course_run)
     enrollment = CourseRunEnrollmentFactory.create(run=course_run)
     return course_run.courseware_id, enrollment
 
@@ -65,8 +60,8 @@ def _build_course_run_case():
 @pytest.mark.parametrize(
     "build_case",
     [
-        pytest.param(_build_program_run_case, id="program_run_id"),
-        pytest.param(_build_program_case, id="program_id"),
+        pytest.param(lambda: _build_program_case(run_tag="R24"), id="program_run_id"),
+        pytest.param(lambda: _build_program_case(), id="program_id"),
         pytest.param(_build_course_run_case, id="course_run_id"),
     ],
 )
@@ -79,6 +74,28 @@ def test_get_order_objects_resolves_enrollment(build_case):
 
     row = _make_refund_row(
         product_id=product_id,
+        order_id=enrollment.order.id,
+        learner_email=enrollment.order.purchaser.email,
+    )
+
+    order, resolved_enrollment = RefundRequestHandler.get_order_objects(row)
+    assert order == enrollment.order
+    assert resolved_enrollment == enrollment
+
+
+def test_get_order_objects_resolves_with_inactive_product():
+    """
+    get_order_objects should resolve the enrollment even when the product is inactive
+    (e.g. an expired offering), since a refund is processed after the product may have
+    been deactivated.
+    """
+    program = ProgramFactory.create()
+    program_run = ProgramRunFactory.create(program=program, run_tag="R24")
+    ProductFactory.create(content_object=program, is_active=False)
+    enrollment = ProgramEnrollmentFactory.create(program=program)
+
+    row = _make_refund_row(
+        product_id=program_run.full_readable_id,
         order_id=enrollment.order.id,
         learner_email=enrollment.order.purchaser.email,
     )

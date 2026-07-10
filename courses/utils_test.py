@@ -18,13 +18,15 @@ from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunGradeFactory,
     ProgramFactory,
+    ProgramRunFactory,
     ProgramCertificateFactory,
     UserFactory,
     CourseLanguageFactory,
 )
-from courses.models import ProgramCertificate
+from courses.models import CourseRun, Program, ProgramCertificate
 from courses.utils import (
     generate_program_certificate,
+    get_courseware_object_from_text_id,
     process_course_run_grade_certificate,
     sync_course_runs,
     get_catalog_languages,
@@ -420,3 +422,47 @@ def test_catalog_visible_languages():
     assert get_catalog_languages() == [
         catalog_language.name for catalog_language in catalog_visible_languages
     ]
+
+
+def test_get_courseware_object_from_text_id_program_run():
+    """A program run id (readable id + run tag) should resolve to the Program"""
+    program = ProgramFactory.create()
+    program_run = ProgramRunFactory.create(program=program, run_tag="R24")
+
+    assert get_courseware_object_from_text_id(program_run.full_readable_id) == program
+
+
+def test_get_courseware_object_from_text_id_program():
+    """A plain program readable id should resolve to the Program"""
+    program = ProgramFactory.create()
+
+    assert get_courseware_object_from_text_id(program.readable_id) == program
+
+
+def test_get_courseware_object_from_text_id_course_run():
+    """A course run readable id should resolve to the CourseRun"""
+    course_run = CourseRunFactory.create()
+
+    assert get_courseware_object_from_text_id(course_run.courseware_id) == course_run
+
+
+def test_get_courseware_object_from_text_id_run_tag_shaped_readable_id():
+    """
+    A Program whose readable_id itself ends in a run-tag-like suffix (with no matching
+    ProgramRun) should resolve via the full-id fallback rather than being mis-parsed.
+    """
+    program = ProgramFactory.create(readable_id="program-v1:xPRO+Standalone+R1")
+
+    assert get_courseware_object_from_text_id(program.readable_id) == program
+
+
+def test_get_courseware_object_from_text_id_missing_program():
+    """An unmatched program (run) id should raise Program.DoesNotExist"""
+    with pytest.raises(Program.DoesNotExist):
+        get_courseware_object_from_text_id("program-v1:xPRO+Missing+R9")
+
+
+def test_get_courseware_object_from_text_id_missing_course_run():
+    """An unmatched course run id should raise CourseRun.DoesNotExist"""
+    with pytest.raises(CourseRun.DoesNotExist):
+        get_courseware_object_from_text_id("course-v1:xPRO+Missing+R9")

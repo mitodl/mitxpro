@@ -6,7 +6,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 
-import ecommerce.api
 from courses.api import deactivate_program_enrollment, deactivate_run_enrollment
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.models import (
@@ -15,7 +14,8 @@ from courses.models import (
     Program,
     ProgramEnrollment,
 )
-from ecommerce.models import Order, Product
+from courses.utils import get_courseware_object_from_text_id
+from ecommerce.models import Order
 from mitxpro.utils import now_in_utc
 from sheets.constants import (
     GOOGLE_API_TRUE_VAL,
@@ -147,7 +147,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         # The product id from the sheet may be a program run readable id (e.g. one
         # with a "+R24" run tag suffix). Resolve it to the underlying Program/CourseRun
         # so the lookup works regardless of whether a run tag was included.
-        _, courseware_object, _ = ecommerce.api.get_product_from_text_id(
+        courseware_object = get_courseware_object_from_text_id(
             refund_req_row.product_id
         )
         if isinstance(courseware_object, Program):
@@ -274,15 +274,10 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
                 )
             elif isinstance(exc, Order.DoesNotExist):
                 message = f"Order with id {refund_req_row.order_id} and purchaser '{refund_req_row.learner_email}' not found"
+            elif isinstance(exc, (Program.DoesNotExist, CourseRun.DoesNotExist)):  # noqa: UP038
+                message = f"No Program/Course run found for product '{refund_req_row.product_id}'"
             elif isinstance(  # noqa: UP038
-                exc,
-                (
-                    ProgramEnrollment.DoesNotExist,
-                    CourseRunEnrollment.DoesNotExist,
-                    Program.DoesNotExist,
-                    CourseRun.DoesNotExist,
-                    Product.DoesNotExist,
-                ),
+                exc, (ProgramEnrollment.DoesNotExist, CourseRunEnrollment.DoesNotExist)
             ):
                 message = f"Program/Course run enrollment does not exist for product '{refund_req_row.product_id}' and order {refund_req_row.order_id}"
             else:
