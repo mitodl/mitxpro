@@ -1501,7 +1501,7 @@ name = "jinxed"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ansicon" },
+    { name = "ansicon", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/20/d0/59b2b80e7a52d255f9e0ad040d2e826342d05580c4b1d7d7747cfb8db731/jinxed-1.3.0.tar.gz", hash = "sha256:1593124b18a41b7a3da3b078471442e51dbad3d77b4d4f2b0c26ab6f7d660dbf", size = 80981, upload-time = "2024-07-31T22:39:18.854Z" }
 wheels = [
@@ -1824,7 +1824,7 @@ wheels = [
 
 [[package]]
 name = "mitol-django-hubspot-api"
-version = "2026.5.6"
+version = "2026.7.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -1836,9 +1836,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/a8/fd40549336983c7c3c7b9fce1368e8a6be4ce69f97a5ca23f60d485e8eaa/mitol_django_hubspot_api-2026.5.6.tar.gz", hash = "sha256:0611eb4b655cf67f47f017736dc2dfd35ad525be835f4b343dd7d65f82a82a43", size = 9651, upload-time = "2026-05-06T09:44:37.41Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a7/52/f0157b2263f933c49f93c76aae62c64b374e4d1217eb479e6c5ee019e7a8/mitol_django_hubspot_api-2026.7.9.tar.gz", hash = "sha256:412ad54663d739d9975769a215f08159bd0060c93050b1236f60853847a8c07e", size = 10035, upload-time = "2026-07-09T18:03:57.599Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/74/cbaf4816ae1ef5cf7e1ec94312b31f7ec6f5e804aa1b2564079eaeb61d21/mitol_django_hubspot_api-2026.5.6-py3-none-any.whl", hash = "sha256:3ea91911f131b5dc8edaa342f7366f1e51c98c3a550dc8504bd5c80f9bb772b1", size = 13821, upload-time = "2026-05-06T09:44:36.215Z" },
+    { url = "https://files.pythonhosted.org/packages/14/61/ec525a8a99fe7903732b485d416aaf725a61e618abd21487fb4aa4c6a7b1/mitol_django_hubspot_api-2026.7.9-py3-none-any.whl", hash = "sha256:8dc715a5f409701fa3b87eee73402e127153edca48c63cc8cbf363ce7ad24314", size = 14165, upload-time = "2026-07-09T18:03:56.652Z" },
 ]
 
 [[package]]
@@ -2039,7 +2039,7 @@ requires-dist = [
     { name = "mitol-django-authentication", specifier = "==2025.3.17" },
     { name = "mitol-django-common", specifier = "==2025.12.23.2" },
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
-    { name = "mitol-django-hubspot-api", specifier = "==2026.5.6" },
+    { name = "mitol-django-hubspot-api", specifier = "==2026.7.9" },
     { name = "mitol-django-mail", specifier = "==2025.6.24" },
     { name = "mitol-django-oauth-toolkit-extensions", specifier = "==2025.3.17" },
     { name = "mitol-django-observability", specifier = ">=2026.1.0" },
