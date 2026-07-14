@@ -424,16 +424,15 @@ def test_catalog_visible_languages():
     ]
 
 
-def _courseware_program_run_case():
-    """A program run id (readable id + run tag) resolves to the Program"""
+def _courseware_program_case(run_tag=None):
+    """
+    A program readable id resolves to the Program, optionally via a program run id
+    (i.e. the readable id plus a run tag suffix like "+R24").
+    """
     program = ProgramFactory.create()
-    program_run = ProgramRunFactory.create(program=program, run_tag="R24")
-    return program_run.full_readable_id, program
-
-
-def _courseware_program_case():
-    """A plain program readable id resolves to the Program"""
-    program = ProgramFactory.create()
+    if run_tag:
+        program_run = ProgramRunFactory.create(program=program, run_tag=run_tag)
+        return program_run.full_readable_id, program
     return program.readable_id, program
 
 
@@ -455,8 +454,10 @@ def _courseware_run_tag_shaped_readable_id_case():
 @pytest.mark.parametrize(
     "build_case",
     [
-        pytest.param(_courseware_program_run_case, id="program_run_id"),
-        pytest.param(_courseware_program_case, id="program_id"),
+        pytest.param(
+            lambda: _courseware_program_case(run_tag="R24"), id="program_run_id"
+        ),
+        pytest.param(lambda: _courseware_program_case(), id="program_id"),
         pytest.param(_courseware_course_run_case, id="course_run_id"),
         pytest.param(
             _courseware_run_tag_shaped_readable_id_case,

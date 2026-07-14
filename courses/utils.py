@@ -413,9 +413,7 @@ def get_courseware_object_from_text_id(text_id):
             .first()
         )
         if program is None:
-            raise Program.DoesNotExist(  # noqa: EM102
-                f"Program matching text id '{text_id}' does not exist"
-            )
+            raise Program.DoesNotExist
         return program
     if is_program_text_id(text_id):
         return Program.objects.get(readable_id=text_id)
