@@ -14,7 +14,7 @@ from courses.models import (
     Program,
     ProgramEnrollment,
 )
-from courses.utils import get_courseware_object_from_text_id
+from courses.utils import resolve_courseware_object_from_text_id
 from ecommerce.models import Order
 from mitxpro.utils import now_in_utc
 from sheets.constants import (
@@ -147,7 +147,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         # The product id from the sheet may be a program run readable id (e.g. one
         # with a "+R24" run tag suffix). Resolve it to the underlying Program/CourseRun
         # so the lookup works regardless of whether a run tag was included.
-        courseware_object = get_courseware_object_from_text_id(
+        courseware_object, _ = resolve_courseware_object_from_text_id(
             refund_req_row.product_id
         )
         if isinstance(courseware_object, Program):

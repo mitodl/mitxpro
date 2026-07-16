@@ -6,7 +6,6 @@ import decimal
 import hashlib
 import hmac
 import logging
-import re
 import uuid
 from base64 import b64encode
 from collections import defaultdict
@@ -17,7 +16,7 @@ from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
-from django.db.models import Count, F, Max, Prefetch, Q, Subquery
+from django.db.models import Count, F, Max, Q, Subquery
 from django.http import HttpRequest
 from django.urls import reverse
 from ipware import get_client_ip
@@ -30,10 +29,9 @@ from courses.constants import (
     CONTENT_TYPE_MODEL_COURSE,
     CONTENT_TYPE_MODEL_COURSERUN,
     CONTENT_TYPE_MODEL_PROGRAM,
-    PROGRAM_RUN_ID_PATTERN,
 )
-from courses.models import CourseRun, Program, ProgramRun
-from courses.utils import is_program_text_id
+from courses.models import CourseRun, Program
+from courses.utils import resolve_courseware_object_from_text_id
 from ecommerce.constants import (
     CYBERSOURCE_DECISION_ACCEPT,
     CYBERSOURCE_DECISION_CANCEL,
@@ -1498,66 +1496,11 @@ def get_product_from_text_id(text_id):
             the Program/CourseRun associated with the text id, and a matching ProgramRun if the text id
             indicated one
     """
-    program_run_id_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
-    # This text id matches the pattern of a program text id with a program run attached
-    if program_run_id_match:
-        match_dict = program_run_id_match.groupdict()
-        potential_prog_run_id = match_dict["run_tag"]
-        potential_text_id_base = match_dict["text_id_base"]
-        # A Program's own text id may end with something that looks like a ProgramRun suffix, but has
-        # no associated ProgramRun (ex: program.readable_id == "program-v1:my+program+R1"). This query looks
-        # for a Program with a ProgramRun that matches the suffix, or one that matches the full given text id
-        # without a ProgramRun. The version with a matching ProgramRun is preferred.
-        program = (
-            Program.objects.filter(
-                Q(
-                    readable_id=potential_text_id_base,
-                    programruns__run_tag=potential_prog_run_id,
-                )
-                | Q(readable_id=text_id)
-            )
-            .order_by("-programruns__run_tag")
-            .prefetch_related(
-                Prefetch(
-                    "programruns",
-                    queryset=ProgramRun.objects.filter(run_tag=potential_prog_run_id),
-                    to_attr="matching_program_runs",
-                )
-            )
-            .prefetch_related("products")
-            .first()
-        )
-        if not program:
-            raise Program.DoesNotExist(
-                f"Could not find Program with readable_id={text_id} "  # noqa: EM102
-                "or readable_id={potential_text_id_base} with program run {potential_prog_run_id}"
-            )
-        program_run = first_or_none(program.matching_program_runs)
-        product = first_or_none(program.products.all())
-        if not product:
-            raise Product.DoesNotExist(f"Product for {program} does not exist")  # noqa: EM102
-        return product, program, program_run
-    # This is a "normal" text id that should match a CourseRun/Program
-    else:
-        if is_program_text_id(text_id):
-            content_object_model = Program
-            content_object_filter = dict(readable_id=text_id)  # noqa: C408
-        else:
-            content_object_model = CourseRun
-            content_object_filter = dict(courseware_id=text_id)  # noqa: C408
-        content_object = (
-            content_object_model.objects.filter(**content_object_filter)
-            .prefetch_related("products")
-            .first()
-        )
-        if not content_object:
-            raise content_object_model.DoesNotExist(
-                f"{content_object_model._meta.model} matching filter {content_object_filter} does not exist"  # noqa: EM102, SLF001
-            )
-        product = first_or_none(content_object.products.all())
-        if not product:
-            raise Product.DoesNotExist(f"Product for {content_object} does not exist")  # noqa: EM102
-        return product, content_object, None
+    content_object, program_run = resolve_courseware_object_from_text_id(text_id)
+    product = first_or_none(content_object.products.all())
+    if not product:
+        raise Product.DoesNotExist(f"Product for {content_object} does not exist")  # noqa: EM102
+    return product, content_object, program_run
 
 
 def get_product_from_querystring_id(qs_product_id):
