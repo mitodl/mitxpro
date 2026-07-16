@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.196.0
+Version 0.196.0 (Released July 16, 2026)
 ---------------
 
 - fix(deps): update dependency redis to v7.4.1 (#3991)
