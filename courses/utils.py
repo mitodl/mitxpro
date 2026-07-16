@@ -376,23 +376,20 @@ def is_program_text_id(item_text_id):
     return item_text_id.startswith(PROGRAM_TEXT_ID_PREFIX)
 
 
-def resolve_courseware_object_from_text_id(text_id):
+def get_courseware_object_from_text_id(text_id):
     """
-    Resolves a text id that references a Program or CourseRun into the matching object,
-    along with the associated ProgramRun when the text id carries a run tag suffix.
+    Resolves a text id that references a Program or CourseRun into the matching object.
 
     Handles program run ids that carry a run tag suffix (e.g. "program-v1:xPRO+QCF+R24"),
     plain program ids, and course run ids. This does not require an associated Product, so
-    callers that only need the courseware object can use it directly (e.g. refund
-    processing, where the product may be inactive/expired); callers that need the product
-    look it up separately.
+    it resolves courseware whose product is inactive/expired (as is common when processing
+    refunds).
 
     Args:
         text_id (str): A text id for a Program/CourseRun (optionally with a program run suffix)
 
     Returns:
-        tuple(Program or CourseRun, ProgramRun or None): The courseware object matching the
-            text id, and the matching ProgramRun if the text id carried a run tag suffix
+        Program or CourseRun: The courseware object matching the given text id
 
     Raises:
         Program.DoesNotExist: if a program (run) text id matches no Program
@@ -401,7 +398,6 @@ def resolve_courseware_object_from_text_id(text_id):
     program_run_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
     if program_run_match:
         match_dict = program_run_match.groupdict()
-        run_tag = match_dict["run_tag"]
         # A Program's own readable_id may end in something that looks like a run tag
         # without an associated ProgramRun. Prefer a Program that has a ProgramRun for
         # the suffix; otherwise fall back to a Program whose readable_id is the full
@@ -410,16 +406,16 @@ def resolve_courseware_object_from_text_id(text_id):
         program = (
             Program.objects.filter(
                 readable_id=match_dict["text_id_base"],
-                programruns__run_tag=run_tag,
+                programruns__run_tag=match_dict["run_tag"],
             ).first()
             or Program.objects.filter(readable_id=text_id).first()
         )
         if program is None:
             raise Program.DoesNotExist
-        return program, program.programruns.filter(run_tag=run_tag).first()
+        return program
     if is_program_text_id(text_id):
-        return Program.objects.get(readable_id=text_id), None
-    return CourseRun.objects.get(courseware_id=text_id), None
+        return Program.objects.get(readable_id=text_id)
+    return CourseRun.objects.get(courseware_id=text_id)
 
 
 def get_catalog_course_filter(relative_filter=""):

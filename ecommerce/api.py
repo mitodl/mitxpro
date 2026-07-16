@@ -31,7 +31,7 @@ from courses.constants import (
     CONTENT_TYPE_MODEL_PROGRAM,
 )
 from courses.models import CourseRun, Program
-from courses.utils import resolve_courseware_object_from_text_id
+from courses.utils import get_courseware_object_from_text_id
 from ecommerce.constants import (
     CYBERSOURCE_DECISION_ACCEPT,
     CYBERSOURCE_DECISION_CANCEL,
@@ -1496,7 +1496,19 @@ def get_product_from_text_id(text_id):
             the Program/CourseRun associated with the text id, and a matching ProgramRun if the text id
             indicated one
     """
-    content_object, program_run = resolve_courseware_object_from_text_id(text_id)
+    content_object = get_courseware_object_from_text_id(text_id)
+    program_run = None
+    if isinstance(content_object, Program):
+        # If the text id carried a program run suffix, it matches the run whose full
+        # readable id (program readable id + run tag) equals the given text id.
+        program_run = next(
+            (
+                run
+                for run in content_object.programruns.all()
+                if run.full_readable_id == text_id
+            ),
+            None,
+        )
     product = first_or_none(content_object.products.all())
     if not product:
         raise Product.DoesNotExist(f"Product for {content_object} does not exist")  # noqa: EM102

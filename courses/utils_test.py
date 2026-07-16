@@ -26,8 +26,8 @@ from courses.factories import (
 from courses.models import CourseRun, Program, ProgramCertificate
 from courses.utils import (
     generate_program_certificate,
+    get_courseware_object_from_text_id,
     process_course_run_grade_certificate,
-    resolve_courseware_object_from_text_id,
     sync_course_runs,
     get_catalog_languages,
 )
@@ -426,20 +426,20 @@ def test_catalog_visible_languages():
 
 def _courseware_program_case(run_tag=None):
     """
-    A program readable id resolves to the Program (and its ProgramRun when the id
-    includes a run tag suffix like "+R24").
+    A program readable id resolves to the Program, optionally via a program run id
+    (i.e. the readable id plus a run tag suffix like "+R24").
     """
     program = ProgramFactory.create()
     if run_tag:
         program_run = ProgramRunFactory.create(program=program, run_tag=run_tag)
-        return program_run.full_readable_id, program, program_run
-    return program.readable_id, program, None
+        return program_run.full_readable_id, program
+    return program.readable_id, program
 
 
 def _courseware_course_run_case():
     """A course run readable id resolves to the CourseRun"""
     course_run = CourseRunFactory.create()
-    return course_run.courseware_id, course_run, None
+    return course_run.courseware_id, course_run
 
 
 def _courseware_run_tag_shaped_readable_id_case():
@@ -448,7 +448,7 @@ def _courseware_run_tag_shaped_readable_id_case():
     ProgramRun) resolves via the full-id fallback rather than being mis-parsed.
     """
     program = ProgramFactory.create(readable_id="program-v1:xPRO+Standalone+R1")
-    return program.readable_id, program, None
+    return program.readable_id, program
 
 
 @pytest.mark.parametrize(
@@ -465,13 +465,11 @@ def _courseware_run_tag_shaped_readable_id_case():
         ),
     ],
 )
-def test_resolve_courseware_object_from_text_id(build_case):
-    """resolve_courseware_object_from_text_id resolves each product id shape and its run"""
-    text_id, expected_object, expected_run = build_case()
+def test_get_courseware_object_from_text_id(build_case):
+    """get_courseware_object_from_text_id resolves each product id shape to its object"""
+    text_id, expected = build_case()
 
-    courseware_object, program_run = resolve_courseware_object_from_text_id(text_id)
-    assert courseware_object == expected_object
-    assert program_run == expected_run
+    assert get_courseware_object_from_text_id(text_id) == expected
 
 
 @pytest.mark.parametrize(
@@ -485,7 +483,7 @@ def test_resolve_courseware_object_from_text_id(build_case):
         ),
     ],
 )
-def test_resolve_courseware_object_from_text_id_missing(text_id, expected_exception):
-    """resolve_courseware_object_from_text_id raises when nothing matches the text id"""
+def test_get_courseware_object_from_text_id_missing(text_id, expected_exception):
+    """get_courseware_object_from_text_id raises when nothing matches the text id"""
     with pytest.raises(expected_exception):
-        resolve_courseware_object_from_text_id(text_id)
+        get_courseware_object_from_text_id(text_id)
