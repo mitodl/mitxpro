@@ -399,18 +399,16 @@ def get_courseware_object_from_text_id(text_id):
     if program_run_match:
         match_dict = program_run_match.groupdict()
         # A Program's own readable_id may end in something that looks like a run tag
-        # without an associated ProgramRun. Match either a Program that has a ProgramRun
-        # for the suffix, or one whose readable_id is the full text id, preferring the former.
+        # without an associated ProgramRun. Prefer a Program that has a ProgramRun for
+        # the suffix; otherwise fall back to a Program whose readable_id is the full
+        # text id. Two separate queries keep the result deterministic (an OR query that
+        # joins programruns can duplicate the full-id Program across its runs).
         program = (
             Program.objects.filter(
-                Q(
-                    readable_id=match_dict["text_id_base"],
-                    programruns__run_tag=match_dict["run_tag"],
-                )
-                | Q(readable_id=text_id)
-            )
-            .order_by("-programruns__run_tag")
-            .first()
+                readable_id=match_dict["text_id_base"],
+                programruns__run_tag=match_dict["run_tag"],
+            ).first()
+            or Program.objects.filter(readable_id=text_id).first()
         )
         if program is None:
             raise Program.DoesNotExist

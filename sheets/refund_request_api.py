@@ -152,11 +152,11 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
         )
         if isinstance(courseware_object, Program):
             enrollment = ProgramEnrollment.all_objects.get(
-                order=order, program=courseware_object
+                user=user, order=order, program=courseware_object
             )
         else:
             enrollment = CourseRunEnrollment.all_objects.get(
-                order=order, run=courseware_object
+                user=user, order=order, run=courseware_object
             )
         return order, enrollment
 

@@ -11,6 +11,7 @@ from courses.factories import (
 )
 from ecommerce.factories import ProductFactory
 from sheets.refund_request_api import RefundRequestHandler, RefundRequestRow
+from users.factories import UserFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -43,8 +44,11 @@ def _build_program_case(run_tag=None, inactive_product=False):
     (i.e. the readable id plus a run tag suffix like "+R24"). When ``inactive_product``
     is set, an inactive Product is attached to mimic an expired offering.
     """
+    user = UserFactory.create()
     program = ProgramFactory.create()
-    enrollment = ProgramEnrollmentFactory.create(program=program)
+    enrollment = ProgramEnrollmentFactory.create(
+        program=program, user=user, order__purchaser=user
+    )
     if inactive_product:
         ProductFactory.create(content_object=program, is_active=False)
     if run_tag:
@@ -55,8 +59,11 @@ def _build_program_case(run_tag=None, inactive_product=False):
 
 def _build_course_run_case():
     """Course run enrollment addressed by a course run readable id"""
+    user = UserFactory.create()
     course_run = CourseRunFactory.create()
-    enrollment = CourseRunEnrollmentFactory.create(run=course_run)
+    enrollment = CourseRunEnrollmentFactory.create(
+        run=course_run, user=user, order__purchaser=user
+    )
     return course_run.courseware_id, enrollment
 
 
