@@ -201,9 +201,10 @@ describe("ecommerce", () => {
       assert.deepEqual(result, expectedResult);
     });
 
-    it("returns no course run selections if there isn't a matching one for every course", () => {
+    it("returns no course run selections if neither preselection nor basket resolves one for every course", () => {
       programBasketItem.run_tag = "R2";
       programBasketItem.courses[1].courseruns[1].run_tag = "notR2";
+      programBasketItem.run_ids = [];
       const result = calcSelectedRunIds(programBasketItem);
       assert.deepEqual(result, {});
     });
@@ -220,6 +221,17 @@ describe("ecommerce", () => {
       assert.deepEqual(result, {
         [courseRunBasketItem.courses[0].id]: courseRunBasketItem.object_id,
       });
+    });
+
+    it("reflects the runs selected in the basket for a program without a preselection", () => {
+      // no run_tag / preselect id -> falls back to the basket's selected runs
+      // (makeItem sets run_ids to the first run of each course)
+      const expectedResult = R.compose(
+        R.fromPairs,
+        R.map((course) => [course.id, course.courseruns[0].id]),
+      )(programBasketItem.courses);
+      const result = calcSelectedRunIds(programBasketItem);
+      assert.deepEqual(result, expectedResult);
     });
   });
 });

@@ -279,6 +279,14 @@
       "description": "Form ID for Hubspot Forms API",
       "required": false
     },
+    "HUBSPOT_DEAL_STAGE_CHECKOUT_ABANDONED_ID": {
+      "description": "Internal HubSpot deal-pipeline stage id for unfulfilled (created/failed) orders. HubSpot auto-generates a numeric id for UI-created stages, so this is configurable per environment.",
+      "required": false
+    },
+    "HUBSPOT_DEAL_STAGE_PROCESSED_ID": {
+      "description": "Internal HubSpot deal-pipeline stage id for fulfilled/refunded (processed) orders.",
+      "required": false
+    },
     "HUBSPOT_ENTERPRISE_PAGE_FORM_ID": {
       "description": "Form ID for Hubspot for Enterprise Page",
       "required": false

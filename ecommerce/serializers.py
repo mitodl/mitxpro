@@ -18,6 +18,7 @@ from ecommerce import models
 from ecommerce.api import (
     best_coupon_for_product,
     create_coupons,
+    create_or_update_unfulfilled_order,
     determine_visitor_country,
     get_or_create_data_consent_users,
     get_product_from_querystring_id,
@@ -25,10 +26,12 @@ from ecommerce.api import (
     get_valid_coupon_versions,
     latest_coupon_version,
     latest_product_version,
+    validate_basket_for_checkout,
 )
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPES
 from ecommerce.models import Basket, TaxRate
 from ecommerce.utils import CouponUtils, validate_amount
+from hubspot_xpro.task_helpers import sync_hubspot_deal
 from mitxpro.serializers import WriteableSerializerMethodField
 from mitxpro.utils import now_in_utc
 from users.serializers import ExtendedLegalAddressSerializer
@@ -488,6 +491,18 @@ class BasketSerializer(serializers.ModelSerializer):
                     models.CourseRunSelection(basket=basket, run_id=run_id)
                     for run_id in updated_run_ids
                 )
+            # Auto-select runs whenever the basket has a product but no run selection,
+            # so the basket is checkout-valid — and its "Checkout Abandoned" deal is
+            # created — as soon as the product is added, regardless of entry point (this
+            # also re-fills after the checkout page re-adds the product on load, which
+            # clears prior selections). It fills only when no run is selected at all; an
+            # existing (partial or complete) selection is left untouched. A course-run
+            # product *is* a single run; for a program we pick the first available run
+            # for each course, selecting nothing if a course has no available run (or the
+            # user is already enrolled in the picked one) and leaving the choice to them.
+            basket_item = basket.basketitems.select_related("product").first()
+            if basket_item is not None and not basket.courserunselection_set.exists():
+                cls._autoselect_runs(basket, basket_item.product)
             if coupon_version is not None:
                 models.CouponSelection.objects.update_or_create(
                     basket=basket, defaults={"coupon": coupon_version.coupon}
@@ -496,6 +511,50 @@ class BasketSerializer(serializers.ModelSerializer):
                 models.DataConsentUser.objects.filter(
                     id__in=data_consents, user=basket.user
                 ).update(consent_date=now_in_utc())
+
+    @staticmethod
+    def _autoselect_runs(basket, product):
+        """
+        Auto-select course run(s) for a product added to the basket, so the basket is
+        immediately valid for checkout. For a course-run product this is the product's
+        own run. For a program it's the first available (unexpired) run of each of its
+        courses; if any course has no available run, or the user is already enrolled in
+        a picked run, nothing is selected (the user then chooses their dates).
+
+        Args:
+            basket (models.Basket): The user's basket
+            product (models.Product): The product just added to the basket
+        """
+        content_object = product.content_object
+        if isinstance(content_object, CourseRun):
+            models.CourseRunSelection.objects.get_or_create(
+                basket=basket, run=content_object
+            )
+        elif isinstance(content_object, Program):
+            enrolled_run_ids = set(
+                basket.user.courserunenrollment_set.values_list("run_id", flat=True)
+            )
+            runs = []
+            # prefetch course runs so course.unexpired_runs doesn't issue a query per
+            # course (avoids an N+1 across the program's courses)
+            for course in content_object.courses.live().prefetch_related("courseruns"):
+                # first available run the user is not already enrolled in
+                run = next(
+                    (
+                        run
+                        for run in course.unexpired_runs
+                        if run.id not in enrolled_run_ids
+                    ),
+                    None,
+                )
+                if run is None:
+                    runs = None
+                    break
+                runs.append(run)
+            if runs:
+                models.CourseRunSelection.objects.bulk_create(
+                    models.CourseRunSelection(basket=basket, run=run) for run in runs
+                )
 
     def _fetch_and_validate_product(self, items):
         """
@@ -633,7 +692,29 @@ class BasketSerializer(serializers.ModelSerializer):
             data_consents=data_consents,
             clear_all=False,
         )
+        self._sync_unfulfilled_order(basket)
         return basket
+
+    @staticmethod
+    def _sync_unfulfilled_order(basket):
+        """
+        Keep the user's unfulfilled Order in sync with the basket so its HubSpot deal
+        reflects the current cart (in the "Checkout Abandoned" stage). Skips silently if
+        the basket is not yet valid for checkout (e.g. no course run selected), in which
+        case any existing order is left untouched until the next valid basket update.
+
+        This is a best-effort side effect: a failure must never break the basket update,
+        so errors are logged and swallowed (the order is (re)created at checkout anyway).
+        """
+        try:
+            validated_basket = validate_basket_for_checkout(basket.user)
+        except ValidationError:
+            return
+        try:
+            order = create_or_update_unfulfilled_order(validated_basket)
+            sync_hubspot_deal(order)
+        except Exception:  # noqa: BLE001
+            log.exception("Failed to sync unfulfilled order for basket %s", basket.id)
 
     @staticmethod
     def _validate_coupons(coupons):
