@@ -91,7 +91,7 @@ const runSelectionsByCourse = (
   item: BasketItem,
   matchRun: (run: Object) => boolean,
 ): { [number]: number } => {
-  const selections = {};
+  const selections: { [number]: number } = {};
   for (const course of item.courses) {
     const run = course.courseruns.find(matchRun);
     if (run) {
