@@ -18,13 +18,15 @@ from courses.factories import (
     CourseRunCertificateFactory,
     CourseRunGradeFactory,
     ProgramFactory,
+    ProgramRunFactory,
     ProgramCertificateFactory,
     UserFactory,
     CourseLanguageFactory,
 )
-from courses.models import ProgramCertificate
+from courses.models import CourseRun, Program, ProgramCertificate
 from courses.utils import (
     generate_program_certificate,
+    get_courseware_object_from_text_id,
     process_course_run_grade_certificate,
     sync_course_runs,
     get_catalog_languages,
@@ -420,3 +422,68 @@ def test_catalog_visible_languages():
     assert get_catalog_languages() == [
         catalog_language.name for catalog_language in catalog_visible_languages
     ]
+
+
+def _courseware_program_case(run_tag=None):
+    """
+    A program readable id resolves to the Program, optionally via a program run id
+    (i.e. the readable id plus a run tag suffix like "+R24").
+    """
+    program = ProgramFactory.create()
+    if run_tag:
+        program_run = ProgramRunFactory.create(program=program, run_tag=run_tag)
+        return program_run.full_readable_id, program
+    return program.readable_id, program
+
+
+def _courseware_course_run_case():
+    """A course run readable id resolves to the CourseRun"""
+    course_run = CourseRunFactory.create()
+    return course_run.courseware_id, course_run
+
+
+def _courseware_run_tag_shaped_readable_id_case():
+    """
+    A Program whose readable_id itself ends in a run-tag-like suffix (with no matching
+    ProgramRun) resolves via the full-id fallback rather than being mis-parsed.
+    """
+    program = ProgramFactory.create(readable_id="program-v1:xPRO+Standalone+R1")
+    return program.readable_id, program
+
+
+@pytest.mark.parametrize(
+    "build_case",
+    [
+        pytest.param(
+            lambda: _courseware_program_case(run_tag="R24"), id="program_run_id"
+        ),
+        pytest.param(lambda: _courseware_program_case(), id="program_id"),
+        pytest.param(_courseware_course_run_case, id="course_run_id"),
+        pytest.param(
+            _courseware_run_tag_shaped_readable_id_case,
+            id="run_tag_shaped_readable_id",
+        ),
+    ],
+)
+def test_get_courseware_object_from_text_id(build_case):
+    """get_courseware_object_from_text_id resolves each product id shape to its object"""
+    text_id, expected = build_case()
+
+    assert get_courseware_object_from_text_id(text_id) == expected
+
+
+@pytest.mark.parametrize(
+    ("text_id", "expected_exception"),
+    [
+        pytest.param(
+            "program-v1:xPRO+Missing+R9", Program.DoesNotExist, id="missing_program"
+        ),
+        pytest.param(
+            "course-v1:xPRO+Missing+R9", CourseRun.DoesNotExist, id="missing_course_run"
+        ),
+    ],
+)
+def test_get_courseware_object_from_text_id_missing(text_id, expected_exception):
+    """get_courseware_object_from_text_id raises when nothing matches the text id"""
+    with pytest.raises(expected_exception):
+        get_courseware_object_from_text_id(text_id)

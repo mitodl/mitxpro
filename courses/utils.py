@@ -10,7 +10,11 @@ from django.db.models import Q
 import re
 from requests.exceptions import HTTPError
 
-from courses.constants import PROGRAM_TEXT_ID_PREFIX, COURSE_KEY_PATTERN
+from courses.constants import (
+    COURSE_KEY_PATTERN,
+    PROGRAM_RUN_ID_PATTERN,
+    PROGRAM_TEXT_ID_PREFIX,
+)
 from courses.models import (
     CourseRun,
     CourseRunCertificate,
@@ -370,6 +374,48 @@ def is_program_text_id(item_text_id):
         bool: True if the given id is a program id
     """
     return item_text_id.startswith(PROGRAM_TEXT_ID_PREFIX)
+
+
+def get_courseware_object_from_text_id(text_id):
+    """
+    Resolves a text id that references a Program or CourseRun into the matching object.
+
+    Handles program run ids that carry a run tag suffix (e.g. "program-v1:xPRO+QCF+R24"),
+    plain program ids, and course run ids. This does not require an associated Product, so
+    it resolves courseware whose product is inactive/expired (as is common when processing
+    refunds).
+
+    Args:
+        text_id (str): A text id for a Program/CourseRun (optionally with a program run suffix)
+
+    Returns:
+        Program or CourseRun: The courseware object matching the given text id
+
+    Raises:
+        Program.DoesNotExist: if a program (run) text id matches no Program
+        CourseRun.DoesNotExist: if a course run text id matches no CourseRun
+    """
+    program_run_match = re.match(PROGRAM_RUN_ID_PATTERN, text_id)
+    if program_run_match:
+        match_dict = program_run_match.groupdict()
+        # A Program's own readable_id may end in something that looks like a run tag
+        # without an associated ProgramRun. Prefer a Program that has a ProgramRun for
+        # the suffix; otherwise fall back to a Program whose readable_id is the full
+        # text id. Two separate queries keep the result deterministic (an OR query that
+        # joins programruns can duplicate the full-id Program across its runs).
+        program = (
+            Program.objects.filter(
+                readable_id=match_dict["text_id_base"],
+                programruns__run_tag=match_dict["run_tag"],
+            ).first()
+            or Program.objects.filter(readable_id=text_id).first()
+        )
+        if program is None:
+            raise Program.DoesNotExist
+        return program
+    if is_program_text_id(text_id):
+        return Program.objects.get(readable_id=text_id)
+    return CourseRun.objects.get(courseware_id=text_id)
 
 
 def get_catalog_course_filter(relative_filter=""):
