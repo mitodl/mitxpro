@@ -801,9 +801,7 @@ def test_create_or_update_unfulfilled_order_affiliate(validated_basket):
     assert affiliate_referral_action.created_order == order
 
 
-def test_create_or_update_unfulfilled_order_idempotent(
-    validated_basket, mock_hubspot_syncs
-):
+def test_create_or_update_unfulfilled_order_idempotent(validated_basket):
     """
     create_or_update_unfulfilled_order should reuse the existing CREATED order for the user (rather than
     create a duplicate) and rebuild it to mirror the current basket.
@@ -818,9 +816,7 @@ def test_create_or_update_unfulfilled_order_idempotent(
     assert same_order.lines.count() == 1
 
 
-def test_create_or_update_unfulfilled_order_per_product(
-    validated_basket, mock_hubspot_syncs
-):
+def test_create_or_update_unfulfilled_order_per_product(validated_basket):
     """
     A different product yields a separate CREATED order (one abandoned-cart deal per
     product), rather than rewriting the existing one.
@@ -841,9 +837,7 @@ def test_create_or_update_unfulfilled_order_per_product(
     assert Order.objects.filter(purchaser=user, status=Order.CREATED).count() == 2
 
 
-def test_create_or_update_unfulfilled_order_mirrors_coupon_removal(
-    validated_basket, mock_hubspot_syncs
-):
+def test_create_or_update_unfulfilled_order_mirrors_coupon_removal(validated_basket):
     """
     Re-syncing the order after the basket's coupon is removed should clear the order's
     CouponRedemption so the order keeps mirroring the basket.
