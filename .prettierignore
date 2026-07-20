@@ -2,6 +2,7 @@
 .yarn/
 flow-typed/npm/
 static/js/flow/
+static/js/vendor/
 static/js/components/forms/elements/FormError.js
 static/js/lib/queries/catalog.js
 static/js/containers/pages/profile/ViewProfilePage.js
