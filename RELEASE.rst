@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+Version 0.197.0
+---------------
+
+- feat(ecommerce): two-stage HubSpot deal flow (Checkout Abandoned → Processed) (#3980)
+- fix: resolve program run IDs when processing refund requests (#3986)
+- fix(deps): update dependency django to v5.2.16 [security] (#4002)
+- chore: update mitol-django-hubspot-api to v2026.7.9 (#4001)
+- chore(deps): update dependency unzipper to v0.12.5 (#3996)
+- fix(deps): update dependency boto3 to v1.43.36 (#3997)
+- chore(deps): update dependency autoprefixer to v10.5.2 (#3988)
+
 Version 0.196.0 (Released July 16, 2026)
 ---------------
 
