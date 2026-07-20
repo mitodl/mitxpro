@@ -3769,11 +3769,11 @@ __metadata:
   linkType: hard
 
 "autoprefixer@npm:^10.0.0":
-  version: 10.5.2
-  resolution: "autoprefixer@npm:10.5.2"
+  version: 10.5.4
+  resolution: "autoprefixer@npm:10.5.4"
   dependencies:
-    browserslist: ^4.28.4
-    caniuse-lite: ^1.0.30001799
+    browserslist: ^4.28.6
+    caniuse-lite: ^1.0.30001806
     fraction.js: ^5.3.4
     picocolors: ^1.1.1
     postcss-value-parser: ^4.2.0
@@ -3781,7 +3781,7 @@ __metadata:
     postcss: ^8.1.0
   bin:
     autoprefixer: bin/autoprefixer
-  checksum: 5a683c5f34803b770e83f777ffc5e39971a31390cead615e677513baea8e25da91af8d21d45f6c783718d7b0955af88684aaa52c62087d600cbeff1756e3522c
+  checksum: 9ae33b73e378937d499dab5e25985d3d99b5a0d89d2ebc490e00b0b3c7ffd85a8899f93b1660414d7c6d039aaa46999d3a380c78e0333037f910c3bfa42817cd
   languageName: node
   linkType: hard
 
@@ -4095,18 +4095,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"browserslist@npm:^4.28.4":
-  version: 4.28.5
-  resolution: "browserslist@npm:4.28.5"
+"browserslist@npm:^4.28.6":
+  version: 4.28.6
+  resolution: "browserslist@npm:4.28.6"
   dependencies:
     baseline-browser-mapping: ^2.10.42
-    caniuse-lite: ^1.0.30001800
-    electron-to-chromium: ^1.5.387
-    node-releases: ^2.0.50
+    caniuse-lite: ^1.0.30001803
+    electron-to-chromium: ^1.5.389
+    node-releases: ^2.0.51
     update-browserslist-db: ^1.2.3
   bin:
     browserslist: cli.js
-  checksum: 682e763eba0bc0aeaae45b4427f3cc00109e6fb8ecff6cbe6e5f13fe377e2b25b673e872b45170398e634b7cdb6a15e37b27fecce383169c06b16eb50f191270
+  checksum: 0a42bac1bdc8ed471bc34dd1fb9d40f2c76049ce6d8a867f98bd10189d150662e1611b5b95886a171a0135e9e16f2aebf3beb62ebe5c3f90f66c3c49ccef4201
   languageName: node
   linkType: hard
 
@@ -4281,10 +4281,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001799, caniuse-lite@npm:^1.0.30001800":
-  version: 1.0.30001803
-  resolution: "caniuse-lite@npm:1.0.30001803"
-  checksum: 157764969d198bdd4dff3221d6204158fa2917c0f0ca2df5ec71f856e7f94937d1209677656155365bd5b2da160f663adeabf5b50b08dc4b3bee838248dfaf6c
+"caniuse-lite@npm:^1.0.30001803, caniuse-lite@npm:^1.0.30001806":
+  version: 1.0.30001806
+  resolution: "caniuse-lite@npm:1.0.30001806"
+  checksum: 4b4a970fbd7cb7b8ee6b5068336f7afa7d9cc65ff444080630ab363dcb44205994f68897c7685dc3de4f04dd1f65ec395e50790a594d0470db4894bedf5cb379
   languageName: node
   linkType: hard
 
@@ -5370,10 +5370,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-to-chromium@npm:^1.5.387":
-  version: 1.5.388
-  resolution: "electron-to-chromium@npm:1.5.388"
-  checksum: 2938127245134e58fd3e762395099c4c82805b7f51f8e91d3427742155e0af449b8c07c575079ee2af35a79c80e29af8433d25d589e5bb39198d39dc086da009
+"electron-to-chromium@npm:^1.5.389":
+  version: 1.5.393
+  resolution: "electron-to-chromium@npm:1.5.393"
+  checksum: a8a72286c5a575911dbb49f7ecaab176fffd1346a6bf0b60ce7cfd931fcad546a2b3c1db7aae24f8485f86761c6a09f0a2d34ea06dde2bc5bead1719363be281
   languageName: node
   linkType: hard
 
@@ -9826,10 +9826,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-releases@npm:^2.0.50":
-  version: 2.0.50
-  resolution: "node-releases@npm:2.0.50"
-  checksum: fec78f8154182875bb35f3bb93eb178e2f51523b64f674ce5a0b72b73d3c058021c0224e97a707b45c82985f7ba24db68fff6b2bb9b08e7661d3a3e131cf85ea
+"node-releases@npm:^2.0.51":
+  version: 2.0.51
+  resolution: "node-releases@npm:2.0.51"
+  checksum: 0d607ebc5c1aa94ef110e6ab926ec51fca55b8534a889a42ffeda1575af00b3bf2e2473898fa45213a3dfedde5f2cedfc4dee2060967e97d6b9518531e388710
   languageName: node
   linkType: hard
 
