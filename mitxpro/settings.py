@@ -26,7 +26,7 @@ from redbeat import RedBeatScheduler
 from mitxpro.celery_utils import OffsettingSchedule
 from mitxpro.sentry import init_sentry
 
-VERSION = "0.196.0"
+VERSION = "0.197.0"
 
 env.reset()
 
@@ -1255,6 +1255,23 @@ HUBSPOT_PIPELINE_ID = get_string(
     name="HUBSPOT_PIPELINE_ID",
     default="default",
     description="Hubspot ID for the ecommerce pipeline",
+)
+HUBSPOT_DEAL_STAGE_CHECKOUT_ABANDONED_ID = get_string(
+    name="HUBSPOT_DEAL_STAGE_CHECKOUT_ABANDONED_ID",
+    default="checkout_abandoned",
+    description=(
+        "Internal HubSpot deal-pipeline stage id for unfulfilled "
+        "(created/failed) orders. HubSpot auto-generates a numeric id for "
+        "UI-created stages, so this is configurable per environment."
+    ),
+)
+HUBSPOT_DEAL_STAGE_PROCESSED_ID = get_string(
+    name="HUBSPOT_DEAL_STAGE_PROCESSED_ID",
+    default="processed",
+    description=(
+        "Internal HubSpot deal-pipeline stage id for fulfilled/refunded "
+        "(processed) orders."
+    ),
 )
 HUBSPOT_MAX_CONCURRENT_TASKS = get_int(
     name="HUBSPOT_MAX_CONCURRENT_TASKS",

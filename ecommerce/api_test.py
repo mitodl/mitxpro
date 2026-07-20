@@ -38,7 +38,7 @@ from ecommerce.api import (
     clear_and_delete_baskets,
     complete_order,
     create_coupons,
-    create_unfulfilled_order,
+    create_or_update_unfulfilled_order,
     enroll_user_in_order_items,
     fetch_and_serialize_unused_coupons,
     generate_cybersource_sa_payload,
@@ -697,28 +697,20 @@ def test_get_product_version_price_with_discount(  # noqa: PLR0913
     assert price == (Decimal(discounted_price) if has_coupon else Decimal(price))
 
 
-@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_get_by_reference_number(
-    settings, validated_basket, basket_and_coupons, mock_hubspot_syncs, hubspot_api_key
-):
+def test_get_by_reference_number(validated_basket, basket_and_coupons):
     """
     get_by_reference_number returns an Order with status created
     """
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
-    order = create_unfulfilled_order(validated_basket)
+    order = create_or_update_unfulfilled_order(validated_basket)
     same_order = Order.objects.get_by_reference_number(order.reference_number)
     assert same_order.id == order.id
-    if hubspot_api_key:
-        mock_hubspot_syncs.order.assert_called_with(order.id)
-    else:
-        mock_hubspot_syncs.order.assert_not_called()
 
 
 def test_get_by_reference_number_missing(validated_basket):
     """
     get_by_reference_number should return an empty queryset if the order id is missing
     """
-    order = create_unfulfilled_order(validated_basket)
+    order = create_or_update_unfulfilled_order(validated_basket)
 
     # change order number to something not likely to already exist in database
     order.id = 98_765_432
@@ -727,25 +719,20 @@ def test_get_by_reference_number_missing(validated_basket):
         Order.objects.get_by_reference_number(order.reference_number)
 
 
-@pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
 @pytest.mark.parametrize("has_coupon", [True, False])
-def test_create_unfulfilled_order(  # noqa: PLR0913
-    settings,
+def test_create_or_update_unfulfilled_order(
     validated_basket,
     has_coupon,
     basket_and_coupons,
-    hubspot_api_key,
-    mock_hubspot_syncs,
 ):
     """
-    create_unfulfilled_order should create an Order from a purchasable course
+    create_or_update_unfulfilled_order should create an Order from a purchasable course
     """
-    settings.MITOL_HUBSPOT_API_PRIVATE_TOKEN = hubspot_api_key
     new_validated_basket = validated_basket
     if not has_coupon:
         new_validated_basket = update_namespace(validated_basket, coupon_version=None)
 
-    order = create_unfulfilled_order(new_validated_basket)
+    order = create_or_update_unfulfilled_order(new_validated_basket)
     assert Order.objects.count() == 1
     assert order.status == Order.CREATED
     assert order.purchaser == new_validated_basket.basket.user
@@ -774,16 +761,13 @@ def test_create_unfulfilled_order(  # noqa: PLR0913
     else:
         assert CouponRedemption.objects.count() == 0
 
-    if hubspot_api_key:
-        mock_hubspot_syncs.order.assert_called_with(order.id)
-    else:
-        mock_hubspot_syncs.order.assert_not_called()
-
 
 @pytest.mark.parametrize("has_program_run", [True, False])
-def test_create_unfulfilled_order_program_run(validated_basket, has_program_run):
+def test_create_or_update_unfulfilled_order_program_run(
+    validated_basket, has_program_run
+):
     """
-    create_unfulfilled_order should associate a ProgramRunLine with a Line in an order if
+    create_or_update_unfulfilled_order should associate a ProgramRunLine with a Line in an order if
     the basket item has a program run attached
     """
     basket_item = BasketItemFactory.create(
@@ -794,7 +778,7 @@ def test_create_unfulfilled_order_program_run(validated_basket, has_program_run)
         validated_basket, basket_item=basket_item, product_version=product_version
     )
 
-    order = create_unfulfilled_order(new_validated_basket)
+    order = create_or_update_unfulfilled_order(new_validated_basket)
     assert order.lines.count() == 1
     line = order.lines.first()
     if has_program_run:
@@ -804,15 +788,66 @@ def test_create_unfulfilled_order_program_run(validated_basket, has_program_run)
             line.programrunline  # noqa: B018
 
 
-def test_create_unfulfilled_order_affiliate(validated_basket):
+def test_create_or_update_unfulfilled_order_affiliate(validated_basket):
     """
-    create_unfulfilled_order should add a database record tracking the order creation if an affiliate id is passed in
+    create_or_update_unfulfilled_order should add a database record tracking the order creation if an affiliate id is passed in
     """
     affiliate = AffiliateFactory.create()
-    order = create_unfulfilled_order(validated_basket, affiliate_id=affiliate.id)
+    order = create_or_update_unfulfilled_order(
+        validated_basket, affiliate_id=affiliate.id
+    )
     affiliate_referral_action = order.affiliate_order_actions.first()
     assert affiliate_referral_action.affiliate == affiliate
     assert affiliate_referral_action.created_order == order
+
+
+def test_create_or_update_unfulfilled_order_idempotent(validated_basket):
+    """
+    create_or_update_unfulfilled_order should reuse the existing CREATED order for the user (rather than
+    create a duplicate) and rebuild it to mirror the current basket.
+    """
+    user = validated_basket.basket.user
+    order = create_or_update_unfulfilled_order(validated_basket)
+    same_order = create_or_update_unfulfilled_order(validated_basket)
+
+    assert same_order.id == order.id
+    assert Order.objects.filter(purchaser=user, status=Order.CREATED).count() == 1
+    # lines are rebuilt to mirror the basket (one item -> one line)
+    assert same_order.lines.count() == 1
+
+
+def test_create_or_update_unfulfilled_order_per_product(validated_basket):
+    """
+    A different product yields a separate CREATED order (one abandoned-cart deal per
+    product), rather than rewriting the existing one.
+    """
+    user = validated_basket.basket.user
+    order_a = create_or_update_unfulfilled_order(validated_basket)
+
+    other_product_version = ProductVersionFactory.create()
+    order_b = create_or_update_unfulfilled_order(
+        validated_basket._replace(
+            product_version=other_product_version,
+            run_selection_ids=None,
+            coupon_version=None,
+        )
+    )
+
+    assert order_a.id != order_b.id
+    assert Order.objects.filter(purchaser=user, status=Order.CREATED).count() == 2
+
+
+def test_create_or_update_unfulfilled_order_mirrors_coupon_removal(validated_basket):
+    """
+    Re-syncing the order after the basket's coupon is removed should clear the order's
+    CouponRedemption so the order keeps mirroring the basket.
+    """
+    order = create_or_update_unfulfilled_order(validated_basket)
+    assert order.couponredemption_set.exists()
+
+    # Same basket, coupon removed -> redemption is cleared on the reused order
+    create_or_update_unfulfilled_order(validated_basket._replace(coupon_version=None))
+    assert not order.couponredemption_set.exists()
 
 
 def test_get_product_courses():

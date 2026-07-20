@@ -752,3 +752,61 @@ def test_promo_coupon_update_serializer_validation(
     assert is_valid == expected_valid
     if not expected_valid:
         assert expected_error_field in serializer.errors
+
+
+def test_basket_sync_unfulfilled_order_when_valid(mocker, validated_basket):
+    """
+    BasketSerializer keeps the user's unfulfilled order in sync with the basket so the
+    HubSpot deal reflects the current cart (Checkout Abandoned stage).
+    """
+    basket = validated_basket.basket
+    validate_mock = mocker.patch(
+        "ecommerce.serializers.validate_basket_for_checkout",
+        return_value=validated_basket,
+    )
+    create_mock = mocker.patch(
+        "ecommerce.serializers.create_or_update_unfulfilled_order", autospec=True
+    )
+    sync_mock = mocker.patch("ecommerce.serializers.sync_hubspot_deal", autospec=True)
+
+    BasketSerializer._sync_unfulfilled_order(basket)
+
+    validate_mock.assert_called_once_with(basket.user)
+    create_mock.assert_called_once_with(validated_basket)
+    sync_mock.assert_called_once_with(create_mock.return_value)
+
+
+def test_basket_sync_unfulfilled_order_skips_when_invalid(mocker, basket_and_coupons):
+    """
+    If the basket is not yet valid for checkout (e.g. no run selected), no order is
+    created/updated and any existing order is left untouched.
+    """
+    mocker.patch(
+        "ecommerce.serializers.validate_basket_for_checkout",
+        side_effect=ValidationError("not ready"),
+    )
+    create_mock = mocker.patch(
+        "ecommerce.serializers.create_or_update_unfulfilled_order", autospec=True
+    )
+
+    BasketSerializer._sync_unfulfilled_order(basket_and_coupons.basket)
+
+    create_mock.assert_not_called()
+
+
+def test_basket_sync_unfulfilled_order_swallows_errors(mocker, validated_basket):
+    """
+    Syncing the unfulfilled order is best-effort: a failure must not break the basket
+    update (the order is re-created at checkout).
+    """
+    mocker.patch(
+        "ecommerce.serializers.validate_basket_for_checkout",
+        return_value=validated_basket,
+    )
+    mocker.patch(
+        "ecommerce.serializers.create_or_update_unfulfilled_order",
+        side_effect=Exception("boom"),
+    )
+
+    # must not raise
+    BasketSerializer._sync_unfulfilled_order(validated_basket.basket)
