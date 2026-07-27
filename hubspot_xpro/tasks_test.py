@@ -115,6 +115,37 @@ def test_batch_upsert_hubspot_deals_chunked(mocker):
     assert result == [result.id for result in mock_results]
 
 
+@pytest.mark.parametrize(
+    "order_factory, sync_func, task_func",  # noqa: PT006
+    [
+        [OrderFactory, "sync_deal_with_hubspot", "batch_upsert_hubspot_deals_chunked"],  # noqa: PT007
+        [  # noqa: PT007
+            B2BOrderFactory,
+            "sync_b2b_deal_with_hubspot",
+            "batch_upsert_hubspot_b2b_deals_chunked",
+        ],
+    ],
+)
+def test_batch_upsert_deals_chunked_skips_bad_order(
+    mocker, order_factory, sync_func, task_func
+):
+    """A bad-data order is skipped while the rest of the chunk still syncs"""
+    orders = sorted(order_factory.create_batch(3), key=lambda order: order.id)
+    good_result = SimplePublicObjectFactory()
+
+    def fake_sync(order_id):
+        if order_id == orders[1].id:
+            raise ValueError("bad data")
+        return good_result
+
+    mock_sync_deal = mocker.patch(
+        f"hubspot_xpro.tasks.api.{sync_func}", side_effect=fake_sync
+    )
+    result = getattr(tasks, task_func)([order.id for order in orders])
+    assert mock_sync_deal.call_count == 3
+    assert result == [good_result.id, good_result.id]
+
+
 @pytest.mark.parametrize("create", [True, False])
 @pytest.mark.parametrize("max_batches", [20, 1])
 def test_batch_upsert_b2b_hubspot_deals(
@@ -269,6 +300,36 @@ def test_batch_update_hubspot_objects_chunked_error(mocker, status, expected_err
         mock_sync_contacts.assert_any_call(item[0])
 
 
+def test_batch_update_hubspot_objects_chunked_skips_unserializable(mocker):
+    """An object that can't be serialized is skipped while the rest still update"""
+    users = sorted(UserFactory.create_batch(2), key=lambda contact: contact.id)
+    chunk = [(contact.id, str(contact.id)) for contact in users]
+    good_message = SimplePublicObjectFactory()
+
+    def fake_message(obj_id):
+        if obj_id == users[0].id:
+            raise ValueError("bad data")
+        return good_message
+
+    mocker.patch.dict(
+        "hubspot_xpro.tasks.api.MODEL_FUNCTION_MAPPING", {"user": fake_message}
+    )
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.objects.batch_api.update.return_value = (
+        mocker.Mock(results=[SimplePublicObjectFactory(id="999")])
+    )
+    result = tasks.batch_update_hubspot_objects_chunked(
+        HubspotObjectType.CONTACTS.value, "user", chunk
+    )
+    sent_inputs = (
+        mock_hubspot_api.return_value.crm.objects.batch_api.update.call_args.args[
+            1
+        ].inputs
+    )
+    assert len(sent_inputs) == 1
+    assert result == ["999"]
+
+
 @pytest.mark.parametrize("id_count", [5, 15])
 def test_batch_create_hubspot_objects_chunked(mocker, id_count):
     """batch_create_hubspot_objects_chunked should make expected api calls and args"""
@@ -370,6 +431,84 @@ def test_batch_create_hubspot_objects_chunked_duplicate_hubspot_id(mocker):
     assert mappings.first().object_id == existing_user.id
 
 
+def test_batch_create_hubspot_objects_chunked_skips_unserializable(mocker):
+    """An object that can't be serialized is skipped while the rest still sync"""
+    users = sorted(UserFactory.create_batch(3), key=lambda contact: contact.id)
+    object_ids = [contact.id for contact in users]
+    good_message = SimplePublicObjectFactory()
+
+    def fake_message(obj_id):
+        if obj_id == object_ids[1]:
+            raise ValueError("bad data")
+        return good_message
+
+    mocker.patch.dict(
+        "hubspot_xpro.tasks.api.MODEL_FUNCTION_MAPPING", {"user": fake_message}
+    )
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.objects.batch_api.create.return_value = (
+        mocker.Mock(results=[])
+    )
+    tasks.batch_create_hubspot_objects_chunked(
+        HubspotObjectType.CONTACTS.value, "user", object_ids
+    )
+    mock_hubspot_api.return_value.crm.objects.batch_api.create.assert_called_once()
+    sent_inputs = (
+        mock_hubspot_api.return_value.crm.objects.batch_api.create.call_args.args[
+            1
+        ].inputs
+    )
+    assert len(sent_inputs) == 2
+
+
+def test_batch_create_hubspot_objects_chunked_skips_bad_result(mocker):
+    """A result missing unique_app_id is skipped without aborting the batch"""
+    product = ProductFactory.create()
+    content_type = ContentType.objects.get_for_model(Product)
+    mocker.patch.dict(
+        "hubspot_xpro.tasks.api.MODEL_FUNCTION_MAPPING",
+        {"product": lambda _obj_id: SimplePublicObjectFactory()},
+    )
+    bad_result = SimplePublicObjectFactory(id="222", properties={})
+    good_result = SimplePublicObjectFactory(
+        id="111", properties={"unique_app_id": f"xpro-{product.id}"}
+    )
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.objects.batch_api.create.return_value = (
+        mocker.Mock(results=[bad_result, good_result])
+    )
+    result = tasks.batch_create_hubspot_objects_chunked(
+        HubspotObjectType.PRODUCTS.value, "product", [product.id]
+    )
+    assert result == ["111"]
+    assert HubspotObject.objects.filter(
+        content_type=content_type, hubspot_id="111", object_id=product.id
+    ).exists()
+    assert not HubspotObject.objects.filter(hubspot_id="222").exists()
+
+
+def test_batch_create_hubspot_objects_chunked_skips_unresolved_user(mocker):
+    """A contact result whose email matches no active user is skipped"""
+    user = UserFactory.create()
+    mocker.patch.dict(
+        "hubspot_xpro.tasks.api.MODEL_FUNCTION_MAPPING",
+        {"user": lambda _obj_id: SimplePublicObjectFactory()},
+    )
+    unknown_result = SimplePublicObjectFactory(
+        id="333", properties={"email": "nobody@example.com"}
+    )
+    good_result = SimplePublicObjectFactory(id="444", properties={"email": user.email})
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.objects.batch_api.create.return_value = (
+        mocker.Mock(results=[unknown_result, good_result])
+    )
+    result = tasks.batch_create_hubspot_objects_chunked(
+        HubspotObjectType.CONTACTS.value, "user", [user.id]
+    )
+    assert result == ["444"]
+    assert not HubspotObject.objects.filter(hubspot_id="333").exists()
+
+
 def test_batch_upsert_associations(settings, mocker, mocked_celery):
     """
     batch_upsert_associations should call batch_upsert_associations_chunked w/correct lists of ids
@@ -451,6 +590,53 @@ def test_batch_upsert_associations_chunked(mocker):
     )
 
 
+def test_batch_upsert_associations_chunked_skips_bad_order(mocker):
+    """A bad-data order is skipped while gathering associations; others still process"""
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    orders = sorted(OrderFactory.create_batch(3), key=lambda order: order.id)
+    for order in orders:
+        LineFactory.create(
+            order=order,
+            product_version=ProductVersionFactory.create(price=Decimal("200.00")),
+        )
+    bad_order = orders[1]
+
+    def fake_id(obj):
+        if isinstance(obj, Order) and obj.id == bad_order.id:
+            raise ValueError("bad data")
+        return f"hs-{type(obj).__name__}-{obj.id}"
+
+    mocker.patch("hubspot_xpro.tasks.get_hubspot_id_for_object", side_effect=fake_id)
+    result = tasks.batch_upsert_associations_chunked([order.id for order in orders])
+    assert result == [order.id for order in orders]
+    assert mock_hubspot_api.return_value.crm.associations.batch_api.create.called
+
+
+@pytest.mark.parametrize(
+    "status, expected_error",  # noqa: PT006
+    [[400, None], [429, TooManyRequestsException]],  # noqa: PT007
+)
+def test_batch_upsert_associations_chunked_api_error(mocker, status, expected_error):
+    """A non-429 association API error is swallowed; a 429 still propagates"""
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.associations.batch_api.create.side_effect = (
+        ApiException(status=status)
+    )
+    orders = OrderFactory.create_batch(2)
+    for order in orders:
+        LineFactory.create(
+            order=order,
+            product_version=ProductVersionFactory.create(price=Decimal("200.00")),
+        )
+    mocker.patch("hubspot_xpro.tasks.get_hubspot_id_for_object", return_value="hs-1")
+    order_ids = [order.id for order in orders]
+    if expected_error:
+        with pytest.raises(expected_error):
+            tasks.batch_upsert_associations_chunked(order_ids)
+    else:
+        assert tasks.batch_upsert_associations_chunked(order_ids) == order_ids
+
+
 @pytest.mark.parametrize(
     "func_name,args,kwargs,result",  # noqa: PT006
     [
@@ -468,7 +654,7 @@ def test_task_obj_lock(func_name, args, kwargs, result):
 
 def test_sync_failed_contacts(mocker):
     """sync_failed_contacts should try to sync each contact and return a list of failed contact ids"""
-    user_ids = sorted(user.id for user in UserFactory.create_batch(4))
+    user_ids = sorted(user.id for user in UserFactory.create_batch(5))
     mock_sync = mocker.patch(
         "hubspot_xpro.tasks.api.sync_contact_with_hubspot",
         side_effect=[
@@ -476,11 +662,12 @@ def test_sync_failed_contacts(mocker):
             ApiException(status=500, reason="err"),
             mocker.Mock(),
             ApiException(status=429, reason="tmr"),
+            ValueError("unexpected"),
         ],
     )
     result = tasks.sync_failed_contacts(user_ids)
-    assert mock_sync.call_count == 4
-    assert result == [user_ids[1], user_ids[3]]
+    assert mock_sync.call_count == 5
+    assert result == [user_ids[1], user_ids[3], user_ids[4]]
 
 
 @pytest.mark.parametrize("for_contacts", [True, False])

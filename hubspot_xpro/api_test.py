@@ -385,9 +385,7 @@ def test_get_hubspot_id_for_object_skips_conflicting_mapping(mocker):
     ).exists()
     # The original owner's mapping is intact
     assert (
-        HubspotObject.objects.get(
-            content_type=content_type, hubspot_id="999"
-        ).object_id
+        HubspotObject.objects.get(content_type=content_type, hubspot_id="999").object_id
         == existing_product.id
     )
 
