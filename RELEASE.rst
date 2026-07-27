@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.197.0
+Version 0.197.0 (Released July 27, 2026)
 ---------------
 
 - feat(ecommerce): two-stage HubSpot deal flow (Checkout Abandoned → Processed) (#3980)
