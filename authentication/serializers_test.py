@@ -15,8 +15,8 @@ pytestmark = [pytest.mark.django_db]
 
 
 @pytest.mark.parametrize(
-    "side_effect,result",  # noqa: PT006
-    (  # noqa: PT007
+    "side_effect,result",
+    (
         (
             AuthException(None, "message"),
             SocialAuthState(SocialAuthState.STATE_ERROR, errors=["message"]),
@@ -48,8 +48,8 @@ def test_social_auth_serializer_error(mocker, side_effect, result):
 
 
 @pytest.mark.parametrize(
-    "data,raises,message",  # noqa: PT006
-    (  # noqa: PT007
+    "data,raises,message",
+    (
         (
             {"email": None, "partial": None},
             ValidationError,

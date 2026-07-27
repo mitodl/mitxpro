@@ -21,7 +21,7 @@ class Command(BaseCommand):
             "-r", "--row", type=int, help="Row number in the refund request Sheet"
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         refund_request_handler = RefundRequestHandler()
         self.stdout.write("Handling refunds and updating spreadsheet...")
         results = refund_request_handler.process_sheet(

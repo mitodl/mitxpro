@@ -65,7 +65,7 @@ init_sentry(
 )
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # noqa: PTH100, PTH120
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SITE_BASE_URL = get_string(
     name="MITXPRO_BASE_URL",
@@ -113,7 +113,7 @@ WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
         "BUNDLE_DIR_NAME": "bundles/",
-        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),  # noqa: PTH118
+        "STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
         "POLL_INTERVAL": 0.1,
         "TIMEOUT": None,
         "IGNORE": [r".+\.hot-update\.+", r".+\.js\.map"],
@@ -248,7 +248,7 @@ ROOT_URLCONF = "mitxpro.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],  # noqa: PTH118
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -273,7 +273,7 @@ WSGI_APPLICATION = "mitxpro.wsgi.application"
 DEFAULT_DATABASE_CONFIG = dj_database_url.parse(
     get_string(
         name="DATABASE_URL",
-        default="sqlite:///{}".format(os.path.join(BASE_DIR, "db.sqlite3")),  # noqa: PTH118
+        default="sqlite:///{}".format(os.path.join(BASE_DIR, "db.sqlite3")),
         description="The connection url to the Postgres database",
         required=True,
         write_app_json=False,
@@ -427,7 +427,7 @@ STATICFILES_FINDERS = [
 ]
 
 STATIC_ROOT = "staticfiles"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)  # noqa: PTH118
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 
 # Important to define this so DEBUG works properly
@@ -547,7 +547,7 @@ NPLUSONE_LOG_LEVEL = logging.ERROR
 
 # LOGGING is provided by mitol-django-observability (structlog-based, JSON in prod)
 # The syslog handler has been removed — Grafana Alloy collects from pod stdout.
-from mitol.observability.settings.logging import LOGGING  # noqa: E402, F401
+from mitol.observability.settings.logging import LOGGING  # noqa: F401
 
 GTM_TRACKING_ID = get_string(
     name="GTM_TRACKING_ID", default="", description="Google Tag Manager container ID"
@@ -612,7 +612,7 @@ if MITXPRO_USE_S3 and (
     not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_STORAGE_BUCKET_NAME
 ):
     raise ImproperlyConfigured(
-        "You have enabled S3 support, but are missing one of "  # noqa: EM101
+        "You have enabled S3 support, but are missing one of "
         "AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, or "
         "AWS_STORAGE_BUCKET_NAME"
     )
@@ -947,9 +947,9 @@ AUTHENTICATION_BACKENDS = (
 
 
 # required for migrations
-OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"  # noqa: S105
+OAUTH2_PROVIDER_ACCESS_TOKEN_MODEL = "oauth2_provider.AccessToken"
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
-OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"  # noqa: S105
+OAUTH2_PROVIDER_REFRESH_TOKEN_MODEL = "oauth2_provider.RefreshToken"
 
 OAUTH2_PROVIDER = {
     # Disable PKCE requirement to maintain backward compatibility with existing OAuth clients
@@ -991,7 +991,7 @@ REST_FRAMEWORK = {
 
 # Relative URL to be used by Djoser for the link in the password reset email
 # (see: http://djoser.readthedocs.io/en/stable/settings.html#password-reset-confirm-url)
-PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"  # noqa: S105 # pragma: allowlist secret
+PASSWORD_RESET_CONFIRM_URL = "password_reset/confirm/{uid}/{token}/"  # pragma: allowlist secret
 
 # mitol-django-common
 MITOL_COMMON_USER_FACTORY = "users.factories.UserFactory"
@@ -1109,7 +1109,7 @@ EXTERNAL_COURSE_SYNC_API_REQUEST_TIMEOUT = get_int(
 if DEBUG:
     INSTALLED_APPS += ("debug_toolbar",)
     # it needs to be enabled before other middlewares
-    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE  # noqa: RUF005
+    MIDDLEWARE = ("debug_toolbar.middleware.DebugToolbarMiddleware",) + MIDDLEWARE
 
 # Cybersource
 CYBERSOURCE_ACCESS_KEY = get_string(
@@ -1477,7 +1477,7 @@ DIGITAL_CREDENTIALS_VERIFICATION_METHOD = get_string(
     default=None,
     description="Verification method for digital credentials",
 )
-# TODO: This setting is meant to be temporary and it should be removed once we decide to support digital credentials  # noqa: FIX002, TD002, TD003
+# TODO: This setting is meant to be temporary and it should be removed once we decide to support digital credentials
 #  for all courses/programs.
 DIGITAL_CREDENTIALS_SUPPORTED_RUNS = get_delimited_list(
     name="DIGITAL_CREDENTIALS_SUPPORTED_RUNS",

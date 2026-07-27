@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     help = "Creates or updates seed data based on a raw seed data file"
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Handle command execution"""
         seed_data_loader = SeedDataLoader()
         raw_seed_data = get_raw_seed_data_from_file()

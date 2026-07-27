@@ -32,7 +32,7 @@ class TestUnblockUsers(TestCase):
         user = UserFactory.create(email=test_email, is_active=True)
         UserSocialAuthFactory.create(user=user, provider="edX")
         email = user.email
-        hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()  # noqa: S324
+        hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()
         assert user.is_active is True
         assert "retired_email" not in user.email
         assert UserSocialAuth.objects.filter(user=user).count() == 1
@@ -81,11 +81,11 @@ class TestUnblockUsers(TestCase):
     def test_user_unblocking_with_invalid_email(self):
         """Test unblock_users command system exit if not provided a valid email address"""
         test_email = "test.com"
-        with self.assertRaises(SystemExit):  # noqa: PT027
+        with self.assertRaises(SystemExit):
             self.UNBLOCK_USER_COMMAND.handle("unblock_users", users=[test_email])
 
     @pytest.mark.django_db
     def test_user_unblocking_with_no_users(self):
         """Test unblock_users command system exit if not any users provided"""
-        with self.assertRaises(SystemExit):  # noqa: PT027
+        with self.assertRaises(SystemExit):
             self.UNBLOCK_USER_COMMAND.handle("unblock_users", users=[])

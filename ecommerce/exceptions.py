@@ -3,25 +3,25 @@ Exceptions for ecommerce
 """
 
 
-class EcommerceException(Exception):  # noqa: N818
+class EcommerceException(Exception):
     """
     General exception regarding ecommerce
     """
 
 
-class EcommerceEdxApiException(Exception):  # noqa: N818
+class EcommerceEdxApiException(Exception):
     """
     Exception regarding edx_api_client
     """
 
 
-class EcommerceModelException(Exception):  # noqa: N818
+class EcommerceModelException(Exception):
     """
     Exception regarding ecommerce models
     """
 
 
-class ParseException(Exception):  # noqa: N818
+class ParseException(Exception):
     """
     Exception regarding parsing CyberSource reference numbers
     """

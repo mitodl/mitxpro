@@ -22,9 +22,9 @@ class Command(BaseCommand):
             "-r", "--row", type=int, help="Row number in the request Sheet"
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         if not options["row"]:
-            raise CommandError("Need to specify -r/--row")  # noqa: EM101
+            raise CommandError("Need to specify -r/--row")
 
         row_index = options["row"]
         coupon_request_handler = CouponRequestHandler()
@@ -36,7 +36,7 @@ class Command(BaseCommand):
         ).first()
         if coupon_gen_request is None:
             raise CommandError(
-                f"No coupon generation request found for coupon name '{coupon_req_row.coupon_name}'. "  # noqa: EM102
+                f"No coupon generation request found for coupon name '{coupon_req_row.coupon_name}'. "
                 "This coupon request has probably not been processed yet."
             )
 
@@ -49,7 +49,7 @@ class Command(BaseCommand):
             already_exists = True
         if already_exists:
             raise CommandError(
-                "A spreadsheet already exists with the file name that would be created for this request ({})".format(  # noqa: EM103, UP032
+                "A spreadsheet already exists with the file name that would be created for this request ({})".format(  # noqa: UP032
                     spreadsheet_file_name
                 )
             )

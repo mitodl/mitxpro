@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Handle command execution"""
 
         user = fetch_user(options["user"]) if options["user"] else None
@@ -58,13 +58,13 @@ class Command(BaseCommand):
 
         if program and run:
             raise CommandError(
-                "Either 'program' or 'run' should be provided, not both."  # noqa: EM101
+                "Either 'program' or 'run' should be provided, not both."
             )
         if not program and not run:
-            raise CommandError("Either 'program' or 'run' must be provided.")  # noqa: EM101
+            raise CommandError("Either 'program' or 'run' must be provided.")
 
         if (program or run) and not user:
-            raise CommandError("A valid user must be provided.")  # noqa: EM101
+            raise CommandError("A valid user must be provided.")
 
         updated = False
         if program:

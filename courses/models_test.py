@@ -15,6 +15,7 @@ from cms.factories import (
     FacultyMembersPageFactory,
     ProgramPageFactory,
 )
+from cms.models import CertificatePage, CoursePage, ProgramPage
 from courses.constants import ENROLL_CHANGE_STATUS_REFUNDED
 from courses.factories import (
     CompanyFactory,
@@ -29,7 +30,6 @@ from courses.factories import (
     ProgramFactory,
     ProgramRunFactory,
 )
-from cms.models import CoursePage, CertificatePage, ProgramPage
 from courses.models import CourseRunEnrollment, limit_to_certificate_pages
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
@@ -267,7 +267,7 @@ def test_clean_calls_validate_courserun_dates(mocker):
     assert call_args == expected_args
 
 
-@pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])  # noqa: PT006, PT007
+@pytest.mark.parametrize("end_days,expected", [[-1, True], [1, False], [None, False]])
 def test_course_run_past(end_days, expected):
     """
     Test that CourseRun.is_past returns the expected boolean value
@@ -280,8 +280,8 @@ def test_course_run_past(end_days, expected):
 
 
 @pytest.mark.parametrize(
-    "start_delta, end_delta, expiration_delta",  # noqa: PT006
-    [[-1, 2, 3], [1, 3, 4], [10, 20, 30]],  # noqa: PT007
+    "start_delta, end_delta, expiration_delta",
+    [[-1, 2, 3], [1, 3, 4], [10, 20, 30]],
 )
 def test_course_run_expiration_date(start_delta, end_delta, expiration_delta):
     """
@@ -299,8 +299,8 @@ def test_course_run_expiration_date(start_delta, end_delta, expiration_delta):
 
 
 @pytest.mark.parametrize(
-    "start_delta, end_delta, expiration_delta",  # noqa: PT006
-    [[1, 2, 1], [1, 2, -1]],  # noqa: PT007
+    "start_delta, end_delta, expiration_delta",
+    [[1, 2, 1], [1, 2, -1]],
 )
 def test_course_run_invalid_expiration_date(start_delta, end_delta, expiration_delta):
     """
@@ -315,16 +315,16 @@ def test_course_run_invalid_expiration_date(start_delta, end_delta, expiration_d
 
 
 @pytest.mark.parametrize(
-    "end_days, enroll_start_days, enroll_end_days, expected",  # noqa: PT006
+    "end_days, enroll_start_days, enroll_end_days, expected",
     [
-        [None, None, None, True],  # noqa: PT007
-        [None, None, 1, True],  # noqa: PT007
-        [None, None, -1, False],  # noqa: PT007
-        [1, None, None, True],  # noqa: PT007
-        [-1, None, None, False],  # noqa: PT007
-        [1, None, -1, False],  # noqa: PT007
-        [None, 1, None, False],  # noqa: PT007
-        [None, -1, None, True],  # noqa: PT007
+        [None, None, None, True],
+        [None, None, 1, True],
+        [None, None, -1, False],
+        [1, None, None, True],
+        [-1, None, None, False],
+        [1, None, -1, False],
+        [None, 1, None, False],
+        [None, -1, None, True],
     ],
 )
 def test_course_run_not_beyond_enrollment(
@@ -355,8 +355,8 @@ def test_course_run_not_beyond_enrollment(
 
 
 @pytest.mark.parametrize(
-    "end_days,enroll_days,expected",  # noqa: PT006
-    [[-1, 1, False], [1, -1, False], [1, 1, True]],  # noqa: PT007
+    "end_days,enroll_days,expected",
+    [[-1, 1, False], [1, -1, False], [1, 1, True]],
 )
 def test_course_run_unexpired(end_days, enroll_days, expected):
     """

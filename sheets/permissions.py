@@ -12,7 +12,7 @@ class HasCouponProductAssignmentPermission(BasePermission):
     for coupon product assignments.
     """
 
-    def has_permission(self, request, view):  # noqa: ARG002
+    def has_permission(self, request, view):
         return all(
             request.user.has_perm(perm)
             for perm in [

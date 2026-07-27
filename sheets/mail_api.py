@@ -14,7 +14,7 @@ from sheets.utils import format_datetime_for_mailgun
 
 log = logging.getLogger(__name__)
 
-BulkAssignmentMessage = namedtuple(  # noqa: PYI024
+BulkAssignmentMessage = namedtuple(
     "BulkAssignmentMessage",
     ["bulk_assignment_id", "coupon_code", "email", "event", "timestamp"],
 )

@@ -22,15 +22,15 @@ def test_verify_exports_compliance_disabled(mocker):
 
 
 @pytest.mark.parametrize(
-    "is_active, inquiry_exists, should_verify",  # noqa: PT006
+    "is_active, inquiry_exists, should_verify",
     [
-        [True, True, False],  # noqa: PT007
-        [True, False, True],  # noqa: PT007
-        [False, True, True],  # noqa: PT007
-        [False, False, True],  # noqa: PT007
+        [True, True, False],
+        [True, False, True],
+        [False, True, True],
+        [False, False, True],
     ],
 )
-def test_verify_exports_compliance_user_active(  # noqa: PLR0913
+def test_verify_exports_compliance_user_active(
     mailoutbox, mocker, user, is_active, inquiry_exists, should_verify
 ):
     """Assert that the user is verified only if they already haven't been"""

@@ -10,5 +10,5 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         configure_wagtail()

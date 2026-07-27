@@ -42,7 +42,7 @@ class Command(BaseCommand):
             ),
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Run the command"""
         enrollment_filter = {}
         if not options["force"]:

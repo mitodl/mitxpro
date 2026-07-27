@@ -25,7 +25,7 @@ def test_app_json_modified():
     import json
     import logging
 
-    with open("app.json") as app_json_file:  # noqa: PTH123
+    with open("app.json") as app_json_file:
         app_json = json.load(app_json_file)
 
     generated_app_json = envs.generate_app_json()
@@ -180,7 +180,7 @@ def test_server_side_cursors_enabled(settings_sandbox):
 )
 def test_bump_my_version_format(settings):
     """Verify VERSION is in sync with pyproject.toml and matches a version format."""
-    with open("pyproject.toml", "rb") as f:  # noqa: PTH123
+    with open("pyproject.toml", "rb") as f:
         pyproject = tomllib.load(f)
     version_pattern = pyproject["tool"]["bumpversion"]["parse"]
     package_version = pyproject["project"]["version"]

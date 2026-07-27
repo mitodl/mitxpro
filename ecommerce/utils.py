@@ -59,11 +59,11 @@ def get_order_id_by_reference_number(*, reference_number, prefix):
             prefix_with_dash,
             reference_number,
         )
-        raise ParseException(f"Reference number must start with {prefix_with_dash}")  # noqa: EM102
+        raise ParseException(f"Reference number must start with {prefix_with_dash}")
     try:
         order_id = int(reference_number[len(prefix_with_dash) :])
     except ValueError:
-        raise ParseException("Unable to parse order number")  # noqa: B904, EM101
+        raise ParseException("Unable to parse order number")
 
     return order_id
 
@@ -110,13 +110,13 @@ def validate_amount(discount_type, amount):
     if amount <= 0:
         return "The amount is invalid, please specify a value greater than 0."
 
-    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:  # noqa: RET503
+    if discount_type == DISCOUNT_TYPE_PERCENT_OFF and amount > 1:
         return "The amount should be between (0 - 1) when discount type is percent-off."
 
 
 def positive_or_zero(number):
     """Return 0 if a number is negative otherwise return number"""
-    return 0 if number < 0 else number
+    return max(number, 0)
 
 
 class CouponUtils:
@@ -144,7 +144,7 @@ class CouponUtils:
                     {"coupon_code": "Coupon code already exists in the platform."}
                 )
             else:
-                raise ValidationError("Coupon code already exists in the platform.")  # noqa: EM101
+                raise ValidationError("Coupon code already exists in the platform.")
 
     @staticmethod
     def is_existing_coupon_code(value):

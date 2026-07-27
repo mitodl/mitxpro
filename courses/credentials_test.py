@@ -47,7 +47,7 @@ def test_build_program_credential(user):
 
 
 @pytest.mark.parametrize(
-    "kwargs, error_message",  # noqa: PT006
+    "kwargs, error_message",
     [
         ({"page": None}, "Program has no CMS program page"),
         (
@@ -62,7 +62,7 @@ def test_build_program_credential_error(user, kwargs, error_message):
     program = ProgramFactory.create(**kwargs)
     certificate = ProgramCertificateFactory.create(user=user, program=program)
     CourseRunCertificateFactory.create(user=user, course_run__course__program=program)
-    with pytest.raises(Exception) as exc_info:  # noqa: PT011
+    with pytest.raises(Exception) as exc_info:
         build_program_credential(certificate)
 
     assert exc_info.value.args[0] == error_message
@@ -71,7 +71,7 @@ def test_build_program_credential_error(user, kwargs, error_message):
 def test_build_program_credential_no_start_end_dates_error():
     """Verify build_program_credential errors with no start or end dates"""
     certificate = ProgramCertificateFactory.create()
-    with pytest.raises(Exception) as exc_info:  # noqa: PT011
+    with pytest.raises(Exception) as exc_info:
         build_program_credential(certificate)
 
     assert exc_info.value.args[0] == "Program has no start or end date"
@@ -100,7 +100,7 @@ def test_build_course_run_credential():
 
 
 @pytest.mark.parametrize(
-    "kwargs, error_message",  # noqa: PT006
+    "kwargs, error_message",
     [
         ({"course__page": None}, "Course has no CMS course page"),
         (
@@ -117,7 +117,7 @@ def test_build_course_run_credential_error(kwargs, error_message):
     course_run = CourseRunFactory.create(**kwargs)
     certificate = CourseRunCertificateFactory.create(course_run=course_run)
 
-    with pytest.raises(Exception) as exc_info:  # noqa: PT011
+    with pytest.raises(Exception) as exc_info:
         build_course_run_credential(certificate)
 
     assert exc_info.value.args[0] == error_message
@@ -209,5 +209,5 @@ def test_build_digital_credential_program_run(settings, mocker):
 def test_test_build_digital_credential_invalid_certified_object(mocker):
     """Verify an exception is raised for an invalid courseware object"""
     invalid_courseware = CourseFactory.create()
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # noqa: B017
         build_digital_credential(invalid_courseware, mocker.Mock())

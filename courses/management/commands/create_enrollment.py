@@ -49,7 +49,7 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Handle command execution"""
 
         user = fetch_user(options["user"])
@@ -57,7 +57,7 @@ class Command(BaseCommand):
         run = CourseRun.objects.filter(courseware_id=options["run"]).first()
         if run is None:
             raise CommandError(
-                "Could not find course run with courseware_id={}".format(options["run"])  # noqa: EM103
+                "Could not find course run with courseware_id={}".format(options["run"])
             )
 
         product = Product.objects.filter(
@@ -65,7 +65,7 @@ class Command(BaseCommand):
         ).first()
         if product is None:
             raise CommandError(
-                "No product found for that course with courseware_id={}".format(  # noqa: EM103
+                "No product found for that course with courseware_id={}".format(
                     options["run"]
                 )
             )
@@ -73,7 +73,7 @@ class Command(BaseCommand):
         coupon = Coupon.objects.filter(coupon_code=options["code"]).first()
         if not coupon:
             raise CommandError(
-                "That enrollment code {} does not exist".format(options["code"])  # noqa: EM103
+                "That enrollment code {} does not exist".format(options["code"])
             )
 
         # Check if the coupon is valid for the product
@@ -110,9 +110,9 @@ class Command(BaseCommand):
                     order=order,
                 )
                 if not successful_enrollments:
-                    raise EdxEnrollmentCreateError  # noqa: TRY301
+                    raise EdxEnrollmentCreateError
             except EdxEnrollmentCreateError:
-                raise CommandError("Failed to create the enrollment record")  # noqa: B904, EM101
+                raise CommandError("Failed to create the enrollment record")
 
         ProductCouponAssignment.objects.filter(
             email__iexact=user.email, redeemed=False, product_coupon__coupon=coupon

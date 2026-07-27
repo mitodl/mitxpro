@@ -25,7 +25,7 @@ def remove_extra_spaces(text):
     Returns:
         str: The text with extra spaces removed
     """
-    if text:  # noqa: RET503
+    if text:
         return re.sub(r"\s+", " ", text.strip())
 
 
@@ -108,7 +108,7 @@ def get_valid_voucher_coupons_version(voucher, product):
     )
 
 
-def read_pdf_domestic(pdf):  # noqa: C901
+def read_pdf_domestic(pdf):
     """
     Process domestic vouchers and return parsed values
     """
@@ -184,7 +184,7 @@ def update_column_values(column_values, elements):
     """
     Update column values with the sliced elements
     """
-    if len(elements) == 5:  # noqa: PLR2004
+    if len(elements) == 5:
         for column, value in zip(column_values, elements):
             if value:
                 if column_values[column]:
@@ -253,7 +253,7 @@ def read_pdf(pdf_file):
     for key in domestic_settings_keys + international_settings_keys:
         if not getattr(settings, key):
             log.warning("Required setting %s missing for read_pdf", key)
-            return  # noqa: RET502
+            return
     try:
         pdf = pdftotext.PDF(pdf_file, physical=True)
         if any("Entity Name:" in page for page in pdf):
@@ -275,7 +275,7 @@ def read_pdf(pdf_file):
                     "%d-%b-%Y",
                 ).date(),
                 "course_id_input": remove_extra_spaces(course_id_input)
-                if len(course_id_input) >= 3  # noqa: PLR2004
+                if len(course_id_input) >= 3
                 else "",
                 "course_title_input": remove_extra_spaces(
                     values.get(settings.VOUCHER_INTERNATIONAL_COURSE_NAME_KEY)
@@ -301,7 +301,7 @@ def read_pdf(pdf_file):
                     "%m/%d/%Y",
                 ).date(),
                 "course_id_input": remove_extra_spaces(course_id_input)
-                if len(course_id_input) >= 3  # noqa: PLR2004
+                if len(course_id_input) >= 3
                 else "",
                 "course_title_input": remove_extra_spaces(
                     " ".join(
@@ -315,7 +315,7 @@ def read_pdf(pdf_file):
         return None
 
 
-def voucher_upload_path(instance, filename):  # noqa: ARG001
+def voucher_upload_path(instance, filename):
     """
     Make a unique path/name for an uploaded voucher
 

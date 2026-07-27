@@ -53,16 +53,16 @@ OPENEDX_REGISTER_USER_PATH = "/user_api/v1/account/registration/"
 OPENEDX_REQUEST_DEFAULTS = dict(country="US", honor_code=True)  # noqa: C408
 
 OPENEDX_OAUTH2_AUTHORIZE_PATH = "/oauth2/authorize"
-OPENEDX_OAUTH2_ACCESS_TOKEN_PATH = "/oauth2/access_token"  # noqa: S105
+OPENEDX_OAUTH2_ACCESS_TOKEN_PATH = "/oauth2/access_token"
 OPENEDX_OAUTH2_SCOPES = ["read", "write"]
-OPENEDX_OAUTH2_ACCESS_TOKEN_PARAM = "code"  # noqa: S105
+OPENEDX_OAUTH2_ACCESS_TOKEN_PARAM = "code"
 OPENEDX_OAUTH2_ACCESS_TOKEN_EXPIRY_MARGIN_SECONDS = 10
 
 OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS = 60
 OPENEDX_AUTH_MAX_TTL_IN_SECONDS = 60 * 60
 
-ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"  # noqa: S105
-AUTH_TOKEN_HEADER_NAME = "Authorization"  # noqa: S105
+ACCESS_TOKEN_HEADER_NAME = "X-Access-Token"
+AUTH_TOKEN_HEADER_NAME = "Authorization"
 
 
 @dataclass(frozen=True)
@@ -124,7 +124,7 @@ def get_existing_openedx_user(user):
         in the settings module.
     """
     if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
-        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")  # noqa: EM101
+        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
     req_session = requests.Session()
     req_session.headers.update(
         {AUTH_TOKEN_HEADER_NAME: f"Bearer {settings.OPENEDX_SERVICE_WORKER_API_TOKEN}"}
@@ -203,14 +203,14 @@ def create_edx_user(user):
             openedx_user = get_existing_openedx_user(user)
             if not openedx_user:
                 raise CoursewareUserCreateError(
-                    f"Error creating Open edX user. {get_error_response_summary(resp)}"  # noqa: EM102
+                    f"Error creating Open edX user. {get_error_response_summary(resp)}"
                 )
             if not openedx_user.is_username_match():  # noqa: SIM102
                 if not update_xpro_user_username(
                     user, openedx_user.openedx_data["username"]
                 ):
                     raise CoursewareUserCreateError(
-                        f"Error creating Open edX user. {get_error_response_summary(resp)}"  # noqa: EM102
+                        f"Error creating Open edX user. {get_error_response_summary(resp)}"
                     )
 
 
@@ -276,11 +276,11 @@ def create_edx_auth_token(user):
         # Step 5
         if not resp.url.startswith(redirect_uri):
             raise OpenEdXOAuth2Error(
-                f"Redirected to '{resp.url}', expected: '{redirect_uri}'"  # noqa: EM102
+                f"Redirected to '{resp.url}', expected: '{redirect_uri}'"
             )
         qs = parse_qs(urlparse(resp.url).query)
         if not qs.get(OPENEDX_OAUTH2_ACCESS_TOKEN_PARAM):
-            raise OpenEdXOAuth2Error("Did not receive access_token from Open edX")  # noqa: EM101
+            raise OpenEdXOAuth2Error("Did not receive access_token from Open edX")
 
         # Step 6
         auth = _create_tokens_and_update_auth(
@@ -294,7 +294,7 @@ def create_edx_auth_token(user):
             ),
         )
 
-    return auth  # noqa: RET504
+    return auth
 
 
 def update_edx_user_email(user):
@@ -345,8 +345,8 @@ def _create_tokens_and_update_auth(auth, params):
         courseware.models.OpenEdxApiAuth:
             the updated auth records
     """
-    resp = requests.post(edx_url(OPENEDX_OAUTH2_ACCESS_TOKEN_PATH), data=params)  # noqa: S113
-    if resp.status_code != 200:  # noqa: PLR2004
+    resp = requests.post(edx_url(OPENEDX_OAUTH2_ACCESS_TOKEN_PATH), data=params)
+    if resp.status_code != 200:
         # The auth is likely broken for reasons unknown, delete and return None
         log.info(
             "Auth token for user %s failed, creating a new one", auth.user.username
@@ -442,7 +442,7 @@ def get_valid_edx_api_auth(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECO
         auth:
             updated OpenEdxApiAuth
     """
-    assert (  # noqa: S101
+    assert (
         ttl_in_seconds < OPENEDX_AUTH_MAX_TTL_IN_SECONDS
     ), f"ttl_in_seconds must be less than {OPENEDX_AUTH_MAX_TTL_IN_SECONDS}"
 
@@ -508,8 +508,8 @@ def get_edx_api_client(user, ttl_in_seconds=OPENEDX_AUTH_DEFAULT_TTL_IN_SECONDS)
     try:
         auth = get_valid_edx_api_auth(user, ttl_in_seconds=ttl_in_seconds)
     except OpenEdxApiAuth.DoesNotExist:
-        raise NoEdxApiAuthError(  # noqa: B904
-            f"{user!s} does not have an associated OpenEdxApiAuth"  # noqa: EM102
+        raise NoEdxApiAuthError(
+            f"{user!s} does not have an associated OpenEdxApiAuth"
         )
     return EdxApi(
         {"access_token": auth.access_token},
@@ -526,7 +526,7 @@ def get_edx_api_service_client():
          EdxApi: edx api service worker client instance
     """
     if settings.OPENEDX_SERVICE_WORKER_API_TOKEN is None:
-        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")  # noqa: EM101
+        raise ImproperlyConfigured("OPENEDX_SERVICE_WORKER_API_TOKEN is not set")
 
     return EdxApi(
         {"access_token": settings.OPENEDX_SERVICE_WORKER_API_TOKEN},
@@ -620,7 +620,7 @@ def get_enrollment(user: User, course_run: CourseRun):
     )
 
 
-def enroll_in_edx_course_runs(user, course_runs, force_enrollment=True):  # noqa: FBT002
+def enroll_in_edx_course_runs(user, course_runs, force_enrollment=True):
     """
     Enrolls a user in edx course runs
 
@@ -661,7 +661,7 @@ def enroll_in_edx_course_runs(user, course_runs, force_enrollment=True):  # noqa
             )
             if not is_enroll_mode_error:
                 raise EdxApiEnrollErrorException(user, course_run, exc) from exc
-            log.error(  # noqa: TRY400
+            log.error(
                 "Failed to enroll user in %s with '%s' mode. Attempting to enroll with '%s' mode instead. "
                 "(%s)",
                 course_run.courseware_id,
@@ -761,9 +761,9 @@ def unenroll_edx_course_run(run_enrollment):
             run_enrollment.run.courseware_id, username=run_enrollment.user.username
         )
     except HTTPError as exc:
-        raise EdxApiEnrollErrorException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904
+        raise EdxApiEnrollErrorException(run_enrollment.user, run_enrollment.run, exc)
     except Exception as exc:  # noqa: BLE001
-        raise UnknownEdxApiEnrollException(run_enrollment.user, run_enrollment.run, exc)  # noqa: B904
+        raise UnknownEdxApiEnrollException(run_enrollment.user, run_enrollment.run, exc)
     else:
         return deactivated_enrollment
 
@@ -786,8 +786,8 @@ def update_edx_user_name(user):
     try:
         return edx_client.user_info.update_user_name(user.username, user.name)
     except Exception as exc:  # noqa: BLE001
-        raise UserNameUpdateFailedException(  # noqa: B904
-            "Error updating user's full name in edX.",  # noqa: EM101
+        raise UserNameUpdateFailedException(
+            "Error updating user's full name in edX.",
             exc,
         )
 

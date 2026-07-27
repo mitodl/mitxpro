@@ -179,7 +179,7 @@ def validate_unique_readable_ids(value):
     unique readable IDs
     """
     # We want to validate the overall stream not underlying blocks individually
-    if len(value) < 2:  # noqa: PLR2004
+    if len(value) < 2:
         return
     items = [
         stream_block.value.get("readable_id")

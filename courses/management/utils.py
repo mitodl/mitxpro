@@ -91,10 +91,10 @@ class EnrollmentChangeCommand(BaseCommand):
 
         if program_property and run_property:
             raise CommandError(
-                "Either 'program' or 'run' should be provided, not both."  # noqa: EM101
+                "Either 'program' or 'run' should be provided, not both."
             )
         if not program_property and not run_property:
-            raise CommandError("Either 'program' or 'run' must be provided.")  # noqa: EM101
+            raise CommandError("Either 'program' or 'run' must be provided.")
 
         query_params = {"user": user}
         if order_property:
@@ -112,7 +112,7 @@ class EnrollmentChangeCommand(BaseCommand):
             enrollment = CourseRunEnrollment.all_objects.filter(**query_params).first()
 
         if not enrollment:
-            raise CommandError(f"Enrollment not found for: {enrolled_obj}")  # noqa: EM102
+            raise CommandError(f"Enrollment not found for: {enrolled_obj}")
         if not enrollment.active and not force:
             raise CommandError(
                 "The given enrollment is not active ({}).\n"  # noqa: EM103, UP032, RUF100
@@ -128,7 +128,7 @@ class EnrollmentChangeCommand(BaseCommand):
         existing_enrollment,
         to_program=None,
         to_user=None,
-        keep_failed_enrollments=False,  # noqa: FBT002
+        keep_failed_enrollments=False,
     ):
         """
         Helper method to create a new ProgramEnrollment based on an existing enrollment
@@ -177,7 +177,7 @@ class EnrollmentChangeCommand(BaseCommand):
         existing_enrollment,
         to_run=None,
         to_user=None,
-        keep_failed_enrollments=False,  # noqa: FBT002
+        keep_failed_enrollments=False,
     ):
         """
         Helper method to create a CourseRunEnrollment based on an existing enrollment
@@ -235,7 +235,7 @@ class EnrollmentChangeCommand(BaseCommand):
         """
         try:
             enroll_in_edx_course_runs(user, course_runs)
-            return True  # noqa: TRY300
+            return True
         except (
             EdxApiEnrollErrorException,
             UnknownEdxApiEnrollException,

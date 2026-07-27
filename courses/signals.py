@@ -16,10 +16,10 @@ from courses.utils import generate_program_certificate
     dispatch_uid="courseruncertificate_post_save",
 )
 def handle_create_course_run_certificate(
-    sender,  # noqa: ARG001
+    sender,
     instance,
     created,
-    **kwargs,  # noqa: ARG001
+    **kwargs,
 ):
     """
     When a CourseRunCertificate model is created.

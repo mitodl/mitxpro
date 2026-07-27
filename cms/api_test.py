@@ -201,7 +201,7 @@ def test_filter_and_sort_catalog_pages_with_default_sorting(sort_by):
         ),
     ],
 )
-def test_filter_and_sort_catalog_pages_with_price_sorting(  # noqa: PLR0913
+def test_filter_and_sort_catalog_pages_with_price_sorting(
     sort_by,
     course_prices,
     program_prices,

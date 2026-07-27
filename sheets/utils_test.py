@@ -1,27 +1,26 @@
 """Sheets app util function tests"""
 
+from datetime import timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
 from pygsheets.worksheet import Worksheet
 
+from ecommerce.factories import BulkCouponAssignmentFactory
+from mitxpro.utils import now_in_utc
 from sheets import utils
 from sheets.constants import (
     GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
     GOOGLE_AUTH_URI,
     GOOGLE_TOKEN_URI,
 )
-from unittest.mock import MagicMock, patch
-
-import pytest
-from datetime import timedelta
-
-from mitxpro.utils import now_in_utc
-from ecommerce.factories import BulkCouponAssignmentFactory
 from sheets.exceptions import CouponAssignmentError
 
 
 def test_generate_google_client_config(settings):
     """generate_google_client_config should return a dict with expected values"""
     settings.DRIVE_CLIENT_ID = "some-id"
-    settings.DRIVE_CLIENT_SECRET = "some-secret"  # noqa: S105
+    settings.DRIVE_CLIENT_SECRET = "some-secret"
     settings.DRIVE_API_PROJECT_ID = "some-project-id"
     settings.SITE_BASE_URL = "http://example.com"
     assert utils.generate_google_client_config() == {
@@ -43,7 +42,7 @@ def test_get_data_rows(mocker):
         ["row 1 - column 1", "row 1 - column 2"],
         ["row 2 - column 1", "row 2 - column 2"],
     ]
-    sheet_rows = [["HEADER 1", "HEADER 2"]] + non_header_rows  # noqa: RUF005
+    sheet_rows = [["HEADER 1", "HEADER 2"]] + non_header_rows
     mocked_worksheet = mocker.MagicMock(
         spec=Worksheet, get_all_values=mocker.Mock(return_value=sheet_rows)
     )

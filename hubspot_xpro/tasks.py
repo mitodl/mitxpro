@@ -270,7 +270,7 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: list[int]) -> list[str]:
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_deals(self, create: bool):  # noqa: FBT001
+def batch_upsert_hubspot_deals(self, create: bool):
     """
     Batch create/update deals in hubspot
 
@@ -293,7 +293,7 @@ def batch_upsert_hubspot_deals(self, create: bool):  # noqa: FBT001
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_b2b_deals(self, create: bool):  # noqa: FBT001
+def batch_upsert_hubspot_b2b_deals(self, create: bool):
     """
     Batch create/update b2b deals in hubspot
 
@@ -378,7 +378,7 @@ def batch_create_hubspot_objects_chunked(
                 errored_chunks.append(still_failed)
         time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     if errored_chunks:
-        if last_error_status == 429:  # noqa: PLR2004
+        if last_error_status == 429:
             raise ApiException(
                 status=last_error_status,
                 reason=f"Batch hubspot create failed for the following chunks: {errored_chunks}",
@@ -451,12 +451,12 @@ def batch_update_hubspot_objects_chunked(
 
 
 @app.task(bind=True)
-def batch_upsert_hubspot_objects(  # noqa: PLR0913
+def batch_upsert_hubspot_objects(
     self,
     hubspot_type: str,
     model_name: str,
     app_label: str,
-    create: bool = True,  # noqa: FBT001, FBT002
+    create: bool = True,
     object_ids: list[int] = None,  # noqa: RUF013
 ):
     """
@@ -475,7 +475,7 @@ def batch_upsert_hubspot_objects(  # noqa: PLR0913
         ).values_list("object_id", "hubspot_id")
         unsynced_object_ids = (
             content_type.model_class()
-            .objects.exclude(id__in=[id[0] for id in synced_object_ids])  # noqa: A001
+            .objects.exclude(id__in=[id[0] for id in synced_object_ids])
             .values_list("id", flat=True)
         )
         object_ids = sorted(unsynced_object_ids if create else synced_object_ids)
@@ -539,8 +539,8 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                     )
                 )
             if (
-                len(contact_associations_batch) == 100  # noqa: PLR2004
-                or len(line_associations_batch) == 100  # noqa: PLR2004
+                len(contact_associations_batch) == 100
+                or len(line_associations_batch) == 100
                 or idx == deal_count - 1
             ):
                 hubspot_client.crm.associations.batch_api.create(

@@ -35,7 +35,7 @@ def mock_email_backend(mocker, backend_settings):
     """Fixture that returns a fake EmailAuth backend object"""
     backend = mocker.Mock()
     backend.name = "email"
-    backend.setting.side_effect = lambda key, default, **kwargs: backend_settings.get(  # noqa: ARG005
+    backend.setting.side_effect = lambda key, default, **kwargs: backend_settings.get(
         key, default
     )
     return backend
@@ -84,7 +84,7 @@ def validate_email_auth_request_not_email_backend(mocker):
 
 
 @pytest.mark.parametrize(
-    "has_user,expected",  # noqa: PT006
+    "has_user,expected",
     [(True, {"flow": SocialAuthState.FLOW_LOGIN}), (False, {})],
 )
 @pytest.mark.django_db
@@ -149,7 +149,7 @@ def test_user_password_not_email_backend(mocker):
 @pytest.mark.parametrize("user_password", ["abc123", "def456"])
 def test_user_password_login(rf, user, user_password, mocker):
     """Tests that user_password works for login case"""
-    request_password = "abc123"  # noqa: S105
+    request_password = "abc123"
     user.set_password(user_password)
     user.save()
     request = rf.post(
@@ -229,7 +229,7 @@ def test_user_password_not_exists(rf, mocker):
 
 
 @pytest.mark.parametrize(
-    "backend_name,flow",  # noqa: PT006
+    "backend_name,flow",
     [
         ("notemail", None),
         ("notemail", SocialAuthState.FLOW_REGISTER),
@@ -379,8 +379,8 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "create_user_return_val,create_user_exception",  # noqa: PT006
-    [[None, None], [UserFactory.build(), ValueError("bad value")]],  # noqa: PT007
+    "create_user_return_val,create_user_exception",
+    [[None, None], [UserFactory.build(), ValueError("bad value")]],
 )
 @pytest.mark.usefixtures("mock_validate_user_registration")
 def test_create_user_via_email_create_fail(
@@ -498,7 +498,7 @@ def test_forbid_hijack(mocker, hijacked):
     kwargs = {"flow": SocialAuthState.FLOW_LOGIN}
 
     if hijacked:
-        with pytest.raises(ValueError):  # noqa: PT011
+        with pytest.raises(ValueError):
             user_actions.forbid_hijack(*args, **kwargs)
     else:
         assert user_actions.forbid_hijack(*args, **kwargs) == {}
@@ -536,31 +536,31 @@ def test_send_user_to_hubspot(mocker, settings):
 @pytest.mark.parametrize("is_active", [True, False])
 @pytest.mark.parametrize("is_new", [True, False])
 @pytest.mark.parametrize(
-    "is_enabled, has_inquiry, computed_result, expected",  # noqa: PT006
+    "is_enabled, has_inquiry, computed_result, expected",
     [
-        [  # noqa: PT007
+        [
             True,
             True,
             RESULT_SUCCESS,
             True,
         ],  # feature enabled, result is success
-        [  # noqa: PT007
+        [
             True,
             True,
             RESULT_DENIED,
             False,
         ],  # feature enabled, result is denied
-        [  # noqa: PT007
+        [
             True,
             True,
             RESULT_UNKNOWN,
             False,
         ],  # feature enabled, result is unknown
-        [False, False, None, True],  # feature disabled  # noqa: PT007
-        [True, False, None, False],  # feature enabled, no result  # noqa: PT007
+        [False, False, None, True],  # feature disabled
+        [True, False, None, False],  # feature enabled, no result
     ],
 )
-def test_activate_user(  # noqa: PLR0913
+def test_activate_user(
     mocker, user, is_active, is_new, is_enabled, has_inquiry, computed_result, expected
 ):
     """Test that activate_user takes the correct action"""
@@ -582,15 +582,15 @@ def test_activate_user(  # noqa: PLR0913
 
 @pytest.mark.parametrize("raises_error", [True, False])
 @pytest.mark.parametrize(
-    "is_active, is_new, creates_records",  # noqa: PT006
+    "is_active, is_new, creates_records",
     [
-        [True, True, True],  # noqa: PT007
-        [True, False, False],  # noqa: PT007
-        [False, True, False],  # noqa: PT007
-        [False, False, False],  # noqa: PT007
+        [True, True, True],
+        [True, False, False],
+        [False, True, False],
+        [False, False, False],
     ],
 )
-def test_create_courseware_user(  # noqa: PLR0913
+def test_create_courseware_user(
     mocker, user, raises_error, is_active, is_new, creates_records
 ):
     """Test that activate_user takes the correct action"""
@@ -624,7 +624,7 @@ def test_create_courseware_user(  # noqa: PLR0913
 
 
 @pytest.mark.parametrize(
-    "backend_name,flow,data",  # noqa: PT006
+    "backend_name,flow,data",
     [
         ("notemail", SocialAuthState.FLOW_REGISTER, {}),
         ("notemail", SocialAuthState.FLOW_LOGIN, dict(email="test@example.com")),  # noqa: C408

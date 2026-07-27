@@ -172,7 +172,7 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
 
     def get_closedate(self, instance):
         """Return the updated_on date (as a timestamp in milliseconds) if fulfilled"""
-        if instance.status == b2b_models.B2BOrder.FULFILLED:  # noqa: RET503
+        if instance.status == b2b_models.B2BOrder.FULFILLED:
             return int(instance.updated_on.timestamp() * 1000)
 
     def get_amount(self, instance):
@@ -181,43 +181,43 @@ class B2BOrderToDealSerializer(serializers.ModelSerializer):
 
     def get_discount_amount(self, instance):
         """Get the discount amount if any"""
-        if instance.discount:  # noqa: RET503
+        if instance.discount:
             return round_half_up(instance.discount).to_eng_string()
 
     def get_discount_percent(self, instance):
         """Get the discount percentage if any"""
-        if instance.coupon:  # noqa: RET503
+        if instance.coupon:
             return round_half_up(instance.coupon.discount_percent * 100).to_eng_string()
 
     def get_discount_type(self, instance):
         """We are only supporting percent-off for b2b as of now"""
-        if instance.coupon:  # noqa: RET503
+        if instance.coupon:
             return DISCOUNT_TYPE_PERCENT_OFF
 
     def get_company(self, instance):
         """Get the company id if any"""
-        if instance.coupon:  # noqa: RET503
+        if instance.coupon:
             company = instance.coupon.company
-            if company:  # noqa: RET503
+            if company:
                 return company.name
 
     def get_coupon_code(self, instance):
         """Get the coupon code used for the order if any"""
-        if instance.coupon:  # noqa: RET503
+        if instance.coupon:
             return instance.coupon.coupon_code
 
     def get_payment_type(self, instance):
         """Get the payment type"""
-        if instance.coupon_payment_version:  # noqa: RET503
+        if instance.coupon_payment_version:
             payment_type = instance.coupon_payment_version.payment_type
-            if payment_type:  # noqa: RET503
+            if payment_type:
                 return payment_type
 
     def get_payment_transaction(self, instance):
         """Get the payment transaction id if any"""
-        if instance.coupon_payment_version:  # noqa: RET503
+        if instance.coupon_payment_version:
             payment_transaction = instance.coupon_payment_version.payment_transaction
-            if payment_transaction:  # noqa: RET503
+            if payment_transaction:
                 return payment_transaction
 
     class Meta:
@@ -297,14 +297,14 @@ class OrderToDealSerializer(serializers.ModelSerializer):
 
     def get_closedate(self, instance):
         """Return the updated_on date (as a timestamp in milliseconds) if fulfilled"""
-        if instance.status == models.Order.FULFILLED:  # noqa: RET503
+        if instance.status == models.Order.FULFILLED:
             return int(instance.updated_on.timestamp() * 1000)
 
     def get_discount_type(self, instance):
         """Get the discount type of the applied coupon"""
 
         coupon_version = self._get_coupon_version(instance)
-        if coupon_version:  # noqa: RET503
+        if coupon_version:
             return coupon_version.payment_version.discount_type
 
     def get_amount(self, instance):
@@ -341,31 +341,31 @@ class OrderToDealSerializer(serializers.ModelSerializer):
     def get_company(self, instance):
         """Get the company id if any"""
         coupon_version = self._get_coupon_version(instance)
-        if coupon_version:  # noqa: RET503
+        if coupon_version:
             company = coupon_version.payment_version.company
-            if company:  # noqa: RET503
+            if company:
                 return company.name
 
     def get_payment_type(self, instance):
         """Get the payment type"""
         coupon_version = self._get_coupon_version(instance)
-        if coupon_version:  # noqa: RET503
+        if coupon_version:
             payment_type = coupon_version.payment_version.payment_type
-            if payment_type:  # noqa: RET503
+            if payment_type:
                 return payment_type
 
     def get_payment_transaction(self, instance):
         """Get the payment transaction id if any"""
         coupon_version = self._get_coupon_version(instance)
-        if coupon_version:  # noqa: RET503
+        if coupon_version:
             payment_transaction = coupon_version.payment_version.payment_transaction
-            if payment_transaction:  # noqa: RET503
+            if payment_transaction:
                 return payment_transaction
 
     def get_coupon_code(self, instance):
         """Get the coupon code used for the order if any"""
         coupon_version = self._get_coupon_version(instance)
-        if coupon_version:  # noqa: RET503
+        if coupon_version:
             return coupon_version.coupon.coupon_code
 
     def get_order_type(self, instance):
@@ -450,5 +450,5 @@ def get_hubspot_serializer(obj: object) -> serializers.ModelSerializer:
     elif isinstance(obj, models.Product):
         serializer_class = ProductSerializer
     else:
-        raise NotImplementedError("Not a supported class")  # noqa: EM101
+        raise NotImplementedError("Not a supported class")
     return serializer_class(obj)

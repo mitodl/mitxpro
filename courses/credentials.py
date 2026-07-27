@@ -17,16 +17,16 @@ def build_program_credential(certificate: ProgramCertificate) -> dict:
     start_date, end_date = certificate.start_end_dates
 
     if not start_date or not end_date:
-        raise Exception("Program has no start or end date")  # noqa: EM101, TRY002
+        raise Exception("Program has no start or end date")  # noqa: TRY002
 
     if not certificate.program.page:
-        raise Exception("Program has no CMS program page")  # noqa: EM101, TRY002
+        raise Exception("Program has no CMS program page")  # noqa: TRY002
 
     if not certificate.program.page.certificate_page:
-        raise Exception("Program has no CMS program certificate page")  # noqa: EM101, TRY002
+        raise Exception("Program has no CMS program certificate page")  # noqa: TRY002
 
     if not certificate.program.page.certificate_page.CEUs:
-        raise Exception("Program has no CEUs defined")  # noqa: EM101, TRY002
+        raise Exception("Program has no CEUs defined")  # noqa: TRY002
 
     return {
         "type": ["EducationalOccupationalCredential", "ProgramCompletionCredential"],
@@ -52,16 +52,16 @@ def build_course_run_credential(certificate: CourseRunCertificate) -> dict:
     start_date, end_date = certificate.start_end_dates
 
     if not start_date or not end_date:
-        raise Exception("CourseRun has no start or end date")  # noqa: EM101, TRY002
+        raise Exception("CourseRun has no start or end date")  # noqa: TRY002
 
     if not course.page:
-        raise Exception("Course has no CMS course page")  # noqa: EM101, TRY002
+        raise Exception("Course has no CMS course page")  # noqa: TRY002
 
     if not course.page.certificate_page:
-        raise Exception("Course has no CMS course certificate page")  # noqa: EM101, TRY002
+        raise Exception("Course has no CMS course certificate page")  # noqa: TRY002
 
     if not course.page.certificate_page.CEUs:
-        raise Exception("Course has no CEUs defined")  # noqa: EM101, TRY002
+        raise Exception("Course has no CEUs defined")  # noqa: TRY002
 
     return {
         "type": ["EducationalOccupationalCredential", "CourseCompletionCredential"],
@@ -90,7 +90,7 @@ def build_digital_credential(
         has_credential = build_course_run_credential(certificate)
     else:
         raise Exception(  # noqa: TRY002, TRY004
-            f"Unexpected courseware object type for digital credentials: {type(certificate)}"  # noqa: EM102
+            f"Unexpected courseware object type for digital credentials: {type(certificate)}"
         )
 
     return {

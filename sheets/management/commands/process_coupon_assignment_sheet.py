@@ -5,8 +5,8 @@ based on the sheet data, and sends a message to all recipients who received a co
 
 from django.core.management import BaseCommand, CommandError
 
-from sheets.utils import assign_coupons_from_spreadsheet
 from sheets.exceptions import CouponAssignmentError
+from sheets.utils import assign_coupons_from_spreadsheet
 
 
 class Command(BaseCommand):
@@ -41,12 +41,12 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         sheet_id = options.get("id")
         title = options.get("title")
 
         if not sheet_id and not title:
-            raise CommandError("Need to provide --id or --title")  # noqa: EM101
+            raise CommandError("Need to provide --id or --title")
 
         use_sheet_id = bool(sheet_id)
         value = sheet_id if use_sheet_id else title

@@ -149,7 +149,7 @@ class CourseTopicQuerySet(models.QuerySet):
                 ),
             )
         )
-        return topics_queryset  # noqa: RET504
+        return topics_queryset
 
 
 class ActiveEnrollmentManager(models.Manager):
@@ -276,7 +276,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course program"""
 
     objects = ProgramQuerySet.as_manager()
-    title = models.CharField(max_length=255)  # noqa: DJ012
+    title = models.CharField(max_length=255)
     readable_id = models.CharField(
         max_length=255, unique=True, validators=[validate_url_path_field]
     )
@@ -310,7 +310,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             ),
             None,
         )
-        if first_course:  # noqa: RET503
+        if first_course:
             return first_course.next_run_date
 
     @property
@@ -341,7 +341,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             ),
             None,
         )
-        if first_course:  # noqa: RET503
+        if first_course:
             return first_course.first_unexpired_run
 
     @property
@@ -355,7 +355,7 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             ),
             None,
         )
-        if first_course:  # noqa: RET503
+        if first_course:
             return first_course.unexpired_runs
 
     @property
@@ -382,9 +382,9 @@ class Program(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         """All course runs related to a program"""
         return [run for course in self.courses.all() for run in course.courseruns.all()]
 
-    def __str__(self):  # noqa: DJ012
+    def __str__(self):
         title = f"{self.readable_id} | {self.title}"
-        return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
+        return title if len(title) <= 100 else title[:97] + "..."
 
 
 class ProgramRun(TimestampedModel, ValidateOnSaveMixin):
@@ -473,7 +473,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
     """Model for a course"""
 
     objects = CourseQuerySet.as_manager()
-    program = models.ForeignKey(  # noqa: DJ012
+    program = models.ForeignKey(
         Program, on_delete=models.CASCADE, null=True, blank=True, related_name="courses"
     )
     position_in_program = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -548,7 +548,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
         ]
         return first_matching_item(
             sorted(eligible_course_runs, key=lambda course_run: course_run.start_date),
-            lambda course_run: True,  # noqa: ARG005
+            lambda course_run: True,
         )
 
     @property
@@ -612,7 +612,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             ).values_list("run__id", flat=True)
         return [run for run in self.unexpired_runs if run.id not in enrolled_runs]
 
-    class Meta:  # noqa: DJ012
+    class Meta:
         ordering = ("program", "title")
 
     def clean(self):
@@ -645,7 +645,7 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
                 }
             )
 
-    def save(self, *args, **kwargs):  # noqa: DJ012
+    def save(self, *args, **kwargs):
         """Overridden save method"""
         # If adding a Course to a Program without position specified, set it as the highest position + 1.
         # WARNING: This is open to a race condition. Two near-simultaneous queries could end up with
@@ -661,9 +661,9 @@ class Course(TimestampedModel, PageProperties, ValidateOnSaveMixin):
             self.position_in_program = 1 if not last_position else last_position + 1
         return super().save(*args, **kwargs)
 
-    def __str__(self):  # noqa: DJ012
+    def __str__(self):
         title = f"{self.readable_id} | {self.title}"
-        return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
+        return title if len(title) <= 100 else title[:97] + "..."
 
 
 class CourseRun(TimestampedModel, ValidateOnSaveMixin):
@@ -682,7 +682,7 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
         max_length=10,
         help_text="A string that identifies the set of runs that this run belongs to (example: 'R2')",
     )
-    courseware_url_path = models.CharField(max_length=500, blank=True, null=True)  # noqa: DJ001
+    courseware_url_path = models.CharField(max_length=500, blank=True, null=True)
     external_course_run_id = models.CharField(max_length=255, blank=True, default="")
     start_date = models.DateTimeField(null=True, blank=True, db_index=True)
     end_date = models.DateTimeField(null=True, blank=True, db_index=True)
@@ -784,7 +784,7 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
 
     def __str__(self):
         title = f"{self.courseware_id} | {self.title}"
-        return title if len(title) <= 100 else title[:97] + "..."  # noqa: PLR2004
+        return title if len(title) <= 100 else title[:97] + "..."
 
     def clean(self):
         """
@@ -801,12 +801,12 @@ class CourseRun(TimestampedModel, ValidateOnSaveMixin):
             self.expiration_date,
         )
         if not is_valid:
-            raise ValidationError(error_msg)  # noqa: EM101
+            raise ValidationError(error_msg)
 
     def save(
         self,
-        force_insert=False,  # noqa: FBT002
-        force_update=False,  # noqa: FBT002
+        force_insert=False,
+        force_update=False,
         using=None,
         update_fields=None,
     ):
@@ -833,7 +833,7 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
         "ecommerce.Company", null=True, blank=True, on_delete=models.PROTECT
     )
     order = models.ForeignKey("ecommerce.Order", null=True, on_delete=models.PROTECT)
-    change_status = models.CharField(  # noqa: DJ001
+    change_status = models.CharField(
         choices=ENROLL_CHANGE_STATUS_CHOICES, max_length=20, null=True, blank=True
     )
     active = models.BooleanField(
@@ -861,13 +861,13 @@ class EnrollmentModel(TimestampedModel, AuditableModel):
             "company_name": self.company.name if self.company else None,
         }
 
-    def deactivate_and_save(self, change_status, no_user=False):  # noqa: FBT002
+    def deactivate_and_save(self, change_status, no_user=False):
         """Sets an enrollment to inactive, sets the status, and saves"""
         self.active = False
         self.change_status = change_status
         return self.save_and_log(None if no_user else self.user)
 
-    def reactivate_and_save(self, no_user=False):  # noqa: FBT002
+    def reactivate_and_save(self, no_user=False):
         """Sets an enrollment to be active again and saves"""
         self.active = True
         self.change_status = None
@@ -996,7 +996,7 @@ class CourseRunGrade(TimestampedModel, AuditableModel, ValidateOnSaveMixin):
     grade = models.FloatField(
         null=False, validators=[MinValueValidator(0.0), MaxValueValidator(1.0)]
     )
-    letter_grade = models.CharField(max_length=6, blank=True, null=True)  # noqa: DJ001
+    letter_grade = models.CharField(max_length=6, blank=True, null=True)
     passed = models.BooleanField(default=False)
     set_by_admin = models.BooleanField(default=False)
 
@@ -1086,7 +1086,7 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
     )
 
     objects = ActiveCertificates()
-    all_objects = models.Manager()  # noqa: DJ012
+    all_objects = models.Manager()
 
     class Meta:
         unique_together = ("user", "course_run")
@@ -1115,10 +1115,10 @@ class CourseRunCertificate(TimestampedModel, BaseCertificate):
         """Returns the start and end date for courseware object duration"""
         return self.course_run.start_date, self.course_run.end_date
 
-    def __str__(self):  # noqa: DJ012
+    def __str__(self):
         return f'CourseRunCertificate for user={self.user.username}, run={self.course_run.text_id} ({self.uuid})"'
 
-    def save(self, *args, **kwargs):  # noqa: DJ012
+    def save(self, *args, **kwargs):
         if not self.certificate_page_revision:
             certificate_page = (
                 self.course_run.course.page.certificate_page
@@ -1183,7 +1183,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
     )
 
     objects = ActiveCertificates()
-    all_objects = models.Manager()  # noqa: DJ012
+    all_objects = models.Manager()
 
     class Meta:
         unique_together = ("user", "program")
@@ -1222,7 +1222,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
         )
         return dates["start_date"], dates["end_date"]
 
-    def __str__(self):  # noqa: DJ012
+    def __str__(self):
         return f'ProgramCertificate for user={self.user.username}, program={self.program.text_id} ({self.uuid})"'
 
     def clean(self):
@@ -1259,7 +1259,7 @@ class ProgramCertificate(TimestampedModel, BaseCertificate):
                 }
             )
 
-    def save(self, *args, **kwargs):  # noqa: DJ012
+    def save(self, *args, **kwargs):
         if not self.certificate_page_revision:
             certificate_page = (
                 self.program.page.certificate_page if self.program.page else None

@@ -383,10 +383,10 @@ def test_get_valid_coupon_versions_after_redemption(user, is_global):
 
 @pytest.mark.parametrize("is_global", [True, False])
 @pytest.mark.parametrize(
-    "discount_type, amount",  # noqa: PT006
+    "discount_type, amount",
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100],  # noqa: PT007
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
     ],
 )
 def test_get_valid_coupon_versions_with_max_redemptions_per_user(
@@ -442,10 +442,10 @@ def test_get_valid_coupon_versions_with_max_redemptions_per_user(
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",  # noqa: PT006
+    "discount_type, amount",
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100],  # noqa: PT007
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100],
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0],
     ],
 )
 def test_global_coupons_apply_all_products(user, discount_type, amount):
@@ -476,10 +476,10 @@ def test_global_coupons_apply_all_products(user, discount_type, amount):
 
 
 @pytest.mark.parametrize(
-    "best_discount_type, best_discount_amount, lesser_coupons_type, lesser_coupons_amounts",  # noqa: PT006
+    "best_discount_type, best_discount_amount, lesser_coupons_type, lesser_coupons_amounts",
     [
-        [DISCOUNT_TYPE_DOLLARS_OFF, 100, DISCOUNT_TYPE_PERCENT_OFF, [0.1, 0.2, 0.5]],  # noqa: PT007
-        [DISCOUNT_TYPE_PERCENT_OFF, 1.0, DISCOUNT_TYPE_DOLLARS_OFF, [10, 20, 80]],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 100, DISCOUNT_TYPE_PERCENT_OFF, [0.1, 0.2, 0.5]],
+        [DISCOUNT_TYPE_PERCENT_OFF, 1.0, DISCOUNT_TYPE_DOLLARS_OFF, [10, 20, 80]],
     ],
 )
 def test_best_coupon_return_best_coupon_between_discount_types(
@@ -664,13 +664,13 @@ def test_get_product_price(basket_and_coupons):
 
 @pytest.mark.parametrize("has_coupon", [True, False])
 @pytest.mark.parametrize(
-    "discount_type, amount, price, discounted_price",  # noqa: PT006
+    "discount_type, amount, price, discounted_price",
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],  # noqa: PT007
-        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],  # noqa: PT007
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5, 100, 50],
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50, 100, 50],
     ],
 )
-def test_get_product_version_price_with_discount(  # noqa: PLR0913
+def test_get_product_version_price_with_discount(
     has_coupon, basket_and_coupons, discount_type, amount, price, discounted_price
 ):
     """
@@ -1566,8 +1566,8 @@ def test_fetch_and_serialize_unused_coupons_for_all_inactive_products(user):
 
 
 @pytest.mark.parametrize(
-    "use_defaults,num_coupon_codes",  # noqa: PT006
-    (  # noqa: PT007
+    "use_defaults,num_coupon_codes",
+    (
         (True, 12),
         (False, 1),
     ),
@@ -1577,7 +1577,7 @@ def test_create_coupons(use_defaults, num_coupon_codes):
     product = ProductVersionFactory.create().product
     name = "n a m e"
     coupon_type = CouponPaymentVersion.SINGLE_USE
-    amount = Decimal("123")
+    amount = Decimal(123)
 
     optional = (
         {}
@@ -1640,12 +1640,12 @@ def test_create_coupons(use_defaults, num_coupon_codes):
 
 
 @pytest.mark.parametrize(
-    "input_text_id,run_text_id,program_text_id,prog_run_tag",  # noqa: PT006
+    "input_text_id,run_text_id,program_text_id,prog_run_tag",
     [
-        ["course-v1:some+run", "course-v1:some+run", None, None],  # noqa: PT007
-        ["program-v1:some+program", None, "program-v1:some+program", None],  # noqa: PT007
-        ["program-v1:some+program+R1", None, "program-v1:some+program+R1", None],  # noqa: PT007
-        ["program-v1:some+program+R1", None, "program-v1:some+program", "R1"],  # noqa: PT007
+        ["course-v1:some+run", "course-v1:some+run", None, None],
+        ["program-v1:some+program", None, "program-v1:some+program", None],
+        ["program-v1:some+program+R1", None, "program-v1:some+program+R1", None],
+        ["program-v1:some+program+R1", None, "program-v1:some+program", "R1"],
     ],
 )
 def test_get_product_from_text_id(
@@ -1701,11 +1701,11 @@ def test_get_product_from_text_id_failure():
 
 
 @pytest.mark.parametrize(
-    "qs_product_id,exp_text_id",  # noqa: PT006
+    "qs_product_id,exp_text_id",
     [
-        ["123", None],  # noqa: PT007
-        ["course-v1:some+id", "course-v1:some+id"],  # noqa: PT007
-        ["course-v1:some id", "course-v1:some+id"],  # noqa: PT007
+        ["123", None],
+        ["course-v1:some+id", "course-v1:some+id"],
+        ["course-v1:some id", "course-v1:some+id"],
     ],
 )
 def test_get_product_from_querystring_id(mocker, qs_product_id, exp_text_id):
@@ -1736,12 +1736,12 @@ class FakeRequest:
 
 
 @pytest.mark.parametrize(
-    "is_client_ip_taxable,is_client_location_taxable",  # noqa: PT006
+    "is_client_ip_taxable,is_client_location_taxable",
     [
-        [True, True],  # noqa: PT007
-        [True, False],  # noqa: PT007
-        [False, True],  # noqa: PT007
-        [False, False],  # noqa: PT007
+        [True, True],
+        [True, False],
+        [False, True],
+        [False, False],
     ],
 )
 def test_tax_calc_from_ip(user, is_client_ip_taxable, is_client_location_taxable):
@@ -1924,7 +1924,7 @@ def test_tax_country_and_no_ip_tax(user):
         (False, "US", "US", "US", False, False, False),
     ],
 )
-def test_is_tax_applicable(  # noqa: PLR0913
+def test_is_tax_applicable(
     is_force_profile_country_flag_enabled,
     user_profile_country,
     user_determined_country,

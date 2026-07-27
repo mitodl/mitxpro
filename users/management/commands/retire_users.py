@@ -77,7 +77,7 @@ class Command(BaseCommand):
         """Convert user email to retired email format."""
         return user_util.get_retired_email(email, RETIRED_USER_SALTS, RETIRED_EMAIL_FMT)
 
-    def handle(self, *args, **kwargs):  # noqa: ARG002
+    def handle(self, *args, **kwargs):
         users = kwargs.get("users", [])
         block_users = kwargs.get("block_users")
 

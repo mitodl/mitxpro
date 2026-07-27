@@ -31,7 +31,7 @@ class AffiliateReferralActionAdmin(TimestampedModelAdmin):
     list_filter = ["affiliate__name"]
     ordering = ["-created_on"]
 
-    def get_queryset(self, request):  # noqa: ARG002
+    def get_queryset(self, request):
         """Overrides base method"""
         return self.model.objects.select_related("affiliate")
 

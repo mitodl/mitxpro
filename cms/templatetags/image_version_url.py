@@ -13,7 +13,7 @@ register = template.Library()
 def image_version_url(
     image,
     filter_spec,
-    full_url=False,  # noqa: FBT002
+    full_url=False,
     viewname="wagtailimages_serve",
 ):
     """

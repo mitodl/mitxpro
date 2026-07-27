@@ -5,7 +5,7 @@ from rest_framework import exceptions, views
 
 def exception_handler(exc, context):
     """Override DRF exception_handler to slightly change format of error response"""
-    if isinstance(exc, exceptions.ValidationError) and isinstance(  # noqa: UP038
+    if isinstance(exc, exceptions.ValidationError) and isinstance(
         exc.detail, (list, dict)
     ):
         exc = exceptions.ValidationError(

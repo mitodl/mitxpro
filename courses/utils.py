@@ -3,11 +3,11 @@ Utilities for courses/certificates
 """
 
 import logging
+import re
 
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Q
-import re
 from requests.exceptions import HTTPError
 
 from courses.constants import (
@@ -16,13 +16,13 @@ from courses.constants import (
     PROGRAM_TEXT_ID_PREFIX,
 )
 from courses.models import (
+    CourseLanguage,
     CourseRun,
     CourseRunCertificate,
     CourseRunGrade,
     Program,
     ProgramCertificate,
     ProgramEnrollment,
-    CourseLanguage,
 )
 from courseware.api import get_edx_api_course_list_client
 from mitxpro.utils import has_equal_properties, now_in_utc
@@ -30,7 +30,7 @@ from mitxpro.utils import has_equal_properties, now_in_utc
 log = logging.getLogger(__name__)
 
 
-def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):  # noqa: FBT002
+def ensure_course_run_grade(user, course_run, edx_grade, should_update=False):
     """
     Ensure that the local grades repository has the grade for the User/CourseRun combination supplied.
 

@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     help = "Repairs missing courseware records"
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Walk all users who are missing records and repair them"""
 
         users_to_repair = User.faulty_courseware_users

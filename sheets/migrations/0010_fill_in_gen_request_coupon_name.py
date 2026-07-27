@@ -24,9 +24,9 @@ def fill_in_coupon_name(apps, schema_editor):
     for coupon_gen_request in coupon_gen_requests:
         try:
             raw_data = json.loads(coupon_gen_request.raw_data)
-            if not isinstance(raw_data, list) or len(raw_data) < 2 or not raw_data[1]:  # noqa: PLR2004
-                raise ValueError(  # noqa: TRY301
-                    "raw_data is either not a list, or does not include a valid coupon name"  # noqa: EM101
+            if not isinstance(raw_data, list) or len(raw_data) < 2 or not raw_data[1]:
+                raise ValueError(
+                    "raw_data is either not a list, or does not include a valid coupon name"
                 )
         except Exception:  # noqa: BLE001
             coupon_name = f"COUPON NAME NEEDED ({coupon_gen_request.id})"

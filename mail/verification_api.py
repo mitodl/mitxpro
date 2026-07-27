@@ -12,7 +12,7 @@ from mail.constants import EMAIL_CHANGE_EMAIL, EMAIL_VERIFICATION
 
 def send_verification_email(
     strategy,
-    backend,  # noqa: ARG001
+    backend,
     code,
     partial_token,
 ):

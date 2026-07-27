@@ -23,7 +23,7 @@ from ecommerce import mail_api
 from mitxpro.utils import first_or_none, partition
 
 log = logging.getLogger(__name__)
-UserEnrollments = namedtuple(  # noqa: PYI024
+UserEnrollments = namedtuple(
     "UserEnrollments",
     [
         "programs",
@@ -90,7 +90,7 @@ def get_user_enrollments(user):
 def create_run_enrollments(
     user,
     runs,
-    keep_failed_enrollments=False,  # noqa: FBT002
+    keep_failed_enrollments=False,
     order=None,
     company=None,
 ):
@@ -127,7 +127,7 @@ def create_run_enrollments(
 
         edx_request_success = False
         if not keep_failed_enrollments:
-            raise EdxEnrollmentCreateError(str(error_message))  # noqa: B904
+            raise EdxEnrollmentCreateError(str(error_message))
         log.exception(str(error_message))
     else:
         edx_request_success = True
@@ -201,7 +201,7 @@ def create_program_enrollments(user, programs, order=None, company=None):
 def deactivate_run_enrollment(
     run_enrollment,
     change_status,
-    keep_failed_enrollments=False,  # noqa: FBT002
+    keep_failed_enrollments=False,
 ):
     """
     Helper method to deactivate a CourseRunEnrollment
@@ -238,8 +238,8 @@ def deactivate_run_enrollment(
 def deactivate_program_enrollment(
     program_enrollment,
     change_status,
-    keep_failed_enrollments=False,  # noqa: FBT002
-    limit_to_order=True,  # noqa: FBT002
+    keep_failed_enrollments=False,
+    limit_to_order=True,
 ):
     """
     Helper method to deactivate a ProgramEnrollment
@@ -271,7 +271,7 @@ def deactivate_program_enrollment(
             change_status=change_status,
             keep_failed_enrollments=keep_failed_enrollments,
         ):
-            deactivated_course_runs.append(run_enrollment)  # noqa: PERF401
+            deactivated_course_runs.append(run_enrollment)
 
     if deactivated_course_runs:
         program_enrollment.deactivate_and_save(change_status, no_user=True)
@@ -285,8 +285,8 @@ def defer_enrollment(
     user,
     from_courseware_id,
     to_courseware_id,
-    keep_failed_enrollments=False,  # noqa: FBT002
-    force=False,  # noqa: FBT002
+    keep_failed_enrollments=False,
+    force=False,
 ):
     """
     Deactivates a user's existing enrollment in one course run and enrolls the user in another.
@@ -313,27 +313,27 @@ def defer_enrollment(
     )
     if not from_enrollment:
         raise ValidationError(
-            f"User is not enrolled in course run '{from_courseware_id}'"  # noqa: EM102
+            f"User is not enrolled in course run '{from_courseware_id}'"
         )
     if not force and not from_enrollment.active:
         raise ValidationError(
-            f"Cannot defer from inactive enrollment (id: {from_enrollment.id}, run: {from_enrollment.run.courseware_id}, user: {user.email}). "  # noqa: EM102
+            f"Cannot defer from inactive enrollment (id: {from_enrollment.id}, run: {from_enrollment.run.courseware_id}, user: {user.email}). "
             "Set force=True to defer anyway."
         )
     to_run = CourseRun.objects.get(courseware_id=to_courseware_id)
     if from_enrollment.run == to_run:
         raise ValidationError(
-            f"Cannot defer to the same course run (run: {to_run.courseware_id})"  # noqa: EM102
+            f"Cannot defer to the same course run (run: {to_run.courseware_id})"
         )
     if not force and not to_run.is_not_beyond_enrollment:
         raise ValidationError(
-            "Cannot defer to a course run that is outside of its enrollment period (run: {}).".format(  # noqa: EM103, UP032
+            "Cannot defer to a course run that is outside of its enrollment period (run: {}).".format(  # noqa: UP032
                 to_run.courseware_id
             )
         )
     if not force and from_enrollment.run.course != to_run.course:
         raise ValidationError(
-            f"Cannot defer to a course run of a different course ('{from_enrollment.run.course.title}' -> '{to_run.course.title}'). "  # noqa: EM102
+            f"Cannot defer to a course run of a different course ('{from_enrollment.run.course.title}' -> '{to_run.course.title}'). "
             "Set force=True to defer anyway."
         )
     try:
@@ -367,7 +367,7 @@ def generate_course_readable_id(course_tag):
     """
     if not course_tag:
         raise ValidationError(
-            "course_tag is required to generate a valid readable ID for a course."  # noqa: EM101
+            "course_tag is required to generate a valid readable ID for a course."
         )
 
     return f"course-v1:xPRO+{course_tag}"

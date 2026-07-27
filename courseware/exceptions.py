@@ -19,7 +19,7 @@ class NoEdxApiAuthError(Exception):
     """The user was expected to have an OpenEdxApiAuth object but does not"""
 
 
-class EdxApiEnrollErrorException(Exception):  # noqa: N818
+class EdxApiEnrollErrorException(Exception):
     """An edX enrollment API call resulted in an error response"""
 
     def __init__(self, user, course_run, http_error, msg=None):
@@ -41,7 +41,7 @@ class EdxApiEnrollErrorException(Exception):  # noqa: N818
         super().__init__(msg)
 
 
-class UnknownEdxApiEnrollException(Exception):  # noqa: N818
+class UnknownEdxApiEnrollException(Exception):
     """An edX enrollment API call failed for an unknown reason"""
 
     def __init__(self, user, course_run, base_exc, msg=None):
@@ -61,11 +61,11 @@ class UnknownEdxApiEnrollException(Exception):  # noqa: N818
         super().__init__(msg)
 
 
-class UserNameUpdateFailedException(Exception):  # noqa: N818
+class UserNameUpdateFailedException(Exception):
     """Raised if a user's profile name(Full Name) update call is failed"""
 
 
-class EdxApiRegistrationValidationException(Exception):  # noqa: N818
+class EdxApiRegistrationValidationException(Exception):
     """An Open edX Registration Validation API call resulted in an error response"""
 
     def __init__(self, name, error_response, msg=None):

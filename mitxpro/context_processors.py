@@ -5,7 +5,7 @@ context processors for bootcamp
 from django.conf import settings
 
 
-def api_keys(request):  # noqa: ARG001
+def api_keys(request):
     """
     Pass a `APIKEYS` dictionary into the template context, which holds
     IDs and secret keys for the various APIs used in this project.
@@ -18,7 +18,7 @@ def api_keys(request):  # noqa: ARG001
     }
 
 
-def configuration_context(request):  # noqa: ARG001
+def configuration_context(request):
     """
     Configuration context for django templates.
     """

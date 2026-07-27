@@ -2,6 +2,8 @@
 
 from wagtail.users.views.users import (
     IndexView as WagtailUserIndexView,
+)
+from wagtail.users.views.users import (
     UserViewSet as WagtailUserViewSet,
 )
 

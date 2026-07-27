@@ -7,7 +7,7 @@ log = logging.getLogger()
 
 
 class Migration(migrations.Migration):
-    def backpopulate_readable_id(apps, schema_editor):  # noqa: ARG002, N805
+    def backpopulate_readable_id(apps, schema_editor):
         """
         Set the readable_id for existing ProductVersions.
         """
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ).courseware_id
             else:
                 log.error(
-                    f"No matching readable_id found for ProductVersion %s",  # noqa: F541, G004
+                    f"No matching readable_id found for ProductVersion %s",  # noqa: F541
                     str(version.id),
                 )
             version.save()

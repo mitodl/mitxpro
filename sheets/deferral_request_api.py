@@ -29,7 +29,7 @@ User = get_user_model()
 class DeferralRequestRow:
     """Represents a row of the deferral request sheet"""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         row_index,
         response_id,
@@ -107,7 +107,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             request_model_cls=DeferralRequest,
         )
 
-    def process_row(  # noqa: C901, PLR0911
+    def process_row(
         self, row_index, row_data
     ):
         """
@@ -177,7 +177,7 @@ class DeferralRequestHandler(EnrollmentChangeRequestHandler):
             )
             # When #1838 is completed, this logic can be removed
             if not from_enrollment and not to_enrollment:
-                raise Exception("edX enrollment change failed")  # noqa: EM101, TRY002
+                raise Exception("edX enrollment change failed")  # noqa: TRY002
         except ObjectDoesNotExist as exc:
             if isinstance(exc, CourseRunEnrollment.DoesNotExist):
                 message = f"'from' course run enrollment does not exist ({deferral_req_row.from_courseware_id})"

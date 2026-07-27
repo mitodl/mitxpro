@@ -59,12 +59,12 @@ def test_reference_number(settings):
 
 
 @pytest.mark.parametrize(
-    "activation_date, expiration_date",  # noqa: PT006
+    "activation_date, expiration_date",
     [
-        [None, None],  # noqa: PT007
-        [timezone.now() - timedelta(days=1), timezone.now() + timedelta(days=1)],  # noqa: PT007
-        [None, timezone.now() + timedelta(days=1)],  # noqa: PT007
-        [timezone.now() - timedelta(days=1), None],  # noqa: PT007
+        [None, None],
+        [timezone.now() - timedelta(days=1), timezone.now() + timedelta(days=1)],
+        [None, timezone.now() + timedelta(days=1)],
+        [timezone.now() - timedelta(days=1), None],
     ],
 )
 def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_date):
@@ -82,11 +82,11 @@ def test_get_unexpired_coupon(order_with_coupon, activation_date, expiration_dat
 
 
 @pytest.mark.parametrize(
-    "attr_name, attr_value",  # noqa: PT006
+    "attr_name, attr_value",
     [
-        ["enabled", False],  # noqa: PT007
-        ["activation_date", timezone.now() + timedelta(days=1)],  # noqa: PT007
-        ["expiration_date", timezone.now() - timedelta(days=1)],  # noqa: PT007
+        ["enabled", False],
+        ["activation_date", timezone.now() + timedelta(days=1)],
+        ["expiration_date", timezone.now() - timedelta(days=1)],
     ],
 )
 def test_get_unexpired_coupon_not_found(order_with_coupon, attr_name, attr_value):
@@ -131,7 +131,7 @@ def test_duplicate_b2b_coupon_not_allowed(factory):
     """Verify that duplicate b2b coupons are not allowed."""
     coupon = factory.create()
 
-    with pytest.raises(ValidationError) as cm:  # noqa: PT012
+    with pytest.raises(ValidationError) as cm:
         new_coupon = B2BCouponFactory.build(coupon_code=coupon.coupon_code)
         new_coupon.clean()
     assert (

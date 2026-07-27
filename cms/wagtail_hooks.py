@@ -15,9 +15,9 @@ from ecommerce.models import Product, ProductVersion
 
 @hooks.register("construct_explorer_page_queryset")
 def sort_pages_alphabetically(
-    parent_page,  # noqa: ARG001
+    parent_page,
     pages,
-    request,  # noqa: ARG001
+    request,
 ):
     """Sort all pages by title alphabetically"""
     return pages.order_by("title")
@@ -81,7 +81,7 @@ def create_product_and_versions_for_courseware_pages(request, page):
 
 
 @hooks.register("after_create_page")
-def create_common_child_pages_for_external_courses(request, page):  # noqa: ARG001
+def create_common_child_pages_for_external_courses(request, page):
     """
     Automatically creates static sections ("How You Will Learn" and "For Teams")
     for newly created ExternalCoursePage instances.

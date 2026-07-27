@@ -16,23 +16,23 @@ class AppContextSerializer(serializers.Serializer):
     release_version = serializers.SerializerMethodField()
     features = serializers.SerializerMethodField()
 
-    def get_features(self, request):  # noqa: ARG002
+    def get_features(self, request):
         """Returns a dictionary of features"""
         return {}
 
-    def get_release_version(self, request):  # noqa: ARG002
+    def get_release_version(self, request):
         """Returns a dictionary of features"""
         return settings.VERSION
 
-    def get_gtm_tracking_id(self, request):  # noqa: ARG002
+    def get_gtm_tracking_id(self, request):
         """Returns the GTM container ID"""
         return settings.GTM_TRACKING_ID
 
-    def get_ga_tracking_id(self, request):  # noqa: ARG002
+    def get_ga_tracking_id(self, request):
         """Returns a dictionary of features"""
         return settings.GA_TRACKING_ID
 
-    def get_environment(self, request):  # noqa: ARG002
+    def get_environment(self, request):
         """Returns a dictionary of features"""
         return settings.ENVIRONMENT
 

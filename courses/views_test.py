@@ -245,7 +245,7 @@ def test_delete_course_run(user_drf_client, course_runs):
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_course_view(  # noqa: PLR0913
+def test_course_view(
     client, user, home_page, is_enrolled, has_unexpired_run, has_product, is_anonymous
 ):
     """
@@ -308,7 +308,7 @@ def test_course_view(  # noqa: PLR0913
 @pytest.mark.parametrize("has_product", [True, False])
 @pytest.mark.parametrize("has_unexpired_run", [True, False])
 @pytest.mark.parametrize("is_anonymous", [True, False])
-def test_program_view(  # noqa: PLR0913
+def test_program_view(
     client, user, home_page, is_enrolled, has_product, has_unexpired_run, is_anonymous
 ):
     """
@@ -496,7 +496,7 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
 
 
 @pytest.mark.parametrize(
-    "factory, serializer_cls, api_name",  # noqa: PT006
+    "factory, serializer_cls, api_name",
     [
         (
             CourseRunCertificateFactory,
@@ -510,7 +510,7 @@ def test_course_runs_without_product_in_programs_api(client, has_product):
         ),
     ],
 )
-def test_course_run_certificate_api(  # noqa: PLR0913
+def test_course_run_certificate_api(
     settings, user, user_drf_client, factory, serializer_cls, api_name
 ):
     """Verify that the certificates APIs function as expected"""

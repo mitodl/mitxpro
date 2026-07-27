@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 null=True,
                 validators=[
                     django.core.validators.MinValueValidator(
-                        Decimal("0"), message="Price cannot be negative"
+                        Decimal(0), message="Price cannot be negative"
                     )
                 ],
             ),
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 null=True,
                 validators=[
                     django.core.validators.MinValueValidator(
-                        Decimal("0"), message="Price cannot be negative"
+                        Decimal(0), message="Price cannot be negative"
                     )
                 ],
             ),

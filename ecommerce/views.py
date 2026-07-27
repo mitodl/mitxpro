@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q, OuterRef, Subquery, Prefetch
+from django.db.models import Count, OuterRef, Prefetch, Q, Subquery
 from django.http import Http404
 from django.shortcuts import render
 from django_filters import rest_framework as filters
@@ -39,10 +39,6 @@ from ecommerce.constants import (
     COUPON_ADD_PERMISSION,
     COUPON_UPDATE_PERMISSION,
 )
-from sheets.constants import (
-    COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION,
-    COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION,
-)
 from ecommerce.exceptions import ParseException
 from ecommerce.filters import ProductFilter
 from ecommerce.mail_api import send_ecommerce_order_receipt
@@ -51,11 +47,11 @@ from ecommerce.models import (
     BulkCouponAssignment,
     Company,
     Coupon,
+    CouponEligibility,
     CouponPaymentVersion,
     Order,
     Product,
     Receipt,
-    CouponEligibility,
 )
 from ecommerce.permissions import (
     HasCouponPermission,
@@ -68,8 +64,8 @@ from ecommerce.serializers import (
     OrderReceiptSerializer,
     ProductSerializer,
     ProgramRunSerializer,
-    PromoCouponSerializer,
     PromoCouponDetailSerializer,
+    PromoCouponSerializer,
     PromoCouponUpdateSerializer,
     SingleUseCouponSerializer,
 )
@@ -81,6 +77,10 @@ from mitxpro.utils import (
     now_in_utc,
 )
 from mitxpro.views import get_base_context
+from sheets.constants import (
+    COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION,
+    COUPON_PRODUCT_ASSIGNMENT_UPDATE_PERMISSION,
+)
 
 log = logging.getLogger(__name__)
 
@@ -200,8 +200,8 @@ class CheckoutView(APIView):
     def post(
         self,
         request,
-        *args,  # noqa: ARG002
-        **kwargs,  # noqa: ARG002
+        *args,
+        **kwargs,
     ):
         """
         Create a new unfulfilled Order from the user's basket
@@ -268,7 +268,7 @@ class OrderFulfillmentView(APIView):
     authentication_classes = ()
     permission_classes = (IsSignedByCyberSource,)
 
-    def post(self, request, *args, **kwargs):  # noqa: ARG002
+    def post(self, request, *args, **kwargs):
         """
         Confirmation from CyberSource which fulfills an existing Order.
         """
@@ -280,7 +280,7 @@ class OrderFulfillmentView(APIView):
                 fulfill_order(request.data)
             else:
                 raise ParseException(
-                    f"Unknown prefix '{reference_number}' for reference number"  # noqa: EM102
+                    f"Unknown prefix '{reference_number}' for reference number"
                 )
         except:
             # Not sure what would cause an error here but make sure we save the receipt
@@ -394,7 +394,7 @@ class CouponListView(APIView):
     permission_classes = (HasCouponPermission,)
     authentication_classes = (SessionAuthentication,)
 
-    def post(self, request, *args, **kwargs):  # noqa: ARG002
+    def post(self, request, *args, **kwargs):
         """Create coupon(s) and related objects"""
         # Determine what kind of coupon this is.
         if request.data.get("coupon_type") == CouponPaymentVersion.SINGLE_USE:

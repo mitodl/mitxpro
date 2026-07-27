@@ -73,7 +73,7 @@ class ChangeEmailRequestViewSet(
         )
 
     def get_serializer_class(self):
-        if self.action == "create":  # noqa: RET503
+        if self.action == "create":
             return ChangeEmailRequestCreateSerializer
         elif self.action == "partial_update":
             return ChangeEmailRequestUpdateSerializer
@@ -84,7 +84,7 @@ class CountriesStatesViewSet(viewsets.ViewSet):
 
     permission_classes = []
 
-    def list(self, request):  # noqa: ARG002
+    def list(self, request):
         """Get generator for countries/states list"""
         queryset = sorted(pycountry.countries, key=lambda country: country.name)
         serializer = CountrySerializer(queryset, many=True)

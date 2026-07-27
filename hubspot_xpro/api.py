@@ -385,7 +385,7 @@ def sync_deal_line_hubspot_ids_to_db(order, hubspot_order_id) -> bool:
 
 def get_hubspot_id_for_object(
     obj: Order or B2BOrder or Product or Line or B2BLine or User,
-    raise_error: bool = False,  # noqa: FBT001, FBT002
+    raise_error: bool = False,
 ) -> str:
     """
     Get the hubspot id for an object, querying Hubspot if necessary
@@ -408,14 +408,14 @@ def get_hubspot_id_for_object(
         return hubspot_obj.hubspot_id
     if isinstance(obj, User):
         hubspot_obj = find_contact(obj.email)
-    elif isinstance(obj, (B2BOrder, Order)):  # noqa: UP038
+    elif isinstance(obj, (B2BOrder, Order)):
         serialized_deal = get_hubspot_serializer(obj).data
         hubspot_obj = find_deal(
             name=serialized_deal["dealname"],
             amount=serialized_deal["amount"],
             raise_count_error=raise_error,
         )
-    elif isinstance(obj, (Line, B2BLine)):  # noqa: UP038
+    elif isinstance(obj, (Line, B2BLine)):
         serialized_line = get_hubspot_serializer(obj).data
         order_id = get_hubspot_id_for_object(obj.order)
         if order_id:
@@ -432,7 +432,7 @@ def get_hubspot_id_for_object(
             price=serialized_product["price"],
             raise_count_error=raise_error,
         )
-    if hubspot_obj and hubspot_obj.id:  # noqa: RET503
+    if hubspot_obj and hubspot_obj.id:
         HubspotObject.objects.update_or_create(
             object_id=obj.id,
             content_type=content_type,

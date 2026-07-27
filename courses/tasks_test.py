@@ -7,16 +7,16 @@ import pytest
 from django.utils.timezone import now
 
 from cms.models import CertificatePage
-from users.factories import UserFactory
 from courses.factories import CourseRunFactory, PlatformFactory
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
 )
 from courses.tasks import (
+    generate_course_certificates,
     sync_courseruns_data,
     task_sync_external_course_runs,
-    generate_course_certificates,
 )
+from users.factories import UserFactory
 
 pytestmark = [pytest.mark.django_db]
 

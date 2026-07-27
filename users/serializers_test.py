@@ -41,39 +41,39 @@ def test_validate_legal_address(sample_address):
 
 
 @pytest.mark.parametrize(
-    "field,value,error",  # noqa: PT006
+    "field,value,error",
     [
-        ["first_name", "", "This field may not be blank."],  # noqa: PT007
-        ["last_name", "", "This field may not be blank."],  # noqa: PT007
-        ["street_address", [], "street_address must be a list of street lines"],  # noqa: PT007
-        [  # noqa: PT007
+        ["first_name", "", "This field may not be blank."],
+        ["last_name", "", "This field may not be blank."],
+        ["street_address", [], "street_address must be a list of street lines"],
+        [
             "street_address",
             ["a", "b", "c", "d", "e", "f"],
             "street_address list must be 5 items or less",
         ],
-        [  # noqa: PT007
+        [
             "street_address",
             ["x" * 61],
             "street_address lines must be 60 characters or less",
         ],
-        ["country", "", "This field may not be blank."],  # noqa: PT007
-        ["country", None, "This field may not be null."],  # noqa: PT007
-        ["state_or_territory", "", "State/territory is required for United States"],  # noqa: PT007
-        [  # noqa: PT007
+        ["country", "", "This field may not be blank."],
+        ["country", None, "This field may not be null."],
+        ["state_or_territory", "", "State/territory is required for United States"],
+        [
             "state_or_territory",
             "CA-QC",
             "Quebec is not a valid state or territory of United States",
         ],
-        ["city", "", "This field may not be blank."],  # noqa: PT007
-        ["postal_code", "", "Postal Code is required for United States"],  # noqa: PT007
-        [  # noqa: PT007
+        ["city", "", "This field may not be blank."],
+        ["postal_code", "", "Postal Code is required for United States"],
+        [
             "postal_code",
             "3082",
             "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'",
         ],
     ],
 )
-def test_validate_required_fields_US_CA(sample_address, field, value, error):  # noqa: N802
+def test_validate_required_fields_US_CA(sample_address, field, value, error):
     """Test that missing required fields causes a validation error"""
     sample_address[field] = value
     serializer = LegalAddressSerializer(data=sample_address)
@@ -82,13 +82,13 @@ def test_validate_required_fields_US_CA(sample_address, field, value, error):  #
 
 
 @pytest.mark.parametrize(
-    "data,error",  # noqa: PT006
+    "data,error",
     [
-        [  # noqa: PT007
+        [
             {"country": "US", "state_or_territory": "US-MA", "postal_code": "2183"},
             "Postal Code must be in the format 'NNNNN' or 'NNNNN-NNNNN'",
         ],
-        [  # noqa: PT007
+        [
             {"country": "CA", "state_or_territory": "CA-BC", "postal_code": "AFA D"},
             "Postal Code must be in the format 'ANA NAN'",
         ],
@@ -210,7 +210,7 @@ def test_update_email_change_request_existing_email(user):
     )
     serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
 
-    with pytest.raises(ValidationError):  # noqa: PT012
+    with pytest.raises(ValidationError):
         serializer.is_valid()
         serializer.save()
 
@@ -220,7 +220,7 @@ def test_create_email_change_request_same_email(user):
     change_request = ChangeEmailRequest.objects.create(user=user, new_email=user.email)
     serializer = ChangeEmailRequestUpdateSerializer(change_request, {"confirmed": True})
 
-    with pytest.raises(ValidationError):  # noqa: PT012
+    with pytest.raises(ValidationError):
         serializer.is_valid()
         serializer.save()
 

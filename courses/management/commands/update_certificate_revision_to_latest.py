@@ -1,8 +1,9 @@
 """Management command to update certificate revisions to the latest version."""
 
 from django.core.management.base import BaseCommand, CommandError
-from courses.models import CourseRun, CourseRunCertificate, Program, ProgramCertificate
+
 from cms.models import CertificatePage
+from courses.models import CourseRun, CourseRunCertificate, Program, ProgramCertificate
 
 
 class Command(BaseCommand):

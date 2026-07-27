@@ -15,7 +15,7 @@ class IsSignedByCyberSource(BasePermission):
     Confirms that the message is signed by CyberSource
     """
 
-    def has_permission(self, request, view):  # noqa: ARG002
+    def has_permission(self, request, view):
         """
         Returns true if request params are signed by CyberSource
         """
@@ -37,7 +37,7 @@ class HasCouponPermission(BasePermission):
     Custom permission to check if the user has the correct coupon permissions based on the HTTP method.
     """
 
-    def has_permission(self, request, view):  # noqa: ARG002
+    def has_permission(self, request, view):
         if request.method == "POST":
             return request.user.has_perm(COUPON_ADD_PERMISSION)
 

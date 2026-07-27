@@ -239,5 +239,5 @@ class Migration(migrations.Migration):
         ),
         # Commenting this, The fields in this data migration are being removed now as cleanup.
         # So the build fails on the fresh instance since it runs this migration
-        # migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),  # noqa: ERA001
+        # migrations.RunPython(migrate_external_courseware, migrations.RunPython.noop),
     ]

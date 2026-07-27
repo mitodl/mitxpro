@@ -214,7 +214,7 @@ class DataConsentAgreementFactory(DjangoModelFactory):
     is_global = False
 
     @post_generation
-    def courses(self, create, extracted, **kwargs):  # noqa: ARG002
+    def courses(self, create, extracted, **kwargs):
         """Create courses for DCA"""
         if not create:
             return

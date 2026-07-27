@@ -1,8 +1,8 @@
 """Tests for sheets.management.utils"""
 
-import pytest
-
 from unittest.mock import MagicMock
+
+import pytest
 
 from sheets.management import utils
 from sheets.management.utils import CouponAssignmentError

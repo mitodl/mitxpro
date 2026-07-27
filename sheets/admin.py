@@ -68,7 +68,7 @@ class GoogleFileWatchAdmin(admin.ModelAdmin):
             file_id = form.cleaned_data["file_id"]
             if self.model.objects.filter(file_id=file_id).exists():
                 raise ValidationError(
-                    f"Only one GoogleFileWatch object should exist for each unique file_id (file_id provided: {file_id}). "  # noqa: EM102
+                    f"Only one GoogleFileWatch object should exist for each unique file_id (file_id provided: {file_id}). "
                     "Update the existing object instead of creating a new one."
                 )
         return super().save_form(request, form, change)

@@ -3,8 +3,8 @@
 import datetime
 import operator as op
 import os
-from decimal import Decimal
 from datetime import timedelta
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -15,6 +15,13 @@ from ecommerce.models import Order
 from mitxpro import features
 from mitxpro.test_utils import MockResponse
 from mitxpro.utils import (
+    ERROR_END_AFTER_START,
+    ERROR_END_IN_FUTURE,
+    ERROR_ENROLLMENT_ORDER,
+    ERROR_EXPIRATION_AFTER_END,
+    ERROR_EXPIRATION_AFTER_START,
+    ERROR_START_OR_ENROLLMENT_END_FUTURE,
+    ERROR_START_OR_ENROLLMENT_END_REQUIRED,
     all_equal,
     all_unique,
     clean_url,
@@ -26,7 +33,6 @@ from mitxpro.utils import (
     first_or_none,
     format_datetime_for_filename,
     format_price,
-    validate_courserun_dates,
     get_error_response_summary,
     get_field_names,
     get_js_settings,
@@ -48,15 +54,9 @@ from mitxpro.utils import (
     strip_datetime,
     unique,
     unique_ignore_case,
+    validate_courserun_dates,
     webpack_dev_server_host,
     webpack_dev_server_url,
-    ERROR_START_OR_ENROLLMENT_END_REQUIRED,
-    ERROR_START_OR_ENROLLMENT_END_FUTURE,
-    ERROR_END_AFTER_START,
-    ERROR_ENROLLMENT_ORDER,
-    ERROR_END_IN_FUTURE,
-    ERROR_EXPIRATION_AFTER_START,
-    ERROR_EXPIRATION_AFTER_END,
 )
 
 now = now_in_utc()
@@ -226,11 +226,11 @@ def test_partition_to_lists():
 
 
 @pytest.mark.parametrize(
-    "url, expected",  # noqa: PT006
+    "url, expected",
     [
-        ["", ""],  # noqa: PT007
-        ["http://url.com/url/here#other", "http://url.com/url/here#other"],  # noqa: PT007
-        ["https://user:pass@sentry.io/12345", "https://user@sentry.io/12345"],  # noqa: PT007
+        ["", ""],
+        ["http://url.com/url/here#other", "http://url.com/url/here#other"],
+        ["https://user:pass@sentry.io/12345", "https://user@sentry.io/12345"],
     ],
 )
 def test_remove_password_from_url(url, expected):
@@ -361,8 +361,8 @@ def test_group_into_dict():
 
 
 @pytest.mark.parametrize(
-    "price,expected",  # noqa: PT006
-    [[Decimal("0"), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],  # noqa: PT007
+    "price,expected",
+    [[Decimal(0), "$0.00"], [Decimal("1234567.89"), "$1,234,567.89"]],
 )
 def test_format_price(price, expected):
     """Format a decimal value into a price"""
@@ -370,11 +370,11 @@ def test_format_price(price, expected):
 
 
 @pytest.mark.parametrize(
-    "content,content_type,exp_summary_content,exp_url_in_summary",  # noqa: PT006
+    "content,content_type,exp_summary_content,exp_url_in_summary",
     [
-        ['{"bad": "response"}', "application/json", '{"bad": "response"}', False],  # noqa: PT007
-        ["plain text", "text/plain", "plain text", False],  # noqa: PT007
-        [  # noqa: PT007
+        ['{"bad": "response"}', "application/json", '{"bad": "response"}', False],
+        ["plain text", "text/plain", "plain text", False],
+        [
             "<div>HTML content</div>",
             "text/html; charset=utf-8",
             "(HTML body ignored)",
@@ -401,11 +401,11 @@ def test_get_error_response_summary(
 
 
 @pytest.mark.parametrize(
-    "content,content_type,expected",  # noqa: PT006
+    "content,content_type,expected",
     [
-        ['{"bad": "response"}', "application/json", True],  # noqa: PT007
-        ["plain text", "text/plain", False],  # noqa: PT007
-        ["<div>HTML content</div>", "text/html; charset=utf-8", False],  # noqa: PT007
+        ['{"bad": "response"}', "application/json", True],
+        ["plain text", "text/plain", False],
+        ["<div>HTML content</div>", "text/html; charset=utf-8", False],
     ],
 )
 def test_is_json_response(content, content_type, expected):

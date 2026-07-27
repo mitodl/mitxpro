@@ -101,7 +101,7 @@ def now_in_utc():
     return datetime.datetime.now(tz=datetime.UTC)
 
 
-def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):  # noqa: FBT002
+def format_datetime_for_filename(datetime_object, include_time=False, include_ms=False):
     """
     Formats a datetime object for use as part of a filename
 
@@ -164,7 +164,7 @@ def serialize_model_object(obj):
             A representation of the model
     """
     # serialize works on iterables so we need to wrap object in a list, then unwrap it
-    if obj:  # noqa: RET503
+    if obj:
         data = json.loads(serialize("json", [obj]))[0]
         serialized = data["fields"]
         serialized["id"] = data["pk"]
@@ -183,7 +183,7 @@ def get_field_names(model):
     """
     return [
         field.name
-        for field in model._meta.get_fields()  # noqa: SLF001
+        for field in model._meta.get_fields()
         if not field.auto_created
     ]
 
@@ -456,8 +456,8 @@ class ValidateOnSaveMixin(models.Model):
 
     def save(
         self,
-        force_insert=False,  # noqa: FBT002
-        force_update=False,  # noqa: FBT002
+        force_insert=False,
+        force_update=False,
         **kwargs,
     ):
         if not (force_insert or force_update):
@@ -558,7 +558,7 @@ def request_get_with_timeout_retry(url, retries):
     Raises:
         requests.exceptions.HTTPError: Raised if the response has a status code indicating an error
     """
-    resp = requests.get(url)  # noqa: S113
+    resp = requests.get(url)
     # If there was a timeout (504), retry before giving up
     tries = 1
     while resp.status_code == status.HTTP_504_GATEWAY_TIMEOUT and tries < retries:
@@ -566,7 +566,7 @@ def request_get_with_timeout_retry(url, retries):
         log.warning(
             "GET request timed out (%s). Retrying for attempt %d...", url, tries
         )
-        resp = requests.get(url)  # noqa: S113
+        resp = requests.get(url)
     resp.raise_for_status()
     return resp
 

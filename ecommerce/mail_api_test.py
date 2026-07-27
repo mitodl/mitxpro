@@ -36,7 +36,6 @@ from ecommerce.mail_api import (
     send_enrollment_failure_message,
 )
 from ecommerce.models import Order
-from mitxpro.features import ENROLLMENT_WELCOME_EMAIL
 from mail.api import EmailMetadata, UserMessageProps
 from mail.constants import (
     EMAIL_B2B_RECEIPT,
@@ -44,6 +43,7 @@ from mail.constants import (
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
 )
+from mitxpro.features import ENROLLMENT_WELCOME_EMAIL
 from mitxpro.utils import format_price
 from users.factories import UserFactory
 

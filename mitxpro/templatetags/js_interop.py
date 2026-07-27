@@ -16,7 +16,7 @@ def js_settings(context):
     request = context["request"]
     js_settings_json = json.dumps(get_js_settings(request))
 
-    return mark_safe(  # noqa: S308
+    return mark_safe(
         f"""<script type="text/javascript">
 var SETTINGS = {js_settings_json};
 </script>"""

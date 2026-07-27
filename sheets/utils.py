@@ -55,8 +55,8 @@ def get_column_letter(column_index):
     Returns:
         str: The column index expressed as a letter
     """
-    if column_index > 25:  # noqa: PLR2004
-        raise ValueError("Cannot generate a column letter past 'Z'")  # noqa: EM101
+    if column_index > 25:
+        raise ValueError("Cannot generate a column letter past 'Z'")
     uppercase_a_ord = ord("A")
     return chr(column_index + uppercase_a_ord)
 
@@ -164,7 +164,7 @@ class RefundRequestSheetMetadata(SingletonSheetMetadata):
         self.num_columns = self.SKIP_ROW_COL + 1
         self.non_input_column_indices = set(
             # Response ID column
-            [self.FORM_RESPONSE_ID_COL]  # noqa: RUF005
+            [self.FORM_RESPONSE_ID_COL]
             +
             # Every column from the finance columns to the end of the row
             list(range(8, self.num_columns))
@@ -193,7 +193,7 @@ class DeferralRequestSheetMetadata(SingletonSheetMetadata):
         self.num_columns = self.SKIP_ROW_COL + 1
         self.non_input_column_indices = set(
             # Response ID column
-            [self.FORM_RESPONSE_ID_COL]  # noqa: RUF005
+            [self.FORM_RESPONSE_ID_COL]
             +
             # Every column from the finance columns to the end of the row
             list(range(self.PROCESSOR_COL, self.num_columns))
@@ -253,17 +253,17 @@ class ResultType(Enum):
         return self.value < other.value
 
 
-RowResult = namedtuple(  # noqa: PYI024
+RowResult = namedtuple(
     "RowResult", ["row_index", "row_db_record", "row_object", "message", "result_type"]
 )
-ProcessedRequest = namedtuple(  # noqa: PYI024
+ProcessedRequest = namedtuple(
     "ProcessedRequest", ["row_index", "coupon_req_row", "request_id", "date_processed"]
 )
-FailedRequest = namedtuple(  # noqa: PYI024
+FailedRequest = namedtuple(
     "FailedRequest", ["row_index", "exception", "sheet_error_text"]
 )
-IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])  # noqa: PYI024
-AssignmentRowUpdate = namedtuple(  # noqa: PYI024
+IgnoredRequest = namedtuple("IgnoredRequest", ["row_index", "coupon_req_row", "reason"])
+AssignmentRowUpdate = namedtuple(
     "AssignmentRowUpdate", ["row_index", "status", "status_date", "alternate_email"]
 )
 
@@ -288,7 +288,7 @@ def assignment_sheet_file_name(coupon_req_row):
     )
 
 
-def get_data_rows(worksheet, include_trailing_empty=False):  # noqa: FBT002
+def get_data_rows(worksheet, include_trailing_empty=False):
     """
     Yield the data rows of a spreadsheet that has a header row
 
@@ -377,7 +377,7 @@ def spreadsheet_repr(spreadsheet=None, spreadsheet_metadata=None):
     else:
         sheet_id, title = None, None
     if not sheet_id or not title:
-        raise ValueError("Invalid spreadsheet/metadata provided")  # noqa: EM101
+        raise ValueError("Invalid spreadsheet/metadata provided")
     return f"'{title}', id: {sheet_id}"
 
 
@@ -571,13 +571,13 @@ def build_multi_cell_update_request_body(
     }
 
 
-def build_protected_range_request_body(  # noqa: PLR0913
+def build_protected_range_request_body(
     start_row_index,
     num_rows,
     start_col_index,
     num_cols,
     worksheet_id=0,
-    warning_only=False,  # noqa: FBT002
+    warning_only=False,
     description=None,
 ):
     """

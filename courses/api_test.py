@@ -195,10 +195,10 @@ def test_create_run_enrollments_api_fail(mocker, user, exception_cls):
 @pytest.mark.django_db
 @pytest.mark.parametrize("keep_failed_enrollments", [True, False])
 @pytest.mark.parametrize(
-    "exception_cls,inner_exception",  # noqa: PT006
+    "exception_cls,inner_exception",
     [
-        [EdxApiEnrollErrorException, MockHttpError()],  # noqa: PT007
-        [UnknownEdxApiEnrollException, Exception()],  # noqa: PT007
+        [EdxApiEnrollErrorException, MockHttpError()],
+        [UnknownEdxApiEnrollException, Exception()],
     ],
 )
 def test_create_run_enrollments_enroll_api_fail(

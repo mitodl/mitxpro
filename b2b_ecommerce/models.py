@@ -154,7 +154,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
     discount = models.DecimalField(
         decimal_places=2, max_digits=20, null=True, blank=True
     )
-    contract_number = models.CharField(max_length=50, null=True, blank=True)  # noqa: DJ001
+    contract_number = models.CharField(max_length=50, null=True, blank=True)
     program_run = models.ForeignKey(
         "courses.ProgramRun",
         blank=True,
@@ -188,10 +188,7 @@ class B2BOrder(OrderAbstract, AuditableModel):
                 **serialize_model_object(self.product_version),
                 "product_info": {
                     **serialize_model_object(self.product_version.product),
-                    "content_type_string": "{} | {}".format(
-                        self.product_version.product.content_type.app_label,
-                        self.product_version.product.content_type.name,
-                    ),
+                    "content_type_string": f"{self.product_version.product.content_type.app_label} | {self.product_version.product.content_type.name}",
                     "content_object": serialize_model_object(
                         self.product_version.product.content_object
                     ),

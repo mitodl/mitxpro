@@ -26,15 +26,15 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Handle command execution"""
         runs = []
         if options["run"]:
             try:
                 runs = [CourseRun.objects.get(courseware_id=options["run"])]
             except CourseRun.DoesNotExist:
-                raise CommandError(  # noqa: B904
-                    "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
+                raise CommandError(
+                    "Could not find run with courseware_id={}".format(options["run"])
                 )
         else:
             # We pick up all the course runs that do not have an expiration date (implies not having

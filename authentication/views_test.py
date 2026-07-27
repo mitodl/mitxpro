@@ -57,14 +57,14 @@ def email_user(user):
     return user
 
 
-def assert_api_call(  # noqa: PLR0913
+def assert_api_call(
     client,
     url,
     payload,
     expected,
-    expect_authenticated=False,  # noqa: FBT002
+    expect_authenticated=False,
     expect_status=status.HTTP_200_OK,
-    use_defaults=True,  # noqa: FBT002
+    use_defaults=True,
 ):
     """Run the API call and perform basic assertions"""
     assert bool(get_user(client).is_authenticated) is False
@@ -170,7 +170,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         # shared data
         self.email = fake.email()
         self.user = None
-        self.password = "password123"  # noqa: S105
+        self.password = "password123"
 
         # track whether we've hit an action that starts a flow or not
         self.flow_started = False
@@ -212,7 +212,7 @@ class AuthStateMachine(RuleBasedStateMachine):
             mock_recaptcha_success = None
             if recaptcha_enabled:
                 mock_recaptcha_success = stack.enter_context(self.recaptcha_patcher)
-                stack.enter_context(override_settings(**{"RECAPTCHA_SITE_KEY": "fake"}))
+                stack.enter_context(override_settings(RECAPTCHA_SITE_KEY="fake"))
             result = assert_api_call(
                 self.client,
                 "psa-register-email",
@@ -245,7 +245,7 @@ class AuthStateMachine(RuleBasedStateMachine):
             mock_recaptcha_success = None
             if recaptcha_enabled:
                 mock_recaptcha_success = stack.enter_context(self.recaptcha_patcher)
-                stack.enter_context(override_settings(**{"RECAPTCHA_SITE_KEY": "fake"}))
+                stack.enter_context(override_settings(RECAPTCHA_SITE_KEY="fake"))
 
             result = assert_api_call(
                 self.client,
@@ -280,7 +280,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                     status_code=status.HTTP_200_OK,
                 ),
             ) as mock_recaptcha_failure,
-            override_settings(**{"RECAPTCHA_SITE_KEY": "fakse"}),
+            override_settings(RECAPTCHA_SITE_KEY="fakse"),
         ):
             assert_api_call(
                 self.client,

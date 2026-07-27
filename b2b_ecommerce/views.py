@@ -45,8 +45,8 @@ class B2BCheckoutView(APIView):
     def post(
         self,
         request,
-        *args,  # noqa: ARG002
-        **kwargs,  # noqa: ARG002
+        *args,
+        **kwargs,
     ):
         """
         Create a new unfulfilled Order from the user's basket
@@ -60,17 +60,17 @@ class B2BCheckoutView(APIView):
             contract_number = request.data.get("contract_number")
             run_id = request.data.get("run_id")
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102
+            raise ValidationError(f"Missing parameter {ex.args[0]}")
 
         try:
             validate_email(email)
         except DjangoValidationError:
-            raise ValidationError({"email": "Invalid email"})  # noqa: B904
+            raise ValidationError({"email": "Invalid email"})
 
         try:
             num_seats = int(num_seats)
         except ValueError:
-            raise ValidationError({"num_seats": "num_seats must be a number"})  # noqa: B904
+            raise ValidationError({"num_seats": "num_seats must be a number"})
 
         if (
             contract_number
@@ -146,7 +146,7 @@ class B2BOrderStatusView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # noqa: ARG002
+    def get(self, request, *args, **kwargs):
         """Return B2B order status and other information about the order needed to display the receipt"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(B2BOrder, unique_id=order_hash)
@@ -198,7 +198,7 @@ class B2BEnrollmentCodesView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # noqa: ARG002
+    def get(self, request, *args, **kwargs):
         """Create a CSV with enrollment codes"""
         order_hash = kwargs["hash"]
         order = get_object_or_404(
@@ -238,14 +238,14 @@ class B2BCouponView(APIView):
     authentication_classes = ()
     permission_classes = ()
 
-    def get(self, request, *args, **kwargs):  # noqa: ARG002
+    def get(self, request, *args, **kwargs):
         """Get information about a coupon"""
         product = None
         try:
             coupon_code = request.GET["code"]
             product_id = request.GET["product_id"]
         except KeyError as ex:
-            raise ValidationError(f"Missing parameter {ex.args[0]}")  # noqa: B904, EM102
+            raise ValidationError(f"Missing parameter {ex.args[0]}")
 
         try:
             # product_id can be an integer e.g. 1234 or
@@ -261,7 +261,7 @@ class B2BCouponView(APIView):
                 coupon_code=coupon_code, product_id=product_id
             )
         except B2BCoupon.DoesNotExist:
-            raise Http404  # noqa: B904
+            raise Http404
 
         return Response(
             data={

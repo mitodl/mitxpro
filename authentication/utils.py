@@ -16,7 +16,7 @@ class SocialAuthState:
 
     # login states
     STATE_LOGIN_EMAIL = "login/email"
-    STATE_LOGIN_PASSWORD = "login/password"  # noqa: S105
+    STATE_LOGIN_PASSWORD = "login/password"
     STATE_LOGIN_PROVIDER = "login/provider"
 
     # registration states
@@ -37,7 +37,7 @@ class SocialAuthState:
     STATE_INVALID_LINK = "invalid-link"
     STATE_EXISTING_ACCOUNT = "existing-account"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         state,
         *,
@@ -72,7 +72,7 @@ def load_drf_strategy(request=None):
 
 def get_md5_hash(value):
     """Returns the md5 hash object for the given value"""
-    return hashlib.md5(value.lower().encode("utf-8"))  # noqa: S324
+    return hashlib.md5(value.lower().encode("utf-8"))
 
 
 def is_user_email_blocked(email):

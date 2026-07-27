@@ -5,7 +5,6 @@ from rest_framework import status
 
 from mitxpro.middleware import HostnameRedirectMiddleware
 
-
 CANONICAL_URL = "https://xpro.mit.edu"
 CANONICAL_HOST = "xpro.mit.edu"
 WRONG_HOST = "xpro-web.odl.mit.edu"

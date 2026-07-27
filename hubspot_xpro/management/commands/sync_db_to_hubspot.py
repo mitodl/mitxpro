@@ -39,7 +39,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.CONTACTS.value,
             ContentType.objects.get_for_model(User).model,
-            User._meta.app_label,  # noqa: SLF001
+            User._meta.app_label,
             create=self.create,
             object_ids=self.object_ids,
         )
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.PRODUCTS.value,
             ContentType.objects.get_for_model(Product).model,
-            Product._meta.app_label,  # noqa: SLF001
+            Product._meta.app_label,
             create=self.create,
             object_ids=self.object_ids,
         )
@@ -95,7 +95,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.DEALS.value,
             ContentType.objects.get_for_model(Order).model,
-            Order._meta.app_label,  # noqa: SLF001
+            Order._meta.app_label,
             self.create,
             object_ids=self.object_ids,
         )
@@ -115,7 +115,7 @@ class Command(BaseCommand):
         task = batch_upsert_hubspot_objects.delay(
             HubspotObjectType.LINES.value,
             ContentType.objects.get_for_model(Line).model,
-            Line._meta.app_label,  # noqa: SLF001
+            Line._meta.app_label,
             self.create,
             object_ids=self.object_ids,
         )
@@ -212,7 +212,7 @@ class Command(BaseCommand):
             help="create or update",
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         if not options["mode"]:
             sys.stderr.write("You must specify mode ('create' or 'update')\n")
             sys.exit(1)

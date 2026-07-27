@@ -55,7 +55,7 @@ def test_base_program_serializer():
 @pytest.mark.parametrize("is_external", [True, False])
 @pytest.mark.parametrize("program_format", [FORMAT_ONLINE, FORMAT_HYBRID])
 @pytest.mark.parametrize(
-    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
     [
         (
             "2 weeks",
@@ -83,7 +83,7 @@ def test_base_program_serializer():
         ),
     ],
 )
-def test_serialize_program(  # noqa: PLR0913
+def test_serialize_program(
     mock_context,
     has_product,
     is_external,
@@ -209,7 +209,7 @@ def test_base_course_serializer():
 @pytest.mark.parametrize("course_page", [True, False])
 @pytest.mark.parametrize("course_format", [FORMAT_ONLINE, FORMAT_HYBRID])
 @pytest.mark.parametrize(
-    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",  # noqa: PT006
+    "duration, min_weeks, max_weeks, time_commitment, min_weekly_hours, max_weekly_hours, video_url, ceus, external_marketing_url, marketing_hubspot_form_id",
     [
         (
             "2 weeks",
@@ -237,7 +237,7 @@ def test_base_course_serializer():
         ),
     ],
 )
-def test_serialize_course(  # noqa: PLR0913
+def test_serialize_course(
     mock_context,
     is_anonymous,
     all_runs,

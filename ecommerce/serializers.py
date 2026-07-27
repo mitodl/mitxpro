@@ -83,7 +83,7 @@ class ProductVersionSerializer(BaseProductVersionSerializer):
         return instance.product.content_type.model
 
     class Meta:
-        fields = BaseProductVersionSerializer.Meta.fields + [  # noqa: RUF005
+        fields = BaseProductVersionSerializer.Meta.fields + [
             "id",
             "object_id",
             "product_id",
@@ -124,7 +124,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
                 courses, many=True, context={**self.context, "filter_products": False}
             ).data
         else:
-            raise ValueError(f"Unexpected product for {model_class}")  # noqa: EM102
+            raise ValueError(f"Unexpected product for {model_class}")
 
     def get_thumbnail_url(self, instance):
         """Return the thumbnail for the courserun or program"""
@@ -134,7 +134,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         elif isinstance(content_object, CourseRun):
             catalog_image_url = content_object.course.catalog_image_url
         else:
-            raise ValueError(f"Unexpected product {content_object}")  # noqa: EM102, TRY004
+            raise ValueError(f"Unexpected product {content_object}")  # noqa: TRY004
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     def get_run_tag(self, instance):
@@ -160,7 +160,7 @@ class FullProductVersionSerializer(ProductVersionSerializer):
         return None
 
     class Meta:
-        fields = ProductVersionSerializer.Meta.fields + [  # noqa: RUF005
+        fields = ProductVersionSerializer.Meta.fields + [
             "start_date",
             "thumbnail_url",
             "run_tag",
@@ -215,7 +215,7 @@ class ProductContentObjectField(serializers.RelatedField):
         elif isinstance(value, CourseRun):
             return CourseRunProductContentObjectSerializer(instance=value).data
         raise Exception(  # noqa: TRY002
-            "Unexpected to find type for Product.content_object:",  # noqa: EM101
+            "Unexpected to find type for Product.content_object:",
             value.__class__,
         )
 
@@ -437,16 +437,16 @@ class BasketSerializer(serializers.ModelSerializer):
         return coupon_version
 
     @classmethod
-    def _update_basket_data(  # noqa: PLR0913
+    def _update_basket_data(
         cls,
         basket,
         updated_product=None,
         updated_run_ids=None,
         program_run=None,
-        should_update_program_run=False,  # noqa: FBT002
+        should_update_program_run=False,
         coupon_version=None,
         data_consents=None,
-        clear_all=False,  # noqa: FBT002
+        clear_all=False,
     ):
         """
         Creates/updates/deletes Basket-related data
@@ -582,12 +582,12 @@ class BasketSerializer(serializers.ModelSerializer):
                     and product_content_obj.end_date < now_in_utc()
                 ):
                     raise ValidationError(
-                        "We're sorry, this course or program is no longer available for enrollment."  # noqa: EM101
+                        "We're sorry, this course or program is no longer available for enrollment."
                     )
 
         except (ObjectDoesNotExist, MultipleObjectsReturned) as exc:
             if isinstance(exc, MultipleObjectsReturned):
-                log.error(  # noqa: TRY400
+                log.error(
                     "Multiple Products found with identical ids: %s", request_product_id
                 )
             raise ValidationError(
@@ -611,7 +611,7 @@ class BasketSerializer(serializers.ModelSerializer):
         )
         if course_or_program.is_external:
             raise ValidationError(
-                "We're sorry, This product cannot be purchased on this web site."  # noqa: EM101
+                "We're sorry, This product cannot be purchased on this web site."
             )
 
     def _validate_and_compare_runs(self, basket, items, product):
@@ -644,7 +644,7 @@ class BasketSerializer(serializers.ModelSerializer):
         self._validate_coupons(coupons)
 
         if items is None and coupons is None and data_consents is None:
-            raise ValidationError("Invalid request")  # noqa: EM101
+            raise ValidationError("Invalid request")
 
         if items == []:
             self._update_basket_data(
@@ -713,7 +713,7 @@ class BasketSerializer(serializers.ModelSerializer):
         try:
             order = create_or_update_unfulfilled_order(validated_basket)
             sync_hubspot_deal(order)
-        except Exception:  # noqa: BLE001
+        except Exception:
             log.exception("Failed to sync unfulfilled order for basket %s", basket.id)
 
     @staticmethod
@@ -780,11 +780,11 @@ class BasketSerializer(serializers.ModelSerializer):
         """Validate some basic things about items"""
         if items:
             if len(items) > 1:
-                raise ValidationError("Basket cannot contain more than one item")  # noqa: EM101
+                raise ValidationError("Basket cannot contain more than one item")
             item = items[0]
             product_id = item.get("product_id")
             if product_id is None:
-                raise ValidationError("Invalid request")  # noqa: EM101
+                raise ValidationError("Invalid request")
         return {"items": items}
 
     def validate_coupons(self, coupons):
@@ -802,7 +802,7 @@ class BasketSerializer(serializers.ModelSerializer):
             invalid_consent_ids = set(data_consents) - valid_consent_ids
             if invalid_consent_ids:
                 raise ValidationError(
-                    f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"  # noqa: EM102
+                    f"Invalid data consent id {','.join([str(consent_id) for consent_id in invalid_consent_ids])}"
                 )
         return {"data_consents": data_consents}
 

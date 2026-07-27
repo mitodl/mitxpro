@@ -61,7 +61,7 @@ log = logging.getLogger(__name__)
 class CouponAssignmentRow:
     """Represents a row of a coupon assignment sheet"""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self, row_index, code, assignee_email, status, status_date, enrolled_email
     ):
         self.row_index = row_index
@@ -578,10 +578,10 @@ class CouponAssignmentHandler:
         data_rows = list(get_data_rows(self.worksheet))
         coupon_codes = [row[0] for row in data_rows]
         if not coupon_codes:
-            raise SheetValidationException("No data found in coupon assignment Sheet")  # noqa: EM101
+            raise SheetValidationException("No data found in coupon assignment Sheet")
         if not all_unique(coupon_codes):
             raise SheetValidationException(
-                "All coupon codes in the Sheet must be unique"  # noqa: EM101
+                "All coupon codes in the Sheet must be unique"
             )
         return [
             CouponAssignmentRow.parse_raw_data(
@@ -682,7 +682,7 @@ class CouponAssignmentHandler:
             row_updates=row_updates, zero_based_index=False
         )
 
-    def update_sheet_with_new_statuses(self, row_updates, zero_based_index=False):  # noqa: FBT002
+    def update_sheet_with_new_statuses(self, row_updates, zero_based_index=False):
         """
         Updates the relevant cells of a coupon assignment Sheet with message statuses and dates.
 
@@ -735,7 +735,7 @@ class CouponAssignmentHandler:
             )
         return responses
 
-    def update_sheet_with_alternate_emails(self, row_updates, zero_based_index=False):  # noqa: FBT002
+    def update_sheet_with_alternate_emails(self, row_updates, zero_based_index=False):
         """
         Updates the relevant cells of a coupon assignment Sheet with emails that users enrolled with (if different from
         the email that was originally entered for the assignment).
@@ -820,7 +820,7 @@ class CouponAssignmentHandler:
         ).values_list("coupon__coupon_code", "id")
         if len(product_coupon_tuples) != len(valid_rows):
             raise SheetValidationException(
-                "Mismatch between the number of matching product coupons and the number of coupon "  # noqa: EM101
+                "Mismatch between the number of matching product coupons and the number of coupon "
                 "codes listed in the Sheet. There may be an invalid coupon code in the Sheet."
             )
         product_coupon_dict = dict(product_coupon_tuples)

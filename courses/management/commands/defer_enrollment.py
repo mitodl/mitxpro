@@ -45,7 +45,7 @@ class Command(EnrollmentChangeCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Handle command execution"""
         user = fetch_user(options["user"])
         from_courseware_id = options["from_run"]
@@ -66,13 +66,13 @@ class Command(EnrollmentChangeCommand):
                 message = f"'to' course does not exist ({to_courseware_id})"
             else:
                 message = str(exc)
-            raise CommandError(message)  # noqa: B904
+            raise CommandError(message)
         except ValidationError as exc:
-            raise CommandError(f"Invalid enrollment deferral - {exc}")  # noqa: B904, EM102
+            raise CommandError(f"Invalid enrollment deferral - {exc}")
         else:
             if not to_enrollment:
                 raise CommandError(
-                    "Failed to create/update the target enrollment ({})".format(  # noqa: EM103, UP032
+                    "Failed to create/update the target enrollment ({})".format(  # noqa: UP032
                         to_courseware_id
                     )
                 )

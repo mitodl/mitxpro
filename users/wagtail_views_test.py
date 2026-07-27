@@ -1,8 +1,8 @@
 """Tests for users Wagtail admin views"""
 
-import pytest
 from unittest.mock import patch
 
+import pytest
 from wagtail.users.views.users import IndexView as WagtailUserIndexView
 
 from users.factories import UserFactory

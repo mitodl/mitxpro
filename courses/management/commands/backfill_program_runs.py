@@ -120,7 +120,7 @@ class Command(BaseCommand):
             for run_tag in run_tags_to_create
         ]
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         """Handle command execution"""
         programs = Program.objects.prefetch_related("programruns", "courses")
         if options["program"]:

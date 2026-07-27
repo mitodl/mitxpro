@@ -2,41 +2,41 @@
 Tests for signals
 """
 
-from datetime import timedelta, datetime, timezone
 import re
+from datetime import UTC, datetime, timedelta
 
 import factory
 import pytest
 from edx_api.course_detail import CourseDetail
-from requests.exceptions import HTTPError
 from requests import Response
+from requests.exceptions import HTTPError
 
 from courses.constants import COURSE_KEY_PATTERN
 from courses.factories import (
     CourseFactory,
-    CourseRunFactory,
+    CourseLanguageFactory,
     CourseRunCertificateFactory,
+    CourseRunFactory,
     CourseRunGradeFactory,
+    ProgramCertificateFactory,
     ProgramFactory,
     ProgramRunFactory,
-    ProgramCertificateFactory,
     UserFactory,
-    CourseLanguageFactory,
 )
 from courses.models import CourseRun, Program, ProgramCertificate
 from courses.utils import (
     generate_program_certificate,
+    get_catalog_languages,
     get_courseware_object_from_text_id,
     process_course_run_grade_certificate,
     sync_course_runs,
-    get_catalog_languages,
 )
 from mitxpro.utils import now_in_utc
 
 pytestmark = pytest.mark.django_db
 
-START_DT = datetime(2098, 1, 1, tzinfo=timezone.utc)
-END_DT = datetime(2099, 2, 1, tzinfo=timezone.utc)
+START_DT = datetime(2098, 1, 1, tzinfo=UTC)
+END_DT = datetime(2099, 2, 1, tzinfo=UTC)
 
 
 def make_api_course(course_id, name):
@@ -119,14 +119,14 @@ def create_course_runs():
 
 
 @pytest.mark.parametrize(
-    "grade, passed, exp_certificate, exp_created, exp_deleted",  # noqa: PT006
+    "grade, passed, exp_certificate, exp_created, exp_deleted",
     [
-        [0.25, True, True, True, False],  # noqa: PT007
-        [0.0, True, False, False, False],  # noqa: PT007
-        [1.0, False, False, False, False],  # noqa: PT007
+        [0.25, True, True, True, False],
+        [0.0, True, False, False, False],
+        [1.0, False, False, False, False],
     ],
 )
-def test_course_run_certificate(  # noqa: PLR0913
+def test_course_run_certificate(
     user, course, grade, passed, exp_certificate, exp_created, exp_deleted
 ):
     """
@@ -330,7 +330,7 @@ def test_sync_course_runs(
     save_error_index,
 ):
     """Test sync_course_runs with various scenarios using parameterization"""
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
 
     mock_course_list = mock_course_list_api(mocker, api_response, api_error)
     course_runs = create_course_runs(local_data)

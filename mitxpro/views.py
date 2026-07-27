@@ -17,7 +17,7 @@ from rest_framework.views import APIView
 from mitxpro.serializers import AppContextSerializer
 
 
-def get_base_context(request):  # noqa: ARG001
+def get_base_context(request):
     """
     Returns the template context key/values needed for the base template and all templates that extend it
     """
@@ -31,7 +31,7 @@ def get_base_context(request):  # noqa: ARG001
 
 
 @csrf_exempt
-def index(request, **kwargs):  # noqa: ARG001
+def index(request, **kwargs):
     """
     The index view
     """
@@ -62,7 +62,7 @@ def index(request, **kwargs):  # noqa: ARG001
     return render(request, "index.html", context=context)
 
 
-def handler404(request, exception):  # noqa: ARG001
+def handler404(request, exception):
     """404: NOT FOUND ERROR handler"""
     response = render_to_string(
         "404.html", request=request, context=get_base_context(request)
@@ -78,7 +78,7 @@ def handler500(request):
     return HttpResponseServerError(response)
 
 
-def cms_signin_redirect_to_site_signin(request):  # noqa: ARG001
+def cms_signin_redirect_to_site_signin(request):
     """Redirect wagtail admin signin to site signin page"""
     return redirect_to_login(reverse("wagtailadmin_home"), login_url="/signin")
 
@@ -88,6 +88,6 @@ class AppContextView(APIView):
 
     permission_classes = []
 
-    def get(self, request, *args, **kwargs):  # noqa: ARG002
+    def get(self, request, *args, **kwargs):
         """Read-only access"""
         return Response(AppContextSerializer(request).data)

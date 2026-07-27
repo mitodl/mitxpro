@@ -85,7 +85,7 @@ def test_retire_user_blocking_with_email():
     user = UserFactory.create(email=test_email, is_active=True)
     UserSocialAuthFactory.create(user=user, provider="edX")
     email = user.email
-    hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()  # noqa: S324
+    hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()
     assert user.is_active is True
     assert "retired_email" not in user.email
     assert UserSocialAuth.objects.filter(user=user).count() == 1
@@ -134,7 +134,7 @@ def test_user_blocking_if_not_requested():
     user = UserFactory.create(email=test_email, is_active=True)
     UserSocialAuthFactory.create(user=user, provider="edX")
     email = user.email
-    hashlib.md5(email.lower().encode("utf-8")).hexdigest()  # noqa: S324
+    hashlib.md5(email.lower().encode("utf-8")).hexdigest()
     assert user.is_active is True
     assert "retired_email" not in user.email
     assert UserSocialAuth.objects.filter(user=user).count() == 1

@@ -2,12 +2,13 @@
 Factories for voucher models
 """
 
+from datetime import UTC
+
 import factory
 from factory.django import DjangoModelFactory
 
 from users.factories import UserFactory
 from voucher.models import Voucher
-from datetime import UTC
 
 
 class VoucherFactory(DjangoModelFactory):

@@ -37,7 +37,7 @@ def ensure_active_user(user):
             if created_auth_token:
                 log.info("Created edX auth token for %s", user.email)
         except HTTPError as exc:
-            log.error(  # noqa: TRY400
+            log.error(
                 "%s (%s): Failed to repair (%s)",
                 user.username,
                 user.email,

@@ -14,10 +14,10 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.parametrize(
-    "create_func,exp_staff,exp_superuser,exp_is_active",  # noqa: PT006
+    "create_func,exp_staff,exp_superuser,exp_is_active",
     [
-        [User.objects.create_user, False, False, False],  # noqa: PT007
-        [User.objects.create_superuser, True, True, True],  # noqa: PT007
+        [User.objects.create_user, False, False, False],
+        [User.objects.create_superuser, True, True, True],
     ],
 )
 @pytest.mark.parametrize("password", [None, "pass"])
@@ -50,7 +50,7 @@ def test_create_user_affiliate():
             "username1",
             email="a@b.com",
             name="Jane Doe",
-            password="asdfghjkl1",  # noqa: S106
+            password="asdfghjkl1",
             affiliate_id=affiliate.id,
         )
     affiliate_referral_action = user.affiliate_user_actions.first()
@@ -69,24 +69,24 @@ def test_create_user_affiliate():
 )
 def test_create_superuser_error(kwargs):
     """Test creating a user"""
-    with pytest.raises(ValueError):  # noqa: PT011
+    with pytest.raises(ValueError):
         User.objects.create_superuser(
             username=None,
             email="uSer@EXAMPLE.com",
             name="Jane Doe",
-            password="abc",  # noqa: S106
+            password="abc",
             **kwargs,
         )
 
 
 @pytest.mark.parametrize(
-    "field, value, is_valid",  # noqa: PT006
+    "field, value, is_valid",
     [
-        ["country", "US", True],  # noqa: PT007
-        ["country", "United States", False],  # noqa: PT007
-        ["state_or_territory", "US-MA", True],  # noqa: PT007
-        ["state_or_territory", "MA", False],  # noqa: PT007
-        ["state_or_territory", "Massachusets", False],  # noqa: PT007
+        ["country", "US", True],
+        ["country", "United States", False],
+        ["state_or_territory", "US-MA", True],
+        ["state_or_territory", "MA", False],
+        ["state_or_territory", "Massachusets", False],
     ],
 )
 def test_legal_address_validation(field, value, is_valid):
@@ -114,11 +114,11 @@ def test_faulty_user_qset():
     expected_faulty_users = users[2:]
     OpenEdxApiAuthFactory.create_batch(
         3,
-        user=factory.Iterator(good_users + [users[3]]),  # noqa: RUF005
+        user=factory.Iterator(good_users + [users[3]]),
     )
     CoursewareUserFactory.create_batch(
         3,
-        user=factory.Iterator(good_users + [users[4]]),  # noqa: RUF005
+        user=factory.Iterator(good_users + [users[4]]),
     )
 
     assert set(User.faulty_courseware_users.values_list("id", flat=True)) == {

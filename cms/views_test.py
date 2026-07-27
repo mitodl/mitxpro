@@ -15,8 +15,8 @@ from rest_framework import status
 from wagtail.models import Site
 
 from cms.constants import (
-    ALL_TOPICS,
     ALL_LANGUAGES,
+    ALL_TOPICS,
     ON_DEMAND_WEBINAR,
     UPCOMING_WEBINAR,
     WEBINAR_DEFAULT_IMAGES,
@@ -381,14 +381,14 @@ def test_catalog_page_product(client, wagtail_basics):
 
 
 @pytest.mark.parametrize(
-    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",  # noqa: PT006
+    "topic_filter, expected_courses_count, expected_program_count, expected_selected_topic",
     [
-        [None, 2, 2, ALL_TOPICS],  # noqa: PT007
-        ["Engineering", 1, 1, "Engineering"],  # noqa: PT007
-        ["RandomTopic", 0, 0, "RandomTopic"],  # noqa: PT007
+        [None, 2, 2, ALL_TOPICS],
+        ["Engineering", 1, 1, "Engineering"],
+        ["RandomTopic", 0, 0, "RandomTopic"],
     ],
 )
-def test_catalog_page_topics(  # noqa: PLR0913
+def test_catalog_page_topics(
     client,
     wagtail_basics,
     topic_filter,
@@ -444,8 +444,8 @@ def test_catalog_page_topics(  # noqa: PLR0913
     assert len(resp.context_data["program_pages"]) == expected_program_count
 
 
-@pytest.mark.parametrize(  # noqa: PT007
-    "language_options, selected_language, assign_language, expected_courses_count, expected_program_count",  # noqa: PT006
+@pytest.mark.parametrize(
+    "language_options, selected_language, assign_language, expected_courses_count, expected_program_count",
     [
         [["Language1", "Language2"], ALL_LANGUAGES, "Language1", 2, 2],
         [["Language1", "Language2"], "Language1", "Language1", 2, 2],
@@ -454,7 +454,7 @@ def test_catalog_page_topics(  # noqa: PLR0913
         [["Language1", "Language2"], "Language1", "Language2", 0, 0],
     ],
 )
-def test_catalog_page_languages(  # noqa: PLR0913
+def test_catalog_page_languages(
     mocker,
     client,
     wagtail_basics,

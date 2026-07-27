@@ -21,7 +21,7 @@ class Command(BaseCommand):
             "-r", "--row", type=int, help="Row number in the request Sheet"
         )
 
-    def handle(self, *args, **options):  # noqa: ARG002
+    def handle(self, *args, **options):
         coupon_request_handler = CouponRequestHandler()
         self.stdout.write("Creating coupons and creating/updating Sheets...")
         results = coupon_request_handler.process_sheet(

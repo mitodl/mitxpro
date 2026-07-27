@@ -1,19 +1,20 @@
 """Tests for the update_certificate_revision_to_latest management command."""
 
-import pytest
 from io import StringIO
-from django.core.management import call_command
-from django.core.management.base import CommandError
 from unittest.mock import patch
 
+import pytest
+from django.core.management import call_command
+from django.core.management.base import CommandError
+
+from cms.factories import CertificatePageFactory, CoursePageFactory
 from cms.models import CertificatePage
 from courses.factories import (
-    CourseRunFactory,
     CourseRunCertificateFactory,
-    ProgramFactory,
+    CourseRunFactory,
     ProgramCertificateFactory,
+    ProgramFactory,
 )
-from cms.factories import CertificatePageFactory, CoursePageFactory
 from courses.models import CourseRunCertificate, ProgramCertificate
 
 pytestmark = [pytest.mark.django_db]

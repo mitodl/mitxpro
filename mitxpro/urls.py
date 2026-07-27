@@ -23,16 +23,16 @@ from mitol.common.decorators import cache_control_max_age_jitter
 from oauth2_provider.urls import base_urlpatterns
 from wagtail import urls as wagtail_urls
 from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.api.v2.router import WagtailAPIRouter
 from wagtail.contrib.sitemaps.views import sitemap
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.images.views.serve import ServeView
 from wagtail.utils.urlpatterns import decorate_urlpatterns
-from wagtail.api.v2.router import WagtailAPIRouter
 
 from cms.views import (
-    CustomPagesAPIViewSet,
-    CustomImagesAPIViewSet,
     CustomDocumentsAPIViewSet,
+    CustomImagesAPIViewSet,
+    CustomPagesAPIViewSet,
 )
 from mitxpro.views import (
     AppContextView,

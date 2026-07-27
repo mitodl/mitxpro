@@ -22,7 +22,7 @@ from users.models import ChangeEmailRequest, LegalAddress, Profile, User
 log = logging.getLogger()
 
 US_POSTAL_RE = re.compile(r"[0-9]{5}(-[0-9]{4}){0,1}")
-CA_POSTAL_RE = re.compile(r"[A-Z]\d[A-Z] \d[A-Z]\d$", flags=re.I)
+CA_POSTAL_RE = re.compile(r"[A-Z]\d[A-Z] \d[A-Z]\d$", flags=re.IGNORECASE)
 USER_NAME_RE = re.compile(
     r"""
     ^                               # Start of string
@@ -30,7 +30,7 @@ USER_NAME_RE = re.compile(
     ([^/^$#*=\[\]`%_;<>{}\"|]+)     # String should not contain characters(s) from this set - All invalid characters
     $                               # End of string
     """,
-    flags=re.I | re.VERBOSE | re.MULTILINE,
+    flags=re.IGNORECASE | re.VERBOSE | re.MULTILINE,
 )
 
 
@@ -54,28 +54,28 @@ class LegalAddressSerializer(serializers.ModelSerializer):
     def validate_first_name(self, value):
         """Validate the first name of the user"""
         if value and not USER_NAME_RE.match(value):
-            raise serializers.ValidationError("First name is not valid")  # noqa: EM101
+            raise serializers.ValidationError("First name is not valid")
         return value
 
     def validate_last_name(self, value):
         """Validate the last name of the user"""
         if value and not USER_NAME_RE.match(value):
-            raise serializers.ValidationError("Last name is not valid")  # noqa: EM101
+            raise serializers.ValidationError("Last name is not valid")
         return value
 
     def validate_street_address(self, value):
         """Validate an incoming street address list"""
         if not value or not isinstance(value, list):
             raise serializers.ValidationError(
-                "street_address must be a list of street lines"  # noqa: EM101
+                "street_address must be a list of street lines"
             )
-        if len(value) > 5:  # noqa: PLR2004
+        if len(value) > 5:
             raise serializers.ValidationError(
-                "street_address list must be 5 items or less"  # noqa: EM101
+                "street_address list must be 5 items or less"
             )
-        if any(len(line) > 60 for line in value):  # noqa: PLR2004
+        if any(len(line) > 60 for line in value):
             raise serializers.ValidationError(
-                "street_address lines must be 60 characters or less"  # noqa: EM101
+                "street_address lines must be 60 characters or less"
             )
         return {f"street_address_{idx + 1}": line for idx, line in enumerate(value)}
 
@@ -177,7 +177,7 @@ class ExtendedLegalAddressSerializer(LegalAddressSerializer):
 
     class Meta:
         model = LegalAddress
-        fields = LegalAddressSerializer.Meta.fields + ("email", "company")  # noqa: RUF005
+        fields = LegalAddressSerializer.Meta.fields + ("email", "company")
         extra_kwargs = LegalAddressSerializer.Meta.extra_kwargs
 
 
@@ -278,7 +278,7 @@ class UserSerializer(serializers.ModelSerializer):
                 openedx_validation_msg = validate_name_with_edx(name)
             except EdxApiRegistrationValidationException as exc:
                 log.exception("Unable to create user account: %s", exc)  # noqa: TRY401
-                raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)  # noqa: B904
+                raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)
 
             if openedx_validation_msg:
                 raise serializers.ValidationError(USER_REGISTRATION_FAILED_MSG)
@@ -405,7 +405,7 @@ class ChangeEmailRequestCreateSerializer(serializers.ModelSerializer):
 
         # verify the password verifies for the current user
         if not user.check_password(password):
-            raise serializers.ValidationError("Invalid Password")  # noqa: EM101
+            raise serializers.ValidationError("Invalid Password")
 
         return attrs
 
@@ -437,7 +437,7 @@ class ChangeEmailRequestUpdateSerializer(serializers.ModelSerializer):
             log.debug(
                 "User %s tried to change email address to one already in use", instance
             )
-            raise serializers.ValidationError("Unable to change email")  # noqa: EM101
+            raise serializers.ValidationError("Unable to change email")
 
         result = super().update(instance, validated_data)
 
