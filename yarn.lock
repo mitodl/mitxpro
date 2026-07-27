@@ -12256,14 +12256,14 @@ __metadata:
   linkType: hard
 
 "sinon@npm:^22.0.0":
-  version: 22.0.0
-  resolution: "sinon@npm:22.0.0"
+  version: 22.1.0
+  resolution: "sinon@npm:22.1.0"
   dependencies:
     "@sinonjs/commons": ^3.0.1
     "@sinonjs/fake-timers": ^15.4.0
     "@sinonjs/samsam": ^10.0.2
     diff: ^9.0.0
-  checksum: 891af8b7899c43ca12e816213b383a86d7f5d28d4aee377853c20bc0a1072399321cd1a04ed9361d2d30e246695c7871376c12aee1d63f5b4324193eac056b7a
+  checksum: cc403cdc0946c7e48cb44a7a6d517a50bb2c133edcd518743773317579eb0540ef79c64a494f750e9d8ed3d32a3293a172504d2ee0696d3e160ea68ef07b9daa
   languageName: node
   linkType: hard
 
