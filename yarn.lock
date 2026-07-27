@@ -2573,19 +2573,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@posthog/core@npm:^1.43.1":
-  version: 1.43.1
-  resolution: "@posthog/core@npm:1.43.1"
+"@posthog/browser-common@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@posthog/browser-common@npm:0.2.2"
   dependencies:
-    "@posthog/types": ^1.396.0
-  checksum: 2d9cefea28b5f123663f653bf70f409ae7a70ff6856db5e075870dd182429cfea4f45d8890c62baf2b7cf69caa56e0916d0f7ebeaa716db245f504b6c359c23d
+    "@posthog/core": ^1.45.1
+    "@posthog/types": ^1.398.0
+  checksum: 2ebde04746991cf56c82413b63ae1366c08adf590da7e7079b35dd9dc769257bf424e74619e44927e71352d34e59e0550d1b3e7ce6162fb223fc7fa46127c704
   languageName: node
   linkType: hard
 
-"@posthog/types@npm:^1.396.0, @posthog/types@npm:^1.397.0":
-  version: 1.397.0
-  resolution: "@posthog/types@npm:1.397.0"
-  checksum: 8ce4c4477230dec5d8e3f0cbd61650b36789ea2d80f6fdc6a83ac8b614cd5d526c1532eaed9e8ab49e0b2d90ff996cb0a67ac45bd581c63a6bb4ff9aece24cff
+"@posthog/core@npm:^1.45.1":
+  version: 1.45.1
+  resolution: "@posthog/core@npm:1.45.1"
+  dependencies:
+    "@posthog/types": ^1.398.0
+  checksum: 8aca1c6183a5ee764884b070651876d5f94eff56484a275005103a199dc25c1a7e0ec3486eaa5635068ac5c997d33307cc79e54eb156812893f925c5aa8ded3c
+  languageName: node
+  linkType: hard
+
+"@posthog/types@npm:^1.398.0":
+  version: 1.398.0
+  resolution: "@posthog/types@npm:1.398.0"
+  checksum: c99ef0d1ce4f2938724d343449f14ea45cc1eaba38d8abbe1430c9abe77bb521be4ca7d2fa3f9369bbdf0c6315b033ce6d0bb841505a32684d9a3d033575b738
   languageName: node
   linkType: hard
 
@@ -10611,18 +10621,19 @@ __metadata:
   linkType: hard
 
 "posthog-js@npm:^1.171.0":
-  version: 1.404.1
-  resolution: "posthog-js@npm:1.404.1"
+  version: 1.407.3
+  resolution: "posthog-js@npm:1.407.3"
   dependencies:
-    "@posthog/core": ^1.43.1
-    "@posthog/types": ^1.397.0
+    "@posthog/browser-common": ^0.2.2
+    "@posthog/core": ^1.45.1
+    "@posthog/types": ^1.398.0
     core-js: ^3.49.0
     dompurify: ^3.3.2
     fflate: ^0.4.8
     preact: ^10.29.3
     query-selector-shadow-dom: ^1.0.1
     web-vitals: ^5.3.0
-  checksum: 3c5c30ac6a0f5fd9a977448ce0fb310c729463e859f27a3f38e05ed418026dfadaecd1a1d9b1d64bb9bd00d970025909a30902af8b8467f82242f7ce75cbdbaa
+  checksum: 60db27a2e92e946937afa0b87396738f98f3690e7ef860177f4a1e2602040349da1c8aeff42ea12f87493807f55aacecbade27e5f7c8fa7e543269c791569e74
   languageName: node
   linkType: hard
 
