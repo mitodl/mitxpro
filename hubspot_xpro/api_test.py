@@ -357,6 +357,41 @@ def test_sync_product_hubspot_ids_dupe_names(mocker, mock_hubspot_api):
     assert HubspotObject.objects.filter(content_type__model="product").count() == 2
 
 
+def test_get_hubspot_id_for_object_skips_conflicting_mapping(mocker):
+    """
+    When a lookup resolves to a hubspot id already mapped to a different object
+    (e.g. a duplicate-named product), get_hubspot_id_for_object should return the
+    hubspot id without raising IntegrityError or creating a conflicting mapping.
+    """
+    existing_product = ProductFactory.create()
+    conflicting_product = ProductFactory.create()
+    content_type = ContentType.objects.get_for_model(Product)
+    HubspotObject.objects.create(
+        content_type=content_type,
+        object_id=existing_product.id,
+        hubspot_id="999",
+    )
+    mocker.patch(
+        "hubspot_xpro.api.find_product",
+        return_value=SimplePublicObjectFactory(id="999"),
+    )
+
+    result = api.get_hubspot_id_for_object(conflicting_product)
+
+    assert result == "999"
+    # No conflicting mapping was created for the second product
+    assert not HubspotObject.objects.filter(
+        content_type=content_type, object_id=conflicting_product.id
+    ).exists()
+    # The original owner's mapping is intact
+    assert (
+        HubspotObject.objects.get(
+            content_type=content_type, hubspot_id="999"
+        ).object_id
+        == existing_product.id
+    )
+
+
 @pytest.mark.parametrize("match_all_lines", [True, False])
 @pytest.mark.parametrize("match_all_deals", [True, False])
 def test_sync_deal_hubspot_ids_to_hubspot(

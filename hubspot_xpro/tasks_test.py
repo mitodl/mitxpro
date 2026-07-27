@@ -332,6 +332,44 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
         mock_sync_contact.assert_any_call(item)
 
 
+def test_batch_create_hubspot_objects_chunked_duplicate_hubspot_id(mocker):
+    """
+    A hubspot_id already mapped to a different object should be skipped (logged)
+    rather than raising the unique (hubspot_id, content_type) IntegrityError.
+    """
+    existing_user, new_user = UserFactory.create_batch(2)
+    content_type = ContentType.objects.get_for_model(existing_user)
+    shared_hubspot_id = "420637415"
+    HubspotObject.objects.create(
+        content_type=content_type,
+        object_id=existing_user.id,
+        hubspot_id=shared_hubspot_id,
+    )
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.objects.batch_api.create.return_value = (
+        mocker.Mock(
+            results=[
+                SimplePublicObjectFactory(
+                    id=shared_hubspot_id,
+                    properties={"email": new_user.email},
+                )
+            ]
+        )
+    )
+
+    # Should not raise, and should skip the conflicting mapping
+    result = tasks.batch_create_hubspot_objects_chunked(
+        HubspotObjectType.CONTACTS.value, "user", [new_user.id]
+    )
+
+    assert result == []
+    mappings = HubspotObject.objects.filter(
+        content_type=content_type, hubspot_id=shared_hubspot_id
+    )
+    assert mappings.count() == 1
+    assert mappings.first().object_id == existing_user.id
+
+
 def test_batch_upsert_associations(settings, mocker, mocked_celery):
     """
     batch_upsert_associations should call batch_upsert_associations_chunked w/correct lists of ids

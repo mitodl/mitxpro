@@ -5,6 +5,7 @@ import re
 from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError
 from django.db.models import Q
 from hubspot.crm.objects import SimplePublicObject, SimplePublicObjectInput
 from mitol.hubspot_api.api import (
@@ -433,11 +434,25 @@ def get_hubspot_id_for_object(
             raise_count_error=raise_error,
         )
     if hubspot_obj and hubspot_obj.id:  # noqa: RET503
-        HubspotObject.objects.update_or_create(
-            object_id=obj.id,
-            content_type=content_type,
-            defaults={"hubspot_id": hubspot_obj.id},
-        )
+        try:
+            HubspotObject.objects.update_or_create(
+                object_id=obj.id,
+                content_type=content_type,
+                defaults={"hubspot_id": hubspot_obj.id},
+            )
+        except IntegrityError:
+            # The found hubspot id is already mapped to a different object of
+            # this content type (e.g. a duplicate-named product). Don't create a
+            # conflicting mapping, but still return the hubspot id so callers can
+            # proceed instead of failing the whole sync.
+            log.warning(
+                "Hubspot %s %s is already mapped to a different object; not "
+                "remapping %s %s",
+                content_type.model,
+                hubspot_obj.id,
+                content_type.model,
+                obj.id,
+            )
         return hubspot_obj.id
     elif raise_error:
         raise ValueError(

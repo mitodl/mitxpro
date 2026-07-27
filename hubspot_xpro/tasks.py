@@ -9,6 +9,7 @@ from math import ceil
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import (
     ApiException,
@@ -102,6 +103,11 @@ def sync_failed_contacts(chunk: list[int]) -> list[int]:
             api.sync_contact_with_hubspot(user_id)
             time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
         except ApiException:
+            failed_ids.append(user_id)
+        except Exception:  # noqa: BLE001
+            log.exception(
+                "Could not sync hubspot contact for user %s; skipping", user_id
+            )
             failed_ids.append(user_id)
     return failed_ids
 
@@ -239,7 +245,14 @@ def batch_upsert_hubspot_deals_chunked(ids: list[int]):
     """
     results = []
     for order in Order.objects.filter(id__in=ids):
-        results.append(api.sync_deal_with_hubspot(order.id).id)
+        try:
+            results.append(api.sync_deal_with_hubspot(order.id).id)
+        except (TooManyRequestsException, ApiException):
+            raise
+        except Exception:  # noqa: BLE001
+            log.exception(
+                "Could not sync hubspot deal for order %s; skipping", order.id
+            )
         time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     return results
 
@@ -264,7 +277,14 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: list[int]) -> list[str]:
     """
     results = []
     for order in B2BOrder.objects.filter(id__in=ids):
-        results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
+        try:
+            results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
+        except (TooManyRequestsException, ApiException):
+            raise
+        except Exception:  # noqa: BLE001
+            log.exception(
+                "Could not sync hubspot b2b deal for order %s; skipping", order.id
+            )
         time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     return results
 
@@ -349,28 +369,73 @@ def batch_create_hubspot_objects_chunked(
     last_error_status = None
     for chunk in chunked_ids:
         try:
+            inputs = []
+            for obj_id in chunk:
+                try:
+                    inputs.append(api.MODEL_FUNCTION_MAPPING[ct_model_name](obj_id))
+                except (TooManyRequestsException, ApiException):
+                    raise
+                except Exception:  # noqa: BLE001
+                    log.exception(
+                        "Could not build hubspot %s sync message for %s %s; skipping",
+                        hubspot_type,
+                        ct_model_name,
+                        obj_id,
+                    )
+            if not inputs:
+                time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
+                continue
             response = HubspotApi().crm.objects.batch_api.create(
                 hubspot_type,
-                BatchInputSimplePublicObjectBatchInputForCreate(
-                    inputs=[
-                        api.MODEL_FUNCTION_MAPPING[ct_model_name](obj_id)
-                        for obj_id in chunk
-                    ]
-                ),
+                BatchInputSimplePublicObjectBatchInputForCreate(inputs=inputs),
             )
             for result in response.results:
-                if ct_model_name == "user":
-                    object_id = User.objects.get(
-                        email__iexact=result.properties["email"], is_active=True
-                    ).id
-                else:
-                    object_id = result.properties["unique_app_id"].split("-")[-1]
-                HubspotObject.objects.update_or_create(
-                    content_type=content_type,
-                    hubspot_id=result.id,
-                    object_id=object_id,
-                )
-                created_ids.append(result.id)
+                try:
+                    if ct_model_name == "user":
+                        try:
+                            object_id = User.objects.get(
+                                email__iexact=result.properties["email"],
+                                is_active=True,
+                            ).id
+                        except (User.DoesNotExist, User.MultipleObjectsReturned):
+                            log.exception(
+                                "Could not resolve a unique active user for hubspot "
+                                "contact %s (email %s); skipping",
+                                result.id,
+                                result.properties.get("email"),
+                            )
+                            continue
+                    else:
+                        object_id = result.properties["unique_app_id"].split("-")[-1]
+                    try:
+                        HubspotObject.objects.update_or_create(
+                            content_type=content_type,
+                            hubspot_id=result.id,
+                            object_id=object_id,
+                        )
+                    except IntegrityError:
+                        # The hubspot_id (or object_id) is already mapped to a
+                        # different object for this content type. Skip rather than
+                        # violating the unique (hubspot_id, content_type) constraint.
+                        log.exception(
+                            "Could not map hubspot %s %s to %s %s; an existing "
+                            "mapping already claims it, skipping",
+                            hubspot_type,
+                            result.id,
+                            ct_model_name,
+                            object_id,
+                        )
+                        continue
+                    created_ids.append(result.id)
+                except (TooManyRequestsException, ApiException):
+                    raise
+                except Exception:  # noqa: BLE001
+                    log.exception(
+                        "Could not process hubspot %s result %s; skipping",
+                        hubspot_type,
+                        getattr(result, "id", None),
+                    )
+                    continue
         except ApiException as ae:
             last_error_status = ae.status
             still_failed = handle_failed_batch_chunk(chunk, hubspot_type)
@@ -421,15 +486,29 @@ def batch_update_hubspot_objects_chunked(
     last_error_status = None
     for chunk in chunked_ids:
         try:
-            inputs = [
-                {
-                    "id": obj_id[1],
-                    "properties": api.MODEL_FUNCTION_MAPPING[ct_model_name](
-                        obj_id[0]
-                    ).properties,
-                }
-                for obj_id in chunk
-            ]
+            inputs = []
+            for obj_id in chunk:
+                try:
+                    inputs.append(
+                        {
+                            "id": obj_id[1],
+                            "properties": api.MODEL_FUNCTION_MAPPING[ct_model_name](
+                                obj_id[0]
+                            ).properties,
+                        }
+                    )
+                except (TooManyRequestsException, ApiException):
+                    raise
+                except Exception:  # noqa: BLE001
+                    log.exception(
+                        "Could not build hubspot %s update message for %s %s; skipping",
+                        hubspot_type,
+                        ct_model_name,
+                        obj_id[0],
+                    )
+            if not inputs:
+                time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
+                continue
             response = HubspotApi().crm.objects.batch_api.update(
                 hubspot_type, BatchInputSimplePublicObjectBatchInput(inputs=inputs)
             )
@@ -517,32 +596,41 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
     hubspot_client = HubspotApi()
     deal_count = len(order_ids)
     for idx, order_id in enumerate(order_ids):
-        deal = Order.objects.get(id=order_id)
-        contact_id = get_hubspot_id_for_object(deal.purchaser)
-        deal_id = get_hubspot_id_for_object(deal)
-        for line in deal.lines.iterator():
-            line_id = get_hubspot_id_for_object(line)
-            if contact_id and deal_id:
-                contact_associations_batch.append(
-                    PublicAssociation(
-                        _from=deal_id,
-                        to=contact_id,
-                        type=HubspotAssociationType.DEAL_CONTACT.value,
+        try:
+            deal = Order.objects.get(id=order_id)
+            contact_id = get_hubspot_id_for_object(deal.purchaser)
+            deal_id = get_hubspot_id_for_object(deal)
+            for line in deal.lines.iterator():
+                line_id = get_hubspot_id_for_object(line)
+                if contact_id and deal_id:
+                    contact_associations_batch.append(
+                        PublicAssociation(
+                            _from=deal_id,
+                            to=contact_id,
+                            type=HubspotAssociationType.DEAL_CONTACT.value,
+                        )
                     )
-                )
-            if line_id and deal_id:
-                line_associations_batch.append(
-                    PublicAssociation(
-                        _from=line_id,
-                        to=deal_id,
-                        type=HubspotAssociationType.LINE_DEAL.value,
+                if line_id and deal_id:
+                    line_associations_batch.append(
+                        PublicAssociation(
+                            _from=line_id,
+                            to=deal_id,
+                            type=HubspotAssociationType.LINE_DEAL.value,
+                        )
                     )
-                )
-            if (
-                len(contact_associations_batch) == 100  # noqa: PLR2004
-                or len(line_associations_batch) == 100  # noqa: PLR2004
-                or idx == deal_count - 1
-            ):
+        except (TooManyRequestsException, ApiException):
+            raise
+        except Exception:  # noqa: BLE001
+            log.exception(
+                "Could not gather hubspot associations for order %s; skipping",
+                order_id,
+            )
+        if (
+            len(contact_associations_batch) == 100  # noqa: PLR2004
+            or len(line_associations_batch) == 100  # noqa: PLR2004
+            or idx == deal_count - 1
+        ):
+            try:
                 hubspot_client.crm.associations.batch_api.create(
                     HubspotObjectType.LINES.value,
                     HubspotObjectType.DEALS.value,
@@ -550,7 +638,14 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                         inputs=line_associations_batch
                     ),
                 )
-                line_associations_batch = []
+            except ApiException as ae:
+                if ae.status == 429:  # noqa: PLR2004
+                    raise
+                log.exception(
+                    "Could not create hubspot line-deal associations batch; skipping"
+                )
+            line_associations_batch = []
+            try:
                 hubspot_client.crm.associations.batch_api.create(
                     HubspotObjectType.DEALS.value,
                     HubspotObjectType.CONTACTS.value,
@@ -558,7 +653,13 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                         inputs=contact_associations_batch
                     ),
                 )
-                contact_associations_batch = []
+            except ApiException as ae:
+                if ae.status == 429:  # noqa: PLR2004
+                    raise
+                log.exception(
+                    "Could not create hubspot deal-contact associations batch; skipping"
+                )
+            contact_associations_batch = []
     return order_ids
 
 
