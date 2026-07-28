@@ -118,3 +118,6 @@ localdev/google.token
 
 # UV
 .uv-cache
+
+# Claude
+.claude/
