@@ -31,7 +31,11 @@ const Header = ({
       username: currentUser.username,
       name: currentUser.name,
     });
-    posthog.identify(currentUser.id, {
+    // Prefix with "xpro:" to keep the id globally unique: this posthog
+    // project is shared with other MIT applications that identify by their
+    // own (Keycloak) global ids, and xpro's integer user ids would otherwise
+    // collide with them.
+    posthog.identify(`xpro:${currentUser.id}`, {
       environment: SETTINGS.environment,
       user_id: currentUser.id,
     });
