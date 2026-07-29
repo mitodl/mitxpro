@@ -3,12 +3,12 @@
 import json
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from unittest.mock import patch
 from urllib.parse import quote_plus, urljoin
 
 import factory
 import faker
 import pytest
+from unittest.mock import patch
 from django.contrib.auth.models import Permission
 from django.db.models import Count, Q
 from django.test import Client
@@ -37,8 +37,8 @@ from ecommerce.factories import (
     CouponPaymentFactory,
     CouponPaymentVersionFactory,
     LineFactory,
-    ProductCouponAssignmentFactory,
     ProductFactory,
+    ProductCouponAssignmentFactory,
     ProductVersionFactory,
 )
 from ecommerce.models import (
@@ -178,7 +178,7 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_zero_price_checkout(
+def test_zero_price_checkout(  # noqa: PLR0913
     basket_client,
     mocker,
     basket_and_coupons,
@@ -241,7 +241,7 @@ def test_zero_price_checkout(
 
 
 @pytest.mark.parametrize("hubspot_api_key", [None, "fake-key"])
-def test_order_fulfilled(
+def test_order_fulfilled(  # noqa: PLR0913
     mocker,
     settings,
     basket_client,
@@ -342,7 +342,7 @@ def test_missing_fields(basket_client, mocker):
     mocker.patch(
         "ecommerce.views.IsSignedByCyberSource.has_permission", return_value=True
     )
-    try:
+    try:  # noqa: SIM105
         # Missing fields from Cybersource POST will cause a ParseException.
         # In this test we just care that we saved the data in Receipt for later
         # analysis.
@@ -398,10 +398,10 @@ def test_ignore_duplicate_cancel(
 
 
 @pytest.mark.parametrize(
-    "order_status, decision",
+    "order_status, decision",  # noqa: PT006
     [(Order.FAILED, "ERROR"), (Order.FULFILLED, "ERROR"), (Order.FULFILLED, "SUCCESS")],
 )
-def test_error_on_duplicate_order(
+def test_error_on_duplicate_order(  # noqa: PLR0913
     mocker, validated_basket, basket_client, basket_and_coupons, order_status, decision
 ):
     """If there is a duplicate message (except for CANCEL), raise an exception"""
@@ -1091,7 +1091,7 @@ def test_patch_basket_external_product(basket_and_coupons):
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """Test that the correct model objects are created for a batch of single-use coupons"""
@@ -1117,7 +1117,7 @@ def test_post_singleuse_coupons(admin_drf_client, single_use_coupon_json):
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json):
     """Test that the correct model objects are created for a batch of single-use coupons (global coupon)"""
@@ -1146,10 +1146,10 @@ def test_post_global_singleuse_coupons(admin_drf_client, single_use_coupon_json)
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],
-        [DISCOUNT_TYPE_DOLLARS_OFF, 50],
+        [DISCOUNT_TYPE_PERCENT_OFF, 0.5],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, 50],  # noqa: PT007
     ],
 )
 def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, amount):
@@ -1178,7 +1178,7 @@ def test_post_promo_coupon(admin_drf_client, promo_coupon_json, discount_type, a
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
     """Test that the correct model objects are created for a promo coupon (global coupon)"""
@@ -1206,20 +1206,20 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
 
 
 @pytest.mark.parametrize(
-    "attribute,bad_value,error",
+    "attribute,bad_value,error",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             "product_ids",
             [9998, 9999],
             "Product with id(s) 9998,9999 could not be found",
         ],
-        [
+        [  # noqa: PT007
             "product_ids",
             [],
             "At least one product must be selected or coupon should be global.",
         ],
-        ["name", "AlreadyExists", "This field must be unique."],
-        [
+        ["name", "AlreadyExists", "This field must be unique."],  # noqa: PT007
+        [  # noqa: PT007
             "coupon_code",
             "AlreadyExists",
             "Coupon code already exists in the platform.",
@@ -1228,7 +1228,7 @@ def test_post_global_promo_coupon(admin_drf_client, promo_coupon_json):
 )
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_promo_coupon_bad_product(
     admin_drf_client, promo_coupon_json, attribute, bad_value, error
@@ -1245,7 +1245,7 @@ def test_create_promo_coupon_bad_product(
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json):
     """Test that a promo CouponPaymentVersion can be created without payment info"""
@@ -1262,7 +1262,7 @@ def test_create_promo_coupon_no_payment_info(admin_drf_client, promo_coupon_json
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_singleuse_coupon_no_payment_info(
     admin_drf_client, single_use_coupon_json
@@ -1282,7 +1282,7 @@ def test_create_singleuse_coupon_no_payment_info(
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_create_coupon_permission(user_drf_client, promo_coupon_json):
     """Test that non-admins cannot create coupons"""
@@ -1389,7 +1389,7 @@ def test_deactivate_coupons(mocker, admin_drf_client):
 
 @pytest.mark.parametrize(
     "discount_type",
-    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),
+    (DISCOUNT_TYPE_DOLLARS_OFF, DISCOUNT_TYPE_PERCENT_OFF),  # noqa: PT007
 )
 def test_coupon_csv_view(admin_client, admin_drf_client, single_use_coupon_json):
     """Test that a valid csv response is returned for a CouponPaymentVersion"""
@@ -1441,27 +1441,27 @@ def test_bulk_assignment_csv_view(settings, admin_client, admin_drf_client):
 
 
 @pytest.mark.parametrize(
-    "url_name,url_kwarg_name,test_client,expected_status_code",
+    "url_name,url_kwarg_name,test_client,expected_status_code",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             "coupons_csv",
             "version_id",
             lazy("admin_client"),
             status.HTTP_404_NOT_FOUND,
         ],
-        [
+        [  # noqa: PT007
             "coupons_csv",
             "version_id",
             lazy("user_client"),
             status.HTTP_403_FORBIDDEN,
         ],
-        [
+        [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
             lazy("admin_client"),
             status.HTTP_404_NOT_FOUND,
         ],
-        [
+        [  # noqa: PT007
             "bulk_assign_csv",
             "bulk_assignment_id",
             lazy("user_client"),

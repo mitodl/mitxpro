@@ -75,18 +75,18 @@ def filter_and_sort_catalog_pages(
         )
     }
 
-    price_desc_sorting_key = lambda page: (
+    price_desc_sorting_key = lambda page: (  # noqa: E731
         page.product.current_price
         if page.product.current_price is not None
         else float("-inf"),
         page.title,
     )
-    price_asc_sorting_key = lambda page: (
+    price_asc_sorting_key = lambda page: (  # noqa: E731
         page.product.current_price is None,
         page.product.current_price,
         page.title,
     )
-    default_sorting_key = lambda page: (
+    default_sorting_key = lambda page: (  # noqa: E731
         page.language.priority,
         page_run_dates[page],
         page.title,
@@ -182,7 +182,7 @@ def ensure_catalog_page():
         catalog_page.refresh_from_db()
 
 
-def ensure_index_pages():
+def ensure_index_pages():  # noqa: C901
     """
     Ensures that the proper index pages exist as children of the home page, and that
     any pages that should belong to those index pages are set as children.

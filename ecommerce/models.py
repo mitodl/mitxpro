@@ -120,7 +120,7 @@ class Product(TimestampedModel):
         from courses.models import CourseRun, Program
 
         if self.object_id and not self.content_object:
-            raise ValidationError("Object Id is invalid.")
+            raise ValidationError("Object Id is invalid.")  # noqa: EM101
 
         if (
             self.content_object
@@ -128,7 +128,7 @@ class Product(TimestampedModel):
             and not isinstance(self.content_object, Program)
         ):
             raise ValidationError(
-                "Content object is invalid. Allowed objects are CourseRun and Program."
+                "Content object is invalid. Allowed objects are CourseRun and Program."  # noqa: EM101
             )
 
     def save(self, *args, **kwargs):
@@ -156,7 +156,7 @@ class Product(TimestampedModel):
         elif self.content_type.model == "program":
             return CourseRun.objects.filter(course__program__id=self.object_id)
         else:
-            raise ValueError(f"Unexpected content type for {self.content_type.model}")
+            raise ValueError(f"Unexpected content type for {self.content_type.model}")  # noqa: EM102
 
     @property
     def type_string(self):
@@ -186,7 +186,7 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             return content_object.course.title
         else:
-            raise ValueError(f"Unexpected content type for {self.content_type.model}")  # noqa: TRY004
+            raise ValueError(f"Unexpected content type for {self.content_type.model}")  # noqa: EM102, TRY004
 
     @property
     def thumbnail_url(self):
@@ -204,7 +204,7 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             catalog_image_url = content_object.course.catalog_image_url
         else:
-            raise ValueError(f"Unexpected product {content_object}")  # noqa: TRY004
+            raise ValueError(f"Unexpected product {content_object}")  # noqa: EM102, TRY004
         return catalog_image_url or static(DEFAULT_COURSE_IMG_PATH)
 
     @property
@@ -223,7 +223,7 @@ class Product(TimestampedModel):
         elif isinstance(content_object, CourseRun):
             return content_object.course.next_run_date
         else:
-            raise ValueError(f"Unexpected product {content_object}")  # noqa: TRY004
+            raise ValueError(f"Unexpected product {content_object}")  # noqa: EM102, TRY004
 
     @property
     def price(self):
@@ -246,7 +246,7 @@ class ProductVersion(TimestampedModel):
     )
     price = models.DecimalField(decimal_places=2, max_digits=20)
     description = models.TextField()
-    text_id = models.TextField(null=True)
+    text_id = models.TextField(null=True)  # noqa: DJ001
     requires_enrollment_code = models.BooleanField(
         default=False,
         help_text="Requires enrollment code will require the learner to enter an enrollment code to enroll in the course at the checkout.",
@@ -258,7 +258,7 @@ class ProductVersion(TimestampedModel):
     def save(self, *args, **kwargs):
         self.text_id = getattr(self.product.content_object, "text_id")  # noqa: B009
         if not self.description:
-            raise ValidationError("Description is a required field.")
+            raise ValidationError("Description is a required field.")  # noqa: EM101
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -357,11 +357,11 @@ class Order(OrderAbstract, AuditableModel):
     )
     total_price_paid = models.DecimalField(decimal_places=2, max_digits=20)
     # These represent the tax collected for the entire order.
-    tax_country_code = models.CharField(max_length=2, blank=True, null=True)
+    tax_country_code = models.CharField(max_length=2, blank=True, null=True)  # noqa: DJ001
     tax_rate = models.DecimalField(
         max_digits=6, decimal_places=4, null=True, blank=True, default=0
     )
-    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")  # noqa: DJ001
 
     objects = OrderManager()
 
@@ -409,7 +409,10 @@ class Order(OrderAbstract, AuditableModel):
                         **serialize_model_object(line.product_version),
                         "product_info": {
                             **serialize_model_object(line.product_version.product),
-                            "content_type_string": f"{line.product_version.product.content_type.app_label} | {line.product_version.product.content_type.name}",
+                            "content_type_string": "{} | {}".format(
+                                line.product_version.product.content_type.app_label,
+                                line.product_version.product.content_type.name,
+                            ),
                             "content_object": serialize_model_object(
                                 line.product_version.product.content_object
                             ),
@@ -566,7 +569,7 @@ class CouponPaymentVersion(TimestampedModel):
     PAYMENT_STAFF = "staff"
     PAYMENT_TYPES = [PAYMENT_CC, PAYMENT_PO, PAYMENT_MKT, PAYMENT_SALE, PAYMENT_STAFF]
 
-    tag = models.CharField(max_length=256, null=True, blank=True)
+    tag = models.CharField(max_length=256, null=True, blank=True)  # noqa: DJ001
     payment = models.ForeignKey(
         CouponPayment, on_delete=models.PROTECT, related_name="versions"
     )
@@ -601,13 +604,13 @@ class CouponPaymentVersion(TimestampedModel):
     company = models.ForeignKey(
         Company, on_delete=models.PROTECT, null=True, blank=True
     )
-    payment_type = models.CharField(
+    payment_type = models.CharField(  # noqa: DJ001
         max_length=128,
         choices=[(paytype, paytype) for paytype in PAYMENT_TYPES],
         null=True,
         blank=True,
     )
-    payment_transaction = models.CharField(max_length=256, null=True, blank=True)
+    payment_transaction = models.CharField(max_length=256, null=True, blank=True)  # noqa: DJ001
 
     class Meta:
         indexes = [models.Index(fields=["created_on"])]
@@ -823,10 +826,10 @@ class DataConsentUser(TimestampedModel):
         return f"DataConsentUser {self.user} for {self.agreement}, consent date {self.consent_date}"
 
 
-class BulkCouponAssignment(models.Model):
+class BulkCouponAssignment(models.Model):  # noqa: DJ008
     """Records the bulk creation of ProductCouponAssignments"""
 
-    assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)
+    assignment_sheet_id = models.CharField(max_length=100, db_index=True, null=True)  # noqa: DJ001
     sheet_last_modified_date = models.DateTimeField(null=True, blank=True)
     last_assignment_date = models.DateTimeField(null=True, blank=True)
     assignments_started_date = models.DateTimeField(null=True, blank=True)
@@ -842,10 +845,10 @@ class ProductCouponAssignment(TimestampedModel):
     """
 
     email = models.EmailField(blank=False)
-    original_email = models.EmailField(null=True, blank=True)
+    original_email = models.EmailField(null=True, blank=True)  # noqa: DJ001
     product_coupon = models.ForeignKey(CouponEligibility, on_delete=models.PROTECT)
     redeemed = models.BooleanField(default=False)
-    message_status = models.CharField(
+    message_status = models.CharField(  # noqa: DJ001
         choices=MAILGUN_EVENT_CHOICES, max_length=15, null=True, blank=True
     )
     message_status_date = models.DateTimeField(null=True, blank=True)
@@ -878,7 +881,7 @@ class TaxRate(TimestampedModel):
 
     country_code = models.CharField(max_length=2)
     tax_rate = models.DecimalField(max_digits=6, decimal_places=4, default=0)
-    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")
+    tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")  # noqa: DJ001
     active = models.BooleanField(default=True)
 
     def to_dict(self):

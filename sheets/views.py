@@ -28,8 +28,8 @@ from sheets.constants import (
 )
 from sheets.exceptions import CouponAssignmentError
 from sheets.models import GoogleApiAuth, GoogleFileWatch
+from sheets.utils import generate_google_client_config, assign_coupons_from_spreadsheet
 from sheets.permissions import HasCouponProductAssignmentPermission
-from sheets.utils import assign_coupons_from_spreadsheet, generate_google_client_config
 
 log = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ def complete_google_auth(request):
     state = request.session.get("state")
     if not state:
         raise GoogleAuthError(
-            "Could not complete Google auth - 'state' was not found in the session"
+            "Could not complete Google auth - 'state' was not found in the session"  # noqa: EM101
         )
     flow = Flow.from_client_config(
         generate_google_client_config(), scopes=REQUIRED_GOOGLE_API_SCOPES, state=state
@@ -109,7 +109,7 @@ def handle_watched_sheet_update(request):
     try:
         sheet_metadata = get_sheet_metadata_from_type(sheet_type)
     except:  # noqa: E722
-        log.error(
+        log.error(  # noqa: TRY400
             "Unknown sheet type '%s' (passed via 'sheet' query parameter)", sheet_type
         )
         return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
@@ -130,7 +130,7 @@ def handle_watched_sheet_update(request):
             req_sheet_file_watch.last_request_received = now_in_utc()
             req_sheet_file_watch.save()
     except GoogleFileWatch.DoesNotExist:
-        log.error(
+        log.error(  # noqa: TRY400
             "Google file watch request for %s received (%s), but no local file watch record exists "
             "in the database.",
             sheet_metadata.sheet_name,

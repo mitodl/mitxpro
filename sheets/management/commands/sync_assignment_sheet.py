@@ -41,11 +41,11 @@ class Command(BaseCommand):
 
     def handle(
         self,
-        *args,
+        *args,  # noqa: ARG002
         **options,
     ):
         if not any([options["id"], options["sheet_id"], options["title"]]):
-            raise CommandError("Need to provide --id, --sheet-id, or --title")
+            raise CommandError("Need to provide --id, --sheet-id, or --title")  # noqa: EM101
 
         if options["id"]:
             qset_kwargs = dict(id=options["id"])  # noqa: C408

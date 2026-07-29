@@ -2,9 +2,8 @@
 Tests for ecommerce serializers
 """
 
-from datetime import timedelta
 from decimal import Decimal
-
+from datetime import timedelta
 import pytest
 from rest_framework.exceptions import ValidationError
 
@@ -20,12 +19,12 @@ from courses.serializers import CourseSerializer
 from ecommerce.api import get_readable_id, round_half_up
 from ecommerce.constants import CYBERSOURCE_CARD_TYPES, DISCOUNT_TYPE_PERCENT_OFF
 from ecommerce.factories import (
-    CompanyFactory,
     CouponEligibilityFactory,
+    CompanyFactory,
     CouponFactory,
+    CouponVersionFactory,
     CouponPaymentFactory,
     CouponPaymentVersionFactory,
-    CouponVersionFactory,
     DataConsentUserFactory,
     LineFactory,
     ProductFactory,
@@ -45,13 +44,13 @@ from ecommerce.serializers import (
     FullProductVersionSerializer,
     OrderReceiptSerializer,
     ProgramRunSerializer,
-    PromoCouponDetailSerializer,
     PromoCouponSerializer,
+    PromoCouponDetailSerializer,
     PromoCouponUpdateSerializer,
     SingleUseCouponSerializer,
 )
-from mitxpro.test_utils import any_instance_of
 from mitxpro.utils import now_in_utc
+from mitxpro.test_utils import any_instance_of
 
 pytestmark = [pytest.mark.django_db]
 
@@ -267,13 +266,13 @@ def test_serialize_coupon_single_use(
 
 
 @pytest.mark.parametrize(
-    "too_high, expected_message",
+    "too_high, expected_message",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             True,
             "The amount should be between (0 - 1) when discount type is percent-off.",
         ],
-        [
+        [  # noqa: PT007
             False,
             "The amount is invalid, please specify a value greater than 0.",
         ],
@@ -333,13 +332,13 @@ def test_serialize_coupon_promo(
 
 
 @pytest.mark.parametrize(
-    "too_high, expected_message",
+    "too_high, expected_message",  # noqa: PT006
     [
-        [
+        [  # noqa: PT007
             True,
             "The amount should be between (0 - 1) when discount type is percent-off.",
         ],
-        [
+        [  # noqa: PT007
             False,
             "The amount is invalid, please specify a value greater than 0.",
         ],
@@ -688,7 +687,7 @@ def test_promo_coupon_update_serializer():
         ),
         # Invalid: promo_coupon does not exist
         (
-            dict,
+            lambda: {},
             lambda _: {
                 "promo_coupon": 999999,
                 "is_global": True,

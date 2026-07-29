@@ -24,7 +24,7 @@ class YouTubeEmbedFinder(OEmbedFinder):
 
         if providers != [youtube]:
             raise ImproperlyConfigured(
-                "The YouTubeEmbedFinder only operates on the youtube provider"
+                "The YouTubeEmbedFinder only operates on the youtube provider"  # noqa: EM101
             )
 
         super().__init__(providers=providers, options=options)

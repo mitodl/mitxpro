@@ -21,7 +21,7 @@ class Command(BaseCommand):
             "-r", "--row", type=int, help="Row number in the deferral request Sheet"
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         defer_request_handler = DeferralRequestHandler()
         self.stdout.write("Handling deferrals and updating spreadsheet...")
         results = defer_request_handler.process_sheet(

@@ -55,12 +55,12 @@ def _determine_filter_field(user_property):
     else:
         try:
             validate_email(user_property)
-            return "email"
+            return "email"  # noqa: TRY300
         except ValidationError:
             return "username"
 
 
-def fetch_user(filter_value, ignore_case=True):
+def fetch_user(filter_value, ignore_case=True):  # noqa: FBT002
     """
     Attempt to fetch a user based on several properties
 
@@ -80,7 +80,7 @@ def fetch_user(filter_value, ignore_case=True):
         return User.objects.get(**query)
     except User.DoesNotExist as e:
         raise User.DoesNotExist(
-            "Could not find User with {}={} ({})".format(
+            "Could not find User with {}={} ({})".format(  # noqa: EM103
                 filter_field,
                 filter_value,
                 "case-insensitive" if ignore_case else "case-sensitive",
@@ -88,7 +88,7 @@ def fetch_user(filter_value, ignore_case=True):
         ) from e
 
 
-def fetch_users(filter_values, ignore_case=True):
+def fetch_users(filter_values, ignore_case=True):  # noqa: FBT002
     """
     Attempt to fetch a set of users based on several properties. The property being searched
     (i.e.: id, email, or username) is assumed to be the same for all of the given values, so the
@@ -114,7 +114,7 @@ def fetch_users(filter_values, ignore_case=True):
     )
     if len(filter_values) > len(unique_filter_values):
         raise ValidationError(
-            "Duplicate values provided ({})".format(  # noqa: UP032
+            "Duplicate values provided ({})".format(  # noqa: EM103, UP032
                 set(filter_values).intersection(unique_filter_values)
             )
         )
@@ -134,7 +134,7 @@ def fetch_users(filter_values, ignore_case=True):
         valid_values = user_qset.values_list(filter_field, flat=True)
         invalid_values = set(filter_values) - set(valid_values)
         raise User.DoesNotExist(
-            "Could not find Users with these '{}' values ({}): {}".format(
+            "Could not find Users with these '{}' values ({}): {}".format(  # noqa: EM103
                 filter_field,
                 "case-insensitive" if ignore_case else "case-sensitive",
                 sorted(invalid_values),

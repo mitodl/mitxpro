@@ -74,7 +74,7 @@ class LegalAddressFactory(DjangoModelFactory):
             return ""
         subdivisions = pycountry.subdivisions.get(country_code=self.country)
         subdivision = random.randgen.sample(list(subdivisions), 1)[0]
-        # Example: "US-MA"
+        # Example: "US-MA"  # noqa: ERA001
         return subdivision.code
 
     class Meta:

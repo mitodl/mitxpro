@@ -8,9 +8,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from mitol.common.utils import (
-    create_user_with_generated_username,
     dict_without_keys,
     usernameify,
+    create_user_with_generated_username,
 )
 from social_core.backends.email import EmailAuth
 from social_core.exceptions import AuthAlreadyAssociated, AuthException
@@ -32,8 +32,8 @@ from compliance import api as compliance_api
 from courseware import api as courseware_api
 from courseware import tasks as courseware_tasks
 from hubspot_xpro.task_helpers import sync_hubspot_user
-from users.constants import USERNAME_MAX_LEN
 from users.serializers import ProfileSerializer, UserSerializer
+from users.constants import USERNAME_MAX_LEN
 
 log = logging.getLogger()
 
@@ -44,11 +44,11 @@ NAME_MIN_LENGTH = 2
 
 
 def validate_email_auth_request(
-    strategy,
+    strategy,  # noqa: ARG001
     backend,
     user=None,
-    *args,
-    **kwargs,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):
     """
     Validates an auth request for email
@@ -70,10 +70,10 @@ def validate_email_auth_request(
 
 def get_username(
     strategy,
-    backend,
+    backend,  # noqa: ARG001
     user=None,
-    *args,
-    **kwargs,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):
     """
     Gets the username for a user
@@ -93,7 +93,7 @@ def create_user_via_email(
     user=None,
     flow=None,
     current_partial=None,
-    *args,
+    *args,  # noqa: ARG001
     **kwargs,
 ):
     """
@@ -156,8 +156,8 @@ def create_user_via_email(
             max_length=USERNAME_MAX_LEN,
         )
         if created_user is None:
-            raise IntegrityError(
-                f"Failed to create User with generated username ({username})"
+            raise IntegrityError(  # noqa: TRY301
+                f"Failed to create User with generated username ({username})"  # noqa: EM102
             )
     except Exception as exc:
         raise UserCreationFailedException(backend, current_partial) from exc
@@ -170,10 +170,10 @@ def create_profile(
     strategy,
     backend,
     user=None,
-    flow=None,
+    flow=None,  # noqa: ARG001
     current_partial=None,
-    *args,
-    **kwargs,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):
     """
     Creates a new profile for the user
@@ -206,11 +206,11 @@ def create_profile(
 def validate_email(
     strategy,
     backend,
-    user=None,
-    flow=None,
+    user=None,  # noqa: ARG001
+    flow=None,  # noqa: ARG001
     current_partial=None,
-    *args,
-    **kwargs,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):
     """
     Validates a user's email for register
@@ -240,8 +240,8 @@ def validate_password(
     user=None,
     flow=None,
     current_partial=None,
-    *args,
-    **kwargs,
+    *args,  # noqa: ARG001
+    **kwargs,  # noqa: ARG001
 ):
     """
     Validates a user's password for login
@@ -274,7 +274,7 @@ def validate_password(
     return {}
 
 
-def forbid_hijack(strategy, backend, **kwargs):
+def forbid_hijack(strategy, backend, **kwargs):  # noqa: ARG001
     """
     Forbid an admin user from trying to login/register while hijacking another user
 
@@ -284,16 +284,16 @@ def forbid_hijack(strategy, backend, **kwargs):
     """
     # As first step in pipeline, stop a hijacking admin from going any further
     if bool(strategy.session_get("hijack_history")):
-        raise AuthException("You are hijacking another user, don't try to login again")
+        raise AuthException("You are hijacking another user, don't try to login again")  # noqa: EM101
     return {}
 
 
 def activate_user(
-    strategy,
-    backend,
+    strategy,  # noqa: ARG001
+    backend,  # noqa: ARG001
     user=None,
-    is_new=False,
-    **kwargs,
+    is_new=False,  # noqa: ARG001, FBT002
+    **kwargs,  # noqa: ARG001
 ):
     """
     Activate the user's account if they passed export controls
@@ -319,11 +319,11 @@ def activate_user(
 
 
 def create_courseware_user(
-    strategy,
-    backend,
+    strategy,  # noqa: ARG001
+    backend,  # noqa: ARG001
     user=None,
-    is_new=False,
-    **kwargs,
+    is_new=False,  # noqa: FBT002
+    **kwargs,  # noqa: ARG001
 ):
     """
     Create a user in the courseware, deferring a retry via celery if it fails
@@ -370,17 +370,17 @@ def send_user_to_hubspot(request, **kwargs):
 
     url = f"https://forms.hubspot.com/uploads/form/v2/{portal_id}/{form_id}?&"
 
-    requests.post(url=url, data=data, headers=headers)
+    requests.post(url=url, data=data, headers=headers)  # noqa: S113
 
     return {}
 
 
 def sync_user_to_hubspot(
-    strategy,
-    backend,
+    strategy,  # noqa: ARG001
+    backend,  # noqa: ARG001
     user=None,
-    is_new=False,
-    **kwargs,
+    is_new=False,  # noqa: ARG001, FBT002
+    **kwargs,  # noqa: ARG001
 ):
     """
     Sync the user's latest profile data with hubspot on login

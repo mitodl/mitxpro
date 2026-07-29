@@ -37,7 +37,7 @@ from mail.exceptions import MultiEmailValidationError
 log = logging.getLogger()
 
 
-EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])
+EmailMetadata = namedtuple("EmailMetadata", ["tags", "user_variables"])  # noqa: PYI024
 
 
 class UserMessageProps:

@@ -264,7 +264,7 @@ def test_product_version_save_empty_description():
 
 
 @pytest.mark.parametrize(
-    "factory, is_valid",
+    "factory, is_valid",  # noqa: PT006
     [
         (CourseFactory, False),
         (CourseRunFactory, True),
@@ -288,7 +288,7 @@ def test_product_valid_content_object(factory, is_valid):
 
 
 @pytest.mark.parametrize(
-    "object_id, is_valid",
+    "object_id, is_valid",  # noqa: PT006
     [
         (1000, False),
         (CourseRunFactory, True),
@@ -349,7 +349,7 @@ def test_duplicate_coupon_not_allowed(factory):
     """Verify that duplicate coupons are not allowed."""
     coupon = factory.create()
 
-    with pytest.raises(ValidationError) as cm:
+    with pytest.raises(ValidationError) as cm:  # noqa: PT012
         new_coupon = CouponFactory.build(coupon_code=coupon.coupon_code)
         new_coupon.clean()
     assert (

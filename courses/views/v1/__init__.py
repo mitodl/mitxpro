@@ -128,7 +128,7 @@ class UserEnrollmentsView(APIView):
     authentication_classes = (SessionAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """Read-only access"""
         user = request.user
         user_enrollments = get_user_enrollments(user)
@@ -227,7 +227,7 @@ class ExternalCourseListView(APIView):
 
     permission_classes = [IsAdminUser]
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
         """
         Get External courses list from the External API and return it.
         """

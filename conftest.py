@@ -23,9 +23,9 @@ from cms.models import (
     SignatoryIndexPage,
     WebinarIndexPage,
 )
-from fixtures.autouse import *
-from fixtures.common import *
-from fixtures.cybersource import *
+from fixtures.autouse import *  # noqa: F403
+from fixtures.common import *  # noqa: F403
+from fixtures.cybersource import *  # noqa: F403
 
 TEST_MEDIA_SUBDIR = "test_media_root"
 
@@ -49,7 +49,7 @@ def pytest_cmdline_main(config):
 def pytest_configure(config):
     """Pytest hook to perform some initial configuration"""
     if not settings.MEDIA_ROOT.endswith(TEST_MEDIA_SUBDIR):
-        settings.MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, TEST_MEDIA_SUBDIR)
+        settings.MEDIA_ROOT = os.path.join(settings.MEDIA_ROOT, TEST_MEDIA_SUBDIR)  # noqa: PTH118
 
     if getattr(config.option, "simple") is True:  # noqa: B009
         # NOTE: These plugins are already configured by the time the pytest_cmdline_main hook is run, so we can't
@@ -71,12 +71,12 @@ def clean_up_files():
     effectively deleting any files that were created by factories over the course of the test suite.
     """
     yield
-    if os.path.exists(settings.MEDIA_ROOT):
+    if os.path.exists(settings.MEDIA_ROOT):  # noqa: PTH110
         shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
 
 
 @pytest.fixture(scope="session")
-def django_db_setup(django_db_setup, django_db_blocker):
+def django_db_setup(django_db_setup, django_db_blocker):  # noqa: ARG001
     """
     Creates all the index pages during the tests setup as index pages are required by the factories.
     """

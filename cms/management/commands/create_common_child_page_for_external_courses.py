@@ -11,6 +11,6 @@ class Command(BaseCommand):
 
     help = __doc__
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         for page in ExternalCoursePage.objects.all():
             create_common_child_pages_for_external_courses(None, page)

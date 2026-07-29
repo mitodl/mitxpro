@@ -54,7 +54,7 @@ class Command(EnrollmentChangeCommand):
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         from_user = fetch_user(options["from_user"])
         to_user = fetch_user(options["to_user"])
         keep_failed_enrollments = options["keep_failed_enrollments"]
@@ -68,7 +68,7 @@ class Command(EnrollmentChangeCommand):
             )
             if len(to_user_existing_enrolled_run_ids) > 0:
                 raise CommandError(
-                    "'to' user is already enrolled in program runs ({})".format(  # noqa: UP032
+                    "'to' user is already enrolled in program runs ({})".format(  # noqa: EM103, UP032
                         list(to_user_existing_enrolled_run_ids)
                     )
                 )
@@ -106,14 +106,14 @@ class Command(EnrollmentChangeCommand):
         if new_program_enrollment or new_run_enrollments:
             self.stdout.write(
                 self.style.SUCCESS(
-                    "Transferred enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n"
+                    "Transferred enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n"  # noqa: RUF001
                     "Enrollments created/updated: {}".format(
                         from_user.username,
                         from_user.email,
                         to_user.username,
                         to_user.email,
                         enrollment_summaries(
-                            filter(bool, [new_program_enrollment] + new_run_enrollments)
+                            filter(bool, [new_program_enrollment] + new_run_enrollments)  # noqa: RUF005
                         ),
                     )
                 )
@@ -121,7 +121,7 @@ class Command(EnrollmentChangeCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n".format(  # noqa: UP032
+                    "Failed to transfer enrollment – 'from' user: {} ({}), 'to' user: {} ({})\n".format(  # noqa: RUF001, UP032
                         from_user.username,
                         from_user.email,
                         to_user.username,

@@ -40,19 +40,19 @@ class Command(BaseCommand):
 
     def handle(
         self,
-        *args,
+        *args,  # noqa: ARG002
         **options,
     ):
         """Handle command execution"""
         program = options.get("program")
         if not program:
-            raise CommandError("Please provide a valid program readable_id.")
+            raise CommandError("Please provide a valid program readable_id.")  # noqa: EM101
 
         try:
             program = Program.objects.get(readable_id=program)
         except Program.DoesNotExist:
-            raise CommandError(
-                f"Could not find any program with provided readable_id={program}"
+            raise CommandError(  # noqa: B904
+                f"Could not find any program with provided readable_id={program}"  # noqa: EM102
             )
 
         user = options.get("user") and fetch_user(options["user"])
@@ -67,7 +67,7 @@ class Command(BaseCommand):
         )
         if not enrollments:
             raise CommandError(
-                f"Could not find course enrollment(s) with provided program readable_id={program.readable_id}"
+                f"Could not find course enrollment(s) with provided program readable_id={program.readable_id}"  # noqa: EM102
             )
 
         results = []

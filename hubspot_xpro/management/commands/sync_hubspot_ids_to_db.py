@@ -20,7 +20,7 @@ from users.models import User
 
 def format_missing(missing: list[int]) -> str:
     """Return a string of missing ids"""
-    return f"\n {','.join([str(id) for id in sorted(missing)])}\n\n"
+    return f"\n {','.join([str(id) for id in sorted(missing)])}\n\n"  # noqa: A001
 
 
 class Command(BaseCommand):
@@ -43,7 +43,7 @@ class Command(BaseCommand):
         ).values_list("username", flat=True)
         if not result and missing.count() > 0:
             sys.stderr.write(
-                f"Some users could not be matched with hubspot ids:\n {','.join([username for username in missing])}\n\n"
+                f"Some users could not be matched with hubspot ids:\n {','.join([username for username in missing])}\n\n"  # noqa: C416
             )
         else:
             sys.stdout.write("All users matched with hubspot ids\n\n")
@@ -145,7 +145,7 @@ class Command(BaseCommand):
             help="Sync all orders",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         sys.stdout.write("Syncing hubspot ids...\n")
         if not (
             options["sync_contacts"]

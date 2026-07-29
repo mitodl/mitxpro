@@ -17,10 +17,10 @@ log = logging.getLogger()
 
 
 def verify_exports_compliance(
-    strategy,
+    strategy,  # noqa: ARG001
     backend,
     user=None,
-    **kwargs,
+    **kwargs,  # noqa: ARG001
 ):
     """
     Verify that the user is allowed by exports compliance
@@ -87,6 +87,6 @@ def verify_exports_compliance(
             )
         raise UserExportBlockedException(backend, export_inquiry.reason_code)
     if export_inquiry.is_unknown:
-        raise AuthException("Unable to authenticate, please contact support")
+        raise AuthException("Unable to authenticate, please contact support")  # noqa: EM101
 
     return {}

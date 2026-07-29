@@ -47,8 +47,8 @@ from sheets.utils import (
 
 log = logging.getLogger(__name__)
 
-DEV_TOKEN_PATH = "localdev/google.token"
-FileWatchSpec = namedtuple(
+DEV_TOKEN_PATH = "localdev/google.token"  # noqa: S105
+FileWatchSpec = namedtuple(  # noqa: PYI024
     "FileWatchSpec",
     ["sheet_metadata", "sheet_file_id", "channel_id", "handler_url", "force"],
 )
@@ -59,16 +59,16 @@ def get_google_creds_from_pickled_token_file(token_file_path):
     Helper method to get valid credentials from a local token file (and refresh as necessary).
     For dev use only.
     """
-    with open(token_file_path, "rb") as f:
-        creds = pickle.loads(f.read())
+    with open(token_file_path, "rb") as f:  # noqa: PTH123
+        creds = pickle.loads(f.read())  # noqa: S301
     if creds and creds.expired and creds.refresh_token:
         creds.refresh(Request())
-        with open(token_file_path, "wb") as token:
+        with open(token_file_path, "wb") as token:  # noqa: PTH123
             pickle.dump(creds, token)
     if not creds:
-        raise ImproperlyConfigured("Local token file credentials are empty")
+        raise ImproperlyConfigured("Local token file credentials are empty")  # noqa: EM101
     if not creds.valid:
-        raise ImproperlyConfigured("Local token file credentials are invalid")
+        raise ImproperlyConfigured("Local token file credentials are invalid")  # noqa: EM101
     return creds
 
 
@@ -90,7 +90,7 @@ def get_credentials():
         )
         if not is_sharing_to_service_account:
             raise ImproperlyConfigured(
-                "If Service Account auth is being used, the SHEETS_ADMIN_EMAILS setting must "
+                "If Service Account auth is being used, the SHEETS_ADMIN_EMAILS setting must "  # noqa: EM101
                 "include a Service Account email for spreadsheet updates/creation to work. "
                 "Add the Service Account email to that setting, or remove the DRIVE_SERVICE_ACCOUNT_CREDS "
                 "setting and use a different auth method."
@@ -129,10 +129,10 @@ def get_credentials():
     # A script with more helpful options than the one in that guide can be found here:
     # https://gist.github.com/gsidebo/b87abaafda3e79186c1e5f7f964074ab
     if settings.ENVIRONMENT == "dev":
-        token_file_path = os.path.join(settings.BASE_DIR, DEV_TOKEN_PATH)
-        if os.path.exists(token_file_path):
+        token_file_path = os.path.join(settings.BASE_DIR, DEV_TOKEN_PATH)  # noqa: PTH118
+        if os.path.exists(token_file_path):  # noqa: PTH110
             return get_google_creds_from_pickled_token_file(token_file_path)
-    raise ImproperlyConfigured("Authorization with Google has not been completed.")
+    raise ImproperlyConfigured("Authorization with Google has not been completed.")  # noqa: EM101
 
 
 def get_authorized_pygsheets_client():
@@ -287,8 +287,8 @@ def build_drive_service(credentials=None):
 
 
 def batch_share_callback(
-    request_id,
-    response,
+    request_id,  # noqa: ARG001
+    response,  # noqa: ARG001
     exception,
 ):
     """
@@ -466,7 +466,7 @@ def _track_file_watch_renewal(sheet_type, sheet_file_id, exception=None):
         FileWatchRenewalAttempt.objects.filter(id__lte=id_to_delete).delete()
 
 
-def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=None):
+def create_or_renew_sheet_file_watch(sheet_metadata, force=False, sheet_file_id=None):  # noqa: FBT002
     """
     Creates or renews a file watch on a spreadsheet depending on the existence
     of other file watches and their expiration.
@@ -570,4 +570,4 @@ def get_sheet_metadata_from_type(sheet_type):
         return CouponAssignSheetMetadata()
     elif sheet_type in {SHEET_TYPE_ENROLL_CHANGE, WORKSHEET_TYPE_REFUND}:
         return RefundRequestSheetMetadata()
-    raise ValueError(f"No sheet metadata exists matching the type '{sheet_type}'")
+    raise ValueError(f"No sheet metadata exists matching the type '{sheet_type}'")  # noqa: EM102

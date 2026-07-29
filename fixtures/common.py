@@ -10,19 +10,19 @@ from users.factories import UserFactory
 
 
 @pytest.fixture
-def user(db):
+def user(db):  # noqa: ARG001
     """Creates a user"""
     return UserFactory.create()
 
 
 @pytest.fixture
-def staff_user(db):
+def staff_user(db):  # noqa: ARG001
     """Staff user fixture"""
     return UserFactory.create(is_staff=True)
 
 
 @pytest.fixture
-def super_user(db):
+def super_user(db):  # noqa: ARG001
     """Super user fixture"""
     return UserFactory.create(is_staff=True, is_superuser=True)
 

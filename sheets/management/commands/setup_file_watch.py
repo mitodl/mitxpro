@@ -17,8 +17,8 @@ from sheets.constants import SHEET_TYPE_COUPON_ASSIGN, VALID_SHEET_TYPES
 from sheets.coupon_assign_api import fetch_webhook_eligible_assign_sheet_ids
 from sheets.models import FileWatchRenewalAttempt
 
-SheetMap = namedtuple("SheetMap", ["metadata", "file_ids"])
-FileWatchResult = namedtuple(
+SheetMap = namedtuple("SheetMap", ["metadata", "file_ids"])  # noqa: PYI024
+FileWatchResult = namedtuple(  # noqa: PYI024
     "FileWatchResult", ["file_watch", "metadata", "created", "updated"]
 )
 
@@ -69,9 +69,9 @@ class Command(BaseCommand):
             ),
         )
 
-    def handle(
+    def handle(  # noqa: C901
         self,
-        *args,
+        *args,  # noqa: ARG002
         **options,
     ):
         sheet_dict = {}
@@ -108,7 +108,7 @@ class Command(BaseCommand):
 
         # Make requests to renew the file watches for the given sheets and record the results
         file_watch_results = []
-        for sheet_type, sheet_map in sheet_dict.items():
+        for sheet_type, sheet_map in sheet_dict.items():  # noqa: B007
             for file_id in sheet_map.file_ids:
                 file_watch, created, updated = create_or_renew_sheet_file_watch(
                     sheet_map.metadata, force=options["force"], sheet_file_id=file_id

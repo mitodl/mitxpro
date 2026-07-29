@@ -38,7 +38,7 @@ class SocialAuthAPIView(APIView):
 
     def get_serializer_cls(self):  # pragma: no cover
         """Return the serializer cls"""
-        raise NotImplementedError("get_serializer_cls must be implemented")
+        raise NotImplementedError("get_serializer_cls must be implemented")  # noqa: EM101
 
     def post(self, request):
         """Processes a request"""
@@ -87,7 +87,7 @@ class RegisterEmailView(SocialAuthAPIView):
         if bool(request.session.get("hijack_history")):
             return Response(status=status.HTTP_403_FORBIDDEN)
         if settings.RECAPTCHA_SITE_KEY:
-            r = requests.post(
+            r = requests.post(  # noqa: S113
                 "https://www.google.com/recaptcha/api/siteverify?secret={key}&response={captcha}".format(
                     key=quote(settings.RECAPTCHA_SECRET_KEY),
                     captcha=quote(request.data["recaptcha"]),
@@ -135,7 +135,7 @@ def get_social_auth_types(request):
     return Response(data=social_auths, status=status.HTTP_200_OK)
 
 
-def confirmation_sent(request, **kwargs):
+def confirmation_sent(request, **kwargs):  # noqa: ARG001
     """The confirmation of an email being sent"""
     return render(request, "confirmation_sent.html")
 
@@ -157,7 +157,7 @@ class CustomLogoutView(LogoutView):
 @api_view(["GET"])
 @renderer_classes([JSONRenderer])
 @permission_classes([])
-def well_known_openid_configuration(request):
+def well_known_openid_configuration(request):  # noqa: ARG001
     """View for openid configuration"""
     # See: https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfig
     # NOTE: this is intentionally incomplete because we don't fully support OpenID

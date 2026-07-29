@@ -26,7 +26,7 @@ def any_instance_of(*cls):
         AnyInstanceOf: dynamic class type with the desired equality
     """
 
-    class AnyInstanceOf(metaclass=abc.ABCMeta):
+    class AnyInstanceOf(metaclass=abc.ABCMeta):  # noqa: B024
         """Dynamic class type for __eq__ in terms of isinstance"""
 
         def __eq__(self, other):
@@ -76,7 +76,7 @@ class MockResponse:
         url=None,
         reason="",
     ):
-        if isinstance(content, (dict, list)):
+        if isinstance(content, (dict, list)):  # noqa: UP038
             self.content = json.dumps(content)
         else:
             self.content = str(content)
@@ -166,12 +166,12 @@ def create_tempfile_csv(rows_iter):
         SimpleUploadedFile: A temporary CSV file with the given contents
     """
     f = tempfile.NamedTemporaryFile(suffix=".csv", delete=False)  # noqa: SIM115
-    with open(f.name, "w", encoding="utf8", newline="") as f:
+    with open(f.name, "w", encoding="utf8", newline="") as f:  # noqa: PTH123
         writer = csv.writer(f, delimiter=",")
         for row in rows_iter:
             writer.writerow(row)
     # Note: open() defaults to read mode ("r")
-    with open(f.name) as user_csv:
+    with open(f.name) as user_csv:  # noqa: PTH123
         return SimpleUploadedFile(
             f.name, user_csv.read().encode("utf8"), content_type="application/csv"
         )

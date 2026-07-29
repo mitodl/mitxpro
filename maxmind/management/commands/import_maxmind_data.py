@@ -31,9 +31,9 @@ class Command(BaseCommand):
             help="The type of file being imported.",
         )
 
-    def handle(self, *args, **kwargs):
-        if not path.exists(kwargs["file"]):
-            raise CommandError(f"Input file {kwargs['file']} does not exist.")
+    def handle(self, *args, **kwargs):  # noqa: ARG002
+        if not path.exists(kwargs["file"]):  # noqa: PTH110
+            raise CommandError(f"Input file {kwargs['file']} does not exist.")  # noqa: EM102
 
         api.import_maxmind_database(kwargs["filetype"], kwargs["file"])
 

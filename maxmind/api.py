@@ -33,11 +33,11 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
     """
 
     if import_type not in MAXMIND_CSV_TYPES:
-        raise Exception(f"Invalid database type {import_type}")  # noqa: TRY002
+        raise Exception(f"Invalid database type {import_type}")  # noqa: EM102, TRY002
 
     rows = []
 
-    with open(import_filename) as import_raw:
+    with open(import_filename) as import_raw:  # noqa: PTH123
         dr = csv.DictReader(import_raw)
 
         for row in dr:
@@ -130,7 +130,7 @@ def import_maxmind_database(import_type: str, import_filename: str) -> None:
                 )
 
     if len(rows) == 0:
-        raise Exception("No rows to process - file format invalid?")  # noqa: TRY002
+        raise Exception("No rows to process - file format invalid?")  # noqa: EM101, TRY002
 
     with transaction.atomic():
         if import_type == MAXMIND_CSV_COUNTRY_LOCATIONS_LITE:

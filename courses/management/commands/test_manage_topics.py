@@ -63,7 +63,7 @@ def get_course(row):
 
 
 @pytest.mark.parametrize(
-    "file_path, error_message",
+    "file_path, error_message",  # noqa: PT006
     [
         ("", "The command can handle only CSV files"),
         ("test", "The command can handle only CSV files"),
@@ -182,7 +182,7 @@ def test_command_assign_topics():
         command_error.value
     )
 
-    with open(
+    with open(  # noqa: PTH123
         "courses/management/commands/resources/test_assign_topics_data.csv"
     ) as topics_csv:
         data_dict = csv.DictReader(topics_csv)

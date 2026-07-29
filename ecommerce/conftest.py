@@ -23,7 +23,7 @@ from ecommerce.factories import (
 )
 from ecommerce.models import CourseRunSelection
 
-CouponGroup = namedtuple(
+CouponGroup = namedtuple(  # noqa: PYI024
     "CouponGroup", ["coupon", "coupon_version", "payment", "payment_version"]
 )
 

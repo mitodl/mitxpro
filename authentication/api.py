@@ -20,7 +20,7 @@ def create_user_session(user):
 
     session = SessionStore()
 
-    session[SESSION_KEY] = user._meta.pk.value_to_string(user)
+    session[SESSION_KEY] = user._meta.pk.value_to_string(user)  # noqa: SLF001
     session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
     session[HASH_SESSION_KEY] = user.get_session_auth_hash()
     session.save()

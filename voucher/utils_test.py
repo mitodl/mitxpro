@@ -60,7 +60,7 @@ def test_remove_extra_spaces():
 def test_pdf_parsing_domestic(settings):
     """Test that pdf parsing correctly parses domestic voucher pdfs"""
     setup_pdf_parsing(settings)
-    with open("voucher/.test/domestic_voucher.pdf", "rb") as pdf_file:
+    with open("voucher/.test/domestic_voucher.pdf", "rb") as pdf_file:  # noqa: PTH123
         values = read_pdf(pdf_file)
         expected_values = {
             "pdf": pdf_file,
@@ -79,7 +79,7 @@ def test_pdf_parsing_domestic(settings):
 def test_pdf_parsing_domestic_offset_credits(settings):
     """Test that pdf parsing handles when the credits value is part of the course name column"""
     setup_pdf_parsing(settings)
-    with open("voucher/.test/domestic_voucher_test_credits.pdf", "rb") as pdf_file:
+    with open("voucher/.test/domestic_voucher_test_credits.pdf", "rb") as pdf_file:  # noqa: PTH123
         values = read_pdf(pdf_file)
         expected_values = {
             "pdf": pdf_file,
@@ -98,7 +98,7 @@ def test_pdf_parsing_domestic_offset_credits(settings):
 def test_pdf_parsing_international(settings):
     """Test that pdf parsing correctly parses international voucher pdfs"""
     setup_pdf_parsing(settings)
-    with open("voucher/.test/international_voucher.pdf", "rb") as pdf_file:
+    with open("voucher/.test/international_voucher.pdf", "rb") as pdf_file:  # noqa: PTH123
         values = read_pdf(pdf_file)
         expected_values = {
             "pdf": pdf_file,

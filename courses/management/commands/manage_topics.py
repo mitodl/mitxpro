@@ -86,7 +86,7 @@ def perform_create_topics(file_path):
         "skipped_subtopics": [],
     }
 
-    with open(file_path) as topics_csv:
+    with open(file_path) as topics_csv:  # noqa: PTH123
         data_dict = csv.DictReader(topics_csv)
         # Top level topic | Parent topics
         # data_dict.fieldnames are all the column names in the header of the CSV file.
@@ -113,12 +113,12 @@ def perform_create_topics(file_path):
         return stats
 
 
-def perform_assign_topics(file_path):
+def perform_assign_topics(file_path):  # noqa: C901
     """Read the data from the CSV file and associate the topics to courses"""
     stats = []
     errors = []
 
-    with open(file_path) as topics_csv:
+    with open(file_path) as topics_csv:  # noqa: PTH123
         data_dict = csv.DictReader(topics_csv)
         # data_dict.fieldnames are all the column names in the header of the topics association CSV file.
         # Also, We want to scope the things while association so we will strictly need the right data. To make sure we have the
@@ -126,7 +126,7 @@ def perform_assign_topics(file_path):
         columns = data_dict.fieldnames
         if not all(required_column in columns for required_column in REQUIRED_COLUMNS):
             raise CommandError(
-                "The file data is invalid. Please check file has all the columns."
+                "The file data is invalid. Please check file has all the columns."  # noqa: EM101
             )
         for row in data_dict:
             platform_name = row.get(PLATFORM_COLUMN_NAME)
@@ -230,7 +230,7 @@ class Command(BaseCommand):
             help="Perform the topics assignment operation",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
 
         file_path = options["topics_file"].strip()
@@ -239,16 +239,16 @@ class Command(BaseCommand):
 
         if not any([arg_create_topics, arg_assign_topics]):
             raise CommandError(
-                "Please select the operation to perform. Options are --create-topics or --assign-topics"
+                "Please select the operation to perform. Options are --create-topics or --assign-topics"  # noqa: EM101
             )
         if arg_create_topics and arg_assign_topics:
-            raise CommandError("Only one operation is allowed.")
+            raise CommandError("Only one operation is allowed.")  # noqa: EM101
 
         if not file_path or not file_path.endswith(".csv"):
-            raise CommandError("The command can handle only CSV files")
+            raise CommandError("The command can handle only CSV files")  # noqa: EM101
 
         if not Path(file_path).exists():
-            raise CommandError("Invalid file path")
+            raise CommandError("Invalid file path")  # noqa: EM101
         if arg_create_topics:
             # Perform the create topics operation
             stats = perform_create_topics(file_path=file_path)

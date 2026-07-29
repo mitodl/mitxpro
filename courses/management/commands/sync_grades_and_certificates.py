@@ -57,33 +57,33 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(
+    def handle(  # noqa: C901, PLR0915
         self,
-        *args,
+        *args,  # noqa: ARG002
         **options,
     ):
         """Handle command execution"""
         # Grade override for all users for the course run. Disallowed.
         if options["grade"] is not None and not options["user"]:
             raise CommandError(
-                "No user supplied with override grade. Overwrite of grade is not supported for all users. Grade should only be supplied when a specific user is targeted."
+                "No user supplied with override grade. Overwrite of grade is not supported for all users. Grade should only be supplied when a specific user is targeted."  # noqa: EM101
             )
         try:
             run = CourseRun.objects.get(courseware_id=options["run"])
         except CourseRun.DoesNotExist:
-            raise CommandError(
-                "Could not find run with courseware_id={}".format(options["run"])
+            raise CommandError(  # noqa: B904
+                "Could not find run with courseware_id={}".format(options["run"])  # noqa: EM103
             )
 
         if run.course.is_external or isinstance(run.course.page, ExternalCoursePage):
             raise CommandError(
-                f"Course run {run} is part of an external course. Grades and certificates cannot be synced for external courses."
+                f"Course run {run} is part of an external course. Grades and certificates cannot be synced for external courses."  # noqa: EM101
             )
 
         now = now_in_utc()
         if not options.get("force") and (run.end_date is None or run.end_date > now):
             raise CommandError(
-                "The given course run has not yet finished, so the course grades should not be "
+                "The given course run has not yet finished, so the course grades should not be "  # noqa: EM103
                 "considered final (courseware_id={}, end_date={}).\n"
                 "Add the -f/--force flag if grades/certificates should be synced anyway.".format(
                     options["run"],
@@ -98,7 +98,7 @@ class Command(BaseCommand):
         if options["grade"] is not None:
             override_grade = float(options["grade"])
             if override_grade and (override_grade < 0.0 or override_grade > 1.0):
-                raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")
+                raise CommandError("Invalid value for grade. Allowed range: 0.0 - 1.0")  # noqa: EM101
 
         edx_grade_user_iter = get_edx_grades_with_users(run, user=user)
 

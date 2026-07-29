@@ -30,7 +30,7 @@ class Command(BaseCommand):
         group.add_argument("--email", help="the email of the user")
         group.add_argument("--username", help="the username of the user")
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Run the command"""
 
         if options["user_id"]:

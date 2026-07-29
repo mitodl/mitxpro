@@ -40,7 +40,7 @@ User = get_user_model()
 class RefundRequestRow:
     """Represents a row of the refund request sheet"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         row_index,
         response_id,
@@ -180,7 +180,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             )
         # When #1838 is completed, this logic can be removed
         if deactivated_enrollment is None:
-            raise Exception("Enrollment change failed in edX")  # noqa: TRY002
+            raise Exception("Enrollment change failed in edX")  # noqa: EM101, TRY002
         order.status = Order.REFUNDED
         order.save_and_log(acting_user=None)
 
@@ -263,7 +263,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
             )
 
         if not self.is_ready_for_reversal(refund_req_row):
-            return
+            return  # noqa: RET502
 
         try:
             order, enrollment = self.get_order_objects(refund_req_row)
@@ -274,7 +274,7 @@ class RefundRequestHandler(EnrollmentChangeRequestHandler):
                 )
             elif isinstance(exc, Order.DoesNotExist):
                 message = f"Order with id {refund_req_row.order_id} and purchaser '{refund_req_row.learner_email}' not found"
-            elif isinstance(
+            elif isinstance(  # noqa: UP038
                 exc,
                 (
                     ProgramEnrollment.DoesNotExist,

@@ -16,7 +16,7 @@ class GoogleApiAuth(TimestampedModel, SingletonModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True
     )
     access_token = models.CharField(max_length=2048)
-    refresh_token = models.CharField(null=True, max_length=512)
+    refresh_token = models.CharField(null=True, max_length=512)  # noqa: DJ001
 
 
 class CouponGenerationRequest(TimestampedModel):
@@ -25,7 +25,7 @@ class CouponGenerationRequest(TimestampedModel):
     purchase_order_id = models.CharField(max_length=100, null=False)
     coupon_name = models.CharField(max_length=256, db_index=True, null=False)
     date_completed = models.DateTimeField(null=True, blank=True)
-    raw_data = models.CharField(max_length=300, null=True, blank=True)
+    raw_data = models.CharField(max_length=300, null=True, blank=True)  # noqa: DJ001
 
     def __str__(self):
         return f"CouponGenerationRequest: id={self.id}, coupon_name={self.coupon_name}, purchase_order_id={self.purchase_order_id}, completed={self.date_completed is not None}"
@@ -36,7 +36,7 @@ class EnrollmentChangeRequestModel(TimestampedModel):
 
     form_response_id = models.IntegerField(db_index=True, unique=True, null=False)
     date_completed = models.DateTimeField(null=True, blank=True)
-    raw_data = models.CharField(max_length=300, null=True, blank=True)
+    raw_data = models.CharField(max_length=300, null=True, blank=True)  # noqa: DJ001
 
     class Meta:
         abstract = True
@@ -74,8 +74,8 @@ class GoogleFileWatch(TimestampedModel):
 
     def save(
         self,
-        force_insert=False,
-        force_update=False,
+        force_insert=False,  # noqa: FBT002
+        force_update=False,  # noqa: FBT002
         using=None,
         update_fields=None,
     ):
@@ -84,7 +84,7 @@ class GoogleFileWatch(TimestampedModel):
             and self._meta.model.objects.filter(file_id=self.file_id).count() > 0
         ):
             raise ValidationError(
-                f"Only one {self.__class__.__name__} object should exist for each unique file_id (file_id provided: {self.file_id}). "
+                f"Only one {self.__class__.__name__} object should exist for each unique file_id (file_id provided: {self.file_id}). "  # noqa: EM102
                 "Update the existing object instead of creating a new one."
             )
         return super().save(
@@ -98,7 +98,7 @@ class GoogleFileWatch(TimestampedModel):
         return f"GoogleFileWatch: id={self.id}, channel_id={self.channel_id}, file_id={self.file_id}, expires={self.expiration_date.isoformat()}"
 
 
-class FileWatchRenewalAttempt(Model):
+class FileWatchRenewalAttempt(Model):  # noqa: DJ008
     """
     Tracks attempts to renew a Google file watch. Used for debugging flaky endpoint.
     """
@@ -111,5 +111,5 @@ class FileWatchRenewalAttempt(Model):
     )
     sheet_file_id = models.CharField(max_length=100, db_index=True, null=False)
     date_attempted = DateTimeField(auto_now_add=True)
-    result = models.CharField(max_length=300, null=True, blank=True)
+    result = models.CharField(max_length=300, null=True, blank=True)  # noqa: DJ001
     result_status_code = PositiveSmallIntegerField(null=True, blank=True)

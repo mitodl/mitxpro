@@ -33,18 +33,18 @@ from courses.sync_external_courses.external_course_sync_api import (
     create_or_update_external_course_run,
     create_or_update_product_and_product_version,
     create_who_should_enroll_in_page,
-    deactivate_missing_course_runs,
     fetch_external_courses,
     generate_external_course_run_courseware_id,
     generate_external_course_run_tag,
     parse_external_course_data_str,
     save_page_revision,
     update_external_course_runs,
+    deactivate_missing_course_runs,
     validate_courserun_dates,
 )
 from ecommerce.factories import ProductFactory, ProductVersionFactory
 from mitxpro.test_utils import MockResponse
-from mitxpro.utils import clean_url, now_in_utc, strip_datetime
+from mitxpro.utils import clean_url, strip_datetime, now_in_utc
 
 
 @pytest.fixture
@@ -201,7 +201,7 @@ def test_generate_external_course_run_courseware_id(
     ],
 )
 @pytest.mark.django_db
-def test_create_or_update_external_course_page(
+def test_create_or_update_external_course_page(  # noqa: PLR0913, C901
     create_course_page,
     publish_page,
     is_live_and_draft,
@@ -558,7 +558,7 @@ def test_enrollment_end_logic(
 )
 @pytest.mark.parametrize("create_existing_data", [True, False])
 @pytest.mark.django_db
-def test_update_external_course_runs(
+def test_update_external_course_runs(  # noqa: PLR0915, PLR0913
     mocker,
     external_course_data,
     create_existing_data,
@@ -832,7 +832,7 @@ def test_fetch_external_courses_error(
     ],
 )
 @pytest.mark.django_db
-def test_create_or_update_product_and_product_version(
+def test_create_or_update_product_and_product_version(  # noqa: PLR0913
     external_course_data,
     create_existing_product,
     existing_price,

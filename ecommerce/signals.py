@@ -9,7 +9,7 @@ from hubspot_xpro.task_helpers import sync_hubspot_product
 
 
 @receiver(post_save, sender=ProductVersion, dispatch_uid="product_version_post_save")
-def sync_product(sender, instance, created, **kwargs):
+def sync_product(sender, instance, created, **kwargs):  # noqa: ARG001
     """
     Sync product to hubspot
     """
@@ -18,10 +18,10 @@ def sync_product(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=Product, dispatch_uid="product_post_save")
 def apply_coupon_on_all_runs(
-    sender,
+    sender,  # noqa: ARG001
     instance,
     created,
-    **kwargs,
+    **kwargs,  # noqa: ARG001
 ):
     """
     Apply coupons to all courseruns of a course, if `include_future_runs = True`

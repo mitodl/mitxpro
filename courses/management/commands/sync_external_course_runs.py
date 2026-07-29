@@ -32,7 +32,7 @@ class Command(BaseCommand):
         )
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         vendor_name = options["vendor_name"]
         keymap = EXTERNAL_COURSE_VENDOR_KEYMAPS.get(vendor_name.lower())

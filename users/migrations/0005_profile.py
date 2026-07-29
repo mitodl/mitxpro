@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [("users", "0004_user_legaladdress")]
 
-    def add_profiles(apps, schema_editor):
+    def add_profiles(apps, schema_editor):  # noqa: ARG002, N805
         """Create profiles for all existing test users, with some defaults for required fields"""
         User = apps.get_model("users", "User")
         Profile = apps.get_model("users", "Profile")

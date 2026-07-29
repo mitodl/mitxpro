@@ -40,7 +40,7 @@ class OpenEdxApiAuth(TimestampedModel):
     )
 
     refresh_token = models.CharField(max_length=128)
-    access_token = models.CharField(null=True, max_length=128)
+    access_token = models.CharField(null=True, max_length=128)  # noqa: DJ001
     access_token_expires_on = models.DateTimeField(null=True)
 
     def __str__(self):

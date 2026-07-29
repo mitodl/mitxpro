@@ -25,11 +25,11 @@ def test_ensure_active_user(mock_repair_faulty_edx_user, user):
 
 
 @pytest.mark.parametrize(
-    "name, email",
+    "name, email",  # noqa: PT006
     [
-        ["Mrs. Tammy Smith DDS", "HeSNMtNMfVdo@example.com"],
-        ["John Doe", "jd_123@example.com"],
-        ["Doe, Jane", "jd_456@example.com"],
+        ["Mrs. Tammy Smith DDS", "HeSNMtNMfVdo@example.com"],  # noqa: PT007
+        ["John Doe", "jd_123@example.com"],  # noqa: PT007
+        ["Doe, Jane", "jd_456@example.com"],  # noqa: PT007
     ],
 )
 def test_format_recipient(name, email):

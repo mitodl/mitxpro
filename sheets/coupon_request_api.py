@@ -75,7 +75,7 @@ def create_coupons_for_request_row(row, company_id):
 class CouponRequestRow:
     """Represents a row of a coupon request sheet"""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         row_index,
         purchase_order_id,
@@ -259,7 +259,7 @@ class CouponRequestHandler(SheetHandler):
                 "Cannot create bulk coupon sheet - No coupon codes found matching the name '%s'",
                 coupon_req_row.coupon_name,
             )
-            return
+            return  # noqa: RET502
         # Create sheet
         spreadsheet_title = assignment_sheet_file_name(coupon_req_row)
         create_kwargs = (
@@ -315,7 +315,7 @@ class CouponRequestHandler(SheetHandler):
             returnas="range",
         )
         first_cell = header_range.cells[0][0]
-        first_cell.set_text_format("bold", True)
+        first_cell.set_text_format("bold", True)  # noqa: FBT003
         header_range.apply_format(first_cell)
         # Protect ranges of cells that should not be edited (everything besides the email column)
         self.protect_coupon_assignment_ranges(

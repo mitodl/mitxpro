@@ -106,7 +106,7 @@ class CourseRunFactory(DjangoModelFactory):
     """Factory for CourseRuns"""
 
     course = factory.SubFactory(CourseFactory)
-    title = factory.LazyAttribute(lambda x: "CourseRun " + FAKE.sentence())
+    title = factory.LazyAttribute(lambda x: "CourseRun " + FAKE.sentence())  # noqa: ARG005
     courseware_id = factory.Sequence(lambda number: f"course:v{number}+{FAKE.slug()}")
     run_tag = factory.Sequence("R{}".format)
     courseware_url_path = factory.Faker("uri")

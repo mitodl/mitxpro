@@ -89,7 +89,7 @@ class CourseRunSerializer(BaseCourseRunSerializer):
 
     class Meta:
         model = models.CourseRun
-        fields = BaseCourseRunSerializer.Meta.fields + [
+        fields = BaseCourseRunSerializer.Meta.fields + [  # noqa: RUF005
             "product_id",
             "instructors",
             "current_price",
@@ -144,7 +144,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         """Get the language of the product"""
         return instance.page.language.name if instance.page else None
 
-    def get_prerequisites(self, instance):
+    def get_prerequisites(self, instance):  # noqa: ARG002
         """Get product prerequisites"""
 
         # This is a hard coded value because the consumers of the API need this field.
@@ -153,7 +153,7 @@ class BaseProductSerializer(serializers.ModelSerializer):
         # so we will not get/check for prerequisites
         return []
 
-    def get_availability(self, instance):
+    def get_availability(self, instance):  # noqa: ARG002
         """Get product availability"""
 
         # This is a hard coded value because the consumers of the API need this field.
@@ -516,7 +516,7 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
         """
         Resolve a receipt for this enrollment
         """
-        if enrollment.order:
+        if enrollment.order:  # noqa: RET503
             return (
                 enrollment.order_id
                 if enrollment.order
@@ -525,7 +525,7 @@ class ProgramEnrollmentSerializer(serializers.ModelSerializer):
             )
 
     def __init__(self, *args, **kwargs):
-        assert (
+        assert (  # noqa: PT018, S101
             "context" in kwargs and "course_run_enrollments" in kwargs["context"]
         ), (
             "An iterable of course run enrollments must be passed in the context (key: course_run_enrollments)"

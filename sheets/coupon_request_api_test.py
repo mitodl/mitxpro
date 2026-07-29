@@ -28,10 +28,10 @@ def courseware_objects():
 @pytest.fixture
 def request_csv_rows(settings, courseware_objects):
     """Fake coupon request spreadsheet data rows (loaded from CSV)"""
-    fake_request_csv_filepath = os.path.join(
+    fake_request_csv_filepath = os.path.join(  # noqa: PTH118
         settings.BASE_DIR, "sheets/resources/coupon_requests.csv"
     )
-    with open(fake_request_csv_filepath) as f:
+    with open(fake_request_csv_filepath) as f:  # noqa: PTH123
         # Return all rows except for the header
         return [line.split(",") for i, line in enumerate(f.readlines()) if i > 0]
 

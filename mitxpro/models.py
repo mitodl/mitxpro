@@ -61,7 +61,7 @@ class TimestampedModel(Model):
     """
 
     objects = TimestampedModelManager()
-    created_on = DateTimeField(auto_now_add=True)  # UTC
+    created_on = DateTimeField(auto_now_add=True)  # UTC  # noqa: DJ012
     updated_on = DateTimeField(auto_now=True)  # UTC
 
     class Meta:
@@ -151,14 +151,14 @@ class SingletonModel(Model):
 
     def save(
         self,
-        force_insert=False,
-        force_update=False,
+        force_insert=False,  # noqa: FBT002
+        force_update=False,  # noqa: FBT002
         using=None,
         update_fields=None,
     ):
         if force_insert and self._meta.model.objects.count() > 0:
             raise ValidationError(
-                f"Only one {self.__class__.__name__} object should exist. Update the existing object instead "
+                f"Only one {self.__class__.__name__} object should exist. Update the existing object instead "  # noqa: EM102
                 "of creating a new one."
             )
         return super().save(
@@ -168,7 +168,7 @@ class SingletonModel(Model):
             update_fields=update_fields,
         )
 
-    class Meta:
+    class Meta:  # noqa: DJ012
         abstract = True
 
 
@@ -205,15 +205,15 @@ class PrefetchGenericQuerySet(QuerySet):
         qs = self._chain()
 
         for model_classes, lookups in model_lookups.items():
-            model_classes = (
+            model_classes = (  # noqa: PLW2901
                 model_classes
                 if isinstance(model_classes, Iterable)
                 else [model_classes]
             )
             for model_cls in model_classes:
                 key = (content_type_field, model_cls)
-                qs._prefetch_generic_related_lookups[key] = [
-                    *qs._prefetch_generic_related_lookups.get(key, []),
+                qs._prefetch_generic_related_lookups[key] = [  # noqa: SLF001
+                    *qs._prefetch_generic_related_lookups.get(key, []),  # noqa: SLF001
                     *lookups,
                 ]
 
@@ -240,7 +240,7 @@ class PrefetchGenericQuerySet(QuerySet):
     def _clone(self):
         """Clone the queryset"""
         c = super()._clone()
-        c._prefetch_generic_related_lookups = copy.deepcopy(
+        c._prefetch_generic_related_lookups = copy.deepcopy(  # noqa: SLF001
             self._prefetch_generic_related_lookups
         )
         return c

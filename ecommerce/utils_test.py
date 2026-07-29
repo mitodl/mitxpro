@@ -19,7 +19,7 @@ from ecommerce.utils import (
 
 
 @pytest.mark.parametrize(
-    "reference_number, error",
+    "reference_number, error",  # noqa: PT006
     [
         ("XYZ-1-3", "Reference number must start with MITXPRO-cyb-prefix-"),
         ("MITXPRO-cyb-prefix-NaN", "Unable to parse order number"),
@@ -37,7 +37,7 @@ def test_get_order_id_by_reference_number_parse_error(reference_number, error):
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount, error",
+    "discount_type, amount, error",  # noqa: PT006
     [
         (
             DISCOUNT_TYPE_PERCENT_OFF,
@@ -183,7 +183,7 @@ def test_validate_amount_with_discount_type(discount_type, amount, error):
         ),
     ],
 )
-def test_make_checkout_url(
+def test_make_checkout_url(  # noqa: PLR0913
     settings,
     product_id,
     coupon_code,

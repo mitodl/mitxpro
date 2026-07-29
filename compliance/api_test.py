@@ -70,12 +70,12 @@ def test_log_exports_inquiry(mocker, cybersource_private_key, user):
 
 
 @pytest.mark.parametrize(
-    "cybersource_mock_client_responses, expected_result",
+    "cybersource_mock_client_responses, expected_result",  # noqa: PT006
     [
-        ["700_reject", RESULT_DENIED],
-        ["100_success_match", RESULT_DENIED],
-        ["100_success", RESULT_SUCCESS],
-        ["978_unknown", RESULT_UNKNOWN],
+        ["700_reject", RESULT_DENIED],  # noqa: PT007
+        ["100_success_match", RESULT_DENIED],  # noqa: PT007
+        ["100_success", RESULT_SUCCESS],  # noqa: PT007
+        ["978_unknown", RESULT_UNKNOWN],  # noqa: PT007
     ],
     indirect=["cybersource_mock_client_responses"],
 )
@@ -116,8 +116,8 @@ def test_verify_user_with_exports_temporary_errors(mocker, user, reason_code):
 
 
 @pytest.mark.parametrize(
-    "sanctions_lists, expect_passed",
-    [[None, False], ["", False], ["OFAC", True]],
+    "sanctions_lists, expect_passed",  # noqa: PT006
+    [[None, False], ["", False], ["OFAC", True]],  # noqa: PT007
 )
 def test_verify_user_with_exports_sanctions_lists(
     mocker, user, cybersource_settings, sanctions_lists, expect_passed

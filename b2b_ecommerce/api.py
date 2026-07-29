@@ -43,7 +43,7 @@ def complete_b2b_order(order):
         payment_version = create_coupons(
             name=name,
             product_ids=[product_id],
-            amount=Decimal(1),
+            amount=Decimal("1"),
             num_coupon_codes=order.num_seats,
             coupon_type=CouponPaymentVersion.SINGLE_USE,
             payment_type=CouponPaymentVersion.PAYMENT_SALE,
@@ -169,7 +169,7 @@ def determine_price_and_discount(*, product_version, discount_code, num_seats):
                 coupon_code=discount_code, product_id=product_version.product.id
             )
         except B2BCoupon.DoesNotExist as exc:
-            raise ValidationError("Invalid coupon code") from exc
+            raise ValidationError("Invalid coupon code") from exc  # noqa: EM101
     else:
         coupon = None
 

@@ -20,16 +20,16 @@ class SocialAuthExceptionRedirectMiddleware(SocialAuthExceptionMiddleware):
         """
         strategy = getattr(request, "social_strategy", None)
         if strategy is None or self.raise_exception(request, exception):
-            return
+            return  # noqa: RET502
 
-        if isinstance(exception, SocialAuthBaseException):
+        if isinstance(exception, SocialAuthBaseException):  # noqa: RET503
             backend = getattr(request, "backend", None)
             backend_name = getattr(backend, "name", "unknown-backend")
 
             message = self.get_message(request, exception)
             url = self.get_redirect_uri(request, exception)
 
-            if url:
+            if url:  # noqa: RET503
                 url += (("?" in url and "&") or "?") + "message={}&backend={}".format(  # noqa: UP032
                     quote(message), backend_name
                 )

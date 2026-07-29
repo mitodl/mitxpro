@@ -15,10 +15,10 @@ from courses.models import Course, CourseRun, Program
 def test_content_type_names():
     """Ensure that content type constants have the correct values relative to the actual ContentTypes"""
     assert (
-        CONTENT_TYPE_MODEL_PROGRAM == ContentType.objects.get_for_model(Program).model
+        CONTENT_TYPE_MODEL_PROGRAM == ContentType.objects.get_for_model(Program).model  # noqa: SIM300
     )
-    assert CONTENT_TYPE_MODEL_COURSE == ContentType.objects.get_for_model(Course).model
+    assert CONTENT_TYPE_MODEL_COURSE == ContentType.objects.get_for_model(Course).model  # noqa: SIM300
     assert (
-        CONTENT_TYPE_MODEL_COURSERUN
+        CONTENT_TYPE_MODEL_COURSERUN  # noqa: SIM300
         == ContentType.objects.get_for_model(CourseRun).model
     )

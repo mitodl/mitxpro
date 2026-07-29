@@ -23,7 +23,7 @@ from compliance.models import ExportsInquiryLog
 
 log = logging.getLogger()
 
-DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])
+DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])  # noqa: PYI024
 
 
 EXPORTS_REQUIRED_KEYS = [

@@ -43,15 +43,15 @@ class Command(BaseCommand):
             help="The title of the seeded object you want to delete",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         seed_data_loader = SeedDataLoader()
         if options["type"]:
             if not options["title"]:
-                raise CommandError("'title' must be specified with 'type'")
+                raise CommandError("'title' must be specified with 'type'")  # noqa: EM101
             if not seed_data_loader.is_seed_value(options["title"]):
                 raise CommandError(
-                    "This command should only be run to delete seeded objects. Seeded objects are indicated "
+                    "This command should only be run to delete seeded objects. Seeded objects are indicated "  # noqa: EM103
                     "by a prefixed title (example: {})".format(
                         seed_data_loader.seed_prefixed("Some Title")
                     )

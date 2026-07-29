@@ -17,9 +17,9 @@ from mail.constants import (
     EMAIL_B2B_RECEIPT,
     EMAIL_BULK_ENROLL,
     EMAIL_COURSE_RUN_UNENROLLMENT,
-    EMAIL_EXTERNAL_DATA_SYNC,
     EMAIL_PRODUCT_ORDER_RECEIPT,
     EMAIL_WELCOME_COURSE_RUN_ENROLLMENT,
+    EMAIL_EXTERNAL_DATA_SYNC,
 )
 from mitxpro import features
 from mitxpro.utils import format_price

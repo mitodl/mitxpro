@@ -44,7 +44,7 @@ def test_get_credentials_personal_auth(settings):
     """
     settings.DRIVE_SERVICE_ACCOUNT_CREDS = None
     settings.DRIVE_CLIENT_ID = "client-id"
-    settings.DRIVE_CLIENT_SECRET = "client-secret"
+    settings.DRIVE_CLIENT_SECRET = "client-secret"  # noqa: S105
     settings.ENVIRONMENT = "prod"
     with pytest.raises(ImproperlyConfigured):
         get_credentials()

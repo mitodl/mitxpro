@@ -86,7 +86,7 @@ class Command(BaseCommand):
             dest="tutordev",
         )
 
-    def determine_edx_hostport(self, *args, **kwargs):
+    def determine_edx_hostport(self, *args, **kwargs):  # noqa: ARG002
         """Returns a tuple of the edX host and port depending on what the user's passed in"""
 
         if kwargs["tutor"]:
@@ -96,7 +96,7 @@ class Command(BaseCommand):
         else:
             return ("edx.odl.local:18000", ":18000")
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         """Coordinates the other commands."""
 
         (edx_host, edx_gateway_port) = self.determine_edx_hostport(**kwargs)

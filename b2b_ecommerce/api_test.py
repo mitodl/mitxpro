@@ -108,7 +108,7 @@ def test_signed_payload(mocker, contract_number):
 
 
 @pytest.mark.parametrize(
-    "contract_number, b2b_coupon_code",
+    "contract_number, b2b_coupon_code",  # noqa: PT006
     [
         ("contract_number", "code"),
         ("contract_number", None),
@@ -147,7 +147,7 @@ def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
     create_coupons.assert_called_once_with(
         name=expected_name,
         product_ids=[order.product_version.product.id],
-        amount=Decimal(1),
+        amount=Decimal("1"),
         num_coupon_codes=order.num_seats,
         coupon_type=CouponPaymentVersion.SINGLE_USE,
         payment_type=CouponPaymentVersion.PAYMENT_SALE,
@@ -158,7 +158,7 @@ def test_complete_b2b_order(mocker, contract_number, b2b_coupon_code):
 
 
 @pytest.mark.parametrize(
-    "order_status, decision",
+    "order_status, decision",  # noqa: PT006
     [
         (B2BOrder.FAILED, "ERROR"),
         (B2BOrder.FULFILLED, "ERROR"),

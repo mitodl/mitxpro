@@ -45,35 +45,35 @@ class Command(BaseCommand):
             dest="codefile",
         )
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **kwargs):  # noqa: ARG002
         if not kwargs["payment"] and not kwargs["codefile"]:
             raise CommandError(
-                "Please specify a payment to deactivate or a code file to process."
+                "Please specify a payment to deactivate or a code file to process."  # noqa: EM101
             )
 
         if kwargs["payment"] is not None:
             try:
                 payment = CouponPayment.objects.filter(name=kwargs["payment"]).get()
             except Exception:  # noqa: BLE001
-                raise CommandError(
-                    f"Payment name {kwargs['payment']} not found or ambiguous."
+                raise CommandError(  # noqa: B904
+                    f"Payment name {kwargs['payment']} not found or ambiguous."  # noqa: EM102
                 )
 
             codes = Coupon.objects.filter(enabled=True, payment=payment).all()
         else:
             try:
                 # Note: open() defaults to read mode ("r")
-                with open(kwargs["codefile"]) as file:
+                with open(kwargs["codefile"]) as file:  # noqa: PTH123
                     procCodes = [line.strip() for line in file]
             except Exception as e:  # noqa: BLE001
-                raise CommandError(
-                    f"Specified file {kwargs['codefile']} could not be opened: {e}"
+                raise CommandError(  # noqa: B904
+                    f"Specified file {kwargs['codefile']} could not be opened: {e}"  # noqa: EM102
                 )
 
             codes = Coupon.objects.filter(coupon_code__in=procCodes, enabled=True).all()
 
         if len(codes) == 0:
-            raise CommandError("No codes found.")
+            raise CommandError("No codes found.")  # noqa: EM101
 
         deactivate_coupons(codes, Coupon)
 

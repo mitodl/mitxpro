@@ -4,10 +4,10 @@ Custom serializers for Wagtail API to handle product child pages and Images
 
 from rest_framework import serializers
 from rest_framework.fields import Field
+from wagtail.models import Page
 from wagtail.api.v2.serializers import get_serializer_class
 from wagtail.api.v2.views import PagesAPIViewSet
 from wagtail.images.models import Image
-from wagtail.models import Page
 
 
 class ImageSerializer(serializers.ModelSerializer):

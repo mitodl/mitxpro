@@ -15,8 +15,6 @@ from wagtail.coreutils import WAGTAIL_APPEND_SLASH
 from wagtail.test.utils.form_data import querydict_from_html
 
 from cms.constants import (
-    ALL_LANGUAGES,
-    ALL_TAB,
     COMMON_COURSEWARE_COMPONENT_INDEX_SLUG,
     FORMAT_HYBRID,
     FORMAT_ONLINE,
@@ -25,6 +23,8 @@ from cms.constants import (
     UPCOMING_WEBINAR,
     UPCOMING_WEBINAR_BUTTON_TITLE,
     WEBINAR_HEADER_BANNER,
+    ALL_LANGUAGES,
+    ALL_TAB,
 )
 from cms.factories import (
     CatalogPageFactory,
@@ -180,10 +180,10 @@ def test_webinar_context(staff_user):
 
 
 @pytest.mark.parametrize(
-    "time, webinar_date,",
-    (
-        ["11 am", datetime.today() + timedelta(days=1)],  # noqa: DTZ002
-        [None, None],
+    "time, webinar_date,",  # noqa: PT006
+    (  # noqa: PT007
+        ["11 am", datetime.today() + timedelta(days=1)],  # noqa: DTZ002, PT007
+        [None, None],  # noqa: PT007
     ),
 )
 def test_upcoming_webinar_date_time(time, webinar_date):

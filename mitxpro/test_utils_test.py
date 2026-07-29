@@ -56,12 +56,12 @@ def test_assert_drf_json_equall():
 
 
 @pytest.mark.parametrize(
-    "content,expected_content,expected_json",
+    "content,expected_content,expected_json",  # noqa: PT006
     [
-        ['{"test": "content"}', '{"test": "content"}', {"test": "content"}],
-        [{"test": "content"}, '{"test": "content"}', {"test": "content"}],
-        [["test", "content"], '["test", "content"]', ["test", "content"]],
-        [123, "123", 123],
+        ['{"test": "content"}', '{"test": "content"}', {"test": "content"}],  # noqa: PT007
+        [{"test": "content"}, '{"test": "content"}', {"test": "content"}],  # noqa: PT007
+        [["test", "content"], '["test", "content"]', ["test", "content"]],  # noqa: PT007
+        [123, "123", 123],  # noqa: PT007
     ],
 )
 def test_mock_response(content, expected_content, expected_json):

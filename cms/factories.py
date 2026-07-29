@@ -95,7 +95,7 @@ class ProgramPageFactory(wagtail_factories.PageFactory):
         skip_postgeneration_save = True
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):
+    def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the program index page
@@ -127,7 +127,7 @@ class CoursePageFactory(wagtail_factories.PageFactory):
         skip_postgeneration_save = True
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):
+    def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the course index page
@@ -158,7 +158,7 @@ class ExternalCoursePageFactory(wagtail_factories.PageFactory):
         skip_postgeneration_save = True
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):
+    def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the course index page
@@ -189,7 +189,7 @@ class ExternalProgramPageFactory(wagtail_factories.PageFactory):
         skip_postgeneration_save = True
 
     @factory.post_generation
-    def post_gen(obj, create, extracted, **kwargs):
+    def post_gen(obj, create, extracted, **kwargs):  # noqa: ARG002, N805
         """Post-generation hook"""
         if create:
             # Move the created page to be a child of the program index page

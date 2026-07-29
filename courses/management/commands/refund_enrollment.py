@@ -47,7 +47,7 @@ class Command(EnrollmentChangeCommand):
 
         super().add_arguments(parser)
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # noqa: ARG002
         """Handle command execution"""
         user = fetch_user(options["user"])
         keep_failed_enrollments = options["keep_failed_enrollments"]
@@ -75,7 +75,7 @@ class Command(EnrollmentChangeCommand):
                 enrollment.user.username,
                 enrollment.user.email,
                 enrollment_summaries(
-                    filter(bool, [program_enrollment] + run_enrollments)
+                    filter(bool, [program_enrollment] + run_enrollments)  # noqa: RUF005
                 ),
             )
 
@@ -94,7 +94,7 @@ class Command(EnrollmentChangeCommand):
         else:
             self.stdout.write(
                 self.style.ERROR(
-                    "Failed to refund the enrollment – 'for' user: {} ({}) from course / program ({})\n".format(
+                    "Failed to refund the enrollment – 'for' user: {} ({}) from course / program ({})\n".format(  # noqa: RUF001
                         user.username, user.email, options["run"] or options["program"]
                     )
                 )

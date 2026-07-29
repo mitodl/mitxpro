@@ -62,11 +62,11 @@ pytestmark = [pytest.mark.django_db]
 
 
 @pytest.mark.parametrize(
-    "text_id, expected",
+    "text_id, expected",  # noqa: PT006
     [
-        ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],
-        ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],
-        ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],
+        ["course-v1:xPRO+SysEngxNAV+R1", "Run 1"],  # noqa: PT007
+        ["course-v1:xPRO+SysEngxNAV+R10", "Run 10"],  # noqa: PT007
+        ["course-v1:xPRO+SysEngxNAV", "course-v1:xPRO+SysEngxNAV"],  # noqa: PT007
     ],
 )
 def test_serialize_product(text_id, expected):
@@ -133,10 +133,10 @@ def test_serialize_order(settings, hubspot_order, status):
 
 
 @pytest.mark.parametrize(
-    "discount_type, amount",
+    "discount_type, amount",  # noqa: PT006
     [
-        [DISCOUNT_TYPE_PERCENT_OFF, Decimal("0.75")],
-        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal(75)],
+        [DISCOUNT_TYPE_PERCENT_OFF, Decimal("0.75")],  # noqa: PT007
+        [DISCOUNT_TYPE_DOLLARS_OFF, Decimal("75")],  # noqa: PT007
     ],
 )
 def test_serialize_order_with_coupon(settings, hubspot_order, discount_type, amount):

@@ -62,8 +62,8 @@ def test_complete_auth(mocker, settings, user, existing_auth):
     GoogleApiAuth object
     """
     settings.SITE_BASE_URL = "http://example.com"
-    access_token = "access-token-123"
-    refresh_token = "refresh-token-123"
+    access_token = "access-token-123"  # noqa: S105
+    refresh_token = "refresh-token-123"  # noqa: S105
     code = "auth-code"
     flow_mock = mocker.Mock(
         credentials=mocker.Mock(token=access_token, refresh_token=refresh_token)

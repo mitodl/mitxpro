@@ -10,8 +10,8 @@ def invert_is_private(apps, schema_editor):
     Product = apps.get_model("ecommerce", "Product")
     Product.objects.all().update(
         is_private=models.Case(
-            models.When(is_private=False, then=models.Value(True)),
-            default=models.Value(False),
+            models.When(is_private=False, then=models.Value(True)),  # noqa: FBT003
+            default=models.Value(False),  # noqa: FBT003
         )
     )
 

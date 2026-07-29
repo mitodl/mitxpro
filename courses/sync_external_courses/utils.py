@@ -7,6 +7,7 @@ on named properties for better readability and maintenance.
 """
 
 from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -16,8 +17,8 @@ class CoursewareInfo:
     """
 
     code: str
-    title: str | None = None
-    msg: str | None = None
+    title: Optional[str] = None
+    msg: Optional[str] = None
 
     def __eq__(self, other):
         """

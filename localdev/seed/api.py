@@ -91,7 +91,7 @@ from mitxpro.utils import (
 #             ...ResourcePage properties...
 #         }  # noqa: ERA001, RUF100
 #     ],
-#     "companies": [ ...Company properties... ],
+#     "companies": [ ...Company properties... ],  # noqa: ERA001
 #     "coupons": [
 #         {  # noqa: ERA001, RUF100
 #             "name": ...CouponPayment name...,  # noqa: ERA001, RUF100
@@ -102,7 +102,7 @@ from mitxpro.utils import (
 #     ]  # noqa: ERA001, RUF100
 # }  # noqa: ERA001, RUF100
 
-SEED_DATA_FILE_PATH = os.path.join(
+SEED_DATA_FILE_PATH = os.path.join(  # noqa: PTH118
     settings.BASE_DIR, "localdev/seed/resources/seed_data.json"
 )
 REQUIRED_VOUCHER_SETTINGS = [
@@ -124,7 +124,7 @@ REQUIRED_VOUCHER_SETTINGS = [
 
 def get_raw_seed_data_from_file():
     """Loads raw seed data from our seed data file"""
-    with open(SEED_DATA_FILE_PATH) as f:
+    with open(SEED_DATA_FILE_PATH) as f:  # noqa: PTH123
         return json.loads(f.read())
 
 
@@ -154,7 +154,7 @@ def delete_wagtail_pages(page_cls, filter_dict):
     base_pages_qset.delete()
     return (
         num_pages,
-        {page_cls._meta.label: num_pages},
+        {page_cls._meta.label: num_pages},  # noqa: SLF001
     )
 
 
@@ -206,10 +206,10 @@ def check_settings():
         except AttributeError:
             missing.append(variable)
     if missing:
-        raise ImproperlyConfigured(f"Missing required voucher settings: {missing}")
+        raise ImproperlyConfigured(f"Missing required voucher settings: {missing}")  # noqa: EM102
 
 
-SeedDataSpec = namedtuple("SeedDataSpec", ["model_cls", "data", "parent"])
+SeedDataSpec = namedtuple("SeedDataSpec", ["model_cls", "data", "parent"])  # noqa: PYI024
 
 
 class SeedResult:
@@ -603,7 +603,7 @@ class SeedDataLoader:
         __, deleted_type_counts = delete_wagtail_pages(
             ResourcePage, {"id": existing_obj.id}
         )
-        self.seed_result.add_deleted(deleted_type_counts)
+        self.seed_result.add_deleted(deleted_type_counts)  # noqa: RET503
 
     def iter_seed_data(self, raw_data):
         """

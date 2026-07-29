@@ -30,7 +30,7 @@ class TestblockUsers(TestCase):
 
         user = UserFactory.create(email=test_email, is_active=True)
         email = user.email
-        hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()
+        hashed_email = hashlib.md5(email.lower().encode("utf-8")).hexdigest()  # noqa: S324
         assert BlockList.objects.all().count() == 0
 
         COMMAND.handle("block_users", users=[test_email], block_users=True)
@@ -55,12 +55,12 @@ class TestblockUsers(TestCase):
     def test_user_blocking_if_not_requested(self):
         """Test block_users command exit if not user provided"""
         assert BlockList.objects.all().count() == 0
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit):  # noqa: PT027
             COMMAND.handle("block_users", users=[])
 
     @pytest.mark.django_db
     def test_user_blocking_with_invalid_email(self):
         """Test block_users command system exit if not provided a valid email address"""
         test_email = "test.com"
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit):  # noqa: PT027
             COMMAND.handle("block_users", users=[test_email])

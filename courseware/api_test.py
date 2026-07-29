@@ -68,7 +68,7 @@ def application(settings):
     settings.OPENEDX_OAUTH_APP_NAME = "test_app_name"
     settings.OPENEDX_API_BASE_URL = "http://example.com"
     settings.OPENEDX_OAUTH_PROVIDER = "test_provider"
-    settings.MITXPRO_REGISTRATION_ACCESS_TOKEN = "access_token"
+    settings.MITXPRO_REGISTRATION_ACCESS_TOKEN = "access_token"  # noqa: S105
     return Application.objects.create(
         name=settings.OPENEDX_OAUTH_APP_NAME,
         user=None,
@@ -81,8 +81,8 @@ def application(settings):
 @pytest.fixture
 def update_token_response(settings):
     """Mock response for updating an auth token"""
-    refresh_token = "abc123"
-    access_token = "def456"
+    refresh_token = "abc123"  # noqa: S105
+    access_token = "def456"  # noqa: S105
 
     responses.add(
         responses.POST,
@@ -98,8 +98,8 @@ def update_token_response(settings):
 @pytest.fixture
 def update_token_response_error(settings):
     """Mock response for updating an auth token"""
-    refresh_token = "abc123"
-    access_token = "def456"
+    refresh_token = "abc123"  # noqa: S105
+    access_token = "def456"  # noqa: S105
 
     responses.add(
         responses.POST,
@@ -133,7 +133,7 @@ def test_validate_name_with_edx_failure(mocker):
     """
     name = "Test User"
 
-    class MockApiException(Exception):
+    class MockApiException(Exception):  # noqa: N818
         """Mock exception for API errors with a response attribute."""
 
         def __init__(self, message, response):
@@ -169,8 +169,8 @@ def test_validate_name_with_edx_failure(mocker):
 @pytest.fixture
 def create_token_responses(settings):
     """Mock responses for creating an auth token"""
-    refresh_token = "abc123"
-    access_token = "def456"
+    refresh_token = "abc123"  # noqa: S105
+    access_token = "def456"  # noqa: S105
     code = "ghi789"
     responses.add(
         responses.GET,
@@ -562,7 +562,7 @@ def test_enroll_pro_unknown_fail(mocker, user, settings):
     )
     mocker.patch("courseware.api.get_edx_api_client", return_value=mock_client)
     course_run = CourseRunFactory.build()
-    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"
+    settings.OPENEDX_SERVICE_WORKER_API_TOKEN = "mock_api_token"  # noqa: S105
 
     with pytest.raises(UnknownEdxApiEnrollException):
         enroll_in_edx_course_runs(user, [course_run])
@@ -607,8 +607,8 @@ def test_retry_failed_edx_enrollments(mocker, exception_raised):
     "mode", [EDX_ENROLLMENT_PRO_MODE, EDX_ENROLLMENT_AUDIT_MODE, "other"]
 )
 @pytest.mark.parametrize(
-    "edx_enrollment_exists, is_active",
-    [[False, False], [True, True], [True, False]],
+    "edx_enrollment_exists, is_active",  # noqa: PT006
+    [[False, False], [True, True], [True, False]],  # noqa: PT007
 )
 def test_retry_failed_edx_enrollments_exists(
     mocker, edx_enrollment_exists, is_active, mode
@@ -688,7 +688,7 @@ def test_retry_failed_enroll_grace_period(mocker):
 
 
 @pytest.mark.parametrize(
-    "no_courseware_user,no_edx_auth",
+    "no_courseware_user,no_edx_auth",  # noqa: PT006
     itertools.product([True, False], [True, False]),
 )
 def test_repair_faulty_edx_user(mocker, user, no_courseware_user, no_edx_auth):
@@ -794,11 +794,11 @@ def test_unenroll_edx_course_run(mocker):
 
 
 @pytest.mark.parametrize(
-    "client_exception_raised,expected_exception",
+    "client_exception_raised,expected_exception",  # noqa: PT006
     [
-        [MockHttpError, EdxApiEnrollErrorException],
-        [ValueError, UnknownEdxApiEnrollException],
-        [Exception, UnknownEdxApiEnrollException],
+        [MockHttpError, EdxApiEnrollErrorException],  # noqa: PT007
+        [ValueError, UnknownEdxApiEnrollException],  # noqa: PT007
+        [Exception, UnknownEdxApiEnrollException],  # noqa: PT007
     ],
 )
 def test_unenroll_edx_course_run_failure(
@@ -834,11 +834,11 @@ def test_update_user_edx_name(mocker, user):
 
 
 @pytest.mark.parametrize(
-    "client_exception_raised,expected_exception",
+    "client_exception_raised,expected_exception",  # noqa: PT006
     [
-        [MockHttpError, UserNameUpdateFailedException],
-        [ValueError, UserNameUpdateFailedException],
-        [Exception, UserNameUpdateFailedException],
+        [MockHttpError, UserNameUpdateFailedException],  # noqa: PT007
+        [ValueError, UserNameUpdateFailedException],  # noqa: PT007
+        [Exception, UserNameUpdateFailedException],  # noqa: PT007
     ],
 )
 def test_update_edx_user_name_failure(

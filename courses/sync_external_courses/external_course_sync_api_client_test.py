@@ -55,7 +55,7 @@ from mitxpro.utils import now_in_utc
         ),
     ],
 )
-def test_external_course_sync_api_client_get_requests(
+def test_external_course_sync_api_client_get_requests(  # noqa: PLR0913
     mocker,
     settings,
     patch_request_path,
