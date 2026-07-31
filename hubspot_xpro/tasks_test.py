@@ -297,8 +297,9 @@ def test_batch_update_hubspot_objects_chunked_error(mocker, status, expected_err
             chunk,
         )
     if status == 429:  # noqa: PLR2004
-        # A 429 during individual retry propagates immediately for backoff
-        mock_sync_contacts.assert_called_once_with(chunk[0][0])
+        # A 429 from the batch call is re-raised immediately for backoff,
+        # without attempting individual retries
+        mock_sync_contacts.assert_not_called()
     else:
         for item in chunk:
             mock_sync_contacts.assert_any_call(item[0])
@@ -386,8 +387,9 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
                 "user",
                 chunk,
             )
-        # A 429 during individual retry propagates immediately for backoff
-        mock_sync_contact.assert_called_once_with(chunk[0])
+        # A 429 from the batch call is re-raised immediately for backoff,
+        # without attempting individual retries
+        mock_sync_contact.assert_not_called()
     else:
         result = tasks.batch_create_hubspot_objects_chunked(
             HubspotObjectType.CONTACTS.value,

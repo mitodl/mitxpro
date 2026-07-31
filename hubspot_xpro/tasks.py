@@ -461,18 +461,17 @@ def batch_create_hubspot_objects_chunked(
                         getattr(result, "id", None),
                     )
                     continue
+        except TooManyRequestsException:
+            raise
         except ApiException as ae:
+            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
+                raise
             last_error_status = ae.status
             still_failed = handle_failed_batch_chunk(chunk, hubspot_type)
             if still_failed:
                 errored_chunks.append(still_failed)
         time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
     if errored_chunks:
-        if last_error_status == 429:  # noqa: PLR2004
-            raise ApiException(
-                status=last_error_status,
-                reason=f"Batch hubspot create failed for the following chunks: {errored_chunks}",
-            )
         log.error(
             "Batch hubspot create failed for type %s, chunks: %s (status %s)",
             hubspot_type,
@@ -547,7 +546,11 @@ def batch_update_hubspot_objects_chunked(
                 hubspot_type, BatchInputSimplePublicObjectBatchInput(inputs=inputs)
             )
             updated_ids.extend([result.id for result in response.results])
+        except TooManyRequestsException:
+            raise
         except ApiException as ae:
+            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
+                raise
             last_error_status = ae.status
             still_failed = handle_failed_batch_chunk(
                 [item[0] for item in chunk], hubspot_type
