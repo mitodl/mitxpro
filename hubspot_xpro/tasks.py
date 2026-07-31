@@ -247,8 +247,12 @@ def batch_upsert_hubspot_deals_chunked(ids: list[int]):
     for order in Order.objects.filter(id__in=ids):
         try:
             results.append(api.sync_deal_with_hubspot(order.id).id)
-        except (TooManyRequestsException, ApiException):
-            raise
+        except ApiException as ae:
+            if ae.status == 429:  # noqa: PLR2004
+                raise
+            log.exception(
+                "Could not sync hubspot deal for order %s; skipping", order.id
+            )
         except Exception:  # noqa: BLE001
             log.exception(
                 "Could not sync hubspot deal for order %s; skipping", order.id
@@ -279,8 +283,12 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: list[int]) -> list[str]:
     for order in B2BOrder.objects.filter(id__in=ids):
         try:
             results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
-        except (TooManyRequestsException, ApiException):
-            raise
+        except ApiException as ae:
+            if ae.status == 429:  # noqa: PLR2004
+                raise
+            log.exception(
+                "Could not sync hubspot b2b deal for order %s; skipping", order.id
+            )
         except Exception:  # noqa: BLE001
             log.exception(
                 "Could not sync hubspot b2b deal for order %s; skipping", order.id
@@ -600,16 +608,16 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
             deal = Order.objects.get(id=order_id)
             contact_id = get_hubspot_id_for_object(deal.purchaser)
             deal_id = get_hubspot_id_for_object(deal)
+            if contact_id and deal_id:
+                contact_associations_batch.append(
+                    PublicAssociation(
+                        _from=deal_id,
+                        to=contact_id,
+                        type=HubspotAssociationType.DEAL_CONTACT.value,
+                    )
+                )
             for line in deal.lines.iterator():
                 line_id = get_hubspot_id_for_object(line)
-                if contact_id and deal_id:
-                    contact_associations_batch.append(
-                        PublicAssociation(
-                            _from=deal_id,
-                            to=contact_id,
-                            type=HubspotAssociationType.DEAL_CONTACT.value,
-                        )
-                    )
                 if line_id and deal_id:
                     line_associations_batch.append(
                         PublicAssociation(
@@ -618,8 +626,13 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             type=HubspotAssociationType.LINE_DEAL.value,
                         )
                     )
-        except (TooManyRequestsException, ApiException):
-            raise
+        except ApiException as ae:
+            if ae.status == 429:  # noqa: PLR2004
+                raise
+            log.exception(
+                "Could not gather hubspot associations for order %s; skipping",
+                order_id,
+            )
         except Exception:  # noqa: BLE001
             log.exception(
                 "Could not gather hubspot associations for order %s; skipping",
@@ -630,36 +643,38 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
             or len(line_associations_batch) == 100  # noqa: PLR2004
             or idx == deal_count - 1
         ):
-            try:
-                hubspot_client.crm.associations.batch_api.create(
-                    HubspotObjectType.LINES.value,
-                    HubspotObjectType.DEALS.value,
-                    batch_input_public_association=BatchInputPublicAssociation(
-                        inputs=line_associations_batch
-                    ),
-                )
-            except ApiException as ae:
-                if ae.status == 429:  # noqa: PLR2004
-                    raise
-                log.exception(
-                    "Could not create hubspot line-deal associations batch; skipping"
-                )
-            line_associations_batch = []
-            try:
-                hubspot_client.crm.associations.batch_api.create(
-                    HubspotObjectType.DEALS.value,
-                    HubspotObjectType.CONTACTS.value,
-                    batch_input_public_association=BatchInputPublicAssociation(
-                        inputs=contact_associations_batch
-                    ),
-                )
-            except ApiException as ae:
-                if ae.status == 429:  # noqa: PLR2004
-                    raise
-                log.exception(
-                    "Could not create hubspot deal-contact associations batch; skipping"
-                )
-            contact_associations_batch = []
+            if line_associations_batch:
+                try:
+                    hubspot_client.crm.associations.batch_api.create(
+                        HubspotObjectType.LINES.value,
+                        HubspotObjectType.DEALS.value,
+                        batch_input_public_association=BatchInputPublicAssociation(
+                            inputs=line_associations_batch
+                        ),
+                    )
+                except ApiException as ae:
+                    if ae.status == 429:  # noqa: PLR2004
+                        raise
+                    log.exception(
+                        "Could not create hubspot line-deal associations batch; skipping"
+                    )
+                line_associations_batch = []
+            if contact_associations_batch:
+                try:
+                    hubspot_client.crm.associations.batch_api.create(
+                        HubspotObjectType.DEALS.value,
+                        HubspotObjectType.CONTACTS.value,
+                        batch_input_public_association=BatchInputPublicAssociation(
+                            inputs=contact_associations_batch
+                        ),
+                    )
+                except ApiException as ae:
+                    if ae.status == 429:  # noqa: PLR2004
+                        raise
+                    log.exception(
+                        "Could not create hubspot deal-contact associations batch; skipping"
+                    )
+                contact_associations_batch = []
     return order_ids
 
 
