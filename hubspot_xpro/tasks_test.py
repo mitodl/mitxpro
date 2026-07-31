@@ -296,8 +296,12 @@ def test_batch_update_hubspot_objects_chunked_error(mocker, status, expected_err
             "user",
             chunk,
         )
-    for item in chunk:
-        mock_sync_contacts.assert_any_call(item[0])
+    if status == 429:  # noqa: PLR2004
+        # A 429 during individual retry propagates immediately for backoff
+        mock_sync_contacts.assert_called_once_with(chunk[0][0])
+    else:
+        for item in chunk:
+            mock_sync_contacts.assert_any_call(item[0])
 
 
 def test_batch_update_hubspot_objects_chunked_skips_unserializable(mocker):
@@ -382,6 +386,8 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
                 "user",
                 chunk,
             )
+        # A 429 during individual retry propagates immediately for backoff
+        mock_sync_contact.assert_called_once_with(chunk[0])
     else:
         result = tasks.batch_create_hubspot_objects_chunked(
             HubspotObjectType.CONTACTS.value,
@@ -389,8 +395,8 @@ def test_batch_create_hubspot_objects_chunked_error(mocker, status, expected_err
             chunk,
         )
         assert result == []
-    for item in chunk:
-        mock_sync_contact.assert_any_call(item)
+        for item in chunk:
+            mock_sync_contact.assert_any_call(item)
 
 
 def test_batch_create_hubspot_objects_chunked_duplicate_hubspot_id(mocker):
@@ -653,21 +659,36 @@ def test_task_obj_lock(func_name, args, kwargs, result):
 
 
 def test_sync_failed_contacts(mocker):
-    """sync_failed_contacts should try to sync each contact and return a list of failed contact ids"""
-    user_ids = sorted(user.id for user in UserFactory.create_batch(5))
+    """sync_failed_contacts should collect failed ids and not abort on non-429 errors"""
+    user_ids = sorted(user.id for user in UserFactory.create_batch(4))
     mock_sync = mocker.patch(
         "hubspot_xpro.tasks.api.sync_contact_with_hubspot",
         side_effect=[
             mocker.Mock(),
             ApiException(status=500, reason="err"),
             mocker.Mock(),
-            ApiException(status=429, reason="tmr"),
             ValueError("unexpected"),
         ],
     )
     result = tasks.sync_failed_contacts(user_ids)
-    assert mock_sync.call_count == 5
-    assert result == [user_ids[1], user_ids[3], user_ids[4]]
+    assert mock_sync.call_count == 4
+    assert result == [user_ids[1], user_ids[3]]
+
+
+def test_sync_failed_contacts_reraises_429(mocker):
+    """A 429 should propagate so Celery retry/backoff can apply, not be swallowed"""
+    user_ids = sorted(user.id for user in UserFactory.create_batch(3))
+    mocker.patch(
+        "hubspot_xpro.tasks.api.sync_contact_with_hubspot",
+        side_effect=[
+            mocker.Mock(),
+            ApiException(status=429, reason="tmr"),
+            mocker.Mock(),
+        ],
+    )
+    with pytest.raises(ApiException) as exc_info:
+        tasks.sync_failed_contacts(user_ids)
+    assert exc_info.value.status == 429
 
 
 @pytest.mark.parametrize("for_contacts", [True, False])

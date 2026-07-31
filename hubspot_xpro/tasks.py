@@ -102,7 +102,11 @@ def sync_failed_contacts(chunk: list[int]) -> list[int]:
         try:
             api.sync_contact_with_hubspot(user_id)
             time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
-        except ApiException:
+        except TooManyRequestsException:
+            raise
+        except ApiException as ae:
+            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
+                raise
             failed_ids.append(user_id)
         except Exception:  # noqa: BLE001
             log.exception(
