@@ -247,8 +247,10 @@ def batch_upsert_hubspot_deals_chunked(ids: list[int]):
     for order in Order.objects.filter(id__in=ids):
         try:
             results.append(api.sync_deal_with_hubspot(order.id).id)
+        except TooManyRequestsException:
+            raise
         except ApiException as ae:
-            if ae.status == 429:  # noqa: PLR2004
+            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
                 raise
             log.exception(
                 "Could not sync hubspot deal for order %s; skipping", order.id
@@ -283,8 +285,10 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: list[int]) -> list[str]:
     for order in B2BOrder.objects.filter(id__in=ids):
         try:
             results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
+        except TooManyRequestsException:
+            raise
         except ApiException as ae:
-            if ae.status == 429:  # noqa: PLR2004
+            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
                 raise
             log.exception(
                 "Could not sync hubspot b2b deal for order %s; skipping", order.id
@@ -626,8 +630,10 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             type=HubspotAssociationType.LINE_DEAL.value,
                         )
                     )
+        except TooManyRequestsException:
+            raise
         except ApiException as ae:
-            if ae.status == 429:  # noqa: PLR2004
+            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
                 raise
             log.exception(
                 "Could not gather hubspot associations for order %s; skipping",
@@ -652,8 +658,10 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             inputs=line_associations_batch
                         ),
                     )
+                except TooManyRequestsException:
+                    raise
                 except ApiException as ae:
-                    if ae.status == 429:  # noqa: PLR2004
+                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
                         raise
                     log.exception(
                         "Could not create hubspot line-deal associations batch; skipping"
@@ -668,8 +676,10 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             inputs=contact_associations_batch
                         ),
                     )
+                except TooManyRequestsException:
+                    raise
                 except ApiException as ae:
-                    if ae.status == 429:  # noqa: PLR2004
+                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
                         raise
                     log.exception(
                         "Could not create hubspot deal-contact associations batch; skipping"
