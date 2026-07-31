@@ -389,8 +389,17 @@ def batch_create_hubspot_objects_chunked(
             for obj_id in chunk:
                 try:
                     inputs.append(api.MODEL_FUNCTION_MAPPING[ct_model_name](obj_id))
-                except (TooManyRequestsException, ApiException):
+                except TooManyRequestsException:
                     raise
+                except ApiException as ae:
+                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
+                        raise
+                    log.exception(
+                        "Could not build hubspot %s sync message for %s %s; skipping",
+                        hubspot_type,
+                        ct_model_name,
+                        obj_id,
+                    )
                 except Exception:  # noqa: BLE001
                     log.exception(
                         "Could not build hubspot %s sync message for %s %s; skipping",
@@ -513,8 +522,17 @@ def batch_update_hubspot_objects_chunked(
                             ).properties,
                         }
                     )
-                except (TooManyRequestsException, ApiException):
+                except TooManyRequestsException:
                     raise
+                except ApiException as ae:
+                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
+                        raise
+                    log.exception(
+                        "Could not build hubspot %s update message for %s %s; skipping",
+                        hubspot_type,
+                        ct_model_name,
+                        obj_id[0],
+                    )
                 except Exception:  # noqa: BLE001
                     log.exception(
                         "Could not build hubspot %s update message for %s %s; skipping",
