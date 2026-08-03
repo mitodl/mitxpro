@@ -39,8 +39,7 @@ def reraise_if_rate_limited(exc: Exception) -> None:
     handle them. Any other exception is left for the caller to handle.
     """
     if isinstance(exc, TooManyRequestsException) or (
-        isinstance(exc, ApiException)
-        and getattr(exc, "status", None) == 429  # noqa: PLR2004
+        isinstance(exc, ApiException) and getattr(exc, "status", None) == 429  # noqa: PLR2004
     ):
         raise exc
 

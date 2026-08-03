@@ -452,9 +452,7 @@ def test_batch_create_hubspot_objects_chunked_reraises_unexpected_integrity_erro
     mock_hubspot_api.return_value.crm.objects.batch_api.create.return_value = (
         mocker.Mock(
             results=[
-                SimplePublicObjectFactory(
-                    id="123", properties={"email": user.email}
-                )
+                SimplePublicObjectFactory(id="123", properties={"email": user.email})
             ]
         )
     )
