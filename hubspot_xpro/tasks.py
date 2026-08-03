@@ -9,7 +9,7 @@ from math import ceil
 import celery
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import (
     ApiException,
@@ -31,6 +31,18 @@ from mitxpro.celery import app
 from users.models import User
 
 log = logging.getLogger()
+
+
+def reraise_if_rate_limited(exc: Exception) -> None:
+    """
+    Re-raise HubSpot rate-limit (429) errors so Celery's autoretry/backoff can
+    handle them. Any other exception is left for the caller to handle.
+    """
+    if isinstance(exc, TooManyRequestsException) or (
+        isinstance(exc, ApiException)
+        and getattr(exc, "status", None) == 429  # noqa: PLR2004
+    ):
+        raise exc
 
 
 def task_obj_lock(func_name: str, args: list[object], kwargs: dict) -> str:
@@ -251,15 +263,8 @@ def batch_upsert_hubspot_deals_chunked(ids: list[int]):
     for order in Order.objects.filter(id__in=ids):
         try:
             results.append(api.sync_deal_with_hubspot(order.id).id)
-        except TooManyRequestsException:
-            raise
-        except ApiException as ae:
-            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                raise
-            log.exception(
-                "Could not sync hubspot deal for order %s; skipping", order.id
-            )
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            reraise_if_rate_limited(exc)
             log.exception(
                 "Could not sync hubspot deal for order %s; skipping", order.id
             )
@@ -289,15 +294,8 @@ def batch_upsert_hubspot_b2b_deals_chunked(ids: list[int]) -> list[str]:
     for order in B2BOrder.objects.filter(id__in=ids):
         try:
             results.append(api.sync_b2b_deal_with_hubspot(order.id).id)
-        except TooManyRequestsException:
-            raise
-        except ApiException as ae:
-            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                raise
-            log.exception(
-                "Could not sync hubspot b2b deal for order %s; skipping", order.id
-            )
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            reraise_if_rate_limited(exc)
             log.exception(
                 "Could not sync hubspot b2b deal for order %s; skipping", order.id
             )
@@ -389,18 +387,8 @@ def batch_create_hubspot_objects_chunked(
             for obj_id in chunk:
                 try:
                     inputs.append(api.MODEL_FUNCTION_MAPPING[ct_model_name](obj_id))
-                except TooManyRequestsException:
-                    raise
-                except ApiException as ae:
-                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                        raise
-                    log.exception(
-                        "Could not build hubspot %s sync message for %s %s; skipping",
-                        hubspot_type,
-                        ct_model_name,
-                        obj_id,
-                    )
-                except Exception:  # noqa: BLE001
+                except Exception as exc:  # noqa: BLE001
+                    reraise_if_rate_limited(exc)
                     log.exception(
                         "Could not build hubspot %s sync message for %s %s; skipping",
                         hubspot_type,
@@ -408,7 +396,6 @@ def batch_create_hubspot_objects_chunked(
                         obj_id,
                     )
             if not inputs:
-                time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
                 continue
             response = HubspotApi().crm.objects.batch_api.create(
                 hubspot_type,
@@ -433,16 +420,39 @@ def batch_create_hubspot_objects_chunked(
                     else:
                         object_id = result.properties["unique_app_id"].split("-")[-1]
                     try:
-                        HubspotObject.objects.update_or_create(
-                            content_type=content_type,
-                            hubspot_id=result.id,
-                            object_id=object_id,
-                        )
+                        # Savepoint so we can catch IntegrityError and keep
+                        # querying: on Postgres a failed statement aborts the
+                        # whole transaction, and the atomic() block rolls back to
+                        # the savepoint to keep the connection usable. See
+                        # https://docs.djangoproject.com/en/stable/topics/db/transactions/#controlling-transactions-explicitly
+                        with transaction.atomic():
+                            HubspotObject.objects.update_or_create(
+                                content_type=content_type,
+                                hubspot_id=result.id,
+                                object_id=object_id,
+                            )
                     except IntegrityError:
+                        mapping_conflict = (
+                            HubspotObject.objects.filter(
+                                content_type=content_type, hubspot_id=result.id
+                            )
+                            .exclude(object_id=object_id)
+                            .exists()
+                            or HubspotObject.objects.filter(
+                                content_type=content_type, object_id=object_id
+                            )
+                            .exclude(hubspot_id=result.id)
+                            .exists()
+                        )
+                        if not mapping_conflict:
+                            # Not the expected (hubspot_id/object_id, content_type)
+                            # conflict; surface the real DB integrity problem
+                            # instead of silently skipping the record.
+                            raise
                         # The hubspot_id (or object_id) is already mapped to a
                         # different object for this content type. Skip rather than
                         # violating the unique (hubspot_id, content_type) constraint.
-                        log.exception(
+                        log.warning(
                             "Could not map hubspot %s %s to %s %s; an existing "
                             "mapping already claims it, skipping",
                             hubspot_type,
@@ -452,7 +462,7 @@ def batch_create_hubspot_objects_chunked(
                         )
                         continue
                     created_ids.append(result.id)
-                except (TooManyRequestsException, ApiException):
+                except (TooManyRequestsException, ApiException, IntegrityError):
                     raise
                 except Exception:  # noqa: BLE001
                     log.exception(
@@ -461,12 +471,9 @@ def batch_create_hubspot_objects_chunked(
                         getattr(result, "id", None),
                     )
                     continue
-        except TooManyRequestsException:
-            raise
-        except ApiException as ae:
-            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                raise
-            last_error_status = ae.status
+        except ApiException as exc:
+            reraise_if_rate_limited(exc)
+            last_error_status = exc.status
             still_failed = handle_failed_batch_chunk(chunk, hubspot_type)
             if still_failed:
                 errored_chunks.append(still_failed)
@@ -521,18 +528,8 @@ def batch_update_hubspot_objects_chunked(
                             ).properties,
                         }
                     )
-                except TooManyRequestsException:
-                    raise
-                except ApiException as ae:
-                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                        raise
-                    log.exception(
-                        "Could not build hubspot %s update message for %s %s; skipping",
-                        hubspot_type,
-                        ct_model_name,
-                        obj_id[0],
-                    )
-                except Exception:  # noqa: BLE001
+                except Exception as exc:  # noqa: BLE001
+                    reraise_if_rate_limited(exc)
                     log.exception(
                         "Could not build hubspot %s update message for %s %s; skipping",
                         hubspot_type,
@@ -540,18 +537,14 @@ def batch_update_hubspot_objects_chunked(
                         obj_id[0],
                     )
             if not inputs:
-                time.sleep(settings.HUBSPOT_TASK_DELAY / 1000)
                 continue
             response = HubspotApi().crm.objects.batch_api.update(
                 hubspot_type, BatchInputSimplePublicObjectBatchInput(inputs=inputs)
             )
             updated_ids.extend([result.id for result in response.results])
-        except TooManyRequestsException:
-            raise
-        except ApiException as ae:
-            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                raise
-            last_error_status = ae.status
+        except ApiException as exc:
+            reraise_if_rate_limited(exc)
+            last_error_status = exc.status
             still_failed = handle_failed_batch_chunk(
                 [item[0] for item in chunk], hubspot_type
             )
@@ -655,16 +648,8 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             type=HubspotAssociationType.LINE_DEAL.value,
                         )
                     )
-        except TooManyRequestsException:
-            raise
-        except ApiException as ae:
-            if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                raise
-            log.exception(
-                "Could not gather hubspot associations for order %s; skipping",
-                order_id,
-            )
-        except Exception:  # noqa: BLE001
+        except Exception as exc:  # noqa: BLE001
+            reraise_if_rate_limited(exc)
             log.exception(
                 "Could not gather hubspot associations for order %s; skipping",
                 order_id,
@@ -683,11 +668,8 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             inputs=line_associations_batch
                         ),
                     )
-                except TooManyRequestsException:
-                    raise
-                except ApiException as ae:
-                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                        raise
+                except ApiException as exc:
+                    reraise_if_rate_limited(exc)
                     log.exception(
                         "Could not create hubspot line-deal associations batch; skipping"
                     )
@@ -701,11 +683,8 @@ def batch_upsert_associations_chunked(order_ids: list[int]):
                             inputs=contact_associations_batch
                         ),
                     )
-                except TooManyRequestsException:
-                    raise
-                except ApiException as ae:
-                    if getattr(ae, "status", None) == 429:  # noqa: PLR2004
-                        raise
+                except ApiException as exc:
+                    reraise_if_rate_limited(exc)
                     log.exception(
                         "Could not create hubspot deal-contact associations batch; skipping"
                     )

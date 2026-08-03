@@ -2,6 +2,7 @@
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError
 from mitol.hubspot_api.factories import HubspotObjectFactory, SimplePublicObjectFactory
 from mitol.hubspot_api.models import HubspotObject
 
@@ -388,6 +389,25 @@ def test_get_hubspot_id_for_object_skips_conflicting_mapping(mocker):
         HubspotObject.objects.get(content_type=content_type, hubspot_id="999").object_id
         == existing_product.id
     )
+
+
+def test_get_hubspot_id_for_object_reraises_unexpected_integrity_error(mocker):
+    """
+    An IntegrityError that is not the expected duplicate-mapping conflict should
+    propagate rather than returning a hubspot id with an inconsistent DB state.
+    """
+    product = ProductFactory.create()
+    mocker.patch(
+        "hubspot_xpro.api.find_product",
+        return_value=SimplePublicObjectFactory(id="555"),
+    )
+    mocker.patch(
+        "hubspot_xpro.api.HubspotObject.objects.update_or_create",
+        side_effect=IntegrityError("unexpected db problem"),
+    )
+
+    with pytest.raises(IntegrityError):
+        api.get_hubspot_id_for_object(product)
 
 
 @pytest.mark.parametrize("match_all_lines", [True, False])

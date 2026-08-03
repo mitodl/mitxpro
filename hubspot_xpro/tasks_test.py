@@ -7,6 +7,7 @@ from math import ceil
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError
 from faker import Faker
 from hubspot.crm.associations import BatchInputPublicAssociation, PublicAssociation
 from hubspot.crm.objects import (
@@ -439,7 +440,33 @@ def test_batch_create_hubspot_objects_chunked_duplicate_hubspot_id(mocker):
     assert mappings.first().object_id == existing_user.id
 
 
-def test_batch_create_hubspot_objects_chunked_skips_unserializable(mocker):
+def test_batch_create_hubspot_objects_chunked_reraises_unexpected_integrity_error(
+    mocker,
+):
+    """
+    An IntegrityError that is not a known (hubspot_id/object_id, content_type)
+    mapping conflict should propagate rather than being silently skipped.
+    """
+    user = UserFactory.create()
+    mock_hubspot_api = mocker.patch("hubspot_xpro.tasks.HubspotApi")
+    mock_hubspot_api.return_value.crm.objects.batch_api.create.return_value = (
+        mocker.Mock(
+            results=[
+                SimplePublicObjectFactory(
+                    id="123", properties={"email": user.email}
+                )
+            ]
+        )
+    )
+    mocker.patch(
+        "hubspot_xpro.tasks.HubspotObject.objects.update_or_create",
+        side_effect=IntegrityError("unexpected db problem"),
+    )
+
+    with pytest.raises(IntegrityError):
+        tasks.batch_create_hubspot_objects_chunked(
+            HubspotObjectType.CONTACTS.value, "user", [user.id]
+        )
     """An object that can't be serialized is skipped while the rest still sync"""
     users = sorted(UserFactory.create_batch(3), key=lambda contact: contact.id)
     object_ids = [contact.id for contact in users]
