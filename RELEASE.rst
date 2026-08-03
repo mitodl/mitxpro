@@ -1,6 +1,26 @@
 Release Notes
 =============
 
+Version 0.197.1 (Released August 03, 2026)
+---------------
+
+- chore(deps): update dependency posthog-js to v1.407.2 (#4017)
+- chore(deps): update astral-sh/setup-uv action to v8.3.2 (#4015)
+- fix(deps): update dependency boto3 to v1.43.46 (#4016)
+- chore(deps): update dependency sinon to v22.1.0 (#4018)
+- chore(deps): update dependency @sentry/browser to v10.68.0 (#4009)
+- chore(deps): update dependency js-yaml to v4.3.0 [security] (#4013)
+- [pre-commit.ci] pre-commit autoupdate (#4012)
+- chore(deps): update dependency posthog-js to v1.404.0 (#4011)
+- chore(deps): update astral-sh/setup-uv action to v8.3.0 (#4008)
+- fix(deps): update dependency boto3 to v1.43.40 (#4007)
+- chore(deps): update dependency autoprefixer to v10.5.4 (#4006)
+- chore(deps): update actions/cache action to v6 (#3998)
+- chore(deps): update dependency stylelint to v17.14.0 (#4000)
+- fix(deps): update dependency setuptools to v83 [security] (#4004)
+- [pre-commit.ci] pre-commit autoupdate (#4003)
+- chore(deps): update actions/cache digest to caa2961 (#3987)
+
 Version 0.197.0 (Released July 27, 2026)
 ---------------
 
