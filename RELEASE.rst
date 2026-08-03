@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.197.1
+Version 0.197.1 (Released August 03, 2026)
 ---------------
 
 - chore(deps): update dependency posthog-js to v1.407.2 (#4017)
