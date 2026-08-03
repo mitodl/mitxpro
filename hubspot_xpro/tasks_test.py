@@ -465,6 +465,9 @@ def test_batch_create_hubspot_objects_chunked_reraises_unexpected_integrity_erro
         tasks.batch_create_hubspot_objects_chunked(
             HubspotObjectType.CONTACTS.value, "user", [user.id]
         )
+
+
+def test_batch_create_hubspot_objects_chunked_skips_unserializable(mocker):
     """An object that can't be serialized is skipped while the rest still sync"""
     users = sorted(UserFactory.create_batch(3), key=lambda contact: contact.id)
     object_ids = [contact.id for contact in users]
