@@ -1787,22 +1787,20 @@ wheels = [
 
 [[package]]
 name = "mitol-django-common"
-version = "2025.12.23.2"
+version = "2026.6.16.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-redis" },
     { name = "django-stubs" },
     { name = "django-webpack-loader" },
-    { name = "factory-boy" },
-    { name = "pytest" },
     { name = "pytz" },
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/81/e0f7017bc26914bca5bc8905e5ccf6aff4db760c7ee386a548a4a5eb7263/mitol_django_common-2025.12.23.2.tar.gz", hash = "sha256:0c4800f7c0be1b36d9cb8a0e132e177b8d57e3108cde7ad4ea11f71886a7ac4d", size = 22164, upload-time = "2026-01-05T13:00:57.515Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5a/c8/bfddaffd14e2f0233e0be31ea83a82865579f9eb1ecc9514cf14edd5d574/mitol_django_common-2026.6.16.4.tar.gz", hash = "sha256:f06dee7575c4c1cfefef016459ed8c673482511b9b0f8387fc2e056844ca6a8c", size = 24357, upload-time = "2026-06-16T19:21:07.244Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1a/d7/4b0c1770fcd48cd16766795f5ba4747608158ffade93941c367f56d10e2e/mitol_django_common-2025.12.23.2-py3-none-any.whl", hash = "sha256:3e9f4083c8f6dfdbc2aec2f4a488bb1fc5bc1d6c43aa74800a03e23628be7656", size = 31946, upload-time = "2026-01-05T13:00:56.315Z" },
+    { url = "https://files.pythonhosted.org/packages/00/d2/db0dd231888821180997dd1a0c35fcd3d7999567596d27604bcb939d0ee6/mitol_django_common-2026.6.16.4-py3-none-any.whl", hash = "sha256:3506d91de35e91bc17e65eee73fe68cfa0b73254edb66d9a59d6e9cee870580b", size = 35258, upload-time = "2026-06-16T19:21:06.429Z" },
 ]
 
 [[package]]
@@ -2037,7 +2035,7 @@ requires-dist = [
     { name = "hubspot-api-client", specifier = "==12.0.0" },
     { name = "ipython", specifier = ">=9.0.0,<10" },
     { name = "mitol-django-authentication", specifier = "==2025.3.17" },
-    { name = "mitol-django-common", specifier = "==2025.12.23.2" },
+    { name = "mitol-django-common", specifier = "==2026.6.16.4" },
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
     { name = "mitol-django-hubspot-api", specifier = "==2026.7.9" },
     { name = "mitol-django-mail", specifier = "==2025.6.24" },
