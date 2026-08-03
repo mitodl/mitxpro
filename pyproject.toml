@@ -95,6 +95,7 @@ dev = [
 [tool.uv]
 package = false
 no-binary-package = ["lxml", "xmlsec"]
+exclude-newer = "7d"
 
 [tool.ruff]
 target-version = "py313"
