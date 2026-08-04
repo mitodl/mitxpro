@@ -933,16 +933,17 @@ wheels = [
 
 [[package]]
 name = "djoser"
-version = "2.3.1"
+version = "2.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
+    { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
     { name = "social-auth-app-django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/01/4a/d5bb069b49199c9fd0dc33c25dd7a6c15152926c47d73a560b6fde3bd2fb/djoser-2.3.1.tar.gz", hash = "sha256:4e7e2716b5b961f1289b5e49b2216ba5c18eb2a3b4b597dd6430638716ff5107", size = 33806, upload-time = "2024-11-09T16:57:50.682Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/35/bc/8931752c12ddc987fc0c729e9b675e2f72e37ebd82f7ca31a10f287de045/djoser-2.3.3.tar.gz", hash = "sha256:6ceeea9898cbdd585f1daa1ee9d46270600c0401dcd2d1db6f7894782006f6a6", size = 35032, upload-time = "2025-07-13T14:36:03.38Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/77/eae6f6ae6b71d578d08f7eee7c0965cff59a270cf024ecdcbb8048fc7a4b/djoser-2.3.1-py3-none-any.whl", hash = "sha256:386f337b9e05cb82354525fe2b6fec19fb1743e93e53b5b4b9dfaffccc38789f", size = 64215, upload-time = "2024-11-09T16:57:49.603Z" },
+    { url = "https://files.pythonhosted.org/packages/01/b3/f51273281172ff233a8c16df916282d75502dbc6a06b9b5d01ed3039f8ed/djoser-2.3.3-py3-none-any.whl", hash = "sha256:b97d233b626c26ebccb09f5614420873ad78b8b1fb1459c76475b05319bae567", size = 71905, upload-time = "2025-07-13T14:36:02.385Z" },
 ]
 
 [[package]]
@@ -1768,7 +1769,7 @@ wheels = [
 
 [[package]]
 name = "mitol-django-authentication"
-version = "2025.3.17"
+version = "2026.4.29"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -1780,9 +1781,9 @@ dependencies = [
     { name = "mitol-django-mail" },
     { name = "social-auth-app-django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/45/9a/4633c6b97a88f7a56992b03a80f30e86b54c7b7ef65489df854e304879c0/mitol_django_authentication-2025.3.17.tar.gz", hash = "sha256:296f3f4ef03722560da5435fc16d5844fc6bbbb8685fdce325dbc95044354952", size = 5887, upload-time = "2025-03-17T20:13:06.758Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5b/9d/14c5f7883a435d27bb3f629911e28babc3618db42644c1113de0f82f15b5/mitol_django_authentication-2026.4.29.tar.gz", hash = "sha256:ce2d5e4d9ca2fa524c7b748915ccfa8af19c7a2c02fdcc9a5ca1534206c53698", size = 6034, upload-time = "2026-04-29T19:56:16.736Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/c8/a6fa787ecfc4e73e03a8c7418e111a6a957d2e24179d182cf83c123641d4/mitol_django_authentication-2025.3.17-py3-none-any.whl", hash = "sha256:f3849bc2469bcbe78fed9b0e999dfed2bf6c9d2923c4e2420d6d54a71f8a99bb", size = 10138, upload-time = "2025-03-17T20:13:05.668Z" },
+    { url = "https://files.pythonhosted.org/packages/2d/4d/fd8c8549d2b363333d75f6259eb84ea16148901cd329abbdf5199d899d34/mitol_django_authentication-2026.4.29-py3-none-any.whl", hash = "sha256:95590074644f0772c10b2507d806afe398559ca86841a2a070736c945aeaedba", size = 10139, upload-time = "2026-04-29T19:56:15.873Z" },
 ]
 
 [[package]]
@@ -2034,7 +2035,7 @@ requires-dist = [
     { name = "granian", specifier = ">=2.7.2" },
     { name = "hubspot-api-client", specifier = "==12.0.0" },
     { name = "ipython", specifier = ">=9.0.0,<10" },
-    { name = "mitol-django-authentication", specifier = "==2025.3.17" },
+    { name = "mitol-django-authentication", specifier = "==2026.4.29" },
     { name = "mitol-django-common", specifier = "==2026.6.16.4" },
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
     { name = "mitol-django-hubspot-api", specifier = "==2026.7.9" },

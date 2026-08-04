@@ -39,7 +39,7 @@ dependencies = [
     "granian>=2.7.2",
     "hubspot-api-client==12.0.0",
     "ipython>=9.0.0,<10",
-    "mitol-django-authentication==2025.3.17",
+    "mitol-django-authentication==2026.4.29",
     "mitol-django-common==2026.6.16.4",
     "mitol-django-digital-credentials==2023.12.19",
     "mitol-django-hubspot-api==2026.7.9",
