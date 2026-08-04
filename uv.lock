@@ -160,16 +160,16 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.43.46"
+version = "1.43.52"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f2/e7/976bf3dfe0aa5d7f31bec2f2cf57c79641620c910a39bc843a237aa9592d/boto3-1.43.46.tar.gz", hash = "sha256:66c0d943b049a46a492ec4ec2ebe73c930b1842c7137bee83aad6d93e95d4d96", size = 112654, upload-time = "2026-07-10T19:32:12.498Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/93/5f98e422ced57a359e3b7827ab79b359d67456abb9c5840b0c5eb7b90e6b/boto3-1.43.52.tar.gz", hash = "sha256:3da09a393c050906d407023bee5fb5b5fb333378513af1a1a51159db870b572f", size = 112680, upload-time = "2026-07-20T19:31:28.396Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ef/1d/c52e66ff32ba7911664e6c4c2ac62e1c6d2d1e7550c7ac185d3f4b70a8a4/boto3-1.43.46-py3-none-any.whl", hash = "sha256:69453e2c1bcb9fd9806527ab99950cacfc2826cb0dce9a3a0414d19270c06c3c", size = 140031, upload-time = "2026-07-10T19:32:11.129Z" },
+    { url = "https://files.pythonhosted.org/packages/a7/57/31e6f45c3e236273f9f83f047ae579a90c4be8c6dc1b8366d63a6dcd9841/boto3-1.43.52-py3-none-any.whl", hash = "sha256:1af1950c2b2400267c93d971d588367fc73554e02b4f435a50a5e930a7c93526", size = 140026, upload-time = "2026-07-20T19:31:26.247Z" },
 ]
 
 [[package]]
@@ -1104,7 +1104,7 @@ wheels = [
 
 [[package]]
 name = "google-api-python-client"
-version = "2.192.0"
+version = "2.198.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "google-api-core" },
@@ -1113,9 +1113,9 @@ dependencies = [
     { name = "httplib2" },
     { name = "uritemplate" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/d8/489052a40935e45b9b5b3d6accc14b041360c1507bdc659c2e1a19aaa3ff/google_api_python_client-2.192.0.tar.gz", hash = "sha256:d48cfa6078fadea788425481b007af33fe0ab6537b78f37da914fb6fc112eb27", size = 14209505, upload-time = "2026-03-05T15:17:01.598Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6b/53/0cd38e3a29d72ce45e27feba2ce1cd8049d69af9c48cb14fb164f1be9133/google_api_python_client-2.198.0.tar.gz", hash = "sha256:dfe3e16fb241af6e9c460a33f65085b3450e05cea09364f6b5d8997fb7e43e2a", size = 15060142, upload-time = "2026-06-25T14:32:42.953Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/76/ec4128f00fefb9011635ae2abc67d7dacd05c8559378f8f05f0c907c38d8/google_api_python_client-2.192.0-py3-none-any.whl", hash = "sha256:63a57d4457cd97df1d63eb89c5fda03c5a50588dcbc32c0115dd1433c08f4b62", size = 14783267, upload-time = "2026-03-05T15:16:58.804Z" },
+    { url = "https://files.pythonhosted.org/packages/d5/92/0fc9e7a09eb240c31b879bd8d2e43f81ed1f86c4798b79ead4a083921ab3/google_api_python_client-2.198.0-py3-none-any.whl", hash = "sha256:fabac935474e817da5e662ff61bf7139439d6f92b32d332a7318a2d45931e03e", size = 15644203, upload-time = "2026-06-25T14:32:39.963Z" },
 ]
 
 [[package]]
@@ -1787,22 +1787,20 @@ wheels = [
 
 [[package]]
 name = "mitol-django-common"
-version = "2025.12.23.2"
+version = "2026.6.16.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-redis" },
     { name = "django-stubs" },
     { name = "django-webpack-loader" },
-    { name = "factory-boy" },
-    { name = "pytest" },
     { name = "pytz" },
     { name = "requests" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/81/e0f7017bc26914bca5bc8905e5ccf6aff4db760c7ee386a548a4a5eb7263/mitol_django_common-2025.12.23.2.tar.gz", hash = "sha256:0c4800f7c0be1b36d9cb8a0e132e177b8d57e3108cde7ad4ea11f71886a7ac4d", size = 22164, upload-time = "2026-01-05T13:00:57.515Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5a/c8/bfddaffd14e2f0233e0be31ea83a82865579f9eb1ecc9514cf14edd5d574/mitol_django_common-2026.6.16.4.tar.gz", hash = "sha256:f06dee7575c4c1cfefef016459ed8c673482511b9b0f8387fc2e056844ca6a8c", size = 24357, upload-time = "2026-06-16T19:21:07.244Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1a/d7/4b0c1770fcd48cd16766795f5ba4747608158ffade93941c367f56d10e2e/mitol_django_common-2025.12.23.2-py3-none-any.whl", hash = "sha256:3e9f4083c8f6dfdbc2aec2f4a488bb1fc5bc1d6c43aa74800a03e23628be7656", size = 31946, upload-time = "2026-01-05T13:00:56.315Z" },
+    { url = "https://files.pythonhosted.org/packages/00/d2/db0dd231888821180997dd1a0c35fcd3d7999567596d27604bcb939d0ee6/mitol_django_common-2026.6.16.4-py3-none-any.whl", hash = "sha256:3506d91de35e91bc17e65eee73fe68cfa0b73254edb66d9a59d6e9cee870580b", size = 35258, upload-time = "2026-06-16T19:21:06.429Z" },
 ]
 
 [[package]]
@@ -2012,7 +2010,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = "==4.15.0" },
-    { name = "boto3", specifier = "==1.43.46" },
+    { name = "boto3", specifier = "==1.43.52" },
     { name = "celery", specifier = "==5.6.3" },
     { name = "celery-redbeat", specifier = "==2.3.3" },
     { name = "dj-database-url", specifier = "==3.1.2" },
@@ -2031,13 +2029,13 @@ requires-dist = [
     { name = "django-webpack-loader", specifier = "==1.8.1" },
     { name = "djangorestframework", specifier = "==3.17.1" },
     { name = "edx-api-client", specifier = "==1.14.0" },
-    { name = "google-api-python-client", specifier = "==2.192.0" },
+    { name = "google-api-python-client", specifier = "==2.198.0" },
     { name = "google-auth", specifier = "==1.35.0" },
     { name = "granian", specifier = ">=2.7.2" },
     { name = "hubspot-api-client", specifier = "==12.0.0" },
     { name = "ipython", specifier = ">=9.0.0,<10" },
     { name = "mitol-django-authentication", specifier = "==2025.3.17" },
-    { name = "mitol-django-common", specifier = "==2025.12.23.2" },
+    { name = "mitol-django-common", specifier = "==2026.6.16.4" },
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
     { name = "mitol-django-hubspot-api", specifier = "==2026.7.9" },
     { name = "mitol-django-mail", specifier = "==2025.6.24" },

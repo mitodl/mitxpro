@@ -1,6 +1,27 @@
 Release Notes
 =============
 
+Version 0.197.2
+---------------
+
+- chore(deps): update dependency @sentry/browser to v10.69.0 (#4033)
+- fix(deps): update dependency boto3 to v1.43.52 (#4039)
+- [pre-commit.ci] pre-commit autoupdate (#4038)
+- fix(deps): update dependency google-api-python-client to v2.198.0 (#4035)
+- fix(deps): update dependency mitol-django-common to v2026 (#4029)
+- chore(deps): update nginx docker tag to v1.31.3 (#4031)
+- chore(deps): update dependency posthog-js to v1.409.4 (#4034)
+- fix(deps): update dependency boto3 to v1.43.51 (#4032)
+- chore(deps): update dependency js-yaml to v5 (#4028)
+- chore(deps): update actions/checkout action to v7 (#4027)
+- fix(deps): update dependency boto3 to v1.43.49 (#4026)
+- Prefix PostHog identify id with "xpro:" for global uniqueness
+- fix(deps): update dependency boto3 to v1.43.48 (#4024)
+- chore(deps): update dependency prettier to v3.9.6 (#4023)
+- [pre-commit.ci] pre-commit autoupdate (#4020)
+- chore(deps): update dependency prettier to v3.9.5 (#3999)
+- chore: add CLAUDE.md file (#4022)
+
 Version 0.197.1 (Released August 03, 2026)
 ---------------
 
