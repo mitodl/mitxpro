@@ -1875,7 +1875,7 @@ wheels = [
 
 [[package]]
 name = "mitol-django-oauth-toolkit-extensions"
-version = "2025.3.17"
+version = "2026.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -1886,9 +1886,9 @@ dependencies = [
     { name = "pytz" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/37/42/7e12a4abaca97d4dd0b48afb7bc4c276aeb7c947181a14737b1a0bd67d6f/mitol_django_oauth_toolkit_extensions-2025.3.17.tar.gz", hash = "sha256:436866115d219c093ab2dd1c86d9f6d2f8903cc2853855245b9546054a76d240", size = 7650, upload-time = "2025-03-17T19:46:48.074Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/dd/b0cbc215c32072256fdaff73850ed1b34ac7519241d64c3b0cac0c840f3e/mitol_django_oauth_toolkit_extensions-2026.4.2.tar.gz", hash = "sha256:ae99641383849d8c329c6cfdb8244b496ec7753c65ab1b3710c987c18079eb92", size = 7572, upload-time = "2026-04-02T15:46:57.001Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/24/48f456300768e2e8354d0b157d273db8dbc22b910fb9c33151c39cc98d36/mitol_django_oauth_toolkit_extensions-2025.3.17-py3-none-any.whl", hash = "sha256:0433695d4c5a51b40cdf08f006ae07665115271bd2f0a21b23c1ded7ab4ccaf6", size = 11369, upload-time = "2025-03-17T19:46:46.933Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/d2/2d378ba9515ef7c567f3d5b6cc894df3d68e1975142e1bbc927e372251ea/mitol_django_oauth_toolkit_extensions-2026.4.2-py3-none-any.whl", hash = "sha256:a348786ef4b9bf7f70723f4970120bc8782ef4fa0a29ce426cd412ba8be986b5", size = 11155, upload-time = "2026-04-02T15:46:56.117Z" },
 ]
 
 [[package]]
@@ -2054,7 +2054,7 @@ requires-dist = [
     { name = "mitol-django-digital-credentials", specifier = "==2023.12.19" },
     { name = "mitol-django-hubspot-api", specifier = "==2026.7.9" },
     { name = "mitol-django-mail", specifier = "==2026.4.29" },
-    { name = "mitol-django-oauth-toolkit-extensions", specifier = "==2025.3.17" },
+    { name = "mitol-django-oauth-toolkit-extensions", specifier = "==2026.4.2" },
     { name = "mitol-django-observability", specifier = ">=2026.1.0" },
     { name = "mitol-django-olposthog", specifier = ">=2026.3.6,<2027" },
     { name = "newrelic", specifier = ">=10.0.0,<11" },
