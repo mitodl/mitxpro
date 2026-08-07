@@ -8,5 +8,8 @@ on:
 
 jobs:
   add-to-hq:
-    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@main
-    secrets: inherit
+    permissions:
+      contents: read
+    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@edd566dec1edd920d35ab1fb60b589cddc44afad # main
+    secrets:
+      OL_HQ_PROJECT_SECRET: ${{ secrets.OL_HQ_PROJECT_SECRET }}

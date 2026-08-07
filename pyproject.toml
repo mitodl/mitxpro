@@ -95,6 +95,18 @@ dev = [
 [tool.uv]
 package = false
 no-binary-package = ["lxml", "xmlsec"]
+exclude-newer = "7d"
+required-version = ">=0.9.17"
+
+[tool.uv.exclude-newer-package]
+mitol-django-authentication = "0d"
+mitol-django-common = "0d"
+mitol-django-hubspot-api = "0d"
+mitol-django-mail = "0d"
+mitol-django-oauth-toolkit-extensions = "0d"
+mitol-django-observability = "0d"
+mitol-django-olposthog = "0d"
+mitol-drf-lint = "0d"
 
 [tool.ruff]
 target-version = "py313"
