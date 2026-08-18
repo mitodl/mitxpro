@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.197.2
+Version 0.197.2 (Released August 18, 2026)
 ---------------
 
 - chore(deps): update dependency @sentry/browser to v10.69.0 (#4033)
