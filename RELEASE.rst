@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.198.0
+---------------
+
+- chore(deps): update dependency hls.js to v1.7.0 (#4048)
+- fix(deps): update dependency django-anymail to v15.1 (#4056)
+- fix(deps): update dependency pygsheets to v2.0.6 (#3757)
+- fix(deps): update dependency boto3 to v1.43.63 (#4053)
+- chore(deps): update dependency js-yaml to v5.3.0 (#4049)
+- chore(deps): update dependency mocha to v11.8.0 (#4050)
+- chore(deps): update dependency posthog-js to v1.417.0 (#4051)
+- fix(deps): update dependency boto3 to v1.43.62 (#4046)
+- [pre-commit.ci] pre-commit autoupdate (#4044)
+- chore(deps): update actions/checkout action to v7.0.1 (#4045)
+- Harden GitHub Actions supply-chain security with zizmor and delay dep updates (#4036)
+- fix: make sync_db_to_hubspot resilient to bad data (#4019)
+- fix(deps): update dependency mitol-django-authentication to v2026 (#4040)
+- fix(deps): update dependency mitol-django-mail to v2026 (#4041)
+
 Version 0.197.2 (Released August 18, 2026)
 ---------------
 
