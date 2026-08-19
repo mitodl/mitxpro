@@ -3,7 +3,12 @@
   "extends": ["local>mitodl/.github:renovate-config"],
   "packageRules": [
     {
-      "matchPackageNames": ["sass"],
+      "matchPackageNames": [
+        "sass",
+        "pygsheets",
+        "google-auth",
+        "google-auth-oauthlib"
+      ],
       "automerge": false
     }
   ]
