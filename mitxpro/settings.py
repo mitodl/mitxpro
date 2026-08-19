@@ -44,6 +44,18 @@ ENVIRONMENT = get_string(
     description="The execution environment that the app is in (e.g. dev, staging, prod)",
     required=True,
 )
+
+# Without this the library falls back to the literal string "unknown" for
+# service.name, which makes every span unattributable in Tempo. VERSION and
+# ENVIRONMENT are already defined above and supply the other two resource
+# attributes. The exporter endpoint is supplied by the environment
+# (OTEL_EXPORTER_OTLP_ENDPOINT), not from settings.
+OPENTELEMETRY_SERVICE_NAME = get_string(
+    name="OPENTELEMETRY_SERVICE_NAME",
+    default="mitxpro",
+    description="The name of the service to report to opentelemetry",
+)
+
 # this is only available to heroku review apps
 HEROKU_APP_NAME = get_string(
     name="HEROKU_APP_NAME", default=None, description="The name of the review app"
