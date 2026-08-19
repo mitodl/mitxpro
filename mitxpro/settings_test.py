@@ -13,34 +13,6 @@ from django.core.exceptions import ImproperlyConfigured
 from mitol.common import envs
 
 
-# NOTE: this is temporarily inlined here until I can stabilize the test upstream in the library
-def test_app_json_modified():
-    """
-    Pytest test that verifies app.json is up-to-date
-
-    To use this, you should import this into a test file somewhere in your project:
-
-    from mitol.common.pytest_utils import test_app_json_modified
-    """
-    import json
-    import logging
-
-    with open("app.json") as app_json_file:  # noqa: PTH123
-        app_json = json.load(app_json_file)
-
-    generated_app_json = envs.generate_app_json()
-
-    if app_json != generated_app_json:
-        logging.error(
-            "Generated app.json does not match the app.json file. To fix this, run `./manage.py generate_app_json`"
-        )
-
-    # pytest will print the difference
-    assert json.dumps(app_json, sort_keys=True, indent=2) == json.dumps(
-        generated_app_json, sort_keys=True, indent=2
-    )
-
-
 @pytest.fixture(autouse=True)
 def settings_sandbox(monkeypatch):
     """Cleanup settings after a test"""
