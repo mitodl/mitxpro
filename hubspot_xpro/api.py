@@ -5,6 +5,7 @@ import re
 from decimal import Decimal
 
 from django.contrib.contenttypes.models import ContentType
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from hubspot.crm.objects import SimplePublicObject, SimplePublicObjectInput
 from mitol.hubspot_api.api import (
@@ -433,11 +434,43 @@ def get_hubspot_id_for_object(
             raise_count_error=raise_error,
         )
     if hubspot_obj and hubspot_obj.id:  # noqa: RET503
-        HubspotObject.objects.update_or_create(
-            object_id=obj.id,
-            content_type=content_type,
-            defaults={"hubspot_id": hubspot_obj.id},
-        )
+        try:
+            # Savepoint so we can catch IntegrityError and keep querying: on
+            # Postgres a failed statement aborts the whole transaction, and the
+            # atomic() block rolls back to the savepoint to keep the connection
+            # usable. See
+            # https://docs.djangoproject.com/en/stable/topics/db/transactions/#controlling-transactions-explicitly
+            with transaction.atomic():
+                HubspotObject.objects.update_or_create(
+                    object_id=obj.id,
+                    content_type=content_type,
+                    defaults={"hubspot_id": hubspot_obj.id},
+                )
+        except IntegrityError:
+            mapping_conflict = (
+                HubspotObject.objects.filter(
+                    content_type=content_type, hubspot_id=hubspot_obj.id
+                )
+                .exclude(object_id=obj.id)
+                .exists()
+            )
+            if not mapping_conflict:
+                # Not the expected duplicate-mapping conflict; surface the real
+                # DB integrity error rather than returning a hubspot id and
+                # continuing with a potentially inconsistent DB state.
+                raise
+            # The found hubspot id is already mapped to a different object of
+            # this content type (e.g. a duplicate-named product). Don't create a
+            # conflicting mapping, but still return the hubspot id so callers can
+            # proceed instead of failing the whole sync.
+            log.warning(
+                "Hubspot %s %s is already mapped to a different object; not "
+                "remapping %s %s",
+                content_type.model,
+                hubspot_obj.id,
+                content_type.model,
+                obj.id,
+            )
         return hubspot_obj.id
     elif raise_error:
         raise ValueError(

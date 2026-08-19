@@ -15,12 +15,12 @@ dependencies = [
     "Pillow==10.4.0",
     "PyNaCl==1.6.2",
     "beautifulsoup4==4.15.0",
-    "boto3==1.43.52",
+    "boto3==1.43.63",
     "celery==5.6.3",
     "celery-redbeat==2.3.3",
     "dj-database-url==3.1.2",
     "django==5.2.16",
-    "django-anymail[mailgun]==15.0",
+    "django-anymail[mailgun]==15.1",
     "django-filter>=24",
     "django-health-check[celery,redis]>=4.0.0",
     "django-hijack==3.7.8",
@@ -39,11 +39,11 @@ dependencies = [
     "granian>=2.7.2",
     "hubspot-api-client==12.0.0",
     "ipython>=9.0.0,<10",
-    "mitol-django-authentication==2025.3.17",
+    "mitol-django-authentication==2026.4.29",
     "mitol-django-common==2026.6.16.4",
     "mitol-django-digital-credentials==2023.12.19",
     "mitol-django-hubspot-api==2026.7.9",
-    "mitol-django-mail==2025.6.24",
+    "mitol-django-mail==2026.4.29",
     "mitol-django-oauth-toolkit-extensions==2025.3.17",
     "mitol-django-observability>=2026.1.0",
     "mitol-django-olposthog>=2026.3.6,<2027",
@@ -95,6 +95,18 @@ dev = [
 [tool.uv]
 package = false
 no-binary-package = ["lxml", "xmlsec"]
+exclude-newer = "7d"
+required-version = ">=0.9.17"
+
+[tool.uv.exclude-newer-package]
+mitol-django-authentication = "0d"
+mitol-django-common = "0d"
+mitol-django-hubspot-api = "0d"
+mitol-django-mail = "0d"
+mitol-django-oauth-toolkit-extensions = "0d"
+mitol-django-observability = "0d"
+mitol-django-olposthog = "0d"
+mitol-drf-lint = "0d"
 
 [tool.ruff]
 target-version = "py313"
