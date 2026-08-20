@@ -44,7 +44,7 @@ dependencies = [
     "mitol-django-digital-credentials==2023.12.19",
     "mitol-django-hubspot-api==2026.7.9",
     "mitol-django-mail==2026.4.29",
-    "mitol-django-oauth-toolkit-extensions==2025.3.17",
+    "mitol-django-oauth-toolkit-extensions==2026.4.2",
     "mitol-django-observability>=2026.8.19",
     # OTel instrumentors. mitol-django-observability auto-discovers these through
     # the `opentelemetry_instrumentor` entry point group; without them it stands
