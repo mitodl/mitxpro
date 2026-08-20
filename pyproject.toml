@@ -45,7 +45,18 @@ dependencies = [
     "mitol-django-hubspot-api==2026.7.9",
     "mitol-django-mail==2026.4.29",
     "mitol-django-oauth-toolkit-extensions==2025.3.17",
-    "mitol-django-observability>=2026.1.0",
+    "mitol-django-observability>=2026.8.19",
+    # OTel instrumentors. mitol-django-observability auto-discovers these through
+    # the `opentelemetry_instrumentor` entry point group; without them it stands
+    # up a TracerProvider that nothing ever feeds, which looks exactly like a
+    # healthy service until you go looking in Tempo. psycopg2 rather than
+    # psycopg because this app is on psycopg2 (the `psycopg` instrumentor
+    # targets psycopg 3 and would silently instrument nothing).
+    "opentelemetry-instrumentation-celery>=0.52b0",
+    "opentelemetry-instrumentation-django>=0.52b0",
+    "opentelemetry-instrumentation-psycopg2>=0.52b0",
+    "opentelemetry-instrumentation-redis>=0.52b0",
+    "opentelemetry-instrumentation-requests>=0.52b0",
     "mitol-django-olposthog>=2026.3.6,<2027",
     "newrelic>=10.0.0,<11",
     "pdftotext>=3.0.0,<4",
