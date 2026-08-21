@@ -164,6 +164,8 @@ def test_get_field_names():
         "tax_rate",
         "tax_rate_name",
         "tax_country_code",
+        "gateway_type",
+        "stripe_checkout_session_id",
     }
 
 
