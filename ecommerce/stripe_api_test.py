@@ -11,6 +11,7 @@ from ecommerce.api import (
     fulfill_stripe_order,
     get_gateway_type_for_user,
     get_stripe_checkout_session_status,
+    start_stripe_checkout,
     stripe_data_to_receipt_data,
 )
 from ecommerce.constants import (
@@ -150,6 +151,35 @@ class TestCartMapping:
         cart_items = _generate_gateway_cart_items(order_with_line)
 
         assert all(item.quantity == 1 for item in cart_items)
+
+
+class TestCheckoutPayload:
+    """What the checkout API hands back to the frontend"""
+
+    def test_payload_carries_the_reference_number(self, mocker, order_with_line):
+        """
+        The checkout page tags its GTM purchase event with `reference_number`.
+        A Stripe session calls it `client_reference_id`, so we add the key the
+        frontend already reads -- CyberSource's payload has it too.
+        """
+        mocker.patch(
+            "ecommerce.api.PaymentGateway.start_payment",
+            return_value={
+                "payload": {"id": "cs_test_123", "client_reference_id": "x"},
+                "url": "https://checkout.stripe.com/c/pay/cs_test_123",
+                "method": "GET",
+            },
+        )
+
+        response = start_stripe_checkout(
+            order=order_with_line,
+            receipt_url="http://example.com/receipt",
+            cancel_url="http://example.com/cancel",
+        )
+
+        assert (
+            response["payload"]["reference_number"] == order_with_line.reference_number
+        )
 
 
 class TestSessionStatus:
