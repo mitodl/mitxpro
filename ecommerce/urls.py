@@ -3,6 +3,8 @@
 from django.urls import include, path, re_path
 from rest_framework.routers import SimpleRouter
 
+from mitxpro.views import index
+
 from ecommerce.views import (
     BasketView,
     CheckoutView,
@@ -11,6 +13,8 @@ from ecommerce.views import (
     PromoCouponView,
     OrderFulfillmentView,
     OrderReceiptView,
+    StripeOrderStatusView,
+    StripeWebhookView,
     ProductViewSet,
     ProgramRunsViewSet,
     bulk_assignment_csv_view,
@@ -40,6 +44,17 @@ urlpatterns = [
         OrderReceiptView.as_view(),
         name="order_receipt_api",
     ),
+    path(
+        "api/checkout/stripe-webhook/",
+        StripeWebhookView.as_view(),
+        name="stripe-webhook",
+    ),
+    path(
+        "api/checkout/stripe-status/",
+        StripeOrderStatusView.as_view(),
+        name="stripe-order-status",
+    ),
+    path("checkout/result/", index, name="stripe-checkout-result"),
     path("api/basket/", BasketView.as_view(), name="basket_api"),
     path("api/coupons/", CouponListView.as_view(), name="coupon_api"),
     path("api/promo_coupons/", PromoCouponView.as_view(), name="promo_coupons_api"),

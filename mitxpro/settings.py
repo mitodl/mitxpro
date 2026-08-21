@@ -36,6 +36,7 @@ import_settings_modules(
     "mitol.common.settings.webpack",
     "mitol.digitalcredentials.settings",
     "mitol.olposthog.settings.olposthog",
+    "mitol.payment_gateway.settings",
 )
 
 ENVIRONMENT = get_string(
@@ -206,6 +207,7 @@ INSTALLED_APPS = (
     "mitol.oauth_toolkit_extensions.apps.OAuthToolkitExtensionsApp",
     "mitol.authentication.apps.TransitionalAuthenticationApp",
     "mitol.olposthog.apps.OlPosthog",
+    "mitol.payment_gateway.apps.PaymentGatewayApp",
     "health_check",
 )
 # Only include the seed data app if this isn't running in prod

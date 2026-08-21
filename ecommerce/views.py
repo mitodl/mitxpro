@@ -2,15 +2,18 @@
 
 import json
 import logging
-from urllib.parse import urljoin
+from urllib.parse import quote_plus, urljoin
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q, OuterRef, Subquery, Prefetch
 from django.http import Http404
 from django.shortcuts import render
+from django.urls import reverse
 from django_filters import rest_framework as filters
 from ipware import get_client_ip
+from mitol.payment_gateway.api import PaymentGateway
+from mitol.payment_gateway.constants import MITOL_PAYMENT_GATEWAY_STRIPE
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.generics import (
@@ -28,16 +31,23 @@ from b2b_ecommerce.api import fulfill_b2b_order
 from b2b_ecommerce.models import B2BOrder
 from courses.models import Course, CourseRun, Program, ProgramRun
 from ecommerce.api import (
+    cancel_stripe_order,
     complete_order,
     create_or_update_unfulfilled_order,
     fulfill_order,
+    fulfill_stripe_order,
     generate_cybersource_sa_payload,
+    get_gateway_type_for_user,
     make_receipt_url,
+    start_stripe_checkout,
+    stripe_object_to_dict,
     validate_basket_for_checkout,
 )
 from ecommerce.constants import (
     COUPON_ADD_PERMISSION,
     COUPON_UPDATE_PERMISSION,
+    STRIPE_CANCEL_EVENTS,
+    STRIPE_FULFILL_EVENTS,
 )
 from sheets.constants import (
     COUPON_PRODUCT_ASSIGNMENT_ADD_PERMISSION,
@@ -243,6 +253,30 @@ class CheckoutView(APIView):
             url = receipt_url
             send_ecommerce_order_receipt(order)
             method = "GET"
+        elif get_gateway_type_for_user(request.user) == MITOL_PAYMENT_GATEWAY_STRIPE:
+            # Stripe hosts the payment page, so all we get back is a URL to send
+            # the learner to. Nothing is posted back to us afterwards -- the
+            # order is fulfilled when the webhook arrives -- so the success URL
+            # carries the checkout session ID for the interstitial to poll on.
+            cancel_url = urljoin(base_url, "checkout/")
+            success_url = urljoin(base_url, reverse("stripe-checkout-result"))
+            success_url = (
+                f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}"
+                f"&purchased={quote_plus(text_id)}"
+            )
+
+            order.gateway_type = MITOL_PAYMENT_GATEWAY_STRIPE
+            order.save()
+
+            stripe_response = start_stripe_checkout(
+                order=order,
+                receipt_url=success_url,
+                cancel_url=cancel_url,
+                ip_address=user_ip,
+            )
+            payload = stripe_response["payload"]
+            url = stripe_response["url"]
+            method = stripe_response["method"]
         else:
             # This generates a signed payload which is submitted as an HTML form to CyberSource
             cancel_url = urljoin(base_url, "checkout/")
@@ -289,6 +323,81 @@ class OrderFulfillmentView(APIView):
 
         # The response does not matter to CyberSource
         return Response(status=status.HTTP_200_OK)
+
+
+class StripeWebhookView(APIView):
+    """
+    Receives Stripe checkout events.
+
+    Only Stripe should reach this. Instead of authenticating, the request's
+    signature is checked against the webhook secrets held by the payment
+    gateway. Stripe delivers events at least once and retries anything that
+    isn't a 2xx, so every handler below has to be safe to run twice.
+    """
+
+    authentication_classes = ()
+    permission_classes = ()
+
+    def post(self, request, *args, **kwargs):  # noqa: ARG002
+        """Handle an incoming Stripe event."""
+        try:
+            event = PaymentGateway.validate_processor_response(
+                MITOL_PAYMENT_GATEWAY_STRIPE, request
+            )
+        except Exception:
+            log.exception("StripeWebhookView: could not validate the Stripe payload")
+            return Response(
+                "Unable to validate request.", status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        # event.data.object is a StripeObject, which doesn't support .get()
+        checkout_session = stripe_object_to_dict(event.data.object) or {}
+        checkout_session_id = checkout_session.get("id")
+
+        if not checkout_session_id:
+            log.error(
+                "StripeWebhookView: event %s carried no checkout session ID", event.id
+            )
+            return Response(status=status.HTTP_200_OK)
+
+        if event.type in STRIPE_FULFILL_EVENTS:
+            fulfill_stripe_order(checkout_session_id)
+        elif event.type in STRIPE_CANCEL_EVENTS:
+            cancel_stripe_order(checkout_session_id, reason=event.type)
+        else:
+            log.info("StripeWebhookView: ignoring unhandled event type %s", event.type)
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class StripeOrderStatusView(APIView):
+    """
+    Reports whether the order behind a checkout session has been fulfilled yet.
+
+    The interstitial polls this while it waits for the webhook to land.
+    """
+
+    authentication_classes = (SessionAuthentication, TokenAuthentication)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):  # noqa: ARG002
+        """Return the order status for a checkout session."""
+        checkout_session_id = request.query_params.get("session_id")
+        if not checkout_session_id:
+            return Response(
+                {"error": "session_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        order = Order.objects.filter(
+            stripe_checkout_session_id=checkout_session_id,
+            purchaser=request.user,
+        ).first()
+
+        if order is None:
+            raise Http404
+
+        return Response({"status": order.status, "reference": order.reference_number})
 
 
 class OrderReceiptView(RetrieveAPIView):
