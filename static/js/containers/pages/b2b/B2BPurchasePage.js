@@ -1,4 +1,5 @@
 // @flow
+/* global SETTINGS: false */
 import React from "react";
 import { connect } from "react-redux";
 import { compose } from "redux";
@@ -112,6 +113,26 @@ export class B2BPurchasePage extends React.Component<Props, State> {
     if (productId && isNaN(productId)) {
       // eslint-disable-next-line no-useless-escape
       productId = productId.replace(/\ /g, "+");
+    }
+
+    // Explicit false only: the flag defaults to on, so a missing value must
+    // mean "available" rather than silently hiding the page.
+    if (SETTINGS.enable_b2b_purchasing === false) {
+      // Bulk purchasing runs on the payment processor being retired, so it can
+      // be switched off without a deploy. Anyone who already bought codes can
+      // still reach them through their receipt link.
+      return (
+        <div className="container b2b-purchase-unavailable">
+          <h2>Bulk purchasing is temporarily unavailable</h2>
+          <p>
+            We&rsquo;re unable to take new bulk enrollment code orders at the
+            moment. If you already purchased codes, your receipt link still
+            works. Please{" "}
+            <a href={`mailto:${SETTINGS.support_email}`}>contact us</a> if you
+            need to place an order.
+          </p>
+        </div>
+      );
     }
 
     return (
