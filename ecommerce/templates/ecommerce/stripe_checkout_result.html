@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Completing your purchase{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 4rem 0; text-align: center">
+  {% if order_failed %}
+  <h2>We couldn't complete your payment</h2>
+  <p>
+    Your card was not charged. Please try again, or contact support if the
+    problem continues.
+  </p>
+  <p><a href="{{ receipt_url }}">Return to your dashboard</a></p>
+  {% else %}
+  <h2>Completing your purchase&hellip;</h2>
+  <p>
+    Your payment went through. We're finalizing your enrollment — this usually
+    takes a few seconds.
+  </p>
+  <p>
+    <a id="receipt-link" href="{{ receipt_url }}">Continue to your dashboard</a>
+  </p>
+  {% endif %}
+</div>
+
+{% if not order_failed %}
+<script>
+  (function () {
+    // Stripe sends nothing to this page; the order is fulfilled by the webhook,
+    // which usually lands a moment after the learner gets back here. Poll until
+    // it does, then move them on. Give up after a while and let them continue
+    // to the dashboard rather than spinning forever.
+    var sessionId = '{{ session_id|escapejs }}';
+    var statusUrl = '{{ status_url|escapejs }}';
+    var receiptUrl = '{{ receipt_url|escapejs }}';
+    var attempts = 0;
+    var maxAttempts = 30;
+
+    if (!sessionId) {
+      return;
+    }
+
+    function poll() {
+      attempts += 1;
+      fetch(statusUrl + '?session_id=' + encodeURIComponent(sessionId), {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      })
+        .then(function (response) {
+          return response.ok ? response.json() : null;
+        })
+        .then(function (data) {
+          if (data && data.status === 'fulfilled') {
+            window.location = receiptUrl;
+          } else if (attempts < maxAttempts) {
+            window.setTimeout(poll, 2000);
+          }
+        })
+        .catch(function () {
+          if (attempts < maxAttempts) {
+            window.setTimeout(poll, 2000);
+          }
+        });
+    }
+
+    window.setTimeout(poll, 1000);
+  })();
+</script>
+{% endif %}
+{% endblock %}

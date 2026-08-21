@@ -5,6 +5,7 @@ Functions for ecommerce
 import decimal
 import hashlib
 import hmac
+import json
 import logging
 import re
 import uuid
@@ -21,6 +22,18 @@ from django.db.models import Count, F, Max, Prefetch, Q, Subquery
 from django.http import HttpRequest
 from django.urls import reverse
 from ipware import get_client_ip
+from mitol.olposthog.features import is_enabled
+from mitol.payment_gateway.api import CartItem as GatewayCartItem
+from mitol.payment_gateway.api import Order as GatewayOrder
+from mitol.payment_gateway.api import PaymentGateway
+from mitol.payment_gateway.constants import (
+    MITOL_PAYMENT_GATEWAY_CYBERSOURCE,
+    MITOL_PAYMENT_GATEWAY_STRIPE,
+    STRIPE_CHECKOUT_SESSION_STATUS_EXPIRED,
+    STRIPE_CHECKOUT_SESSION_STATUS_OPEN,
+    STRIPE_PAYMENT_STATUS_NPR,
+    STRIPE_PAYMENT_STATUS_PAID,
+)
 from rest_framework.exceptions import ValidationError
 
 import sheets.tasks
@@ -39,6 +52,15 @@ from ecommerce.constants import (
     CYBERSOURCE_DECISION_CANCEL,
     DISCOUNT_TYPE_DOLLARS_OFF,
     DISCOUNT_TYPE_PERCENT_OFF,
+    STRIPE_CHECKOUT_STATUS_CANCELLED,
+    STRIPE_CHECKOUT_STATUS_ERROR,
+    STRIPE_CHECKOUT_STATUS_PAID,
+    STRIPE_CHECKOUT_STATUS_PENDING,
+    STRIPE_INTENT_STATUS_CANCELED,
+    STRIPE_INTENT_STATUS_PROCESSING,
+    STRIPE_INTENT_STATUS_REQUIRES_ACTION,
+    STRIPE_INTENT_STATUS_REQUIRES_CONFIRMATION,
+    STRIPE_INTENT_STATUS_REQUIRES_PAYMENT_METHOD,
 )
 from ecommerce.exceptions import EcommerceException
 from ecommerce.mail_api import send_ecommerce_order_receipt
@@ -69,6 +91,7 @@ from ecommerce.models import (
 from ecommerce.utils import positive_or_zero
 from hubspot_xpro.task_helpers import sync_hubspot_deal
 from maxmind.api import ip_to_country_code
+from mitxpro import features
 from mitxpro.utils import case_insensitive_equal, first_or_none, now_in_utc
 
 log = logging.getLogger(__name__)
@@ -242,6 +265,20 @@ def sign_cybersource_payload(payload):
     return {**payload, "signature": generate_cybersource_sa_signature(payload)}
 
 
+def get_order_coupon_version(order):
+    """
+    Get the CouponVersion redeemed against an order, if any.
+
+    Args:
+        order (Order): An order
+
+    Returns:
+        CouponVersion or None
+    """
+    coupon_redemption = CouponRedemption.objects.filter(order=order).first()
+    return coupon_redemption.coupon_version if coupon_redemption is not None else None
+
+
 def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_address):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
@@ -260,10 +297,7 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
     # length of 255. At the moment none of these fields should go over that, due to database
     # constraints or other reasons
 
-    coupon_redemption = CouponRedemption.objects.filter(order=order).first()
-    coupon_version = (
-        coupon_redemption.coupon_version if coupon_redemption is not None else None
-    )
+    coupon_version = get_order_coupon_version(order)
 
     line_items = {}
     total = 0
@@ -363,6 +397,509 @@ def generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addres
             ip_address=ip_address,
         )
     )
+
+
+def get_gateway_type_for_user(user):
+    """
+    Determine which payment gateway a user's checkout should go through.
+
+    Gateway selection is per-user so that Stripe can be rolled out gradually.
+    Anyone not covered by the flag stays on CyberSource, which remains the
+    fallback for the whole migration.
+
+    Args:
+        user (User): The purchasing user
+
+    Returns:
+        str: A gateway name from mitol.payment_gateway.constants
+    """
+    if is_enabled(
+        features.ENABLE_STRIPE_PAYMENTS, default=False, opt_unique_id=str(user.id)
+    ):
+        return MITOL_PAYMENT_GATEWAY_STRIPE
+
+    # Not covered by the flag: fall back to whatever the environment is
+    # configured to use. This is how a deployment (or a local dev setup with no
+    # PostHog) forces one gateway without touching the flag.
+    if settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY == MITOL_PAYMENT_GATEWAY_STRIPE:
+        return MITOL_PAYMENT_GATEWAY_STRIPE
+
+    return MITOL_PAYMENT_GATEWAY_CYBERSOURCE
+
+
+def _generate_gateway_cart_items(order, coupon_version=None):
+    """
+    Map an order's lines onto the payment gateway's CartItem dataclass.
+
+    Prices and tax are calculated exactly as they are for CyberSource: we work
+    out the tax ourselves and hand the gateway the pre-tax price plus the tax
+    as `taxable`. The Stripe backend charges `unitprice + taxable` with an
+    inclusive tax behaviour, so Stripe never recalculates it.
+
+    Args:
+        order (Order): An order
+
+    Returns:
+        list of GatewayCartItem: The cart items for the gateway
+    """
+    coupon_version = get_order_coupon_version(order)
+
+    coupon_version = coupon_version or get_order_coupon_version(order)
+
+    cart_items = []
+    for line in order.lines.all():
+        product_version = line.product_version
+        product_price_dict = get_product_version_price_with_discount_tax(
+            coupon_version=coupon_version,
+            product_version=product_version,
+            tax_rate=order.tax_rate,
+        )
+        content_type = product_version.product.content_type
+        cart_items.append(
+            GatewayCartItem(
+                code=f"{content_type.app_label} | {content_type.name}",
+                name=str(product_version.description)[:254],
+                sku=str(product_version.product.content_object.id),
+                # Deliberately 1, not line.quantity. Order.total_price_paid and
+                # the CyberSource `amount` are both computed from the unit price
+                # without multiplying by quantity, so passing the quantity here
+                # would have Stripe charge a multiple of what the learner agreed
+                # to and what their receipt shows.
+                quantity=1,
+                unitprice=product_price_dict["price"],
+                taxable=decimal.Decimal(product_price_dict["tax_assessed"]).quantize(
+                    decimal.Decimal("0.01")
+                ),
+            )
+        )
+
+    return cart_items
+
+
+def _generate_gateway_merchant_fields(order, coupon_version=None):
+    """
+    Build the merchant-defined data for an order.
+
+    These are the same fields we send to CyberSource; for Stripe they are
+    stored as metadata on the checkout session.
+
+    Args:
+        order (Order): An order
+
+    Returns:
+        dict: merchant defined data fields
+    """
+    coupon_version = get_order_coupon_version(order)
+    coupon_version = coupon_version or get_order_coupon_version(order)
+    product_version = order.lines.first().product_version
+    product = product_version.product
+    readable_id = get_readable_id(product.content_object)
+
+    merchant_fields = {
+        "merchant_defined_data1": f"{product.content_type.app_label} | {product.content_type.name}",
+        "merchant_defined_data2": readable_id,
+        "merchant_defined_data3": "1",
+    }
+
+    if coupon_version is not None:
+        merchant_fields["merchant_defined_data4"] = coupon_version.coupon.coupon_code
+        merchant_fields["merchant_defined_data5"] = (  # company name
+            coupon_version.payment_version.company.name
+            if coupon_version.payment_version.company
+            else ""
+        )
+        merchant_fields["merchant_defined_data6"] = (
+            coupon_version.payment_version.payment_transaction or ""
+        )
+        merchant_fields["merchant_defined_data7"] = (
+            coupon_version.payment_version.payment_type or ""
+        )
+
+    return merchant_fields
+
+
+def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
+    """
+    Create a Stripe checkout session for an order.
+
+    The session ID is stored on the order before the learner is redirected. If
+    we never hear back from Stripe, that ID is the only way to reconcile or
+    refund the payment later.
+
+    Args:
+        order (Order): An order
+        receipt_url (str): Where Stripe returns the learner after checkout
+        cancel_url (str): Where Stripe returns the learner if they cancel
+        ip_address (str): The user's IP address
+
+    Returns:
+        dict: payload/url/method, in the same shape CheckoutView already returns
+    """
+    coupon_version = get_order_coupon_version(order)
+    cart_items = _generate_gateway_cart_items(order, coupon_version=coupon_version)
+
+    # Charging the wrong amount is the worst thing that can go wrong here, so
+    # check the total we're about to send against the order before sending it.
+    cart_total = sum(
+        (decimal.Decimal(item.unitprice) + decimal.Decimal(item.taxable))
+        * item.quantity
+        for item in cart_items
+    ).quantize(decimal.Decimal("0.01"))
+    expected_total = (
+        decimal.Decimal(order.total_price_paid)
+        * (1 + (decimal.Decimal(order.tax_rate or 0) / 100))
+    ).quantize(decimal.Decimal("0.01"))
+    if cart_total != expected_total:
+        # Not fatal: prices are recomputed from the current product version at
+        # checkout time, so an order created before a price change legitimately
+        # diverges from its stored total -- CyberSource behaves the same way.
+        # Worth shouting about, because the other way to land here is a bug in
+        # the cart mapping, and that would charge the wrong amount.
+        log.warning(
+            "start_stripe_checkout: cart total %s for order %s does not match the "
+            "stored order total %s",
+            cart_total,
+            order.reference_number,
+            expected_total,
+        )
+
+    gateway_order = GatewayOrder(
+        username=order.purchaser.username,
+        email=order.purchaser.email,
+        ip_address=ip_address,
+        reference=order.reference_number,
+        items=cart_items,
+    )
+
+    payload = PaymentGateway.start_payment(
+        MITOL_PAYMENT_GATEWAY_STRIPE,
+        gateway_order,
+        receipt_url,
+        cancel_url,
+        merchant_fields=_generate_gateway_merchant_fields(
+            order, coupon_version=coupon_version
+        ),
+    )
+
+    # Hand back a plain dict rather than a StripeObject: this payload is
+    # serialised into the checkout API response.
+    session = stripe_object_to_dict(payload["payload"])
+
+    # The checkout page reads `reference_number` off this payload to tag its
+    # GTM purchase event. CyberSource's payload carries it; a Stripe session
+    # calls it `client_reference_id`, so without this the event would go out
+    # untagged and the purchase would be unattributable in analytics.
+    session["reference_number"] = order.reference_number
+
+    payload["payload"] = session
+    checkout_session_id = session.get("id") if session else None
+    if checkout_session_id:
+        Order.objects.filter(id=order.id).update(
+            stripe_checkout_session_id=checkout_session_id
+        )
+    else:
+        log.error(
+            "start_stripe_checkout: no checkout session ID returned for order %s",
+            order.reference_number,
+        )
+
+    return payload
+
+
+def stripe_object_to_dict(stripe_object):
+    """
+    Convert a Stripe API object into a plain dict.
+
+    The Stripe SDK returns StripeObject instances, which don't behave like
+    dicts for attribute access and can't be stored in a JSONField. Everything
+    downstream of the API boundary works with plain dicts instead.
+
+    Args:
+        stripe_object: A StripeObject, dict, or None
+
+    Returns:
+        dict or None
+    """
+    if stripe_object is None or isinstance(stripe_object, str):
+        return None
+    if hasattr(stripe_object, "to_dict_recursive"):
+        return stripe_object.to_dict_recursive()
+    if hasattr(stripe_object, "to_dict"):
+        return json.loads(json.dumps(stripe_object.to_dict(), default=str))
+    return stripe_object
+
+
+def get_stripe_checkout_session_status(checkout_session_id):
+    """
+    Work out the real state of a Stripe checkout session.
+
+    `checkout.session.completed` only means the learner finished the checkout
+    flow. For payment methods with delayed notification (ACH, SEPA, and the
+    like) the session completes while the payment is still processing, and it
+    can fail afterwards, so the event type alone is not safe to fulfil on. This
+    re-pulls the session with the PaymentIntent expanded and reduces the two
+    together to a single state.
+
+    Args:
+        checkout_session_id (str): The Stripe checkout session ID
+
+    Returns:
+        dict: `status` (one of the STRIPE_CHECKOUT_STATUS_* values), plus
+            `session` and `payment_intent` for callers that need the detail
+    """
+    gateway = PaymentGateway.get_gateway_class(MITOL_PAYMENT_GATEWAY_STRIPE)
+    session = stripe_object_to_dict(
+        gateway.stripe_client.v1.checkout.sessions.retrieve(
+            checkout_session_id,
+            {"expand": ["payment_intent", "payment_intent.latest_charge"]},
+        )
+    )
+    payment_intent = session.get("payment_intent")
+    if isinstance(payment_intent, str):
+        payment_intent = None
+
+    session_status = session.get("status")
+    payment_status = session.get("payment_status")
+    intent_status = payment_intent.get("status") if payment_intent else None
+
+    if session_status == STRIPE_CHECKOUT_SESSION_STATUS_EXPIRED:
+        status_value = STRIPE_CHECKOUT_STATUS_CANCELLED
+    elif intent_status == STRIPE_INTENT_STATUS_CANCELED:
+        status_value = STRIPE_CHECKOUT_STATUS_CANCELLED
+    elif payment_status in (STRIPE_PAYMENT_STATUS_PAID, STRIPE_PAYMENT_STATUS_NPR):
+        status_value = STRIPE_CHECKOUT_STATUS_PAID
+    elif intent_status in (
+        STRIPE_INTENT_STATUS_PROCESSING,
+        STRIPE_INTENT_STATUS_REQUIRES_ACTION,
+        STRIPE_INTENT_STATUS_REQUIRES_CONFIRMATION,
+    ):
+        # Delayed payment methods sit here until the bank confirms.
+        status_value = STRIPE_CHECKOUT_STATUS_PENDING
+    elif intent_status == STRIPE_INTENT_STATUS_REQUIRES_PAYMENT_METHOD:
+        # The payment was attempted and did not go through.
+        status_value = STRIPE_CHECKOUT_STATUS_ERROR
+    elif session_status == STRIPE_CHECKOUT_SESSION_STATUS_OPEN:
+        status_value = STRIPE_CHECKOUT_STATUS_PENDING
+    else:
+        status_value = STRIPE_CHECKOUT_STATUS_ERROR
+
+    return {
+        "status": status_value,
+        "session": session,
+        "payment_intent": payment_intent,
+    }
+
+
+def stripe_data_to_receipt_data(session, payment_intent=None):
+    """
+    Translate Stripe checkout data into the receipt keys the app already reads.
+
+    The receipt page and the receipt email both read CyberSource-style `req_*`
+    keys. Rather than teach them about Stripe, we write those same keys at the
+    point the webhook lands, and keep the raw Stripe objects alongside so
+    nothing is lost.
+
+    Args:
+        session (dict): The Stripe checkout session
+        payment_intent (dict): The expanded PaymentIntent, if available
+
+    Returns:
+        dict: Receipt data using the existing req_* keys
+    """
+    total = session.get("amount_total")
+    total_details = session.get("total_details") or {}
+    tax_amount = total_details.get("amount_tax") or 0
+    customer_details = session.get("customer_details") or {}
+
+    # Newer Stripe API versions dropped `payment_intent.charges` in favour of
+    # `latest_charge`; fall back to the old shape for older versions.
+    charge = None
+    if payment_intent:
+        latest_charge = payment_intent.get("latest_charge")
+        if isinstance(latest_charge, dict):
+            charge = latest_charge
+        else:
+            charges = (payment_intent.get("charges") or {}).get("data") or []
+            charge = charges[0] if charges else None
+
+    payment_method_details = (charge or {}).get("payment_method_details") or {}
+    # Don't assume cards: ACH and other methods are available to learners, and
+    # writing "card" for a bank payment would put a lie on the receipt.
+    payment_method_type = payment_method_details.get("type", "")
+    card = payment_method_details.get("card") or {}
+
+    receipt_data = {
+        "req_reference_number": session.get("client_reference_id"),
+        "req_amount": str(
+            (decimal.Decimal(total or 0) / 100).quantize(decimal.Decimal("0.01"))
+        ),
+        "req_tax_amount": str(
+            (decimal.Decimal(tax_amount) / 100).quantize(decimal.Decimal("0.01"))
+        ),
+        "req_currency": (session.get("currency") or "usd").upper(),
+        "req_bill_to_email": customer_details.get("email"),
+        "req_payment_method": payment_method_type,
+        "req_card_number": f"xxxxxxxxxxxx{card['last4']}" if card.get("last4") else "",
+        "req_card_type": card.get("brand", ""),
+        "req_transaction_uuid": session.get("id"),
+        "decision": "ACCEPT",
+        # The raw objects, so nothing Stripe told us is thrown away.
+        "stripe_checkout_session": session,
+        "stripe_payment_intent": payment_intent,
+    }
+
+    for key in ("merchant_defined_data1", "merchant_defined_data2"):
+        value = (session.get("metadata") or {}).get(key)
+        if value:
+            receipt_data[key] = value
+
+    return receipt_data
+
+
+def fulfill_stripe_order(checkout_session_id):
+    """
+    Fulfil the order behind a Stripe checkout session.
+
+    Safe to call more than once, and safe to call concurrently: the order row
+    is locked before its status is read, so a duplicate webhook delivery waits
+    for the first to commit and then quietly finds the order already fulfilled.
+    Stripe delivers events at least once and retries anything that isn't a 2xx,
+    so this has to be a no-op rather than an error the second time around.
+
+    Args:
+        checkout_session_id (str): The Stripe checkout session ID
+
+    Returns:
+        Order or None: The order, or None if no matching order exists
+    """
+    status_info = get_stripe_checkout_session_status(checkout_session_id)
+    session = status_info["session"]
+    reference_number = session.get("client_reference_id")
+
+    try:
+        order = Order.objects.get_by_reference_number(reference_number)
+    except Order.DoesNotExist:
+        log.error(
+            "fulfill_stripe_order: no order matching reference number %s (session %s)",
+            reference_number,
+            checkout_session_id,
+        )
+        return None
+
+    receipt_data = stripe_data_to_receipt_data(session, status_info["payment_intent"])
+
+    with transaction.atomic():
+        locked_order = Order.objects.select_for_update().get(id=order.id)
+
+        if locked_order.status == Order.FULFILLED:
+            log.info(
+                "fulfill_stripe_order: order %s is already fulfilled, ignoring "
+                "duplicate delivery for session %s",
+                locked_order.reference_number,
+                checkout_session_id,
+            )
+            return locked_order
+
+        if status_info["status"] == STRIPE_CHECKOUT_STATUS_PENDING:
+            # A delayed payment method that hasn't cleared. Leave the order
+            # alone; checkout.session.async_payment_succeeded brings us back.
+            log.info(
+                "fulfill_stripe_order: session %s for order %s is still pending "
+                "payment, leaving the order unfulfilled",
+                checkout_session_id,
+                locked_order.reference_number,
+            )
+            return locked_order
+
+        receipt = Receipt.objects.create(data=receipt_data)
+        receipt.order = locked_order
+        receipt.save()
+
+        if status_info["status"] != STRIPE_CHECKOUT_STATUS_PAID:
+            locked_order.status = Order.FAILED
+            locked_order.save()
+
+    if locked_order.status == Order.FAILED:
+        return locked_order
+
+    # Enroll the learner *before* marking the order fulfilled. If enrollment
+    # fails we want the webhook to return non-2xx so Stripe retries the whole
+    # thing; leaving the order unfulfilled is what makes that retry useful,
+    # because a fulfilled order short-circuits on the next delivery and the
+    # learner would be left paid-but-not-enrolled. create_run_enrollments is
+    # idempotent, so re-running it on a retry is safe.
+    complete_order(locked_order)
+
+    locked_order.status = Order.FULFILLED
+    locked_order.save()
+
+    send_ecommerce_order_receipt(
+        order=locked_order,
+        cyber_source_provided_email=receipt_data.get("req_bill_to_email"),
+    )
+
+    # CRM sync is best-effort: a HubSpot outage must not fail the webhook, for
+    # the same reason.
+    try:
+        sync_hubspot_deal(locked_order)
+    except Exception:  # noqa: BLE001
+        log.exception(
+            "fulfill_stripe_order: HubSpot sync failed for order %s; fulfilment "
+            "itself is unaffected",
+            locked_order.reference_number,
+        )
+
+    locked_order.save_and_log(None)
+
+    return locked_order
+
+
+def cancel_stripe_order(checkout_session_id, *, reason=""):
+    """
+    Mark the order behind an expired or failed checkout session as failed.
+
+    Like fulfilment this is safe to run twice; an order that already reached a
+    terminal state is left alone.
+
+    Args:
+        checkout_session_id (str): The Stripe checkout session ID
+        reason (str): Why the session ended, for the log
+
+    Returns:
+        Order or None: The order, or None if no matching order exists
+    """
+    order = Order.objects.filter(stripe_checkout_session_id=checkout_session_id).first()
+
+    if order is None:
+        log.error(
+            "cancel_stripe_order: no order for checkout session %s",
+            checkout_session_id,
+        )
+        return None
+
+    with transaction.atomic():
+        locked_order = Order.objects.select_for_update().get(id=order.id)
+
+        if locked_order.status != Order.CREATED:
+            log.info(
+                "cancel_stripe_order: order %s is already in state %s, ignoring",
+                locked_order.reference_number,
+                locked_order.status,
+            )
+            return locked_order
+
+        locked_order.status = Order.FAILED
+        locked_order.save()
+
+    log.info(
+        "cancel_stripe_order: order %s marked failed (session %s)%s",
+        locked_order.reference_number,
+        checkout_session_id,
+        f": {reason}" if reason else "",
+    )
+    locked_order.save_and_log(None)
+
+    return locked_order
 
 
 def latest_coupon_version(coupon):

@@ -55,3 +55,41 @@ DISCOUNT_TYPES = [
 
 COUPON_ADD_PERMISSION = "ecommerce.add_coupon"
 COUPON_UPDATE_PERMISSION = "ecommerce.change_coupon"
+
+# Stripe event types we act on. `completed` only means the learner finished the
+# checkout flow -- for payment methods with delayed notification the payment can
+# still be processing -- so the async events matter as much as the first one.
+STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED = "checkout.session.completed"
+STRIPE_EVENT_CHECKOUT_SESSION_EXPIRED = "checkout.session.expired"
+STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED = (
+    "checkout.session.async_payment_succeeded"
+)
+STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED = (
+    "checkout.session.async_payment_failed"
+)
+
+STRIPE_FULFILL_EVENTS = [
+    STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED,
+    STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED,
+]
+STRIPE_CANCEL_EVENTS = [
+    STRIPE_EVENT_CHECKOUT_SESSION_EXPIRED,
+    STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED,
+]
+
+# PaymentIntent statuses. The payment gateway library has constants for the
+# checkout session and payment statuses, but not for these.
+# https://docs.stripe.com/payments/paymentintents/lifecycle
+STRIPE_INTENT_STATUS_CANCELED = "canceled"
+STRIPE_INTENT_STATUS_PROCESSING = "processing"
+STRIPE_INTENT_STATUS_REQUIRES_ACTION = "requires_action"
+STRIPE_INTENT_STATUS_REQUIRES_CONFIRMATION = "requires_confirmation"
+STRIPE_INTENT_STATUS_REQUIRES_PAYMENT_METHOD = "requires_payment_method"
+
+# Overall states a Stripe checkout session is collapsed into. The session's own
+# status fields don't tell the whole story -- the PaymentIntent carries the
+# detail of the payment itself -- so both are considered together.
+STRIPE_CHECKOUT_STATUS_PAID = "paid"
+STRIPE_CHECKOUT_STATUS_PENDING = "pending"
+STRIPE_CHECKOUT_STATUS_CANCELLED = "cancelled"
+STRIPE_CHECKOUT_STATUS_ERROR = "error"

@@ -164,6 +164,8 @@ def test_get_field_names():
         "tax_rate",
         "tax_rate_name",
         "tax_country_code",
+        "gateway_type",
+        "stripe_checkout_session_id",
     }
 
 
@@ -500,6 +502,7 @@ def test_get_js_settings(settings, rf, user, mocker):
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": False,
+        "enable_b2b_purchasing": False,
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
         "posthog_api_host": settings.POSTHOG_API_HOST,
     }
