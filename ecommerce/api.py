@@ -585,6 +585,12 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
     # serialised into the checkout API response.
     session = stripe_object_to_dict(payload["payload"])
 
+    # The checkout page reads `reference_number` off this payload to tag its
+    # GTM purchase event. CyberSource's payload carries it; a Stripe session
+    # calls it `client_reference_id`, so without this the event would go out
+    # untagged and the purchase would be unattributable in analytics.
+    session["reference_number"] = order.reference_number
+
     payload["payload"] = session
     checkout_session_id = session.get("id") if session else None
     if checkout_session_id:
