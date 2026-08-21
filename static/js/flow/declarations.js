@@ -16,6 +16,7 @@ declare type Settings = {
   digital_credentials_supported_runs: Array<string>,
   is_tax_applicable: boolean,
   enable_enterprise: boolean,
+  enable_b2b_purchasing: boolean,
   posthog_api_token: ?string,
   posthog_api_host: ?string
 };

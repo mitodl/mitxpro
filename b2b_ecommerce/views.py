@@ -9,8 +9,10 @@ from django.core.validators import validate_email
 from django.db import transaction
 from django.http.response import Http404
 from django.urls import reverse
+from mitol.olposthog.features import is_enabled
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -27,6 +29,7 @@ from ecommerce.models import Coupon, ProductVersion
 from ecommerce.serializers import FullProductVersionSerializer
 from ecommerce.utils import make_checkout_url
 from hubspot_xpro.task_helpers import sync_hubspot_b2b_deal
+from mitxpro import features
 from mitxpro.utils import make_csv_http_response
 from users.models import User
 
@@ -52,6 +55,22 @@ class B2BCheckoutView(APIView):
         Create a new unfulfilled Order from the user's basket
         and return information used to submit to CyberSource.
         """
+        if not is_enabled(features.ENABLE_B2B_PURCHASING, default=True):
+            # Bulk purchasing runs on CyberSource, which is being retired. This
+            # is the switch that stops new purchases without a deploy. It only
+            # closes the door on *new* orders: anyone who already paid can still
+            # reach their enrollment codes and order status.
+            log.info("B2BCheckoutView: bulk purchasing is disabled, refusing checkout")
+            return Response(
+                {
+                    "errors": [
+                        "Bulk purchasing is temporarily unavailable. Please contact "
+                        "us if you need to place an order."
+                    ]
+                },
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
         try:
             num_seats = request.data["num_seats"]
             email = request.data["email"]
