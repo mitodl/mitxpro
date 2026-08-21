@@ -515,3 +515,44 @@ def test_coupon_view_missing_param(client, key):
     response = client.get(f"{reverse('b2b-coupon-view')}?{urlencode(params)}")
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"errors": [f"Missing parameter {key}"]}
+
+
+@pytest.mark.parametrize("flag_enabled", [True, False])
+def test_checkout_respects_the_purchasing_kill_switch(client, mocker, flag_enabled):
+    """
+    Bulk purchasing can be switched off without a deploy, because it runs on
+    the payment processor being retired.
+    """
+    mocker.patch("b2b_ecommerce.views.is_enabled", return_value=flag_enabled)
+
+    resp = client.post(reverse("b2b-checkout"), {})
+
+    if flag_enabled:
+        # The request is rubbish, but it got past the switch and into validation.
+        assert resp.status_code != status.HTTP_503_SERVICE_UNAVAILABLE
+    else:
+        assert resp.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
+        assert "temporarily unavailable" in resp.json()["errors"][0]
+
+
+def test_kill_switch_does_not_block_enrollment_codes(client, mocker):
+    """
+    Switching purchasing off must not strand anyone who already paid: the
+    enrollment codes and order status stay reachable.
+    """
+    mocker.patch("b2b_ecommerce.views.is_enabled", return_value=False)
+    coupon_version = CouponVersionFactory.create()
+    order = B2BOrderFactory.create(
+        coupon_payment_version=coupon_version.payment_version,
+        status=B2BOrder.FULFILLED,
+    )
+
+    codes_resp = client.get(
+        reverse("b2b-enrollment-codes", kwargs={"hash": order.unique_id})
+    )
+    status_resp = client.get(
+        reverse("b2b-order-status", kwargs={"hash": order.unique_id})
+    )
+
+    assert codes_resp.status_code == status.HTTP_200_OK
+    assert status_resp.status_code == status.HTTP_200_OK
