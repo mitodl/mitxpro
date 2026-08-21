@@ -329,6 +329,70 @@ describe("CheckoutPage", () => {
     assert.isTrue(window.location.toString().endsWith(url));
   });
 
+  describe("GTM purchase tracking", () => {
+    const url = "/a/b/c/";
+
+    afterEach(() => {
+      delete global.dataLayer;
+      SETTINGS.gtmTrackingID = null;
+    });
+
+    const submitCheckout = async (payload) => {
+      const { inner } = await renderPage();
+      helper.handleRequestStub.withArgs("/api/checkout/", "POST").returns({
+        body: { url, payload, method: "GET" },
+        status: 200,
+      });
+      const actions = {
+        setSubmitting: helper.sandbox.stub(),
+        setErrors: helper.sandbox.stub(),
+      };
+      await inner.find("CheckoutForm").prop("onSubmit")({ runs: {} }, actions);
+    };
+
+    it("tags the purchase event with the order reference number", async () => {
+      // Stripe's payload calls this `client_reference_id`; the server adds
+      // `reference_number` so the event stays attributable. Without it the
+      // purchase would be reported to analytics unidentified.
+      SETTINGS.gtmTrackingID = "GTM-FAKE";
+      const pushStub = helper.sandbox.stub();
+      global.dataLayer = { push: pushStub };
+
+      await submitCheckout({ reference_number: "xpro-b2c-dev-42" });
+
+      sinon.assert.calledOnce(pushStub);
+      const event = pushStub.firstCall.args[0];
+      assert.equal(event.event, "purchase");
+      assert.equal(event.referenceNumber, "xpro-b2c-dev-42");
+    });
+
+    it("redirects through the GTM callback when tracking is on", async () => {
+      // The redirect to the payment page lives inside eventCallback, so GTM
+      // sits between the learner and checkout. Every Stripe purchase takes
+      // this path, so it must not be broken silently.
+      SETTINGS.gtmTrackingID = "GTM-FAKE";
+      const pushStub = helper.sandbox.stub();
+      global.dataLayer = { push: pushStub };
+
+      await submitCheckout({ reference_number: "xpro-b2c-dev-42" });
+
+      const event = pushStub.firstCall.args[0];
+      assert.isFunction(event.eventCallback);
+      assert.equal(event.eventTimeout, 2000);
+    });
+
+    it("redirects directly when tracking is off", async () => {
+      SETTINGS.gtmTrackingID = null;
+      const pushStub = helper.sandbox.stub();
+      global.dataLayer = { push: pushStub };
+
+      await submitCheckout({ reference_number: "xpro-b2c-dev-42" });
+
+      sinon.assert.notCalled(pushStub);
+      assert.isTrue(window.location.toString().endsWith(url));
+    });
+  });
+
   it("fails to check out because basket API failed to validate", async () => {
     const { inner } = await renderPage();
     const errors = ["something went wrong"];
