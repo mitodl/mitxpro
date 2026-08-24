@@ -6,7 +6,7 @@ import pytest
 
 from ecommerce.api import (
     _generate_cybersource_sa_payload,
-    _generate_gateway_cart_items,
+    _generate_stripe_cart_items,
     cancel_stripe_order,
     fulfill_stripe_order,
     get_gateway_type_for_user,
@@ -116,7 +116,7 @@ class TestCartMapping:
             cancel_url="http://example.com/cancel",
             ip_address="127.0.0.1",
         )
-        cart_items = _generate_gateway_cart_items(order_with_line)
+        cart_items = _generate_stripe_cart_items(order_with_line)
         stripe_total = sum(
             (decimal.Decimal(item.unitprice) + decimal.Decimal(item.taxable))
             * item.quantity
@@ -130,7 +130,7 @@ class TestCartMapping:
         order_with_line.tax_rate = decimal.Decimal("10.0000")
         order_with_line.save()
 
-        cart_items = _generate_gateway_cart_items(order_with_line)
+        cart_items = _generate_stripe_cart_items(order_with_line)
 
         assert len(cart_items) == 1
         assert cart_items[0].taxable > 0
@@ -148,7 +148,7 @@ class TestCartMapping:
         line.quantity = 3
         line.save()
 
-        cart_items = _generate_gateway_cart_items(order_with_line)
+        cart_items = _generate_stripe_cart_items(order_with_line)
 
         assert all(item.quantity == 1 for item in cart_items)
 
