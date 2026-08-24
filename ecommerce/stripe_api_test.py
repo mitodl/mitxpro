@@ -213,6 +213,40 @@ class TestSupersededSessions:
         order_with_line.refresh_from_db()
         assert order_with_line.stripe_checkout_session_id == "cs_test_new"
 
+    def test_swap_reads_the_stored_session_not_the_instance(
+        self, mocker, order_with_line
+    ):
+        """
+        The previous session must come from the database under the lock, not
+        from the in-memory instance: a stale instance would expire an already
+        superseded session and leave the truly-previous one payable.
+        """
+        # Simulate another checkout having landed after this instance was read.
+        Order.objects.filter(id=order_with_line.id).update(
+            stripe_checkout_session_id="cs_test_concurrent"
+        )
+        # The in-memory instance still says None.
+        assert order_with_line.stripe_checkout_session_id is None
+
+        mocker.patch(
+            "ecommerce.api.PaymentGateway.start_payment",
+            return_value={
+                "payload": {"id": "cs_test_new"},
+                "url": "https://checkout.stripe.com/c/pay/cs_test_new",
+                "method": "GET",
+            },
+        )
+        expire = mocker.patch("ecommerce.api.expire_stripe_checkout_session")
+
+        start_stripe_checkout(
+            order=order_with_line,
+            receipt_url="http://example.com/receipt",
+            cancel_url="http://example.com/cancel",
+        )
+
+        # It expired what was actually stored, not what the instance believed.
+        expire.assert_called_once_with("cs_test_concurrent")
+
     def test_nothing_to_expire_on_a_first_attempt(self, mocker, order_with_line):
         """No previous session means nothing to retire"""
         mocker.patch(
@@ -457,6 +491,29 @@ class TestFulfillment:
 
         order_with_line.refresh_from_db()
         assert order_with_line.status == Order.FAILED
+
+    def test_redelivered_failure_does_not_pile_up_receipts(
+        self, order_with_line, mocker
+    ):
+        """
+        FAILED is terminal too: a failed order is never reused, so a
+        redelivered failure event must not write another receipt each time.
+        """
+        from ecommerce.models import Receipt
+
+        mocker.patch("ecommerce.api.complete_order")
+        mocker.patch("ecommerce.api.sync_hubspot_deal")
+
+        with_status = self._patch_status(
+            mocker, order_with_line, STRIPE_CHECKOUT_STATUS_ERROR
+        )
+        fulfill_stripe_order("cs_test_123")
+        fulfill_stripe_order("cs_test_123")
+        assert with_status.call_count == 2
+
+        order_with_line.refresh_from_db()
+        assert order_with_line.status == Order.FAILED
+        assert Receipt.objects.filter(order=order_with_line).count() == 1
 
     def test_duplicate_delivery_is_a_no_op(self, order_with_line, mocker):
         """
