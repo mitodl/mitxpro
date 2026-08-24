@@ -436,9 +436,10 @@ def get_gateway_type_for_user(user):
     return MITOL_PAYMENT_GATEWAY_CYBERSOURCE
 
 
-def _generate_gateway_cart_items(order, coupon_version=_COUPON_VERSION_UNSET):
+def _generate_stripe_cart_items(order, coupon_version=_COUPON_VERSION_UNSET):
     """
-    Map an order's lines onto the payment gateway's CartItem dataclass.
+    Map an order's lines onto the payment gateway library's CartItem dataclass
+    for a Stripe checkout session.
 
     Prices and tax are calculated exactly as they are for CyberSource: we work
     out the tax ourselves and hand the gateway the pre-tax price plus the tax
@@ -447,12 +448,13 @@ def _generate_gateway_cart_items(order, coupon_version=_COUPON_VERSION_UNSET):
 
     Args:
         order (Order): An order
+        coupon_version (CouponVersion or None): The coupon applied to the order.
+            Looked up from the order when not supplied; pass None to say
+            explicitly that no coupon applies.
 
     Returns:
-        list of GatewayCartItem: The cart items for the gateway
+        list of GatewayCartItem: The cart items for the checkout session
     """
-    coupon_version = get_order_coupon_version(order)
-
     if coupon_version is _COUPON_VERSION_UNSET:
         coupon_version = get_order_coupon_version(order)
 
@@ -486,7 +488,7 @@ def _generate_gateway_cart_items(order, coupon_version=_COUPON_VERSION_UNSET):
     return cart_items
 
 
-def _generate_gateway_merchant_fields(order, coupon_version=_COUPON_VERSION_UNSET):
+def _generate_stripe_merchant_fields(order, coupon_version=_COUPON_VERSION_UNSET):
     """
     Build the merchant-defined data for an order.
 
@@ -495,11 +497,13 @@ def _generate_gateway_merchant_fields(order, coupon_version=_COUPON_VERSION_UNSE
 
     Args:
         order (Order): An order
+        coupon_version (CouponVersion or None): The coupon applied to the order.
+            Looked up from the order when not supplied; pass None to say
+            explicitly that no coupon applies.
 
     Returns:
         dict: merchant defined data fields
     """
-    coupon_version = get_order_coupon_version(order)
     if coupon_version is _COUPON_VERSION_UNSET:
         coupon_version = get_order_coupon_version(order)
 
@@ -548,7 +552,7 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
         dict: payload/url/method, in the same shape CheckoutView already returns
     """
     coupon_version = get_order_coupon_version(order)
-    cart_items = _generate_gateway_cart_items(order, coupon_version=coupon_version)
+    cart_items = _generate_stripe_cart_items(order, coupon_version=coupon_version)
 
     # Charging the wrong amount is the worst thing that can go wrong here, so
     # check the total we're about to send against the order before sending it.
@@ -588,7 +592,7 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
         gateway_order,
         receipt_url,
         cancel_url,
-        merchant_fields=_generate_gateway_merchant_fields(
+        merchant_fields=_generate_stripe_merchant_fields(
             order, coupon_version=coupon_version
         ),
     )
