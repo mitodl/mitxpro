@@ -58,6 +58,14 @@ def test_unknown_reference_number_is_an_error():
         call_command(COMMAND, order="xpro-b2c-dev-999999")
 
 
+def test_nothing_stuck_is_not_an_error():
+    """
+    Nothing stuck is the healthy state. Exiting non-zero would make this
+    unusable on a schedule.
+    """
+    call_command(COMMAND, all=True)
+
+
 def test_paid_session_fulfills_the_order(mocker, stuck_order):
     """The main case: Stripe took the money, we never heard, so fulfil it now"""
     _patch_status(mocker, STRIPE_CHECKOUT_STATUS_PAID)
