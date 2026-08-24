@@ -13,7 +13,10 @@ from django.urls import reverse
 from django_filters import rest_framework as filters
 from ipware import get_client_ip
 from mitol.payment_gateway.api import PaymentGateway
-from mitol.payment_gateway.constants import MITOL_PAYMENT_GATEWAY_STRIPE
+from mitol.payment_gateway.constants import (
+    MITOL_PAYMENT_GATEWAY_CYBERSOURCE,
+    MITOL_PAYMENT_GATEWAY_STRIPE,
+)
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.generics import (
@@ -278,6 +281,13 @@ class CheckoutView(APIView):
             url = stripe_response["url"]
             method = stripe_response["method"]
         else:
+            # Record the gateway on this path too. An unpaid order is reused
+            # across attempts, so one that started on Stripe and is finished on
+            # CyberSource -- after the flag is turned off, say -- would
+            # otherwise keep the wrong label.
+            order.gateway_type = MITOL_PAYMENT_GATEWAY_CYBERSOURCE
+            order.save()
+
             # This generates a signed payload which is submitted as an HTML form to CyberSource
             cancel_url = urljoin(base_url, "checkout/")
             payload = generate_cybersource_sa_payload(

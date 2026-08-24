@@ -17,7 +17,7 @@ type Props = {
   forceRequest: () => Promise<void>,
 };
 type State = {
-  attempts: number,
+  timedOut: boolean,
 };
 
 // Stripe sends nothing to this page; the order is fulfilled by a webhook that
@@ -29,18 +29,18 @@ const MAX_ATTEMPTS = 30;
 
 export class CheckoutResultPage extends React.Component<Props, State> {
   state = {
-    attempts: 0,
+    timedOut: false,
   };
 
-  componentDidUpdate(prevProps: Props) {
-    if (prevProps.orderStatus !== this.props.orderStatus) {
-      this.handleOrderStatus();
-    }
+  componentDidMount() {
+    this.poll();
   }
 
-  componentDidMount() {
-    this.handleOrderStatus();
+  componentWillUnmount() {
+    this.unmounted = true;
   }
+
+  unmounted = false;
 
   receiptUrl = () => {
     const purchased = qs.parse(this.props.location.search).purchased;
@@ -51,31 +51,47 @@ export class CheckoutResultPage extends React.Component<Props, State> {
       : routes.dashboard;
   };
 
-  handleOrderStatus = async () => {
-    const { orderStatus, forceRequest } = this.props;
-    const { attempts } = this.state;
+  // Driven by a timer rather than by successful entity updates: if the first
+  // status request fails there is no update to react to, and a learner who has
+  // paid would sit here forever. Request errors are swallowed so a transient
+  // failure doesn't break the chain.
+  poll = async () => {
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      if (this.unmounted) {
+        return;
+      }
 
-    if (!orderStatus) {
-      // wait until we have an order status
-      return;
+      const { orderStatus } = this.props;
+
+      if (orderStatus && orderStatus.status === "fulfilled") {
+        window.location = this.receiptUrl();
+        return;
+      }
+
+      if (orderStatus && orderStatus.status === "failed") {
+        return;
+      }
+
+      await wait(NUM_MILLIS_PER_POLL);
+
+      try {
+        await this.props.forceRequest();
+      } catch (e) {
+        // Keep polling: a transient error shouldn't strand a paid learner.
+      }
     }
 
-    if (orderStatus.status === "fulfilled") {
-      window.location = this.receiptUrl();
-      return;
+    if (!this.unmounted) {
+      // Stop polling, but say so. Delayed payment methods legitimately stay
+      // unconfirmed for far longer than this, and leaving "completing your
+      // purchase" on screen forever implies something is still happening.
+      this.setState({ timedOut: true });
     }
-
-    if (orderStatus.status === "failed" || attempts >= MAX_ATTEMPTS) {
-      return;
-    }
-
-    this.setState({ attempts: attempts + 1 });
-    await wait(NUM_MILLIS_PER_POLL);
-    await forceRequest();
   };
 
   render() {
     const { orderStatus } = this.props;
+    const { timedOut } = this.state;
     const failed = orderStatus && orderStatus.status === "failed";
 
     return (
@@ -84,17 +100,30 @@ export class CheckoutResultPage extends React.Component<Props, State> {
           <React.Fragment>
             <h2>We couldn&rsquo;t complete your payment</h2>
             <p>
-              Your card was not charged. Please try again, or contact support if
+              You have not been charged. Please try again, or contact support if
               the problem continues.
             </p>
             <a href={routes.dashboard}>Return to your dashboard</a>
+          </React.Fragment>
+        ) : timedOut ? (
+          <React.Fragment>
+            <h2>Your payment is still being confirmed</h2>
+            <p>
+              This is normal for some payment methods, such as bank transfers,
+              which can take a few days to clear. We&rsquo;ll email you as soon
+              as it&rsquo;s confirmed and your enrollment is ready &mdash; you
+              don&rsquo;t need to pay again or stay on this page.
+            </p>
+            <a href={routes.dashboard}>Go to your dashboard</a>
           </React.Fragment>
         ) : (
           <React.Fragment>
             <h2>Completing your purchase&hellip;</h2>
             <p>
-              Your payment went through. We&rsquo;re finalizing your enrollment
-              &mdash; this usually takes a few seconds.
+              We&rsquo;re confirming your payment and finalizing your
+              enrollment. This usually takes a few seconds, though some payment
+              methods &mdash; bank transfers in particular &mdash; can take
+              longer. We&rsquo;ll email you once it&rsquo;s confirmed.
             </p>
             <a href={this.receiptUrl()}>Continue to your dashboard</a>
           </React.Fragment>

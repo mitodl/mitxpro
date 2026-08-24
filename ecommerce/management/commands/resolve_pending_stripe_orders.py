@@ -89,8 +89,13 @@ class Command(BaseCommand):
         return orders.filter(id=order.id)
 
     def handle(self, *args, **kwargs):  # noqa: ARG002
-        if not kwargs["all"] and not kwargs["order"]:
-            raise CommandError("Please specify an order reference number or --all.")  # noqa: EM101
+        if bool(kwargs["all"]) == bool(kwargs["order"]):
+            # Refuse both cases. Silently letting --all win when an order was
+            # also named would apply changes to every pending order when the
+            # operator meant one of them.
+            raise CommandError(  # noqa: TRY003
+                "Specify either an order reference number or --all, not both."  # noqa: EM101
+            )
 
         dry_run = not kwargs["commit"]
         orders = self.get_orders(kwargs["order"], process_all=kwargs["all"])
