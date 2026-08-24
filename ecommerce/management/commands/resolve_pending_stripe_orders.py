@@ -101,7 +101,12 @@ class Command(BaseCommand):
         orders = self.get_orders(kwargs["order"], process_all=kwargs["all"])
 
         if not orders:
-            raise CommandError("No stuck Stripe orders found.")  # noqa: EM101
+            # Nothing stuck is the healthy state, not a failure -- exiting
+            # non-zero here would make this unusable on a schedule. A named
+            # order that doesn't exist is a different matter and still errors,
+            # in get_orders.
+            self.stdout.write("No stuck Stripe orders found.")
+            return
 
         resolved = 0
         for order in orders:
