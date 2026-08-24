@@ -43,6 +43,15 @@ def test_requires_an_order_or_all():
         call_command(COMMAND)
 
 
+def test_rejects_order_and_all_together():
+    """
+    --all silently winning would let someone rescuing a single order apply
+    changes to every pending one.
+    """
+    with pytest.raises(CommandError):
+        call_command(COMMAND, order="xpro-b2c-dev-1", all=True)
+
+
 def test_unknown_reference_number_is_an_error():
     """A typo in the reference number should say so, not silently do nothing"""
     with pytest.raises(CommandError):

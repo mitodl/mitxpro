@@ -46,6 +46,18 @@ describe("CheckoutResultPage", () => {
     assert.include(inner.text(), "couldn’t complete your payment");
   });
 
+  it("says so when polling gives up rather than spinning forever", async () => {
+    // Delayed payment methods legitimately stay unconfirmed for longer than
+    // we poll, so the page has to explain itself instead of implying progress.
+    const { inner } = await renderPage({
+      entities: { stripe_order_status: { status: "created" } },
+    });
+    inner.setState({ timedOut: true });
+
+    assert.include(inner.text(), "still being confirmed");
+    assert.notInclude(inner.text(), "Completing your purchase");
+  });
+
   it("sends the learner to their dashboard once the order is fulfilled", async () => {
     await renderPage({
       entities: { stripe_order_status: { status: "fulfilled" } },

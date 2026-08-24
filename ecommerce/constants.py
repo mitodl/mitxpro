@@ -93,3 +93,16 @@ STRIPE_CHECKOUT_STATUS_PAID = "paid"
 STRIPE_CHECKOUT_STATUS_PENDING = "pending"
 STRIPE_CHECKOUT_STATUS_CANCELLED = "cancelled"
 STRIPE_CHECKOUT_STATUS_ERROR = "error"
+
+# Stripe reports card brands by name; the receipt serializer looks brands up in
+# CYBERSOURCE_CARD_TYPES by numeric code. Translate at write time so the receipt
+# page and email keep working unchanged.
+STRIPE_CARD_BRAND_TO_CYBERSOURCE_CODE = {
+    "visa": "001",
+    "mastercard": "002",
+    "amex": "003",
+    "discover": "004",
+    "diners": "005",
+    "jcb": "007",
+    "unionpay": "062",
+}

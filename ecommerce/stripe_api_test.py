@@ -182,6 +182,58 @@ class TestCheckoutPayload:
         )
 
 
+class TestSupersededSessions:
+    """Starting checkout again on the same order"""
+
+    def test_previous_session_is_expired(self, mocker, order_with_line):
+        """
+        An unpaid order is reused across attempts, so a learner who goes back
+        and starts again gets a second session. Both would stay payable, which
+        is a route to being charged twice.
+        """
+        order_with_line.stripe_checkout_session_id = "cs_test_old"
+        order_with_line.save()
+        mocker.patch(
+            "ecommerce.api.PaymentGateway.start_payment",
+            return_value={
+                "payload": {"id": "cs_test_new"},
+                "url": "https://checkout.stripe.com/c/pay/cs_test_new",
+                "method": "GET",
+            },
+        )
+        expire = mocker.patch("ecommerce.api.expire_stripe_checkout_session")
+
+        start_stripe_checkout(
+            order=order_with_line,
+            receipt_url="http://example.com/receipt",
+            cancel_url="http://example.com/cancel",
+        )
+
+        expire.assert_called_once_with("cs_test_old")
+        order_with_line.refresh_from_db()
+        assert order_with_line.stripe_checkout_session_id == "cs_test_new"
+
+    def test_nothing_to_expire_on_a_first_attempt(self, mocker, order_with_line):
+        """No previous session means nothing to retire"""
+        mocker.patch(
+            "ecommerce.api.PaymentGateway.start_payment",
+            return_value={
+                "payload": {"id": "cs_test_new"},
+                "url": "https://checkout.stripe.com/c/pay/cs_test_new",
+                "method": "GET",
+            },
+        )
+        expire = mocker.patch("ecommerce.api.expire_stripe_checkout_session")
+
+        start_stripe_checkout(
+            order=order_with_line,
+            receipt_url="http://example.com/receipt",
+            cancel_url="http://example.com/cancel",
+        )
+
+        assert expire.call_count == 0
+
+
 class TestSessionStatus:
     """Collapsing a checkout session into a single state"""
 
@@ -246,7 +298,8 @@ class TestReceiptMapping:
         assert receipt_data["req_reference_number"] == "xpro-b2c-dev-1"
         assert receipt_data["req_amount"] == "123.45"
         assert receipt_data["req_card_number"] == "xxxxxxxxxxxx4242"
-        assert receipt_data["req_card_type"] == "visa"
+        # The serializer looks brands up in CYBERSOURCE_CARD_TYPES by code.
+        assert receipt_data["req_card_type"] == "001"
         assert receipt_data["req_tax_amount"] == "3.45"
         assert receipt_data["req_bill_to_email"] == "learner@example.com"
         assert receipt_data["decision"] == "ACCEPT"
@@ -295,6 +348,55 @@ class TestReceiptMapping:
 
         assert receipt_data["stripe_checkout_session"] == session
         assert receipt_data["stripe_payment_intent"]["id"] == "pi_test_123"
+
+
+class TestReceiptSerialization:
+    """The receipt page and email have to keep working unchanged"""
+
+    def test_card_brand_survives_into_the_receipt(self, order_with_line):
+        """
+        `OrderReceiptSerializer` looks the card type up in
+        CYBERSOURCE_CARD_TYPES by numeric code, so a raw Stripe brand like
+        "visa" would silently drop off the receipt.
+        """
+        from ecommerce.models import Receipt
+        from ecommerce.serializers import OrderReceiptSerializer
+
+        session = _checkout_session(
+            client_reference_id=order_with_line.reference_number
+        )
+        receipt_data = stripe_data_to_receipt_data(session, session["payment_intent"])
+        Receipt.objects.create(data=receipt_data, order=order_with_line)
+
+        serialized = OrderReceiptSerializer(order_with_line).data
+
+        assert serialized["receipt"]["card_type"] == "Visa"
+        assert serialized["receipt"]["card_number"] == "xxxxxxxxxxxx4242"
+
+
+class TestReceiptDecision:
+    """The stored decision has to match what actually happened"""
+
+    @pytest.mark.parametrize(
+        ("checkout_status", "expected_decision"),
+        [
+            (STRIPE_CHECKOUT_STATUS_PAID, "ACCEPT"),
+            (STRIPE_CHECKOUT_STATUS_CANCELLED, "CANCEL"),
+            (STRIPE_CHECKOUT_STATUS_ERROR, "DECLINE"),
+        ],
+    )
+    def test_decision_reflects_the_outcome(self, checkout_status, expected_decision):
+        """
+        A receipt is stored for failures too, so recording ACCEPT on a failed
+        payment would leave contradictory records behind.
+        """
+        session = _checkout_session()
+
+        receipt_data = stripe_data_to_receipt_data(
+            session, session["payment_intent"], checkout_status=checkout_status
+        )
+
+        assert receipt_data["decision"] == expected_decision
 
 
 class TestFulfillment:

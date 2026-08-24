@@ -49,9 +49,11 @@ from courses.models import CourseRun, Program, ProgramRun
 from courses.utils import is_program_text_id
 from ecommerce.constants import (
     CYBERSOURCE_DECISION_ACCEPT,
+    CYBERSOURCE_DECISION_DECLINE,
     CYBERSOURCE_DECISION_CANCEL,
     DISCOUNT_TYPE_DOLLARS_OFF,
     DISCOUNT_TYPE_PERCENT_OFF,
+    STRIPE_CARD_BRAND_TO_CYBERSOURCE_CODE,
     STRIPE_CHECKOUT_STATUS_CANCELLED,
     STRIPE_CHECKOUT_STATUS_ERROR,
     STRIPE_CHECKOUT_STATUS_PAID,
@@ -265,6 +267,11 @@ def sign_cybersource_payload(payload):
     return {**payload, "signature": generate_cybersource_sa_signature(payload)}
 
 
+# Sentinel so callers can pass "no coupon" without it being mistaken for
+# "not supplied" and re-queried.
+_COUPON_VERSION_UNSET = object()
+
+
 def get_order_coupon_version(order):
     """
     Get the CouponVersion redeemed against an order, if any.
@@ -427,7 +434,7 @@ def get_gateway_type_for_user(user):
     return MITOL_PAYMENT_GATEWAY_CYBERSOURCE
 
 
-def _generate_gateway_cart_items(order, coupon_version=None):
+def _generate_gateway_cart_items(order, coupon_version=_COUPON_VERSION_UNSET):
     """
     Map an order's lines onto the payment gateway's CartItem dataclass.
 
@@ -444,7 +451,8 @@ def _generate_gateway_cart_items(order, coupon_version=None):
     """
     coupon_version = get_order_coupon_version(order)
 
-    coupon_version = coupon_version or get_order_coupon_version(order)
+    if coupon_version is _COUPON_VERSION_UNSET:
+        coupon_version = get_order_coupon_version(order)
 
     cart_items = []
     for line in order.lines.all():
@@ -476,7 +484,7 @@ def _generate_gateway_cart_items(order, coupon_version=None):
     return cart_items
 
 
-def _generate_gateway_merchant_fields(order, coupon_version=None):
+def _generate_gateway_merchant_fields(order, coupon_version=_COUPON_VERSION_UNSET):
     """
     Build the merchant-defined data for an order.
 
@@ -490,7 +498,9 @@ def _generate_gateway_merchant_fields(order, coupon_version=None):
         dict: merchant defined data fields
     """
     coupon_version = get_order_coupon_version(order)
-    coupon_version = coupon_version or get_order_coupon_version(order)
+    if coupon_version is _COUPON_VERSION_UNSET:
+        coupon_version = get_order_coupon_version(order)
+
     product_version = order.lines.first().product_version
     product = product_version.product
     readable_id = get_readable_id(product.content_object)
@@ -594,9 +604,18 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
     payload["payload"] = session
     checkout_session_id = session.get("id") if session else None
     if checkout_session_id:
+        # An unpaid order is reused across checkout attempts, so a learner who
+        # goes back and starts again gets a second session. Both stay payable
+        # until they expire, which is a route to being charged twice, so retire
+        # the previous one. The order's session ID is updated first: the expiry
+        # webhook looks orders up by session ID, and this way the expired
+        # session no longer matches anything and can't fail the live order.
+        previous_session_id = order.stripe_checkout_session_id
         Order.objects.filter(id=order.id).update(
             stripe_checkout_session_id=checkout_session_id
         )
+        if previous_session_id and previous_session_id != checkout_session_id:
+            expire_stripe_checkout_session(previous_session_id)
     else:
         log.error(
             "start_stripe_checkout: no checkout session ID returned for order %s",
@@ -627,6 +646,28 @@ def stripe_object_to_dict(stripe_object):
     if hasattr(stripe_object, "to_dict"):
         return json.loads(json.dumps(stripe_object.to_dict(), default=str))
     return stripe_object
+
+
+def expire_stripe_checkout_session(checkout_session_id):
+    """
+    Expire a checkout session so it can no longer be paid.
+
+    Used when a learner starts checkout again on the same order: without this
+    the earlier session stays payable and they could be charged twice.
+
+    Args:
+        checkout_session_id (str): The Stripe checkout session ID
+    """
+    gateway = PaymentGateway.get_gateway_class(MITOL_PAYMENT_GATEWAY_STRIPE)
+    try:
+        gateway.stripe_client.v1.checkout.sessions.expire(checkout_session_id)
+    except Exception:  # noqa: BLE001
+        # Already expired, already paid, or Stripe is unhappy. Not worth
+        # failing the new checkout over, but we want to see it.
+        log.exception(
+            "expire_stripe_checkout_session: could not expire session %s",
+            checkout_session_id,
+        )
 
 
 def get_stripe_checkout_session_status(checkout_session_id):
@@ -690,7 +731,7 @@ def get_stripe_checkout_session_status(checkout_session_id):
     }
 
 
-def stripe_data_to_receipt_data(session, payment_intent=None):
+def stripe_data_to_receipt_data(session, payment_intent=None, checkout_status=None):
     """
     Translate Stripe checkout data into the receipt keys the app already reads.
 
@@ -702,10 +743,21 @@ def stripe_data_to_receipt_data(session, payment_intent=None):
     Args:
         session (dict): The Stripe checkout session
         payment_intent (dict): The expanded PaymentIntent, if available
+        checkout_status (str): The resolved checkout status, used to record a
+            decision that matches what actually happened
 
     Returns:
         dict: Receipt data using the existing req_* keys
     """
+    # A receipt is stored for failures too -- CyberSource does the same, and it
+    # is the audit trail for "what did the processor tell us" -- so the decision
+    # has to reflect the real outcome. Writing ACCEPT on a failed payment would
+    # leave contradictory records.
+    decision = {
+        STRIPE_CHECKOUT_STATUS_PAID: CYBERSOURCE_DECISION_ACCEPT,
+        STRIPE_CHECKOUT_STATUS_CANCELLED: CYBERSOURCE_DECISION_CANCEL,
+        STRIPE_CHECKOUT_STATUS_ERROR: CYBERSOURCE_DECISION_DECLINE,
+    }.get(checkout_status, CYBERSOURCE_DECISION_ACCEPT)
     total = session.get("amount_total")
     total_details = session.get("total_details") or {}
     tax_amount = total_details.get("amount_tax") or 0
@@ -740,9 +792,11 @@ def stripe_data_to_receipt_data(session, payment_intent=None):
         "req_bill_to_email": customer_details.get("email"),
         "req_payment_method": payment_method_type,
         "req_card_number": f"xxxxxxxxxxxx{card['last4']}" if card.get("last4") else "",
-        "req_card_type": card.get("brand", ""),
+        "req_card_type": STRIPE_CARD_BRAND_TO_CYBERSOURCE_CODE.get(
+            card.get("brand", ""), ""
+        ),
         "req_transaction_uuid": session.get("id"),
-        "decision": "ACCEPT",
+        "decision": decision,
         # The raw objects, so nothing Stripe told us is thrown away.
         "stripe_checkout_session": session,
         "stripe_payment_intent": payment_intent,
@@ -786,7 +840,9 @@ def fulfill_stripe_order(checkout_session_id):
         )
         return None
 
-    receipt_data = stripe_data_to_receipt_data(session, status_info["payment_intent"])
+    receipt_data = stripe_data_to_receipt_data(
+        session, status_info["payment_intent"], checkout_status=status_info["status"]
+    )
 
     with transaction.atomic():
         locked_order = Order.objects.select_for_update().get(id=order.id)
@@ -818,21 +874,27 @@ def fulfill_stripe_order(checkout_session_id):
         if status_info["status"] != STRIPE_CHECKOUT_STATUS_PAID:
             locked_order.status = Order.FAILED
             locked_order.save()
+            return locked_order
 
-    if locked_order.status == Order.FAILED:
-        return locked_order
+        # Enroll the learner *before* marking the order fulfilled, and do both
+        # while still holding the row lock. Two things depend on that:
+        #
+        # - if enrollment fails, the transaction rolls back and the order stays
+        #   unfulfilled, so Stripe's retry re-runs the whole thing. Marking it
+        #   fulfilled first would leave a paying learner unenrolled with the
+        #   retry short-circuiting on the fulfilled order.
+        # - a concurrent duplicate delivery blocks on the lock until this
+        #   commits, then sees FULFILLED and stops. Releasing the lock before
+        #   the transition would let both deliveries enroll and send receipts.
+        #
+        # create_run_enrollments is idempotent, so a retry is safe.
+        complete_order(locked_order)
 
-    # Enroll the learner *before* marking the order fulfilled. If enrollment
-    # fails we want the webhook to return non-2xx so Stripe retries the whole
-    # thing; leaving the order unfulfilled is what makes that retry useful,
-    # because a fulfilled order short-circuits on the next delivery and the
-    # learner would be left paid-but-not-enrolled. create_run_enrollments is
-    # idempotent, so re-running it on a retry is safe.
-    complete_order(locked_order)
+        locked_order.status = Order.FULFILLED
+        locked_order.save()
 
-    locked_order.status = Order.FULFILLED
-    locked_order.save()
-
+    # Outside the transaction: sending mail isn't rollback-able, and we only
+    # want it once the fulfilled state is actually committed.
     send_ecommerce_order_receipt(
         order=locked_order,
         cyber_source_provided_email=receipt_data.get("req_bill_to_email"),
