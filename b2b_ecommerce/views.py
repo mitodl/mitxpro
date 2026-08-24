@@ -56,10 +56,9 @@ class B2BCheckoutView(APIView):
         and return information used to submit to CyberSource.
         """
         if not is_enabled(features.ENABLE_B2B_PURCHASING, default=True):
-            # Bulk purchasing runs on CyberSource, which is being retired. This
-            # is the switch that stops new purchases without a deploy. It only
-            # closes the door on *new* orders: anyone who already paid can still
-            # reach their enrollment codes and order status.
+            # Kill switch for new bulk purchases, flippable without a deploy.
+            # It closes the door on *new* orders only: anyone who already paid
+            # can still reach their enrollment codes and order status.
             log.info("B2BCheckoutView: bulk purchasing is disabled, refusing checkout")
             return Response(
                 {
