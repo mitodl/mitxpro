@@ -610,10 +610,17 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
         # the previous one. The order's session ID is updated first: the expiry
         # webhook looks orders up by session ID, and this way the expired
         # session no longer matches anything and can't fail the live order.
-        previous_session_id = order.stripe_checkout_session_id
-        Order.objects.filter(id=order.id).update(
-            stripe_checkout_session_id=checkout_session_id
-        )
+        # Swap the session ID under a row lock. Reading the previous value off
+        # the in-memory instance would race: two concurrent checkouts would
+        # both read the same "previous", each would expire it, and both new
+        # sessions would stay payable -- exactly the double-charge this exists
+        # to prevent. Serialized, the second checkout sees the first's session
+        # as previous and retires it, leaving one live session.
+        with transaction.atomic():
+            locked_order = Order.objects.select_for_update().get(id=order.id)
+            previous_session_id = locked_order.stripe_checkout_session_id
+            locked_order.stripe_checkout_session_id = checkout_session_id
+            locked_order.save(update_fields=["stripe_checkout_session_id"])
         if previous_session_id and previous_session_id != checkout_session_id:
             expire_stripe_checkout_session(previous_session_id)
     else:
@@ -847,11 +854,16 @@ def fulfill_stripe_order(checkout_session_id):
     with transaction.atomic():
         locked_order = Order.objects.select_for_update().get(id=order.id)
 
-        if locked_order.status == Order.FULFILLED:
+        if locked_order.status in (Order.FULFILLED, Order.FAILED):
+            # Both are terminal: a failed order is never reused for checkout
+            # (a new attempt creates a new order), so a redelivered event has
+            # nothing to do here -- and writing another receipt per redelivery
+            # would pile up duplicates.
             log.info(
-                "fulfill_stripe_order: order %s is already fulfilled, ignoring "
+                "fulfill_stripe_order: order %s is already %s, ignoring "
                 "duplicate delivery for session %s",
                 locked_order.reference_number,
+                locked_order.status,
                 checkout_session_id,
             )
             return locked_order
@@ -933,8 +945,12 @@ def cancel_stripe_order(checkout_session_id, *, reason=""):
     order = Order.objects.filter(stripe_checkout_session_id=checkout_session_id).first()
 
     if order is None:
-        log.error(
-            "cancel_stripe_order: no order for checkout session %s",
+        # Expected for superseded sessions: when a learner restarts checkout,
+        # the order's session ID is replaced and the old session is expired,
+        # so its expiry event matches nothing. Not an error.
+        log.info(
+            "cancel_stripe_order: no order for checkout session %s (most "
+            "likely a superseded session)",
             checkout_session_id,
         )
         return None
