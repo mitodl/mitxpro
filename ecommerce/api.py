@@ -410,9 +410,11 @@ def get_gateway_type_for_user(user):
     """
     Determine which payment gateway a user's checkout should go through.
 
-    Gateway selection is per-user so that Stripe can be rolled out gradually.
-    Anyone not covered by the flag stays on CyberSource, which remains the
-    fallback for the whole migration.
+    The PostHog flag decides this per user. When the flag is off for a user,
+    the gateway is the deployment default from ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
+    (CyberSource unless that setting names Stripe). Selection is per-user so
+    that a gateway can be turned on for a subset of users without changing the
+    default for everyone.
 
     Args:
         user (User): The purchasing user
