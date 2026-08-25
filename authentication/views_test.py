@@ -1,12 +1,10 @@
 """Tests for authentication views"""
 
 from contextlib import ExitStack, contextmanager
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import factory
 import pytest
-import responses
-from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.core import mail
 from django.db import transaction
@@ -30,12 +28,16 @@ from social_core.backends.email import EmailAuth
 
 from authentication.serializers import PARTIAL_PIPELINE_TOKEN_KEY
 from authentication.utils import SocialAuthState
-from compliance.constants import RESULT_DENIED, RESULT_SUCCESS
+from compliance.constants import (
+    DECISION_COMPLETED,
+    DECISION_DECLINED,
+    RESULT_DENIED,
+    RESULT_SUCCESS,
+)
 from compliance.models import ExportsInquiryLog
 from compliance.test_utils import (
     get_cybersource_test_settings,
-    mock_cybersource_wsdl,
-    mock_cybersource_wsdl_operation,
+    make_cybersource_response,
 )
 from mitxpro.test_utils import MockResponse, any_instance_of
 from users.factories import UserFactory, UserSocialAuthFactory
@@ -104,14 +106,16 @@ def noop():
 
 
 @contextmanager
-def export_check_response(response_name):
+def export_check_response(status, info_codes=None):
     """Context manager for configuring export check responses"""
+    mock_client = MagicMock()
+    mock_client.validate_export_compliance.return_value = make_cybersource_response(
+        status, info_codes
+    )
     with (
         override_settings(**get_cybersource_test_settings()),
-        responses.RequestsMock() as mocked_responses,
+        patch("compliance.api.get_cybersource_client", return_value=mock_client),
     ):
-        mock_cybersource_wsdl(mocked_responses, settings)
-        mock_cybersource_wsdl_operation(mocked_responses, response_name)
         yield
 
 
@@ -435,7 +439,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         self.user.is_active = False
         self.user.save()
 
-        cm = export_check_response("100_success") if verify_exports else noop()
+        cm = export_check_response(DECISION_COMPLETED) if verify_exports else noop()
 
         with cm:
             assert_api_call(
@@ -585,7 +589,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     )
     def register_details_export_success(self, auth_state):
         """Complete the register confirmation details page with exports enabled"""
-        with export_check_response("100_success"):
+        with export_check_response(DECISION_COMPLETED):
             result = assert_api_call(
                 self.client,
                 "psa-register-details",
@@ -622,7 +626,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
     def register_details_export_reject(self, auth_state):
         """Complete the register confirmation details page with exports enabled"""
-        with export_check_response("700_reject"):
+        with export_check_response(DECISION_DECLINED):
             assert_api_call(
                 self.client,
                 "psa-register-details",
@@ -644,7 +648,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 {
                     "flow": auth_state["flow"],
                     "partial_token": None,
-                    "errors": ["Error code: CS_700"],
+                    "errors": ["Error code: CS_DECLINED"],
                     "state": SocialAuthState.STATE_USER_BLOCKED,
                 },
             )

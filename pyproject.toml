@@ -18,6 +18,7 @@ dependencies = [
     "boto3==1.43.63",
     "celery==5.6.3",
     "celery-redbeat==2.3.3",
+    "cybersource-rest-client-python==0.0.78",
     "dj-database-url==3.1.2",
     "django==5.2.17",
     "django-anymail[mailgun]==15.1",
@@ -66,7 +67,7 @@ dependencies = [
     "redis==7.4.1",
     "requests>=2.31.0,<3",
     "sentry-sdk>=2.0.0,<3",
-    "setuptools==83.0.0",
+    "setuptools<=81.0.0",  # capped by cybersource-rest-client-python (needs pkg_resources)
     "social-auth-app-django>=5.4.0,<6",
     "ulid-py>=1.1.0,<2",
     "user-agents==2.2.0",
@@ -74,7 +75,6 @@ dependencies = [
     "wagtail==6.4.2",
     "wagtail-metadata==5.0.0",
     "xmltodict>=1.0.0,<2",
-    "zeep==4.3.3",
 ]
 
 [dependency-groups]
@@ -156,6 +156,13 @@ filterwarnings = [
     "ignore:Coverage disabled via --no-cov switch!",
     # Wagtail triggers Django 6.0 URLField scheme deprecations during test collection.
     "ignore:The default scheme will be changed from 'http' to 'https' in Django 6\\.0.*:django.utils.deprecation.RemovedInDjango60Warning",
+    # cybersource-rest-client-python imports pkg_resources; setuptools is capped
+    # at <=81 because that SDK needs it.
+    "ignore:pkg_resources is deprecated as an API.*:UserWarning",
+    "ignore:Deprecated call to `pkg_resources\\.declare_namespace.*:DeprecationWarning",
+    # standard-imghdr backfills imghdr for Python 3.13; the CyberSource SDK
+    # reaches it via pgpy.
+    "ignore:imghdr was removed in Python 3\\.13.*:DeprecationWarning",
     # pytest may import namespace-package directories while collecting tests.
     "ignore:.*Not importing directory.*:ImportWarning",
 ]

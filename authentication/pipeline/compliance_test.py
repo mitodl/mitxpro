@@ -77,10 +77,10 @@ def test_verify_exports_compliance_api_raises_exception(mocker, user):
 @pytest.mark.parametrize("email_fails", [True, False])
 def test_verify_exports_compliance_denied(mailoutbox, mocker, user, email_fails):
     """Assert that a UserExportBlockedException is raised if the inquiry result is denied"""
-    reason_code = 100
+    info_code = "MATCH-BCO"
     mock_api = mocker.patch("authentication.pipeline.compliance.api")
     mock_api.verify_user_with_exports.return_value = mocker.Mock(
-        is_denied=True, is_unknown=False, reason_code=reason_code, info_code="123"
+        is_denied=True, is_unknown=False, reason_code="COMPLETED", info_code=info_code
     )
 
     if email_fails:
@@ -93,7 +93,8 @@ def test_verify_exports_compliance_denied(mailoutbox, mocker, user, email_fails)
     with pytest.raises(UserExportBlockedException) as exc:
         compliance.verify_exports_compliance(None, None, user=user)
 
-    assert exc.value.reason_code == reason_code
+    # the sanctions-list match is the useful code, not the COMPLETED status
+    assert exc.value.reason_code == info_code
 
     mock_api.verify_user_with_exports.assert_called_once_with(user)
     assert len(mailoutbox) == (0 if email_fails else 1)

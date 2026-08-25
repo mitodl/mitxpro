@@ -28,7 +28,7 @@ class ExportsInquiryLog(TimestampedModel):
         max_length=30, choices=zip(RESULT_CHOICES, RESULT_CHOICES)
     )
 
-    reason_code = models.IntegerField()
+    reason_code = models.CharField(max_length=255, blank=True, default="")
     info_code = models.CharField(max_length=255, null=True)  # noqa: DJ001
 
     encrypted_request = models.TextField()
