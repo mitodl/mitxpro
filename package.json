@@ -102,7 +102,7 @@
     "reselect": "^5.0.0",
     "sass": "~1.64.2",
     "sass-lint": "^1.13.1",
-    "sass-loader": "^12.1.0",
+    "sass-loader": "^17.0.0",
     "shelljs": "^0.10.0",
     "sinon": "^22.0.0",
     "slick-carousel": "1.8.1",

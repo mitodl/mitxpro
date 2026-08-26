@@ -8686,7 +8686,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"klona@npm:^2.0.4, klona@npm:^2.0.5":
+"klona@npm:^2.0.5":
   version: 2.0.6
   resolution: "klona@npm:2.0.6"
   checksum: ac9ee3732e42b96feb67faae4d27cf49494e8a3bf3fa7115ce242fe04786788e0aff4741a07a45a2462e2079aa983d73d38519c85d65b70ef11447bbc3c58ce7
@@ -9597,7 +9597,7 @@ __metadata:
     reselect: ^5.0.0
     sass: ~1.64.2
     sass-lint: ^1.13.1
-    sass-loader: ^12.1.0
+    sass-loader: ^17.0.0
     shelljs: ^0.10.0
     sinon: ^22.0.0
     slick-carousel: 1.8.1
@@ -11939,28 +11939,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sass-loader@npm:^12.1.0":
-  version: 12.6.0
-  resolution: "sass-loader@npm:12.6.0"
-  dependencies:
-    klona: ^2.0.4
-    neo-async: ^2.6.2
+"sass-loader@npm:^17.0.0":
+  version: 17.0.0
+  resolution: "sass-loader@npm:17.0.0"
   peerDependencies:
-    fibers: ">= 3.1.0"
-    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+    "@rspack/core": 0.x || ^1.0.0 || ^2.0.0-0
     sass: ^1.3.0
     sass-embedded: "*"
     webpack: ^5.0.0
   peerDependenciesMeta:
-    fibers:
-      optional: true
-    node-sass:
+    "@rspack/core":
       optional: true
     sass:
       optional: true
     sass-embedded:
       optional: true
-  checksum: 5d73a428588150f704016aa27397941bb9246cecd2ee083b573e95d969fc080ac6a16f2fe1cc64aca08f6e70da6f3c586ee68f0efc9f527fecc360e5f1c299ec
+    webpack:
+      optional: true
+  checksum: bbdce8c0f455f2c5d8ab51e9b5a4e4047e47d96336a3a8f0e499fa709f523bb0e9959e8b4f8664ff211fad1060cadabb43324fc11a42a85fcd6617d7db371839
   languageName: node
   linkType: hard
 
