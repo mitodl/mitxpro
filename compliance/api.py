@@ -23,6 +23,7 @@ from CyberSource.models.riskv1exportcomplianceinquiries_export_compliance_inform
 from CyberSource.models.validate_export_compliance_request import (
     ValidateExportComplianceRequest,
 )
+from CyberSource.rest import ApiException
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from nacl.encoding import Base64Encoder
@@ -182,6 +183,31 @@ def remove_none_values(value):
     if isinstance(value, list):
         return [remove_none_values(item) for item in value if item is not None]
     return value
+
+
+def parse_api_error(exc):
+    """
+    Decode the response body carried by an ApiException
+
+    CyberSource answers a request it cannot process - missing bill-to fields,
+    an unrecognised country - with a 4xx whose body holds the same decision
+    shape as a normal response. Everything else (auth failures, outages) has no
+    decision in it and should keep propagating.
+
+    Args:
+        exc (CyberSource.rest.ApiException): the raised exception
+
+    Returns:
+        dict or None: the decoded body, or None if it holds no decision
+    """
+    body = getattr(exc, "body", None)
+    if not body:
+        return None
+    try:
+        decoded = json.loads(body.decode("utf-8") if isinstance(body, bytes) else body)
+    except ValueError:
+        return None
+    return decoded if get_response_value(decoded, "status") else None
 
 
 def serialize_response(response):
@@ -378,7 +404,15 @@ def verify_user_with_exports(user):
     # values into it unless they're stripped first
     request_payload = json.dumps(remove_none_values(payload.to_dict()), default=str)
 
-    response = client.validate_export_compliance(request_payload)
+    try:
+        response = client.validate_export_compliance(request_payload)
+    except ApiException as exc:
+        # a request CyberSource can't process comes back as a 4xx with the
+        # decision in the body rather than as a normal response, so treat it
+        # like any other non-success decision instead of an error
+        response = parse_api_error(exc)
+        if response is None:
+            raise
 
     # some SDK calls hand back (body, status, raw) rather than just the body
     if isinstance(response, tuple) and response:

@@ -4,6 +4,7 @@ import json
 import time
 
 import pytest
+from CyberSource.rest import ApiException
 from nacl.encoding import Base64Encoder
 from nacl.public import SealedBox
 
@@ -210,6 +211,55 @@ def test_verify_user_with_exports_screening_weights(
     export_info = payload["export_compliance_information"]
     assert export_info["address_operator"] == "OR"
     assert export_info["weights"] == {"address": "low", "name": "medium"}
+
+
+def _api_exception(status, body):
+    """Build an ApiException carrying a raw response body"""
+    exc = ApiException(status=status)
+    exc.body = body
+    return exc
+
+
+def test_verify_user_with_exports_error_carrying_a_decision(
+    user, cybersource_mock_client
+):
+    """A 4xx whose body holds a decision is handled, not raised"""
+    cybersource_mock_client.validate_export_compliance.side_effect = _api_exception(
+        400,
+        json.dumps(
+            {
+                "status": DECISION_INVALID_REQUEST,
+                "reason": "MISSING_FIELD",
+                "details": [{"field": "orderInformation.billTo.country"}],
+            }
+        ).encode("utf-8"),
+    )
+
+    assert api.verify_user_with_exports(user) is None
+    assert not ExportsInquiryLog.objects.filter(user=user).exists()
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        b'{"message": "Authentication Failed"}',  # no decision in it
+        b"not json at all",
+        b"",
+        None,
+    ],
+)
+def test_verify_user_with_exports_error_without_a_decision(
+    user, cybersource_mock_client, body
+):
+    """Errors with no decision keep propagating rather than becoming a silent None"""
+    cybersource_mock_client.validate_export_compliance.side_effect = _api_exception(
+        401, body
+    )
+
+    with pytest.raises(ApiException):
+        api.verify_user_with_exports(user)
+
+    assert not ExportsInquiryLog.objects.filter(user=user).exists()
 
 
 def test_get_latest_export_inquiry(user):
