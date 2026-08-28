@@ -159,6 +159,11 @@ filterwarnings = [
     # cybersource-rest-client-python imports pkg_resources; setuptools is capped
     # at <=81 because that SDK needs it.
     "ignore:pkg_resources is deprecated as an API.*:UserWarning",
+    # The SDK's vendored authenticationsdk has an invalid escape sequence in a
+    # string literal. Python emits a SyntaxWarning at compile time, which -W error
+    # turns into a SyntaxError. It only bites on a cold venv (CI), since a warm
+    # one has the module already byte-compiled.
+    "ignore:invalid escape sequence '\\\\R'",
     "ignore:Deprecated call to `pkg_resources\\.declare_namespace.*:DeprecationWarning",
     # standard-imghdr backfills imghdr for Python 3.13; the CyberSource SDK
     # reaches it via pgpy.
