@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-Version 0.198.0
+Version 0.198.0 (Released August 31, 2026)
 ---------------
 
 - fix: revert pygsheets 2.0.6 (#4059)
