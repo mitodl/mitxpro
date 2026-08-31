@@ -25,7 +25,6 @@ from CyberSource.models.validate_export_compliance_request import (
 )
 from CyberSource.rest import ApiException
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from nacl.encoding import Base64Encoder
 from nacl.public import PublicKey, SealedBox
 
@@ -309,32 +308,20 @@ def get_bill_to_address(user):
         dict:
             User's legal_address in the appropriate data structure
     """
-    try:
-        legal_address = user.legal_address
-    except ObjectDoesNotExist:
-        # A user with no legal address can't be screened. Send what we have and
-        # let CyberSource reject the request as INVALID_REQUEST, which the caller
-        # already handles as a temporary failure.
-        log.warning("User %s has no legal_address to screen", user.id)
-        legal_address = None
+    legal_address = user.legal_address
 
-    billing_address = {"email": user.email}
-
-    if legal_address is None:
-        return billing_address
-
-    billing_address.update(
-        {
-            "first_name": legal_address.first_name,
-            "last_name": legal_address.last_name,
-            "address1": legal_address.street_address_1,
-            "address2": legal_address.street_address_2,
-            "address3": legal_address.street_address_3,
-            "address4": legal_address.street_address_4,
-            "locality": legal_address.city,
-            "country": legal_address.country,
-        }
-    )
+    # minimally required fields
+    billing_address = {
+        "first_name": legal_address.first_name,
+        "last_name": legal_address.last_name,
+        "email": user.email,
+        "address1": legal_address.street_address_1,
+        "address2": legal_address.street_address_2,
+        "address3": legal_address.street_address_3,
+        "address4": legal_address.street_address_4,
+        "locality": legal_address.city,
+        "country": legal_address.country,
+    }
 
     # these are required for certain countries, we presume here that data was validated before it was written
     if legal_address.state_or_territory:
@@ -397,6 +384,17 @@ def build_export_payload(user):
 
 def verify_user_with_exports(user):
     """Verify the user against the CyberSource exports service"""
+    # A user with no legal address can't be screened at all, and CyberSource
+    # rejects a bill-to carrying only an email. Don't spend a request learning
+    # that. Django's RelatedObjectDoesNotExist subclasses AttributeError, which
+    # is what makes hasattr the right question here.
+    if not hasattr(user, "legal_address"):
+        log.error(
+            "Unable to verify exports controls for user %s: no legal address on file",
+            user.id,
+        )
+        return None
+
     client = get_cybersource_client()
 
     payload = build_export_payload(user)

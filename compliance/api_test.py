@@ -131,26 +131,29 @@ def test_verify_user_with_exports_unwraps_tuple_response(user, cybersource_mock_
     assert result.computed_result == RESULT_SUCCESS
 
 
-@pytest.mark.usefixtures("cybersource_settings")
 def test_verify_user_with_exports_without_legal_address(
     mocker, user, cybersource_mock_client
 ):
-    """A user with no legal address is screened on email alone rather than erroring"""
+    """A user with no legal address is not screened at all, and CyberSource is not called"""
+    mock_log = mocker.patch("compliance.api.log")
     mocker.patch.object(
         type(user),
         "legal_address",
-        property(lambda self: (_ for _ in ()).throw(api.ObjectDoesNotExist())),
-    )
-    cybersource_mock_client.validate_export_compliance.return_value = (
-        make_cybersource_response(DECISION_INVALID_REQUEST)
+        property(
+            lambda self: (_ for _ in ()).throw(
+                type(user).legal_address.RelatedObjectDoesNotExist("no address")
+            )
+        ),
     )
 
     assert api.verify_user_with_exports(user) is None
 
-    payload = json.loads(
-        cybersource_mock_client.validate_export_compliance.call_args.args[0]
+    cybersource_mock_client.validate_export_compliance.assert_not_called()
+    mock_log.error.assert_called_once_with(
+        "Unable to verify exports controls for user %s: no legal address on file",
+        user.id,
     )
-    assert payload["order_information"]["bill_to"] == {"email": user.email}
+    assert not ExportsInquiryLog.objects.filter(user=user).exists()
 
 
 @pytest.mark.parametrize("decision", TEMPORARY_FAILURE_DECISIONS)
