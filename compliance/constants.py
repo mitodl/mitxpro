@@ -15,7 +15,7 @@ RESULT_CHOICES = (
 )
 
 # CyberSource REST export compliance decisions, returned as the `status` field of
-# a /risk/v1/exportcomplianceinquiries response.
+# a /risk/v1/export-compliance-inquiries response.
 
 # The screening ran to completion. This is *not* by itself a pass: a completed
 # check still reports any sanctions-list matches in infoCodes.

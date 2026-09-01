@@ -1138,9 +1138,10 @@ CYBERSOURCE_PROFILE_ID = get_string(
     name="CYBERSOURCE_PROFILE_ID", default=None, description="CyberSource Profile ID"
 )
 # CyberSource REST credentials, used by the `compliance` app for export
-# sanctions screening. Deliberately separate from the Secure Acceptance keys
-# above and from MITOL_PAYMENT_GATEWAY_CYBERSOURCE_*: those configure payments,
-# which are moving to Stripe, while export screening is required indefinitely.
+# sanctions screening. Kept separate from the Secure Acceptance keys above
+# (CYBERSOURCE_ACCESS_KEY / _PROFILE_ID / _SECURITY_KEY), which configure
+# checkout: those are two different CyberSource credential sets, and only
+# these are needed for screening.
 CYBERSOURCE_REST_MERCHANT_ID = get_string(
     name="CYBERSOURCE_REST_MERCHANT_ID",
     default=None,
@@ -1158,7 +1159,10 @@ CYBERSOURCE_REST_SECRET = get_string(
 )
 CYBERSOURCE_REST_ENVIRONMENT = get_string(
     name="CYBERSOURCE_REST_ENVIRONMENT",
-    default="apitest.cybersource.com",
+    # no default: this is in EXPORTS_REQUIRED_KEYS, and defaulting to the
+    # sandbox would let a missing production value screen against apitest and
+    # record misleading SUCCESS rows instead of failing the check loudly
+    default=None,
     description="The CyberSource REST API host, e.g. apitest.cybersource.com or api.cybersource.com",
 )
 CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY = get_string(

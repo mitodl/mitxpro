@@ -42,6 +42,15 @@ log = logging.getLogger()
 
 DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])  # noqa: PYI024
 
+# This call sits in the synchronous login and registration path, so a hung
+# connection would hold a worker. The SDK only honours a per-request value;
+# a `timeout` key in the client config is silently ignored.
+EXPORTS_REQUEST_TIMEOUT_SECONDS = 10
+
+# only a 4xx carries a decision; 5xx and auth failures are outages
+HTTP_BAD_REQUEST = 400
+HTTP_SERVER_ERROR = 500
+
 
 EXPORTS_REQUIRED_KEYS = [
     "CYBERSOURCE_REST_MERCHANT_ID",
@@ -53,7 +62,7 @@ EXPORTS_REQUIRED_KEYS = [
 
 
 def is_exports_verification_enabled():
-    """Returns True if the exports verification is configured"""  # noqa: D401
+    """Returns True if the exports verification is configured"""
     return all(getattr(settings, key) for key in EXPORTS_REQUIRED_KEYS)
 
 
@@ -64,7 +73,7 @@ def get_cybersource_client():
     Returns:
         CyberSource.api.verification_api.VerificationApi:
             the configured client for the export compliance service
-    """  # noqa: D401
+    """
     return VerificationApi(
         {
             "authentication_type": "HTTP_SIGNATURE",
@@ -72,7 +81,6 @@ def get_cybersource_client():
             "merchant_keyid": settings.CYBERSOURCE_REST_KEY_ID,
             "merchant_secretkey": settings.CYBERSOURCE_REST_SECRET,
             "run_environment": settings.CYBERSOURCE_REST_ENVIRONMENT,
-            "timeout": 1000,
         }
     )
 
@@ -88,7 +96,7 @@ def compute_result_from_codes(decision, info_code):
     Returns:
         str:
             the computed result
-    """  # noqa: D401
+    """
     # if there's either an explicit denial or any sanctions list was matched
     # NOTE: a decision can be COMPLETED but a match still be reported in infoCodes
     if decision in DENIED_DECISIONS or info_code:
@@ -107,7 +115,7 @@ def compute_result_from_codes(decision, info_code):
 
 
 def get_encryption_public_key():
-    """Returns the public key for encryption of export requests/responses"""  # noqa: D401
+    """Returns the public key for encryption of export requests/responses"""
     return PublicKey(
         settings.CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY, encoder=Base64Encoder
     )
@@ -132,8 +140,9 @@ def get_response_value(response, *names):
 
     if isinstance(response, dict):
         for name in names:
-            if name in response:
-                return response[name]
+            value = response.get(name)
+            if value is not None:
+                return value
         return None
 
     for name in names:
@@ -199,6 +208,10 @@ def parse_api_error(exc):
     Returns:
         dict or None: the decoded body, or None if it holds no decision
     """
+    status_code = getattr(exc, "status", None)
+    if status_code is None or not HTTP_BAD_REQUEST <= status_code < HTTP_SERVER_ERROR:
+        return None
+
     body = getattr(exc, "body", None)
     if not body:
         return None
@@ -220,10 +233,8 @@ def serialize_response(response):
         str: the serialized response
     """
     if hasattr(response, "to_dict"):
-        return json.dumps(response.to_dict(), default=str)
-    if isinstance(response, dict):
-        return json.dumps(response, default=str)
-    return str(response)
+        response = response.to_dict()
+    return json.dumps(response, default=str)
 
 
 def log_exports_inquiry(user, request_payload, response):
@@ -247,7 +258,13 @@ def log_exports_inquiry(user, request_payload, response):
     if decision in TEMPORARY_FAILURE_DECISIONS:
         # if it's a temporary failure in the CyberSource backend or
         # the request itself, no point in recording this
-        log.error("Unable to verify exports controls, received status: %s", decision)
+        log.error(
+            "Unable to verify exports controls for user %s: status=%s reason=%s details=%s",
+            user.id,
+            decision,
+            get_response_value(response, "reason"),
+            get_response_value(response, "details"),
+        )
         return None
 
     # if the data matched a sanctions list this will be truthy
@@ -284,7 +301,7 @@ def decrypt_exports_inquiry(exports_inquiry_log, private_key):
     Returns:
         DecryptedLog:
             the decrypted request and response
-    """  # noqa: D401
+    """
     box = SealedBox(private_key)
 
     decrypted_request = box.decrypt(
@@ -299,7 +316,7 @@ def decrypt_exports_inquiry(exports_inquiry_log, private_key):
 
 def get_bill_to_address(user):
     """
-    Create an address appropriate to pass to billTo on the CyberSource API
+    Create the bill-to fields for the CyberSource export compliance request
 
     Args:
         user (users.models.User): the user whose address to use
@@ -403,7 +420,9 @@ def verify_user_with_exports(user):
     request_payload = json.dumps(remove_none_values(payload.to_dict()), default=str)
 
     try:
-        response = client.validate_export_compliance(request_payload)
+        response = client.validate_export_compliance(
+            request_payload, _request_timeout=EXPORTS_REQUEST_TIMEOUT_SECONDS
+        )
     except ApiException as exc:
         # a request CyberSource can't process comes back as a 4xx with the
         # decision in the body rather than as a normal response, so treat it
@@ -429,5 +448,5 @@ def get_latest_exports_inquiry(user):
     Returns:
         ExportsInquiryLog:
             the latest record sorted by created_on
-    """  # noqa: D401
+    """
     return user.exports_inquiries.order_by("-created_on").first()

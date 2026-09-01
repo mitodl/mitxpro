@@ -168,7 +168,11 @@ def test_verify_user_with_exports_temporary_errors(
 
     assert api.verify_user_with_exports(user) is None
     mock_log.error.assert_called_once_with(
-        "Unable to verify exports controls, received status: %s", decision
+        "Unable to verify exports controls for user %s: status=%s reason=%s details=%s",
+        user.id,
+        decision,
+        None,
+        None,
     )
 
     assert not ExportsInquiryLog.objects.filter(user=user).exists()
@@ -240,6 +244,32 @@ def test_verify_user_with_exports_error_carrying_a_decision(
 
     assert api.verify_user_with_exports(user) is None
     assert not ExportsInquiryLog.objects.filter(user=user).exists()
+
+
+def test_verify_user_with_exports_error_carrying_a_denial(
+    user, cybersource_mock_client
+):
+    """A 4xx body holding a non-temporary decision is recorded like any other result
+
+    INVALID_REQUEST returns early in log_exports_inquiry, so this is the only case
+    that exercises get_info_code and serialize_response against a dict-shaped
+    response rather than an SDK model.
+    """
+    cybersource_mock_client.validate_export_compliance.side_effect = _api_exception(
+        400,
+        json.dumps(
+            {
+                "status": DECISION_DECLINED,
+                "exportComplianceInformation": {"infoCodes": ["MATCH-DPC"]},
+            }
+        ).encode("utf-8"),
+    )
+
+    log = api.verify_user_with_exports(user)
+
+    assert log.computed_result == RESULT_DENIED
+    assert log.reason_code == DECISION_DECLINED
+    assert log.info_code == "MATCH-DPC"
 
 
 @pytest.mark.parametrize(
