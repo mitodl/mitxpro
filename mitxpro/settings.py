@@ -344,6 +344,10 @@ SOCIAL_AUTH_EMAIL_FORCE_EMAIL_VALIDATION = True
 SOCIAL_AUTH_EMAIL_VALIDATION_FUNCTION = "mail.verification_api.send_verification_email"
 SOCIAL_AUTH_EMAIL_VALIDATION_URL = "/"
 
+# Disable the default active user filter in social-auth-app-django 5.9+.
+# The pipeline handles inactive users explicitly via the `activate_user` step.
+SOCIAL_AUTH_ACTIVE_USERS_FILTER = {}
+
 SOCIAL_AUTH_PIPELINE = (
     # Checks if an admin user attempts to login/register while hijacking another user.
     "authentication.pipeline.user.forbid_hijack",

@@ -689,7 +689,7 @@ def test_retry_failed_enroll_grace_period(mocker):
 
 @pytest.mark.parametrize(
     "no_courseware_user,no_edx_auth",  # noqa: PT006
-    itertools.product([True, False], [True, False]),
+    list(itertools.product([True, False], [True, False])),
 )
 def test_repair_faulty_edx_user(mocker, user, no_courseware_user, no_edx_auth):
     """
