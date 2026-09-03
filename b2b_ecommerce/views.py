@@ -64,7 +64,7 @@ class B2BCheckoutView(APIView):
                 {
                     "errors": [
                         "Bulk purchasing is temporarily unavailable. Please contact "
-                        "us if you need to place an order."
+                        "customer support for more information."
                     ]
                 },
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,

@@ -40,7 +40,7 @@ def _checkout_session(**kwargs):
         "client_reference_id": None,
         "amount_total": 10000,
         "currency": "usd",
-        "customer_details": {"email": "learner@example.com"},
+        "customer_details": {"email": "learner@example.com", "name": "Ada Lovelace"},
         "total_details": {"amount_tax": 0},
         "metadata": {},
         "payment_intent": {
@@ -324,7 +324,32 @@ class TestReceiptMapping:
         assert receipt_data["req_card_type"] == "001"
         assert receipt_data["req_tax_amount"] == "3.45"
         assert receipt_data["req_bill_to_email"] == "learner@example.com"
+        # Stripe gives one full name; the receipt reads two keys. Without
+        # these the receipt rendered the purchaser as "None".
+        assert receipt_data["req_bill_to_forename"] == "Ada"
+        assert receipt_data["req_bill_to_surname"] == "Lovelace"
         assert receipt_data["decision"] == "ACCEPT"
+
+    @pytest.mark.parametrize(
+        ("name", "forename", "surname"),
+        [
+            ("Ada Lovelace", "Ada", "Lovelace"),
+            ("Mary Jane Watson", "Mary", "Jane Watson"),
+            ("Cher", "Cher", ""),
+            ("  Ada Lovelace  ", "Ada", "Lovelace"),
+            (None, "", ""),
+        ],
+    )
+    def test_billing_name_is_split_for_the_receipt(self, name, forename, surname):
+        """Stripe's single name becomes the forename/surname pair receipts read"""
+        session = _checkout_session(
+            customer_details={"email": "learner@example.com", "name": name}
+        )
+
+        receipt_data = stripe_data_to_receipt_data(session, session["payment_intent"])
+
+        assert receipt_data["req_bill_to_forename"] == forename
+        assert receipt_data["req_bill_to_surname"] == surname
 
     @pytest.mark.parametrize(
         ("payment_method_details", "expected_method", "expected_card"),

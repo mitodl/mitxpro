@@ -443,6 +443,8 @@ def test_coupon_payment_version_serializer():
             "req_bill_to_forename": "XYZ",
             "req_bill_to_surname": "ABC",
         },
+        # One half only: must render "Cher", not "Cher None".
+        {"req_bill_to_forename": "Cher"},
         {},
     ],
 )
@@ -516,10 +518,15 @@ def test_serialize_order_receipt(receipt_data):
             "bill_to_email": receipt.data["req_bill_to_email"]  # noqa: SIM401
             if "req_bill_to_email" in receipt.data
             else None,
-            "name": f"{receipt.data.get('req_bill_to_forename')} {receipt.data.get('req_bill_to_surname')}"
-            if "req_bill_to_forename" in receipt.data
-            or "req_bill_to_surname" in receipt.data
-            else None,
+            "name": " ".join(
+                part
+                for part in (
+                    receipt.data.get("req_bill_to_forename"),
+                    receipt.data.get("req_bill_to_surname"),
+                )
+                if part
+            )
+            or None,
         }
         if receipt
         else None,
