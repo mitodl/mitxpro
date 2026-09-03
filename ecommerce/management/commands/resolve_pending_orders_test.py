@@ -1,4 +1,4 @@
-"""Tests for the resolve_pending_stripe_orders command"""
+"""Tests for the resolve_pending_orders command"""
 
 import pytest
 from django.core.management import CommandError, call_command
@@ -14,7 +14,7 @@ from ecommerce.models import Order
 
 pytestmark = pytest.mark.django_db
 
-COMMAND = "resolve_pending_stripe_orders"
+COMMAND = "resolve_pending_orders"
 
 
 @pytest.fixture
@@ -32,24 +32,26 @@ def stuck_order():
 def _patch_status(mocker, status_value):
     """Make Stripe report a given state for the session"""
     return mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.get_stripe_checkout_session_status",
+        "ecommerce.management.commands.resolve_pending_orders.get_stripe_checkout_session_status",
         return_value={"status": status_value, "session": {}, "payment_intent": None},
     )
 
 
-def test_requires_an_order_or_all():
-    """The command shouldn't guess at what to operate on"""
-    with pytest.raises(CommandError):
-        call_command(COMMAND)
-
-
-def test_rejects_order_and_all_together():
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param({}, id="neither"),
+        pytest.param({"order": "xpro-b2c-dev-1", "all": True}, id="both"),
+    ],
+)
+def test_requires_exactly_one_of_order_or_all(kwargs):
     """
-    --all silently winning would let someone rescuing a single order apply
-    changes to every pending one.
+    The command shouldn't guess at what to operate on, and letting --all
+    silently win would apply changes to every pending order when the operator
+    named a single one.
     """
     with pytest.raises(CommandError):
-        call_command(COMMAND, order="xpro-b2c-dev-1", all=True)
+        call_command(COMMAND, **kwargs)
 
 
 def test_unknown_reference_number_is_an_error():
@@ -70,7 +72,7 @@ def test_paid_session_fulfills_the_order(mocker, stuck_order):
     """The main case: Stripe took the money, we never heard, so fulfil it now"""
     _patch_status(mocker, STRIPE_CHECKOUT_STATUS_PAID)
     fulfill = mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.fulfill_stripe_order"
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_stripe_order"
     )
 
     call_command(COMMAND, order=stuck_order.reference_number, commit=True)
@@ -82,7 +84,7 @@ def test_cancelled_session_fails_the_order(mocker, stuck_order):
     """If the payment never happened, the order shouldn't sit pending forever"""
     _patch_status(mocker, STRIPE_CHECKOUT_STATUS_CANCELLED)
     cancel = mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.cancel_stripe_order"
+        "ecommerce.management.commands.resolve_pending_orders.cancel_stripe_order"
     )
 
     call_command(COMMAND, order=stuck_order.reference_number, commit=True)
@@ -97,10 +99,10 @@ def test_pending_payment_is_left_alone(mocker, stuck_order):
     """
     _patch_status(mocker, STRIPE_CHECKOUT_STATUS_PENDING)
     fulfill = mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.fulfill_stripe_order"
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_stripe_order"
     )
     cancel = mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.cancel_stripe_order"
+        "ecommerce.management.commands.resolve_pending_orders.cancel_stripe_order"
     )
 
     call_command(COMMAND, order=stuck_order.reference_number, commit=True)
@@ -116,7 +118,7 @@ def test_reports_without_changing_anything_by_default(mocker, stuck_order):
     """
     _patch_status(mocker, STRIPE_CHECKOUT_STATUS_PAID)
     fulfill = mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.fulfill_stripe_order"
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_stripe_order"
     )
 
     call_command(COMMAND, order=stuck_order.reference_number)
@@ -126,23 +128,155 @@ def test_reports_without_changing_anything_by_default(mocker, stuck_order):
     assert stuck_order.status == Order.CREATED
 
 
-def test_ignores_cybersource_and_already_finished_orders(mocker, stuck_order):
-    """--all only picks up Stripe orders that are actually stuck"""
+def test_ignores_already_finished_orders(mocker, stuck_order):
+    """
+    --all picks up stuck orders on both gateways, and nothing that has already
+    reached a final state.
+    """
     cybersource_order = OrderFactory.create(status=Order.CREATED)
-    cybersource_order.stripe_checkout_session_id = "cs_test_other"
-    cybersource_order.save()
     OrderFactory.create(
         status=Order.FULFILLED,
         gateway_type=MITOL_PAYMENT_GATEWAY_STRIPE,
         stripe_checkout_session_id="cs_test_done",
     )
+    OrderFactory.create(status=Order.FULFILLED)
     patched = _patch_status(mocker, STRIPE_CHECKOUT_STATUS_PAID)
     mocker.patch(
-        "ecommerce.management.commands.resolve_pending_stripe_orders.fulfill_stripe_order"
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_stripe_order"
     )
+    gateway = _patch_cybersource(mocker, [])
 
     call_command(COMMAND, all=True, commit=True)
 
-    # Only the one stuck Stripe order was looked up.
+    # Only the stuck Stripe order was looked up at Stripe.
     assert patched.call_count == 1
     assert patched.call_args.args[0] == stuck_order.stripe_checkout_session_id
+    # And only the stuck CyberSource order was searched for.
+    assert gateway.find_transactions.call_args.args[0] == [
+        cybersource_order.reference_number
+    ]
+
+
+@pytest.fixture
+def cybersource_stuck_order():
+    """
+    An order whose merchant POST never arrived: paid at CyberSource, still
+    `created` here. CyberSource is the model default, so nothing to set.
+    """
+    order = OrderFactory.create(status=Order.CREATED)
+    LineFactory.create(order=order)
+    return order
+
+
+def _patch_cybersource(mocker, transactions, payload=None):
+    """
+    Stand in for the CyberSource gateway.
+
+    `transactions` is what the search returns: (transaction id, reference
+    number, submitted at) rows, the same shape find_transactions produces.
+    """
+    gateway = mocker.Mock()
+    gateway.find_transactions.return_value = transactions
+    gateway.get_transaction_details.return_value = (mocker.Mock(), payload)
+    mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.PaymentGateway.get_gateway_class",
+        return_value=gateway,
+    )
+    return gateway
+
+
+def test_paid_cybersource_transaction_fulfills_the_order(
+    mocker, cybersource_stuck_order
+):
+    """
+    The CyberSource equivalent of the main case: the money was taken, the
+    merchant POST never landed, so replay it now.
+    """
+    refno = cybersource_stuck_order.reference_number
+    payload = {"decision": "ACCEPT", "req_reference_number": refno}
+    _patch_cybersource(
+        mocker, [["7883514374536923204011", refno, "2026-09-02"]], payload
+    )
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
+    )
+
+    call_command(COMMAND, order=refno, commit=True)
+
+    # The payload is handed to the same function the merchant POST would reach.
+    fulfill.assert_called_once_with(payload)
+
+
+def test_declined_cybersource_transaction_still_replays(
+    mocker, cybersource_stuck_order
+):
+    """
+    A declined payment is resolved too: fulfill_order records the receipt and
+    moves the order to failed, so it stops sitting in `created`.
+    """
+    refno = cybersource_stuck_order.reference_number
+    payload = {"decision": "DECLINE", "req_reference_number": refno}
+    _patch_cybersource(
+        mocker, [["788351437453692320401", refno, "2026-09-02"]], payload
+    )
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
+    )
+
+    call_command(COMMAND, order=refno, commit=True)
+
+    fulfill.assert_called_once_with(payload)
+
+
+def test_cybersource_order_with_no_transaction_is_left_alone(
+    mocker, cybersource_stuck_order
+):
+    """
+    No transaction means the learner never paid -- an abandoned checkout, which
+    looks identical to a stuck order in our own database. Don't touch it.
+    """
+    _patch_cybersource(mocker, [])
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
+    )
+
+    call_command(COMMAND, order=cybersource_stuck_order.reference_number, commit=True)
+
+    fulfill.assert_not_called()
+
+
+def test_cybersource_dry_run_changes_nothing(mocker, cybersource_stuck_order):
+    """Without --commit the command reports and leaves the order alone"""
+    refno = cybersource_stuck_order.reference_number
+    payload = {"decision": "ACCEPT", "req_reference_number": refno}
+    _patch_cybersource(
+        mocker, [["7883514374536923204011", refno, "2026-09-02"]], payload
+    )
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
+    )
+
+    call_command(COMMAND, order=refno)
+
+    fulfill.assert_not_called()
+    cybersource_stuck_order.refresh_from_db()
+    assert cybersource_stuck_order.status == Order.CREATED
+
+
+def test_does_not_use_the_broken_library_helper(mocker, cybersource_stuck_order):
+    """
+    PaymentGateway.find_and_get_transactions raises KeyError as soon as the
+    search finds anything, so this command must not call it.
+    """
+    refno = cybersource_stuck_order.reference_number
+    gateway = _patch_cybersource(
+        mocker,
+        [["7883514374536923204011", refno, "2026-09-02"]],
+        {"decision": "ACCEPT", "req_reference_number": refno},
+    )
+    mocker.patch("ecommerce.management.commands.resolve_pending_orders.fulfill_order")
+
+    call_command(COMMAND, order=refno, commit=True)
+
+    gateway.find_and_get_transactions.assert_not_called()
+    gateway.find_transactions.assert_called_once()
