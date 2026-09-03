@@ -3,6 +3,9 @@
 # From secure acceptance documentation, under API reply fields:
 # http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_SOP/Secure_Acceptance_SOP.pdf
 CYBERSOURCE_DECISION_ACCEPT = "ACCEPT"
+# reason_code 100 is the only success code; anything else is a failure of
+# some kind. https://developer.cybersource.com/library/documentation/sbc/reason_codes/reason_codes.html
+CYBERSOURCE_REASON_CODE_ACCEPTED = "100"
 CYBERSOURCE_DECISION_DECLINE = "DECLINE"
 CYBERSOURCE_DECISION_REVIEW = "REVIEW"
 CYBERSOURCE_DECISION_ERROR = "ERROR"

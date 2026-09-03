@@ -25,8 +25,6 @@ Fulfilling an order enrolls the learner and emails them a receipt, and --all is
 the easiest thing to type, so the safe option is the default one.
 """
 
-import logging
-
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
 from mitol.payment_gateway.api import PaymentGateway
@@ -43,6 +41,8 @@ from ecommerce.api import (
 )
 from ecommerce.constants import (
     CYBERSOURCE_DECISION_ACCEPT,
+    CYBERSOURCE_DECISION_DECLINE,
+    CYBERSOURCE_REASON_CODE_ACCEPTED,
     STRIPE_CHECKOUT_STATUS_CANCELLED,
     STRIPE_CHECKOUT_STATUS_ERROR,
     STRIPE_CHECKOUT_STATUS_PAID,
@@ -50,11 +50,34 @@ from ecommerce.constants import (
 )
 from ecommerce.models import Order
 
-log = logging.getLogger(__name__)
-
 # CyberSource's search endpoint takes a batch, so ask for the orders in chunks
 # rather than one request per order.
 CYBERSOURCE_SEARCH_BATCH_SIZE = 20
+
+
+def _normalize_cybersource_payload(payload):
+    """
+    Make the library's transaction payload look like a Secure Acceptance reply.
+
+    fulfill_order decides fulfilled-vs-failed from `decision`, expecting the
+    word CyberSource puts in a merchant POST ("ACCEPT", "DECLINE", ...). The
+    payment gateway library builds its payload from the Transaction Details
+    API instead and writes the numeric reason code into `decision` -- "100" on
+    success. Passed through as-is, a paid order would compare "100" != "ACCEPT"
+    and be marked failed. Derive the word from the reason code, as MITx Online
+    does. The raw reason code is kept alongside.
+
+    The same payload leaves `req_card_type` and `req_card_number` empty, so a
+    receipt written from it shows no card details. That is a limit of the
+    Transaction Details data the library maps, not something we can fill in.
+    """
+    reason_code = str(payload.get("reason_code", "")).strip()
+    decision = (
+        CYBERSOURCE_DECISION_ACCEPT
+        if reason_code == CYBERSOURCE_REASON_CODE_ACCEPTED
+        else CYBERSOURCE_DECISION_DECLINE
+    )
+    return {**payload, "decision": decision}
 
 
 class Command(BaseCommand):
@@ -142,7 +165,7 @@ class Command(BaseCommand):
                 _submitted,
             ) in gateway.find_transactions(batch, len(batch)):
                 _response, payload = gateway.get_transaction_details(transaction_id)
-                payloads[reference_number] = payload
+                payloads[reference_number] = _normalize_cybersource_payload(payload)
 
         return payloads
 
