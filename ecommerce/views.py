@@ -229,6 +229,8 @@ class CheckoutView(APIView):
         text_id = validated_basket.product_version.product.content_object.text_id
         receipt_url = make_receipt_url(base_url=base_url, readable_id=text_id)
         user_ip, _ = get_client_ip(request)
+        # Where either gateway sends the learner if they abandon payment.
+        cancel_url = urljoin(base_url, "checkout/")
 
         if order.total_price_paid == 0:
             # If price is $0, don't bother going to CyberSource, just mark as fulfilled
@@ -261,7 +263,6 @@ class CheckoutView(APIView):
             # the learner to. Nothing is posted back to us afterwards -- the
             # order is fulfilled when the webhook arrives -- so the success URL
             # carries the checkout session ID for the interstitial to poll on.
-            cancel_url = urljoin(base_url, "checkout/")
             success_url = urljoin(base_url, reverse("stripe-checkout-result"))
             success_url = (
                 f"{success_url}?session_id={{CHECKOUT_SESSION_ID}}"
@@ -289,7 +290,6 @@ class CheckoutView(APIView):
             order.save()
 
             # This generates a signed payload which is submitted as an HTML form to CyberSource
-            cancel_url = urljoin(base_url, "checkout/")
             payload = generate_cybersource_sa_payload(
                 order=order,
                 receipt_url=receipt_url,
