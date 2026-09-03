@@ -1,5 +1,7 @@
 """Tests for the resolve_pending_orders command"""
 
+from io import StringIO
+
 import pytest
 from django.core.management import CommandError, call_command
 from mitol.payment_gateway.constants import MITOL_PAYMENT_GATEWAY_STRIPE
@@ -168,6 +170,24 @@ def cybersource_stuck_order():
     return order
 
 
+def _library_payload(refno, reason_code):
+    """
+    A payload shaped the way the payment gateway library actually returns it.
+
+    Note `decision` carries the numeric reason code, not a word -- that is what
+    the library does, and it is why the command has to normalize it. A test
+    using a tidy {"decision": "ACCEPT"} payload would pass against code that
+    marks every paid order failed.
+    """
+    return {
+        "decision": reason_code,
+        "reason_code": reason_code,
+        "req_reference_number": refno,
+        "req_card_type": "",
+        "req_card_number": "",
+    }
+
+
 def _patch_cybersource(mocker, transactions, payload=None):
     """
     Stand in for the CyberSource gateway.
@@ -193,9 +213,10 @@ def test_paid_cybersource_transaction_fulfills_the_order(
     merchant POST never landed, so replay it now.
     """
     refno = cybersource_stuck_order.reference_number
-    payload = {"decision": "ACCEPT", "req_reference_number": refno}
     _patch_cybersource(
-        mocker, [["7883514374536923204011", refno, "2026-09-02"]], payload
+        mocker,
+        [["7883514374536923204011", refno, "2026-09-02"]],
+        _library_payload(refno, "100"),
     )
     fulfill = mocker.patch(
         "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
@@ -203,8 +224,13 @@ def test_paid_cybersource_transaction_fulfills_the_order(
 
     call_command(COMMAND, order=refno, commit=True)
 
-    # The payload is handed to the same function the merchant POST would reach.
-    fulfill.assert_called_once_with(payload)
+    fulfill.assert_called_once()
+    replayed = fulfill.call_args.args[0]
+    assert replayed["req_reference_number"] == refno
+    # The library's "100" must arrive at fulfill_order as the word it expects,
+    # or determine_order_status_change fails a paid order.
+    assert replayed["decision"] == "ACCEPT"
+    assert replayed["reason_code"] == "100"
 
 
 def test_declined_cybersource_transaction_still_replays(
@@ -215,9 +241,10 @@ def test_declined_cybersource_transaction_still_replays(
     moves the order to failed, so it stops sitting in `created`.
     """
     refno = cybersource_stuck_order.reference_number
-    payload = {"decision": "DECLINE", "req_reference_number": refno}
     _patch_cybersource(
-        mocker, [["788351437453692320401", refno, "2026-09-02"]], payload
+        mocker,
+        [["788351437453692320401", refno, "2026-09-02"]],
+        _library_payload(refno, "203"),
     )
     fulfill = mocker.patch(
         "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
@@ -225,7 +252,8 @@ def test_declined_cybersource_transaction_still_replays(
 
     call_command(COMMAND, order=refno, commit=True)
 
-    fulfill.assert_called_once_with(payload)
+    fulfill.assert_called_once()
+    assert fulfill.call_args.args[0]["decision"] == "DECLINE"
 
 
 def test_cybersource_order_with_no_transaction_is_left_alone(
@@ -245,22 +273,28 @@ def test_cybersource_order_with_no_transaction_is_left_alone(
     fulfill.assert_not_called()
 
 
-def test_cybersource_dry_run_changes_nothing(mocker, cybersource_stuck_order):
-    """Without --commit the command reports and leaves the order alone"""
+def test_cybersource_dry_run_reports_the_right_action(mocker, cybersource_stuck_order):
+    """
+    Without --commit the command reports and leaves the order alone -- and
+    the report has to say "fulfill" for a paid order, not "fail".
+    """
     refno = cybersource_stuck_order.reference_number
-    payload = {"decision": "ACCEPT", "req_reference_number": refno}
     _patch_cybersource(
-        mocker, [["7883514374536923204011", refno, "2026-09-02"]], payload
+        mocker,
+        [["7883514374536923204011", refno, "2026-09-02"]],
+        _library_payload(refno, "100"),
     )
     fulfill = mocker.patch(
         "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
     )
+    out = StringIO()
 
-    call_command(COMMAND, order=refno)
+    call_command(COMMAND, order=refno, stdout=out)
 
     fulfill.assert_not_called()
     cybersource_stuck_order.refresh_from_db()
     assert cybersource_stuck_order.status == Order.CREATED
+    assert f"{refno}: would fulfill" in out.getvalue()
 
 
 def test_does_not_use_the_broken_library_helper(mocker, cybersource_stuck_order):
@@ -272,7 +306,7 @@ def test_does_not_use_the_broken_library_helper(mocker, cybersource_stuck_order)
     gateway = _patch_cybersource(
         mocker,
         [["7883514374536923204011", refno, "2026-09-02"]],
-        {"decision": "ACCEPT", "req_reference_number": refno},
+        _library_payload(refno, "100"),
     )
     mocker.patch("ecommerce.management.commands.resolve_pending_orders.fulfill_order")
 
