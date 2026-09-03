@@ -127,9 +127,9 @@ export class B2BPurchasePage extends React.Component<Props, State> {
           <p>
             We&rsquo;re unable to take new bulk enrollment code orders at the
             moment. If you already purchased codes, your receipt link still
-            works. Please{" "}
-            <a href={`mailto:${SETTINGS.support_email}`}>contact us</a> if you
-            need to place an order.
+            works. Please contact{" "}
+            <a href={`mailto:${SETTINGS.support_email}`}>customer support</a>{" "}
+            for more information.
           </p>
         </div>
       );

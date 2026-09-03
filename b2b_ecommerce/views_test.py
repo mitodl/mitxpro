@@ -535,12 +535,13 @@ def test_checkout_respects_the_purchasing_kill_switch(client, mocker, flag_enabl
         assert "temporarily unavailable" in resp.json()["errors"][0]
 
 
-def test_kill_switch_does_not_block_enrollment_codes(client, mocker):
+@pytest.mark.parametrize("flag_enabled", [True, False])
+def test_kill_switch_does_not_block_enrollment_codes(client, mocker, flag_enabled):
     """
     Switching purchasing off must not strand anyone who already paid: the
-    enrollment codes and order status stay reachable.
+    enrollment codes and order status stay reachable either way.
     """
-    mocker.patch("b2b_ecommerce.views.is_enabled", return_value=False)
+    mocker.patch("b2b_ecommerce.views.is_enabled", return_value=flag_enabled)
     coupon_version = CouponVersionFactory.create()
     order = B2BOrderFactory.create(
         coupon_payment_version=coupon_version.payment_version,

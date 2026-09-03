@@ -68,26 +68,14 @@ class TestGatewaySelection:
     """The per-user gateway choice"""
 
     @pytest.mark.parametrize(
-        ("flag_enabled", "configured_default", "expected"),
+        ("flag_enabled", "expected"),
         [
-            # The flag wins whenever it is on.
-            (True, MITOL_PAYMENT_GATEWAY_CYBERSOURCE, MITOL_PAYMENT_GATEWAY_STRIPE),
-            (True, MITOL_PAYMENT_GATEWAY_STRIPE, MITOL_PAYMENT_GATEWAY_STRIPE),
-            # Otherwise the configured default decides, so a deployment (or a
-            # local setup with no PostHog) can force one gateway.
-            (False, MITOL_PAYMENT_GATEWAY_STRIPE, MITOL_PAYMENT_GATEWAY_STRIPE),
-            (
-                False,
-                MITOL_PAYMENT_GATEWAY_CYBERSOURCE,
-                MITOL_PAYMENT_GATEWAY_CYBERSOURCE,
-            ),
+            (True, MITOL_PAYMENT_GATEWAY_STRIPE),
+            (False, MITOL_PAYMENT_GATEWAY_CYBERSOURCE),
         ],
     )
-    def test_gateway_selection(
-        self, mocker, user, settings, flag_enabled, configured_default, expected
-    ):
-        """The flag chooses the gateway, falling back to the configured default"""
-        settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY = configured_default
+    def test_gateway_selection(self, mocker, user, flag_enabled, expected):
+        """The flag is the only control: off or absent means CyberSource"""
         mocker.patch("ecommerce.api.is_enabled", return_value=flag_enabled)
 
         assert get_gateway_type_for_user(user) == expected

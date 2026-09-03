@@ -24,7 +24,10 @@ type State = {
 // usually lands a moment after the learner gets back here. Poll until it does,
 // then move them on. Give up after a while rather than spinning forever -- the
 // order is still recoverable server-side, and a stuck spinner helps nobody.
-const NUM_MILLIS_PER_POLL = 2000;
+//
+// The interval is a load trade-off: every checkout in progress polls this, so
+// the rate is kept to 20/min per learner while still covering a 90 second wait.
+const NUM_MILLIS_PER_POLL = 3000;
 const MAX_ATTEMPTS = 30;
 
 export class CheckoutResultPage extends React.Component<Props, State> {

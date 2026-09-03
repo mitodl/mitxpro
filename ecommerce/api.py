@@ -286,6 +286,41 @@ def get_order_coupon_version(order):
     return coupon_redemption.coupon_version if coupon_redemption is not None else None
 
 
+CENTS_PER_UNIT = 100
+
+
+def round_to_cents(value):
+    """
+    Round a monetary value to two decimal places.
+
+    Every amount handed to a gateway or written to a receipt goes through here,
+    so the rounding rule lives in one place rather than being restated at each
+    call site.
+
+    Args:
+        value (decimal.Decimal or int or str): A monetary value
+
+    Returns:
+        decimal.Decimal: The value rounded to cents
+    """
+    return decimal.Decimal(value).quantize(decimal.Decimal("0.01"))
+
+
+def stripe_minor_units_to_amount(minor_units):
+    """
+    Convert a Stripe amount in minor units to a decimal amount.
+
+    Stripe reports money in the currency's smallest unit (cents for USD).
+
+    Args:
+        minor_units (int or None): An amount as Stripe reports it
+
+    Returns:
+        decimal.Decimal: The amount in major units, rounded to cents
+    """
+    return round_to_cents(decimal.Decimal(minor_units or 0) / CENTS_PER_UNIT)
+
+
 def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_address):
     """
     Generates a payload dict to send to CyberSource for Secure Acceptance
@@ -322,51 +357,19 @@ def _generate_cybersource_sa_payload(*, order, receipt_url, cancel_url, ip_addre
         line_items[f"item_{i}_quantity"] = line.quantity
         line_items[f"item_{i}_sku"] = product_version.product.content_object.id
         line_items[f"item_{i}_tax_amount"] = str(
-            decimal.Decimal(product_price_dict["tax_assessed"]).quantize(
-                decimal.Decimal("0.01")
-            )
+            round_to_cents(product_price_dict["tax_assessed"])
         )
         line_items[f"item_{i}_unit_price"] = str(product_price_dict["price"])
 
         total += product_price_dict["price"]
         total_tax_assessed += product_price_dict["tax_assessed"]
 
-    # At the moment there should only be one line
-    product_version = order.lines.first().product_version
-    product = product_version.product
-    content_object = product.content_object
-    readable_id = get_readable_id(content_object)
-
-    merchant_fields = {
-        "merchant_defined_data1": f"{product.content_type.app_label} | {product.content_type.name}",
-        "merchant_defined_data2": readable_id,
-        "merchant_defined_data3": "1",
-    }
-
-    if coupon_version is not None:
-        merchant_fields["merchant_defined_data4"] = coupon_version.coupon.coupon_code
-        merchant_fields["merchant_defined_data5"] = (  # company name
-            coupon_version.payment_version.company.name
-            if coupon_version.payment_version.company
-            else ""
-        )
-        merchant_fields["merchant_defined_data6"] = (
-            coupon_version.payment_version.payment_transaction or ""
-        )
-        merchant_fields["merchant_defined_data7"] = (
-            coupon_version.payment_version.payment_type or ""
-        )
+    merchant_fields = _generate_merchant_fields(order, coupon_version)
 
     return {
         "access_key": settings.CYBERSOURCE_ACCESS_KEY,
-        "amount": str(
-            decimal.Decimal(total + total_tax_assessed).quantize(
-                decimal.Decimal("0.01")
-            )
-        ),
-        "tax_amount": str(
-            decimal.Decimal(total_tax_assessed).quantize(decimal.Decimal("0.01"))
-        ),
+        "amount": str(round_to_cents(total + total_tax_assessed)),
+        "tax_amount": str(round_to_cents(total_tax_assessed)),
         "consumer_id": order.purchaser.username,
         "currency": "USD",
         "locale": "en-us",
@@ -410,11 +413,10 @@ def get_gateway_type_for_user(user):
     """
     Determine which payment gateway a user's checkout should go through.
 
-    The PostHog flag decides this per user. When the flag is off for a user,
-    the gateway is the deployment default from ECOMMERCE_DEFAULT_PAYMENT_GATEWAY
-    (CyberSource unless that setting names Stripe). Selection is per-user so
-    that a gateway can be turned on for a subset of users without changing the
-    default for everyone.
+    The PostHog flag is the only control: on for a user means Stripe, off or
+    absent means CyberSource. Selection is per-user so a gateway can be turned
+    on for a subset of users, and turning the flag off everywhere returns the
+    whole site to CyberSource.
 
     Args:
         user (User): The purchasing user
@@ -425,12 +427,6 @@ def get_gateway_type_for_user(user):
     if is_enabled(
         features.ENABLE_STRIPE_PAYMENTS, default=False, opt_unique_id=str(user.id)
     ):
-        return MITOL_PAYMENT_GATEWAY_STRIPE
-
-    # Not covered by the flag: fall back to whatever the environment is
-    # configured to use. This is how a deployment (or a local dev setup with no
-    # PostHog) forces one gateway without touching the flag.
-    if settings.ECOMMERCE_DEFAULT_PAYMENT_GATEWAY == MITOL_PAYMENT_GATEWAY_STRIPE:
         return MITOL_PAYMENT_GATEWAY_STRIPE
 
     return MITOL_PAYMENT_GATEWAY_CYBERSOURCE
@@ -479,21 +475,19 @@ def _generate_stripe_cart_items(order, coupon_version=_COUPON_VERSION_UNSET):
                 # to and what their receipt shows.
                 quantity=1,
                 unitprice=product_price_dict["price"],
-                taxable=decimal.Decimal(product_price_dict["tax_assessed"]).quantize(
-                    decimal.Decimal("0.01")
-                ),
+                taxable=round_to_cents(product_price_dict["tax_assessed"]),
             )
         )
 
     return cart_items
 
 
-def _generate_stripe_merchant_fields(order, coupon_version=_COUPON_VERSION_UNSET):
+def _generate_merchant_fields(order, coupon_version=_COUPON_VERSION_UNSET):
     """
     Build the merchant-defined data for an order.
 
-    These are the same fields we send to CyberSource; for Stripe they are
-    stored as metadata on the checkout session.
+    Both gateways send the same fields: CyberSource takes them in the Secure
+    Acceptance payload, Stripe stores them as checkout session metadata.
 
     Args:
         order (Order): An order
@@ -556,15 +550,17 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
 
     # Charging the wrong amount is the worst thing that can go wrong here, so
     # check the total we're about to send against the order before sending it.
-    cart_total = sum(
-        (decimal.Decimal(item.unitprice) + decimal.Decimal(item.taxable))
-        * item.quantity
-        for item in cart_items
-    ).quantize(decimal.Decimal("0.01"))
-    expected_total = (
+    cart_total = round_to_cents(
+        sum(
+            (decimal.Decimal(item.unitprice) + decimal.Decimal(item.taxable))
+            * item.quantity
+            for item in cart_items
+        )
+    )
+    expected_total = round_to_cents(
         decimal.Decimal(order.total_price_paid)
         * (1 + (decimal.Decimal(order.tax_rate or 0) / 100))
-    ).quantize(decimal.Decimal("0.01"))
+    )
     if cart_total != expected_total:
         # Not fatal: prices are recomputed from the current product version at
         # checkout time, so an order created before a price change legitimately
@@ -592,9 +588,7 @@ def start_stripe_checkout(*, order, receipt_url, cancel_url, ip_address=None):
         gateway_order,
         receipt_url,
         cancel_url,
-        merchant_fields=_generate_stripe_merchant_fields(
-            order, coupon_version=coupon_version
-        ),
+        merchant_fields=_generate_merchant_fields(order, coupon_version=coupon_version),
     )
 
     # Hand back a plain dict rather than a StripeObject: this payload is
@@ -787,6 +781,12 @@ def stripe_data_to_receipt_data(session, payment_intent=None, checkout_status=No
             charges = (payment_intent.get("charges") or {}).get("data") or []
             charge = charges[0] if charges else None
 
+    # The receipt page and email read the CyberSource name keys. Stripe gives a
+    # single full name, so split it the way a billing form would. Without this
+    # neither key exists and the receipt renders the purchaser's name as "None".
+    billing_name = (customer_details.get("name") or "").strip()
+    forename, _, surname = billing_name.partition(" ")
+
     payment_method_details = (charge or {}).get("payment_method_details") or {}
     # Don't assume cards: ACH and other methods are available to learners, and
     # writing "card" for a bank payment would put a lie on the receipt.
@@ -795,14 +795,12 @@ def stripe_data_to_receipt_data(session, payment_intent=None, checkout_status=No
 
     receipt_data = {
         "req_reference_number": session.get("client_reference_id"),
-        "req_amount": str(
-            (decimal.Decimal(total or 0) / 100).quantize(decimal.Decimal("0.01"))
-        ),
-        "req_tax_amount": str(
-            (decimal.Decimal(tax_amount) / 100).quantize(decimal.Decimal("0.01"))
-        ),
+        "req_amount": str(stripe_minor_units_to_amount(total)),
+        "req_tax_amount": str(stripe_minor_units_to_amount(tax_amount)),
         "req_currency": (session.get("currency") or "usd").upper(),
         "req_bill_to_email": customer_details.get("email"),
+        "req_bill_to_forename": forename,
+        "req_bill_to_surname": surname.strip(),
         "req_payment_method": payment_method_type,
         "req_card_number": f"xxxxxxxxxxxx{card['last4']}" if card.get("last4") else "",
         "req_card_type": STRIPE_CARD_BRAND_TO_CYBERSOURCE_CODE.get(
