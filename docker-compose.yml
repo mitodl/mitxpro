@@ -68,7 +68,7 @@ services:
     extra_hosts: *default-extra-hosts
 
   watch:
-    image: node:24.14.0
+    image: node:24.14.0@sha256:5a593d74b632d1c6f816457477b6819760e13624455d587eef0fa418c8d0777b
     working_dir: /src
     command: >
       /bin/bash -c './webpack_dev_server.sh --install'
