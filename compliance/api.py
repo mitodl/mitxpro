@@ -3,6 +3,7 @@
 import json
 import logging
 from collections import namedtuple
+from http import HTTPStatus
 
 from CyberSource.api.verification_api import VerificationApi
 from CyberSource.models.riskv1exportcomplianceinquiries_order_information import (
@@ -46,11 +47,6 @@ DecryptedLog = namedtuple("DecryptedLog", ["request", "response"])  # noqa: PYI0
 # connection would hold a worker. The SDK only honours a per-request value;
 # a `timeout` key in the client config is silently ignored.
 EXPORTS_REQUEST_TIMEOUT_SECONDS = 10
-
-# only a 4xx carries a decision; 5xx and auth failures are outages
-HTTP_BAD_REQUEST = 400
-HTTP_SERVER_ERROR = 500
-
 
 EXPORTS_REQUIRED_KEYS = [
     "CYBERSOURCE_REST_MERCHANT_ID",
@@ -161,7 +157,7 @@ def get_info_code(response):
         response: the response returned from CyberSource
 
     Returns:
-        str or None: the comma-separated infoCodes, or None if there were no matches
+        str: the comma-separated infoCodes, or "" if there were no matches
     """
     export_info = get_response_value(
         response,
@@ -169,7 +165,7 @@ def get_info_code(response):
         "exportComplianceInformation",
     )
     info_codes = get_response_value(export_info, "info_codes", "infoCodes")
-    return ",".join(info_codes) if info_codes else None
+    return ",".join(info_codes) if info_codes else ""
 
 
 def remove_none_values(value):
@@ -208,8 +204,11 @@ def parse_api_error(exc):
     Returns:
         dict or None: the decoded body, or None if it holds no decision
     """
+    # only a 4xx carries a decision; 5xx and auth failures are outages
     status_code = getattr(exc, "status", None)
-    if status_code is None or not HTTP_BAD_REQUEST <= status_code < HTTP_SERVER_ERROR:
+    if (status_code is None) or not (
+        HTTPStatus.BAD_REQUEST <= status_code < HTTPStatus.INTERNAL_SERVER_ERROR
+    ):
         return None
 
     body = getattr(exc, "body", None)

@@ -29,7 +29,7 @@ class ExportsInquiryLog(TimestampedModel):
     )
 
     reason_code = models.CharField(max_length=255, blank=True, default="")
-    info_code = models.TextField(null=True)  # noqa: DJ001
+    info_code = models.TextField(blank=True, default="")
 
     encrypted_request = models.TextField()
     encrypted_response = models.TextField()
