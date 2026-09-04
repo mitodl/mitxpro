@@ -4,6 +4,10 @@ from django import forms
 from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from mitol.payment_gateway.models import (
+    StripeWebhookSecret,
+    StripeWebhookSecretRoute,
+)
 
 from courses.models import Course
 from ecommerce.models import (
@@ -638,3 +642,55 @@ class TaxRateAdmin(admin.ModelAdmin):
     list_display = ("id", "country_code", "tax_rate", "tax_rate_name", "active")
     search_fields = ("country_code", "tax_rate_name", "tax_rate")
     model = TaxRate
+
+
+class StripeWebhookSecretRouteInline(admin.TabularInline):
+    """Routes are edited with their secret: one without the other does nothing"""
+
+    model = StripeWebhookSecretRoute
+    extra = 1
+
+
+@admin.register(StripeWebhookSecret)
+class StripeWebhookSecretAdmin(admin.ModelAdmin):
+    """
+    Admin for the Stripe webhook signing secret.
+
+    The payment gateway verifies every incoming Stripe webhook against this
+    secret, so without a row here webhooks are rejected and paid orders are
+    never fulfilled. Each environment has its own value, shown once on the
+    endpoint's page in the Stripe dashboard.
+
+    This is registered so the secret can be set without a shell on the server.
+    Seeing it needs the payment_gateway permissions, which are granted to nobody
+    by default, so in practice that means a superuser. It is a verification
+    secret -- it cannot move money -- but it is never shown in full in the list
+    regardless.
+    """
+
+    model = StripeWebhookSecret
+    inlines = [StripeWebhookSecretRouteInline]
+    list_display = ["id", "secret_name", "is_active", "masked_secret", "routes_list"]
+    list_filter = ["is_active"]
+    search_fields = ["secret_name"]
+    readonly_fields = ["created_on", "updated_on"]
+
+    def get_queryset(self, request):
+        """
+        Show inactive secrets too.
+
+        The model's default manager filters them out, which would leave a
+        rotated-out secret invisible and impossible to re-activate here.
+        """
+        return StripeWebhookSecret.all_objects.get_queryset()
+
+    @admin.display(description="Secret")
+    def masked_secret(self, obj):
+        """Enough to match against Stripe, without putting it on screen in full"""
+        secret = obj.webhook_secret or ""
+        return f"{secret[:9]}\u2026{secret[-4:]}" if secret else ""
+
+    @admin.display(description="Routes")
+    def routes_list(self, obj):
+        """A secret with no route is never consulted, so surface that here"""
+        return ", ".join(obj.routes.values_list("url_name", flat=True)) or "NONE"
