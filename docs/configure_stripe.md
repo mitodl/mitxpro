@@ -82,7 +82,7 @@ Leave this running in its own terminal while you test.
 It prints a signing secret starting with `whsec_`. Webhook secrets are read from
 the database rather than from settings, so store it once — either through Django
 admin (**Payment Gateway → Stripe webhook secrets**, superusers only), or in a
-shell:
+shell (`secret_name` is just a label for your own reference):
 
 ```
 docker-compose run --rm web ./manage.py shell
@@ -92,8 +92,8 @@ docker-compose run --rm web ./manage.py shell
 from mitol.payment_gateway.models import StripeWebhookSecret, StripeWebhookSecretRoute
 
 secret = StripeWebhookSecret.objects.create(
-    secret_name="local stripe listen",  # any label you like
-    webhook_secret="whsec_...",
+    secret_name="local stripe listen",  # pragma: allowlist secret
+    webhook_secret="whsec_...",  # pragma: allowlist secret
     is_active=True,
 )
 StripeWebhookSecretRoute.objects.create(secret=secret, url_name="stripe-webhook")
