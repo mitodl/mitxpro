@@ -162,6 +162,17 @@ export default {
       ...DEFAULT_POST_OPTIONS,
     },
   }),
+  stripeOrderStatus: (sessionId: string) => ({
+    queryKey: "stripeOrderStatus",
+    url: `/api/checkout/stripe-status/?session_id=${encodeURIComponent(sessionId)}`,
+    transform: (json: Object) => ({
+      stripe_order_status: json,
+    }),
+    update: {
+      stripe_order_status: (prev: Object, next: Object) => next,
+    },
+    force: true,
+  }),
   b2bOrderStatus: (orderHash: string) => ({
     queryKey: "b2bOrderStatus",
     url: `/api/b2b/orders/${orderHash}/status/`,

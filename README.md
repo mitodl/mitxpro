@@ -56,6 +56,8 @@ We are using a couple of feature flags for xPRO. All these feature flags are lis
 # Documentation
 
 - [Wagtail API for Course and Program Metadata](cms/README.md)
+- [Configuring Stripe for local development](docs/configure_stripe.md)
+- [Configuring Digital Credentials](docs/configure_digital_credentials.md)
 
 # Optional Setup
 
