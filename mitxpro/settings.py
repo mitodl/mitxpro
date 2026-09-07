@@ -1137,26 +1137,42 @@ CYBERSOURCE_SECURE_ACCEPTANCE_URL = get_string(
 CYBERSOURCE_PROFILE_ID = get_string(
     name="CYBERSOURCE_PROFILE_ID", default=None, description="CyberSource Profile ID"
 )
-CYBERSOURCE_WSDL_URL = get_string(
-    name="CYBERSOURCE_WSDL_URL",
+# CyberSource REST credentials, used by the `compliance` app for export
+# sanctions screening. Kept separate from the Secure Acceptance keys above
+# (CYBERSOURCE_ACCESS_KEY / _PROFILE_ID / _SECURITY_KEY), which configure
+# checkout: those are two different CyberSource credential sets, and only
+# these are needed for screening.
+CYBERSOURCE_REST_MERCHANT_ID = get_string(
+    name="CYBERSOURCE_REST_MERCHANT_ID",
     default=None,
-    description="The URL to the cybersource WSDL",
+    description="The CyberSource merchant id used for export compliance checks",
 )
-CYBERSOURCE_MERCHANT_ID = get_string(
-    name="CYBERSOURCE_MERCHANT_ID",
+CYBERSOURCE_REST_KEY_ID = get_string(
+    name="CYBERSOURCE_REST_KEY_ID",
     default=None,
-    description="The cybersource merchant id",
+    description="The CyberSource REST API shared secret key id",
 )
-CYBERSOURCE_TRANSACTION_KEY = get_string(
-    name="CYBERSOURCE_TRANSACTION_KEY",
+CYBERSOURCE_REST_SECRET = get_string(
+    name="CYBERSOURCE_REST_SECRET",
     default=None,
-    description="The cybersource transaction key",
+    description="The CyberSource REST API shared secret key",
+)
+CYBERSOURCE_REST_ENVIRONMENT = get_string(
+    name="CYBERSOURCE_REST_ENVIRONMENT",
+    # no default: this is in EXPORTS_REQUIRED_KEYS, and defaulting to the
+    # sandbox would let a missing production value screen against apitest and
+    # record misleading SUCCESS rows instead of failing the check loudly
+    default=None,
+    description="The CyberSource REST API host, e.g. apitest.cybersource.com or api.cybersource.com",
 )
 CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY = get_string(
     name="CYBERSOURCE_INQUIRY_LOG_NACL_ENCRYPTION_KEY",
     default=None,
     description="The public key to encrypt export results with for our own security purposes. Should be a base64 encoded NaCl public key.",
 )
+# Export screening tuning, sent on every export compliance request. The REST API
+# accepts these per request just as the SOAP API did, so the values carry over
+# unchanged and screening strictness is unaffected by the transport change.
 CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR = get_string(
     name="CYBERSOURCE_EXPORT_SERVICE_ADDRESS_OPERATOR",
     default="AND",
@@ -1172,10 +1188,9 @@ CYBERSOURCE_EXPORT_SERVICE_NAME_WEIGHT = get_string(
     default="high",
     description="The weight of the name in determining whether a user passes exports checks. Refer to Cybersource docs.",
 )
-
-CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_string(
+CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS = get_delimited_list(
     name="CYBERSOURCE_EXPORT_SERVICE_SANCTIONS_LISTS",
-    default=None,
+    default=[],
     description="Additional sanctions lists to validate for exports. Refer to Cybersource docs.",
 )
 

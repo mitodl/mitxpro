@@ -1,12 +1,11 @@
-"""Fxitures for CyberSource tests"""
+"""Fixtures for CyberSource tests"""
 
 import pytest
 from nacl.public import PrivateKey
 
 from compliance.test_utils import (
     get_cybersource_test_settings,
-    mock_cybersource_wsdl,
-    mock_cybersource_wsdl_operation,
+    make_cybersource_response,
 )
 
 
@@ -26,9 +25,19 @@ def cybersource_settings(settings, cybersource_private_key):
     return settings
 
 
-@pytest.fixture(params=[])
-def cybersource_mock_client_responses(request, mocked_responses, cybersource_settings):
-    """Mock out the components of a valid WSDL API"""
-    mock_cybersource_wsdl(mocked_responses, cybersource_settings)
-    mock_cybersource_wsdl_operation(mocked_responses, request.param)
-    return mocked_responses
+@pytest.fixture
+def cybersource_mock_client(mocker, cybersource_settings):  # noqa: ARG001
+    """Patch out the CyberSource REST client and return the mock"""
+    mock_client = mocker.Mock()
+    mocker.patch("compliance.api.get_cybersource_client", return_value=mock_client)
+    return mock_client
+
+
+@pytest.fixture
+def cybersource_mock_client_responses(request, cybersource_mock_client):
+    """Patch the REST client to return a given (status, info_codes) response"""
+    status, info_codes = request.param
+    cybersource_mock_client.validate_export_compliance.return_value = (
+        make_cybersource_response(status, info_codes)
+    )
+    return cybersource_mock_client

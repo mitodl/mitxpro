@@ -85,7 +85,11 @@ def verify_exports_compliance(
             log.exception(
                 "Exception sending email to support regarding export compliance check failure"
             )
-        raise UserExportBlockedException(backend, export_inquiry.reason_code)
+        # prefer the sanctions-list match code: a denial can arrive as a COMPLETED
+        # screening that matched a list, and "CS_COMPLETED" would tell support nothing
+        raise UserExportBlockedException(
+            backend, export_inquiry.info_code or export_inquiry.reason_code
+        )
     if export_inquiry.is_unknown:
         raise AuthException("Unable to authenticate, please contact support")  # noqa: EM101
 
