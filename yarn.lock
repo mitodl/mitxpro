@@ -11590,9 +11590,9 @@ __metadata:
   linkType: hard
 
 "reselect@npm:^5.0.0":
-  version: 5.2.0
-  resolution: "reselect@npm:5.2.0"
-  checksum: b274c69ba657cfe3531ae32ba332a6bae62050bb5addd7d42a66625fa85db0d82a93d69f0b6df1db345717fbcb8e9d311e843b09051afebd2b06da539f3510bb
+  version: 5.3.0
+  resolution: "reselect@npm:5.3.0"
+  checksum: ebe24b04f118302858e6e3086ec5200b27bc190b55fc1499feb8aecd8ddd0e75aeb0e744babc185d42252695846edaf5add0b3bb60aae7091afbbf04ccbbaf5d
   languageName: node
   linkType: hard
 
