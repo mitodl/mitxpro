@@ -32,7 +32,7 @@ dependencies = [
     "django-storages==1.14.6",
     "django-user-agents==0.4.0",
     "django-webpack-loader==1.8.1",
-    "djangorestframework==3.17.1",
+    "djangorestframework==3.17.2",
     "edx-api-client==1.14.0",
     "google-api-python-client==2.198.0",
     "google-auth==1.35.0",
