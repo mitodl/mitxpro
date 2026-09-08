@@ -2,7 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { compose } from "redux";
-import { connectRequest } from "redux-query";
+import { connectRequest, requestAsync } from "redux-query";
 import qs from "query-string";
 
 import queries from "../../lib/queries";
@@ -14,7 +14,7 @@ import type { Location } from "react-router";
 type Props = {
   orderStatus: ?Object,
   location: Location,
-  forceRequest: () => Promise<void>,
+  fetchOrderStatus: (sessionId: string) => Promise<*>,
 };
 type State = {
   timedOut: boolean,
@@ -44,6 +44,9 @@ export class CheckoutResultPage extends React.Component<Props, State> {
   }
 
   unmounted = false;
+
+  sessionId = () =>
+    String(qs.parse(this.props.location.search).session_id || "");
 
   receiptUrl = () => {
     const purchased = qs.parse(this.props.location.search).purchased;
@@ -78,7 +81,7 @@ export class CheckoutResultPage extends React.Component<Props, State> {
       await wait(NUM_MILLIS_PER_POLL);
 
       try {
-        await this.props.forceRequest();
+        await this.props.fetchOrderStatus(this.sessionId());
       } catch (e) {
         // Keep polling: a transient error shouldn't strand a paid learner.
       }
@@ -140,6 +143,16 @@ const mapStateToProps = (state) => ({
   orderStatus: state.entities.stripe_order_status,
 });
 
+// connectRequest's own forceRequest() dispatches without returning the promise,
+// so awaiting it resolves immediately: polls overlap, and because the reducer
+// is last-write-wins a slow response landing after a newer one overwrites it.
+// Dispatching requestAsync ourselves yields a real promise, so each poll waits
+// for its own round trip -- and the try/catch around it can actually fire.
+const mapDispatchToProps = (dispatch) => ({
+  fetchOrderStatus: (sessionId: string) =>
+    dispatch(requestAsync(queries.ecommerce.stripeOrderStatus(sessionId))),
+});
+
 const mapPropsToConfig = (props) => [
   queries.ecommerce.stripeOrderStatus(
     String(qs.parse(props.location.search).session_id || ""),
@@ -147,6 +160,6 @@ const mapPropsToConfig = (props) => [
 ];
 
 export default compose(
-  connect(mapStateToProps),
+  connect(mapStateToProps, mapDispatchToProps),
   connectRequest(mapPropsToConfig),
 )(CheckoutResultPage);
