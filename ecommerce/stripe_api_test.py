@@ -15,6 +15,7 @@ from ecommerce.api import (
     stripe_data_to_receipt_data,
 )
 from ecommerce.constants import (
+    CYBERSOURCE_DECISION_CANCEL,
     STRIPE_CHECKOUT_STATUS_CANCELLED,
     STRIPE_CHECKOUT_STATUS_ERROR,
     STRIPE_CHECKOUT_STATUS_PAID,
@@ -586,10 +587,19 @@ class TestFulfillment:
 class TestCancellation:
     """Expired and failed sessions"""
 
-    def test_expired_session_fails_the_order(self, order_with_line):
+    def test_expired_session_fails_the_order(self, mocker, order_with_line):
         """An expired checkout session marks the order failed"""
         order_with_line.stripe_checkout_session_id = "cs_test_123"
         order_with_line.save()
+        # Cancelling now records a receipt, so it reads the session back.
+        mocker.patch(
+            "ecommerce.api.get_stripe_checkout_session_status",
+            return_value={
+                "status": STRIPE_CHECKOUT_STATUS_CANCELLED,
+                "session": {"client_reference_id": order_with_line.reference_number},
+                "payment_intent": None,
+            },
+        )
 
         cancel_stripe_order("cs_test_123", reason="checkout.session.expired")
 
@@ -606,3 +616,64 @@ class TestCancellation:
 
         order_with_line.refresh_from_db()
         assert order_with_line.status == Order.FULFILLED
+
+
+def test_fulfill_leaves_a_refunded_order_alone(mocker, order_with_line):
+    """
+    A refunded order is terminal. A late redelivery must not re-fulfil it and
+    re-enroll a learner whose money has been returned.
+    """
+    stripe_order = order_with_line
+    stripe_order.status = Order.REFUNDED
+    stripe_order.gateway_type = MITOL_PAYMENT_GATEWAY_STRIPE
+    stripe_order.stripe_checkout_session_id = "cs_test_refunded"
+    stripe_order.save()
+    mocker.patch(
+        "ecommerce.api.get_stripe_checkout_session_status",
+        return_value={
+            "status": STRIPE_CHECKOUT_STATUS_PAID,
+            "session": {"client_reference_id": stripe_order.reference_number},
+            "payment_intent": None,
+        },
+    )
+    complete = mocker.patch("ecommerce.api.complete_order")
+
+    result = fulfill_stripe_order(stripe_order.stripe_checkout_session_id)
+
+    stripe_order.refresh_from_db()
+    assert stripe_order.status == Order.REFUNDED
+    assert result.status == Order.REFUNDED
+    complete.assert_not_called()
+
+
+def test_cancel_records_a_receipt(mocker, order_with_line):
+    """
+    CyberSource stores a receipt for a declined payment, so a failed Stripe
+    payment should leave the same audit trail.
+    """
+    stripe_order = order_with_line
+    stripe_order.gateway_type = MITOL_PAYMENT_GATEWAY_STRIPE
+    stripe_order.stripe_checkout_session_id = "cs_test_cancelled"
+    stripe_order.save()
+    mocker.patch(
+        "ecommerce.api.get_stripe_checkout_session_status",
+        return_value={
+            "status": STRIPE_CHECKOUT_STATUS_CANCELLED,
+            "session": {
+                "client_reference_id": stripe_order.reference_number,
+                "customer_details": {"email": "learner@example.com"},
+            },
+            "payment_intent": None,
+        },
+    )
+
+    cancel_stripe_order(
+        stripe_order.stripe_checkout_session_id, reason="checkout.session.expired"
+    )
+
+    stripe_order.refresh_from_db()
+    assert stripe_order.status == Order.FAILED
+    receipt = stripe_order.receipt_set.first()
+    assert receipt is not None
+    # The decision reflects what actually happened, not a blanket ACCEPT.
+    assert receipt.data["decision"] == CYBERSOURCE_DECISION_CANCEL

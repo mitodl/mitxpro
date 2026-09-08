@@ -858,11 +858,12 @@ def fulfill_stripe_order(checkout_session_id):
     with transaction.atomic():
         locked_order = Order.objects.select_for_update().get(id=order.id)
 
-        if locked_order.status in (Order.FULFILLED, Order.FAILED):
-            # Both are terminal: a failed order is never reused for checkout
-            # (a new attempt creates a new order), so a redelivered event has
-            # nothing to do here -- and writing another receipt per redelivery
-            # would pile up duplicates.
+        if locked_order.status in (Order.FULFILLED, Order.FAILED, Order.REFUNDED):
+            # All three are terminal. A failed order is never reused for
+            # checkout (a new attempt creates a new order), and a refunded one
+            # must not be quietly re-fulfilled by a late redelivery, which
+            # would re-enroll a learner whose money has been returned. Writing
+            # another receipt per redelivery would also pile up duplicates.
             log.info(
                 "fulfill_stripe_order: order %s is already %s, ignoring "
                 "duplicate delivery for session %s",
@@ -959,6 +960,27 @@ def cancel_stripe_order(checkout_session_id, *, reason=""):
         )
         return None
 
+    if order.status != Order.CREATED:
+        # Checked before fetching the session so a redelivery for an order that
+        # is already settled costs nothing at Stripe.
+        log.info(
+            "cancel_stripe_order: order %s is already in state %s, ignoring",
+            order.reference_number,
+            order.status,
+        )
+        return order
+
+    # CyberSource records a receipt for a declined payment too, so do the same
+    # here: what the processor told us is the audit trail, and it should not
+    # depend on which gateway took the order. Fetched before the lock is taken,
+    # to keep a network call out of the transaction.
+    status_info = get_stripe_checkout_session_status(checkout_session_id)
+    receipt_data = stripe_data_to_receipt_data(
+        status_info["session"],
+        status_info["payment_intent"],
+        checkout_status=STRIPE_CHECKOUT_STATUS_CANCELLED,
+    )
+
     with transaction.atomic():
         locked_order = Order.objects.select_for_update().get(id=order.id)
 
@@ -969,6 +991,10 @@ def cancel_stripe_order(checkout_session_id, *, reason=""):
                 locked_order.status,
             )
             return locked_order
+
+        receipt = Receipt.objects.create(data=receipt_data)
+        receipt.order = locked_order
+        receipt.save()
 
         locked_order.status = Order.FAILED
         locked_order.save()
