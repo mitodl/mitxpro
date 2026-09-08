@@ -314,3 +314,98 @@ def test_does_not_use_the_broken_library_helper(mocker, cybersource_stuck_order)
 
     gateway.find_and_get_transactions.assert_not_called()
     gateway.find_transactions.assert_called_once()
+
+
+def test_accepts_a_plain_order_id(mocker, cybersource_stuck_order):
+    """An operator reading the database has the ID, not the reference number"""
+    refno = cybersource_stuck_order.reference_number
+    payload = {
+        "decision": "ACCEPT",
+        "req_reference_number": refno,
+        "reason_code": "100",
+    }
+    _patch_cybersource(
+        mocker, [["788351437453692320401", refno, "2026-09-02"]], payload
+    )
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
+    )
+
+    call_command(COMMAND, order=str(cybersource_stuck_order.id), commit=True)
+
+    fulfill.assert_called_once_with(payload)
+
+
+def test_malformed_reference_number_explains_itself():
+    """
+    A reference number from another environment raises ParseException inside
+    the lookup. The operator should be told what is wrong, not shown a
+    traceback.
+    """
+    with pytest.raises(CommandError) as exc:
+        call_command(COMMAND, order="not-a-reference-number")
+
+    assert "not a valid order reference number" in str(exc.value)
+
+
+def test_one_bad_order_does_not_abandon_the_rest(mocker, cybersource_stuck_order):
+    """With --all, an order that blows up must not strand the others"""
+    other = OrderFactory.create(status=Order.CREATED)
+    LineFactory.create(order=other)
+    payloads = {
+        cybersource_stuck_order.reference_number: {
+            "decision": "ACCEPT",
+            "req_reference_number": cybersource_stuck_order.reference_number,
+        },
+        other.reference_number: {
+            "decision": "ACCEPT",
+            "req_reference_number": other.reference_number,
+        },
+    }
+    mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.Command._find_cybersource_payloads",
+        return_value=payloads,
+    )
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order",
+        side_effect=[Exception("boom"), None],
+    )
+
+    # Still exits non-zero, so a scheduled run notices.
+    with pytest.raises(CommandError):
+        call_command(COMMAND, all=True, commit=True, stderr=StringIO())
+
+    # Both were attempted: the failure did not stop the loop.
+    assert fulfill.call_count == 2
+
+
+def test_prefers_the_accepted_transaction(mocker, cybersource_stuck_order):
+    """
+    A reused order can have a declined attempt and a later successful one.
+    Whichever the search returns last, the paid transaction must win, or a
+    genuinely paid order gets marked failed.
+    """
+    refno = cybersource_stuck_order.reference_number
+    declined = {"reason_code": "481", "req_reference_number": refno}
+    accepted = {"reason_code": "100", "req_reference_number": refno}
+    gateway = mocker.Mock()
+    # Accepted first, declined last -- the order that used to lose.
+    gateway.find_transactions.return_value = [
+        ["tx-accepted", refno, "2026-09-02T10:00:00Z"],
+        ["tx-declined", refno, "2026-09-02T09:00:00Z"],
+    ]
+    gateway.get_transaction_details.side_effect = [
+        (mocker.Mock(), accepted),
+        (mocker.Mock(), declined),
+    ]
+    mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.PaymentGateway.get_gateway_class",
+        return_value=gateway,
+    )
+    fulfill = mocker.patch(
+        "ecommerce.management.commands.resolve_pending_orders.fulfill_order"
+    )
+
+    call_command(COMMAND, order=refno, commit=True)
+
+    assert fulfill.call_args.args[0]["decision"] == "ACCEPT"
