@@ -1,6 +1,24 @@
 Release Notes
 =============
 
+Version 0.198.1
+---------------
+
+- chore(deps): update dependency @sentry/browser to v10.71.0 (#4073)
+- chore(deps): update dependency uv_build to >=0.12.5,<0.13.0 (#4071)
+- chore(deps): update dependency hls.js to v1.7.1 (#4072)
+- chore(deps): update dependency posthog-js to v1.422.2 (#4070)
+- fix(deps): update dependency boto3 to v1.43.72 (#4069)
+- [pre-commit.ci] pre-commit autoupdate (#4066)
+- chore(deps): update dependency @sentry/browser to v10.70.0 (#4047)
+- chore(deps): update actions/setup-node action to v7 (#4057)
+- [pre-commit.ci] pre-commit autoupdate (#4052)
+- chore(deps): update astral-sh/setup-uv action to v9 (#4058)
+- feat(observability): adopt OTel instrumentation and bump the library (#4063)
+- chore: drop the Heroku deployment artifacts (#4064)
+- fix(deps): update dependency django to v5.2.17 [security] (#4062)
+- chore(deps): update dependency webpack to v5.109.2 (#4055)
+
 Version 0.198.0 (Released August 31, 2026)
 ---------------
 
