@@ -10,6 +10,7 @@ from decimal import Decimal
 from pathlib import Path
 
 import pytest
+from django.db import IntegrityError
 from wagtail.test.utils.wagtail_factories import ImageFactory
 
 from cms.factories import (
@@ -1396,3 +1397,114 @@ def test_update_external_course_runs_syncs_same_tag_from_two_vendors():
         Course.objects.filter(readable_id__endswith="MCPO", is_external=True).count()
         == 2
     )
+
+
+@pytest.mark.django_db
+def test_update_external_course_runs_reports_integrity_error_and_continues():
+    """
+    A course that violates a unique constraint is reported, not raised.
+
+    Without this the exception escapes to `task_sync_external_course_runs`, which
+    abandons the platform's remaining courses and never sends the stats email.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    CourseIndexPageFactory.create(parent=home_page, title="Courses")
+
+    # Squat on the readable_id that syncing `MO-DBIP` is going to generate.
+    CourseFactory.create(
+        title="Squatter",
+        readable_id="course-v1:xPRO+MO_DBIP",
+        platform=PlatformFactory.create(name="Some Other Platform"),
+        external_course_id="OTHER-DBIP",
+        page=None,
+        is_external=True,
+    )
+
+    stats_collector = update_external_course_runs(
+        [
+            _external_course_row("MO-DBIP", "MO-DBIP-99-09#1"),
+            _external_course_row("MO-PCCY", "MO-PCCY-99-09#1"),
+        ],
+        keymap=EmeritusKeyMap(),
+    )
+    stats = stats_collector.get_unformatted_stats()
+
+    assert [item.code for item in stats["courses_failed"]] == ["MO-DBIP"]
+    assert not Course.objects.filter(external_course_id="MO-DBIP").exists()
+
+    # The rest of the batch still syncs.
+    assert [item.code for item in stats["courses_created"]] == ["MO-PCCY"]
+    assert Course.objects.filter(external_course_id="MO-PCCY").exists()
+
+
+def _fail_first_course_after_page_creation(mocker):
+    """Make the first course raise an IntegrityError after its page was created."""
+    return mocker.patch(
+        "courses.sync_external_courses.external_course_sync_api"
+        ".create_common_child_pages_for_external_courses",
+        side_effect=[IntegrityError("late failure"), None],
+    )
+
+
+@pytest.mark.django_db
+def test_update_external_course_runs_recovers_after_rollback_following_page_creation(
+    mocker,
+):
+    """
+    A rollback that undoes a course page must not break the courses that follow.
+
+    `course_index_page` is fetched once, before the loop, and `add_child()` bumps its
+    in-memory `numchild` while the database copy is updated separately. After a
+    rollback the cached value is too high, and treebeard then computes the next
+    child's path from `get_last_child()`, which is `None` when the index page has no
+    children in the database.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    _fail_first_course_after_page_creation(mocker)
+
+    stats_collector = update_external_course_runs(
+        [
+            _external_course_row("MO-DBIP", "MO-DBIP-99-09#1"),
+            _external_course_row("MO-PCCY", "MO-PCCY-99-09#1"),
+        ],
+        keymap=EmeritusKeyMap(),
+    )
+    stats = stats_collector.get_unformatted_stats()
+
+    assert [item.code for item in stats["courses_failed"]] == ["MO-DBIP"]
+    assert not Course.objects.filter(external_course_id="MO-DBIP").exists()
+    assert Course.objects.filter(external_course_id="MO-PCCY").exists()
+
+
+@pytest.mark.django_db
+def test_update_external_course_runs_discards_stats_for_rolled_back_course(mocker):
+    """
+    Work undone by a rollback must not be reported as created in the sync email.
+
+    Success stats are recorded as each step of a course succeeds, but the whole
+    course is rolled back if a later step fails.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    _fail_first_course_after_page_creation(mocker)
+
+    stats_collector = update_external_course_runs(
+        [
+            _external_course_row("MO-DBIP", "MO-DBIP-99-09#1"),
+            _external_course_row("MO-PCCY", "MO-PCCY-99-09#1"),
+        ],
+        keymap=EmeritusKeyMap(),
+    )
+    stats = stats_collector.get_unformatted_stats()
+
+    assert [item.code for item in stats["courses_failed"]] == ["MO-DBIP"]
+    for key in ("courses_created", "course_pages_created"):
+        assert [item.code for item in stats[key]] == ["MO-PCCY"], (
+            f"{key} still reports the rolled-back course"
+        )
+    for key in ("course_runs_created", "products_created", "product_versions_created"):
+        codes = [item.code for item in stats[key]]
+        assert not any("DBIP" in code for code in codes), (
+            f"{key} still reports rolled-back work: {codes}"
+        )
