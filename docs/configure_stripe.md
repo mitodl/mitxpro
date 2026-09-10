@@ -33,9 +33,16 @@ FEATURE_xpro-stripe-payments=True
 | `MITOL_PAYMENT_GATEWAY_STRIPE_API_KEY` | `sk_test_...`             | Your Stripe secret key from step 1.                                       |
 | `FEATURE_xpro-stripe-payments`         | `True`, `False` (default) | Sends your checkouts to Stripe. Without it, checkout goes to CyberSource. |
 
-Gateway selection reads the `xpro-stripe-payments` flag from PostHog and falls
-back to `settings.FEATURES` when PostHog has no value for it, so the `.env`
-setting is enough locally whether or not you have PostHog configured.
+`xpro-stripe-payments` is a PostHog flag. Locally you usually have no PostHog
+value for it, and `is_enabled()` then falls back to `settings.FEATURES`, which
+is built from the `FEATURE_`-prefixed environment variables — so setting it in
+`.env` is enough either way.
+
+Keep the flag's exact name after the prefix, hyphens included. The fallback
+looks the flag up by its PostHog name, and `settings.FEATURES` uses whatever
+follows `FEATURE_` verbatim, so the upper-case form you may expect
+(`FEATURE_ENABLE_STRIPE_PAYMENTS`) creates a key nothing reads and silently
+leaves you on CyberSource.
 
 Restart the app after editing `.env`, and again after pulling new code:
 the source is mounted into the container but the running server does not
