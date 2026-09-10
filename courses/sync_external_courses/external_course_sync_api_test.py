@@ -1316,3 +1316,83 @@ def test_create_or_update_external_course_page_kept_as_draft(external_course_dat
     # The live (published) version still has the old marketing URL.
     assert external_course_page.external_marketing_url == "https://old-url.com"
     assert external_course_page.has_unpublished_changes
+
+
+def _external_course_row(course_code, course_run_code):
+    """An external course JSON row with future dates and the given codes."""
+    with Path(
+        "courses/sync_external_courses/test_data/batch_test.json"
+    ).open() as test_data_file:
+        row = json.load(test_data_file)["rows"][0]
+
+    return {
+        **row,
+        "course_code": course_code,
+        "course_run_code": course_run_code,
+        "start_date": "2099-09-30",
+        "end_date": "2099-11-30",
+    }
+
+
+def test_external_course_readable_id_is_vendor_scoped():
+    """
+    The same course tag from two vendors must produce two distinct readable IDs.
+
+    `Course.readable_id` is unique across all courses, so dropping the vendor prefix
+    made the second vendor's course impossible to create.
+    """
+    emeritus_course = ExternalCourse(
+        _external_course_row("MO-DBIP", "MO-DBIP-99-09#1"), EmeritusKeyMap()
+    )
+    global_alumni_course = ExternalCourse(
+        _external_course_row("MXP-DBIP", "MXP-DBIP-99-09#1"), GlobalAlumniKeyMap()
+    )
+
+    assert emeritus_course.course_readable_id == "course-v1:xPRO+MO_DBIP"
+    assert global_alumni_course.course_readable_id == "course-v1:xPRO+MXP_DBIP"
+
+
+def test_external_course_readable_id_keeps_full_course_tag():
+    """Course tags containing `.` or `-` are preserved (as `_`), never truncated."""
+    external_course = ExternalCourse(
+        _external_course_row("MO-MTE.SEPO", "MO-MTE.SEPO-99-09#1"), EmeritusKeyMap()
+    )
+    assert external_course.course_readable_id == "course-v1:xPRO+MO_MTE_SEPO"
+
+
+@pytest.mark.django_db
+def test_update_external_course_runs_syncs_same_tag_from_two_vendors():
+    """
+    A course tag already used by another vendor syncs into its own course.
+
+    Regression test for the `courses_course_readable_id_23dff66f_uniq` IntegrityError.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    CourseIndexPageFactory.create(parent=home_page, title="Courses")
+
+    global_alumni_platform = PlatformFactory.create(name=GLOBAL_ALUMNI_PLATFORM_NAME)
+    # Courses synced before the vendor prefix was added keep their original readable_id,
+    # so this is the shape the colliding course actually has in the database.
+    CourseFactory.create(
+        title="Materials Characterization and Process Optimization",
+        readable_id="course-v1:xPRO+MCPO",
+        platform=global_alumni_platform,
+        external_course_id="MXP-MCPO",
+        page=None,
+        is_external=True,
+    )
+
+    stats_collector = update_external_course_runs(
+        [_external_course_row("MO-MCPO", "MO-MCPO-99-09#1")], keymap=EmeritusKeyMap()
+    )
+    stats = stats_collector.get_unformatted_stats()
+
+    assert len(stats["courses_created"]) == 1
+
+    emeritus_course = Course.objects.get(external_course_id="MO-MCPO")
+    assert emeritus_course.readable_id == "course-v1:xPRO+MO_MCPO"
+    assert emeritus_course.platform.name == EMERITUS_PLATFORM_NAME
+    assert (
+        Course.objects.filter(readable_id__endswith="MCPO", is_external=True).count()
+        == 2
+    )

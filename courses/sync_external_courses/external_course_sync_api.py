@@ -126,10 +126,12 @@ class ExternalCourse:
         self.course_title = program_name.strip() if program_name else None
         self.course_code = external_course_json.get("course_code")
 
-        # External course code format is `<MXP | MO>-<COURSE_TAG>`, where course tag can contain `.`,
-        # we will replace `.` with `_` to follow the internal readable id format.
+        # External course code format is `<MXP | MO>-<COURSE_TAG>`. The prefix identifies
+        # the vendor and has to stay in the readable ID: two vendors can ship the same
+        # course tag, and `Course.readable_id` is unique across all courses. Neither `-`
+        # nor `.` is a valid readable ID character, so both are replaced with `_`.
         self.course_readable_id = generate_course_readable_id(
-            self.course_code.split("-")[1].replace(".", "_")
+            self.course_code.replace("-", "_").replace(".", "_")
         )
 
         self.course_run_code = external_course_json.get("course_run_code")
