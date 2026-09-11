@@ -45,6 +45,22 @@
               {% else %}No courses created during this sync.{% endif %}
             </li>
             <li>
+              <span style="color: #ff0000"
+                >Courses Failed to Sync ({{ stats.courses_failed|length }}):</span
+              >
+              {% if stats.courses_failed %}
+              <ul>
+                {% for course in stats.courses_failed %}
+                <li>
+                  {{ course.code }}
+                  ({{ course.title }}) -
+                  {{ course.msg }}
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}No courses failed to sync.{% endif %}
+            </li>
+            <li>
               <span style="color: #008000"
                 >Existing Courses ({{ stats.existing_courses|length }}):</span
               >
