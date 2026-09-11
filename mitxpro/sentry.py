@@ -1,5 +1,7 @@
 """Sentry setup and configuration"""
 
+import re
+
 import sentry_sdk
 from celery.exceptions import WorkerLostError
 from sentry_sdk.integrations.celery import CeleryIntegration
@@ -8,6 +10,62 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 # these errors occur when a shutdown is happening (usually caused by a SIGTERM)
 SHUTDOWN_ERRORS = (WorkerLostError, SystemExit)
+
+
+# Postgres appends a DETAIL line to constraint violations that echoes the whole
+# offending row -- on a users table that is the learner's name, email and
+# external UUID.  psycopg puts it in str(exc), so it ships inside the exception
+# value, where no SDK privacy setting reaches it: send_default_pii governs
+# user/cookie/header capture and max_request_body_size governs request bodies,
+# and neither touches exception text.
+#
+# The newline is matched both raw and as a literal backslash-n: the SDK repr()s
+# frame locals and non-string logging params during serialization, so there the
+# DETAIL line arrives as "...constraint\\nDETAIL: ..." inside a repr string.
+PG_DETAIL_RE = re.compile(r"(\n|\\n)DETAIL:.*", re.DOTALL)
+
+
+def scrub_pg_detail(text):
+    """Truncate a Postgres error string at its DETAIL line.
+
+    Keeps the primary message, which is what identifies the failure, and drops
+    the row echo plus any HINT/CONTEXT Postgres appends after it.
+    """
+    return PG_DETAIL_RE.sub(
+        lambda match: match.group(1) + "DETAIL:  [scrubbed]", text, count=1
+    )
+
+
+def scrub_pg_details(event):
+    """Truncate Postgres DETAIL lines everywhere in a Sentry event.
+
+    The row echo reaches Sentry through more fields than the exception value:
+    LoggingIntegration puts the log message in a breadcrumb
+    (BreadcrumbHandler._breadcrumb_from_record), logger.error("...: %s", exc)
+    puts it in logentry.params (EventHandler._emit), and captured stack-frame
+    locals carry it in frame vars because include_local_variables defaults to
+    True (serialize_frame).  Walking the whole event covers those without
+    enumerating them, and does not go stale when the SDK adds another.
+
+    Safe to walk naively because Client._prepare_event serializes the event
+    before calling before_send, so every leaf here is already a JSON
+    primitive -- no live exception objects to coerce.
+    """
+    return _scrub_node(event)
+
+
+def _scrub_node(node):
+    """Recurse through the serialized event, rewriting strings in place."""
+    if isinstance(node, str):
+        return scrub_pg_detail(node)
+    if isinstance(node, dict):
+        for key, value in node.items():
+            node[key] = _scrub_node(value)
+        return node
+    if isinstance(node, list):
+        node[:] = [_scrub_node(item) for item in node]
+        return node
+    return node
 
 
 def before_send(event, hint):
@@ -26,7 +84,7 @@ def before_send(event, hint):
         if isinstance(exc_value, SHUTDOWN_ERRORS):
             # so we don't want to report expected shutdown errors to sentry
             return None
-    return event
+    return scrub_pg_details(event)
 
 
 def init_sentry(*, dsn, environment, version, log_level, heroku_app_name):
@@ -45,6 +103,14 @@ def init_sentry(*, dsn, environment, version, log_level, heroku_app_name):
         environment=environment,
         release=version,
         before_send=before_send,
+        # Request bodies are NOT gated on send_default_pii: the SDK sets
+        # request.data unconditionally (RequestExtractor.extract_into_event)
+        # and this is the only control (request_body_within_bounds).  Left
+        # unset it defaults to "medium", i.e. 10,000-byte bodies -- checkout,
+        # B2B checkout, CyberSource order fulfillment, registration and
+        # profile payloads.  Set explicitly so the choice is findable here
+        # rather than in a dependency's defaults.
+        max_request_body_size="small",
         integrations=[
             DjangoIntegration(),
             CeleryIntegration(),
