@@ -44,6 +44,8 @@ export const routes = {
 
   checkout: "/checkout/",
 
+  checkoutResult: "/checkout/result/",
+
   ecommerceAdmin: include("/ecommerce/admin/", {
     index: "",
     coupons: "coupons/",

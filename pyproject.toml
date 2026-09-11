@@ -59,6 +59,7 @@ dependencies = [
     "opentelemetry-instrumentation-redis>=0.52b0",
     "opentelemetry-instrumentation-requests>=0.52b0",
     "mitol-django-olposthog>=2026.3.6,<2027",
+    "mitol-django-payment-gateway==2026.8.10",
     "newrelic>=10.0.0,<11",
     "pdftotext>=3.0.0,<4",
     "psycopg2==2.9.12",
