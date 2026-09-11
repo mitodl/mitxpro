@@ -599,6 +599,9 @@ def get_js_settings(request: HttpRequest):
         "digital_credentials_supported_runs": settings.DIGITAL_CREDENTIALS_SUPPORTED_RUNS,
         "is_tax_applicable": is_tax_applicable(request),
         "enable_enterprise": is_enabled(features.ENABLE_ENTERPRISE, default=False),
+        "enable_b2b_purchasing": is_enabled(
+            features.ENABLE_B2B_PURCHASING, default=True
+        ),
         "posthog_api_token": settings.POSTHOG_PROJECT_API_KEY,
         "posthog_api_host": settings.POSTHOG_API_HOST,
     }

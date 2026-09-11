@@ -17,6 +17,7 @@ import Header from "../components/Header";
 import PrivateRoute from "../components/PrivateRoute";
 
 import CheckoutPage from "./pages/CheckoutPage";
+import CheckoutResultPage from "./pages/CheckoutResultPage";
 import DashboardPage from "./pages/DashboardPage";
 import ReceiptPage from "./pages/ReceiptPage";
 import LoginPages from "./pages/login/LoginPages";
@@ -101,6 +102,10 @@ export class App extends React.Component<Props, void> {
           <Route
             path={urljoin(match.url, String(routes.register))}
             component={RegisterPages}
+          />
+          <PrivateRoute
+            path={urljoin(match.url, String(routes.checkoutResult))}
+            component={CheckoutResultPage}
           />
           <PrivateRoute
             path={urljoin(match.url, routes.checkout)}
