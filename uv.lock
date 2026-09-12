@@ -7,18 +7,18 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-09-01T10:06:12.61495Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
-mitol-django-hubspot-api = { timestamp = "2026-09-08T10:06:12.615062Z", span = "PT0S" }
-mitol-drf-lint = { timestamp = "2026-09-08T10:06:12.615064Z", span = "PT0S" }
-mitol-django-observability = { timestamp = "2026-09-08T10:06:12.615064Z", span = "PT0S" }
-mitol-django-authentication = { timestamp = "2026-09-08T10:06:12.614999Z", span = "PT0S" }
-mitol-django-olposthog = { timestamp = "2026-09-08T10:06:12.615064Z", span = "PT0S" }
-mitol-django-common = { timestamp = "2026-09-08T10:06:12.615062Z", span = "PT0S" }
-mitol-django-mail = { timestamp = "2026-09-08T10:06:12.615063Z", span = "PT0S" }
-mitol-django-oauth-toolkit-extensions = { timestamp = "2026-09-08T10:06:12.615063Z", span = "PT0S" }
+mitol-django-authentication = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-common = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-hubspot-api = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-mail = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-oauth-toolkit-extensions = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-observability = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-olposthog = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-drf-lint = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
 
 [[package]]
 name = "amqp"
@@ -1075,14 +1075,14 @@ wheels = [
 
 [[package]]
 name = "faker"
-version = "40.23.0"
+version = "40.37.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f3/d6/fc071e5754815d9058e12ab549cc88e90f8f4ecf4dc33b6b750cdf4b622d/faker-40.23.0.tar.gz", hash = "sha256:f135e563f1f95f19346bb680bc2e43570bc43b7893e566023746f51f32c69dfc", size = 1972975, upload-time = "2026-06-10T20:53:21.611Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/fb/35acc76128d5ee8983d940da871cc8eba876e7b0e9e6bd402ecd7104dcdc/faker-40.37.0.tar.gz", hash = "sha256:a92dff7f310e61fb544c61720e15edb2e7448bc33d15a321a99e9ab7b94abf54", size = 2025920, upload-time = "2026-08-21T16:33:16.261Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/5f/824e6fb3e9d63408151dc9173994fa65bde620a67dde3a59354f5aecd497/faker-40.23.0-py3-none-any.whl", hash = "sha256:775922453e54afa42eaf60eac478fa3a969357f224d09a8022b93e3ad88f18ae", size = 2013046, upload-time = "2026-06-10T20:53:19.226Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/22/bf589b6b2c7527047f55450358fbe5961aeaadf168d6b51a1a1c67da497f/faker-40.37.0-py3-none-any.whl", hash = "sha256:ddbafa55c94d5b69c08ced3a7f202614204a02e07ba6548c729b8d18acc0b490", size = 2062853, upload-time = "2026-08-21T16:33:14.516Z" },
 ]
 
 [[package]]
@@ -1580,7 +1580,7 @@ name = "jinxed"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ansicon", marker = "sys_platform == 'win32'" },
+    { name = "ansicon" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/20/d0/59b2b80e7a52d255f9e0ad040d2e826342d05580c4b1d7d7747cfb8db731/jinxed-1.3.0.tar.gz", hash = "sha256:1593124b18a41b7a3da3b078471442e51dbad3d77b4d4f2b0c26ab6f7d660dbf", size = 80981, upload-time = "2024-07-31T22:39:18.854Z" }
 wheels = [
@@ -2175,7 +2175,7 @@ dev = [
     { name = "bpython" },
     { name = "django-debug-toolbar" },
     { name = "factory-boy", specifier = "==3.3.3" },
-    { name = "faker", specifier = "==40.23.0" },
+    { name = "faker", specifier = "==40.37.0" },
     { name = "flaky", specifier = "==3.8.1" },
     { name = "freezegun", specifier = "==1.5.5" },
     { name = "hypothesis", specifier = "==4.24.6" },
