@@ -121,3 +121,6 @@ localdev/google.token
 
 # Claude
 .claude/
+
+# drf-lint cross-file index cache
+.drf_lint_cache.json
