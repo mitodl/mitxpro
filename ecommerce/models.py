@@ -26,6 +26,10 @@ from ecommerce.utils import (
     validate_amount,
 )
 from mail.constants import MAILGUN_EVENT_CHOICES
+from mitol.payment_gateway.constants import (
+    MITOL_PAYMENT_GATEWAY_CYBERSOURCE,
+    MITOL_PAYMENT_GATEWAY_STRIPE,
+)
 from mitxpro.models import (
     AuditableModel,
     AuditModel,
@@ -362,6 +366,25 @@ class Order(OrderAbstract, AuditableModel):
         max_digits=6, decimal_places=4, null=True, blank=True, default=0
     )
     tax_rate_name = models.CharField(max_length=100, null=True, default="VAT")  # noqa: DJ001
+    stripe_checkout_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text=(
+            "The Stripe checkout session this order was sent to, recorded before "
+            "the learner is redirected so the payment can be reconciled later."
+        ),
+    )
+    gateway_type = models.CharField(
+        max_length=30,
+        choices=[
+            (MITOL_PAYMENT_GATEWAY_CYBERSOURCE, MITOL_PAYMENT_GATEWAY_CYBERSOURCE),
+            (MITOL_PAYMENT_GATEWAY_STRIPE, MITOL_PAYMENT_GATEWAY_STRIPE),
+        ],
+        default=MITOL_PAYMENT_GATEWAY_CYBERSOURCE,
+        help_text="The payment gateway that processed this order.",
+    )
 
     objects = OrderManager()
 

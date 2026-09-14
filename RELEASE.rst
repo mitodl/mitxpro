@@ -1,6 +1,15 @@
 Release Notes
 =============
 
+Version 0.199.0
+---------------
+
+- chore(deps): update nginx docker tag to v1.31.4 (#4094)
+- fix(deps): update dependency boto3 to v1.43.83 (#4095)
+- [pre-commit.ci] pre-commit autoupdate (#4087)
+- chore: refresh drf-lint baseline for new ORM003-ORM006 rules (#4092)
+- feat(ecommerce): add Stripe as a second payment gateway (#4065)
+
 Version 0.198.2
 ---------------
 

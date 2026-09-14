@@ -3,6 +3,9 @@
 # From secure acceptance documentation, under API reply fields:
 # http://apps.cybersource.com/library/documentation/dev_guides/Secure_Acceptance_SOP/Secure_Acceptance_SOP.pdf
 CYBERSOURCE_DECISION_ACCEPT = "ACCEPT"
+# reason_code 100 is the only success code; anything else is a failure of
+# some kind. https://developer.cybersource.com/library/documentation/sbc/reason_codes/reason_codes.html
+CYBERSOURCE_REASON_CODE_ACCEPTED = "100"
 CYBERSOURCE_DECISION_DECLINE = "DECLINE"
 CYBERSOURCE_DECISION_REVIEW = "REVIEW"
 CYBERSOURCE_DECISION_ERROR = "ERROR"
@@ -55,3 +58,54 @@ DISCOUNT_TYPES = [
 
 COUPON_ADD_PERMISSION = "ecommerce.add_coupon"
 COUPON_UPDATE_PERMISSION = "ecommerce.change_coupon"
+
+# Stripe event types we act on. `completed` only means the learner finished the
+# checkout flow -- for payment methods with delayed notification the payment can
+# still be processing -- so the async events matter as much as the first one.
+STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED = "checkout.session.completed"
+STRIPE_EVENT_CHECKOUT_SESSION_EXPIRED = "checkout.session.expired"
+STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED = (
+    "checkout.session.async_payment_succeeded"
+)
+STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED = (
+    "checkout.session.async_payment_failed"
+)
+
+STRIPE_FULFILL_EVENTS = [
+    STRIPE_EVENT_CHECKOUT_SESSION_COMPLETED,
+    STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED,
+]
+STRIPE_CANCEL_EVENTS = [
+    STRIPE_EVENT_CHECKOUT_SESSION_EXPIRED,
+    STRIPE_EVENT_CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED,
+]
+
+# PaymentIntent statuses. The payment gateway library has constants for the
+# checkout session and payment statuses, but not for these.
+# https://docs.stripe.com/payments/paymentintents/lifecycle
+STRIPE_INTENT_STATUS_CANCELED = "canceled"
+STRIPE_INTENT_STATUS_PROCESSING = "processing"
+STRIPE_INTENT_STATUS_REQUIRES_ACTION = "requires_action"
+STRIPE_INTENT_STATUS_REQUIRES_CONFIRMATION = "requires_confirmation"
+STRIPE_INTENT_STATUS_REQUIRES_PAYMENT_METHOD = "requires_payment_method"
+
+# Overall states a Stripe checkout session is collapsed into. The session's own
+# status fields don't tell the whole story -- the PaymentIntent carries the
+# detail of the payment itself -- so both are considered together.
+STRIPE_CHECKOUT_STATUS_PAID = "paid"
+STRIPE_CHECKOUT_STATUS_PENDING = "pending"
+STRIPE_CHECKOUT_STATUS_CANCELLED = "cancelled"
+STRIPE_CHECKOUT_STATUS_ERROR = "error"
+
+# Stripe reports card brands by name; the receipt serializer looks brands up in
+# CYBERSOURCE_CARD_TYPES by numeric code. Translate at write time so the receipt
+# page and email keep working unchanged.
+STRIPE_CARD_BRAND_TO_CYBERSOURCE_CODE = {
+    "visa": "001",
+    "mastercard": "002",
+    "amex": "003",
+    "discover": "004",
+    "diners": "005",
+    "jcb": "007",
+    "unionpay": "062",
+}
