@@ -1751,13 +1751,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@csstools/css-calc@npm:^3.2.0, @csstools/css-calc@npm:^3.2.1":
+"@csstools/css-calc@npm:^3.2.0":
   version: 3.2.1
   resolution: "@csstools/css-calc@npm:3.2.1"
   peerDependencies:
     "@csstools/css-parser-algorithms": ^4.0.0
     "@csstools/css-tokenizer": ^4.0.0
   checksum: 621c2d134aff7cd5366f48c5f440d10cedfc2fff8c4f5393b2d4a0ae20ee6c037091d52296c8c28aa12e7c701af85f5df525807ed9092686e8c8db819a533670
+  languageName: node
+  linkType: hard
+
+"@csstools/css-calc@npm:^3.3.0":
+  version: 3.4.0
+  resolution: "@csstools/css-calc@npm:3.4.0"
+  peerDependencies:
+    "@csstools/css-parser-algorithms": ^4.0.0
+    "@csstools/css-tokenizer": ^4.0.0
+  checksum: 5d6b1191e908eb399e428275c2af9d28d3c4ace9e96424d0451adda4e6379333629278a33bc77453b9e9ae97537fb86352fe400f2d4c224937b612b88857597f
   languageName: node
   linkType: hard
 
@@ -1802,15 +1812,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@csstools/css-syntax-patches-for-csstree@npm:^1.1.6":
-  version: 1.1.6
-  resolution: "@csstools/css-syntax-patches-for-csstree@npm:1.1.6"
+"@csstools/css-syntax-patches-for-csstree@npm:^1.1.9":
+  version: 1.1.13
+  resolution: "@csstools/css-syntax-patches-for-csstree@npm:1.1.13"
   peerDependencies:
     css-tree: ^3.2.1
   peerDependenciesMeta:
     css-tree:
       optional: true
-  checksum: 9bbc45ed6e13d5090954e733dd7b1b0de51d5a894a5f29c6db2960c25dfbb3abbe4fc65cb9ca50536f011faf151d3161dff00582268254af2fe3a29dd6257e93
+  checksum: 09d200d114884e71cd728d3a8a4b432dfd80f6fa67b1dcbb8ab271cefb0ae5eaa988cd417828dc3f21f886be1a322f8699946b8d06ef5e1d1463140395747c13
   languageName: node
   linkType: hard
 
@@ -1831,12 +1841,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@csstools/selector-resolve-nested@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@csstools/selector-resolve-nested@npm:4.0.0"
+"@csstools/selector-resolve-nested@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@csstools/selector-resolve-nested@npm:4.0.1"
   peerDependencies:
     postcss-selector-parser: ^7.1.1
-  checksum: eebdec8f3a8dbb81afa5c76b0568bb1a0b6dfa7c2c9434dbc4cd86cc2244db1cca2392127fca0d54653050688eb1da18eb7bfecedf5c1f9689957c4c44617f32
+  checksum: 008fce65d03e294f176f3887f0dd2145f9a3f2e1a3d9ee2da5d553095fef8320cea5fdaaab144fced6401dc6b0e7c1cadc1bd345806531e6a209310c504165ac
   languageName: node
   linkType: hard
 
@@ -4597,10 +4607,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colord@npm:^2.9.3":
-  version: 2.9.3
-  resolution: "colord@npm:2.9.3"
-  checksum: 95d909bfbcfd8d5605cbb5af56f2d1ce2b323990258fd7c0d2eb0e6d3bb177254d7fb8213758db56bb4ede708964f78c6b992b326615f81a18a6aaf11d64c650
+"colord@npm:^2.10.0":
+  version: 2.10.0
+  resolution: "colord@npm:2.10.0"
+  checksum: 7bd2fca99b61bf7a9e8b76114a4c57010a5dfabff36bd030ecfe57ff7f43e84c0038c3f96d204ae7edec918b74169401caf22999e04777fa2a3fd1ed89117fab
   languageName: node
   linkType: hard
 
@@ -7142,17 +7152,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globby@npm:^16.2.1":
-  version: 16.2.2
-  resolution: "globby@npm:16.2.2"
+"globby@npm:^16.2.4":
+  version: 16.2.4
+  resolution: "globby@npm:16.2.4"
   dependencies:
     "@sindresorhus/merge-streams": ^4.0.0
     fast-glob: ^3.3.3
     ignore: ^7.0.5
     is-path-inside: ^4.0.0
+    micromatch: ^4.0.8
     slash: ^5.1.0
     unicorn-magic: ^0.4.0
-  checksum: 7e57252781c1657d3e04bf99d27894136f1243785a958cf16b7a9e19d7de5eb5970b0381c427da44d75e523efce293ac01876ae63a9c7f8f6e4e0fe2787083d1
+  checksum: a759acea5aaf1a64647b285913b4303bd0870a22d8dc9a67f33e8a176c9bb9248f12420f3773968548f135bdebfb4eb6425df06da364da35903d404a1514a16b
   languageName: node
   linkType: hard
 
@@ -7666,6 +7677,13 @@ __metadata:
   version: 7.0.5
   resolution: "ignore@npm:7.0.5"
   checksum: d0862bf64d3d58bf34d5fb0a9f725bec9ca5ce8cd1aecc8f28034269e8f69b8009ffd79ca3eda96962a6a444687781cd5efdb8c7c8ddc0a6996e36d31c217f14
+  languageName: node
+  linkType: hard
+
+"ignore@npm:^7.0.6":
+  version: 7.0.9
+  resolution: "ignore@npm:7.0.9"
+  checksum: 5d2c5369db4f940fa65dfa2a95af9a3877b1b36b8d7ad991f457200f3f5f8996c93eb84f8151f3b0a4ed02e0d2f39d50114868d82cb7820bcbe76bdbb1298e18
   languageName: node
   linkType: hard
 
@@ -9731,12 +9749,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.3.16":
-  version: 3.3.16
-  resolution: "nanoid@npm:3.3.16"
+"nanoid@npm:^3.3.18":
+  version: 3.3.19
+  resolution: "nanoid@npm:3.3.19"
   bin:
     nanoid: bin/nanoid.cjs
-  checksum: 2489d8f87f02178a15b901d7d06e490838383a2acdf01ec2b4e4343c02325ab648965a539eba8bdb821560a33e4c34be506b9e1c7c1bb5cb750e894f500fce92
+  checksum: 9e7a9c78d81b3778844df795aa17da6fde77825eacee6c6e5776cac0055326d54cc1bfee71ad0a9a1f11556c93a243a63648228e6c6b24ae7d4f75f6d4466a99
   languageName: node
   linkType: hard
 
@@ -10586,13 +10604,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-selector-parser@npm:^7.1.4":
-  version: 7.1.4
-  resolution: "postcss-selector-parser@npm:7.1.4"
+"postcss-selector-parser@npm:^7.1.5":
+  version: 7.1.6
+  resolution: "postcss-selector-parser@npm:7.1.6"
   dependencies:
     cssesc: ^3.0.0
     util-deprecate: ^1.0.2
-  checksum: 66fa9908f4239e8042e47a67272556404f71d5ef9ef4a271ae519b1a3775f999c7ae6cc9e504f7d6c2715c12ed89ca73f77b8ee23f93ea127d06a2a720854b50
+  checksum: 4588a63d378cc46b85e19bdbcd157431094bfad096d022deadf81569a804ce3d3aa80257b1f4f81206d50f10f952472438243a8e916f5b6f905ba5fbb052e4a1
   languageName: node
   linkType: hard
 
@@ -10621,14 +10639,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.5.16":
-  version: 8.5.20
-  resolution: "postcss@npm:8.5.20"
+"postcss@npm:^8.5.26":
+  version: 8.5.28
+  resolution: "postcss@npm:8.5.28"
   dependencies:
-    nanoid: ^3.3.16
+    nanoid: ^3.3.18
     picocolors: ^1.1.1
     source-map-js: ^1.2.1
-  checksum: 0dd2c0eb3ab98237ef6b9e016d36f02c416b6ce7794b07a62625c89d0b1ff07e0301ecc32f3292ac843bd2b588a05536a7682f3e592027e503cf596723ccaca0
+  checksum: 914a3a7af573aa2b672c0e286e0c7665a0e8c7e7a2370a0247c4531c189559e1909bac90d973bc2ff0ab64173780ec7ccde28be20298c887d16ed65d95098f6a
   languageName: node
   linkType: hard
 
@@ -12563,13 +12581,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"string-width@npm:^8.2.1":
-  version: 8.2.1
-  resolution: "string-width@npm:8.2.1"
+"string-width@npm:^8.2.2":
+  version: 8.2.2
+  resolution: "string-width@npm:8.2.2"
   dependencies:
     get-east-asian-width: ^1.5.0
     strip-ansi: ^7.1.2
-  checksum: f77829903c89e671942a8863cfc801f9ea330d3b7439f0ef9b0fcb2960866802bb90c598cf9aca86961e616e6d5182077e8b9c389f8ace42f7a3584a4f8f99d0
+  checksum: 37fc1e2bdb488404118b1a07747cf9bb1f5fddfe6f850ba4b1451d118d09fb03ca5948cc69740fec5c54bce384232bcc74e181e8bedf39b5d385e9565df1270e
   languageName: node
   linkType: hard
 
@@ -12832,17 +12850,17 @@ __metadata:
   linkType: hard
 
 "stylelint@npm:^17.0.0":
-  version: 17.14.1
-  resolution: "stylelint@npm:17.14.1"
+  version: 17.15.0
+  resolution: "stylelint@npm:17.15.0"
   dependencies:
-    "@csstools/css-calc": ^3.2.1
+    "@csstools/css-calc": ^3.3.0
     "@csstools/css-parser-algorithms": ^4.0.0
-    "@csstools/css-syntax-patches-for-csstree": ^1.1.6
+    "@csstools/css-syntax-patches-for-csstree": ^1.1.9
     "@csstools/css-tokenizer": ^4.0.0
     "@csstools/media-query-list-parser": ^5.0.0
-    "@csstools/selector-resolve-nested": ^4.0.0
+    "@csstools/selector-resolve-nested": ^4.0.1
     "@csstools/selector-specificity": ^6.0.0
-    colord: ^2.9.3
+    colord: ^2.10.0
     cosmiconfig: ^9.0.2
     css-functions-list: ^3.3.3
     css-tree: ^3.2.1
@@ -12851,28 +12869,28 @@ __metadata:
     fastest-levenshtein: ^1.0.16
     file-entry-cache: ^11.1.5
     global-modules: ^2.0.0
-    globby: ^16.2.1
+    globby: ^16.2.4
     globjoin: ^0.1.4
     html-tags: ^5.1.0
-    ignore: ^7.0.5
+    ignore: ^7.0.6
     import-meta-resolve: ^4.2.0
     mathml-tag-names: ^4.0.0
     meow: ^14.1.0
     micromatch: ^4.0.8
     normalize-path: ^3.0.0
     picocolors: ^1.1.1
-    postcss: ^8.5.16
+    postcss: ^8.5.26
     postcss-safe-parser: ^7.0.1
-    postcss-selector-parser: ^7.1.4
+    postcss-selector-parser: ^7.1.5
     postcss-value-parser: ^4.2.0
-    string-width: ^8.2.1
+    string-width: ^8.2.2
     supports-hyperlinks: ^4.5.0
     svg-tags: ^1.0.0
     table: ^6.9.0
     write-file-atomic: ^7.0.1
   bin:
     stylelint: bin/stylelint.mjs
-  checksum: a613a8698719049f3eae0c3553b60a3dc3d224d6a21e47205521d2a2508557719fced123c38c49e85957995fce8f1df5fa9a8fb151d6768793e05c8f5cba58b8
+  checksum: 27c83015f990b8e8bea22e4aeac537835e3609ad1b5409c8c2ddf242f8dafe80a542994ecf52f017e73e837613d536e504f3c6696094b918b2c2fe80f88414e5
   languageName: node
   linkType: hard
 
