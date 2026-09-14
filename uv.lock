@@ -2160,7 +2160,7 @@ requires-dist = [
     { name = "redis", specifier = "==7.4.1" },
     { name = "requests", specifier = ">=2.31.0,<3" },
     { name = "sentry-sdk", specifier = ">=2.0.0,<3" },
-    { name = "setuptools", specifier = "<=81.0.0" },
+    { name = "setuptools", specifier = "<=83.0.0" },
     { name = "social-auth-app-django", specifier = ">=5.4.0,<6" },
     { name = "ulid-py", specifier = ">=1.1.0,<2" },
     { name = "user-agents", specifier = "==2.2.0" },
