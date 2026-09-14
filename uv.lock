@@ -7,18 +7,18 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-09-01T10:06:12.61495Z"
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
-mitol-django-hubspot-api = { timestamp = "2026-09-08T10:06:12.615062Z", span = "PT0S" }
-mitol-drf-lint = { timestamp = "2026-09-08T10:06:12.615064Z", span = "PT0S" }
-mitol-django-observability = { timestamp = "2026-09-08T10:06:12.615064Z", span = "PT0S" }
-mitol-django-authentication = { timestamp = "2026-09-08T10:06:12.614999Z", span = "PT0S" }
-mitol-django-olposthog = { timestamp = "2026-09-08T10:06:12.615064Z", span = "PT0S" }
-mitol-django-common = { timestamp = "2026-09-08T10:06:12.615062Z", span = "PT0S" }
-mitol-django-mail = { timestamp = "2026-09-08T10:06:12.615063Z", span = "PT0S" }
-mitol-django-oauth-toolkit-extensions = { timestamp = "2026-09-08T10:06:12.615063Z", span = "PT0S" }
+mitol-django-authentication = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-common = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-hubspot-api = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-mail = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-oauth-toolkit-extensions = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-observability = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-django-olposthog = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
+mitol-drf-lint = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
 
 [[package]]
 name = "amqp"
@@ -174,30 +174,30 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.43.78"
+version = "1.43.83"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/be/55/e026c943f7f1ed6d2f5e6035713f21233bbe9ee975008662dc64ca0d4ced/boto3-1.43.78.tar.gz", hash = "sha256:2fa59116e298171ef59e7600a8be6c01177faef8af4b9a4314b7a57a04009ada", size = 112679, upload-time = "2026-08-21T19:37:36.84Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ec/30/96cf7d324e75cd2c349e2911ae2334d987fb8525d551495a2ef6758c26f3/boto3-1.43.83.tar.gz", hash = "sha256:6413d6e99f716af5d333a732db140e4b3359cac005a1271b11777b6d9ca82194", size = 112686, upload-time = "2026-08-28T19:35:52.273Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e3/55/288b1f0d987e15db0417f5ea43da564bfa042063f508c259eec893134628/boto3-1.43.78-py3-none-any.whl", hash = "sha256:893f06a171469618e17de78dc927aca6e74fcf45a70d2c5918e9ac9919e96cc9", size = 140028, upload-time = "2026-08-21T19:37:35.358Z" },
+    { url = "https://files.pythonhosted.org/packages/f2/4b/843f30dc77324778efa90c4169d503963668760b8d8abdf26a61bd090141/boto3-1.43.83-py3-none-any.whl", hash = "sha256:73a3564f737d4516625964eee709a498fa98ccee6aca929febad2b0b5fbeae1e", size = 140025, upload-time = "2026-08-28T19:35:49.228Z" },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.43.78"
+version = "1.43.89"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/67/71/490aaa384855bf3b69405ded52ae77a0e5f4eeb2165044fa65466c4d3a73/botocore-1.43.78.tar.gz", hash = "sha256:e8238d22c1e1342025d75d2e33d154a375e7caad0fc67f77d77faa2d82668b94", size = 15982895, upload-time = "2026-08-21T19:37:32.402Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/06/f63fb1befdf77af18539fb24ea01f2da0f13965ed5de091061708ac96416/botocore-1.43.89.tar.gz", hash = "sha256:f0574942970742657b0e0716cf08c2dfe6bef8e6de5fbb7081c3424e262b4cca", size = 16074206, upload-time = "2026-09-04T19:24:52.464Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c5/5b/b7c5c22767c0e8eb4bb2bd0a972d77bd0be3dd9908e15d4487094a31fa4b/botocore-1.43.78-py3-none-any.whl", hash = "sha256:ddd020493235e264b3bd12606f239a3d3b2dd7cfb1d25a0691061183c290c228", size = 15677214, upload-time = "2026-08-21T19:37:28.894Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/9d/96f9dee6d12eedf1c2b4264eefd59c7ac8cac10daadb9a7bfccc9ee881c6/botocore-1.43.89-py3-none-any.whl", hash = "sha256:d7211220c815427fe71225acc6909e4ab5dfab3b03770e72fd16cf9eb86b3d1a", size = 15768272, upload-time = "2026-09-04T19:24:49.769Z" },
 ]
 
 [[package]]
@@ -1580,7 +1580,7 @@ name = "jinxed"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ansicon", marker = "sys_platform == 'win32'" },
+    { name = "ansicon" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/20/d0/59b2b80e7a52d255f9e0ad040d2e826342d05580c4b1d7d7747cfb8db731/jinxed-1.3.0.tar.gz", hash = "sha256:1593124b18a41b7a3da3b078471442e51dbad3d77b4d4f2b0c26ab6f7d660dbf", size = 80981, upload-time = "2024-07-31T22:39:18.854Z" }
 wheels = [
@@ -2111,7 +2111,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "beautifulsoup4", specifier = "==4.15.0" },
-    { name = "boto3", specifier = "==1.43.78" },
+    { name = "boto3", specifier = "==1.43.83" },
     { name = "celery", specifier = "==5.6.3" },
     { name = "celery-redbeat", specifier = "==2.3.3" },
     { name = "cybersource-rest-client-python", specifier = "==0.0.78" },
