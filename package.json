@@ -86,7 +86,7 @@
     "react-ga": "^2.2.0",
     "react-google-recaptcha": "^1.0.5",
     "react-hot-loader": "^4.8.0",
-    "react-markdown": "^5.0.3",
+    "react-markdown": "^10.0.0",
     "react-picky": "^5.3.2",
     "react-redux": "^5.0.5",
     "react-router": "^4.1.1",
