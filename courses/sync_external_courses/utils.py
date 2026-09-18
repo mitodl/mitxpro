@@ -98,6 +98,11 @@ class StatsCollector:
                 "existing_courses",
                 "External Course Codes",
             ),
+            "courses_failed": StatItemsCollection(
+                "courses_failed",
+                "External Course Codes",
+                display_name="Courses Failed to Sync",
+            ),
             "course_runs_created": StatItemsCollection(
                 "course_runs_created",
                 "External Course Run Codes",
@@ -176,6 +181,25 @@ class StatsCollector:
         """
         for code in codes:
             self.add_stat(key, code)
+
+    def snapshot(self):
+        """
+        Capture the currently collected items so they can be restored later.
+
+        Returns:
+            dict: a mapping of stat key to a copy of that stat's items
+        """
+        return {key: set(stat.items) for key, stat in self.stats.items()}
+
+    def restore(self, snapshot):
+        """
+        Roll the collected stats back to a previously captured snapshot.
+
+        Args:
+            snapshot(dict): a mapping returned by `snapshot()`
+        """
+        for key, items in snapshot.items():
+            self.stats[key].items = set(items)
 
     def remove_duplicates(self, target_stat_key, reference_stat_key):
         """
