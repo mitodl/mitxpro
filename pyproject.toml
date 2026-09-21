@@ -68,7 +68,7 @@ dependencies = [
     "redis==7.4.1",
     "requests>=2.31.0,<3",
     "sentry-sdk>=2.0.0,<3",
-    "setuptools<=81.0.0",  # capped by cybersource-rest-client-python (needs pkg_resources)
+    "setuptools<=83.0.0",  # capped by cybersource-rest-client-python (needs pkg_resources)
     "social-auth-app-django>=5.4.0,<6",
     "ulid-py>=1.1.0,<2",
     "user-agents==2.2.0",
