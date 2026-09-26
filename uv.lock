@@ -2007,14 +2007,14 @@ wheels = [
 
 [[package]]
 name = "mitol-drf-lint"
-version = "2026.4.2"
+version = "2026.8.28"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "libcst" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7f/f3/a4f6c2556efd3605425be21f71c8b27a4cafebebb269875b607faaefb285/mitol_drf_lint-2026.4.2.tar.gz", hash = "sha256:c8e4ba0e518f0f37016a00e9ed6b72e2d1645b750d79da695192a8ef49460c37", size = 7113, upload-time = "2026-04-02T18:44:36.763Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/be/93/1184d252123b449ab7a972c9f78d029e969a7e02fc421abfe3b9af1f8ccc/mitol_drf_lint-2026.8.28.tar.gz", hash = "sha256:843ac26594012489ff10c4bd4e5db26a9848b2938ec4cfdd574ff14898cd7b44", size = 37161, upload-time = "2026-08-28T20:06:44.934Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/59/5c/0d25ae042b082a404eaef88ae8f177b2c5d570121f3bc575636e280a6016/mitol_drf_lint-2026.4.2-py3-none-any.whl", hash = "sha256:dec795ab47ba0f983e13b2af19eb6842a6c6fd24c244fbd20be68a6211f21588", size = 11550, upload-time = "2026-04-02T18:44:35.968Z" },
+    { url = "https://files.pythonhosted.org/packages/35/43/4b447b190bc8b01c9f0ade03335472daf6d77c224fa0b930c76166efebaa/mitol_drf_lint-2026.8.28-py3-none-any.whl", hash = "sha256:f2bc196c6b8fb22df0b4c5666e7bcfacfd8657794173c8139723b27bb3744a2b", size = 53749, upload-time = "2026-08-28T20:06:43.455Z" },
 ]
 
 [[package]]
@@ -2180,7 +2180,7 @@ dev = [
     { name = "freezegun", specifier = "==1.5.5" },
     { name = "hypothesis", specifier = "==4.24.6" },
     { name = "ipdb" },
-    { name = "mitol-drf-lint", specifier = "==2026.4.2" },
+    { name = "mitol-drf-lint", specifier = "==2026.8.28" },
     { name = "nplusone", specifier = ">=0.8.1" },
     { name = "pdbpp" },
     { name = "pytest", specifier = ">=9" },
