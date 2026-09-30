@@ -37,7 +37,9 @@ uv run pytest                              # Run all tests (with coverage)
 uv run pytest path/to/test_file.py -k test_name  # Run specific test
 uv run ./scripts/test/python_tests.sh      # Full suite (migration checks + tests)
 uv run ./scripts/test/detect_missing_migrations.sh
-pre-commit run --all-files                 # Ruff, shfmt, yamllint, detect-secrets
+uv sync                                   # Install dev dependencies, including prek
+uv run prek install -f                    # Replace an existing pre-commit git hook
+uv run prek run --all-files                 # Ruff, shfmt, yamllint, detect-secrets
 ```
 
 ### JavaScript
@@ -64,7 +66,7 @@ Services: `db` (:5432), `redis` (:6379), `web` (:8051), `watch` (:8052), `nginx`
 
 ## Code Style
 
-- **Python**: Ruff (formatting + linting via pre-commit). No additional config needed — pre-commit handles it.
+- **Python**: Ruff (formatting + linting via prek). No additional config needed — prek reads `.pre-commit-config.yaml`.
 - **JavaScript**: ESLint (`eslint-config-mitodl`) + Prettier. Flow for type checking (not TypeScript).
 - **SCSS**: Stylelint via `npm run scss-lint`.
 - **Secrets**: `detect-secrets` baseline at `.secrets.baseline` — update baseline if adding test secrets.

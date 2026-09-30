@@ -79,7 +79,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+prek = ["prek==0.5.4"]
 dev = [
+    { include-group = "prek" },
     "bpython",
     "django-debug-toolbar",
     "factory-boy==3.3.3",
@@ -111,6 +113,7 @@ exclude-newer = "7d"
 required-version = ">=0.9.17"
 
 [tool.uv.exclude-newer-package]
+prek = "0d"
 mitol-django-authentication = "0d"
 mitol-django-common = "0d"
 mitol-django-hubspot-api = "0d"

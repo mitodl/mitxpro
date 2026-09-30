@@ -1,0 +1,97 @@
+# Reference prek + autofix.ci workflow for repositories that pin prek in uv.lock.
+#
+# Copy to .github/workflows/autofix.yml and change only the lines marked ADAPT.
+# Contract: https://github.com/mitodl/ol-github-workflows/blob/main/docs/prek-autofix-contract.md
+# Playbook: https://github.com/mitodl/ol-github-workflows/blob/main/docs/prek-autofix-playbook.md
+# Source:   https://github.com/mitodl/ol-github-workflows/blob/main/workflow-templates/autofix-uv.yml
+#
+# The repository declares prek in its own dependency group, included by `dev`:
+#
+#   [dependency-groups]
+#   prek = ["prek==X.Y.Z"]
+#   dev = [{include-group = "prek"}, ...]
+#
+# so `uv sync` installs it locally and CI installs only it, hash-checked against uv.lock.
+name: autofix.ci # autofix.ci refuses to run under any other name
+on:
+  pull_request:
+  push:
+    branches: [master] # ADAPT: the repository's default branch
+permissions:
+  contents: read
+concurrency:
+  group: autofix-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  prek:
+    name: prek # the required-check context; keep it stable
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # ADAPT: private repositories delete this block (contract §3.1)
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.20"
+      - name: Install prek from uv.lock
+        run: |
+          uv sync --frozen --only-group prek
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/prek
+          key: prek-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: package.json # ADAPT: the repository pins Node
+      # Cache the package manager's download cache, not node_modules. Yarn checks each
+      # cached archive against its checksum in yarn.lock and fails the install on a
+      # mismatch (YN0018). A pull_request run saves only to its own ref, and restores its
+      # own ref's cache or else the default branch's.
+      - name: Locate the package cache
+        run: |
+          corepack enable
+          cache="$(yarn config get cacheFolder)" # ADAPT: `npm config get cache` in npm repositories
+          if [ -z "$cache" ] || [ "$cache" = undefined ]; then
+            echo "::error::Could not read the package manager's cache folder (Yarn 1 has none)."
+            exit 1
+          fi
+          echo "PACKAGE_CACHE=$cache" >> "$GITHUB_ENV"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PACKAGE_CACHE }}
+          key: packages-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }} # ADAPT: package-lock.json in npm repositories
+      - name: Install dependencies from the lockfile
+        run: |
+          yarn install --immutable # ADAPT: `npm ci` in npm repositories
+          echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+      - name: Tree is clean before hooks run
+        id: clean-tree
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Setup left changes in the working tree, and autofix.ci would commit them."
+            git status --porcelain
+            exit 1
+          fi
+      - name: prek (fixing pass)
+        id: fixing-pass
+        run: prek run --all-files --color=always || true
+      - name: prek (must converge)
+        id: converge
+        run: prek run --all-files --show-diff-on-failure --color=always
+      - name: Default branch has no fixable drift
+        id: no-drift
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Hooks changed files on ${GITHUB_REF_NAME}. Commit these fixes in a pull request."
+            git status --porcelain
+            git diff
+            exit 1
+          fi
+      - uses: autofix-ci/action@c5b2d67aa2274e7b5a18224e8171550871fc7e4a # v1.3.4
+        id: autofix
+        if: github.event_name == 'pull_request'
+        with:
+          fail-fast: false
