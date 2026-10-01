@@ -79,7 +79,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+prek = ["prek==0.5.3"]
 dev = [
+    { include-group = "prek" },
     "bpython",
     "django-debug-toolbar",
     "factory-boy==3.3.3",

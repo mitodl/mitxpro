@@ -38,7 +38,7 @@ jobs:
         run: sudo apt-get update -y
 
       - name: Apt install
-        run: cat Aptfile | sudo xargs apt-get install
+        run: xargs sudo apt-get install < Aptfile
 
       - name: Install uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
@@ -70,7 +70,8 @@ jobs:
 
       - name: Tests
         run: |
-          export MEDIA_ROOT="$(mktemp -d)"
+          MEDIA_ROOT="$(mktemp -d)"
+          export MEDIA_ROOT
           uv run ./scripts/test/python_tests.sh
         env:
           DEBUG: False
@@ -117,7 +118,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
-        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+        run: echo "dir=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)

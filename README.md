@@ -78,9 +78,9 @@ for running the app
     docker-compose run --rm web pytest /path/to/test.py -k test_some_logic
 
     ### PYTHON FORMATTING
-    # We have a Ruff hook in the pre-commit that checks and formats files wherever possible.
-    pip install pre-commit
-    pre-commit run --all-files
+    # We have a Ruff hook in prek that checks and formats files wherever possible.
+    uv sync
+    uv run prek run --all-files
 
     ### JS/CSS TESTS/LINTING
     # We also include a helper script to execute JS tests in most of our projects
@@ -164,15 +164,18 @@ would in a Django shell.
 To ensure commits to github are safe, you should install the following first:
 
 ```
-pip install pre_commit
-pre-commit install
+uv sync
+uv run prek install -f
 ```
 
-To automatically install precommit hooks when cloning a repo, you can run this:
+The `prek` check runs all hooks on pull requests, and autofix.ci pushes fixable changes.
+`prek install -f` replaces an existing pre-commit git hook.
+
+To automatically install prek hooks when cloning a repo, you can run this:
 
 ```
 git config --global init.templateDir ~/.git-template
-pre-commit init-templatedir ~/.git-template
+uv run prek init-templatedir ~/.git-template
 ```
 
 # Updating python dependencies
