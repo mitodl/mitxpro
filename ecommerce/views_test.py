@@ -3,12 +3,13 @@
 import json
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from urllib.parse import quote_plus, urljoin
+from urllib.parse import urljoin
 
 import factory
 import faker
 import pytest
 from unittest.mock import patch
+from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.db.models import Count, Q
 from django.test import Client
@@ -169,10 +170,12 @@ def test_creates_order(basket_client, mocker, basket_and_coupons):
     assert generate_payload_mock.call_args[0] == ()
     assert generate_payload_mock.call_args[1] == {
         "order": order,
+        # From SITE_BASE_URL, not the request host: the URLs CyberSource sends
+        # the learner back to must not inherit the proxy's http scheme.
         "receipt_url": make_receipt_url(
-            base_url="http://testserver", readable_id=text_id
+            base_url=settings.SITE_BASE_URL, readable_id=text_id
         ),
-        "cancel_url": "http://testserver/checkout/",
+        "cancel_url": urljoin(settings.SITE_BASE_URL, "checkout/"),
         "ip_address": fake_ip,
     }
 
@@ -222,7 +225,7 @@ def test_zero_price_checkout(  # noqa: PLR0913
             "courseware_id": text_id,
             "reference_number": f"REF-{order.id}",
         },
-        "url": f"http://testserver/dashboard/?status=purchased&purchased={quote_plus(text_id)}",
+        "url": make_receipt_url(base_url=settings.SITE_BASE_URL, readable_id=text_id),
         "method": "GET",
     }
 
@@ -1885,3 +1888,36 @@ def test_put_calls_update_coupon_and_handles_errors(
 
         assert response.status_code == expected_status_code
         assert expected_response_part in response.data
+
+
+def test_return_urls_are_https_behind_the_proxy(
+    settings, basket_client, mocker, basket_and_coupons
+):
+    """
+    TLS terminates upstream and Django is not told, so the request it sees is
+    http. The URLs CyberSource sends the learner back to must still be https:
+    CyberSource makes the browser POST its reply to them, and an http target
+    makes Chrome warn that the learner's payment details are not secure.
+    """
+    settings.SITE_BASE_URL = "https://xpro.mit.edu"
+    line = LineFactory.create(
+        order__status=Order.CREATED, product_version=basket_and_coupons.product_version
+    )
+    mocker.patch(
+        "ecommerce.views.create_or_update_unfulfilled_order",
+        autospec=True,
+        return_value=line.order,
+    )
+    generate_payload_mock = mocker.patch(
+        "ecommerce.views.generate_cybersource_sa_payload",
+        autospec=True,
+        return_value={},
+    )
+
+    # The test client speaks http, standing in for the proxy.
+    resp = basket_client.post(reverse("checkout"))
+
+    assert resp.status_code == status.HTTP_200_OK
+    kwargs = generate_payload_mock.call_args[1]
+    assert kwargs["receipt_url"].startswith("https://xpro.mit.edu/")
+    assert kwargs["cancel_url"].startswith("https://xpro.mit.edu/")

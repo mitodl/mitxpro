@@ -5,6 +5,7 @@ from urllib.parse import urlencode, urljoin
 
 import faker
 import pytest
+from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 
@@ -83,7 +84,7 @@ def test_create_order(client, mocker):
     assert order.per_item_price == product_version.price
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
-    base_url = "http://testserver/"
+    base_url = settings.SITE_BASE_URL
     receipt_url = f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
     assert generate_mock.call_count == 1
     assert generate_mock.call_args[0] == ()
@@ -136,7 +137,7 @@ def test_create_order_with_coupon(client, mocker):
     assert order.b2bcouponredemption_set.first().coupon == coupon
     assert order.num_seats == num_seats
     assert order.b2breceipt_set.count() == 0
-    base_url = "http://testserver/"
+    base_url = settings.SITE_BASE_URL
     receipt_url = f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
     assert generate_payload_mock.call_count == 1
     assert generate_payload_mock.call_args[0] == ()
@@ -277,7 +278,7 @@ def test_zero_price_checkout(client, mocker):
     )
     assert B2BOrder.objects.count() == 1
     order = B2BOrder.objects.first()
-    base_url = "http://testserver"
+    base_url = settings.SITE_BASE_URL
     receipt_url = f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?hash={str(order.unique_id)}"  # noqa: RUF010
     assert resp.status_code == status.HTTP_200_OK
     assert resp.json() == {"payload": {}, "url": receipt_url, "method": "GET"}
