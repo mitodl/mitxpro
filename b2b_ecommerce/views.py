@@ -126,7 +126,10 @@ class B2BCheckoutView(APIView):
             if coupon:
                 B2BCouponRedemption.objects.create(coupon=coupon, order=order)
 
-        base_url = request.build_absolute_uri("/")
+        # See the note in ecommerce.views.CheckoutView: the request's scheme is
+        # http behind the proxy, and CyberSource posts its reply here through the
+        # learner's browser.
+        base_url = settings.SITE_BASE_URL
         receipt_url = (
             f"{urljoin(base_url, reverse('bulk-enrollment-code-receipt'))}?"
             f"{urlencode({'hash': str(order.unique_id)})}"

@@ -225,7 +225,12 @@ class CheckoutView(APIView):
         order = create_or_update_unfulfilled_order(
             validated_basket, affiliate_id=affiliate_id, request=request
         )
-        base_url = request.build_absolute_uri("/")
+        # Built from SITE_BASE_URL, not the request: TLS terminates upstream and
+        # Django is not told about it, so build_absolute_uri() reports http://.
+        # CyberSource makes the learner's browser POST its reply to this URL, and
+        # an http:// target makes Chrome warn that their payment details are not
+        # secure.
+        base_url = settings.SITE_BASE_URL
         text_id = validated_basket.product_version.product.content_object.text_id
         receipt_url = make_receipt_url(base_url=base_url, readable_id=text_id)
         user_ip, _ = get_client_ip(request)
