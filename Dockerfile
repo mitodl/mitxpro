@@ -30,7 +30,7 @@ RUN --mount=type=cache,target=/opt/uv-cache,uid=1000,gid=1000 \
     uv sync --frozen --no-install-project --no-dev
 
 # ─── Node / frontend asset build ─────────────────────────────────────────────
-FROM node:24-slim AS node_builder
+FROM node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS node_builder
 COPY . /src
 WORKDIR /src
 ENV NODE_ENV=production
