@@ -1,6 +1,38 @@
 Release Notes
 =============
 
+Version 0.200.0
+---------------
+
+- fix(ecommerce): build CyberSource return URLs from SITE_BASE_URL (#4119)
+- chore(deps): update codecov/codecov-action action to v7.1.1 (#4122)
+- fix(deps): update dependency boto3 to v1.43.98 (#4121)
+- chore(deps): update dependency @babel/eslint-parser to v7.29.9 (#4110)
+- fix(deps): update dependency psycopg2 to v2.9.13 (#4114)
+- chore: remove the interim pre-commit.ci ci: block
+- ci: correct the codecov-action version comments
+- ci: pin prek 0.5.3
+- ci: fix actionlint drift with runner ShellCheck
+- ci: run hooks with prek and autofix.ci
+- chore(deps): update dependency prettier to v3.9.9 (#4112)
+- chore(deps): update dependency posthog-js to v1.434.13 (#4111)
+- fix(deps): update dependency boto3 to v1.43.93 (#4113)
+- chore(deps): update dependency js-yaml to v5.4.2 (#4102)
+- chore(deps): update dependency @sentry/browser to v10.75.3 (#4108)
+- [pre-commit.ci] pre-commit autoupdate (#4109)
+- chore(deps): update dependency hls.js to v1.7.3 (#4101)
+- chore(deps): update dependency css-loader to v7.1.5 (#4081)
+- chore(deps): update dependency posthog-js to v1.434.0 (#4106)
+- chore(deps): update dependency autoprefixer to v10.6.1 (#4093)
+- [pre-commit.ci] pre-commit autoupdate (#4100)
+- fix(sentry): cap request bodies at 1KB and scrub Postgres DETAIL rows (#4088)
+- chore: remove xpro-enrollment-welcome-email feature flag (#4091)
+- chore(deps): update dependency stylelint to v17.15.0 (#4098)
+- chore(deps): update dependency posthog-js to v1.430.2 (#4097)
+- chore(deps): update dependency @sentry/browser to v10.74.0 (#4096)
+- fix: contain per-course integrity errors in external course sync
+- fix: scope external course readable_id to the vendor
+
 Version 0.199.0
 ---------------
 
