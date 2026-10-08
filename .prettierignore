@@ -1,5 +1,6 @@
 .venv/
 .yarn/
+.pytest_cache/
 flow-typed/npm/
 static/js/flow/
 static/js/vendor/
