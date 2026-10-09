@@ -2609,27 +2609,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser-utils@npm:10.75.3":
-  version: 10.75.3
-  resolution: "@sentry/browser-utils@npm:10.75.3"
+"@sentry/browser-utils@npm:10.76.2":
+  version: 10.76.2
+  resolution: "@sentry/browser-utils@npm:10.76.2"
   dependencies:
     "@sentry/conventions": ^0.16.0
-    "@sentry/core": 10.75.3
-  checksum: bbd4fdf3245f4a6e9f8b9b0044ec704cbd77a4f287d5bf91fd30971f13b1797b8195b543c6614040aa08cc6987b150d9c9fc79750e8447a5af87e1a026aec556
+    "@sentry/core": 10.76.2
+  checksum: bf5481a25a0c2ba2db9fd35f8fa9755710b12e2d53aa455172286a38935e85d1a9119b022a2fb00094b35437a4b339ae72e75884aa6ee6097c3d4c055be7c55f
   languageName: node
   linkType: hard
 
 "@sentry/browser@npm:^10.0.0":
-  version: 10.75.3
-  resolution: "@sentry/browser@npm:10.75.3"
+  version: 10.76.2
+  resolution: "@sentry/browser@npm:10.76.2"
   dependencies:
-    "@sentry/browser-utils": 10.75.3
+    "@sentry/browser-utils": 10.76.2
     "@sentry/conventions": ^0.16.0
-    "@sentry/core": 10.75.3
-    "@sentry/feedback": 10.75.3
-    "@sentry/replay": 10.75.3
-    "@sentry/replay-canvas": 10.75.3
-  checksum: 37a37cab0687f7b5b990d73d1bd26d05e386f240221fc76e2a3cd9673ee3c2ba5f2e1037297a588bcbd61fdaa0e5933bf8fdb002f145f56aa696f3288040c10a
+    "@sentry/core": 10.76.2
+    "@sentry/feedback": 10.76.2
+    "@sentry/replay": 10.76.2
+    "@sentry/replay-canvas": 10.76.2
+  checksum: a4c7c7c95c79c42a0d6ab4a7fa50ace81ad097e67d9d2de1a3ae6e1f30cf2da7d3209f8421bbd9dfbf59e54b740501018b605c2c051e1c4241a19b4de39f937a
   languageName: node
   linkType: hard
 
@@ -2640,41 +2640,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:10.75.3":
-  version: 10.75.3
-  resolution: "@sentry/core@npm:10.75.3"
+"@sentry/core@npm:10.76.2":
+  version: 10.76.2
+  resolution: "@sentry/core@npm:10.76.2"
   dependencies:
     "@sentry/conventions": ^0.16.0
-  checksum: 07c1a0afeff183888b24a6c2444a2f3ed89594766670dbad83f3d6ebef01a5e3c42723fdc6117686511f2cd33d35e812ccf0af911ee5d39a05235e6c61ac7f5c
+  checksum: 66fe7071ca72c82446f40035dd3debdc6e19b0a1c72f317e913febff42ccbae92cd6aefb30a71af04abe6b3799c0eb2477d5e8ff963021f9c70ce32c99abb7cb
   languageName: node
   linkType: hard
 
-"@sentry/feedback@npm:10.75.3":
-  version: 10.75.3
-  resolution: "@sentry/feedback@npm:10.75.3"
+"@sentry/feedback@npm:10.76.2":
+  version: 10.76.2
+  resolution: "@sentry/feedback@npm:10.76.2"
   dependencies:
-    "@sentry/core": 10.75.3
-  checksum: 8baad1d31e9371f001977e19edc15ae644aae69bf099e2fa03fb8abaa332298eb4abef585bc24abaccf8640803d176a673924c050b6e622d52f302c60355b8b9
+    "@sentry/core": 10.76.2
+  checksum: 084a22063f6ed2bcb296dbf9cc41c9597ff5c8de5f74e5b338ff99033d9c8c907396c197f507cba510438261832666c23fa618f10ae513d573944b744b5b9f8d
   languageName: node
   linkType: hard
 
-"@sentry/replay-canvas@npm:10.75.3":
-  version: 10.75.3
-  resolution: "@sentry/replay-canvas@npm:10.75.3"
+"@sentry/replay-canvas@npm:10.76.2":
+  version: 10.76.2
+  resolution: "@sentry/replay-canvas@npm:10.76.2"
   dependencies:
-    "@sentry/core": 10.75.3
-    "@sentry/replay": 10.75.3
-  checksum: 4cb70f101e811fcc5a97eb76294a3eeff53325a05fb35a02b890aac6d508f5982fc8b3065fa9ce18e790d48f14483f9fcfba23ac874d2c27fef08f6e7b4133f9
+    "@sentry/core": 10.76.2
+    "@sentry/replay": 10.76.2
+  checksum: 45aef1e17f2e0c195acc27cb5cc2add2001ea70d7ec04b468a9fdc623844192e44866124a90abe0341caa1e681f7bc4ca0bee3bdad957c9e8a8295db0a219b49
   languageName: node
   linkType: hard
 
-"@sentry/replay@npm:10.75.3":
-  version: 10.75.3
-  resolution: "@sentry/replay@npm:10.75.3"
+"@sentry/replay@npm:10.76.2":
+  version: 10.76.2
+  resolution: "@sentry/replay@npm:10.76.2"
   dependencies:
-    "@sentry/browser-utils": 10.75.3
-    "@sentry/core": 10.75.3
-  checksum: 39151940651bfd7b9c42d93c3d0190ca8d126d484a368a97e8f3d2d2b4237aef18d95093474ed6ccf28a460a8fbc2ddf1193c68f27d393abeb9d4232d4e89e6c
+    "@sentry/browser-utils": 10.76.2
+    "@sentry/core": 10.76.2
+  checksum: b148de64bb05bd1f870fb7e71a36d06cae50e06231eeef009e3a756630504ef2585f43028e13161c809dfb9d4741411e2dde31e030aee80b85e603769b859d7c
   languageName: node
   linkType: hard
 
