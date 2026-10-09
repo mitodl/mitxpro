@@ -9618,7 +9618,7 @@ __metadata:
     sass-loader: ^12.1.0
     shelljs: ^0.10.0
     sinon: ^22.0.0
-    slick-carousel: 1.8.1
+    slick-carousel: 2.0.0
     style-loader: ^3.2.1
     styled-components: ^4.2.0
     stylelint: ^17.0.0
@@ -12378,12 +12378,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"slick-carousel@npm:1.8.1":
-  version: 1.8.1
-  resolution: "slick-carousel@npm:1.8.1"
+"slick-carousel@npm:2.0.0":
+  version: 2.0.0
+  resolution: "slick-carousel@npm:2.0.0"
   peerDependencies:
     jquery: ">=1.8.0"
-  checksum: acaad391e4d8bc1c7fdb8d361faa1f1d60829b31d618b54bc38c0550a59b26de36537e0ab4bc0364176ec11d1a61d0cf11e99d8d5b1285d656673c9a1a719257
+  checksum: d88485640b75da4a6a9460b478fbe202ffd9140153bf4192fc3ee60b5fa3b2a730370486ed54d2612f9baa3cfb93f4556a44c68cf64f041dfc849aeb12a1292e
   languageName: node
   linkType: hard
 
