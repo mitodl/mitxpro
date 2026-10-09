@@ -2155,7 +2155,7 @@ requires-dist = [
     { name = "opentelemetry-instrumentation-psycopg2", specifier = ">=0.52b0" },
     { name = "opentelemetry-instrumentation-redis", specifier = ">=0.52b0" },
     { name = "opentelemetry-instrumentation-requests", specifier = ">=0.52b0" },
-    { name = "pdftotext", specifier = ">=3.0.0,<4" },
+    { name = "pdftotext", specifier = ">=4,<5" },
     { name = "pillow", specifier = "==10.4.0" },
     { name = "psycopg2", specifier = "==2.9.13" },
     { name = "pycountry", specifier = "==26.2.16" },
@@ -2532,9 +2532,9 @@ wheels = [
 
 [[package]]
 name = "pdftotext"
-version = "3.0.0"
+version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f0/99/b6c910344eb95f3dddf8e27cddcdebb51765174b0624632db4cd62d3f172/pdftotext-3.0.0.tar.gz", hash = "sha256:c3652b19154e145515a8bfa953fc6136338ed92337bdccbb53fe0d88013b1aaa", size = 113565, upload-time = "2024-12-06T23:16:31.22Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f4/f4/603a95657786fdbca99c3a65127507cb1a2d43c0c1c4d9f7a4680c56b61e/pdftotext-4.0.0.tar.gz", hash = "sha256:6c949f01bb0fea4560cc23e4b8b017188647d22f99a604a7ed3d09f72f43e634", size = 112311, upload-time = "2026-06-26T15:19:12.499Z" }
 
 [[package]]
 name = "pexpect"
