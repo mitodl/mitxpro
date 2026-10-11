@@ -1,9 +1,9 @@
 @import "variables";
-@import "node_modules/@material/layout-grid/dist/mdc.layout-grid";
-@import "node_modules/@material/top-app-bar/dist/mdc.top-app-bar";
-@import "node_modules/react-picky/dist/picky";
+@import "@material/layout-grid/dist/mdc.layout-grid";
+@import "@material/top-app-bar/dist/mdc.top-app-bar";
+@import "react-picky/dist/picky";
 @import "react-day-picker/src/style.css";
-@import "node_modules/bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";
 @import "auth";
 @import "common";
 @import "top-app-bar";
