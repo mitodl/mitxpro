@@ -7,9 +7,9 @@ if [[ -n $COVERAGE ]]; then
 elif [[ -n $CODECOV ]]; then
 	export CMD="node ./node_modules/nyc/bin/nyc.js --reporter=lcovonly -R spec mocha"
 elif [[ -n $WATCH ]]; then
-	export CMD="node ./node_modules/mocha/bin/_mocha --watch"
+	export CMD="node ./node_modules/.bin/mocha --watch"
 else
-	export CMD="node ./node_modules/mocha/bin/_mocha"
+	export CMD="node ./node_modules/.bin/mocha"
 fi
 
 export FILE_PATTERN=${1:-'"static/**/*/*_test.js"'}

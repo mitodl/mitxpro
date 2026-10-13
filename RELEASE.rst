@@ -1,6 +1,29 @@
 Release Notes
 =============
 
+Version 0.200.1
+---------------
+
+- chore(deps): update dependency js-yaml to v5.4.3 (#4138)
+- chore(deps): update dependency prek to v0.5.4 (#4140)
+- chore(deps): update pre-commit hook astral-sh/ruff-pre-commit to v0.16.9 (#4141)
+- chore(deps): update dependency posthog-js to v1.438.4 (#4143)
+- fix(deps): update dependency boto3 to v1.43.103 (#4142)
+- chore(deps): update dependency mitol-drf-lint to v2026.8.28 (#4105)
+- fix(deps): update dependency webpack-dev-middleware to v7 [security] (#4116)
+- fix(test): call mocha.js in js_test.sh for mocha 12 (#4137)
+- fix(deps): update dependency pdftotext to v4 (#4139)
+- fix(deps): update dependency django-anymail to v15.2 (#4131)
+- fix(deps): update dependency @sentry/browser to v11 (#4133)
+- fix(deps): update dependency mocha to v12 (#4136)
+- fix(deps): update dependency slick-carousel to v2 (#4134)
+- chore(deps): update dependency @sentry/browser to v10.76.0 (#4129)
+- fix(deps): update dependency boto3 to v1.43.102 (#4128)
+- chore(deps): update dependency react-day-picker to v10.0.2 (#4127)
+- chore(deps): update dependency stylelint to v17.16.0 (#4125)
+- chore(deps): update dependency chai to v6.3.0 (#4123)
+- chore(deps): update dependency posthog-js to v1.435.6 (#4124)
+
 Version 0.200.0
 ---------------
 
