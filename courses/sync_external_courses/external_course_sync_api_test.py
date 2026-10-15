@@ -21,7 +21,7 @@ from cms.factories import (
 )
 from cms.models import CertificatePage
 from courses.factories import CourseFactory, CourseRunFactory, PlatformFactory
-from courses.models import Course, CourseRun
+from courses.models import Course, CourseLanguage, CourseRun
 from courses.sync_external_courses.external_course_sync_api import (
     EMERITUS_PLATFORM_NAME,
     GLOBAL_ALUMNI_PLATFORM_NAME,
@@ -1508,3 +1508,88 @@ def test_update_external_course_runs_discards_stats_for_rolled_back_course(mocke
         assert not any("DBIP" in code for code in codes), (
             f"{key} still reports rolled-back work: {codes}"
         )
+
+
+@pytest.mark.django_db
+def test_update_external_course_runs_reports_duplicate_course_and_continues():
+    """
+    A course code matching more than one existing course is reported, not raised.
+
+    Regression test for `Course.MultipleObjectsReturned` (Sentry XPRO-8FR): nothing
+    stops two courses from sharing a platform and `external_course_id`, and the
+    exception escaped the per-course failure handling, so every course after the
+    duplicated one was skipped.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    CourseIndexPageFactory.create(parent=home_page, title="Courses")
+
+    emeritus_platform = PlatformFactory.create(name=EMERITUS_PLATFORM_NAME)
+    for readable_id in ("course-v1:xPRO+MCPO", "course-v1:xPRO+MO_MCPO"):
+        CourseFactory.create(
+            title="Materials Characterization and Process Optimization",
+            readable_id=readable_id,
+            platform=emeritus_platform,
+            external_course_id="MO-MCPO",
+            page=None,
+            is_external=True,
+        )
+
+    stats_collector = update_external_course_runs(
+        [
+            _external_course_row("MO-MCPO", "MO-MCPO-99-09#1"),
+            _external_course_row("MO-PCCY", "MO-PCCY-99-09#1"),
+        ],
+        keymap=EmeritusKeyMap(),
+    )
+    stats = stats_collector.get_unformatted_stats()
+
+    assert [(item.code, item.msg) for item in stats["courses_failed"]] == [
+        ("MO-MCPO", "More than one existing Course matches, see the logs for details.")
+    ]
+    assert Course.objects.filter(external_course_id="MO-MCPO").count() == 2
+    assert not CourseRun.objects.filter(
+        external_course_run_id="MO-MCPO-99-09#1"
+    ).exists()
+
+    # The rest of the batch still syncs.
+    assert [item.code for item in stats["courses_created"]] == ["MO-PCCY"]
+    assert Course.objects.filter(external_course_id="MO-PCCY").exists()
+
+
+@pytest.mark.django_db
+def test_update_external_course_runs_names_model_matching_multiple_records():
+    """
+    The failure reason names the model whose lookup matched more than one record.
+
+    Lookups other than the course's can also match several records, e.g. the
+    `name__icontains` language lookup, and the sync email shouldn't send operators
+    looking for duplicate courses that don't exist.
+    """
+    home_page = HomePageFactory.create(title="Home Page", subhead="<p>subhead</p>")
+    CourseIndexPageFactory.create(parent=home_page, title="Courses")
+    CourseLanguage.objects.create(name="Klingon")
+    CourseLanguage.objects.create(name="Klingon (Classic)")
+
+    stats_collector = update_external_course_runs(
+        [
+            {
+                **_external_course_row("MO-DBIP", "MO-DBIP-99-09#1"),
+                "language": "Klingon",
+            },
+            {
+                **_external_course_row("MO-PCCY", "MO-PCCY-99-09#1"),
+                "language": "English",
+            },
+        ],
+        keymap=EmeritusKeyMap(),
+    )
+    stats = stats_collector.get_unformatted_stats()
+
+    assert [(item.code, item.msg) for item in stats["courses_failed"]] == [
+        (
+            "MO-DBIP",
+            "More than one existing CourseLanguage matches, see the logs for details.",
+        )
+    ]
+    assert not Course.objects.filter(external_course_id="MO-DBIP").exists()
+    assert [item.code for item in stats["courses_created"]] == ["MO-PCCY"]

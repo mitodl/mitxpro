@@ -11,6 +11,7 @@ from enum import Enum
 from pathlib import Path
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import IntegrityError, transaction
 from django.db.models import Prefetch
 from wagtail.images.models import Image
@@ -285,11 +286,12 @@ def fetch_external_courses(keymap):
 @contextmanager
 def atomic_or_record_failure(stats_collector, external_course, course_index_page):
     """
-    Sync a single course in a transaction, recording integrity errors instead of raising.
+    Sync a single course in a transaction, recording data errors instead of raising.
 
     A course that collides with an existing one on a unique constraint (e.g. two vendors
-    shipping the same course tag) would otherwise abort the sync for the rest of the
-    platform's catalog and suppress the stats email entirely.
+    shipping the same course tag), or whose code matches more than one existing course,
+    would otherwise abort the sync for the rest of the platform's catalog and suppress
+    the stats email entirely.
 
     Args:
         stats_collector(StatsCollector): collector to record the failure in
@@ -306,20 +308,34 @@ def atomic_or_record_failure(stats_collector, external_course, course_index_page
         # treats it as sensitive. It is recorded in the stat (and the sync email)
         # instead, and the traceback identifies the course in Sentry.
         log.exception("Failed to sync an external course due to an integrity error.")
-        # Everything recorded for this course describes work the rollback just undid,
-        # so drop it rather than report it as created.
-        stats_collector.restore(stats_snapshot)
-        # `add_child()` increments the cached index page's `numchild` in memory while
-        # the database copy is updated separately, so the rollback leaves the cached
-        # value too high and the next course would compute a child path from a
-        # `get_last_child()` that no longer exists.
-        course_index_page.refresh_from_db()
-        stats_collector.add_stat(
-            "courses_failed",
-            external_course.course_code,
-            external_course.course_title,
-            "Database integrity error, see the logs for details.",
+        reason = "Database integrity error, see the logs for details."
+    except MultipleObjectsReturned as exc:
+        # Nothing makes `external_course_id` unique per platform, so duplicate rows
+        # can exist. Picking one could attach runs and products to the wrong course,
+        # so the course is skipped until the duplicates are cleaned up. Other lookups
+        # (e.g. the course language) can also match several rows, so the reason names
+        # the model, which Django puts in the class name (`Course.MultipleObjectsReturned`).
+        log.exception("Failed to sync an external course matching multiple records.")
+        model_name = type(exc).__qualname__.rpartition(".")[0] or "record"
+        reason = (
+            f"More than one existing {model_name} matches, see the logs for details."
         )
+    else:
+        return
+    # Everything recorded for this course describes work the rollback just undid,
+    # so drop it rather than report it as created.
+    stats_collector.restore(stats_snapshot)
+    # `add_child()` increments the cached index page's `numchild` in memory while
+    # the database copy is updated separately, so the rollback leaves the cached
+    # value too high and the next course would compute a child path from a
+    # `get_last_child()` that no longer exists.
+    course_index_page.refresh_from_db()
+    stats_collector.add_stat(
+        "courses_failed",
+        external_course.course_code,
+        external_course.course_title,
+        reason,
+    )
 
 
 def update_external_course_runs(external_courses, keymap):  # noqa: C901, PLR0915
