@@ -850,6 +850,29 @@ def test_create_or_update_unfulfilled_order_mirrors_coupon_removal(validated_bas
     assert not order.couponredemption_set.exists()
 
 
+def test_create_or_update_unfulfilled_order_keeps_tax_without_request(
+    settings, validated_basket
+):
+    """
+    Re-syncing the order without a request (as the basket update does) should leave the
+    tax assessed at checkout in place, since the learner may already be paying it.
+    """
+    settings.ECOMMERCE_FORCE_PROFILE_COUNTRY = True
+    user = validated_basket.basket.user
+    tax_rate = TaxRateFactory.create(country_code=user.legal_address.country)
+    request = FakeRequest()
+    request.user = user
+
+    order = create_or_update_unfulfilled_order(validated_basket, request=request)
+    assert order.tax_rate == tax_rate.tax_rate
+
+    create_or_update_unfulfilled_order(validated_basket)
+    order.refresh_from_db()
+    assert order.tax_rate == tax_rate.tax_rate
+    assert order.tax_country_code == tax_rate.country_code
+    assert order.tax_rate_name == tax_rate.tax_rate_name
+
+
 def test_get_product_courses():
     """
     Verify that the correct list of courses for a product is returned

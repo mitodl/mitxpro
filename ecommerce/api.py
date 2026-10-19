@@ -1573,18 +1573,7 @@ def create_or_update_unfulfilled_order(validated_basket, affiliate_id=None, **kw
             coupon_version=validated_basket.coupon_version,
             product_version=validated_basket.product_version,
         )
-        country_code = determine_visitor_country(
-            kwargs["request"] if "request" in kwargs else None  # noqa: SIM401
-        )
-
-        try:
-            tax_rate_info = TaxRate.objects.filter(active=True).get(
-                country_code=country_code
-            )
-        except (TaxRate.DoesNotExist, TaxRate.MultipleObjectsReturned):
-            # not using get_or_create here because we don't want the rate to stick around
-            tax_rate_info = TaxRate()
-
+        request = kwargs.get("request")
         product = validated_basket.product_version.product
         order = (
             Order.objects.select_for_update(of=("self",))
@@ -1599,9 +1588,21 @@ def create_or_update_unfulfilled_order(validated_basket, affiliate_id=None, **kw
         if order is None:
             order = Order(status=Order.CREATED, purchaser=basket.user)
         order.total_price_paid = total_price_paid
-        order.tax_country_code = country_code
-        order.tax_rate = tax_rate_info.tax_rate
-        order.tax_rate_name = tax_rate_info.tax_rate_name
+        # Tax can only be assessed from a request (IP + profile). Basket syncs have
+        # none, and must not reset the tax set at checkout: the learner may already
+        # be on the payment page paying it.
+        if request is not None:
+            country_code = determine_visitor_country(request)
+            try:
+                tax_rate_info = TaxRate.objects.filter(active=True).get(
+                    country_code=country_code
+                )
+            except (TaxRate.DoesNotExist, TaxRate.MultipleObjectsReturned):
+                # not using get_or_create here because we don't want the rate to stick around
+                tax_rate_info = TaxRate()
+            order.tax_country_code = country_code
+            order.tax_rate = tax_rate_info.tax_rate
+            order.tax_rate_name = tax_rate_info.tax_rate_name
         order.save()
 
         # One Line per basket item, reused (same id) so its HubSpot line item is updated
