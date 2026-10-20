@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+Version 0.201.0
+---------------
+
+- fix(ecommerce): don't reset order tax on basket sync (#4146)
+- chore(deps): update dependency astral-sh/uv to v0.12.23 (#4148)
+- chore(deps): update dependency prettier to v3.9.10 (#4151)
+- fix(deps): update dependency boto3 to v1.43.108 (#4153)
+- chore(deps): update pre-commit hook astral-sh/ruff-pre-commit to v0.16.10 (#4152)
+- chore(deps): update dependency prek to v0.5.5 (#4150)
+- chore(deps): update dependency posthog-js to v1.438.12 (#4149)
+- fix: skip external courses matching multiple records instead of aborting sync
+
 Version 0.200.1
 ---------------
 
