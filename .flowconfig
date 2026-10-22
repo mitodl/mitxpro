@@ -16,7 +16,7 @@
 ./flow-typed/npm/
 
 [options]
-esproposal.class_static_fields=enable
-esproposal.class_instance_fields=enable
-suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
 module.file_ext=.cjs
+
+[lints]
+libdef-override=off
