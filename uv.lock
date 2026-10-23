@@ -21,6 +21,9 @@ mitol-django-observability = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S"
 mitol-django-olposthog = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
 mitol-drf-lint = { timestamp = "0001-01-01T00:00:00Z", span = "PT0S" }
 
+[manifest]
+constraints = [{ name = "certifi", specifier = ">=2026.10.19" }]
+
 [[package]]
 name = "amqp"
 version = "5.3.1"

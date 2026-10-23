@@ -107,6 +107,7 @@ dev = [
 ]
 
 [tool.uv]
+constraint-dependencies = ["certifi>=2026.10.19"]  # eMudhra CA compromise: never resolve a certifi that trusts the compromised CAs
 package = false
 no-binary-package = ["lxml", "xmlsec"]
 exclude-newer = "7d"
