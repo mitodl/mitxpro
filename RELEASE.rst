@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+Version 0.201.1
+---------------
+
+- Add certifi>=2026.10.19 constraint (eMudhra CA compromise) (#4158)
+- Bump certifi to 2026.10.19 (eMudhra CA compromise) (#4157)
+- fix(deps): update dependency djangorestframework to v3.18.2 [security] (#4156)
+
 Version 0.201.0
 ---------------
 
