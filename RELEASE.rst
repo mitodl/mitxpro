@@ -1,6 +1,12 @@
 Release Notes
 =============
 
+Version 0.202.0
+---------------
+
+- fix(deps): update dependency pillow to v13 [security] (#4155)
+- Merge pull request #3777 from mitodl/renovate/pypi-wagtail-vulnerability
+
 Version 0.201.1
 ---------------
 
