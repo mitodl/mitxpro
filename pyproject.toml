@@ -114,7 +114,6 @@ exclude-newer = "7d"
 required-version = ">=0.9.17"
 
 [tool.uv.exclude-newer-package]
-certifi = "0d"  # eMudhra CA compromise fix (2026.10.19), remove after 2026-10-27
 mitol-django-authentication = "0d"
 mitol-django-common = "0d"
 mitol-django-hubspot-api = "0d"
