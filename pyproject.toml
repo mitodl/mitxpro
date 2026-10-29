@@ -1,6 +1,6 @@
 [project]
 name = "mitxpro"
-version = "0.195.0"
+version = "2026.10.27.1"
 description = "MITx Pro"
 authors = [{ name = "MIT ODL" }]
 requires-python = ">=3.13,<4"
@@ -207,6 +207,7 @@ env = [
 ]
 
 [tool.bumpversion]
+current_version = "2026.10.27.1"
 commit = false
 tag = false
 parse = "(?P<release>(?:[1-9][0-9]{3})\\.(?:1[0-2]|[1-9])\\.(?:3[0-1]|[12][0-9]|[1-9]))\\.(?P<build>\\d+)"
