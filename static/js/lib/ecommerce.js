@@ -40,7 +40,7 @@ export const calculatePrice = (
 ): Decimal => {
   const price = new Decimal(item.price).minus(calculateDiscount(item, coupon));
   if (price < 0) {
-    return 0;
+    return new Decimal(0);
   } else {
     return price;
   }
