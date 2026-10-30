@@ -10132,10 +10132,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"normalize-url@npm:^9.0.0":
-  version: 9.0.1
-  resolution: "normalize-url@npm:9.0.1"
-  checksum: 96906c9fe4d60922893bdd48745add1a08d775640951ee4d119232b8398e2a2d9d42982be8b0e6b55db32cd9f6f34e77484a9998f1327accfb3bd1ae5c059c7d
+"normalize-url@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "normalize-url@npm:10.0.0"
+  checksum: 4583dbbd2eadd3764e6bed4564d64d65095a49658c408909c820167bc7b413909cefda78f0661e10edb63440696153433580b1cd0b29999bcdba21333d7afaac
   languageName: node
   linkType: hard
 
