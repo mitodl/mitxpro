@@ -16,7 +16,12 @@ import {
   formatRunTitle,
 } from "./ecommerce";
 import { makeCourseRun } from "../factories/course";
-import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../constants";
+import {
+  DISCOUNT_TYPE_DOLLARS_OFF,
+  DISCOUNT_TYPE_PERCENT_OFF,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM,
+} from "../constants";
 
 describe("ecommerce", () => {
   describe("calculatePrice", () => {
@@ -41,6 +46,36 @@ describe("ecommerce", () => {
         calculatePrice(item, coupon).toString(),
         new Decimal("61.72").toString(),
       );
+    });
+
+    [
+      [
+        "dollars-off coupon above the price",
+        "50",
+        DISCOUNT_TYPE_DOLLARS_OFF,
+        "75",
+      ],
+      [
+        "percent-off rounding above the price",
+        "50.008",
+        DISCOUNT_TYPE_PERCENT_OFF,
+        "0.99999",
+      ],
+    ].forEach(([desc, price, discountType, amount]) => {
+      it(`returns a Decimal zero for a ${desc}`, () => {
+        const item = {
+          ...makeItem(),
+          price,
+        };
+        const coupon = {
+          ...makeCouponSelection(item),
+          discount_type: discountType,
+          amount,
+        };
+        const result = calculatePrice(item, coupon);
+        assert.instanceOf(result, Decimal);
+        assert.equal(result.toString(), "0");
+      });
     });
   });
 
@@ -81,6 +116,19 @@ describe("ecommerce", () => {
         };
         assert.equal(calculateTotalAfterTax(item, coupon, taxRate), tax);
       });
+    });
+
+    it("returns zero when a dollars-off coupon exceeds the price", () => {
+      const item = {
+        ...makeItem(),
+        price: "50",
+      };
+      const coupon = {
+        ...makeCouponSelection(item),
+        discount_type: DISCOUNT_TYPE_DOLLARS_OFF,
+        amount: "75",
+      };
+      assert.equal(calculateTotalAfterTax(item, coupon, 20).toString(), "0");
     });
   });
 
