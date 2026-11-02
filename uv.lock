@@ -611,7 +611,7 @@ wheels = [
 
 [[package]]
 name = "cybersource-rest-client-python"
-version = "0.0.78"
+version = "0.0.80"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -625,7 +625,7 @@ dependencies = [
     { name = "standard-imghdr" },
     { name = "urllib3-future" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e9/20/1aea75103f031ab4e284e97cf3b8b1ef50ecff5c3740a4ce37f11f33b72e/cybersource_rest_client_python-0.0.78.tar.gz", hash = "sha256:80917a2fae4290e8d8ea76df3cdcef4d95af2a90c02b909ff925a148d2455b22", size = 1790913, upload-time = "2026-08-04T15:42:25.639Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b9/98/51c4c8c71187bf8c9cdfd613f095716d404fcc7b6e2200181f3d6733cc9d/cybersource_rest_client_python-0.0.80.tar.gz", hash = "sha256:8eeebb5db8a372141b533741041c044f1d8c9441b63d587b41afb4082d3c3b0d", size = 1913825, upload-time = "2026-10-05T09:48:25.069Z" }
 
 [[package]]
 name = "datetime"
@@ -2121,7 +2121,7 @@ requires-dist = [
     { name = "boto3", specifier = "==1.43.114" },
     { name = "celery", specifier = "==5.6.3" },
     { name = "celery-redbeat", specifier = "==2.3.3" },
-    { name = "cybersource-rest-client-python", specifier = "==0.0.78" },
+    { name = "cybersource-rest-client-python", specifier = "==0.0.80" },
     { name = "dj-database-url", specifier = "==3.1.2" },
     { name = "django", specifier = "==5.2.17" },
     { name = "django-anymail", extras = ["mailgun"], specifier = "==15.2" },
