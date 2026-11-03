@@ -10,6 +10,6 @@ jobs:
   add-to-hq:
     permissions:
       contents: read
-    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@edd566dec1edd920d35ab1fb60b589cddc44afad # main
+    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@d56e69b360897777af9b8c15885ae5d1e72508e4 # main
     secrets:
       OL_HQ_PROJECT_SECRET: ${{ secrets.OL_HQ_PROJECT_SECRET }}
