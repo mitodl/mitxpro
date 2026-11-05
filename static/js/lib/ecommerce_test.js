@@ -55,6 +55,7 @@ describe("ecommerce", () => {
         DISCOUNT_TYPE_DOLLARS_OFF,
         "75",
       ],
+      // Real prices are 2dp, so this only guards against the factory's unrounded prices
       [
         "percent-off rounding above the price",
         "50.008",
