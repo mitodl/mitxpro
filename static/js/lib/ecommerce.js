@@ -39,8 +39,8 @@ export const calculatePrice = (
   coupon: ?CouponSelection,
 ): Decimal => {
   const price = new Decimal(item.price).minus(calculateDiscount(item, coupon));
-  if (price < 0) {
-    return 0;
+  if (price.isNegative()) {
+    return new Decimal(0);
   } else {
     return price;
   }

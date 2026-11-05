@@ -19,7 +19,11 @@ import {
   formatRunTitle,
   calcSelectedRunIds,
 } from "../../lib/ecommerce";
-import { PRODUCT_TYPE_COURSERUN, PRODUCT_TYPE_PROGRAM } from "../../constants";
+import {
+  DISCOUNT_TYPE_DOLLARS_OFF,
+  PRODUCT_TYPE_COURSERUN,
+  PRODUCT_TYPE_PROGRAM,
+} from "../../constants";
 import { isIf, shouldIf } from "../../lib/test_utils";
 
 describe("CheckoutForm", () => {
@@ -149,6 +153,21 @@ describe("CheckoutForm", () => {
         `Total Before Tax:${formatPrice(calculatePrice(basketItem, hasCoupon ? coupon : null))}`,
       );
     });
+  });
+
+  it("shows a zero total when a dollars-off coupon exceeds the price", async () => {
+    SETTINGS.is_tax_applicable = true;
+    basketItem.price = "50";
+
+    const inner = await renderForm({
+      coupon: {
+        ...coupon,
+        discount_type: DISCOUNT_TYPE_DOLLARS_OFF,
+        amount: "75",
+      },
+    });
+
+    assert.equal(inner.find(".total-row").text(), "Total:$0.00");
   });
 
   it("renders a course run basket item", async () => {
