@@ -32,7 +32,7 @@ services:
       - "6379"
 
   nginx:
-    image: nginx:1.31.4@sha256:b34848eff6db786b6b1282d3a9c3fd0b5563dfb6d261df4923378b419e0d24f0
+    image: nginx:1.31.7@sha256:8632b3314d74c61f0e27f59055bab13f7793b988c94c090154d867bc29e0f39b
     ports:
       - "8053:8053"
     links:
