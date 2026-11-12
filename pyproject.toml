@@ -101,7 +101,6 @@ dev = [
     "pytest-mock",
     "pytest-xdist",
     "responses",
-    "safety",
     "semantic-version",
     "wagtail-factories",
 ]
