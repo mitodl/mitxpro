@@ -365,7 +365,13 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
 
     def create(self, validated_data):  # noqa: ARG002
         """Try to 'save' the request"""
-        return super()._authenticate(SocialAuthState.FLOW_REGISTER)
+        try:
+            return super()._authenticate(SocialAuthState.FLOW_REGISTER)
+        except AuthSessionError:
+            # The link's partial can't be resumed, e.g. it was emailed before the
+            # social-auth-core 6 upgrade and lacks the external-resume flag: treat it as an
+            # expired link so the user registers again.
+            return SocialAuthState(SocialAuthState.STATE_INVALID_LINK)
 
 
 class RegisterDetailsSerializer(SocialAuthSerializer):
