@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 
+from django.utils.datastructures import MultiValueDict
 from social_core.utils import PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME
 from social_django.strategy import (
     PARTIAL_PIPELINE_CONFIRMATION_NONCE_PARAMETER,
@@ -9,6 +10,8 @@ from social_django.strategy import (
 )
 
 PARTIAL_PIPELINE_CONFIRMATION_PARAMETER = "partial_pipeline_confirm"
+# request fields that must never be written to stored partials or the session
+SENSITIVE_REQUEST_FIELDS = frozenset({"password"})
 
 
 @dataclass(frozen=True)
@@ -41,10 +44,24 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
         if not self.drf_request:
             return {}
 
-        # DRF stores json payload data here, not in request.POST or request.GET like PSA expects
-        if not self.extra_request_data:
-            return self.drf_request.data
-        return {**self.drf_request.data, **self.extra_request_data}
+        # DRF stores json payload data here, not in request.POST or request.GET like PSA expects.
+        # Form-encoded data arrives as a QueryDict; dict-unpacking one copies its internal lists,
+        # so normalize to plain values before anything (here or in social-core) merges it.
+        data = self.drf_request.data
+        if isinstance(data, MultiValueDict):
+            data = data.dict()
+        return {**data, **self.extra_request_data}
+
+    def to_session_value(self, val):
+        """
+        Never persist passwords: social-core 6 snapshots request data into every stored partial
+        (social_auth_partial) and into the session. Steps still read the live request.
+        """
+        if isinstance(val, MultiValueDict):
+            val = val.dict()
+        if isinstance(val, dict) and not SENSITIVE_REQUEST_FIELDS.isdisjoint(val):
+            val = {k: v for k, v in val.items() if k not in SENSITIVE_REQUEST_FIELDS}
+        return super().to_session_value(val)
 
     def partial_pipeline_external_resume_confirmation(
         self,
