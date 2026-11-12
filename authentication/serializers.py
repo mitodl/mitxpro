@@ -39,8 +39,6 @@ from authentication.utils import SocialAuthState
 from users.constants import USER_REGISTRATION_FAILED_MSG
 
 PARTIAL_PIPELINE_TOKEN_KEY = "partial_pipeline_token"  # noqa: S105
-# token of the email-verification partial, kept in the session of the browser that registered
-EMAIL_VERIFICATION_PARTIAL_TOKEN_KEY = "email_verification_partial_token"  # noqa: S105
 # social-core raises AuthCredentialError with this code when an email verification code is invalid
 EMAIL_VERIFICATION_REJECTED = "email_verification_rejected"
 
@@ -106,22 +104,16 @@ class SocialAuthSerializer(serializers.Serializer):
             strategy.session_pop(PARTIAL_PIPELINE_TOKEN_KEY)
         result = partial_pipeline_result(backend, user, **kwargs)
         if isinstance(result.response, ExternalResumeConfirmation):
-            confirmation = result.response
-            if confirmation.token != strategy.session_get(
-                EMAIL_VERIFICATION_PARTIAL_TOKEN_KEY
-            ):
-                # The verification link was opened in a browser that didn't start this
-                # registration; the user has to explicitly confirm before it resumes.
-                return SocialAuthState(
-                    SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED,
-                    extra_data={
-                        "email": confirmation.email,
-                        "confirmation_nonce": confirmation.nonce,
-                    },
-                )
-            # same browser that registered, so confirm on the user's behalf
-            strategy.confirm_external_resume(confirmation.nonce)
-            result = partial_pipeline_result(backend, user, **kwargs)
+            # A verification link always needs an explicit confirmation before it resumes, even
+            # in the browser that registered: the auth API has no CSRF protection, so another
+            # site could have started that registration in this browser.
+            return SocialAuthState(
+                SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED,
+                extra_data={
+                    "email": result.response.email,
+                    "confirmation_nonce": result.response.nonce,
+                },
+            )
 
         partial = result.partial
         if partial is None and result.halt:
@@ -243,12 +235,8 @@ class SocialAuthSerializer(serializers.Serializer):
                 # object, and we only want to continue the pipeline with that object if the user has
                 # clicked the email verification link and the Partial has been matched from
                 # the verification URL (that URL also contains the verification code, which we need
-                # to continue the pipeline). Remember the token separately so that opening the
-                # link in this same browser can resume without an extra confirmation step.
-                session = self.context["backend"].strategy.session
-                session[EMAIL_VERIFICATION_PARTIAL_TOKEN_KEY] = session.pop(
-                    PARTIAL_PIPELINE_TOKEN_KEY
-                )
+                # to continue the pipeline).
+                self.context["backend"].strategy.session.pop(PARTIAL_PIPELINE_TOKEN_KEY)
         else:
             # if we got here, we saw an unexpected result
             log.error("Received unexpected result: %s", result)
