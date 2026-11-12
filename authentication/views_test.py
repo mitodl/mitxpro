@@ -202,7 +202,9 @@ class AuthStateMachine(RuleBasedStateMachine):
     def confirm_link_nonce(self, link_payload):
         """Open a verification link: it always asks for confirmation; return the nonce"""
         result = self.client.post(
-            reverse("psa-register-confirm"), link_payload, content_type="application/json"
+            reverse("psa-register-confirm"),
+            link_payload,
+            content_type="application/json",
         ).json()
         assert result["state"] == SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED
         return result["extra_data"]["confirmation_nonce"]
