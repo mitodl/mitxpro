@@ -1,5 +1,6 @@
 """Tests for authentication views"""
 
+import json
 from contextlib import ExitStack, contextmanager
 from unittest.mock import MagicMock, patch
 
@@ -40,6 +41,8 @@ from compliance.test_utils import (
     make_cybersource_response,
 )
 from mitxpro.test_utils import MockResponse, any_instance_of
+from social_django.models import Partial
+
 from users.factories import UserFactory, UserSocialAuthFactory
 
 pytestmark = [pytest.mark.django_db]
@@ -862,6 +865,37 @@ def test_register_confirm_abandoned_by_new_registration(mock_email_send):
     )
     assert result["state"] != SocialAuthState.STATE_REGISTER_DETAILS
     assert result["partial_token"] is None
+
+
+@pytest.mark.django_db
+def test_partials_do_not_store_password():
+    """The password submitted to a partial pipeline step is never persisted in a stored Partial"""
+    password = "a-very-secret-passw0rd"  # noqa: S105
+    user = UserFactory.create(email=NEW_EMAIL)
+    user.set_password("the-real-passw0rd")
+    user.save()
+    UserSocialAuthFactory.create(user=user, provider=EmailAuth.name, uid=user.email)
+    client = Client()
+    partial_token = _post(
+        client,
+        "psa-login-email",
+        {"flow": SocialAuthState.FLOW_LOGIN, "email": NEW_EMAIL},
+    )["partial_token"]
+
+    result = _post(
+        client,
+        "psa-login-password",
+        {
+            "flow": SocialAuthState.FLOW_LOGIN,
+            "partial_token": partial_token,
+            "password": password,
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_ERROR
+    assert Partial.objects.exists()
+    for partial in Partial.objects.all():
+        assert password not in json.dumps(partial.data)
 
 
 @pytest.mark.django_db
