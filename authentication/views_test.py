@@ -199,6 +199,14 @@ class AuthStateMachine(RuleBasedStateMachine):
         transaction.set_rollback(True)  # noqa: FBT003, RUF100
         self.atomic.__exit__(None, None, None)
 
+    def confirm_link_nonce(self, link_payload):
+        """Open a verification link: it always asks for confirmation; return the nonce"""
+        result = self.client.post(
+            reverse("psa-register-confirm"), link_payload, content_type="application/json"
+        ).json()
+        assert result["state"] == SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED
+        return result["extra_data"]["confirmation_nonce"]
+
     def create_existing_user(self):
         """Create an existing user"""
         self.user = UserFactory.create(email=self.email)
@@ -502,13 +510,35 @@ class AuthStateMachine(RuleBasedStateMachine):
     def redeem_confirmation_code(self, auth_state):
         """Redeem a registration confirmation code"""
         _, _, code, partial_token = self.mock_email_send.call_args[0]
+        link_payload = {
+            "flow": auth_state["flow"],
+            "verification_code": code.code,
+            "partial_token": partial_token,
+        }
+        # opening the link always asks the user to confirm the email first
+        prompt = assert_api_call(
+            self.client,
+            "psa-register-confirm",
+            link_payload,
+            {
+                "flow": auth_state["flow"],
+                "state": SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED,
+                "partial_token": None,
+                "extra_data": {
+                    "email": self.email,
+                    "confirmation_nonce": any_instance_of(str),
+                },
+            },
+        )
         return assert_api_call(
             self.client,
             "psa-register-confirm",
             {
-                "flow": auth_state["flow"],
-                "verification_code": code.code,
-                "partial_token": partial_token,
+                **link_payload,
+                "partial_pipeline_confirm": "1",
+                "partial_pipeline_confirm_nonce": prompt["extra_data"][
+                    "confirmation_nonce"
+                ],
             },
             {
                 "flow": auth_state["flow"],
@@ -520,13 +550,18 @@ class AuthStateMachine(RuleBasedStateMachine):
     def redeem_confirmation_code_twice(self, auth_state):
         """Redeeming a code twice should fail"""
         _, _, code, partial_token = self.mock_email_send.call_args[0]
+        link_payload = {
+            "flow": auth_state["flow"],
+            "verification_code": code.code,
+            "partial_token": partial_token,
+        }
         assert_api_call(
             self.client,
             "psa-register-confirm",
             {
-                "flow": auth_state["flow"],
-                "verification_code": code.code,
-                "partial_token": partial_token,
+                **link_payload,
+                "partial_pipeline_confirm": "1",
+                "partial_pipeline_confirm_nonce": self.confirm_link_nonce(link_payload),
             },
             {
                 "errors": [],
@@ -541,14 +576,19 @@ class AuthStateMachine(RuleBasedStateMachine):
     def redeem_confirmation_code_twice_existing_user(self, auth_state):
         """Redeeming a code twice with an existing user should fail with existing account state"""
         _, _, code, partial_token = self.mock_email_send.call_args[0]
+        link_payload = {
+            "flow": auth_state["flow"],
+            "verification_code": code.code,
+            "partial_token": partial_token,
+        }
         self.create_existing_user()
         assert_api_call(
             self.client,
             "psa-register-confirm",
             {
-                "flow": auth_state["flow"],
-                "verification_code": code.code,
-                "partial_token": partial_token,
+                **link_payload,
+                "partial_pipeline_confirm": "1",
+                "partial_pipeline_confirm_nonce": self.confirm_link_nonce(link_payload),
             },
             {
                 "errors": [],
@@ -811,6 +851,55 @@ def test_register_confirm_in_other_browser_requires_confirmation(mock_email_send
     )
     assert result["state"] == SocialAuthState.STATE_REGISTER_DETAILS
     assert result["partial_token"]
+
+
+@pytest.mark.django_db
+def test_register_confirm_in_same_browser_requires_confirmation(mock_email_send):
+    """
+    The browser that registered also has to confirm: the auth API has no CSRF protection, so
+    another site could have started the registration in it
+    """
+    client = Client()
+    code, partial_token = _start_registration(client, mock_email_send)
+
+    result = _post(
+        client,
+        "psa-register-confirm",
+        {
+            "flow": SocialAuthState.FLOW_REGISTER,
+            "verification_code": code,
+            "partial_token": partial_token,
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED
+    assert result["extra_data"]["email"] == NEW_EMAIL
+
+
+@pytest.mark.django_db
+def test_register_confirm_continue_form_encoded(mock_email_send):
+    """A form-encoded Continue resumes registration (request values must not become lists)"""
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    browser = Client()
+    link_payload = {
+        "flow": SocialAuthState.FLOW_REGISTER,
+        "verification_code": code,
+        "partial_token": partial_token,
+    }
+    nonce = _post(browser, "psa-register-confirm", link_payload)["extra_data"][
+        "confirmation_nonce"
+    ]
+
+    result = browser.post(
+        reverse("psa-register-confirm"),
+        {
+            **link_payload,
+            "partial_pipeline_confirm": "1",
+            "partial_pipeline_confirm_nonce": nonce,
+        },
+    ).json()
+
+    assert result["state"] == SocialAuthState.STATE_REGISTER_DETAILS
 
 
 @pytest.mark.django_db

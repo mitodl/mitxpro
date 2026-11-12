@@ -4,12 +4,8 @@ from dataclasses import dataclass
 
 from django.utils.datastructures import MultiValueDict
 from social_core.utils import PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME
-from social_django.strategy import (
-    PARTIAL_PIPELINE_CONFIRMATION_NONCE_PARAMETER,
-    DjangoStrategy,
-)
+from social_django.strategy import DjangoStrategy
 
-PARTIAL_PIPELINE_CONFIRMATION_PARAMETER = "partial_pipeline_confirm"
 # request fields that must never be written to stored partials or the session
 SENSITIVE_REQUEST_FIELDS = frozenset({"password"})
 
@@ -31,7 +27,6 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
 
     def __init__(self, storage, drf_request=None, tpl=None):
         self.drf_request = drf_request
-        self.extra_request_data = {}
         # pass the original django request to DjangoStrategy
         request = drf_request._request  # noqa: SLF001
         super().__init__(storage, request=request, tpl=tpl)
@@ -49,8 +44,8 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
         # so normalize to plain values before anything (here or in social-core) merges it.
         data = self.drf_request.data
         if isinstance(data, MultiValueDict):
-            data = data.dict()
-        return {**data, **self.extra_request_data}
+            return data.dict()
+        return dict(data)
 
     def to_session_value(self, val):
         """
@@ -77,10 +72,3 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
             nonce=nonce,
             email=(partial.kwargs.get("details") or {}).get("email"),
         )
-
-    def confirm_external_resume(self, nonce):
-        """Confirm a pending external resume on behalf of the client"""
-        self.extra_request_data = {
-            PARTIAL_PIPELINE_CONFIRMATION_PARAMETER: "1",
-            PARTIAL_PIPELINE_CONFIRMATION_NONCE_PARAMETER: nonce,
-        }

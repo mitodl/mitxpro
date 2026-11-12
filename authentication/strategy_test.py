@@ -29,21 +29,6 @@ def test_strategy_request_data(mocker, data):
     assert strategy.request_data() == {"email": "a@example.com", "partial_token": "tok"}
 
 
-def test_strategy_request_data_with_confirmation(mocker):
-    """Confirming an external resume adds the confirmation fields without turning values into lists"""
-    drf_request = mocker.Mock(
-        data=QueryDict("partial_token=tok&verification_code=code")
-    )
-    strategy = load_drf_strategy(request=drf_request)
-    strategy.confirm_external_resume("nonce")
-    assert strategy.request_data() == {
-        "partial_token": "tok",
-        "verification_code": "code",
-        "partial_pipeline_confirm": "1",
-        "partial_pipeline_confirm_nonce": "nonce",
-    }
-
-
 @pytest.mark.parametrize(
     "value",
     [
