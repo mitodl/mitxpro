@@ -22,11 +22,11 @@ def test_strategy_request_data(mocker):
 
 
 def test_strategy_clean_authenticate_args(mocker):
-    """Tests that the strategy clean_authenticate_args moves the request to kwargs"""
+    """Tests that the strategy clean_authenticate_args drops the positional request"""
     # NOTE: don't pass this to load_drf_Strategy, it will error
     drf_request = Request(mocker.Mock(spec=HttpRequest))
     strategy = load_drf_strategy(mocker.Mock())
     assert strategy.clean_authenticate_args(drf_request, 2, 3, kwarg1=1, kwarg2=2) == (
         (2, 3),
-        {"request": drf_request, "kwarg1": 1, "kwarg2": 2},
+        {"kwarg1": 1, "kwarg2": 2},
     )

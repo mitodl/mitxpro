@@ -27,6 +27,8 @@ export const STATE_LOGIN_PROVIDER = "login/provider";
 export const STATE_REGISTER_EMAIL = "register/email";
 export const STATE_REGISTER_CONFIRM_SENT = "register/confirm-sent";
 export const STATE_REGISTER_CONFIRM = "register/confirm";
+// the verification link was opened in a browser that didn't start the registration
+export const STATE_REGISTER_CONFIRM_REQUIRED = "register/confirm-required";
 export const STATE_REGISTER_DETAILS = "register/details";
 export const STATE_REGISTER_EXTRA_DETAILS = "register/extra";
 export const STATE_REGISTER_REQUIRED = "register/required";
@@ -50,6 +52,7 @@ export const ALL_STATES = [
   STATE_REGISTER_EMAIL,
   STATE_REGISTER_CONFIRM,
   STATE_REGISTER_CONFIRM_SENT,
+  STATE_REGISTER_CONFIRM_REQUIRED,
   STATE_REGISTER_DETAILS,
   STATE_REGISTER_EXTRA_DETAILS,
   STATE_REGISTER_REQUIRED,

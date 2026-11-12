@@ -69,7 +69,7 @@ dependencies = [
     "requests>=2.31.0,<3",
     "sentry-sdk>=2.0.0,<3",
     "setuptools<=81.0.0",  # capped by cybersource-rest-client-python (needs pkg_resources)
-    "social-auth-app-django>=5.4.0,<6",
+    "social-auth-app-django>=7.2.0,<8",
     "ulid-py>=1.1.0,<2",
     "user-agents==2.2.0",
     "user-util==2.0.0",
@@ -107,6 +107,9 @@ dev = [
 
 [tool.uv]
 constraint-dependencies = ["certifi>=2026.10.19"]  # eMudhra CA compromise: never resolve a certifi that trusts the compromised CAs
+# mitol-django-authentication pins djoser==2.3.4, which caps social-auth-app-django <6 and blocks the
+# social-auth-core 6.x security fixes; djoser 2.3.5 allows <8. Drop once mitol-django-authentication allows djoser>=2.3.5.
+override-dependencies = ["djoser==2.3.5"]
 package = false
 no-binary-package = ["lxml", "xmlsec"]
 exclude-newer = "7d"
@@ -171,6 +174,8 @@ filterwarnings = [
     # standard-imghdr backfills imghdr for Python 3.13; the CyberSource SDK
     # reaches it via pgpy.
     "ignore:imghdr was removed in Python 3\\.13.*:DeprecationWarning",
+    # social-auth-core 6 imports python3-openid, which still imports defusedxml.cElementTree.
+    "ignore:defusedxml\\.cElementTree is deprecated.*:DeprecationWarning",
     # pytest may import namespace-package directories while collecting tests.
     "ignore:.*Not importing directory.*:ImportWarning",
 ]

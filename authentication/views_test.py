@@ -178,6 +178,8 @@ class AuthStateMachine(RuleBasedStateMachine):
 
         # track whether we've hit an action that starts a flow or not
         self.flow_started = False
+        # the "next" url saved in this browser's session, if any
+        self.next_url = None
 
     def teardown(self):
         """Cleanup from a run"""
@@ -251,6 +253,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 mock_recaptcha_success = stack.enter_context(self.recaptcha_patcher)
                 stack.enter_context(override_settings(**{"RECAPTCHA_SITE_KEY": "fake"}))
 
+            self.next_url = NEXT_URL
             result = assert_api_call(
                 self.client,
                 "psa-register-email",
@@ -326,6 +329,7 @@ class AuthStateMachine(RuleBasedStateMachine):
         self.flow_started = True
         self.create_existing_user()
 
+        self.next_url = NEXT_URL
         return assert_api_call(
             self.client,
             "psa-login-email",
@@ -355,6 +359,7 @@ class AuthStateMachine(RuleBasedStateMachine):
             None  # assign None to ensure no accidental usage here
         )
 
+        self.next_url = NEXT_URL
         return assert_api_call(
             self.client,
             "psa-login-email",
@@ -703,7 +708,7 @@ class AuthStateMachine(RuleBasedStateMachine):
     def register_user_extra_details(self, auth_state):
         """Complete the user's extra details"""
         assert_api_call(
-            Client(),
+            self.client,
             "psa-register-extra",
             {
                 "flow": auth_state["flow"],
@@ -717,6 +722,7 @@ class AuthStateMachine(RuleBasedStateMachine):
                 "flow": auth_state["flow"],
                 "state": SocialAuthState.STATE_SUCCESS,
                 "partial_token": None,
+                "redirect_url": self.next_url,
             },
             expect_authenticated=True,
         )
@@ -753,6 +759,136 @@ def test_new_register_no_session_partial(client):
         },
     )
     assert PARTIAL_PIPELINE_TOKEN_KEY not in client.session.keys()  # noqa: SIM118
+
+
+def _start_registration(client, mock_email_send, email=NEW_EMAIL):
+    """Register an email in the given browser and return the emailed (code, partial_token)"""
+    client.post(
+        reverse("psa-register-email"),
+        {"flow": SocialAuthState.FLOW_REGISTER, "email": email},
+        content_type="application/json",
+    )
+    _, _, code, partial_token = mock_email_send.call_args[0]
+    return code.code, partial_token
+
+
+def _post(client, url, payload):
+    """POST json to an auth API and return the response json"""
+    return client.post(reverse(url), payload, content_type="application/json").json()
+
+
+@pytest.mark.django_db
+def test_register_confirm_in_other_browser_requires_confirmation(mock_email_send):
+    """
+    A verification link opened in a browser that didn't start the registration must be
+    explicitly confirmed before the registration resumes (CVE-2026-57179)
+    """
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    other_browser = Client()
+    link_payload = {
+        "flow": SocialAuthState.FLOW_REGISTER,
+        "verification_code": code,
+        "partial_token": partial_token,
+    }
+
+    result = _post(other_browser, "psa-register-confirm", link_payload)
+    assert result["state"] == SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED
+    assert result["extra_data"]["email"] == NEW_EMAIL
+    nonce = result["extra_data"]["confirmation_nonce"]
+    assert nonce
+
+    result = _post(
+        other_browser,
+        "psa-register-confirm",
+        {
+            **link_payload,
+            "partial_pipeline_confirm": "1",
+            "partial_pipeline_confirm_nonce": nonce,
+        },
+    )
+    assert result["state"] == SocialAuthState.STATE_REGISTER_DETAILS
+    assert result["partial_token"]
+
+
+@pytest.mark.django_db
+def test_register_confirm_in_other_browser_wrong_nonce(mock_email_send):
+    """An external resume confirmation with the wrong nonce does not resume the registration"""
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    other_browser = Client()
+    link_payload = {
+        "flow": SocialAuthState.FLOW_REGISTER,
+        "verification_code": code,
+        "partial_token": partial_token,
+    }
+    _post(other_browser, "psa-register-confirm", link_payload)
+
+    result = _post(
+        other_browser,
+        "psa-register-confirm",
+        {
+            **link_payload,
+            "partial_pipeline_confirm": "1",
+            "partial_pipeline_confirm_nonce": "not-the-nonce",
+        },
+    )
+    assert result["state"] == SocialAuthState.STATE_ERROR
+    assert result["partial_token"] is None
+
+
+@pytest.mark.django_db
+def test_register_confirm_abandoned_by_new_registration(mock_email_send):
+    """Starting a new registration ("not my email") abandons the pending link confirmation"""
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    other_browser = Client()
+    link_payload = {
+        "flow": SocialAuthState.FLOW_REGISTER,
+        "verification_code": code,
+        "partial_token": partial_token,
+    }
+    nonce = _post(other_browser, "psa-register-confirm", link_payload)["extra_data"][
+        "confirmation_nonce"
+    ]
+
+    _start_registration(other_browser, mock_email_send, email="mine@example.com")
+
+    result = _post(
+        other_browser,
+        "psa-register-confirm",
+        {
+            **link_payload,
+            "partial_pipeline_confirm": "1",
+            "partial_pipeline_confirm_nonce": nonce,
+        },
+    )
+    assert result["state"] != SocialAuthState.STATE_REGISTER_DETAILS
+    assert result["partial_token"] is None
+
+
+@pytest.mark.django_db
+def test_partial_token_not_resumable_from_other_browser():
+    """A partial token from another browser's login flow can't be used to resume it"""
+    user = UserFactory.create(email=NEW_EMAIL)
+    user.set_password("password123")
+    user.save()
+    UserSocialAuthFactory.create(user=user, provider=EmailAuth.name, uid=user.email)
+    partial_token = _post(
+        Client(),
+        "psa-login-email",
+        {"flow": SocialAuthState.FLOW_LOGIN, "email": NEW_EMAIL},
+    )["partial_token"]
+
+    other_browser = Client()
+    result = _post(
+        other_browser,
+        "psa-login-password",
+        {
+            "flow": SocialAuthState.FLOW_LOGIN,
+            "partial_token": partial_token,
+            "password": "password123",
+        },
+    )
+    assert result["state"] == SocialAuthState.STATE_ERROR
+    assert bool(get_user(other_browser).is_authenticated) is False
 
 
 def test_login_email_error(client, mocker):

@@ -5,7 +5,7 @@ from urllib.parse import quote
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.shortcuts import reverse
 from rest_framework import status
-from social_core.exceptions import AuthAlreadyAssociated
+from social_core.exceptions import AuthAssociationError
 from social_django.utils import load_backend, load_strategy
 
 from authentication.middleware import SocialAuthExceptionRedirectMiddleware
@@ -22,7 +22,7 @@ def test_process_exception_no_strategy(rf, settings, mocker):
 def test_process_exception(rf, settings, mocker):
     """Tests that a process_exception handles auth exceptions correctly"""
     settings.DEBUG = False
-    msg = "This account is already in use."
+    msg = "This identity is already associated with another account."
     request = rf.get(reverse("social:complete", args=("email",)))
     # social_django depends on request.sesssion, so use the middleware to set that
     SessionMiddleware(get_response=mocker.Mock()).process_request(request)
@@ -32,7 +32,7 @@ def test_process_exception(rf, settings, mocker):
     request.backend = backend
 
     middleware = SocialAuthExceptionRedirectMiddleware(get_response=mocker.Mock())
-    result = middleware.process_exception(request, AuthAlreadyAssociated(backend, msg))
+    result = middleware.process_exception(request, AuthAssociationError(backend))
     assert result.status_code == status.HTTP_302_FOUND
     assert result.url == "{}?message={}&backend={}".format(
         reverse("login"), quote(msg), backend.name
