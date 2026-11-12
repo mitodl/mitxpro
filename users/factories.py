@@ -3,6 +3,7 @@
 import pycountry
 from factory import (
     Faker,
+    LazyAttribute,
     RelatedFactory,
     SubFactory,
     Trait,
@@ -41,6 +42,8 @@ class UserSocialAuthFactory(DjangoModelFactory):
     provider = FuzzyText()
     user = SubFactory("users.factories.UserFactory")
     uid = FuzzyText()
+    # mirrors social_django's 0020_backfill_id_keys / pipeline: email rows are keyed by "email"
+    id_key = LazyAttribute(lambda obj: "email" if obj.provider == "email" else "")
 
     class Meta:
         model = UserSocialAuth

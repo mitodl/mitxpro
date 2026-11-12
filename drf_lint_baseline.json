@@ -1,5 +1,5 @@
 [
-  "authentication/serializers.py:100:34:ORM001",
+  "authentication/serializers.py:142:34:ORM001",
   "courses/serializers.py:241:14:ORM003",
   "courses/serializers.py:249:26:ORM003",
   "courses/serializers.py:253:16:ORM004",

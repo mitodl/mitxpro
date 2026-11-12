@@ -23,6 +23,8 @@ class SocialAuthState:
     STATE_REGISTER_EMAIL = "register/email"
     STATE_REGISTER_CONFIRM_SENT = "register/confirm-sent"
     STATE_REGISTER_CONFIRM = "register/confirm"
+    # the verification link was opened in a browser that didn't start the registration
+    STATE_REGISTER_CONFIRM_REQUIRED = "register/confirm-required"
     STATE_REGISTER_DETAILS = "register/details"
     STATE_REGISTER_EXTRA_DETAILS = "register/extra"
     STATE_REGISTER_REQUIRED = "register/required"
@@ -48,6 +50,7 @@ class SocialAuthState:
         field_errors=None,
         redirect_url=None,
         user=None,
+        extra_data=None,
     ):
         self.state = state
         self.partial = partial
@@ -57,6 +60,7 @@ class SocialAuthState:
         self.field_errors = field_errors or {}
         self.redirect_url = redirect_url
         self.user = user
+        self.extra_data = extra_data or {}
 
     def get_partial_token(self):
         """Return the partial token or None"""

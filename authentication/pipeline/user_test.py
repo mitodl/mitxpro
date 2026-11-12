@@ -3,7 +3,7 @@
 import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthAlreadyAssociated
+from social_core.exceptions import AuthAssociationError
 from social_django.utils import load_backend, load_strategy
 
 from affiliate.factories import AffiliateFactory
@@ -246,6 +246,7 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
     mock_strategy = mocker.Mock()
     mock_backend = mocker.Mock()
     mock_backend.name = backend_name
+    mock_strategy.request_data.return_value = {}
     assert (
         user_actions.create_user_via_email(
             mock_strategy, mock_backend, pipeline_index=0, flow=flow
@@ -253,7 +254,8 @@ def test_create_user_via_email_exit(mocker, backend_name, flow):
         == {}
     )
 
-    mock_strategy.request_data.assert_not_called()
+    # only the @partial decorator reads request data; the step exits before reading it
+    mock_strategy.request_data.assert_called_once()
 
 
 @pytest.mark.django_db
@@ -362,12 +364,12 @@ def test_create_user_via_email_with_email_case_insensitive_existing_user(
     mock_email_backend, mock_create_user_strategy
 ):
     """
-    Tests that create_user_via_email raises AuthAlreadyAssociated exception
+    Tests that create_user_via_email raises AuthAssociationError exception
     if a user already exists with different case email
     """
     email = "user@example.com"
     UserFactory.create(email=email.upper())
-    with pytest.raises(AuthAlreadyAssociated):
+    with pytest.raises(AuthAssociationError):
         user_actions.create_user_via_email(
             mock_create_user_strategy,
             mock_email_backend,
@@ -510,11 +512,13 @@ def test_send_user_to_hubspot(mocker, settings):
     """
     mock_requests = mocker.patch("authentication.pipeline.user.requests")
 
-    mock_request = mocker.Mock(COOKIES={"hubspotutk": "somefakedata"})
+    mock_strategy = mocker.Mock(
+        request=mocker.Mock(COOKIES={"hubspotutk": "somefakedata"})
+    )
 
     # Test with no settings set
     ret_val = user_actions.send_user_to_hubspot(
-        mock_request, details={"email": "test@test.co"}
+        mock_strategy, details={"email": "test@test.co"}
     )
     assert ret_val == {}
 
@@ -522,7 +526,7 @@ def test_send_user_to_hubspot(mocker, settings):
     settings.HUBSPOT_CONFIG["HUBSPOT_PORTAL_ID"] = "123456"
     settings.HUBSPOT_CONFIG["HUBSPOT_CREATE_USER_FORM_ID"] = "abcdefg"
     ret_val = user_actions.send_user_to_hubspot(
-        mock_request, details={"email": "test@test.co"}
+        mock_strategy, details={"email": "test@test.co"}
     )
     assert ret_val == {}
 
@@ -643,7 +647,8 @@ def test_validate_email_backend(mocker, backend_name, flow, data):
         == {}
     )
 
-    mock_strategy.request_data.assert_called_once()
+    # once by the @partial decorator, once by the step itself
+    assert mock_strategy.request_data.call_count == 2
 
 
 @pytest.mark.django_db

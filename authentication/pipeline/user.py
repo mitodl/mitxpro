@@ -13,7 +13,7 @@ from mitol.common.utils import (
     create_user_with_generated_username,
 )
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthAlreadyAssociated, AuthException
+from social_core.exceptions import AuthAssociationError, AuthException
 from social_core.pipeline.partial import partial
 
 from affiliate.api import get_affiliate_id_from_request
@@ -129,7 +129,7 @@ def create_user_via_email(
     data["email"] = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     if User.objects.filter(email__iexact=data["email"]).exists():
-        raise AuthAlreadyAssociated(backend)
+        raise AuthAssociationError(backend, code="email_in_use", stage="pipeline")
 
     username = usernameify(data["name"], email=data["email"])
     data["username"] = username
@@ -347,7 +347,7 @@ def create_courseware_user(
     return {}
 
 
-def send_user_to_hubspot(request, **kwargs):
+def send_user_to_hubspot(strategy, **kwargs):
     """
     Create a hubspot contact using the hubspot Forms API
     Submit the user's email and optionally a hubspotutk cookie
@@ -358,7 +358,8 @@ def send_user_to_hubspot(request, **kwargs):
     if not (portal_id and form_id):
         return {}
 
-    hutk = request.COOKIES.get("hubspotutk")
+    # social-auth-app-django 7 no longer passes the request into pipeline kwargs
+    hutk = strategy.request.COOKIES.get("hubspotutk")
     email = kwargs.get("email", kwargs.get("details", {}).get("email"))
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}

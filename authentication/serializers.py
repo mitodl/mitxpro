@@ -6,9 +6,17 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from rest_framework import serializers
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthAlreadyAssociated, AuthException, InvalidEmail
+from social_core.exceptions import (
+    AuthAssociationError,
+    AuthCredentialError,
+    AuthException,
+    AuthSessionError,
+)
 from social_core.utils import (
-    partial_pipeline_data,
+    PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME,
+    PARTIAL_TOKEN_PENDING_REQUEST_SESSION_NAME,
+    PARTIAL_TOKEN_PENDING_SESSION_NAME,
+    partial_pipeline_result,
     sanitize_redirect,
     user_is_active,
     user_is_authenticated,
@@ -26,10 +34,15 @@ from authentication.exceptions import (
     UserExportBlockedException,
     UserTryAgainLaterException,
 )
+from authentication.strategy import ExternalResumeConfirmation
 from authentication.utils import SocialAuthState
 from users.constants import USER_REGISTRATION_FAILED_MSG
 
 PARTIAL_PIPELINE_TOKEN_KEY = "partial_pipeline_token"  # noqa: S105
+# token of the email-verification partial, kept in the session of the browser that registered
+EMAIL_VERIFICATION_PARTIAL_TOKEN_KEY = "email_verification_partial_token"  # noqa: S105
+# social-core raises AuthCredentialError with this code when an email verification code is invalid
+EMAIL_VERIFICATION_REJECTED = "email_verification_rejected"
 
 log = logging.getLogger()
 
@@ -55,9 +68,10 @@ class SocialAuthSerializer(serializers.Serializer):
 
     def get_extra_data(self, instance):
         """Serialize extra_data"""
+        extra_data = dict(instance.extra_data)
         if instance.user is not None:
-            return {"name": instance.user.name}
-        return {}
+            extra_data["name"] = instance.user.name
+        return extra_data
 
     def _save_next(self, data):
         """Persists the next url to the session"""
@@ -86,11 +100,39 @@ class SocialAuthSerializer(serializers.Serializer):
 
         kwargs = {"request": request, "flow": flow}
 
-        partial = partial_pipeline_data(backend, user, **kwargs)
+        if not strategy.get_request_data().get("partial_token"):
+            # No partial token means the client is starting a new flow: don't let social-core
+            # fall back to resuming an abandoned partial bound to this session.
+            strategy.session_pop(PARTIAL_PIPELINE_TOKEN_KEY)
+        result = partial_pipeline_result(backend, user, **kwargs)
+        if isinstance(result.response, ExternalResumeConfirmation):
+            confirmation = result.response
+            if confirmation.token != strategy.session_get(
+                EMAIL_VERIFICATION_PARTIAL_TOKEN_KEY
+            ):
+                # The verification link was opened in a browser that didn't start this
+                # registration; the user has to explicitly confirm before it resumes.
+                return SocialAuthState(
+                    SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED,
+                    extra_data={
+                        "email": confirmation.email,
+                        "confirmation_nonce": confirmation.nonce,
+                    },
+                )
+            # same browser that registered, so confirm on the user's behalf
+            strategy.confirm_external_resume(confirmation.nonce)
+            result = partial_pipeline_result(backend, user, **kwargs)
+
+        partial = result.partial
+        if partial is None and result.halt:
+            # a partial token was sent but this session isn't allowed to resume it
+            raise AuthSessionError(backend, stage="pipeline")
         if partial:
             try:
                 user = backend.continue_pipeline(partial)
-            except InvalidEmail:
+            except AuthCredentialError as exc:
+                if exc.code != EMAIL_VERIFICATION_REJECTED:
+                    raise
                 authentication_flow = partial.data.get("kwargs").get("flow")
                 if (
                     authentication_flow
@@ -103,7 +145,7 @@ class SocialAuthSerializer(serializers.Serializer):
                         return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
                     return SocialAuthState(SocialAuthState.STATE_INVALID_LINK)
                 return SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)
-            except AuthAlreadyAssociated:
+            except AuthAssociationError:
                 return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
             # clean partial data after usage
             strategy.clean_partial_pipeline(partial.token)
@@ -157,8 +199,6 @@ class SocialAuthSerializer(serializers.Serializer):
                 provider=exc.social_auth.provider,
                 user=exc.social_auth.user,
             )
-        except InvalidEmail:
-            result = SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)
         except UserExportBlockedException as exc:
             result = SocialAuthState(
                 SocialAuthState.STATE_USER_BLOCKED,
@@ -181,21 +221,34 @@ class SocialAuthSerializer(serializers.Serializer):
                 errors=[USER_REGISTRATION_FAILED_MSG],
             )
         except AuthException as exc:
-            log.exception("Received unexpected AuthException")
-            result = SocialAuthState(SocialAuthState.STATE_ERROR, errors=[str(exc)])
+            if (
+                isinstance(exc, AuthCredentialError)
+                and exc.code == EMAIL_VERIFICATION_REJECTED
+            ):
+                result = SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)
+            else:
+                log.exception("Received unexpected AuthException")
+                result = SocialAuthState(SocialAuthState.STATE_ERROR, errors=[str(exc)])
 
         if isinstance(result, SocialAuthState):
             if result.partial is not None:
                 strategy = self.context["strategy"]
                 strategy.storage.partial.store(result.partial)
+                # social-core only resumes a partial owned by this browser's session; the
+                # partial_token sent back by the client is not accepted on its own.
+                strategy.session_set(PARTIAL_PIPELINE_TOKEN_KEY, result.partial.token)
             if result.state == SocialAuthState.STATE_REGISTER_CONFIRM_SENT:
                 # If the user has just signed up and a verification link has been emailed, we need
                 # to remove the partial token from the session. The partial token refers to a Partial
                 # object, and we only want to continue the pipeline with that object if the user has
                 # clicked the email verification link and the Partial has been matched from
                 # the verification URL (that URL also contains the verification code, which we need
-                # to continue the pipeline).
-                self.context["backend"].strategy.session.pop(PARTIAL_PIPELINE_TOKEN_KEY)
+                # to continue the pipeline). Remember the token separately so that opening the
+                # link in this same browser can resume without an extra confirmation step.
+                session = self.context["backend"].strategy.session
+                session[EMAIL_VERIFICATION_PARTIAL_TOKEN_KEY] = session.pop(
+                    PARTIAL_PIPELINE_TOKEN_KEY
+                )
         else:
             # if we got here, we saw an unexpected result
             log.error("Received unexpected result: %s", result)
@@ -284,6 +337,17 @@ class RegisterEmailSerializer(SocialAuthSerializer):
     def create(self, validated_data):
         """Try to 'save' the request"""
         self._save_next(validated_data)
+
+        if validated_data.get("email"):
+            # Starting a new registration abandons any verification link this browser was
+            # asked to confirm (e.g. the user chose "not my email" on the confirm page).
+            strategy = self.context["strategy"]
+            for key in (
+                PARTIAL_TOKEN_PENDING_SESSION_NAME,
+                PARTIAL_TOKEN_PENDING_REQUEST_SESSION_NAME,
+                PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME,
+            ):
+                strategy.session_pop(key)
 
         try:
             result = super()._authenticate(SocialAuthState.FLOW_REGISTER)

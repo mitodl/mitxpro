@@ -15,6 +15,7 @@ export type AuthStates =
   | "register/email"
   | "register/confirm-sent"
   | "register/confirm"
+  | "register/confirm-required"
   | "register/details"
   | "register/extra"
   | "register/required";
@@ -29,6 +30,8 @@ export type AuthFieldErrors = {
 
 export type AuthExtraData = {
   name?: string,
+  email?: string,
+  confirmation_nonce?: string,
 };
 
 export type AuthResponse = {

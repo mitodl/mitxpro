@@ -62,6 +62,21 @@ export default {
     },
   }),
 
+  // explicitly confirms a verification link opened in a browser that didn't start registration
+  registerConfirmEmailContinueMutation: (
+    qsParams: Object,
+    confirmationNonce: string,
+  ) => ({
+    ...DEFAULT_OPTIONS,
+    url: "/api/register/confirm/",
+    body: {
+      flow: FLOW_REGISTER,
+      ...qsParams,
+      partial_pipeline_confirm: "1",
+      partial_pipeline_confirm_nonce: confirmationNonce,
+    },
+  }),
+
   registerDetailsMutation: (
     name: string,
     password: string,

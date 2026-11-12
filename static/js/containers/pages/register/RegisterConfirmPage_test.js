@@ -1,11 +1,14 @@
 // @flow
 import { assert } from "chai";
+import sinon from "sinon";
 
 import IntegrationTestHelper from "../../../util/integration_test_helper";
 import RegisterConfirmPage, {
   RegisterConfirmPage as InnerRegisterConfirmPage,
 } from "./RegisterConfirmPage";
 import {
+  FLOW_REGISTER,
+  STATE_REGISTER_CONFIRM_REQUIRED,
   STATE_REGISTER_DETAILS,
   STATE_INVALID_LINK,
   STATE_EXISTING_ACCOUNT,
@@ -125,5 +128,59 @@ describe("RegisterConfirmPage", () => {
       confirmationErrorText.text().replace("<Link />", ""),
       "No confirmation code was provided or it has expired. .",
     );
+  });
+
+  describe("when the link was opened in another browser", () => {
+    const email = "someone@example.com";
+    const nonce = "a-nonce";
+    const confirmRequiredAuth = {
+      state: STATE_REGISTER_CONFIRM_REQUIRED,
+      partial_token: null,
+      extra_data: { email, confirmation_nonce: nonce },
+    };
+
+    it("asks the user to confirm the email before continuing", async () => {
+      helper.handleRequestStub.returns({});
+      const { inner } = await renderPage({
+        entities: { auth: confirmRequiredAuth },
+      });
+
+      assert.include(inner.find(".confirmation-message").text(), email);
+      assert.equal(inner.find("button").text(), "Continue");
+      const link = inner.find(".not-my-email Link");
+      assert.equal(link.prop("to"), routes.register.begin);
+      assert.equal(
+        link.prop("children"),
+        "Create an account with a different email",
+      );
+    });
+
+    it("confirms with the nonce when the user clicks Continue", async () => {
+      const qsParams = { verification_code: "code", partial_token: "token" };
+      helper.handleRequestStub.returns({});
+      const { inner } = await renderPage(
+        { entities: { auth: confirmRequiredAuth } },
+        { location: { search: "?verification_code=code&partial_token=token" } },
+      );
+      helper.handleRequestStub.resetHistory();
+
+      inner.find("button").simulate("click");
+
+      sinon.assert.calledWith(
+        helper.handleRequestStub,
+        "/api/register/confirm/",
+        "POST",
+        {
+          body: {
+            flow: FLOW_REGISTER,
+            ...qsParams,
+            partial_pipeline_confirm: "1",
+            partial_pipeline_confirm_nonce: nonce,
+          },
+          headers: undefined,
+          credentials: undefined,
+        },
+      );
+    });
   });
 });
