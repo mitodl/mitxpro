@@ -41,7 +41,26 @@ type Props = {
   qsParams: Object,
 };
 
-export class RegisterConfirmPage extends React.Component<Props> {
+type State = {
+  continuing: boolean,
+};
+
+export class RegisterConfirmPage extends React.Component<Props, State> {
+  state = { continuing: false };
+
+  // set synchronously, so a fast double click can't send the one-time code twice
+  continuing = false;
+
+  mounted = false;
+
+  componentDidMount() {
+    this.mounted = true;
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
   componentDidUpdate(prevProps: Props) {
     const { addUserNotification, auth, history } = this.props;
     const prevState = path(["auth", "state"], prevProps);
@@ -62,11 +81,21 @@ export class RegisterConfirmPage extends React.Component<Props> {
     }
   }
 
-  onContinue = () => {
+  onContinue = async () => {
     const { auth, continueRegistration, qsParams } = this.props;
     const nonce = path(["extra_data", "confirmation_nonce"], auth);
-    if (nonce) {
-      continueRegistration(qsParams, nonce);
+    if (!nonce || this.continuing) {
+      return;
+    }
+    this.continuing = true;
+    this.setState({ continuing: true });
+    try {
+      await continueRegistration(qsParams, nonce);
+    } finally {
+      this.continuing = false;
+      if (this.mounted) {
+        this.setState({ continuing: false });
+      }
     }
   };
 
@@ -83,6 +112,7 @@ export class RegisterConfirmPage extends React.Component<Props> {
           type="button"
           className="btn btn-primary btn-light-blue"
           onClick={this.onContinue}
+          disabled={this.state.continuing}
         >
           Continue
         </button>

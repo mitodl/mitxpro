@@ -1,5 +1,6 @@
 """Custom strategy"""
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from django.utils.datastructures import MultiValueDict
@@ -45,7 +46,9 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
         data = self.drf_request.data
         if isinstance(data, MultiValueDict):
             return data.dict()
-        return dict(data)
+        # a JSON body that isn't an object (123, "abc", [1], null) has no fields; the serializer
+        # rejects it with a 400
+        return dict(data) if isinstance(data, Mapping) else {}
 
     def to_session_value(self, val):
         """

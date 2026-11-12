@@ -925,7 +925,8 @@ def test_register_confirm_in_other_browser_wrong_nonce(mock_email_send):
             "partial_pipeline_confirm_nonce": "not-the-nonce",
         },
     )
-    assert result["state"] == SocialAuthState.STATE_ERROR
+    # a confirmation that can't be resumed is reported as an expired link
+    assert result["state"] == SocialAuthState.STATE_INVALID_LINK
     assert result["partial_token"] is None
 
 
@@ -1087,3 +1088,40 @@ def test_well_known_openid_configuration(client):
         "authorization_endpoint": "http://localhost:8053/oauth2/authorize/",
         "token_endpoint": "http://localhost:8053/oauth2/token/",
     }
+
+
+@pytest.mark.parametrize("body", ["123", '"abc"', "[1]", "null"])
+@pytest.mark.parametrize(
+    "url", ["psa-login-email", "psa-register-email", "psa-register-confirm"]
+)
+def test_auth_api_rejects_non_object_json(client, url, body):
+    """A JSON body that isn't an object is rejected with 400, not a server error"""
+    response = client.post(reverse(url), body, content_type="application/json")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("same_browser", [True, False])
+def test_register_confirm_pre_upgrade_link_is_expired(mock_email_send, same_browser):
+    """
+    A verification link whose partial predates social-auth-core 6 (no external-resume flag)
+    can't be resumed; it is reported as an expired link so the user registers again
+    """
+    browser = Client()
+    code, partial_token = _start_registration(browser, mock_email_send)
+    partial = Partial.objects.get(token=partial_token)
+    partial.data.pop("allow_external_resume")
+    partial.save()
+
+    result = _post(
+        browser if same_browser else Client(),
+        "psa-register-confirm",
+        {
+            "flow": SocialAuthState.FLOW_REGISTER,
+            "verification_code": code,
+            "partial_token": partial_token,
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_INVALID_LINK
+    assert result["partial_token"] is None

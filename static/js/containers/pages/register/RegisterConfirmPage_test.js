@@ -155,6 +155,25 @@ describe("RegisterConfirmPage", () => {
       );
     });
 
+    it("sends the confirmation only once when Continue is clicked repeatedly", async () => {
+      helper.handleRequestStub.returns({});
+      const { inner } = await renderPage(
+        { entities: { auth: confirmRequiredAuth } },
+        { location: { search: "?verification_code=code&partial_token=token" } },
+      );
+      helper.handleRequestStub.resetHistory();
+
+      const first = inner.instance().onContinue();
+      const second = inner.instance().onContinue();
+      inner.update();
+      assert.isTrue(inner.find("button").prop("disabled"));
+      await Promise.all([first, second]);
+
+      sinon.assert.calledOnce(helper.handleRequestStub);
+      inner.update();
+      assert.isFalse(inner.find("button").prop("disabled"));
+    });
+
     it("confirms with the nonce when the user clicks Continue", async () => {
       const qsParams = { verification_code: "code", partial_token: "token" };
       helper.handleRequestStub.returns({});
