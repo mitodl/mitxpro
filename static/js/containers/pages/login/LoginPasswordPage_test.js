@@ -10,6 +10,8 @@ import {
   STATE_SUCCESS,
   STATE_ERROR,
   STATE_LOGIN_PASSWORD,
+  STATE_SESSION_EXPIRED,
+  SESSION_EXPIRED_NOTIFICATION,
 } from "../../../lib/auth";
 import { makeLoginAuthResponse } from "../../../factories/auth";
 import { routes } from "../../../lib/urls";
@@ -93,5 +95,29 @@ describe("LoginPasswordPage", () => {
     assert.equal(window.location.href, `http://fake${routes.dashboard}`);
     sinon.assert.notCalled(setErrorsStub);
     sinon.assert.calledWith(setSubmittingStub, false);
+  });
+
+  it("restarts sign-in with a notice when the session expired", async () => {
+    const { inner, store } = await renderPage();
+
+    helper.handleRequestStub.returns({
+      body: makeLoginAuthResponse({
+        state: STATE_SESSION_EXPIRED,
+      }),
+    });
+
+    const onSubmit = inner.find("LoginPasswordForm").prop("onSubmit");
+
+    await onSubmit(
+      { password },
+      { setSubmitting: setSubmittingStub, setErrors: setErrorsStub },
+    );
+
+    assert.equal(helper.currentLocation.location.pathname, routes.login.begin);
+    assert.deepEqual(
+      store.getState().ui.userNotifications,
+      SESSION_EXPIRED_NOTIFICATION,
+    );
+    sinon.assert.notCalled(setErrorsStub);
   });
 });

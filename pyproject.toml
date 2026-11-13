@@ -107,7 +107,7 @@ dev = [
 
 [tool.uv]
 constraint-dependencies = ["certifi>=2026.10.19"]  # eMudhra CA compromise: never resolve a certifi that trusts the compromised CAs
-# mitol-django-authentication pins djoser==2.3.4, which caps social-auth-app-django <6 and blocks the
+# mitol-django-authentication pins djoser==2.3.3, which caps social-auth-app-django <6 and blocks the
 # social-auth-core 6.x security fixes; djoser 2.3.5 allows <8. Drop once mitol-django-authentication allows djoser>=2.3.5.
 override-dependencies = ["djoser==2.3.5"]
 package = false

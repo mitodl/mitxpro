@@ -23,7 +23,7 @@ class SocialAuthState:
     STATE_REGISTER_EMAIL = "register/email"
     STATE_REGISTER_CONFIRM_SENT = "register/confirm-sent"
     STATE_REGISTER_CONFIRM = "register/confirm"
-    # the verification link was opened in a browser that didn't start the registration
+    # a verification link was opened and the user must confirm before registration continues
     STATE_REGISTER_CONFIRM_REQUIRED = "register/confirm-required"
     STATE_REGISTER_DETAILS = "register/details"
     STATE_REGISTER_EXTRA_DETAILS = "register/extra"
@@ -38,6 +38,9 @@ class SocialAuthState:
     STATE_USER_BLOCKED = "user-blocked"
     STATE_INVALID_LINK = "invalid-link"
     STATE_EXISTING_ACCOUNT = "existing-account"
+    # the partial pipeline is no longer bound to this session (e.g. a newer sign-in started in
+    # another tab, or it began before the social-auth-core 6 upgrade): the user starts again
+    STATE_SESSION_EXPIRED = "session-expired"
 
     def __init__(  # noqa: PLR0913
         self,

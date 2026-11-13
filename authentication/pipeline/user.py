@@ -358,7 +358,7 @@ def send_user_to_hubspot(strategy, **kwargs):
     if not (portal_id and form_id):
         return {}
 
-    # social-auth-app-django 7 no longer passes the request into pipeline kwargs
+    # social-core 6's BaseAuth.run_pipeline pops request from the pipeline kwargs
     hutk = strategy.request.COOKIES.get("hubspotutk")
     email = kwargs.get("email", kwargs.get("details", {}).get("email"))
 

@@ -18,7 +18,8 @@ export type AuthStates =
   | "register/confirm-required"
   | "register/details"
   | "register/extra"
-  | "register/required";
+  | "register/required"
+  | "session-expired";
 
 export type AuthFlow = "register" | "login";
 

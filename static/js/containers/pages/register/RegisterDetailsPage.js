@@ -18,8 +18,10 @@ import users from "../../../lib/queries/users";
 import { routes } from "../../../lib/urls";
 import { getAppropriateInformationFragment } from "../../../lib/util";
 import {
+  SESSION_EXPIRED_NOTIFICATION,
   STATE_ERROR,
   STATE_EXISTING_ACCOUNT,
+  STATE_SESSION_EXPIRED,
   handleAuthResponse,
 } from "../../../lib/auth";
 import queries from "../../../lib/queries";
@@ -108,6 +110,8 @@ export class RegisterDetailsPage extends React.Component<Props, State> {
         /* eslint-disable camelcase */
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
+        [STATE_SESSION_EXPIRED]: () =>
+          addUserNotification(SESSION_EXPIRED_NOTIFICATION),
       });
     } finally {
       setSubmitting(false);
