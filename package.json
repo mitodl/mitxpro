@@ -123,7 +123,7 @@
     "yup": "^1.0.0"
   },
   "engines": {
-    "node": "24.14.0"
+    "node": "24.22.2"
   },
   "scripts": {
     "postinstall": "./webpack_if_prod.sh",
