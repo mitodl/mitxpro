@@ -46,6 +46,18 @@ log = logging.getLogger()
 
 User = get_user_model()
 
+PENDING_CONFIRMATION_SESSION_KEYS = (
+    PARTIAL_TOKEN_PENDING_SESSION_NAME,
+    PARTIAL_TOKEN_PENDING_REQUEST_SESSION_NAME,
+    PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME,
+)
+
+
+def clear_pending_confirmation(strategy):
+    """Forget a verification link this browser was asked to confirm"""
+    for key in PENDING_CONFIRMATION_SESSION_KEYS:
+        strategy.session_pop(key)
+
 
 class SocialAuthSerializer(serializers.Serializer):
     """Serializer for social auth"""
@@ -104,13 +116,18 @@ class SocialAuthSerializer(serializers.Serializer):
             strategy.session_pop(PARTIAL_PIPELINE_TOKEN_KEY)
         result = partial_pipeline_result(backend, user, **kwargs)
         if isinstance(result.response, ExternalResumeConfirmation):
+            email = result.response.email
+            if email and User.objects.filter(email__iexact=email).exists():
+                # the link was already used: say so rather than asking to continue
+                clear_pending_confirmation(strategy)
+                return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
             # A verification link always needs an explicit confirmation before it resumes, even
             # in the browser that registered: the auth API has no CSRF protection, so another
             # site could have started that registration in this browser.
             return SocialAuthState(
                 SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED,
                 extra_data={
-                    "email": result.response.email,
+                    "email": email,
                     "confirmation_nonce": result.response.nonce,
                 },
             )
@@ -212,6 +229,16 @@ class SocialAuthSerializer(serializers.Serializer):
                 SocialAuthState.STATE_ERROR_TEMPORARY,
                 errors=[USER_REGISTRATION_FAILED_MSG],
             )
+        except AuthSessionError as exc:
+            # Expected when a newer sign-in started in another tab, or the flow began before
+            # the upgrade: send the user back to the start rather than to the error page.
+            log.info(
+                "Auth session no longer valid, restarting %s flow: %s (%s)",
+                self.validated_data["flow"],
+                exc.code,
+                exc.detail,
+            )
+            result = SocialAuthState(SocialAuthState.STATE_SESSION_EXPIRED)
         except AuthException as exc:
             if (
                 isinstance(exc, AuthCredentialError)
@@ -329,13 +356,7 @@ class RegisterEmailSerializer(SocialAuthSerializer):
         if validated_data.get("email"):
             # Starting a new registration abandons any verification link this browser was
             # asked to confirm (e.g. the user chose "not my email" on the confirm page).
-            strategy = self.context["strategy"]
-            for key in (
-                PARTIAL_TOKEN_PENDING_SESSION_NAME,
-                PARTIAL_TOKEN_PENDING_REQUEST_SESSION_NAME,
-                PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME,
-            ):
-                strategy.session_pop(key)
+            clear_pending_confirmation(self.context["strategy"])
 
         try:
             result = super()._authenticate(SocialAuthState.FLOW_REGISTER)
@@ -367,10 +388,13 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
         """Try to 'save' the request"""
         try:
             return super()._authenticate(SocialAuthState.FLOW_REGISTER)
-        except AuthSessionError:
+        except AuthSessionError as exc:
             # The link's partial can't be resumed, e.g. it was emailed before the
             # social-auth-core 6 upgrade and lacks the external-resume flag: treat it as an
             # expired link so the user registers again.
+            log.info(
+                "Verification link can't be resumed: %s (%s)", exc.code, exc.detail
+            )
             return SocialAuthState(SocialAuthState.STATE_INVALID_LINK)
 
 

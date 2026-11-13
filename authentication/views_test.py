@@ -9,6 +9,7 @@ import pytest
 from django.contrib.auth import get_user, get_user_model
 from django.core import mail
 from django.db import transaction
+from django.conf import settings
 from django.test import Client, override_settings
 from django.urls import reverse
 from faker import Faker
@@ -576,21 +577,19 @@ class AuthStateMachine(RuleBasedStateMachine):
 
     @rule(auth_state=consumes(ConfirmationRedeemedAuthStates))
     def redeem_confirmation_code_twice_existing_user(self, auth_state):
-        """Redeeming a code twice with an existing user should fail with existing account state"""
+        """
+        Redeeming a code twice with an existing user reports the existing account right away,
+        without asking to continue first
+        """
         _, _, code, partial_token = self.mock_email_send.call_args[0]
-        link_payload = {
-            "flow": auth_state["flow"],
-            "verification_code": code.code,
-            "partial_token": partial_token,
-        }
         self.create_existing_user()
         assert_api_call(
             self.client,
             "psa-register-confirm",
             {
-                **link_payload,
-                "partial_pipeline_confirm": "1",
-                "partial_pipeline_confirm_nonce": self.confirm_link_nonce(link_payload),
+                "flow": auth_state["flow"],
+                "verification_code": code.code,
+                "partial_token": partial_token,
             },
             {
                 "errors": [],
@@ -1013,7 +1012,9 @@ def test_partial_token_not_resumable_from_other_browser():
             "password": "password123",
         },
     )
-    assert result["state"] == SocialAuthState.STATE_ERROR
+    # the user is sent back to the start of sign-in, not to the error page
+    assert result["state"] == SocialAuthState.STATE_SESSION_EXPIRED
+    assert result["flow"] == SocialAuthState.FLOW_LOGIN
     assert bool(get_user(other_browser).is_authenticated) is False
 
 
@@ -1125,3 +1126,178 @@ def test_register_confirm_pre_upgrade_link_is_expired(mock_email_send, same_brow
 
     assert result["state"] == SocialAuthState.STATE_INVALID_LINK
     assert result["partial_token"] is None
+
+
+def _create_email_user(password="password123"):
+    """Create a user who signs in with email and password"""
+    user = UserFactory.create(email=NEW_EMAIL)
+    user.set_password(password)
+    user.save()
+    UserSocialAuthFactory.create(user=user, provider=EmailAuth.name, uid=user.email)
+    return user
+
+
+@pytest.mark.django_db
+def test_login_password_after_sign_in_restarted_in_another_tab():
+    """
+    Starting sign-in again in another tab replaces the session's partial, so submitting the
+    first tab's password restarts the flow instead of showing the registration error page
+    """
+    _create_email_user()
+    browser = Client()
+    login_email = {"flow": SocialAuthState.FLOW_LOGIN, "email": NEW_EMAIL}
+    first_tab_token = _post(browser, "psa-login-email", login_email)["partial_token"]
+    second_tab_token = _post(browser, "psa-login-email", login_email)["partial_token"]
+    assert first_tab_token != second_tab_token
+
+    result = _post(
+        browser,
+        "psa-login-password",
+        {
+            "flow": SocialAuthState.FLOW_LOGIN,
+            "partial_token": first_tab_token,
+            "password": "password123",
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_SESSION_EXPIRED
+    assert result["errors"] == []
+    assert bool(get_user(browser).is_authenticated) is False
+
+
+@pytest.mark.django_db
+def test_register_details_from_pre_upgrade_session_restarts(mock_email_send):
+    """
+    A registration in progress when social-auth-core 6 is deployed has no partial bound to
+    the session (older versions never stored one), so the next step restarts the flow
+    """
+    browser = Client()
+    code, partial_token = _start_registration(browser, mock_email_send)
+    link_payload = {
+        "flow": SocialAuthState.FLOW_REGISTER,
+        "verification_code": code,
+        "partial_token": partial_token,
+    }
+    nonce = _post(browser, "psa-register-confirm", link_payload)["extra_data"][
+        "confirmation_nonce"
+    ]
+    details_token = _post(
+        browser,
+        "psa-register-confirm",
+        {
+            **link_payload,
+            "partial_pipeline_confirm": "1",
+            "partial_pipeline_confirm_nonce": nonce,
+        },
+    )["partial_token"]
+    # what a pre-upgrade session looks like: no partial token bound to it (sessions are
+    # signed cookies, so the saved session has to be written back to the cookie)
+    session = browser.session
+    session.pop(PARTIAL_PIPELINE_TOKEN_KEY)
+    session.save()
+    browser.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
+
+    result = _post(
+        browser,
+        "psa-register-details",
+        {
+            "flow": SocialAuthState.FLOW_REGISTER,
+            "partial_token": details_token,
+            "name": "Sally Smith",
+            "password": "password123",
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_SESSION_EXPIRED
+    assert result["flow"] == SocialAuthState.FLOW_REGISTER
+
+
+@pytest.mark.django_db
+def test_register_confirm_link_opened_in_two_tabs(mock_email_send):
+    """Opening the verification link in a second tab keeps the first tab's Continue working"""
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    browser = Client()
+    link_payload = {
+        "flow": SocialAuthState.FLOW_REGISTER,
+        "verification_code": code,
+        "partial_token": partial_token,
+    }
+    first_tab = _post(browser, "psa-register-confirm", link_payload)
+    second_tab = _post(browser, "psa-register-confirm", link_payload)
+    nonce = first_tab["extra_data"]["confirmation_nonce"]
+    assert second_tab["extra_data"]["confirmation_nonce"] == nonce
+
+    result = _post(
+        browser,
+        "psa-register-confirm",
+        {
+            **link_payload,
+            "partial_pipeline_confirm": "1",
+            "partial_pipeline_confirm_nonce": nonce,
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_REGISTER_DETAILS
+
+
+@pytest.mark.django_db
+def test_register_confirm_link_for_existing_account(mock_email_send):
+    """A link for an email that already has an account says so instead of asking to continue"""
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    UserFactory.create(email=NEW_EMAIL)
+
+    result = _post(
+        Client(),
+        "psa-register-confirm",
+        {
+            "flow": SocialAuthState.FLOW_REGISTER,
+            "verification_code": code,
+            "partial_token": partial_token,
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_EXISTING_ACCOUNT
+    assert result["extra_data"] == {}
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "confirmation",
+    [
+        {"partial_pipeline_confirm": "1"},
+        {"partial_pipeline_confirm": "1", "partial_pipeline_confirm_nonce": ""},
+        {"partial_pipeline_confirm": "1", "partial_pipeline_confirm_nonce": "guess"},
+    ],
+    ids=["no-nonce", "empty-nonce", "guessed-nonce"],
+)
+def test_register_confirm_crafted_link_requires_confirmation(
+    mock_email_send, confirmation
+):
+    """
+    A link that already carries partial_pipeline_confirm (with no nonce, or a guessed one),
+    opened in a browser with nothing pending, still asks the user to confirm: this is the
+    cross-site request the CVE fix guards against
+    """
+    code, partial_token = _start_registration(Client(), mock_email_send)
+    next_step = Partial.objects.get(token=partial_token).next_step
+    fresh_browser = Client()
+
+    result = _post(
+        fresh_browser,
+        "psa-register-confirm",
+        {
+            "flow": SocialAuthState.FLOW_REGISTER,
+            "verification_code": code,
+            "partial_token": partial_token,
+            **confirmation,
+        },
+    )
+
+    assert result["state"] == SocialAuthState.STATE_REGISTER_CONFIRM_REQUIRED
+    assert result["partial_token"] is None
+    assert result["extra_data"]["confirmation_nonce"] != confirmation.get(
+        "partial_pipeline_confirm_nonce"
+    )
+    # the registration did not move past email verification
+    assert Partial.objects.get(token=partial_token).next_step == next_step
+    assert User.objects.filter(email=NEW_EMAIL).exists() is False

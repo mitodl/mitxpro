@@ -105,6 +105,7 @@ export class RegisterConfirmPage extends React.Component<Props, State> {
 
     return (
       <div className="confirm-required">
+        <h1>Confirm your email</h1>
         <p className="confirmation-message">
           Continue creating your account for <strong>{email}</strong>?
         </p>

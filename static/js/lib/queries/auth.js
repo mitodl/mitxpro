@@ -62,7 +62,7 @@ export default {
     },
   }),
 
-  // explicitly confirms a verification link opened in a browser that didn't start registration
+  // explicitly confirms a verification link before registration continues
   registerConfirmEmailContinueMutation: (
     qsParams: Object,
     confirmationNonce: string,

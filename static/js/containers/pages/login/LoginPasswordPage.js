@@ -11,7 +11,13 @@ import { createStructuredSelector } from "reselect";
 import auth, { authSelector } from "../../../lib/queries/auth";
 import users from "../../../lib/queries/users";
 import { routes } from "../../../lib/urls";
-import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth";
+import { addUserNotification } from "../../../actions";
+import {
+  SESSION_EXPIRED_NOTIFICATION,
+  STATE_ERROR,
+  STATE_SESSION_EXPIRED,
+  handleAuthResponse,
+} from "../../../lib/auth";
 
 import LoginPasswordForm from "../../../components/forms/LoginPasswordForm";
 
@@ -24,6 +30,7 @@ import type {
 } from "../../../flow/authTypes";
 
 type Props = {
+  addUserNotification: Function,
   location: Location,
   history: RouterHistory,
   auth: AuthResponse,
@@ -51,6 +58,7 @@ export class LoginPasswordPage extends React.Component<Props> {
   ) {
     /* eslint-disable camelcase */
     const {
+      addUserNotification,
       loginPassword,
       history,
       auth: { partial_token },
@@ -66,6 +74,8 @@ export class LoginPasswordPage extends React.Component<Props> {
       handleAuthResponse(history, body, {
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
+        [STATE_SESSION_EXPIRED]: () =>
+          addUserNotification(SESSION_EXPIRED_NOTIFICATION),
       });
     } finally {
       setSubmitting(false);
@@ -126,6 +136,7 @@ const getCurrentUser = () =>
   });
 
 const mapDispatchToProps = {
+  addUserNotification,
   loginPassword,
   getCurrentUser,
 };

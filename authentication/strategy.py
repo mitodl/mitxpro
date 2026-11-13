@@ -4,7 +4,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from django.utils.datastructures import MultiValueDict
-from social_core.utils import PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME
+from social_core.utils import (
+    PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME,
+    PARTIAL_TOKEN_PENDING_SESSION_NAME,
+)
 from social_django.strategy import DjangoStrategy
 
 # request fields that must never be written to stored partials or the session
@@ -18,7 +21,6 @@ class ExternalResumeConfirmation:
     (email verification) is resumed from a link, so the API can ask the client to confirm.
     """
 
-    token: str
     nonce: str
     email: str | None
 
@@ -68,10 +70,14 @@ class DjangoRestFrameworkStrategy(DjangoStrategy):
         request_data,  # noqa: ARG002
     ):
         """Record a confirmation nonce in the session and return it instead of rendering HTML"""
-        nonce = self.random_string(32)
+        # Reuse the nonce if this link is already pending here, so opening it in a second tab
+        # doesn't invalidate the Continue button in the first one.
+        nonce = None
+        if self.session_get(PARTIAL_TOKEN_PENDING_SESSION_NAME) == partial.token:
+            nonce = self.session_get(PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME)
+        nonce = nonce or self.random_string(32)
         self.session_set(PARTIAL_TOKEN_PENDING_CONFIRMATION_SESSION_NAME, nonce)
         return ExternalResumeConfirmation(
-            token=partial.token,
             nonce=nonce,
             email=(partial.kwargs.get("details") or {}).get("email"),
         )

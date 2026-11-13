@@ -130,7 +130,7 @@ describe("RegisterConfirmPage", () => {
     );
   });
 
-  describe("when the link was opened in another browser", () => {
+  describe("when a verification link needs confirmation", () => {
     const email = "someone@example.com";
     const nonce = "a-nonce";
     const confirmRequiredAuth = {
@@ -145,6 +145,10 @@ describe("RegisterConfirmPage", () => {
         entities: { auth: confirmRequiredAuth },
       });
 
+      assert.equal(
+        inner.find(".confirm-required h1").text(),
+        "Confirm your email",
+      );
       assert.include(inner.find(".confirmation-message").text(), email);
       assert.equal(inner.find("button").text(), "Continue");
       const link = inner.find(".not-my-email Link");
