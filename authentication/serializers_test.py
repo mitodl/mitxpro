@@ -3,7 +3,7 @@
 import pytest
 from rest_framework.serializers import ValidationError
 from social_core.backends.email import EmailAuth
-from social_core.exceptions import AuthException, InvalidEmail
+from social_core.exceptions import AuthCredentialError, AuthException
 
 from authentication.serializers import RegisterEmailSerializer
 from authentication.utils import SocialAuthState
@@ -19,9 +19,22 @@ pytestmark = [pytest.mark.django_db]
     (  # noqa: PT007
         (
             AuthException(None, "message"),
-            SocialAuthState(SocialAuthState.STATE_ERROR, errors=["message"]),
+            SocialAuthState(
+                SocialAuthState.STATE_ERROR,
+                errors=["Authentication could not be completed."],
+            ),
         ),
-        (InvalidEmail(None), SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL)),
+        (
+            AuthCredentialError(None, code="email_verification_rejected"),
+            SocialAuthState(SocialAuthState.STATE_INVALID_EMAIL),
+        ),
+        (
+            AuthCredentialError(None),
+            SocialAuthState(
+                SocialAuthState.STATE_ERROR,
+                errors=["The authentication credentials were rejected."],
+            ),
+        ),
     ),
 )
 def test_social_auth_serializer_error(mocker, side_effect, result):

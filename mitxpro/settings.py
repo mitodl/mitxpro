@@ -342,6 +342,10 @@ SILKY_ANALYZE_QUERIES = True
 
 SOCIAL_AUTH_LOGIN_ERROR_URL = "login"
 SOCIAL_AUTH_ALLOWED_REDIRECT_HOSTS = [urlparse(SITE_BASE_URL).netloc]
+# social-auth-app-django 7 only resolves active users by default. Users here stay inactive until
+# they pass export compliance, and the pipeline (activate_user) and serializers handle inactive
+# users explicitly, so keep resolving them.
+SOCIAL_AUTH_ACTIVE_USERS_FILTER = {}
 
 # Email backend settings
 SOCIAL_AUTH_EMAIL_FORM_URL = "login"
