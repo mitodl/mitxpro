@@ -14124,8 +14124,8 @@ __metadata:
   linkType: hard
 
 "webpack-bundle-analyzer@npm:^5.0.0":
-  version: 5.3.0
-  resolution: "webpack-bundle-analyzer@npm:5.3.0"
+  version: 5.4.2
+  resolution: "webpack-bundle-analyzer@npm:5.4.2"
   dependencies:
     "@discoveryjs/json-ext": ^0.6.3
     acorn: ^8.0.4
@@ -14139,7 +14139,7 @@ __metadata:
     ws: ^8.19.0
   bin:
     webpack-bundle-analyzer: lib/bin/analyzer.js
-  checksum: ddd3f1beb2a52034e3c5c2d6cd1894d5542de094660567afaf48274a813266a37be952062297f6e5d224d60abbeacf3623fbc97d24fb18bdda6d4dff901930fe
+  checksum: 43a1bf9b79f0020ccbe94e5de3df0878b964e0c798a285ee0251c877792a4354c0cb377358789a79b650dfb062c9386ec8911d4d53b1c735a3691b12061458c3
   languageName: node
   linkType: hard
 
