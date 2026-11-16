@@ -10,6 +10,6 @@ jobs:
   add-to-hq:
     permissions:
       contents: read
-    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@d56e69b360897777af9b8c15885ae5d1e72508e4 # main
+    uses: mitodl/ol-github-workflows/.github/workflows/add-to-ol-hq.yaml@d56e69b360897777af9b8c15885ae5d1e72508e4 # main # zizmor: ignore[ref-version-mismatch] -- ol-github-workflows has no tags; this SHA was main when pinned
     secrets:
       OL_HQ_PROJECT_SECRET: ${{ secrets.OL_HQ_PROJECT_SECRET }}
