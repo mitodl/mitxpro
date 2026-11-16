@@ -41,7 +41,7 @@ dependencies = [
     "hubspot-api-client==12.0.0",
     "ipython>=9.0.0,<10",
     "mitol-django-authentication==2026.10.30",
-    "mitol-django-common==2026.6.16.4",
+    "mitol-django-common==2026.10.29",
     "mitol-django-digital-credentials==2023.12.19",
     "mitol-django-hubspot-api==2026.10.30",
     "mitol-django-mail==2026.10.30",
