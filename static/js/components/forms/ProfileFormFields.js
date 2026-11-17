@@ -29,6 +29,9 @@ export const NAME_REGEX_FAIL_MESSAGE =
   "Name cannot start with a special character (~!@&)(+:'.?/,`-), and cannot contain any of (/^$#*=[]`%_;<>{}|\")"
 const ADDRESS_LINES_MAX = 4
 const seedYear = moment().year()
+// Terms of service allow learners aged 13 and older to register
+export const MIN_USER_AGE = 13
+export const MAX_USER_AGE = 120
 
 export const legalAddressValidation = yup.object().shape({
   name: yup
@@ -376,7 +379,9 @@ export const ProfileFields = () => (
             className="form-control"
           >
             <option value="">-----</option>
-            {reverse(range(seedYear - 120, seedYear - 14)).map((year, i) => (
+            {reverse(
+              range(seedYear - MAX_USER_AGE, seedYear - MIN_USER_AGE + 1)
+            ).map((year, i) => (
               <option key={i} value={year}>
                 {year}
               </option>
