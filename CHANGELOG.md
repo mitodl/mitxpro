@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2026.11.17.1] - 2026-11-17
+
+### Changes
+
+- **chore(deps): update node.js** (#4210) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency wagtail to v7.4.4** (#4227) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency astral-sh/uv to v0.13.7** (#4208) by 29139614+renovate[bot]@users.noreply.github.com
+- **ci: remove the new-issues workflow** (#4229) by 34372316+arslanashraf7@users.noreply.github.com
+- **fix(deps): update dependency mitol-django-common to v2026.10.29** (#4224) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency mitol-django-authentication to v2026.10.30** (#4223) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency mitol-django-mail to v2026.10.30** (#4226) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency mitol-django-hubspot-api to v2026.10.30** (#4225) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update pre-commit hook zizmorcore/zizmor-pre-commit to v1.32.0** (#4220) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency posthog-js to v1.448.0** (#4209) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency dnspython to v2.9.2 [security]** (#4212) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency opentelemetry-api to v1.45.2 [security]** (#4213) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency prek to v0.5.10** (#4205) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency @sentry/browser to v11.11.0** (#4207) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency boto3 to v1.43.125** (#4206) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency soupsieve to v4 [security]** (#4204) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): remove unused safety dev dependency** (#4203) by 34372316+arslanashraf7@users.noreply.github.com
+- **chore(deps): update dependency pillow-heif to v1 [security]** (#4199) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency oauthlib to v4 [security]** (#4198) by 29139614+renovate[bot]@users.noreply.github.com
+
 ## [2026.11.11.1] - 2026-11-11
 
 ### Changes
