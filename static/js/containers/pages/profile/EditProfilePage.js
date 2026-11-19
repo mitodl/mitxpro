@@ -107,9 +107,19 @@ export class EditProfilePage extends React.Component<Props, State> {
         setErrors({
           email: errors[0],
         });
-      } else if (isErrorResponse(response) && body && body.profile) {
+      } else if (errors && errors.profile) {
         // Field errors for the profile, e.g. a birth year outside the allowed range
-        setErrors({ profile: map(head, body.profile) });
+        setErrors({ profile: map(head, errors.profile) });
+      } else if (isErrorResponse(response)) {
+        addUserNotification({
+          "profile-update-failed-status": {
+            type: ALERT_TYPE_TEXT,
+            color: "danger",
+            props: {
+              text: "Unable to update your profile, please try again later.",
+            },
+          },
+        });
       } else {
         history.push(routes.profile.view);
       }
