@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models import Count, Q
 from django.utils.translation import gettext_lazy as _
@@ -15,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from affiliate.models import AffiliateReferralAction
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc
+from users.constants import MAX_USER_AGE, MIN_USER_AGE
 
 # Defined in edX Profile model
 MALE = "m"
@@ -282,6 +284,16 @@ class LegalAddress(TimestampedModel):
         ]
 
 
+def min_birth_year():
+    """Earliest birth year a user can have"""
+    return now_in_utc().year - MAX_USER_AGE
+
+
+def max_birth_year():
+    """Latest birth year a user can have"""
+    return now_in_utc().year - MIN_USER_AGE
+
+
 class Profile(TimestampedModel):
     """A user's profile and employment info"""
 
@@ -290,7 +302,14 @@ class Profile(TimestampedModel):
     gender = models.CharField(
         max_length=10, blank=True, choices=GENDER_CHOICES, default=""
     )
-    birth_year = models.IntegerField(null=True, blank=True)
+    birth_year = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[
+            MinValueValidator(min_birth_year),
+            MaxValueValidator(max_birth_year),
+        ],
+    )
 
     company = models.CharField(max_length=128, blank=True, default="")
     job_title = models.CharField(max_length=128, blank=True, default="")
