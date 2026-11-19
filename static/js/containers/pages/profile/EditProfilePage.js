@@ -7,7 +7,7 @@ import { compose } from "redux";
 import { connect } from "react-redux";
 import { connectRequest, mutateAsync, requestAsync } from "redux-query";
 import { createStructuredSelector } from "reselect";
-import { head, map } from "ramda";
+import { head, map, pick } from "ramda";
 
 import users, { currentUserSelector } from "../../../lib/queries/users";
 import { routes } from "../../../lib/urls";
@@ -107,9 +107,9 @@ export class EditProfilePage extends React.Component<Props, State> {
         setErrors({
           email: errors[0],
         });
-      } else if (errors && errors.profile) {
-        // Field errors for the profile, e.g. a birth year outside the allowed range
-        setErrors({ profile: map(head, errors.profile) });
+      } else if (errors && (errors.profile || errors.legal_address)) {
+        // Field errors, e.g. a birth year outside the allowed range
+        setErrors(map(map(head), pick(["profile", "legal_address"], errors)));
       } else if (isErrorResponse(response)) {
         addUserNotification({
           "profile-update-failed-status": {
