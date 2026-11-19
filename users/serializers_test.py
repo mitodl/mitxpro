@@ -312,9 +312,12 @@ def test_profile_serializers_birth_year_range(user, birth_year, is_valid):
             "job_title": "QA Tester",
         },
     )
+    expected_error = (
+        f"Birth year must be between {min_birth_year()} and {max_birth_year()}."
+    )
     assert serializer.is_valid() is is_valid
     if not is_valid:
-        assert "birth_year" in serializer.errors
+        assert serializer.errors["birth_year"] == [expected_error]
 
     user_serializer = UserSerializer(
         instance=user,
@@ -323,4 +326,4 @@ def test_profile_serializers_birth_year_range(user, birth_year, is_valid):
     )
     assert user_serializer.is_valid() is is_valid
     if not is_valid:
-        assert "birth_year" in user_serializer.errors["profile"]
+        assert user_serializer.errors["profile"]["birth_year"] == [expected_error]

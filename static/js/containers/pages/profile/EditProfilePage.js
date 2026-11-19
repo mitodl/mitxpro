@@ -7,11 +7,13 @@ import { compose } from "redux";
 import { connect } from "react-redux";
 import { connectRequest, mutateAsync, requestAsync } from "redux-query";
 import { createStructuredSelector } from "reselect";
+import { head, map } from "ramda";
 
 import users, { currentUserSelector } from "../../../lib/queries/users";
 import { routes } from "../../../lib/urls";
 import queries from "../../../lib/queries";
 import EditProfileForm from "../../../components/forms/EditProfileForm";
+import { isErrorResponse } from "../../../lib/util";
 
 import type { Response } from "redux-query";
 import type { Country, LoggedInUser, User } from "../../../flow/authTypes";
@@ -83,10 +85,10 @@ export class EditProfilePage extends React.Component<Props, State> {
     };
 
     try {
-      const {
-        /* eslint-disable camelcase */
-        body: { errors },
-      }: { body: Object } = await editProfile(payload);
+      const response: { body: Object, status: number } =
+        await editProfile(payload);
+      const { body } = response;
+      const errors = body && body.errors;
       if (errors && errors.non_field_errors) {
         const nonFieldErrors = errors.non_field_errors;
 
@@ -105,6 +107,9 @@ export class EditProfilePage extends React.Component<Props, State> {
         setErrors({
           email: errors[0],
         });
+      } else if (isErrorResponse(response) && body && body.profile) {
+        // Field errors for the profile, e.g. a birth year outside the allowed range
+        setErrors({ profile: map(head, body.profile) });
       } else {
         history.push(routes.profile.view);
       }
