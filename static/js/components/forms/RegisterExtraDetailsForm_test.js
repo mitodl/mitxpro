@@ -6,6 +6,7 @@ import { mount } from "enzyme";
 import wait from "waait";
 
 import RegisterExtraDetailsForm from "./RegisterExtraDetailsForm";
+import { MIN_USER_AGE, MAX_USER_AGE } from "./ProfileFormFields";
 
 import {
   findFormikFieldByName,
@@ -36,6 +37,20 @@ describe("RegisterExtraDetailsForm", () => {
     assert.ok(findFormikFieldByName(form, "profile.birth_year").exists());
     assert.ok(findFormikFieldByName(form, "profile.company_size").exists());
     assert.ok(form.find("button[type='submit']").exists());
+  });
+
+  it("offers birth years for users aged 13 and older", () => {
+    const wrapper = renderForm();
+    const years = wrapper
+      .find("select[name='profile.birth_year'] option")
+      .map((option) => option.props().value)
+      .filter(Boolean)
+      .map(Number);
+    const currentYear = new Date().getFullYear();
+
+    assert.equal(years[0], currentYear - MIN_USER_AGE);
+    assert.equal(years[years.length - 1], currentYear - MAX_USER_AGE);
+    assert.notInclude(years, currentYear - MIN_USER_AGE + 1);
   });
 
   //
