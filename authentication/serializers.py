@@ -53,6 +53,16 @@ PENDING_CONFIRMATION_SESSION_KEYS = (
 )
 
 
+def email_has_account(email):
+    """Whether a user is already registered with this email"""
+    return bool(email) and User.objects.filter(email__iexact=email).exists()
+
+
+def describe_session_error(exc):
+    """The reason an AuthSessionError was raised, for logging"""
+    return f"{exc.code} ({exc.detail})" if exc.detail else exc.code
+
+
 def clear_pending_confirmation(strategy):
     """Forget a verification link this browser was asked to confirm"""
     for key in PENDING_CONFIRMATION_SESSION_KEYS:
@@ -117,7 +127,7 @@ class SocialAuthSerializer(serializers.Serializer):
         result = partial_pipeline_result(backend, user, **kwargs)
         if isinstance(result.response, ExternalResumeConfirmation):
             email = result.response.email
-            if email and User.objects.filter(email__iexact=email).exists():
+            if email_has_account(email):
                 # the link was already used: say so rather than asking to continue
                 clear_pending_confirmation(strategy)
                 return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
@@ -148,7 +158,7 @@ class SocialAuthSerializer(serializers.Serializer):
                     and authentication_flow == SocialAuthState.FLOW_REGISTER
                 ):
                     email = partial.data.get("kwargs").get("details").get("email")
-                    user_exists = User.objects.filter(email__iexact=email).exists()
+                    user_exists = email_has_account(email)
 
                     if user_exists:
                         return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
@@ -233,10 +243,9 @@ class SocialAuthSerializer(serializers.Serializer):
             # Expected when a newer sign-in started in another tab, or the flow began before
             # the upgrade: send the user back to the start rather than to the error page.
             log.info(
-                "Auth session no longer valid, restarting %s flow: %s (%s)",
+                "Auth session no longer valid, restarting %s flow: %s",
                 self.validated_data["flow"],
-                exc.code,
-                exc.detail,
+                describe_session_error(exc),
             )
             result = SocialAuthState(SocialAuthState.STATE_SESSION_EXPIRED)
         except AuthException as exc:
@@ -393,8 +402,18 @@ class RegisterConfirmSerializer(SocialAuthSerializer):
             # social-auth-core 6 upgrade and lacks the external-resume flag: treat it as an
             # expired link so the user registers again.
             log.info(
-                "Verification link can't be resumed: %s (%s)", exc.code, exc.detail
+                "Verification link can't be resumed: %s", describe_session_error(exc)
             )
+            strategy = self.context["strategy"]
+            partial = strategy.partial_load(
+                strategy.get_request_data().get("partial_token")
+            )
+            email = ((partial.kwargs.get("details") or {}) if partial else {}).get(
+                "email"
+            )
+            if email_has_account(email):
+                # the email has registered since this link was sent
+                return SocialAuthState(SocialAuthState.STATE_EXISTING_ACCOUNT)
             return SocialAuthState(SocialAuthState.STATE_INVALID_LINK)
 
 

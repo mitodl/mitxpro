@@ -1103,16 +1103,28 @@ def test_auth_api_rejects_non_object_json(client, url, body):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("same_browser", [True, False])
-def test_register_confirm_pre_upgrade_link_is_expired(mock_email_send, same_browser):
+@pytest.mark.parametrize(
+    ("email_registered", "expected_state"),
+    [
+        (False, SocialAuthState.STATE_INVALID_LINK),
+        (True, SocialAuthState.STATE_EXISTING_ACCOUNT),
+    ],
+)
+def test_register_confirm_pre_upgrade_link_is_expired(
+    mock_email_send, same_browser, email_registered, expected_state
+):
     """
     A verification link whose partial predates social-auth-core 6 (no external-resume flag)
-    can't be resumed; it is reported as an expired link so the user registers again
+    can't be resumed; it is reported as an expired link so the user registers again, or as
+    an existing account if that email has registered since
     """
     browser = Client()
     code, partial_token = _start_registration(browser, mock_email_send)
     partial = Partial.objects.get(token=partial_token)
     partial.data.pop("allow_external_resume")
     partial.save()
+    if email_registered:
+        UserFactory.create(email=NEW_EMAIL)
 
     result = _post(
         browser if same_browser else Client(),
@@ -1124,7 +1136,7 @@ def test_register_confirm_pre_upgrade_link_is_expired(mock_email_send, same_brow
         },
     )
 
-    assert result["state"] == SocialAuthState.STATE_INVALID_LINK
+    assert result["state"] == expected_state
     assert result["partial_token"] is None
 
 

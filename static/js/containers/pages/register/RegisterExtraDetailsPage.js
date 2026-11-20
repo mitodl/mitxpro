@@ -11,6 +11,7 @@ import { createStructuredSelector } from "reselect";
 
 import { addUserNotification } from "../../../actions";
 import {
+  FLOW_LOGIN,
   SESSION_EXPIRED_NOTIFICATION,
   STATE_ERROR,
   STATE_SESSION_EXPIRED,
@@ -58,8 +59,13 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
 
     try {
       const { body } = await registerExtraDetails(profileData, partialToken);
+      // the account already exists at this step, so an expired session restarts at sign-in
+      const response =
+        body.state === STATE_SESSION_EXPIRED
+          ? { ...body, flow: FLOW_LOGIN }
+          : body;
 
-      handleAuthResponse(history, body, {
+      handleAuthResponse(history, response, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
