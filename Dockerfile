@@ -1,7 +1,7 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:572cebbc2b15e6f84c077742952674889cb63cd5e9b80abdffcbe587b6f19183
 # hadolint global ignore=DL3008
 
-FROM mitodl/ol-python-base:3.13 AS base
+FROM mitodl/ol-python-base:3.13@sha256:8fc6306d7944b1505df49100f424679c9772a4c2843dee4067523402fdae9f8a AS base
 LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # App-specific apt extras; common-core packages (git, curl, libjpeg-dev,
@@ -30,7 +30,7 @@ RUN --mount=type=cache,target=/opt/uv-cache,uid=1000,gid=1000 \
     uv sync --frozen --no-install-project --no-dev
 
 # ─── Node / frontend asset build ─────────────────────────────────────────────
-FROM node:24-slim AS node_builder
+FROM node:24-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS node_builder
 COPY . /src
 WORKDIR /src
 ENV NODE_ENV=production
