@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from affiliate.models import AffiliateReferralAction
 from mitxpro.models import TimestampedModel
 from mitxpro.utils import now_in_utc
+from users.constants import MAX_USER_AGE, MIN_USER_AGE
 
 # Defined in edX Profile model
 MALE = "m"
@@ -282,6 +283,29 @@ class LegalAddress(TimestampedModel):
         ]
 
 
+def min_birth_year():
+    """Earliest birth year a user can have"""
+    return now_in_utc().year - MAX_USER_AGE
+
+
+def max_birth_year():
+    """Latest birth year a user can have"""
+    return now_in_utc().year - MIN_USER_AGE
+
+
+def validate_birth_year(value):
+    """Validate that a birth year is for a user aged MIN_USER_AGE to MAX_USER_AGE"""
+    # A single function validator rather than Min/MaxValueValidator: DRF lifts those
+    # into its own min_value/max_value and puts the callable's repr in the message.
+    min_year, max_year = min_birth_year(), max_birth_year()
+    if not min_year <= value <= max_year:
+        raise ValidationError(
+            _("Birth year must be between %(min_year)s and %(max_year)s."),
+            code="invalid_birth_year",
+            params={"min_year": min_year, "max_year": max_year},
+        )
+
+
 class Profile(TimestampedModel):
     """A user's profile and employment info"""
 
@@ -290,7 +314,11 @@ class Profile(TimestampedModel):
     gender = models.CharField(
         max_length=10, blank=True, choices=GENDER_CHOICES, default=""
     )
-    birth_year = models.IntegerField(null=True, blank=True)
+    birth_year = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[validate_birth_year],
+    )
 
     company = models.CharField(max_length=128, blank=True, default="")
     job_title = models.CharField(max_length=128, blank=True, default="")

@@ -1,5 +1,6 @@
 // @flow
 import { assert } from "chai";
+import { map } from "ramda";
 import sinon from "sinon";
 
 import EditProfilePage, {
@@ -11,6 +12,7 @@ import {
   makeUser,
 } from "../../../factories/user";
 import IntegrationTestHelper from "../../../util/integration_test_helper";
+import { ALERT_TYPE_TEXT } from "../../../constants";
 
 describe("EditProfilePage", () => {
   let helper, renderPage;
@@ -85,6 +87,7 @@ describe("EditProfilePage", () => {
       };
 
       helper.handleRequestStub.returns({
+        status: hasError ? 400 : 200,
         body: {
           errors: hasError ? "some errors" : null,
         },
@@ -125,5 +128,82 @@ describe("EditProfilePage", () => {
         assert.equal(helper.currentLocation.location.pathname, "/profile/");
       }
     });
+  });
+
+  //
+  [
+    [
+      "profile",
+      { profile: { birth_year: "Birth year must be between 1906 and 2013." } },
+    ],
+    [
+      "address",
+      {
+        legal_address: {
+          city: "Ensure this field has no more than 50 characters.",
+        },
+      },
+    ],
+    [
+      "profile and address",
+      {
+        profile: { birth_year: "Birth year must be between 1906 and 2013." },
+        legal_address: {
+          city: "Ensure this field has no more than 50 characters.",
+        },
+      },
+    ],
+  ].forEach(([description, expectedErrors]) => {
+    it(`shows ${description} field errors and stays on the page when the API rejects them`, async () => {
+      const { inner } = await renderPage();
+      const setSubmitting = helper.sandbox.stub();
+      const setErrors = helper.sandbox.stub();
+
+      // mitxpro.exceptions.exception_handler wraps serializer errors in "errors"
+      helper.handleRequestStub.returns({
+        status: 400,
+        body: {
+          errors: map(
+            map((error) => [error]),
+            expectedErrors,
+          ),
+        },
+      });
+
+      await inner.find("EditProfileForm").prop("onSubmit")(user, {
+        setErrors,
+        setSubmitting,
+      });
+
+      sinon.assert.calledWith(setErrors, expectedErrors);
+      sinon.assert.calledWith(setSubmitting, false);
+      assert.isNull(helper.currentLocation);
+    });
+  });
+
+  it("shows a failure notification and stays on the page when the save fails without field errors", async () => {
+    const { inner, store } = await renderPage();
+    const setSubmitting = helper.sandbox.stub();
+    const setErrors = helper.sandbox.stub();
+
+    helper.handleRequestStub.returns({ status: 503 });
+
+    await inner.find("EditProfileForm").prop("onSubmit")(user, {
+      setErrors,
+      setSubmitting,
+    });
+
+    assert.deepEqual(store.getState().ui.userNotifications, {
+      "profile-update-failed-status": {
+        type: ALERT_TYPE_TEXT,
+        color: "danger",
+        props: {
+          text: "Unable to update your profile, please try again later.",
+        },
+      },
+    });
+    sinon.assert.notCalled(setErrors);
+    sinon.assert.calledWith(setSubmitting, false);
+    assert.isNull(helper.currentLocation);
   });
 });
