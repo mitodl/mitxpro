@@ -12,6 +12,8 @@ import {
   STATE_ERROR,
   STATE_ERROR_TEMPORARY,
   STATE_REGISTER_EXTRA_DETAILS,
+  STATE_SESSION_EXPIRED,
+  SESSION_EXPIRED_NOTIFICATION,
 } from "../../../lib/auth";
 import { routes } from "../../../lib/urls";
 import { makeRegisterAuthResponse } from "../../../factories/auth";
@@ -184,5 +186,31 @@ describe("RegisterExtraDetailsPage", () => {
       }
       sinon.assert.calledWith(setSubmittingStub, false);
     });
+  });
+
+  it("restarts at sign-in with a notice when the session expired", async () => {
+    const { inner, store } = await renderPage();
+
+    helper.handleRequestStub.returns({
+      body: makeRegisterAuthResponse({
+        state: STATE_SESSION_EXPIRED,
+        partial_token: undefined,
+      }),
+    });
+
+    const onSubmit = inner.find("RegisterExtraDetailsForm").prop("onSubmit");
+
+    await onSubmit(profileData, {
+      setSubmitting: setSubmittingStub,
+      setErrors: setErrorsStub,
+    });
+
+    // the account was created at the previous step, so the user signs in rather than registers
+    assert.equal(helper.currentLocation.location.pathname, routes.login.begin);
+    assert.deepEqual(
+      store.getState().ui.userNotifications,
+      SESSION_EXPIRED_NOTIFICATION,
+    );
+    sinon.assert.notCalled(setErrorsStub);
   });
 });

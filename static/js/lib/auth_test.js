@@ -5,11 +5,17 @@ import { createMemoryHistory } from "history";
 
 import {
   ALL_STATES,
+  FLOW_LOGIN,
+  FLOW_REGISTER,
+  STATE_SESSION_EXPIRED,
   generateLoginRedirectUrl,
   handleAuthResponse,
 } from "./auth";
 import { routes } from "../lib/urls";
-import { makeRegisterAuthResponse } from "../factories/auth";
+import {
+  makeLoginAuthResponse,
+  makeRegisterAuthResponse,
+} from "../factories/auth";
 
 describe("auth lib function", () => {
   it("generateLoginRedirectUrl should generate a url to redirect to after login", () => {
@@ -45,6 +51,21 @@ describe("auth lib function", () => {
         handleAuthResponse(history, response, handlers);
 
         sinon.assert.calledWith(handler, response);
+      });
+    });
+
+    [
+      [FLOW_LOGIN, makeLoginAuthResponse, routes.login.begin],
+      [FLOW_REGISTER, makeRegisterAuthResponse, routes.register.begin],
+    ].forEach(([flow, makeResponse, beginRoute]) => {
+      it(`sends the user back to the start of the ${flow} flow when the session expired`, () => {
+        handleAuthResponse(
+          history,
+          makeResponse({ state: STATE_SESSION_EXPIRED }),
+          {},
+        );
+
+        assert.equal(history.location.pathname, beginRoute);
       });
     });
   });

@@ -23,6 +23,8 @@ class SocialAuthState:
     STATE_REGISTER_EMAIL = "register/email"
     STATE_REGISTER_CONFIRM_SENT = "register/confirm-sent"
     STATE_REGISTER_CONFIRM = "register/confirm"
+    # a verification link was opened and the user must confirm before registration continues
+    STATE_REGISTER_CONFIRM_REQUIRED = "register/confirm-required"
     STATE_REGISTER_DETAILS = "register/details"
     STATE_REGISTER_EXTRA_DETAILS = "register/extra"
     STATE_REGISTER_REQUIRED = "register/required"
@@ -36,6 +38,9 @@ class SocialAuthState:
     STATE_USER_BLOCKED = "user-blocked"
     STATE_INVALID_LINK = "invalid-link"
     STATE_EXISTING_ACCOUNT = "existing-account"
+    # the partial pipeline is no longer bound to this session (e.g. a newer sign-in started in
+    # another tab, or it began before the social-auth-core 6 upgrade): the user starts again
+    STATE_SESSION_EXPIRED = "session-expired"
 
     def __init__(  # noqa: PLR0913
         self,
@@ -48,6 +53,7 @@ class SocialAuthState:
         field_errors=None,
         redirect_url=None,
         user=None,
+        extra_data=None,
     ):
         self.state = state
         self.partial = partial
@@ -57,6 +63,7 @@ class SocialAuthState:
         self.field_errors = field_errors or {}
         self.redirect_url = redirect_url
         self.user = user
+        self.extra_data = extra_data or {}
 
     def get_partial_token(self):
         """Return the partial token or None"""
