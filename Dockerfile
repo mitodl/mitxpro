@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # hadolint global ignore=DL3008
 
-FROM mitodl/ol-python-base:3.13 AS base
+FROM mitodl/ol-python-base:3.14@sha256:3d5bc4cc68299a0bf2be1b67b7da43ecaafc61917a871f2fafed3aea4398bcb5 AS base
 LABEL maintainer="ODL DevOps <mitx-devops@mit.edu>"
 
 # App-specific apt extras; common-core packages (git, curl, libjpeg-dev,
