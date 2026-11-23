@@ -7,11 +7,13 @@ import { compose } from "redux";
 import { connect } from "react-redux";
 import { connectRequest, mutateAsync, requestAsync } from "redux-query";
 import { createStructuredSelector } from "reselect";
+import { head, map, pick } from "ramda";
 
 import users, { currentUserSelector } from "../../../lib/queries/users";
 import { routes } from "../../../lib/urls";
 import queries from "../../../lib/queries";
 import EditProfileForm from "../../../components/forms/EditProfileForm";
+import { isErrorResponse } from "../../../lib/util";
 
 import type { Response } from "redux-query";
 import type { Country, LoggedInUser, User } from "../../../flow/authTypes";
@@ -83,10 +85,10 @@ export class EditProfilePage extends React.Component<Props, State> {
     };
 
     try {
-      const {
-        /* eslint-disable camelcase */
-        body: { errors },
-      }: { body: Object } = await editProfile(payload);
+      const response: { body: Object, status: number } =
+        await editProfile(payload);
+      const { body } = response;
+      const errors = body && body.errors;
       if (errors && errors.non_field_errors) {
         const nonFieldErrors = errors.non_field_errors;
 
@@ -104,6 +106,19 @@ export class EditProfilePage extends React.Component<Props, State> {
       } else if (errors && errors.length > 0) {
         setErrors({
           email: errors[0],
+        });
+      } else if (errors && (errors.profile || errors.legal_address)) {
+        // Field errors, e.g. a birth year outside the allowed range
+        setErrors(map(map(head), pick(["profile", "legal_address"], errors)));
+      } else if (isErrorResponse(response)) {
+        addUserNotification({
+          "profile-update-failed-status": {
+            type: ALERT_TYPE_TEXT,
+            color: "danger",
+            props: {
+              text: "Unable to update your profile, please try again later.",
+            },
+          },
         });
       } else {
         history.push(routes.profile.view);

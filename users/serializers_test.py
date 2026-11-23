@@ -6,9 +6,11 @@ from rest_framework.exceptions import ValidationError
 from affiliate.factories import AffiliateFactory
 from users.factories import UserFactory
 from users.models import ChangeEmailRequest
+from users.models import max_birth_year, min_birth_year
 from users.serializers import (
     ChangeEmailRequestUpdateSerializer,
     LegalAddressSerializer,
+    ProfileSerializer,
     UserSerializer,
 )
 
@@ -284,3 +286,44 @@ def test_legal_address_serializer_invalid_name(sample_address):
         serializer = LegalAddressSerializer(data=sample_address)
         with pytest.raises(ValidationError):
             serializer.is_valid(raise_exception=True)
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("birth_year", "is_valid"),
+    [
+        (lambda: min_birth_year() - 1, False),
+        (min_birth_year, True),
+        (max_birth_year, True),
+        (lambda: max_birth_year() + 1, False),
+    ],
+)
+def test_profile_serializers_birth_year_range(user, birth_year, is_valid):
+    """
+    Both serializers that save birth_year (registration and profile edit) only
+    accept birth years for users aged 13 to 120
+    """
+    serializer = ProfileSerializer(
+        instance=user.profile,
+        data={
+            "birth_year": str(birth_year()),
+            "gender": "f",
+            "company": "MIT",
+            "job_title": "QA Tester",
+        },
+    )
+    expected_error = (
+        f"Birth year must be between {min_birth_year()} and {max_birth_year()}."
+    )
+    assert serializer.is_valid() is is_valid
+    if not is_valid:
+        assert serializer.errors["birth_year"] == [expected_error]
+
+    user_serializer = UserSerializer(
+        instance=user,
+        data={"profile": {"birth_year": birth_year()}},
+        partial=True,
+    )
+    assert user_serializer.is_valid() is is_valid
+    if not is_valid:
+        assert user_serializer.errors["profile"]["birth_year"] == [expected_error]

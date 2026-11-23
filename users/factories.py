@@ -15,7 +15,14 @@ from factory.django import DjangoModelFactory
 from factory.fuzzy import FuzzyText
 from social_django.models import UserSocialAuth
 
-from users.models import GENDER_CHOICES, LegalAddress, Profile, User
+from users.models import (
+    GENDER_CHOICES,
+    LegalAddress,
+    Profile,
+    User,
+    max_birth_year,
+    min_birth_year,
+)
 
 
 class UserFactory(DjangoModelFactory):
@@ -90,7 +97,7 @@ class ProfileFactory(DjangoModelFactory):
     user = SubFactory("users.factories.UserFactory")
 
     gender = fuzzy.FuzzyChoice(choices=[gender[0] for gender in GENDER_CHOICES])
-    birth_year = Faker("year")
+    birth_year = fuzzy.FuzzyInteger(min_birth_year(), max_birth_year())
     company = Faker("company")
     job_title = Faker("word")
 

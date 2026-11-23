@@ -22,6 +22,7 @@ from authentication.utils import SocialAuthState
 from compliance.constants import RESULT_DENIED, RESULT_SUCCESS, RESULT_UNKNOWN
 from compliance.factories import ExportsInquiryLogFactory
 from users.factories import UserFactory
+from users.models import max_birth_year, min_birth_year
 
 
 @pytest.fixture
@@ -468,6 +469,31 @@ def test_create_profile(
         mock_user_sync.assert_called_with(user.id)
     else:
         mock_user_sync.assert_not_called()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "birth_year", [lambda: min_birth_year() - 1, lambda: max_birth_year() + 1]
+)
+def test_create_profile_invalid_birth_year(
+    mock_email_backend, mock_create_profile_strategy, birth_year
+):
+    """Tests that create_profile rejects birth years for users younger than 13 or older than 120"""
+    user = UserFactory.create(profile__incomplete=True)
+    mock_create_profile_strategy.request_data.return_value["birth_year"] = str(
+        birth_year()
+    )
+    with pytest.raises(RequireProfileException) as exc:
+        user_actions.create_profile(
+            mock_create_profile_strategy,
+            mock_email_backend,
+            user=user,
+            pipeline_index=0,
+            flow=SocialAuthState.FLOW_REGISTER,
+        )
+    assert "birth_year" in exc.value.errors
+    user.profile.refresh_from_db()
+    assert user.profile.birth_year is None
 
 
 @pytest.mark.django_db
