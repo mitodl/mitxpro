@@ -971,15 +971,16 @@ wheels = [
 
 [[package]]
 name = "edx-api-client"
-version = "1.14.0"
+version = "1.15.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "certifi" },
     { name = "python-dateutil" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/83/02/522e8651e7618a033f334f01644a3559959534001ba945083069cb8cb9da/edx_api_client-1.14.0.tar.gz", hash = "sha256:b18c604c1499a9afb532893d82b508aa1bfb5b77f35e6e0403a536f2da72ba0f", size = 60108, upload-time = "2025-12-03T09:54:25.04Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/58/ac7cc5bcb252dcb735104d31b4f1b9db45980ee70f75355cf0e5b0f309a7/edx_api_client-1.15.1.tar.gz", hash = "sha256:06d4a7b28921b479478dd3c73eef0621a32153b79cec3e36f45c76548367d152", size = 31795, upload-time = "2026-10-30T12:55:26.622Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/37/8cebd8e4344fe51cc880d7edcd0b7878068338b28ea497f5fbd128051148/edx_api_client-1.14.0-py2.py3-none-any.whl", hash = "sha256:22cf76f434146e6397fae21811fdaea4ea05b99f96faaa0ef10f0e45c56ddafa", size = 78045, upload-time = "2025-12-03T09:54:23.895Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/f0/785091baef5e2da5970772337cdaa78dfda375e87a6133d21e1c1cb3597c/edx_api_client-1.15.1-py3-none-any.whl", hash = "sha256:e84d2984e2636b5a5595afde1e57e866ff8f65edac23ea0146f5383d5fc548a3", size = 39685, upload-time = "2026-10-30T12:55:25.334Z" },
 ]
 
 [[package]]
@@ -1943,7 +1944,7 @@ requires-dist = [
     { name = "django-user-agents", specifier = "==0.4.0" },
     { name = "django-webpack-loader", specifier = "==1.8.1" },
     { name = "djangorestframework", specifier = "==3.18.3" },
-    { name = "edx-api-client", specifier = "==1.14.0" },
+    { name = "edx-api-client", specifier = "==1.15.1" },
     { name = "google-api-python-client", specifier = "==2.201.0" },
     { name = "google-auth", specifier = "==1.35.0" },
     { name = "granian", specifier = ">=2.7.2" },
