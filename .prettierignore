@@ -1,7 +1,5 @@
 .venv/
 .yarn/
-# JSON-with-comments; prettier >=3.10 infers it as YAML and fails to parse
-.eslintrc
 flow-typed/npm/
 static/js/flow/
 static/js/vendor/
