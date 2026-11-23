@@ -9,7 +9,14 @@ import { Link } from "react-router-dom";
 import { mutateAsync, requestAsync } from "redux-query";
 import { createStructuredSelector } from "reselect";
 
-import { STATE_ERROR, handleAuthResponse } from "../../../lib/auth";
+import { addUserNotification } from "../../../actions";
+import {
+  FLOW_LOGIN,
+  SESSION_EXPIRED_NOTIFICATION,
+  STATE_ERROR,
+  STATE_SESSION_EXPIRED,
+  handleAuthResponse,
+} from "../../../lib/auth";
 import auth from "../../../lib/queries/auth";
 import users from "../../../lib/queries/users";
 import { routes } from "../../../lib/urls";
@@ -28,6 +35,7 @@ type RegisterProps = {|
 |};
 
 type DispatchProps = {|
+  addUserNotification: Function,
   registerExtraDetails: (
     profileData: ProfileForm,
     partialToken: string,
@@ -43,6 +51,7 @@ type Props = {|
 export class RegisterExtraDetailsPage extends React.Component<Props> {
   async onSubmit(profileData: ProfileForm, { setSubmitting, setErrors }: any) {
     const {
+      addUserNotification,
       history,
       registerExtraDetails,
       params: { partialToken },
@@ -50,11 +59,18 @@ export class RegisterExtraDetailsPage extends React.Component<Props> {
 
     try {
       const { body } = await registerExtraDetails(profileData, partialToken);
+      // the account already exists at this step, so an expired session restarts at sign-in
+      const response =
+        body.state === STATE_SESSION_EXPIRED
+          ? { ...body, flow: FLOW_LOGIN }
+          : body;
 
-      handleAuthResponse(history, body, {
+      handleAuthResponse(history, response, {
         // eslint-disable-next-line camelcase
         [STATE_ERROR]: ({ field_errors }: AuthResponse) =>
           setErrors(field_errors),
+        [STATE_SESSION_EXPIRED]: () =>
+          addUserNotification(SESSION_EXPIRED_NOTIFICATION),
       });
     } finally {
       setSubmitting(false);
@@ -112,6 +128,7 @@ const getCurrentUser = () =>
   });
 
 const mapDispatchToProps = {
+  addUserNotification,
   registerExtraDetails: registerExtraDetails,
   getCurrentUser,
 };
