@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2026.11.24.1] - 2026-11-24
+
+### Changes
+
+- **chore(deps): update dependency prettier to v3.10.1** (#4217) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency mitol-django-oauth-toolkit-extensions to v2026** (#4042) by 29139614+renovate[bot]@users.noreply.github.com
+- **Move the uv.lock revision check to v1.1.0** (#4244) by nlevesq@mit.edu
+- **chore(deps): update nginx docker tag to v1.31.8** (#4214) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency edx-api-client to v1.15.1** (#4222) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency celery to v5.7.0** (#4221) by 29139614+renovate[bot]@users.noreply.github.com
+- **Revert "chore(deps): update mitodl/ol-python-base docker tag to v3.14"** (#4236) by 34372316+arslanashraf7@users.noreply.github.com
+- **chore(deps): update mitodl/ol-python-base docker tag to v3.14** (#4076) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(deps): update dependency boto3 to v1.44.3** (#4215) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency faker to v40.54.0** (#4216) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update postgres docker tag to v18.6** (#4218) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update pre-commit hook astral-sh/ruff-pre-commit to v0.17.5** (#4219) by 29139614+renovate[bot]@users.noreply.github.com
+- **fix(users): reject birth years outside the 13-120 age range** (#4232) by 88967643+Anas12091101@users.noreply.github.com
+- **chore(deps): update dependency social-auth-core to v6 [security]** (#4200) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update astral-sh/setup-uv action to v10.3.3** (#4228) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency node to v24.22.3** (#4234) by 29139614+renovate[bot]@users.noreply.github.com
+- **chore(deps): update dependency webpack-bundle-analyzer to v5.4.3** (#4030) by 29139614+renovate[bot]@users.noreply.github.com
+- **Call the shared uv.lock revision action** (#4233) by rhysyngsun@users.noreply.github.com
+- **fix(profile): offer birth years for learners aged 13 and older** (#4230) by 88967643+Anas12091101@users.noreply.github.com
+- **Assert uv.lock stays on revision 5** (#4211) by nlevesq@mit.edu
+
 ## [2026.11.17.1] - 2026-11-17
 
 ### Changes
