@@ -4,7 +4,7 @@
 declare var dataLayer: Object[];
 
 import React from "react";
-import { RouteComponentProps } from "react-router-dom";
+import type { ContextRouter } from "react-router";
 import DocumentTitle from "react-document-title";
 import { CHECKOUT_PAGE_TITLE } from "../../constants";
 import { connect } from "react-redux";
@@ -44,7 +44,8 @@ import type {
   Values,
 } from "../../components/forms/CheckoutForm";
 
-type Props = RouteComponentProps & {
+type Props = {
+  ...ContextRouter,
   basket: ?BasketResponse,
   requestPending: boolean,
   checkout: () => Promise<Response<CheckoutResponse>>,
