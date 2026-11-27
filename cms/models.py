@@ -82,7 +82,12 @@ from cms.constants import (
     CatalogSorting,
 )
 from cms.forms import CertificatePageForm, CoursewareForm
-from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
+from courses.constants import (
+    DEFAULT_COURSE_IMG_PATH,
+    EMERITUS_MORE_DATES_LIMIT,
+    EMERITUS_PLATFORM_NAME,
+    PROGRAM_RUN_ID_PATTERN,
+)
 from cms.serializers import ImageSerializer
 from courses.models import (
     Course,
@@ -1585,6 +1590,14 @@ class CourseProductPage(ProductPage):
     def product(self):
         """Gets the product associated with this page"""
         return self.course
+
+    @property
+    def more_dates_runs(self):
+        """Unexpired runs listed under "More Dates"; Emeritus pages list only the next few."""
+        runs = self.product.unexpired_runs
+        if self.product.platform.name.lower() == EMERITUS_PLATFORM_NAME.lower():
+            return runs[:EMERITUS_MORE_DATES_LIMIT]
+        return runs
 
 
 class CoursePage(CourseProductPage):
