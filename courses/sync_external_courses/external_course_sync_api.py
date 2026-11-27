@@ -28,6 +28,7 @@ from cms.models import (
 )
 from cms.wagtail_hooks import create_common_child_pages_for_external_courses
 from courses.api import generate_course_readable_id
+from courses.constants import EMERITUS_PLATFORM_NAME, GLOBAL_ALUMNI_PLATFORM_NAME
 from courses.models import Course, CourseLanguage, CourseRun, CourseTopic, Platform
 from courses.sync_external_courses.utils import StatsCollector
 from courses.sync_external_courses.external_course_sync_api_client import (
@@ -43,8 +44,11 @@ from mitxpro.utils import (
 
 log = logging.getLogger(__name__)
 
-EMERITUS_PLATFORM_NAME = "Emeritus"
-GLOBAL_ALUMNI_PLATFORM_NAME = "Global Alumni"
+EXTERNAL_COURSE_ITEM_BULLETS = "●•▪-"
+# Also split on 2+ spaces before a bullet: Global Alumni sometimes puts items on one line.
+EXTERNAL_COURSE_ITEM_SEPARATOR_RE = re.compile(
+    rf"\s*\n\s*|\s{{2,}}(?=[{EXTERNAL_COURSE_ITEM_BULLETS}])"
+)
 
 
 class ExternalCourseVendorBaseKeyMap:
@@ -924,14 +928,34 @@ def parse_external_course_data_str(items_str):
     """
     Parses `WhoShouldEnrollPage` and `LearningOutcomesPage` items for the external API.
 
+    If any line starts with a bullet, only bulleted lines are kept, with the bullet
+    stripped. Otherwise the items are the lines after the last line ending in ":"
+    (a trailing one is ignored), or every line after the first if there is none.
+
     Args:
-        items_str(str): String containing a list of items separated by `\r\n`.
+        items_str(str): Raw list text; items are separated by line breaks or by 2+
+            spaces before a bullet.
 
     Returns:
         list: List of items.
     """
-    items_list = items_str.strip().split("\r\n")
-    return [item.replace("●", "").strip() for item in items_list][1:]
+    lines = [
+        line.strip()
+        for line in EXTERNAL_COURSE_ITEM_SEPARATOR_RE.split(items_str)
+        if line.strip()
+    ]
+    bullet_items = [
+        line.lstrip(EXTERNAL_COURSE_ITEM_BULLETS).strip()
+        for line in lines
+        if line[0] in EXTERNAL_COURSE_ITEM_BULLETS
+    ]
+    if bullet_items:
+        return [item for item in bullet_items if item]
+    heading_index = max(
+        (index for index, line in enumerate(lines[:-1]) if line.endswith(":")),
+        default=0,
+    )
+    return lines[heading_index + 1 :]
 
 
 def create_course_overview_page(

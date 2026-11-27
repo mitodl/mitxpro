@@ -420,26 +420,55 @@ def test_create_learning_outcomes_page(external_course_vendor_keymap):
     assert course_page.outcomes is not None
 
 
-def test_parse_external_course_data_str():
+@pytest.mark.parametrize(
+    ("data_str", "expected"),
+    [
+        (
+            "This program will enable you to:\r\n●       Gain an overview of cybersecurity risk "
+            "management\r\n●       Explore the domains covering cloud technology",
+            [
+                "Gain an overview of cybersecurity risk management",
+                "Explore the domains covering cloud technology",
+            ],
+        ),
+        (
+            "The program will equip you to:\n\n•        Develop an AI strategy\n\n"
+            "•        Design a data strategy\n\n",
+            ["Develop an AI strategy", "Design a data strategy"],
+        ),
+        (
+            "•\tIntegrate AI into your strategy\r\n•\tAddress AI risks\r\n",
+            ["Integrate AI into your strategy", "Address AI risks"],
+        ),
+        (
+            "The program is ideal for:\r\n●       Technical professionals\r\n"
+            "Prerequisites for the program: A basic understanding of AI.\r",
+            ["Technical professionals"],
+        ),
+        (
+            "This course will enable you to:          -Explore deep neural networks.\n\n"
+            "-Experiment with deep learning models.",
+            ["Explore deep neural networks.", "Experiment with deep learning models."],
+        ),
+        (
+            "The program is designed for leaders.\r\n\r\nThe program is beneficial for:"
+            "\r\n\r\nHealthcare leaders\r\n\r\nProduct and R&D leaders",
+            ["Healthcare leaders", "Product and R&D leaders"],
+        ),
+        ("The AI for Senior Executives program is ideal for leaders.", []),
+        ("Ideal for:\nLeaders\nManagers\nNote:", ["Leaders", "Managers", "Note:"]),
+        ("Ideal for:\n•\n• Leaders", ["Leaders"]),
+        (
+            "Ideal for:\n• Self-driving car teams - all levels",
+            ["Self-driving car teams - all levels"],
+        ),
+    ],
+)
+def test_parse_external_course_data_str(data_str, expected):
     """
-    Tests that `parse_external_course_data_str` parses who should enroll and learning outcomes strings as expected.
+    Tests that `parse_external_course_data_str` keeps only the list items across the API's text formats.
     """
-    data_str = (
-        "This program will enable you to:\r\n●       Gain an overview of cybersecurity risk "
-        "management, including its foundational concepts and relevant regulations\r\n●       "
-        "Explore the domains covering various aspects of cloud technology\r\n●       "
-        "Learn adversary tactics and techniques that are utilized as the foundational development "
-        "of specific threat models and methodologies\r\n●       Understand the guidelines for "
-        "organizations to prepare themselves against cybersecurity attacks"
-    )
-    assert parse_external_course_data_str(data_str) == [
-        "Gain an overview of cybersecurity risk management, including "
-        "its foundational concepts and relevant regulations",
-        "Explore the domains covering various aspects of cloud technology",
-        "Learn adversary tactics and techniques that are utilized as the foundational development "
-        "of specific threat models and methodologies",
-        "Understand the guidelines for organizations to prepare themselves against cybersecurity attacks",
-    ]
+    assert parse_external_course_data_str(data_str) == expected
 
 
 @pytest.mark.parametrize(

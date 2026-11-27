@@ -82,7 +82,12 @@ from cms.constants import (
     CatalogSorting,
 )
 from cms.forms import CertificatePageForm, CoursewareForm
-from courses.constants import DEFAULT_COURSE_IMG_PATH, PROGRAM_RUN_ID_PATTERN
+from courses.constants import (
+    DEFAULT_COURSE_IMG_PATH,
+    EMERITUS_MORE_DATES_LIMIT,
+    EMERITUS_PLATFORM_NAME,
+    PROGRAM_RUN_ID_PATTERN,
+)
 from cms.serializers import ImageSerializer
 from courses.models import (
     Course,
@@ -96,7 +101,7 @@ from courses.models import (
 )
 from courses.utils import get_catalog_languages
 from ecommerce.models import Product
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import case_insensitive_equal, now_in_utc
 from mitxpro.views import get_base_context
 from courses.serializers import CourseSerializer, ProgramSerializer
 from .serializers import ProductChildPageSerializer
@@ -1585,6 +1590,14 @@ class CourseProductPage(ProductPage):
     def product(self):
         """Gets the product associated with this page"""
         return self.course
+
+    @cached_property
+    def more_dates_runs(self):
+        """Unexpired runs listed under "More Dates", capped at EMERITUS_MORE_DATES_LIMIT for Emeritus."""
+        runs = self.product.unexpired_runs
+        if case_insensitive_equal(self.product.platform.name, EMERITUS_PLATFORM_NAME):
+            return runs[:EMERITUS_MORE_DATES_LIMIT]
+        return runs
 
 
 class CoursePage(CourseProductPage):

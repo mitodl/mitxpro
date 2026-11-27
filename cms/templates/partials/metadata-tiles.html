@@ -8,8 +8,8 @@
         <span class="text"
           >{{ page.product.first_unexpired_run.start_date|date:"F j, Y" }}</span
         >
-        {% if page.product.unexpired_runs|length > 1 %}
-        {% with course_runs=page.product.unexpired_runs %}
+        {% if page.more_dates_runs|length > 1 %}
+        {% with course_runs=page.more_dates_runs %}
         <span class="dates-link">
           <a
             tabindex="0"

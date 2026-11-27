@@ -2441,3 +2441,28 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
 
     assert for_teams_page.title != b2b_page_wo_platform.title
     assert for_teams_page.title == b2b_page.title
+
+
+@pytest.mark.parametrize(
+    ("platform_name", "expected_count"),
+    [("Emeritus", 2), ("emeritus", 2), ("Global Alumni", 4), ("xPRO", 4)],
+)
+def test_course_page_more_dates_runs(platform_name, expected_count):
+    """Emeritus course pages list only the next two unexpired runs under "More Dates"."""
+    course_page = ExternalCoursePageFactory.create(course__platform__name=platform_name)
+    now = now_in_utc()
+    runs = [
+        CourseRunFactory.create(
+            course=course_page.course,
+            start_date=now + timedelta(days=days),
+            end_date=now + timedelta(days=days + 30),
+            enrollment_end=None,
+        )
+        for days in (30, 10, 20, 40)
+    ]
+    CourseRunFactory.create(
+        course=course_page.course, start_date=now + timedelta(days=5), live=False
+    )
+
+    expected = sorted(runs, key=lambda run: run.start_date)[:expected_count]
+    assert course_page.more_dates_runs == expected
