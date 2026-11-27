@@ -28,6 +28,15 @@ function copyProps(src, target) {
 // Proxy window.location assignments to use jsdom.reconfigure()
 // instead of direct assignment, which is no longer allowed in v26
 const windowProxy = new Proxy(window, {
+  // jsdom 31+ brand-checks `this` on Window methods, so a Proxy receiver
+  // fails (e.g. window.addEventListener). Bind methods to the real window.
+  get: function (target, prop) {
+    const value = Reflect.get(target, prop, target);
+    if (typeof value === "function" && !/^[A-Z]/.test(String(prop))) {
+      return value.bind(target);
+    }
+    return value;
+  },
   set: function (target, prop, value) {
     if (prop === "location") {
       let url = value;
