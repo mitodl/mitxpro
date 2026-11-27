@@ -9971,7 +9971,7 @@ __metadata:
     stylelint: ^17.0.0
     stylelint-config-standard-scss: ^17.0.0
     unzipper: ^0.12.0
-    url-join: ^4.0.0
+    url-join: ^6.0.0
     url-loader: ^4.1.1
     waait: ^1.0.4
     webpack: ^5.76.0
@@ -14093,10 +14093,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"url-join@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "url-join@npm:4.0.1"
-  checksum: f74e868bf25dbc8be6a8d7237d4c36bb5b6c62c72e594d5ab1347fe91d6af7ccd9eb5d621e30152e4da45c2e9a26bec21390e911ab54a62d4d82e76028374ee5
+"url-join@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "url-join@npm:6.0.0"
+  checksum: cdd02750672fc990d4b794ec2f4e72701276feb178dddfa0cc5aea2e896bf0c605b01dc8a61d262276cf7b1138a04ff45a93249ef396f2acd08956a172969415
   languageName: node
   linkType: hard
 
