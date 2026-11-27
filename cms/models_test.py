@@ -2445,7 +2445,7 @@ def test_child_page_with_static_pages_with_platform(superuser_client):
 
 @pytest.mark.parametrize(
     ("platform_name", "expected_count"),
-    [("Emeritus", 2), ("emeritus", 2), ("Global Alumni", 3), ("xPRO", 3)],
+    [("Emeritus", 2), ("emeritus", 2), ("Global Alumni", 4), ("xPRO", 4)],
 )
 def test_course_page_more_dates_runs(platform_name, expected_count):
     """Emeritus course pages list only the next two unexpired runs under "More Dates"."""
@@ -2458,7 +2458,7 @@ def test_course_page_more_dates_runs(platform_name, expected_count):
             end_date=now + timedelta(days=days + 30),
             enrollment_end=None,
         )
-        for days in (30, 10, 20)
+        for days in (30, 10, 20, 40)
     ]
     CourseRunFactory.create(
         course=course_page.course, start_date=now + timedelta(days=5), live=False

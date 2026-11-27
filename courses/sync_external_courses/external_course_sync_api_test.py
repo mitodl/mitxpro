@@ -456,6 +456,12 @@ def test_create_learning_outcomes_page(external_course_vendor_keymap):
             ["Healthcare leaders", "Product and R&D leaders"],
         ),
         ("The AI for Senior Executives program is ideal for leaders.", []),
+        ("Ideal for:\nLeaders\nManagers\nNote:", ["Leaders", "Managers", "Note:"]),
+        ("Ideal for:\n•\n• Leaders", ["Leaders"]),
+        (
+            "Ideal for:\n• Self-driving car teams - all levels",
+            ["Self-driving car teams - all levels"],
+        ),
     ],
 )
 def test_parse_external_course_data_str(data_str, expected):

@@ -19,7 +19,7 @@ PROGRAM_RUN_ID_PATTERN = (
 
 EMERITUS_PLATFORM_NAME = "Emeritus"
 GLOBAL_ALUMNI_PLATFORM_NAME = "Global Alumni"
-# Emeritus pages list only the next two cohorts under "More Dates" (mitodl/hq#13652).
+# Max runs Emeritus course pages list under "More Dates" (mitodl/hq#13652).
 EMERITUS_MORE_DATES_LIMIT = 2
 
 ENROLL_CHANGE_STATUS_DEFERRED = "deferred"

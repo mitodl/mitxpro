@@ -45,8 +45,10 @@ from mitxpro.utils import (
 log = logging.getLogger(__name__)
 
 EXTERNAL_COURSE_ITEM_BULLETS = "●•▪-"
-# Global Alumni sometimes separates the heading from the first item with spaces, not a line break.
-EXTERNAL_COURSE_ITEM_SEPARATOR_RE = re.compile(r"\s*\n\s*|\s{2,}(?=[●•▪-])")
+# Also split on 2+ spaces before a bullet: Global Alumni sometimes puts items on one line.
+EXTERNAL_COURSE_ITEM_SEPARATOR_RE = re.compile(
+    rf"\s*\n\s*|\s{{2,}}(?=[{EXTERNAL_COURSE_ITEM_BULLETS}])"
+)
 
 
 class ExternalCourseVendorBaseKeyMap:
@@ -926,11 +928,13 @@ def parse_external_course_data_str(items_str):
     """
     Parses `WhoShouldEnrollPage` and `LearningOutcomesPage` items for the external API.
 
-    Items are bulleted lines; intro, heading and note lines around them are dropped.
-    Without bullets, the items are the lines after the last heading ending in ":".
+    If any line starts with a bullet, only bulleted lines are kept, with the bullet
+    stripped. Otherwise the items are the lines after the last line ending in ":"
+    (a trailing one is ignored), or every line after the first if there is none.
 
     Args:
-        items_str(str): String containing a list of items separated by line breaks.
+        items_str(str): Raw list text; items are separated by line breaks or by 2+
+            spaces before a bullet.
 
     Returns:
         list: List of items.
@@ -947,8 +951,11 @@ def parse_external_course_data_str(items_str):
     ]
     if bullet_items:
         return [item for item in bullet_items if item]
-    heading_indexes = [index for index, line in enumerate(lines) if line.endswith(":")]
-    return lines[heading_indexes[-1] + 1 if heading_indexes else 1 :]
+    heading_index = max(
+        (index for index, line in enumerate(lines[:-1]) if line.endswith(":")),
+        default=0,
+    )
+    return lines[heading_index + 1 :]
 
 
 def create_course_overview_page(

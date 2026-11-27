@@ -101,7 +101,7 @@ from courses.models import (
 )
 from courses.utils import get_catalog_languages
 from ecommerce.models import Product
-from mitxpro.utils import now_in_utc
+from mitxpro.utils import case_insensitive_equal, now_in_utc
 from mitxpro.views import get_base_context
 from courses.serializers import CourseSerializer, ProgramSerializer
 from .serializers import ProductChildPageSerializer
@@ -1591,11 +1591,11 @@ class CourseProductPage(ProductPage):
         """Gets the product associated with this page"""
         return self.course
 
-    @property
+    @cached_property
     def more_dates_runs(self):
-        """Unexpired runs listed under "More Dates"; Emeritus pages list only the next few."""
+        """Unexpired runs listed under "More Dates", capped at EMERITUS_MORE_DATES_LIMIT for Emeritus."""
         runs = self.product.unexpired_runs
-        if self.product.platform.name.lower() == EMERITUS_PLATFORM_NAME.lower():
+        if case_insensitive_equal(self.product.platform.name, EMERITUS_PLATFORM_NAME):
             return runs[:EMERITUS_MORE_DATES_LIMIT]
         return runs
 

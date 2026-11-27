@@ -823,3 +823,25 @@ def test_course_overview_context(client, page_klass, overview, course_descriptio
 
     resp_page = _get_course_page(client, page.get_url())
     assert resp_page.course_overview.get_overview == new_overview
+
+
+@pytest.mark.parametrize(
+    ("platform_name", "expected_dates"), [("Emeritus", 2), ("Global Alumni", 3)]
+)
+def test_external_course_page_more_dates(client, platform_name, expected_dates):
+    """The "More Dates" popover lists at most two runs on Emeritus course pages."""
+    page = ExternalCoursePageFactory.create(course__platform__name=platform_name)
+    page.save_revision().publish()
+    now = now_in_utc()
+    for days in (10, 20, 30):
+        CourseRunFactory.create(
+            course=page.course,
+            start_date=now + timedelta(days=days),
+            end_date=now + timedelta(days=days + 30),
+            enrollment_end=None,
+        )
+
+    resp = client.get(page.get_url())
+
+    assert resp.status_code == 200
+    assert resp.content.decode().count("class='date-link'") == expected_dates
