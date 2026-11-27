@@ -2,12 +2,24 @@
 import { assert } from "chai";
 import sinon from "sinon";
 import { mergeRight } from "ramda";
+import { Switch, matchPath } from "react-router";
 
 import App, { App as InnerApp } from "./App";
 import { routes } from "../lib/urls";
 import IntegrationTestHelper from "../util/integration_test_helper";
 import { makeUser, makeUnusedCoupon } from "../factories/user";
 import { ALERT_TYPE_UNUSED_COUPON } from "../constants";
+import DashboardPage from "./pages/DashboardPage";
+import ReceiptPage from "./pages/ReceiptPage";
+import LoginPages from "./pages/login/LoginPages";
+import RegisterPages from "./pages/register/RegisterPages";
+import CheckoutPage from "./pages/CheckoutPage";
+import CheckoutResultPage from "./pages/CheckoutResultPage";
+import EcommerceAdminPages from "./pages/admin/EcommerceAdminPages";
+import ProfilePages from "./pages/profile/ProfilePages";
+import EcommerceBulkPages from "./pages/b2b/EcommerceBulkPages";
+import AccountSettingsPage from "./pages/settings/AccountSettingsPage";
+import EmailConfirmPage from "./pages/settings/EmailConfirmPage";
 
 describe("Top-level App", () => {
   let helper, renderPage;
@@ -82,6 +94,45 @@ describe("Top-level App", () => {
       inner.setProps({ location: { pathname: routes.dashboard } });
       state = store.getState();
       assert.deepEqual(state.ui.userNotifications, expectedNotificationState);
+    });
+  });
+
+  describe("routing", () => {
+    // Mirror <Switch>: the first child whose path matches the URL wins
+    const matchedComponent = (inner, url) => {
+      const route = inner
+        .find(Switch)
+        .children()
+        .filterWhere((child) =>
+          matchPath(url, {
+            path: child.prop("path"),
+            exact: child.prop("exact"),
+          }),
+        )
+        .first();
+      return route.exists() ? route.prop("component") : null;
+    };
+
+    [
+      [routes.dashboard, DashboardPage],
+      ["/receipt/123/", ReceiptPage],
+      [routes.login.begin, LoginPages],
+      [routes.login.password, LoginPages],
+      [routes.register.details, RegisterPages],
+      [routes.checkoutResult, CheckoutResultPage],
+      [routes.checkout, CheckoutPage],
+      [routes.ecommerceAdmin.coupons, EcommerceAdminPages],
+      [routes.profile.update, ProfilePages],
+      [routes.ecommerceBulk.receipt, EcommerceBulkPages],
+      [routes.accountSettings, AccountSettingsPage],
+      [routes.account.confirmEmail, EmailConfirmPage],
+    ].forEach(([url, expectedComponent]) => {
+      it(`routes ${url} to the right page`, async () => {
+        const { inner } = await renderPage();
+        inner.setProps({ currentUser: makeUser() });
+
+        assert.equal(matchedComponent(inner, url), expectedComponent);
+      });
     });
   });
 });

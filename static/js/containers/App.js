@@ -6,7 +6,6 @@ import { connect } from "react-redux";
 import { Switch, Route } from "react-router";
 import { connectRequest } from "redux-query";
 import { createStructuredSelector } from "reselect";
-import urljoin from "url-join";
 
 import users, { currentUserSelector } from "../lib/queries/users";
 import { routes } from "../lib/urls";
@@ -70,7 +69,7 @@ export class App extends React.Component<Props, void> {
         prevProps.location.pathname === routes.checkout));
 
   render() {
-    const { match, currentUser, location, courseTopics } = this.props;
+    const { currentUser, location, courseTopics } = this.props;
 
     if (!currentUser) {
       // application is still loading
@@ -88,47 +87,32 @@ export class App extends React.Component<Props, void> {
         <Switch>
           <PrivateRoute
             exact
-            path={urljoin(match.url, routes.dashboard)}
+            path={routes.dashboard}
             component={DashboardPage}
           />
+          <PrivateRoute path={routes.receipt} component={ReceiptPage} />
+          <Route path={String(routes.login)} component={LoginPages} />
+          <Route path={String(routes.register)} component={RegisterPages} />
           <PrivateRoute
-            path={urljoin(match.url, routes.receipt)}
-            component={ReceiptPage}
-          />
-          <Route
-            path={urljoin(match.url, String(routes.login))}
-            component={LoginPages}
-          />
-          <Route
-            path={urljoin(match.url, String(routes.register))}
-            component={RegisterPages}
-          />
-          <PrivateRoute
-            path={urljoin(match.url, String(routes.checkoutResult))}
+            path={String(routes.checkoutResult)}
             component={CheckoutResultPage}
           />
-          <PrivateRoute
-            path={urljoin(match.url, routes.checkout)}
-            component={CheckoutPage}
-          />
+          <PrivateRoute path={routes.checkout} component={CheckoutPage} />
           <Route
-            path={urljoin(match.url, String(routes.ecommerceAdmin))}
+            path={String(routes.ecommerceAdmin)}
             component={EcommerceAdminPages}
           />
+          <Route path={String(routes.profile)} component={ProfilePages} />
           <Route
-            path={urljoin(match.url, String(routes.profile))}
-            component={ProfilePages}
-          />
-          <Route
-            path={urljoin(match.url, String(routes.ecommerceBulk))}
+            path={String(routes.ecommerceBulk)}
             component={EcommerceBulkPages}
           />
           <PrivateRoute
-            path={urljoin(match.url, String(routes.accountSettings))}
+            path={String(routes.accountSettings)}
             component={AccountSettingsPage}
           />
           <Route
-            path={urljoin(match.url, String(routes.account.confirmEmail))}
+            path={String(routes.account.confirmEmail)}
             component={EmailConfirmPage}
           />
         </Switch>
