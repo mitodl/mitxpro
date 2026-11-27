@@ -25,17 +25,33 @@ function copyProps(src, target) {
   });
 }
 
+// jsdom 31+ brand-checks `this` on Window methods, so calling them through
+// the Proxy below (e.g. window.addEventListener) throws. Bind jsdom's own
+// methods to the real window. Functions assigned later (e.g. sinon stubs)
+// are returned as-is so stubbing and restoring keep working.
+const nativeMethods = new Set();
+for (let obj = window; obj; obj = Object.getPrototypeOf(obj)) {
+  for (const name of Object.getOwnPropertyNames(obj)) {
+    const { value } = Object.getOwnPropertyDescriptor(obj, name);
+    if (typeof value === "function" && !/^[A-Z]/.test(name)) {
+      nativeMethods.add(value);
+    }
+  }
+}
+const boundMethods = new WeakMap();
+
 // Proxy window.location assignments to use jsdom.reconfigure()
 // instead of direct assignment, which is no longer allowed in v26
 const windowProxy = new Proxy(window, {
-  // jsdom 31+ brand-checks `this` on Window methods, so a Proxy receiver
-  // fails (e.g. window.addEventListener). Bind methods to the real window.
   get: function (target, prop) {
     const value = Reflect.get(target, prop, target);
-    if (typeof value === "function" && !/^[A-Z]/.test(String(prop))) {
-      return value.bind(target);
+    if (!nativeMethods.has(value)) {
+      return value;
     }
-    return value;
+    if (!boundMethods.has(value)) {
+      boundMethods.set(value, value.bind(target));
+    }
+    return boundMethods.get(value);
   },
   set: function (target, prop, value) {
     if (prop === "location") {
